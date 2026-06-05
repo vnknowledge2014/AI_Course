@@ -1,12 +1,40 @@
 # Index
 
-Danh mục phân loại toàn bộ nội dung trong LLM Wiki. Trình duy trì (LLM Agent) luôn tìm kiếm file này đầu tiên khi cần tra cứu thông tin tổng thể.
+Danh mục phân loại toàn bộ nội dung trong LLM Wiki.
 
-## Entities & Concepts
-*Hiện tại chưa có Entity/Concept nào. Hệ thống sẽ thêm vào sau các phiên Ingest.*
+## Concepts
+- [Concept: Agents](concepts/Agents.md)
+- [Concept: Transformers](concepts/Transformers.md)
+- [Concept: RAG](concepts/RAG.md)
+- [Concept: LLM](concepts/LLM.md)
+- [Concept: Prompt Engineering](concepts/Prompt_Engineering.md)
 
 ## Sources (Nguồn đã phân tích)
-*Hiện tại chưa có Source nào được Ingest. Dữ liệu thô đang ở trong `repos/` và `references/`.*
-
----
-*Ghi chú: Mục lục này được quản lý tự động bởi LLM Agent. Nó hỗ trợ tìm kiếm bằng cách phân cấp thông tin thành các thực thể, nguồn và khái niệm cốt lõi của khóa học AI.*
+- [Repo: AI-For-Beginners](sources/Summary_AI-For-Beginners.md)
+- [Repo: Adam](sources/Summary_Adam.md)
+- [Repo: Agentic-Design-Patterns](sources/Summary_Agentic-Design-Patterns.md)
+- [Repo: Context-Engineering](sources/Summary_Context-Engineering.md)
+- [Repo: Hands-On-AI-Engineering](sources/Summary_Hands-On-AI-Engineering.md)
+- [Repo: LLM-Interview-Questions-and-Answers-Hub](sources/Summary_LLM-Interview-Questions-and-Answers-Hub.md)
+- [Repo: LLMs-from-scratch](sources/Summary_LLMs-from-scratch.md)
+- [Repo: ML-For-Beginners](sources/Summary_ML-For-Beginners.md)
+- [Repo: Practical-Guide-to-Context-Engineering](sources/Summary_Practical-Guide-to-Context-Engineering.md)
+- [Repo: Prompt-Engineering-Guide](sources/Summary_Prompt-Engineering-Guide.md)
+- [Repo: Prompt-Engineering-Techniques-Hub](sources/Summary_Prompt-Engineering-Techniques-Hub.md)
+- [Repo: Understanding-Transformers-Step-by-Step-math-example](sources/Summary_Understanding-Transformers-Step-by-Step-math-example.md)
+- [Repo: ai-agents-for-beginners](sources/Summary_ai-agents-for-beginners.md)
+- [Repo: ai-agents-from-scratch](sources/Summary_ai-agents-from-scratch.md)
+- [Repo: ai-engineering-from-scratch](sources/Summary_ai-engineering-from-scratch.md)
+- [Repo: ai-engineering-interview-questions](sources/Summary_ai-engineering-interview-questions.md)
+- [Repo: all-agentic-architectures](sources/Summary_all-agentic-architectures.md)
+- [Repo: build-your-own-openclaw](sources/Summary_build-your-own-openclaw.md)
+- [Repo: deepseek-from-scratch](sources/Summary_deepseek-from-scratch.md)
+- [Repo: generative-ai-for-beginners](sources/Summary_generative-ai-for-beginners.md)
+- [Repo: hello-agents](sources/Summary_hello-agents.md)
+- [Repo: learn-harness-engineering](sources/Summary_learn-harness-engineering.md)
+- [Repo: leetcode-patterns](sources/Summary_leetcode-patterns.md)
+- [Repo: maths-cs-ai-compendium](sources/Summary_maths-cs-ai-compendium.md)
+- [Repo: prompt-eng-interactive-tutorial](sources/Summary_prompt-eng-interactive-tutorial.md)
+- [Repo: rag-from-scratch](sources/Summary_rag-from-scratch.md)
+- [Repo: rag-zero-to-hero-guide](sources/Summary_rag-zero-to-hero-guide.md)
+- [Repo: transformers-from-scratch](sources/Summary_transformers-from-scratch.md)
