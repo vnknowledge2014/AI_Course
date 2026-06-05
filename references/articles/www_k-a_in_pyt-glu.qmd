@@ -1,0 +1,498 @@
+# Source: https://www.k-a.in/pyt-glu.html
+
+Today we dive into the implementation of Gated Linear Units(GLU) and their variants introduced in the paper GLU Variants Improve Transformer (2020) by Noam Shazeer.
+
+GLU represents evolution in neural network architecture that changes how information flows through feedforward layers. At its core it introduces a gating mechanism that allows the network to selectively control which information passes through, unlike traditional fedforward networks that simply apply an activation function to a linear transformation, GLU splits the computation into two parallel paths:
+one path generates a "gate" that determines what information should flow, while the other path produces the actual values to be gated.
+This gating mechanism is achieved through element-wise multiplication between the two paths, creating a more sophisticated and selective information processing system.
+
+The mathematics of GLU is a standard feedforward layer computes 
+$$$
+\text{FFN}(x) = \sigma(xW\_1 + b\_1)W\_2 + b\_2
+$$$
+a gated linear unit transforms this into 
+$$$
+\text{GLU}(x) = (\sigma(xW\_1) \otimes xV)W\_2
+$$$
+
+where  $ \otimes $  represents element-wise multiplication and  $ V $  is an additional learned parameter matrix.
+
+This seemingly small change has profound implications, the network can now learn to "turn off" certain neurons or features based on the input context, leading to more efficient and expressive representations. The GLU variants like ReGLU, GEGLU, and SwiGLU has ability to experiment with different activation functions for the gating mechanism, with recent research showing that SwiGLU (using the Swish activation) has become particularly popular in large language models like PaLM and LLaMA due to its superior performance characteristics.
+
+### Imports and Dependencies
+
+Before we get into the meat of GLUs, let's appreciate what we're working with here
+
+```
+import dataclasses
+import torch
+from torch import nn
+from torch.utils.data import Dataset, DataLoader
+```
+
+The key imports here are:
+
+* `dataclasses`: For clean configuration management
+* `torch` and `nn`: Core PyTorch for neural networks
+* `Dataset, DataLoader`: For handling our training data
+
+Nothing fancy, but notice the `dataclasses` import. This is going to save us from configuration hell later.
+
+### Configuration Management with Dataclasses
+
+```
+@dataclasses.dataclass
+class Configs:
+    d_model: int = 512          # Model dimension (embedding size)
+    seq_len: int = 128          # Sequence length for training
+    batch_size: int = 32        # Training batch size
+    n_layers: int = 6           # Number of transformer layers
+    n_heads: int = 8            # Number of attention heads
+    dropout: float = 0.1        # Dropout probability
+    d_ff: int = 2048           # Feedforward network dimension
+    glu_variant: str = 'GLU'    # Which GLU variant to use
+    epochs: int = 5             # Number of training epochs
+    grad_norm_clip: float = 0.5 # Gradient clipping threshold
+```
+
+everything is in one place, with sensible defaults, and it's type hinted. The `d_ff = 2048` is particularly important in GLU variants, this becomes the intermediate dimension before gating.
+spoiler alert: the parameter count gets weird and the actual parameter count is different from standard FFNs.
+
+### Setting Up Autoregressive Transformer
+
+We're building what's essentially a mini-GPT here, the autoregressive transformer architecture is straightforward but there's some clever masking going on, tis basically a language model that predicts the next token based on previous tokens.
+
+The core architecture is pretty straightforward:
+
+```
+class AutoregressiveModel(Module):
+    def __init__(self, src_embed: Module, encoder: Encoder, generator: Module):
+        super().__init__()
+        self.src_embed = src_embed      # Token embeddings
+        self.encoder = encoder          # The transformer layers
+        self.generator = generator      # Output projection
+        self.src_mask = None           # Causal mask
+```
+
+The clever bit here is the masking. We're using `subsequent_mask` to ensure our model can only look at previous tokens, not future ones. That's what makes it autoregressive. Its like covering up the rest of the sentence while you're trying to predict the next word.
+
+### The Forward Pass Logic
+
+The magic happens in the forward pass with this lazy mask creation
+
+```
+def forward(self, src: torch.Tensor):
+    # Create subsequent mask for causal attention
+    if self.src_mask is None or self.src_mask.size(0) != len(src):
+        self.src_mask = subsequent_mask(len(src)).to(src.device)
+    
+    # Embed tokens and pass through transformer
+    res = self.encoder(self.src_embed(src), self.src_mask)
+    
+    # Generate next token logits
+    return self.generator(res)
+```
+
+The lazy mask creation is smart, it only computes the mask once per sequence length and reuses it. The `subsequent_mask` creates a lower triangular matrix that prevents the model from looking at future tokens:
+
+```
+[[1, 0, 0, 0],
+ [1, 1, 0, 0],
+ [1, 1, 1, 0],
+ [1, 1, 1, 1]]
+```
+
+It's like putting blinders on a horse, but for neural networks.
+
+### Dataset
+
+The `TinyShakespeareDataset` is our choice of dataset for this implementation.
+
+```
+class TinyShakespeareDataset(Dataset):
+    def __init__(self, seq_len: int):
+        path = lab.get_data_path() / 'tiny_shakespeare.txt'
+        download_file('https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt', path)
+        
+        with open(str(path), 'r') as f:
+            text = f.read()
+
+        # Create vocabulary mappings
+        chars = list(set(text))
+        self.stoi = {c: i for i, c in enumerate(chars)}  # string to integer
+        self.itos = {i: c for i, c in enumerate(chars)}  # integer to string
+        
+        self.seq_len = seq_len
+        self.data = self.text_to_i(text)
+```
+
+### Character-Level Tokenization
+
+We're doing character-level tokenization. This means our model has to learn everything from scratch: spelling, grammar, meaning, all from individual characters. It's like teaching someone to write by showing them one letter at a time. Brutal, but educational.
+
+The `text_to_i` method converts text to integer tensors:
+
+```
+def text_to_i(self, text: str):
+    return torch.tensor([self.stoi[c] for c in text], dtype=torch.long)
+```
+
+This creates a character-level vocabulary, which typically has 50-100 unique characters (letters, punctuation, spaces). Character level modeling is actually quite challenging!
+
+### Data Sampling
+
+The dataset's `__getitem__` method, where sampling logic is classic next-token prediction:
+
+```
+def __getitem__(self, idx):
+    return self.data[idx:idx + self.seq_len], self.data[idx + 1:idx + self.seq_len + 1]
+```
+
+This returns input sequence and target sequence where targets are shifted by one position. So if input is "Hello", target is "ello ".
+
+### GLU Variants Implementation
+
+Okay, here's where things get spicy.
+
+The brilliant thing about this implementation is how it handles all the different variants through one flexible `FeedForward` class. Let me break down what each variant is actually doing.
+
+### Traditional Feedforward Networks
+
+### Standard ReLU FFN
+
+```
+# Standard ReLU FFN
+elif configs.glu_variant == 'ReLU':
+    ffn = FeedForward(configs.d_model, configs.d_ff, configs.dropout, nn.ReLU())
+```
+
+This is your grandmother's feedforward network.
+Linear transformation, ReLU, another linear transformation. Works, but it's 2017 calling.
+
+Formula: 
+$$$
+FFN\_{ReLU}(x) = \text{ReLU}(xW\_1 + b\_1)W\_2 + b\_2
+$$$
+
+The parameters here are:
+
+* `d_model`: Input/output dimension (512)
+* `d_ff`: Hidden dimension (2048)
+* `dropout`: Regularization
+* `nn.ReLU()`: Activation function
+* Default parameters create standard FFN (no gating)
+
+### Gated Linear Unit (GLU)
+
+The original GLU uses sigmoid gating
+
+```
+if configs.glu_variant == 'GLU':
+    ffn = FeedForward(configs.d_model, configs.d_ff, configs.dropout, 
+                     nn.Sigmoid(), True, False, False, False)
+```
+
+parameters:
+
+* `nn.Sigmoid()`: Gate activation function
+* `True`: `is_gated=True` - enables gating mechanism
+* `False, False, False`: Other boolean flags for different FFN variants
+
+Formula: 
+$$$
+FFN\_{GLU}(x) = (\sigma(xW\_1) \otimes xV)W\_2
+$$$
+Notice we have TWO linear transformations now:  $ W\_1 $  for the gate and  $ V $  for the values. The sigmoid gate  $ \sigma(xW\_1) $  decides how much of the value  $ xV $  to let through. It's like having a bouncer at a club, but the bouncer is learned.
+
+* $ W\_1 $ : First linear transformation (for gating)
+* $ V $ : Second linear transformation (for values)
+* $ W\_2 $ : Output projection
+* $ \sigma $ : Sigmoid activation
+* $ \otimes $ : Element-wise multiplication
+
+### Modern GLU Variants
+
+#### ReGLU (ReLU Gated Linear Unit)
+
+The ReLU gate is harsh, it completely zeros out negative activations. This creates sparse, selective information flow.
+
+```
+elif configs.glu_variant == 'ReGLU':
+    ffn = FeedForward(configs.d_model, configs.d_ff, configs.dropout, 
+                     nn.ReLU(), True, False, False, False)
+```
+
+Formula: 
+$$$
+FFN\_{ReGLU}(x) = (\max(0, xW\_1) \otimes xV)W\_2
+$$$
+
+#### GEGLU (GELU Gated Linear Unit)
+
+GELU is smoother than ReLU. Its like ReLU's sophisticated cousin who went to graduate school. Mathematically, it's  $ \text{GELU}(x) = x \cdot \Phi(x) $  where  $ \Phi $  is the standard Gaussian CDF.
+
+```
+elif configs.glu_variant == 'GEGLU':
+    ffn = FeedForward(configs.d_model, configs.d_ff, configs.dropout, 
+                     nn.GELU(), True, False, False, False)
+```
+
+Formula: 
+$$$
+FFN\_{GEGLU}(x) = (\text{GELU}(xW\_1) \otimes xV)W\_2
+$$$
+
+#### SwiGLU (Swish Gated Linear Unit)
+
+Swish (also called SiLU) is defined as  $ x \cdot \sigma(x) $ . This is what the big boys are using now PaLM, LLaMA, you name it.
+
+```
+elif configs.glu_variant == 'SwiGLU':
+    ffn = FeedForward(configs.d_model, configs.d_ff, configs.dropout, 
+                     nn.SiLU(), True, False, False, False)
+```
+
+Formula: 
+$$$
+FFN\_{SwiGLU}(x) = (\text{Swish}(xW\_1) \otimes xV)W\_2
+$$$
+
+Note: `nn.SiLU()` is PyTorch's implementation of Swish/SiLU. Swish is defined as  $ \text{Swish}(x) = x \cdot \sigma(x) $ , where  $ \sigma $  is the sigmoid function.
+
+**Bilinear Variant**:
+
+```
+elif configs.glu_variant == 'Bilinear':
+    ffn = FeedForward(configs.d_model, configs.d_ff, configs.dropout, 
+                     nn.Identity(), True, False, False, False)
+```
+
+Formula: 
+$$$
+FFN\_{Bilinear}(x) = (xW\_1 \otimes xV)W\_2
+$$$
+
+This removes the nonlinearity in the gate entirely, making it a pure bilinear operation.
+
+### Model Architecture Assembly
+
+The `Trainer.__init__` method shows how all components come together:
+
+```
+# Character vocabulary size
+n_chars = len(self.dataset.stoi)
+
+# Multi-head attention
+mha = MultiHeadAttention(configs.n_heads, configs.d_model, configs.dropout)
+
+# Transformer layer with chosen FFN variant
+transformer_layer = TransformerLayer(d_model=configs.d_model, 
+                                   self_attn=mha, 
+                                   src_attn=None,  # No cross-attention
+                                   feed_forward=ffn, 
+                                   dropout_prob=configs.dropout)
+
+# Complete model assembly
+self.model = AutoregressiveModel(
+    EmbeddingsWithPositionalEncoding(configs.d_model, n_chars),
+    Encoder(transformer_layer, configs.n_layers),
+    nn.Linear(configs.d_model, n_chars)
+)
+```
+
+### Understanding the Components
+
+* **EmbeddingsWithPositionalEncoding**: Converts character indices to dense vectors and adds positional information
+* **Encoder**: Stacks multiple `TransformerLayer`s
+* **Final Linear Layer**: Projects hidden states to vocabulary logits
+
+The `src_attn=None` indicates this is decoder-only (like GPT), not encoder-decoder (like T5).
+
+### Training Loop
+
+The training loop has several important aspects:
+
+### Optimizer Setup
+
+```
+self.optimizer = Noam(self.model.parameters(), lr=1.0, warmup=2_000, d_model=configs.d_model)
+```
+
+The Noam scheduler implements: 
+$$$
+lr = d\_{model}^{-0.5} \cdot \min(step^{-0.5}, step \cdot warmup^{-1.5})
+$$$
+
+This means:
+
+* learning rate scales with model dimension
+* warmup period of 2,000 steps
+* learning rate increases linearly during warmup, then decays
+
+### Loss Calculation and Optimization
+
+```
+def train(self):
+    for _ in monit.loop(self.epochs):
+        for i, batch in monit.enum('Train', self.dataloader):
+            data, target = batch[0].to(self.device), batch[1].to(self.device)
+            
+            # Track training progress
+            tracker.add_global_step(data.shape[0] * data.shape[1])
+            
+            self.model.train()
+            output = self.model(data)
+            
+            # Reshape for cross-entropy loss
+            loss = self.loss_func(output.view(-1, output.shape[-1]), 
+                                target.view(-1))
+            
+            tracker.add("loss.train", loss)
+            
+            # Backpropagation with gradient clipping
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(), 
+                                         max_norm=self.grad_norm_clip)
+            self.optimizer.step()
+            self.optimizer.zero_grad()
+```
+
+### Training Details
+
+* **Loss Reshaping**: `output.view(-1, output.shape[-1])` flattens the sequence and batch dimensions, creating shape `[batch_size * seq_len, vocab_size]`
+* **Gradient Clipping**: Prevents exploding gradients by limiting the L2 norm to 0.5
+* **Global Step Tracking**: Counts total characters processed, not just batches
+* **Periodic Sampling**: Every 100 steps, generates text to monitor training progress
+
+### Sampling Mechanism
+
+The sampling function is crucial for understanding training progress
+
+```
+def sample(self):
+    prompt = 'It is'
+    log = [(prompt, Text.subtle)]
+    
+    for i in monit.iterate('Sample', 25):
+        # Convert prompt to tensor
+        data = self.dataset.text_to_i(prompt).unsqueeze(-1)
+        data = data.to(self.device)
+        
+        # Get model predictions
+        output = self.model(data)
+        
+        # Greedy sampling (take most likely token)
+        output = output.argmax(dim=-1).squeeze()
+        
+        # Add predicted character to prompt
+        prompt += self.dataset.itos[output[-1].item()]
+        log += [(self.dataset.itos[output[-1].item()], Text.value)]
+    
+    logger.log(log)
+```
+
+### Sampling Strategy
+
+This uses **greedy sampling** always picks the most likely next character. Other strategies include:
+
+* **Top-k sampling**: Choose from k most likely tokens
+* **Top-p (nucleus) sampling**: Choose from tokens comprising top p probability mass
+* **Temperature scaling**: Control randomness by dividing logits by temperature
+
+The `output[-1].item()` takes the prediction for the last position (since we're doing autoregressive generation).
+
+### Experiment Tracking and Management
+
+```
+def main():
+    experiment.create(name="glu_variants")
+    configs = Configs()
+    experiment.configs(dataclasses.asdict(configs))
+    
+    trainer = Trainer(configs)
+    experiment.add_pytorch_models({'model': trainer.model})
+    
+    with experiment.start():
+        trainer.train()
+```
+
+This automatically:
+
+* Logs hyperparameters
+* Tracks metrics over time
+* Saves model checkpoints
+* Creates visualizations
+* Enables comparison across runs
+
+### Parameter Count Analysis
+
+GLU variants actually change the parameter count:
+
+**Standard FFN**:
+
+* $ W\_1 $ : `d_model × d_ff`
+* $ W\_2 $ : `d_ff × d_model`
+* Total: `2 × d_model × d_ff`
+
+**GLU Variants**:
+
+* $ W\_1 $ : `d_model × d_ff` (gate)
+* $ V $ : `d_model × d_ff` (values)
+* $ W\_2 $ : `d_ff × d_model`
+* Total: `(2 × d_model × d_ff) + (d_ff × d_model) = 3 × d_model × d_ff`
+
+So GLU variants have 1.5x more parameters in the FFN! This is why they often perform better AND they have more capacity.
+
+### Performance Insights
+
+### Why GLU Variants Work Better?
+
+* **Selective Information Flow**: The gating mechanism allows the model to selectively pass information, similar to LSTM gates
+* **Reduced Vanishing Gradients**: The multiplicative connections provide additional gradient paths
+* **Activation Function Choice**: Different activations (GELU, Swish) have different properties:
+  + **GELU**: Smooth, works well with normalization
+  + **Swish**: Self-gated, balances linearity and nonlinearity
+  + **ReLU**: Sparse, computationally efficient
+
+#### Recent Research Insights
+
+* **SwiGLU** has shown excellent results in large language models (PaLM, LLaMA)
+* **GEGLU** works particularly well with layer normalization
+* The gating mechanism seems especially beneficial for larger models
+
+### Memory and Computational Considerations
+
+GLU variants have different computational profiles:
+
+```
+# Memory usage (forward pass):
+# Standard FFN: O(batch_size × seq_len × d_ff)  
+# GLU variants: O(batch_size × seq_len × d_ff × 1.5)
+
+# Computational complexity:
+# All variants: O(batch_size × seq_len × d_model × d_ff)
+# But GLU variants do 1.5x more matrix multiplications
+```
+
+### Final Thoughts
+
+What makes this implementation special:
+
+* **Clean Architecture**: Easy to understand and modify
+* **Fair Comparison**: Only the FFN changes between experiments
+* **Comprehensive Logging**: Track everything needed for analysis
+* **Educational Value**: Perfect for understanding transformer internals
+
+The key insight? Feedforward networks are more important than we initially thought. They're not just "the MLP part", they're where a lot of the models capacity and computation lives. GLU variants represent a simple but powerful way to make this computation more effective.
+
+When trying to squeeze more performance out of models these patterns are worth understanding. The beauty is in the simplicity: add a gate, double some parameters, get better performance.
+
+*And hey, if you want to really understand this stuff, run the full implementation in colab notebook below and start experimenting. Change the variants, mess with the hyperparameters, watch how the generated text evolves. That's where the real learning happens.*
+
+LESFGOOOO.
+
+---
+
+*full implementation > colab notebook*
+
+*\* The following series of articles are a deeper walkthrough+implementation of Annotated Research Paper Implementations from labml.*

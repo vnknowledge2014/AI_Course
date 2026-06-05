@@ -1,0 +1,146 @@
+# Source: https://www.k-a.in/muon.html
+
+Muon, a neural network optimizer that gained attention for its excellent performance in training speed records for NanoGPT and CIFAR-10. Muon Optimizer is specifically designed for linear layers in neural networks and at its core tackles optimization through a geometric lens, specifically addressing the question: *how do changes in weight matrices affect the behavior of a neural network?*
+This seemingly simple inquiry leads to profound insights about the relationship between weight updates and functional changes in neural networks.
+  
+  
+Muon is a joint work of Jeremy Bernstein, Keller Jordan, Vlado Boza, Yuchen Jin, Jiacheng You, Franz Cesista and Laker Newhouse.
+
+A linear layer takes an input vector  $ x $  and multiplies it by a weight matrix  $ W $  to produce an output vector  $ y $ .
+$$$
+y=Wx
+$$$
+The key insight behind Muon is to normalize weight updates in a way that, given the structure of the inputs, automatically induces desirable effects on the outputs.
+
+The Muon optimizer can be understood through four key steps that build on each other to create a powerful optimization approach:
+
+### 1. Metrizing the Linear Layer
+
+Muon uses RMS (Root-Mean-Square) norms to consistently measure the sizes of vectors and matrices in neural networks. For vectors, the RMS norm averages the squared entries and gives a sense of the typical entry size, which is useful because activations often hover around magnitude 1.   
+ For matrices, Muon defines the RMS-to-RMS operator norm, which tells you how much a matrix can stretch a vector *on average*, normalized by input and output dimensions. This provides a clean way to control and compare the influence of weights regardless of the layer size, making network scaling more predictable and stable.
+
+For measuring inputs and outputs vextors using RMS norm:
+
+$$$
+\lvert x\rvert {RSM} = \sqrt{\frac{1}{d\_x}\sum\_{i=1}^{d\_x} x\_i^2} = \frac{1}{\sqrt{d\_x}}|x|\_2
+$$$
+
+This norm measures the average magnitude of entries in a vector, which aligns with how dense activations typically have entries of size around 1.
+
+For weight matrices, Muon introduces the RMS-to-RMS operator norm:
+
+$$$
+\lvert W \rvert\_{op,RMS} = \max\_{x \neq 0} \frac{\lvert Wx \rvert\_{RMS}}{\lvert x \rvert\_{RMS}} = \frac{|W|\_{\text{sp}}}{\sqrt{d\_x d\_y}}
+$$$
+
+* ∣W∣ op: RMS Operator norm induced by RMS norm
+* ∣W∣ sp: Spectral norm (max singular value)
+
+This measures how much a matrix can amplify the size of input vectors, providing a natural way to control the influence of weights.
+
+### 2. Perturbing the Linear Layer
+
+Muon shows that controlling the size of weight updates directly limits how much the network's outputs can change. By keeping the operator norm of the weight update small, the change in output stays proportional to the size of the input. This means training becomes more stable, as each update causes only a predictable, bounded shift in the network’s behavior.
+
+Examining how weight updates affect network outputs. When we update weights by  $ \Delta W $ , outputs change by  $ \Delta y = \Delta W \cdot x $ . Muon bounds this change using RMS norm:
+
+$$$
+\lvert \Delta \rvert y\_{RMS} \leq \lvert\Delta W \rvert\_{op,RMS} \cdot |x|\_{\text{RMS}}
+$$$
+
+### 3. Dualizing the Gradient
+
+Muon turns weight updates into an optimization problem: it aims to improve the loss (via the gradient) while capping how much the output can change. This is done by minimizing the inner product ⟨G, ΔW⟩ which aligns updates with the gradient, subject to a constraint on the operator norm of ΔW (∣ΔW∣ₒₚ,ᴿᴹˢ ≤ β). The optimal solution reshapes the gradient without changing its direction: it uses the SVD of the gradient (G = UΣVᵀ) and sets the update to ΔW = –α·β·UVᵀ. This keeps the key directions of the gradient but flattens the singular values, ensuring consistent, bounded updates that improve the loss while keeping output changes under control.
+
+formulate weight updates as an optimization problem:
+
+$$$
+\min\_{\Delta W} \langle G, \Delta W \rangle \quad \text{subject to} \quad |\Delta W|\_{\text{op},\text{RMS}} \leq \beta
+$$$
+
+Where  $ G $  is the gradient and  $ \beta $  controls the magnitude of change. The solution involves "orthogonalizing" the gradient - keeping its directional information while normalizing its impact.
+
+If the gradient has singular value decomposition  $ G = U\Sigma V^T $ , the optimal update becomes:
+
+$$$
+\Delta W = -\alpha \cdot \beta \cdot UV^T
+$$$
+
+This preserves the directions of the gradient while standardizing all singular values to 1.
+
+### 4. Fast Orthogonalization via Newton-Schulz
+
+Since computing full SVDs is too slow for large networks, Muon uses Newton-Schulz iterations, a fast, iterative method to approximate orthogonalization. It applies a simple polynomial function,  $ ( f(X) = \frac{3X - X^3}{2} ) $ , repeatedly to a normalized matrix, which gradually forces all singular values to 1 while preserving singular vectors. This efficiently mimics the SVD-based update without the cost. The final Muon update rule becomes  $ ( W \leftarrow W - \alpha \cdot \frac{\text{NS}(G)}{|G|\_F} \cdot \sqrt{d\_x d\_y} ) $ , where NS(G) is the Newton-Schulz orthogonalized gradient.
+
+Newton-Schulz iterations approximating the orthogonalization process,via polynomial:
+
+$$$
+f(X) = \frac{3X - X^3}{2}
+$$$
+
+When applied iteratively to a properly normalized matrix, this polynomial converges to a matrix with the same singular vectors but with all singular values equal to 1 - achieving orthogonalization without the computational burden of SVD.
+
+These four steps combine to create Muon's update rule:
+
+$$$
+W \leftarrow W - \alpha \cdot \frac{\sqrt{d\_x d\_y}}{|G|\_F} \cdot \text{NS}(G)
+$$$
+
+Where:
+
+* $ \alpha $  is the step size/learning rate
+* $ d\_x $  and  $ d\_y $  are the dimensions of the weight matrix
+* $ G $  is the gradient of the loss with respect to the weights
+* $ \text{NS} $  represents the Newton-Schulz orthogonalization
+* W is the weight matrix of a given layer in the neural network. It represents the parameters being learned for that layer—what transforms the input x into the output y via the operation y = Wx.
+* This rule updates W by subtracting a scaled, orthogonalized version of the gradient.
+* The update ensures that the direction of the update (from NS(G)) aligns with the gradient but has uniform singular values (i.e., it doesn’t distort some directions more than others).
+* The scale of the update is normalized (via  $ |G|\_F $ ) and adjusted for layer size (via  $ \sqrt{d\_x d\_y} $ ).
+
+So in short: W is the current weight matrix being trained, and this formula tells how to update it using Muon’s method.
+
+This approach leads to faster convergence and automatic learning rate transfer across network widths, making Muon particularly valuable for training large-scale neural networks.
+
+## The Practical Benefits: Why Muon Matters
+
+Muon's theoretical elegance translates into tangible benefits for neural network training:
+
+### Automatic Learning Rate Transfer
+
+Perhaps most impressively, Muon achieves automatic learning rate transfer across network widths. This means that, unlike traditional optimizers where learning rates must be carefully tuned when scaling networks, Muon maintains consistent behavior regardless of layer width. This property emerges naturally from the RMS-to-RMS normalization, which scales appropriately with dimension.
+
+In practical terms, this eliminates one of the most frustrating aspects of scaling neural networks: the need to repeatedly tune hyperparameters. The same learning rate that works for a small network will work for a large one—a property previously achieved through specialized techniques like µP (maximal update parameterization) but now derived naturally from Muon's principles.
+
+### Faster Convergence
+
+Experiments consistently demonstrate that Muon converges faster than traditional optimizers like Adam. This acceleration isn't merely a matter of larger effective step sizes; it reflects a fundamentally more efficient traversal of the loss landscape, guided by the geometric principles encoded in the optimizer.
+
+### Simplified Numerical Properties
+
+Another subtle but important benefit is Muon's numerical behavior. In experiments where weight matrices are watermarked with patterns, Muon shows a distinctive ability to erase these patterns more rapidly during training. This suggests that Muon can escape the neighborhood of initialization more effectively than traditional methods.
+
+This observation has theoretical implications, challenging the notion that neural networks primarily operate in a "linearized regime" around their initialization (the Neural Tangent Kernel perspective). Instead, Muon shows that effective optimization can involve substantial movement in weight space.
+
+## Beyond Linear Layers: The Modular Vision
+
+The underlying philosophy of Muon extends to a broader vision of "modular" deep learning theory. The proposal to breaking down neural networks into fundamental building blocks, developing tailored optimization theory for each component, and then composing these solutons.
+
+This modular approach offers a path toward demystifying neural networks—transforming them from "inscrutable beasts" (as Bernstein puts it) into well-understood mathematical systems with predictable behaviors. The success of Muon for linear layers validates this direction and points toward a future where similarly principled optimizers might be derived for other layer types.
+
+## The Geometric Perspective
+
+At a more fundamental level, Muon exemplifies the deep connection between optimization and geometry. Different notions of distance lead to different optimization theories, and Muon leverages the geometry of matrices acting as linear operators between RMS-normed spaces.
+
+This geometric intuition provides a bridge between weight space (where optimization happens) and function space (where performance is measured)—a connection that has been explored in previous work on deep relative trust, the modular norm, and modular duality.
+
+## Practical Implementation and Performance
+
+In the NanoGPT speed records, Muon demonstrated substantial improvements over conventional methods. While the theoretical version described here provides the foundation, the practical implementation incorporates additional refinements, such as applying Newton-Schulz to momentum rather than raw gradients and carefully tuning the polynomial coefficients.
+
+## Standing on Giants' Shoulders
+
+Muon builds upon several important predecessors, including Stochastic Spectral Descent (2015) and Duality Structure Gradient Descent (2017), which also explored gradient orthogonalization. The Shampoo optimizer's numerical techniques also provided inspiration for the feasibility of matrix operations at scale.
+
+The key innovations in Muon include the use of Newton-Schulz iterations for efficient orthogonalization and the adoption of the RMS-to-RMS operator norm for automatic learning rate transfer.
+
+*We Implement Muon in our next post.*

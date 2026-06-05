@@ -1,0 +1,886 @@
+# Source: https://www.k-a.in/pyt-retro.html
+
+Today we are going to implement Retrieval-Enhanced Transformer from scratch using PyTorch. RETRO model architecture is described in the paper "Improving language models by retrieving from trillions of tokens." which was published by GDM released in February, 2022.
+I've been excited to implement this since reading the paper and im sure you are too, so let's dive in and build it.
+
+## RETROOO
+
+RETRO enhances language models by retrieving relevant chunks of text from a database when generating content. The key idea is to build a database of text chunks, retrieve similar chunks during inference, and use these retrieved chunks to improve the model's predictions.
+
+#### Here's how it works
+
+we create a key-value database where the keys are BERT embeddings of text chunks, and the values are the chunks themselves along with some context. When the model is generating text, it retrieves similar chunks from this database and uses them to inform its predictions. It's like giving the model access to a vast knowledge base that it can reference when needed.
+
+## Setting Up BERT Embeddings
+
+To get BERT embeddings for chunks of text these embeddings will be used to index our database and find similar chunks. Lets implement this:
+
+```
+from typing import List
+import torch
+from transformers import BertTokenizer, BertModel
+from labml import lab, monit
+
+class BERTChunkEmbeddings:
+    """
+    Generate BERT embeddings for chunks of text
+    """
+
+    def __init__(self, device: torch.device):
+        self.device = device
+        
+        # Load the BERT tokenizer
+        with monit.section('Load BERT tokenizer'):
+            self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased',cache_dir=str(lab.get_data_path() / 'cache' / 'bert-tokenizer'))
+
+        # Load the BERT model
+        with monit.section('Load BERT model'):
+            self.model = BertModel.from_pretrained("bert-base-uncased",cache_dir=str(lab.get_data_path() / 'cache' / 'bert-model'))
+            
+            self.model.to(device)
+```
+
+using a pre-trained BERT model from HuggingFace here. We'll use this to convert chunks of text into embeddings. The key part is that we freeze these BERT weights. we won't be training BERT, just using it to generate embeddings.
+
+lets add the method to actually compute these embeddings:
+
+```
+def __call__(self, chunks: List[str]):
+    """Get BERT embeddings for a list of chunks"""
+    with torch.no_grad():
+        # Tokenize the chunks
+        tokens = self.tokenizer(chunks, return_tensors='pt', add_special_tokens=False, padding=True)
+
+        # Move to device
+        input_ids = tokens['input_ids'].to(self.device)
+        attention_mask = tokens['attention_mask'].to(self.device)
+        token_type_ids = tokens['token_type_ids'].to(self.device)
+
+        # Get BERT output
+        output = self.model(input_ids=input_ids,
+                          attention_mask=attention_mask,
+                          token_type_ids=token_type_ids)
+
+        # Calculate average embeddings
+        state = output['last_hidden_state']
+        emb = (state * attention_mask[:, :, None]).sum(dim=1) / attention_mask[:, :, None].sum(dim=1)
+
+        return emb
+```
+
+we tokenize each chunk, pass it through BERT and then average the token embeddings to get a single embedding for each chunk. This embedding represents the semantic meaning of the chunk.
+
+## Database for Retrieval
+
+we need to build a database that will store our chunks and allow us to efficiently retrieve similar chunks. We use the faiss library for this, perfect for nearest neighbor search in high-dimensional spaces.
+
+```
+import faiss
+import numpy as np
+from labml_helpers.datasets.text import TextFileDataset
+
+
+def build_database(chunk_len: int = 16, batch_size: int = 64, d_emb: int = 768, n_centeroids: int = 256,
+                  code_size: int = 64, n_probe: int = 8, n_train: int = 50_000):
+
+    # Load the dataset
+    dataset = TextFileDataset(
+        lab.get_data_path() / 'tiny_shakespeare.txt',
+        list,
+        url='https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt')
+        
+    # Get training data
+    text = dataset.train
+
+    # Split into chunks
+    chunks = [text[i:i + chunk_len] for i in range(0, len(text), chunk_len) if i + chunk_len * 2 < len(text)]
+
+    chunk_offsets = np.array([i for i in range(0, len(text), chunk_len) if i + chunk_len * 2 < len(text)])
+
+    n_chunks = len(chunks)
+
+    # Get BERT embeddings
+    bert = BERTChunkEmbeddings(torch.device('cuda:0'))
+
+    chunk_emb = []
+
+    for i in monit.iterate('Get embeddings', range(0, n_chunks, batch_size)):
+        chunk_emb.append(bert(chunks[i: i + batch_size]).cpu())
+    chunk_emb = torch.cat(chunk_emb, dim=0).numpy()
+
+    # Create FAISS index
+    quantizer = faiss.IndexFlatL2(d_emb)
+    index = faiss.IndexIVFPQ(quantizer, d_emb, n_centeroids, code_size, 8)
+    index.nprobe = n_probe
+
+    # Train the index
+    random_sample = np.random.choice(np.arange(n_chunks), size=[min(n_train, n_chunks)], replace=False)
+
+    with monit.section('Train index'):
+        index.train(chunk_emb[random_sample])
+
+    # Add chunks to the index
+    for s in monit.iterate('Index', range(0, n_chunks, 1024)):
+        e = min(s + 1024, n_chunks)
+        index.add_with_ids(chunk_emb[s:e], chunk_offsets[s: e])
+
+    # Save the index
+    with monit.section('Save'):
+        faiss.write_index(index, str(lab.get_data_path() / 'retro.index'))
+```
+
+This function builds our database, loads the text data, splits it into chunks, computes BERT embeddings for each chunk, and then indexes these embeddings using faiss.
+The index allows us to efficiently find chunks with similar embeddings.
+
+#### `RetroIndex` to retrieve neighbors from database:
+
+```
+class RetroIndex:
+    """Index for retrieving nearest neighbors"""
+    def __init__(self, chunk_len: int = 16, n_probe: int = 8,
+                n_neighbors: int = 2, n_extra: int = 2,
+                exclude_neighbor_span: int = 8):
+        self.n_neighbors = n_neighbors
+        self.chunk_len = chunk_len
+        self.exclude_neighbor_span = exclude_neighbor_span
+        self.n_extra = n_extra
+        
+        # Initialize BERT
+        self.bert = BERTChunkEmbeddings(torch.device('cuda:0'))
+        
+        # Load the database
+        with monit.section('Load index'):
+            self.index = faiss.read_index(str(lab.get_data_path() / 'retro.index'))
+            self.index.nprobe = n_probe
+
+    def __call__(self, query_chunks: List[str], offsets: Optional[List[int]]):
+        """Retrieve nearest neighbors"""
+        
+        # Get embeddings
+        emb = self.bert(query_chunks).cpu()
+        
+        # Search for neighbors
+        distance, neighbor_offsets = self.index.search(emb.numpy(), self.n_neighbors + self.n_extra)
+
+        # Filter overlapping chunks if offsets are provided
+        if offsets is not None:
+            neighbor_offsets = [self.filter_neighbors(off, n_off)
+                               for off, n_off in zip(offsets, neighbor_offsets)]
+
+        # Get the closest neighbors
+        neighbor_offsets = [n_off[:self.n_neighbors] for n_off in neighbor_offsets]
+        return neighbor_offsets
+```
+
+the class loads our faiss index and provides a method to retrieve nearest neighbors for a list of query chunks. It also handles filtering out neighbors that overlap with the query chunks to avoid information leakage.
+
+## Building the RETRO Model
+
+Now for the fun part! building the actual RETRO model!
+RETRO is based on the Transformer architecture but with some important modifications to incorporate the retrieved chunks. Let's start by implementing the core attention mechanisms.
+
+#### Implement the rotary positional embeddings:
+
+```
+class RotaryPositionalEmbeddings(nn.Module):
+
+    """Rotary positional embeddings"""
+
+    def __init__(self, d: int, base: int = 10_000):
+
+        super().__init__()
+
+        self.theta = nn.Parameter(1. / (base ** (torch.arange(0, d, 2).float() / d)), requires_grad=False)
+
+    def forward(self, x: torch.Tensor):
+
+        batch_size, seq_len, n_heads, d = x.shape
+
+        d_2 = d // 2
+
+        # Create position indexes
+
+        seq_idx = torch.arange(seq_len, device=x.device).type_as(self.theta)
+
+        # Calculate rotation angles
+
+        idx_theta = torch.einsum('n,d->nd', seq_idx, self.theta)
+
+        idx_theta2 = torch.cat([idx_theta, idx_theta], dim=1)
+
+        # Apply rotations
+
+        neg_half_x = torch.cat([-x[:, :, :, d_2:], x[:, :, :, :d_2]], dim=-1)
+
+        rx = (x * idx_theta2.cos()[None, :, None, :]) + (neg_half_x * idx_theta2.sin()[None, :, None, :])
+
+        return rx
+```
+
+This is an implementation of Rotary Position Embeddings (RoPE), which is a way to inject positional information into the model. RoPE has become quite popular in transformer models because it handles sequence length extrapolation well.
+
+#### implement the self-attention mechanism:
+
+```
+class SelfAttention(nn.Module):
+
+    """Self-Attention Layer"""
+
+    def __init__(self, d_model: int, n_heads: int, d_k: int, is_causal: bool):
+        super().__init__()
+        self.is_causal = is_causal
+        self.n_heads = n_heads
+        self.d_k = d_k
+
+        # Scaling factor
+        self.scale = 1 / math.sqrt(self.d_k)
+        
+        # Linear layers
+        self.query = nn.Linear(d_model, n_heads * d_k)
+        self.key = nn.Linear(d_model, n_heads * d_k)
+        self.value = nn.Linear(d_model, n_heads * d_k)
+
+        # Layer normalization
+        self.norm = nn.LayerNorm(d_model)
+
+        # Softmax
+        self.softmax = nn.Softmax(dim=-1)
+
+        # Rotary positional embeddings
+        self.rotary_pe = RotaryPositionalEmbeddings(self.d_k)
+
+        # Output projection
+        self.output = nn.Linear(n_heads * d_k, d_model)
+
+    def forward(self, h: torch.Tensor):
+
+        # Residual connection
+        h_res = h
+
+        # Pre-normalization
+        h = self.norm(h)
+
+        # Project to query, key, value
+        mh_shape = (*h.shape[:-1], self.n_heads, self.d_k)
+
+        q = self.query(h).view(mh_shape)
+        k = self.key(h).view(mh_shape)
+        v = self.value(h).view(mh_shape)
+
+        # Apply rotary positional embeddings
+        q = self.rotary_pe(q)
+        k = self.rotary_pe(k)
+
+        # Calculate attention scores
+        attn = torch.einsum('bihd,bjhd->bhij', q, k)
+        attn = attn * self.scale
+
+        # Apply causal mask if needed
+        if self.is_causal:
+            mask = torch.tril(attn.new_ones(attn.shape[-2:]))
+            attn = attn.masked_fill(mask == 0, float('-inf'))
+
+        # Calculate attention probabilities
+        attn = self.softmax(attn)
+
+        # Apply attention to values
+        h = torch.einsum("bhij,bjhd->bihd", attn, v)
+
+        # Reshape and project
+        h = h.reshape(*h.shape[:-2], -1)
+        h = self.output(h)
+
+        # Add residual connection
+        return h + h_res
+```
+
+this is a standard self-attention mechanism with a few RETRO-specific modifications. The `is_causal` parameter determines whether this is a causal attention layer (used in the decoder) or a bidirectional attention layer (used in the encoder).
+
+#### implement the cross-attention mechanisms.
+
+RETRO uses two types of cross-attention: one in the encoder and one in the decoder.
+
+```
+class CrossAttention(nn.Module):
+
+    """Cross-Attention Layer for the encoder"""
+
+    def __init__(self, d_model: int, n_heads: int, d_k: int):
+        super().__init__()
+        self.n_heads = n_heads
+        self.d_k = d_k
+
+        # Scaling factor
+        self.scale = 1 / math.sqrt(self.d_k)
+
+        # Linear layers
+        self.query = nn.Linear(d_model, n_heads * d_k)
+        self.key = nn.Linear(d_model, n_heads * d_k)
+        self.value = nn.Linear(d_model, n_heads * d_k)
+
+        # Layer normalization
+        self.norm = nn.LayerNorm(d_model)
+
+        # Softmax
+        self.softmax = nn.Softmax(dim=-1)
+
+        # Output projection
+        self.output = nn.Linear(n_heads * d_k, d_model)
+
+    def forward(self, e: torch.Tensor, h: torch.Tensor):
+
+        # Residual connection
+        e_res = e
+
+        # Normalize retrieved chunks
+        e = self.norm(e)
+
+        # Project to query, key, value
+        q = self.query(e).view(*e.shape[:-1], self.n_heads, self.d_k)
+        k = self.key(h).view(*h.shape[:-1], self.n_heads, self.d_k)
+        v = self.value(h).view(*h.shape[:-1], self.n_heads, self.d_k)
+
+        # Calculate attention scores
+        attn = torch.einsum('bcnihd,bcjhd->bcnhij', q, k)
+        attn = attn * self.scale
+
+        # Calculate softmax
+        attn = self.softmax(attn)
+
+        # Apply attention to values
+        e = torch.einsum("bcnhij,bcjhd->bcnihd", attn, v)
+
+        # Reshape and project
+        e = e.reshape(*e.shape[:-2], -1)
+        e = self.output(e)
+
+        # Add residual connection
+        return e + e_res
+```
+
+The encoders cross-attention layer allows the retrieved neighbors to attend to the input chunks that retrieved them. This helps the model understand the relationship between the retrieved chunks and the current context.
+
+#### implement the chunked cross-attention layer for the decoder:
+
+```
+class ChunkedCrossAttention(nn.Module):
+
+    """Chunked Cross-Attention Layer for the decoder"""
+
+    def __init__(self, d_model: int, n_heads: int, d_k: int, chunk_len: int):
+        super().__init__()
+        self.chunk_len = chunk_len
+        self.n_heads = n_heads
+        self.d_k = d_k
+
+        # Scaling factor
+        self.scale = 1 / math.sqrt(self.d_k)
+
+        # Linear layers
+        self.query = nn.Linear(d_model, n_heads * d_k)
+        self.key = nn.Linear(d_model, n_heads * d_k)
+        self.value = nn.Linear(d_model, n_heads * d_k)
+
+        # Layer normalization
+        self.norm = nn.LayerNorm(d_model)
+
+        # Softmax
+        self.softmax = nn.Softmax(dim=-1)
+
+        # Output projection
+        self.output = nn.Linear(n_heads * d_k, d_model)
+
+    def forward(self, h: torch.Tensor, e: torch.Tensor):
+        # Get shape
+        batch_size, chunks, neighbors, neighbor_len, d_model = e.shape
+
+        # No attention if there are no chunks
+        if chunks == 0:
+            return h
+
+        # Residual connection
+        h_res = h
+
+        # Shift input to ensure causal attention
+        h = h[:, self.chunk_len - 1:]
+        h = self.norm(h)
+
+        # Pad if necessary and reshape into chunks
+        if h.shape[1] < chunks * self.chunk_len:
+
+            h = torch.cat((h, h.new_zeros(batch_size, chunks * self.chunk_len - h.shape[1], d_model)), dim=1)
+
+        h = h.reshape(batch_size, chunks, self.chunk_len, d_model)
+
+        # Project to query, key, value
+        q = self.query(h).view(*h.shape[:-1], self.n_heads, self.d_k)
+        k = self.key(e).view(*e.shape[:-1], self.n_heads, self.d_k)
+        v = self.value(e).view(*e.shape[:-1], self.n_heads, self.d_k)
+
+        # Calculate attention scores
+        attn = torch.einsum('bcihd,bcnjhd->bchinj', q, k)
+        attn = attn * self.scale
+
+        # Calculate softmax
+        attn = self.softmax(attn.view(*attn.shape[:-2], -1)).view(attn.shape)
+
+        # Apply attention to values
+        h = torch.einsum("bchinj,bcnjhd->bcihd", attn, v)
+
+        # Reshape and project
+        h = h.reshape(batch_size, chunks * self.chunk_len, -1)
+        h = self.output(h)
+
+        # Shift back and add residual connection
+        h = torch.cat((h.new_zeros(batch_size, self.chunk_len - 1, d_model), h), dim=1)
+
+        return h[:, :h_res.shape[1]] + h_res
+```
+
+The chunked cross-attention layer in the decoder allows the model to attend to the encoded retrieved chunks. This is where the magic happens - the model can use information from similar chunks in its database to improve its predictions.
+
+#### implement a simple feed-forward network:
+
+```
+class FeedForward(nn.Module):
+
+    """Position-wise Feed Forward Layer"""
+
+    def __init__(self, d_model: int, d_ff: int)
+        super().__init__()
+        
+        # Linear layers
+        self.lin1 = nn.Linear(d_model, d_ff)
+        self.lin2 = nn.Linear(d_ff, d_model)
+
+        # Activation
+        self.act = nn.ReLU()
+
+        # Layer normalization
+        self.norm = nn.LayerNorm(d_model)
+
+    def forward(self, h: torch.Tensor):
+        # Residual connection
+        h_res = h
+
+        # Pre-norm
+        h = self.norm(h)
+
+        # Apply feed-forward network
+        h = self.lin1(h)
+        h = self.act(h)
+        h = self.lin2(h)
+
+        # Add residual connection
+        return h + h_res
+```
+
+#### implement the nearest neighbor encoder, which processes the retrieved chunks:
+
+```
+class NearestNeighborEncoder(nn.Module):
+
+    """Encoder for retrieved nearest neighbors"""
+
+    def __init__(self, chunk_len: int, n_layers: int, ca_layers: Set[int],
+                d_model: int, n_heads: int, d_k: int, d_ff: int):
+
+        super().__init__()
+        self.ca_layers = ca_layers
+        self.chunk_len = chunk_len
+
+        # Cross-attention layers
+        self.ca = nn.ModuleList([CrossAttention(d_model, n_heads, d_k) for _ in range(len(ca_layers))])
+
+        # Self-attention layers
+        self.attn = nn.ModuleList([SelfAttention(d_model, n_heads, d_k, is_causal=False) for _ in range(n_layers)])
+
+        # Feed-forward layers
+        self.ffw = nn.ModuleList([FeedForward(d_model, d_ff) for _ in range(n_layers)])
+
+        # Layer normalization for input
+        self.norm_h = nn.LayerNorm(d_model)
+
+    def forward(self, e: torch.Tensor, h: torch.Tensor):
+        # Split input into chunks
+        h_split = h[:, :self.chunk_len * e.shape[1], :].reshape(h.shape[0], e.shape[1], self.chunk_len, h.shape[2])
+
+        # Pre-norm input
+        h_split = self.norm_h(h_split)
+
+        # Process through layers
+        p_ca = 0
+
+        for p in range(len(self.attn)):
+            # Self-attention
+            e = self.attn[p](e.view(-1, e.shape[2] * e.shape[3], e.shape[4])).view(e.shape)
+
+            # Cross-attention if needed
+            if p in self.ca_layers:
+                e = self.ca[p_ca](e, h_split)
+                p_ca += 1
+
+            # Feed-forward
+            e = self.ffw[p](e)
+
+        return e
+```
+
+The encoder processes the retrieved chunks, allowing them to attend to each other (through self-attention) and to the input chunks that retrieved them (through cross-attention).
+
+### RETRO model
+
+```
+class RetroModel(nn.Module):
+
+    """RETRO model"""
+    def __init__(self, n_vocab: int, d_model: int, n_layers: int, ca_layers: Set[int], chunk_len: int,
+                n_heads: int, d_k: int, d_ff: int, encoder: NearestNeighborEncoder):
+
+        super().__init__()
+        self.ca_layers = ca_layers
+        self.encoder = encoder
+
+        # Token embedding
+        self.emb = nn.Embedding(n_vocab, d_model)
+
+        # Chunked cross-attention layers
+        self.cca = nn.ModuleList(
+
+            [ChunkedCrossAttention(d_model, n_heads, d_k, chunk_len) for _ in range(len(ca_layers))])
+
+        # Self-attention layers
+        self.attn = nn.ModuleList([SelfAttention(d_model, n_heads, d_k, is_causal=True) for _ in range(n_layers)])
+
+        # Feed-forward layers
+        self.ffw = nn.ModuleList([FeedForward(d_model, d_ff) for _ in range(n_layers)])
+
+        # Output layer
+        self.read = nn.Linear(d_model, n_vocab)
+
+        # Layer normalization for encoder output
+        self.norm_e = nn.LayerNorm(d_model)
+
+    def forward(self, x: torch.Tensor, ret: torch.Tensor):
+
+        # Get input embeddings
+        h = self.emb(x)
+
+        # Get embeddings of retrieved neighbors
+        ret_emb = self.emb(ret)
+        p_ca = 0
+
+        for p in range(len(self.attn)):
+
+            # Causal self-attention
+            h = self.attn[p](h)
+
+            # Encode neighbors before first cross-attention
+            if self.ca_layers and p == min(self.ca_layers):
+                e = self.encoder(ret_emb, h)
+                e = self.norm_e(e)
+
+            # Chunked cross-attention if needed
+            if p in self.ca_layers:
+                h = self.cca[p_ca](h, e)
+                p_ca += 1
+
+            # Feed-forward
+            h = self.ffw[p](h)
+
+        # Output layer
+        return self.read(h)
+```
+
+The RETRO model combines all these components. It first embeds the input, processes it through multiple layers of self-attention, cross-attention with the encoded retrieved chunks, and feed-forward networks, and finally produces output probabilities through a linear readout layer.
+
+## Building the Dataset for Training
+
+To train RETRO efficiently, we pre-retrieve the nearest neighbors for our training dataset. This way, we don't need to perform retrieval during training, which would be very slow.
+
+```
+def build_dataset(chunk_len: int = 16, chunks_per_sample: int = 32, skip_range: int = 8):
+
+    # Load text dataset
+    dataset = TextFileDataset(
+        lab.get_data_path() / 'tiny_shakespeare.txt',
+        list,
+        url='https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt')
+
+    # Get training text
+    text = dataset.train
+
+    # Initialize retrieval index
+    index = RetroIndex()
+
+    # Generate sample offsets
+    sample_offsets = []
+    i = 0
+    while i < len(text):
+        skip = np.random.randint(skip_range)
+        i += skip
+        if i + chunks_per_sample * chunk_len > len(text):
+
+            break
+        sample_offsets.append(i)
+        i += chunks_per_sample * chunk_len
+
+    # Retrieve neighbors for samples
+    samples = []
+    for i in monit.iterate('Gather Neighbors', sample_offsets):
+        # Get the sample
+        sample = text[i: i + chunks_per_sample * chunk_len + 1]
+        src = sample[:-1]
+
+        # Break into chunks
+        chunks = [src[j:j + chunk_len] for j in range(0, len(src), chunk_len)]
+        chunk_offsets = [j + i for j in range(0, len(src), chunk_len)]
+
+        # Retrieve neighbors
+        neighbor_offsets = index(chunks, chunk_offsets)
+        neighbors = [[text[j: j + chunk_len * 2] for j in n_off] for n_off in neighbor_offsets]
+
+        # Add to samples
+        samples.append((sample[:-1], sample[1:], neighbors))
+
+    # Save dataset
+    with open(str(lab.get_data_path() / 'retro_train_dataset.json'), 'w') as f:
+        f.write(json.dumps(samples))
+```
+
+This function builds our training dataset by retrieving neighbors for each chunk in our samples. We save this dataset to disk so we can load it efficiently during training.
+
+#### PyTorch dataset class to load data:
+
+```
+class Dataset(PyTorchDataset):
+
+    """PyTorch dataset for RETRO"""
+    def __init__(self, file_path: Path, tds: TextDataset):
+        self.tds = tds
+
+        # Load samples
+        with open(str(file_path), 'r') as f:
+            self.samples = json.loads(f.read())
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, idx: int):
+        # Get sample
+        s = self.samples[idx]
+
+        # Tokenize
+        src = self.tds.text_to_i(s[0])
+        tgt = self.tds.text_to_i(s[1])
+
+        neighbors = torch.stack([torch.stack([self.tds.text_to_i(n) for n in chunks]) for chunks in s[2]])
+
+        return src, tgt, neighbors
+```
+
+This dataset class loads our pre-retrieved neighbors and tokenizes them for the model.
+
+## Training the RETRO Model
+
+Now that we have all the components, let's train the model! First, let's implement a sampler that will help us generate text from the model:
+
+```
+class Sampler:
+
+    """Sampler for generating text from the model"""
+
+    def __init__(self, device: torch.device, model: RetroModel, tds: TextFileDataset, chunk_len: int):
+
+        self.chunk_len = chunk_len
+        self.tds = tds
+        self.model = model
+        self.device = device
+
+        # Initialize retrieval index
+        self.index = RetroIndex()
+
+    def retrieve_nearest_neighbours(self, chunk: str):
+
+        # Retrieve neighbors
+        neighbor_offsets = self.index([chunk], None)
+
+        # Get neighbor text
+        text = self.tds.train
+
+        neighbors = [text[j: j + self.chunk_len * 2] for j in neighbor_offsets[0]]
+
+        return neighbors
+
+    def sample(self, prompt: str, sample_len: int):
+
+        # Store neighbors
+        neighbors_str = []
+
+        # Sampled text
+        sampled = ''
+
+        # Sample tokens
+        for i in range(sample_len):
+
+            # Retrieve neighbors if needed
+            while len(neighbors_str) < len(prompt) // self.chunk_len:
+                off = len(neighbors_str) * self.chunk_len
+                chunk = prompt[off: off + self.chunk_len]
+                neighbors_str.append(self.retrieve_nearest_neighbours(chunk))
+
+            # Tokenize input and neighbors
+            src = self.tds.text_to_i(prompt)
+
+            neighbors = torch.stack([torch.stack([self.tds.text_to_i(n) for n in chunk]) for chunk in neighbors_str])
+
+            # Move to device
+            src = src.to(self.device)
+            neighbors = neighbors.to(self.device)
+
+            # Get model output
+            res = self.model(src[None, :], neighbors[None, :, :, :])
+
+            # Sample next token
+            token = res[0, -1, :].argmax(dim=-1)
+
+            # Add to prompt and sampled text
+            prompt += self.tds.itos[token.item()]
+            sampled += self.tds.itos[token.item()]
+
+        return sampled
+```
+
+This sampler implements greedy sampling from the model. It retrieves neighbors for each chunk in the prompt and uses them to generate text.
+
+#### Finally, Implement the trainer:
+
+```
+class Trainer:
+
+    """Trainer for RETRO model"""
+
+    def __init__(self, device: torch.device, model: RetroModel,
+                dataloader: DataLoader, optimizer: torch.optim.Optimizer):
+
+        self.optimizer = optimizer
+        self.device = device
+        self.dataloader = dataloader
+        self.model = model
+        self.loss_func = nn.CrossEntropyLoss()
+
+    def __call__(self):
+        # Train for an epoch
+        for i, (src, tgt, neighbors) in monit.enum('Train', self.dataloader):
+            # Move to device
+            src, tgt, neighbors = src.to(self.device), tgt.to(self.device), neighbors.to(self.device)
+
+            # Forward pass
+            res = self.model(src, neighbors)
+
+            # Calculate loss
+            loss = self.loss_func(res.view(-1, res.shape[-1]), tgt.view(-1))
+
+            # Backward pass
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+
+            # Log statistics
+            tracker.save({'loss.train': loss})
+            tracker.add_global_step(len(src))
+```
+
+And the main training function:
+
+```
+def train():
+
+    # Create experiment
+    experiment.create(name='retro_small')
+
+    # Set device
+    device = torch.device('cuda:0')
+
+    # Load dataset
+    tds = TextFileDataset(
+        lab.get_data_path() / 'tiny_shakespeare.txt',
+        list,
+        url='https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt')
+
+    # Load training dataset
+    train_dataset = Dataset(lab.get_data_path() / 'retro_train_dataset.json', tds)
+
+    # Create dataloader
+    train_dl = DataLoader(train_dataset,
+                         batch_size=4,
+                         sampler=RandomSampler(train_dataset, replacement=True))
+
+    # Set hyperparameters
+    chunk_len = 16
+    d_model = 128
+    d_ff = 512
+    n_heads = 16
+    d_k = 16
+
+    # Create model
+    nearest_neighbor_encoder = NearestNeighborEncoder(chunk_len, 6, {3}, d_model, n_heads, d_k, d_ff)
+
+    model = RetroModel(tds.n_tokens, d_model, 6, {3, 5}, chunk_len, n_heads, d_k, d_ff, encoder=nearest_neighbor_encoder)
+
+    # Move to device
+    model = model.to(device)
+
+    # Create optimizer
+    optimizer = Noam(model.parameters(), lr=1., d_model=d_model, warmup=2_000)
+
+    # Create trainer and sampler
+    trainer = Trainer(device, model, train_dl, optimizer)
+    sampler = Sampler(device, model, tds, chunk_len)
+
+    # Set prompt for sampling
+    prompt = '''Second Citizen:\nOne word, good citizens.\n\nFirst Citizen:'''
+
+    # Train
+    with experiment.start():
+        for epoch in monit.loop(32):
+            trainer()
+            tracker.new_line()
+            
+            # Sample from model
+            logger.log([(prompt.replace('\n', '\\n\n'), Text.subtle),
+                       (sampler.sample(prompt, 128).replace('\n', '\\n\n'), Text.none)])
+
+            # Save checkpoint
+            experiment.save_checkpoint()
+```
+
+*This trains our RETRO model for 32 epochs(in our imp we do 5 epochs), sampling text from it after each epoch.*
+
+## Recap RETRO
+
+Now that we've built all the components of RETRO, let's recap what we've done:
+
+* built a system to get BERT embeddings for chunks of text
+* created a key-value database for efficient retrieval of nearest neighbors
+* implemented the RETRO model, including:
+  + RoPE
+  + self-attention
+  + cross-attention
+  + chunked cross-attention
+  + feedforward layers
+  + nearest neighbor encoder
+  + dataset for training with pre-retrieved neighbors
+  + trainer and a sampler for text gen
+
+With this implementation, we can train a language model that retrieves and uses relevant chunks of text from a large database to improve its predictions. This approach is particularly useful when the model needs to generate text that requires specific knowledge or information.
+
+The prime innovation in RETRO is the separation of retrieval and generation. By freezing a pre-trained BERT model for retrieval, we can build a massive key-value database without having to retrain the retrieval system. And by using attention mechanisms to incorporate the retrieved chunks, the model can learn to use this external information effectively.
+
+I hope you had fun reading this and and learned something new, check out the full implementation below and feel free to tinker with the code, try different hyperparameters, or apply it to your own text datasets. The concept of retrieval-enhanced language models is powerful and has many potential applications.
+
+---
+
+*full implementation > colab notebook*
+
+*\* The following series of articles are a deeper walkthrough+implementation of Annotated Research Paper Implementations from labml.*

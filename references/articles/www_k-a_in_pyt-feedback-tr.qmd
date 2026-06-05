@@ -1,0 +1,420 @@
+# Source: https://www.k-a.in/pyt-feedback-tr.html
+
+I have been reading the paper about Feedback Transformers, Addressing Some Limitations of Transformers with Feedback Memory and wanted to implement this clever twist on the standard transformer architecture.
+
+### Core Insight
+
+Regular transformers are like assembly lines, each layer processes all tokens in parallel, passes them to the next layer, and that's it. But what if we could give our transformer a memory? What if each step could look back at what happened in previous steps across all layers? That's exactly what the Feedback Transformer does.
+
+The trade-off is speed during training. Instead of processing everything in parallel, we now have to go token by token, which makes training about 5-10 times slower. But during inference it's actually faster because we can cache those memory vectors and predict the next token directly.
+
+### Feedback Attention
+
+Lets start with the attention mechanism. The math here gets a bit involved because we're using relative positional encodings but bear with me:
+
+```
+class FeedbackAttention(Module):
+    def __init__(self, heads: int, d_model: int, dropout_prob: float = 0.1, *,
+                 is_kv_precomputed: bool = False):
+        super().__init__()
+        
+        self.d_k = d_model // heads
+        self.heads = heads
+        
+        # The usual suspects for multi-head attention
+        self.query = PrepareForMultiHeadAttention(d_model, heads, self.d_k, bias=False)
+        
+        # Here's where it gets interesting we might pre-compute keys, values
+        if not is_kv_precomputed:
+            self.key = PrepareForMultiHeadAttention(d_model, heads, self.d_k, bias=False)
+            self.value = PrepareForMultiHeadAttention(d_model, heads, self.d_k, bias=True)
+        else:
+            self.key = None
+            self.value = None
+```
+
+The positional encoding setup is more sophisticated than it looks:
+
+```
+# Number of relative positions
+self.P = 2 ** 12
+
+# Relative positional embeddings for key relative to the query.
+self.key_pos_embeddings = nn.Parameter(torch.zeros((self.P, heads, self.d_k)), requires_grad=True)
+# Relative positional embedding bias for key relative to the query.
+self.key_pos_bias = nn.Parameter(torch.zeros((self.P, heads)), requires_grad=True)
+# Positional embeddings for the query is independent of the position of the query
+self.query_pos_bias = nn.Parameter(torch.zeros((heads, self.d_k)), requires_grad=True)
+```
+
+So we actually maintain 4096 relative positions (that's  $ 2^{12} $ ) which is way more than I mentioned. The key insight I missed is that we have three separate learnable parameters: embeddings for keys at different relative positions, bias terms for those keys, and a position-independent bias for queries. This gives the model much more flexibility in how it handles relative positioning.
+
+To handle relative positions, instead of absolute positions we calculate attention based on how far back in time each memory vector is.
+
+```
+def get_scores(self, query: torch.Tensor, key: torch.Tensor):
+    # Relative positional embeddings - this is where the magic happens
+    key_pos_emb = self.key_pos_embeddings[-key.shape[0]:]
+    query_pos_bias = self.query_pos_bias[None, :, :]
+    key_pos_bias = self.key_pos_bias[-key.shape[0]:]
+    
+    # The attention score becomes a sum of four terms
+    ac = torch.einsum('bhd,jbhd->jbh', query + query_pos_bias, key)
+    bd = torch.einsum('bhd,jhd->jbh', query, key_pos_emb) + key_pos_bias[:, None, :]
+    
+    return ac + bd
+```
+
+What happens is we break down the attention computation into four components. The original paper shows it like this:
+
+$$$
+A\_{j} = Q^\top K\_j + Q^\top U^K\_j + {U^Q}^\top K\_j + {U^Q}^\top U^K\_j
+$$$
+
+where  $ Q, K\_j $  are the transformed embeddings and  $ U^Q, U^K\_j $  are the positional encodings. We replace that last term with a learned bias  $ S\_j $  to make things efficient.
+
+The code implementation maps directly to these mathematical components:
+
+#### Key Positional Embeddings ( $ U\_j^K $ )
+
+```
+key_pos_emb = self.key_pos_embeddings[-key.shape[0]:]
+```
+
+#### Query Positional Bias ( $ U^Q $ )
+
+```
+query_pos_bias = self.query_pos_bias[None, :, :]
+```
+
+#### Key Positional Bias ( $ S\_j $ )
+
+```
+key_pos_bias = self.key_pos_bias[-key.shape[0]:]
+```
+
+#### Content-Content and Content-Position Interactions ( $ Q^T K\_j + U^Q{}^T K\_j $ )
+
+```
+ac = torch.einsum('bhd,jbhd->jbh', query + query_pos_bias, key)
+```
+
+#### Position-Content and Position-Position Interactions ( $ Q^T U\_j^K + S\_j $ )
+
+```
+bd = torch.einsum('bhd,jhd->jbh', query, key_pos_emb) + key_pos_bias[:, None, :]
+```
+
+#### Final Attention Scores ( $ A\_j $ )
+
+```
+return ac + bd
+```
+
+This decomposition allows the model to separately handle how content relates to content, content relates to position, position relates to content, and position relates to position, providing more nuanced attention patterns that can better capture sequential dependencies and relative positioning information.
+
+### Complete Attention Forward Pass
+
+```
+def forward(self, *, query: torch.Tensor, key: torch.Tensor, value: torch.Tensor):
+    # Prepare `query`, `key` and `value` for attention computation
+    # `key` and `value`  will then have shape `[seq_len, batch_size, heads, d_k]`
+    # and `query` will have shape `[batch_size, heads, d_k]`
+    query = self.query(query)
+    if self.key:
+        key = self.key(key)
+    if self.value:
+        value = self.value(value)
+
+    # Compute attention scores.
+    scores = self.get_scores(query, key)
+    scores *= self.scale  # Scale by 1/sqrt(d_k)
+    
+    attn = self.softmax(scores)
+    attn = self.dropout(attn)
+    
+    # This is the key step I missed - the einsum operation
+    x = torch.einsum("jbh,jbhd->bhd", attn, value)
+    
+    # Concatenate multiple heads and apply output projection
+    x = x.reshape(x.shape[0], -1)
+    return self.output(x)
+```
+
+That einsum operation `"jbh,jbhd->bhd"` is doing the weighted sum over the sequence dimension. We're taking attention weights of shape `[seq_len, batch_size, heads]` and combining them with values of shape `[seq_len, batch_size, heads, d_k]` to get our final output.
+
+### Transformer Layer
+
+implementing the actual transformer layer:
+
+```
+class FeedbackTransformerLayer(Module):
+    def __init__(self, *, d_model: int, attn: FeedbackAttention, 
+                 feed_forward: FeedForward, dropout_prob: float):
+        super().__init__()
+        self.size = d_model
+        self.attn = attn
+        self.feed_forward = feed_forward
+        self.dropout = nn.Dropout(dropout_prob)
+        
+        # Layer normalization - pre-norm style
+        self.norm_self_attn = nn.LayerNorm([d_model])
+        self.norm_ff = nn.LayerNorm([d_model])
+    
+    def forward(self, *, x: torch.Tensor, key: Optional[torch.Tensor], 
+                value: Optional[torch.Tensor]):
+        # Only do attention if we have memory
+        if key is not None:
+            z = self.norm_self_attn(x)
+            self_attn = self.attn(query=z, key=key, value=value)
+            x = x + self.dropout(self_attn)
+        
+        # Standard feed-forward path
+        z = self.norm_ff(x)
+        ff = self.feed_forward(z)
+        x = x + self.dropout(ff)
+        
+        return x
+```
+
+how simple it looks on the surface. we are just doing standard transformer operations, but the key and value tensors now come from our accumulated memory across all previous steps.
+
+### Full Feedback Transformer
+
+The main transformer processes sequences step by step, building up memory as it goes:
+
+```
+class FeedbackTransformer(Module):
+    def __init__(self, layer: FeedbackTransformerLayer, n_layers: int):
+        super().__init__()
+        self.layers = clone_module_list(layer, n_layers)
+        self.norm = nn.LayerNorm([layer.size])
+        
+        # This is crucial - we learn how to weight different layers' outputs
+        self.weights = nn.Parameter(torch.ones(n_layers + 1), requires_grad=True)
+        self.softmax = nn.Softmax(0)
+    
+    def forward(self, x_seq: torch.Tensor):
+        x_seq = torch.unbind(x_seq, dim=0)
+        res = []
+        mem = []  # This accumulates our memory vectors
+        
+        for x in x_seq:
+            layer_outputs = [x]  # Start with input
+            
+            # Stack existing memory if we have any
+            mem_tensor = torch.stack(mem) if mem else None
+            
+            # Process through all layers
+            for layer in self.layers:
+                x = layer(x=x, key=mem_tensor, value=mem_tensor)
+                layer_outputs.append(x)
+            
+            # Create memory as weighted sum of all layer outputs
+            layer_outputs = torch.stack(layer_outputs)
+            memory_vector = torch.einsum('lbd,l->bd', layer_outputs, 
+                                       self.softmax(self.weights))
+            mem.append(memory_vector)
+            res.append(x)
+        
+        return self.norm(torch.stack(res))
+```
+
+The weighted sum, instead of just using the final layer's output as memory we are learning optimal weights to combine representations from all layers. This gives the model much better memory to work with.
+
+### Optimizing with Shared Keys and Values
+
+We are recalculating keys and values from the same memory vectors at every step. The paper's solution is to share the key and value transformations across layers and cache the results.
+
+But first, I need to solve a PyTorch performance issue. Repeatedly calling `torch.stack` creates new tensors each time, which is slow. So I'm implementing a custom autograd function:
+
+```
+class StackFunction(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, memory, memory_grad, last, n):
+        ctx._mem_grad = memory_grad
+        ctx._n = n
+        return memory[:n + 1]
+    
+    @staticmethod
+    def backward(ctx, grad_output):
+        n = ctx._n
+        memory_grad = ctx._mem_grad
+        memory_grad[:n + 1] += grad_output
+        return None, None, memory_grad[n], None
+```
+
+This lets us maintain a shared memory buffer and efficiently accumulate gradients during backpropagation. It's a neat trick that significantly speeds up training.
+
+### The Stack Class Implementation
+
+```
+class Stack:
+    def append(self, n: int, value: torch.Tensor):
+        # Critical assertion I missed
+        assert n == 0 or self.last_get_n == n - 1, f"{n}, {self.last_get_n}"
+        
+        with torch.no_grad():
+            if self.memory is None or self.memory.shape[1:] != value.shape:
+                assert n == 0  # This should only happen when stack is empty
+                self.memory = value.new_zeros(self.max_len, *value.shape, requires_grad=False)
+                self.memory_grad = value.new_zeros(self.memory.shape, requires_grad=False)
+            elif n == 0:
+                # Reset accumulated gradients when starting fresh
+                self.memory_grad.fill_(0.)
+            
+            self.memory.data[n] = value.detach()
+            self.n = n
+        
+        self.last = value  # Keep reference for gradient flow
+```
+
+That assertion is enforcing a usage pattern - you must call `get()` after each `append()`. This is because the gradient accumulation logic depends on this ordering. Also, the logic for handling memory reallocation when tensor shapes change is more involved.
+
+### The Conditional Key/Value Processing
+
+```
+if not is_kv_precomputed:
+    self.key = PrepareForMultiHeadAttention(d_model, heads, self.d_k, bias=False)
+    self.value = PrepareForMultiHeadAttention(d_model, heads, self.d_k, bias=True)
+else:
+    self.key = None
+    self.value = None
+```
+
+And in the forward pass:
+
+```
+if self.key:
+    key = self.key(key)
+if self.value:
+    value = self.value(value)
+```
+
+This `is_kv_precomputed` flag is setting up for the optimized version where we share key/value computations across layers. When it's True, we skip the key/value transformations entirely because they're handled elsewhere. This is a clever design pattern that lets the same attention class work in both the basic and optimized versions.
+
+### The Optimized Version
+
+The final optimized version caches keys and values:
+
+```
+class FeedbackTransformerKV(Module):
+    def __init__(self, layer: FeedbackTransformerLayer, n_layers: int, 
+                 d_model: int, heads: int):
+        super().__init__()
+        self.layers = clone_module_list(layer, n_layers)
+        self.norm = nn.LayerNorm([layer.size])
+        self.weights = nn.Parameter(torch.ones(n_layers + 1), requires_grad=True)
+        self.softmax = nn.Softmax(0)
+        
+        # Shared key and value transformations
+        d_k = d_model // heads
+        self.key = PrepareForMultiHeadAttention(d_model, heads, d_k, bias=False)
+        self.value = PrepareForMultiHeadAttention(d_model, heads, d_k, bias=False)
+        
+        # Efficient memory stacks
+        self.mem_key = Stack(512)
+        self.mem_value = Stack(512)
+```
+
+In the forward pass, we compute keys and values once per step and cache them:
+
+```
+def forward(self, x_seq: torch.Tensor):
+    x_seq = torch.unbind(x_seq, dim=0)
+    res = []
+    
+    for step, x in enumerate(x_seq):
+        layer_outputs = [x]
+        
+        # Get cached keys/values if available
+        key_tensor = self.mem_key.get() if step > 0 else None
+        value_tensor = self.mem_value.get() if step > 0 else None
+        
+        # Process through layers using cached key/value
+        for layer in self.layers:
+            x = layer(x=x, key=key_tensor, value=value_tensor)
+            layer_outputs.append(x)
+        
+        # Compute and cache new memory
+        layer_outputs = torch.stack(layer_outputs)
+        mem = torch.einsum('lbd,l->bd', layer_outputs, self.softmax(self.weights))
+        
+        self.mem_key.append(step, self.key(mem))
+        self.mem_value.append(step, self.value(mem))
+        res.append(x)
+    
+    return self.norm(torch.stack(res))
+```
+
+### Memory Management in the Optimized Version
+
+the `free()` method in the optimized transformer:
+
+```
+def free(self):
+    self.mem_key.free()
+    self.mem_value.free()
+```
+
+And in the Stack class:
+
+```
+def free(self):
+    self.memory = None
+    self.memory_grad = None
+    self.last = None
+```
+
+This is crucial for long sequences without explicitly freeing the cached memory, you'd run out of GPU memory pretty quickly. It's one of those practical details that makes the difference between a research prototype and something you can actually use.
+
+### The Attention Storage Detail
+
+One small but important detail:
+
+```
+# We store attentions so that it can be used for logging, or other computations if needed
+self.attn = None
+```
+
+The code sets up storage for attention weights, presumably for visualization or analysis, though the actual storage isn't implemented in this version. This is a common pattern in research code, setting up hooks for debugging and analysis.
+
+### Layer Normalization Placement
+
+the pre-normalization pattern being used:
+
+```
+def forward(self, *, x: torch.Tensor, key: Optional[torch.Tensor], value: Optional[torch.Tensor]):
+    if key is not None:
+        z = self.norm_self_attn(x)  # Normalize BEFORE attention
+        self_attn = self.attn(query=z, key=key, value=value)
+        x = x + self.dropout(self_attn)
+
+    z = self.norm_ff(x)  # Normalize BEFORE feed-forward
+    ff = self.feed_forward(z)
+    x = x + self.dropout(ff)
+```
+
+This is pre-norm rather than post-norm which has become the standard in modern transformers because it's more stable during training. The normalization happens before the transformation, not after.
+
+### The Training Strategy
+
+In order to speed up the training, the paper discusses starting with a short sequence length and gradually increasing it. They also discuss using a pretrained parallel transformer as the starting point.
+
+These aren't just casual suggestions they're practically essential for making this architecture trainable. Starting with short sequences and curriculum learning helps manage the memory requirements and training instability. Using a pretrained parallel transformer as initialization gives you a huge head start since the model already knows how to do basic language modeling.
+
+### What's Cool About Feedback Transformer
+
+Here we essentially give the transformer a *working memory* that spans across layers and time steps. Each position can attend to finer representations from all previous positions, not just the output of the previous layer.
+
+Through relative positioning, rather than absolute positions, we encode how far back in time each memory vector is. This makes the attention mechanism inherently recurrent while maintaining the parallel structure within each step.
+
+The training slowdown is real but the paper suggests some practical solutions like starting with short sequences and gradually increasing length, or initializing with a pre-trained parallel transformer. For inference this architecture is faster because of the caching mechanism.
+
+This implementation teaches a lot about the delicate balance between model expressiveness and computational efficiency. And so, the feedback transformer pushes the boundaries of what's possible with attention mechanisms.
+
+---
+
+*full implementation > colab notebook*
+
+*\* The following series of articles are a deeper walkthrough+implementation of Annotated Research Paper Implementations from labml.*

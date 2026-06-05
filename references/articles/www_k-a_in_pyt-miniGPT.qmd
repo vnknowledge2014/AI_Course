@@ -1,0 +1,336 @@
+# Source: https://www.k-a.in/pyt-miniGPT.html
+
+Today we explore how to build a small/mini GPT model from scratch along with the details you need to understand it's architecture.
+
+The GPT model is fundamentally a standard transformer architecture with some modifications. Models like GPT-2 and particularly GPT-3 are very large, making it impossible to fit them on a single GPU, thus requiring model parallelism. This implementation does not incorporate data parallelism and is primarily designed for educational purposes. The key distinctions from a basic autoregressive transformer lie in how parameters are initialized, the application of weight decay, and the learning rate scheduling.
+
+This is a simple implementation of mini GPT type model with a colab notebook at the end.
+
+![](images/anya.png)
+
+# Why Build a GPT?
+
+When I first started exploring language models, I was amazed by how powerful they could be despite having relatively straightforward architectures. GPT (Generative Pre-trained Transformer) represents one of the most influential architectures in modern AI, and building one yourself is an excellent way to truly understand how these models work.
+
+## Understanding the Architecture
+
+Let's start by writing the core GPT class:
+
+```
+class GPT(Module):
+    """
+    ## GPT model
+
+    This consists of a token embedding layer, transformer encoder, and
+    a final linear layer that gives token logits.
+    """
+
+    def __init__(self, encoder: Encoder, src_embed: Module, generator: Module):
+        super().__init__()
+        self.src_embed = src_embed
+        self.encoder = encoder
+        self.generator = generator
+
+        # The mask will be initialized on the first call
+        self.mask = None
+
+    def forward(self, x: torch.Tensor):
+        # Create subsequent mask if mask is not initialized
+        # or if the size of the mask is different
+        if self.mask is None or self.mask.size(0) != len(x):
+            # Subsequent mask, will mask out tokens from seeing future tokens
+            self.mask = subsequent_mask(len(x)).to(x.device)
+        # Get the token embeddings with positional encodings
+        x = self.src_embed(x)
+        # Transformer encoder
+        x = self.encoder(x, self.mask)
+        # Get logits
+        x = self.generator(x)
+
+        # Return results
+        # (second value is for state, since our trainer is used with RNNs also)
+        return x, None
+```
+
+The `GPT` class is composed of three main components:
+
+* `src_embed`: Takes our input tokens and converts them into continuous vector representations (embeddings), including positional information
+* `encoder`: The transformer encoder that processes these embeddings
+* `generator`: A final linear layer that converts the encoder's output into logits over the vocabulary
+
+The critical bit is in the `forward` method, where the magic happens:
+
+* First, we create a "subsequent mask" if needed, which ensures the model can only attend to past and current tokens (not future ones)
+* Then, we convert our tokens into embeddings using `src_embed`
+* Next, we process these embeddings through the transformer encoder
+* Finally, we generate logits with the generator
+
+Let's imagine what's happening: our input might be a sequence like ["Once", "upon", "a", "time"], and we're transforming it into a sequence of probabilities for what word comes next!
+
+## Configuring Your GPT
+
+we use a clean configuration-based approach:
+
+```
+class Configs(NLPAutoRegressionConfigs):
+    """
+    ## Configurations
+
+    This inherits from
+    [`NLPAutoRegressionConfigs`](../../experiments/nlp_autoregression.html#NLPAutoRegressionConfigs)
+    """
+
+    # GPT model
+    model: GPT
+    # Transformer
+    transformer: TransformerConfigs
+    # Weight decay
+    weight_decay: float = 0.1
+    # Number of tokens for wamup
+    warmup_steps: int = 128 * 128 * 20
+
+    # Custom optimizer
+    optimizer = 'transformer_optimizer'
+```
+
+I love this approach because it makes the model extremely flexible.
+You can easily change the number of layers, model dimensions, or even the activation functions without rewriting code.
+
+## Weight Initialization
+
+One detail that people often overlook is weight initialization. It turns out this is crucial for transformer models:
+
+```
+def _init_weights(module):
+    """
+    ### Initialize weights
+
+    Weights of linear layers and embedding layers are initialized
+    to $\mathcal{N}(0, 0.02)$
+    instead of the default Xavier initialzation.
+    """
+
+    if not isinstance(module, (nn.Linear, nn.Embedding)):
+        return
+
+    module.weight.data.normal_(mean=0.0, std=0.02)
+
+    # Initialize biases to $0$
+    if isinstance(module, nn.Linear) and module.bias is not None:
+        module.bias.data.zero_()
+```
+
+This might seem like a small detail, but it makes a big difference in practice. Instead of using Xavier initialization (which is the PyTorch default), GPT uses a normal distribution with a mean of 0 and a standard deviation of 0.02. This small change helps with stability during training.
+
+## Custom Optimizer with Weight Decay
+
+Another crucial detail is the optimizer. This impl uses a custom optimizer with weight decay
+
+```
+@option(NLPAutoRegressionConfigs.optimizer)
+def transformer_optimizer(c: NLPAutoRegressionConfigs):
+    """
+    ### Create custom optimizer with weight decay
+
+    This code is taken from [minGPT](https://github.com/karpathy/minGPT).
+    This applies weight decay only to weights of linear layers.
+    """
+    # Collect names of parameters to apply weight decay
+    decay = set()
+    for mn, m in c.model.named_modules():
+        for pn, p in m.named_parameters():
+            fpn = f'{mn}.{pn}' if mn else pn  # full param name
+
+            if fpn.endswith('weight') and isinstance(m, nn.Linear):
+                decay.add(fpn)
+
+    # Get all the parameters
+    param_dict = {pn: p for pn, p in c.model.named_parameters()}
+    # Parameters that are not decayed
+    no_decay = set(param_dict.keys()) - decay
+
+    # create the pytorch optimizer object
+    opt_groups = [
+        {"params": [param_dict[pn] for pn in sorted(list(decay))], "weight_decay": c.weight_decay},
+        {"params": [param_dict[pn] for pn in sorted(list(no_decay))], "weight_decay": 0.0},
+    ]
+```
+
+Notice how weight decay is applied only to the weights of linear layers, not to biases or other parameters. This selective application of weight decay is a clever optimization that helps prevent overfitting while maintaining model expressiveness.
+
+## How to train your GPT?
+
+let's look at how we actually train this model
+
+```
+def main():
+    # Create experiment
+    experiment.create(name="gpt")
+    # Create configs
+    conf = Configs()
+    # Override configurations
+    experiment.configs(conf, {
+        # Use character level tokenizer
+        'tokenizer': 'character',
+        # Prompt separator is blank
+        'prompt_separator': '',
+        # Starting prompt for sampling
+        'prompt': 'It is ',
+        # Use Tiny Shakespeare dataset
+        'text': 'tiny_shakespeare',
+
+        # Use a context size of $128$
+        'seq_len': 128,
+        # Train for $32$ epochs
+        'epochs': 32,
+        # Batch size $128$
+        'batch_size': 128,
+        # Switch between training and validation for $10$ times
+        # per epoch
+        'inner_iterations': 10,
+
+        # Transformer configurations
+        'transformer.d_model': 512,
+        'transformer.ffn.d_ff': 2048,
+        'transformer.n_heads': 8,
+        'transformer.n_layers': 6
+    })
+```
+
+This is where we set all the hyperparameters for our model:
+
+* we are using a character-level tokenizer (each character is a token)
+* our context size is 128 (the model can "see" 128 characters at a time)
+* we are training for 32 epochs with a batch size of 128
+* the model has 512 dimensions, 8 attention heads, and 6 transformer layers
+
+These settings create a relatively small GPT model (much smaller than GPT-3 or GPT-4), but it's still capable of generating coherent text after training!
+
+## Understanding the Training Loop
+
+The actual training loop is implemented in the `NLPAutoRegressionConfigs` class:
+
+```
+def step(self, batch: any, batch_idx: BatchIndex):
+    """
+    ### Training or validation step
+    """
+
+    # Set training/eval mode
+    self.model.train(self.mode.is_train)
+
+    # Move data to the device
+    data, target = batch[0].to(self.device), batch[1].to(self.device)
+
+    # Update global step (number of tokens processed) when in training mode
+    if self.mode.is_train:
+        tracker.add_global_step(data.shape[0] * data.shape[1])
+
+    # Whether to capture model outputs
+    with self.mode.update(is_log_activations=batch_idx.is_last and self.is_log_model_activations):
+        # Get model outputs.
+        # It's returning a tuple for states when using RNNs.
+        # This is not implemented yet. 😜
+        output, *_ = self.model(data)
+
+    # Calculate and log loss
+    loss = self.loss_func(output, target)
+    tracker.add("loss.", loss)
+
+    # Calculate and log accuracy
+    self.accuracy(output, target)
+    self.accuracy.track()
+
+    self.other_metrics(output, target)
+
+    # Train the model
+    if self.mode.is_train:
+        # Calculate gradients
+        loss.backward()
+        # Clip gradients
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=self.grad_norm_clip)
+        # Take optimizer step
+        self.optimizer.step()
+        # Log the model parameters and gradients on last batch of every epoch
+        if batch_idx.is_last and self.is_log_model_params_grads:
+            tracker.add('model', self.model)
+        # Clear the gradients
+        self.optimizer.zero_grad()
+```
+
+Let's understand what's happening:
+
+* we pass a batch of data through the model to get predictions
+* we calculate the loss and accuracy
+* in training mode, we:
+  + Compute gradients with `loss.backward()`
+  + Clip gradients to prevent exploding gradients
+  + Update parameters with `optimizer.step()`
+  + Clear gradients with `optimizer.zero_grad()`
+
+This is the standard training loop for deep learning models, with some additional logging and tracking.
+
+## Generating Text - Sampling from Our GPT
+
+One of the most exciting parts of training a language model is seeing it generate text! The code includes a sampling function:
+
+```
+def sample(self):
+    """
+    ### Sampling function to generate samples periodically while training
+    """
+
+    # Starting prompt
+    prompt = self.prompt
+    # Collect output for printing
+    log = [(prompt, Text.subtle)]
+    # Sample 25 tokens
+    for i in monit.iterate('Sample', 25):
+        # Tokenize the prompt
+        data = self.text.text_to_i(prompt).unsqueeze(-1)
+        data = data.to(self.device)
+        # Get the model output
+        output, *_ = self.model(data)
+        # Get the model prediction (greedy)
+        output = output.argmax(dim=-1).squeeze()
+        # Add the prediction to prompt
+        prompt += self.prompt_separator + self.text.itos[output[-1]]
+        # Add the prediction for logging
+        log += [(self.prompt_separator + self.text.itos[output[-1]], Text.value)]
+```
+
+This is a simple greedy sampling approach:
+
+* we start with a prompt ("It is ")
+* feed the prompt to the model and get predictions
+* take the most likely next token (using argmax)
+* add this token to our prompt and repeat 25 times
+
+This produces a sample of text that shows what the model has learned. With more sophisticated sampling techniques like top-k or nucleus sampling, we could generate even more interesting text!
+
+## Putting It Into Practice - Your Turn!
+
+Although i have written the full implementation in a colab notebook, I want you to try it yourself first with all the details and code we've gone through together.
+Let's think about how you might use this knowledge to build your own GPT model:
+
+**Start small:** Begin with a small dataset and model to make sure everything works.
+
+**Experiment with hyperparameters:** Try different context sizes, model dimensions, or learning rates.
+
+**Modify the architecture:** Try different positional encodings or attention mechanisms.
+
+**Improve the sampling:** Implement more sophisticated sampling techniques like top-k or nucleus sampling.
+
+**Scale up:** Once everything is working, try training on larger datasets with more parameters.
+
+Remember, the key to learning is experimentation! Try changing parts of the code and see what happens. That's how we all learn and grow as AI researchers.
+
+Understanding how to build a GPT model from scratch gives you deep insights into how modern language models work. While the largest models today are much bigger (with billions or trillions of parameters), they still use many of the same architectural components we've explored here.
+
+By building this knowledge, you're setting yourself up to understand and contribute to the cutting edge of AI research. Whether you want to create your own models, fine-tune existing ones, or develop entirely new architectures, this foundation will serve you well. LFGGGG!
+
+---
+
+*full implementation > colab notebook*
+
+*\* The following series of articles are a deeper walkthrough+implementation of Annotated Research Paper Implementations from labml.*

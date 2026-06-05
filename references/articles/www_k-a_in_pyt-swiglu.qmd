@@ -1,0 +1,240 @@
+# Source: https://www.k-a.in/pyt-swiglu.html
+
+Today we are going to do some math and zone into one of the variants introduced in the paper GLU Variants Improve Transformer - SwiGLU (*sounds cute!*).
+If you've been following the latest developments in AI you might have noticed that newer language models like GPT4, Claude, and others have gotten remarkably better. While there are many reasons for this improvement, one small but important change is happening under the hood, the switch from traditional activation functions to **SwiGLU**.
+
+#### Before we jump into equations
+
+Activation functions are like the "decision makers" in neural networks, they determine what information gets passed forward and what gets filtered out. For years we have used simple functions like ReLU, but as models got bigger and more complex, researchers discoverd smarter activation function could dramatically improve performance.
+SwiGLU is one of these "smarter" functions.
+
+#### • quick neural network refresher
+
+Neural networks are essentially function approximators, they learn to map inputs to outputs by combining simple mathematical operations in clever ways. The basic building block is the linear layer, which performs operations.
+
+#### • why we need non-linearity?
+
+Consider a simple nn with two linear layers:
+
+$ \text{Layer 1: } f\_1(x) = W\_1 x + b\_1 $
+
+$ \text{Layer 2: } f\_2(x) = W\_2 x + b\_2 $
+
+when we compose them:
+
+$ f\_2(f\_1(x)) = W\_2(W\_1 x + b\_1) + b\_2 $
+
+$ =W\_2 W\_1 x + W\_2 b\_1 + b\_2 $
+
+This is mathematically equivalent to a single linear transformation:
+
+$ Wx + b $  where  $ W = W\_2 W\_1 $  and  $ b = W\_2 b\_1 + b\_2 $ .
+
+**problem**: No matter how many linear layers we stack, we always get just one linear function. The network can't learn complex patterns.
+
+**solution**: Insert non-linear activation functions between layers to break this mathematical collapse.
+
+### ReLU
+
+Piecewise linear function.
+ReLU is defined as:
+
+  
+
+$$$
+\text{ReLU}(x) = \max(0, x) =
+\begin{cases}
+x & \text{if } x > 0 \\
+0 & \text{if } x \leq 0
+\end{cases}
+$$$
+
+Mathematically, this creates a **piecewise linear function**. Its derivative is:
+
+  
+
+$$$
+\frac{d}{dx} \, \text{ReLU}(x) =
+\begin{cases}
+1 & \text{if } x > 0 \\
+0 & \text{if } x \leq 0
+\end{cases}
+$$$
+
+ReLU introduces non-linearity while keeping computations simple. The derivative is either 0 or 1, making backpropagation straightforward.
+
+**problem**: derivative is 0 for all negative inputs, potentially causing "dead neurons" that never update.
+
+### Sigmoid
+
+The "Smooth Squashing" function
+is defined as:
+
+$$$
+\sigma(x) = \frac{1}{1 + e^{-x}}
+$$$
+
+analyzing its behavior mathematically:
+
+* As  $ x \to +\infty: \quad e^{-x} \to 0 \quad \Rightarrow \quad \sigma(x) \to 1 $
+* As  $ x \to -\infty: \quad e^{-x} \to +\infty \quad \Rightarrow \quad \sigma(x) \to 0 $
+* At  $ x = 0: \quad \sigma(0) = \frac{1}{1 + 1} = 0.5 $
+
+The derivative is:
+
+$$$
+\frac{d}{dx} \sigma(x) = \sigma(x)\left(1 - \sigma(x)\right)
+$$$
+
+**vanishing gradient problem**: When  $ |x| $  is large,  $ \sigma(x) $  approaches 0 or 1,
+
+making  $ \sigma(x)(1 - \sigma(x)) \approx 0 $ . This causes gradients to vanish during backpropagation.
+
+### Swish
+
+A Self-Gated Function
+
+Swish introduces a learnable parameter β:
+$$$
+\text{Swish}(x) = x \cdot \sigma(\beta x) = x \cdot \left( \frac{1}{1 + e^{-\beta x}} \right)
+$$$
+
+with different values of β:
+
+**When  $ \beta = 0 $**  :
+
+$$$
+\text{Swish}(x) = x \cdot \sigma(0) = x \cdot 0.5 = 0.5 x
+$$$
+
+its just a scaled linear function.
+
+**When  $ \beta → \infty $**  :
+$$$
+\sigma(\beta x) \to
+\begin{cases}
+1 & \text{if } x > 0 \
+0 & \text{if } x < 0
+\end{cases}
+$$$
+
+So  $ \text{Swish}(x) \to x.ReLU\_{gate}(x) \approx ReLU(x) $
+
+**When  $ \beta = 1 $**  (typical initialization):
+$$$
+\text{Swish}(x) = \frac{x}{1 + e^{-x}}
+$$$
+The derivative is more complex but provides smooth gradients:
+
+$$$
+\frac{d}{dx} , \text{Swish}(x) = \sigma(\beta x) + x \cdot \beta \cdot \sigma(\beta x) \left(1 - \sigma(\beta x)\right)
+$$$
+
+**Mathematical advantage**: Unlike ReLU, Swish has non-zero derivatives for negative inputs, preventing dead neurons.
+
+### GLU
+
+Gating Mechanism
+
+GLU (Gated Linear Unit) splits the computation into two paths:
+$$$
+\text{GLU}(x) = (W x + b) \odot \sigma(V x + c)
+$$$
+Where ⊙ denotes element-wise multiplication.
+
+**Mathematical interpretation**:
+
+* $ (Wx + b) $ : Linear transformation of input
+* $ \sigma(Vx + c) $ : Gate values between  $ 0 $  and  $ 1 $
+* The multiplication:  $ \sigma(Vx + c) $  controls how much of  $ (Wx + b) $  passes through
+
+**Dimensionality**: If input  $ x $  has dimension  $ d $ , then:
+
+* $ W $  and  $ V $  are learned matrices
+* The gate  $ \sigma(Vx + c) $  provides element-wise control
+* Each dimension can be gated independently
+
+### Mathematical Synthesis of SwiGLU
+
+SwiGLU replaces the sigmoid gate in GLU with Swish:
+
+$ \text{SwiGLU}(x) = (W x + b) \odot \text{Swish}(V x + c) $ 
+ $ =(W x + b) \odot \left[ (V x + c) \cdot \sigma\big(\beta (V x + c)\big) \right] $
+
+**analyzing a specific case**: Setting  $ W = V = \sqrt2 $  and  $ \sigma = 0 $ :
+
+$$$
+\begin{aligned}
+\text{SwiGLU}(x) &= (\sqrt{2} x) \odot \left[ \sqrt{2} x \cdot \sigma(0) \right] \
+&= (\sqrt{2} x) \odot \left[ \sqrt{2} x \cdot 0.5 \right] \
+&= (\sqrt{2} x) \odot \left( \frac{\sqrt{2} x}{2} \right) \
+&= x^2
+\end{aligned}
+$$$
+
+it shows SwiGLU can approximate quadratic functions! This **parameter multiplication capability** is mathematically significant because:
+
+* Linear layers can only do: `ax + b`
+* SwiGLU can do: `ax² + bx + c` (and more complex forms)
+
+**Function approximation theory** tells us that:
+
+* **ReLU networks**: Can approximate any continuous function, but may need exponentially many neurons for certain functions.
+* **SwiGLU networks**: Can approximate the same functions more efficiently due to:
+  + Quadratic terms reducing the number of required neurons
+  + Smooth derivatives improving optimization dynamics
+  + Gating mechanism providing adaptive sparsity
+
+**Gradient flow analysis**:
+
+$ For ReLU:\nabla \text{ReLU}(x) \in {0, 1} $
+
+$ For SwiGLU:\nabla \text{SwiGLU}(x) \text{ is continuous and non-zero almost everywhere} $
+
+This mathematical property leads to more stable training.
+
+Research suggests that SwiGLU networks converge faster because:
+
+**Better condition numbers**: The Hessian matrix has more favorable eigenvalue distributions
+
+**Reduced gradient variance**: Smooth derivatives lead to more consistent gradient updates
+
+**Adaptive computation**: The gating mechanism mathematically implements learned sparsity
+
+#### Mathematical Implementation
+
+In practice SwiGLU is often implemented as:
+
+```
+def swiglu(x):
+    # Split input into two halves
+    x1, x2 = torch.chunk(x, 2, dim=-1)
+    return x1 * torch.nn.functional.silu(x2)  # silu is Swish
+```
+
+This efficient implementation leverages the mathematical structure for computational efficiency.
+
+From an optimization perspective, SwiGLU creates:
+
+* **Smoother loss surfaces**: Fewer sharp minima due to continuous derivatives
+* **Better gradient scaling**: The multiplicative structure naturally scales gradients
+* **Adaptive learning rates**: Different neurons effectively get different learning rates through the gating mechanism
+
+### SwiGLU
+
+SwiGLU succeeds because it combines several mathematical principles:
+
+* **Non-linear expressivity**: Can represent more complex functions efficiently
+* **Smooth optimization**: Continuous derivatives improve gradient-based learning
+* **Adaptive computation**: Learned gating provides mathematical elegance
+* **Efficient approximation**: Quadratic terms reduce network size requirements
+
+While we may not have a complete theoretical understanding of why SwiGLU works so well, the mathematics clearly shows it provides superior function approximation capabilities and optimization properties compared to simpler activation functions.
+
+The mathematical journey from linear layers to SwiGLU demonstrates how small theoretical improvements can compound into significant practical advantages in modern AI systems.
+
+---
+
+*full implementation > colab notebook*
+
+*\* The following series of articles are a deeper walkthrough+implementation of Annotated Research Paper Implementations from labml.*

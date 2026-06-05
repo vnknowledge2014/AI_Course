@@ -1,0 +1,234 @@
+# Source: https://www.k-a.in/pyt-transformer.html
+
+Transformer architecture is the foundation of modern NLP models, today we implement the transformer building blocks and explain how it works in simple terms.
+
+## Code Structure
+
+Classes that make up a transformer model:
+
+* Embedding layers with positional encoding
+* Transformer layers
+* Encoder and decoder modules
+* A generator for predicting tokens
+
+Let's dive into each part step by step.
+
+## Embeddings and Positional Encodings
+
+First, let's look at how inputs are embedded and how positional information is added:
+
+```
+class EmbeddingsWithPositionalEncoding(nn.Module):
+    def __init__(self, d_model: int, n_vocab: int, max_len: int = 5000):
+        super().__init__()
+        self.linear = nn.Embedding(n_vocab, d_model)
+        self.d_model = d_model
+        self.register_buffer('positional_encodings', get_positional_encoding(d_model, max_len))
+
+    def forward(self, x: torch.Tensor):
+        pe = self.positional_encodings[:x.shape[0]].requires_grad_(False)
+        return self.linear(x) * math.sqrt(self.d_model) + pe
+```
+
+This class takes tokens (represented as integers) and converts them to dense vectors. Since transformers don't have any built-in understanding of token positions, we need to add positional information. Here, it's using fixed positional encodings calculated using sine and cosine functions. The embedding is scaled by  $ \sqrt{d\_{model}} $  before adding the positional encoding.
+
+There's also a variant that uses learned positional encodings instead of fixed ones:
+
+```
+class EmbeddingsWithLearnedPositionalEncoding(nn.Module):
+    def __init__(self, d_model: int, n_vocab: int, max_len: int = 5000):
+        super().__init__()
+        self.linear = nn.Embedding(n_vocab, d_model)
+        self.d_model = d_model
+        self.positional_encodings = nn.Parameter(torch.zeros(max_len, 1, d_model), requires_grad=True)
+
+    def forward(self, x: torch.Tensor):
+        pe = self.positional_encodings[:x.shape[0]]
+        return self.linear(x) * math.sqrt(self.d_model) + pe
+```
+
+In this version, the positional encodings are parameters that get learned during training.
+
+## The Transformer Layer
+
+Now let's look at the core building block - the transformer layer:
+
+```
+class TransformerLayer(nn.Module):
+    def __init__(self, *,
+                 d_model: int,
+                 self_attn: MultiHeadAttention,
+                 src_attn: MultiHeadAttention = None,
+                 feed_forward: FeedForward,
+                 dropout_prob: float):
+        super().__init__()
+        self.size = d_model
+        self.self_attn = self_attn
+        self.src_attn = src_attn
+        self.feed_forward = feed_forward
+        self.dropout = nn.Dropout(dropout_prob)
+        self.norm_self_attn = nn.LayerNorm([d_model])
+        if self.src_attn is not None:
+            self.norm_src_attn = nn.LayerNorm([d_model])
+        self.norm_ff = nn.LayerNorm([d_model])
+        self.is_save_ff_input = False
+```
+
+This layer can function either as an encoder layer or a decoder layer, depending on whether `src_attn` is provided. The layer uses pre-norm architecture, which means normalization is applied before the attention and feed-forward operations.
+
+The forward pass is where the magic happens:
+
+```
+def forward(self, *,
+            x: torch.Tensor,
+            mask: torch.Tensor,
+            src: torch.Tensor = None,
+            src_mask: torch.Tensor = None):
+    # Normalize the vectors before doing self attention
+    z = self.norm_self_attn(x)
+    # Run through self attention
+    self_attn = self.self_attn(query=z, key=z, value=z, mask=mask)
+    # Add the self attention results
+    x = x + self.dropout(self_attn)
+
+    # If a source is provided, get results from attention to source
+    if src is not None:
+        z = self.norm_src_attn(x)
+        attn_src = self.src_attn(query=z, key=src, value=src, mask=src_mask)
+        x = x + self.dropout(attn_src)
+
+    # Feed-forward network
+    z = self.norm_ff(x)
+    if self.is_save_ff_input:
+        self.ff_input = z.clone()
+    ff = self.feed_forward(z)
+    x = x + self.dropout(ff)
+
+    return x
+```
+
+Let me break this down:
+
+* First, we normalize the input and pass it through self-attention, where tokens attend to each other.
+* We add the self-attention results to the original input (residual connection).
+* If we're in a decoder layer looking at encoder outputs, we do cross-attention where decoder tokens attend to encoder outputs.
+* Finally, we pass through a feed-forward network with another residual connection.
+
+## Encoder and Decoder
+
+Now, let's see how multiple transformer layers are stacked to form the encoder and decoder:
+
+```
+class Encoder(nn.Module):
+    def __init__(self, layer: TransformerLayer, n_layers: int):
+        super().__init__()
+        self.layers = clone_module_list(layer, n_layers)
+        self.norm = nn.LayerNorm([layer.size])
+
+    def forward(self, x: torch.Tensor, mask: torch.Tensor):
+        for layer in self.layers:
+            x = layer(x=x, mask=mask)
+        return self.norm(x)
+```
+
+The encoder is simply a stack of identical transformer layers followed by a final layer normalization. The `clone_module_list` function creates multiple copies of the same layer.
+
+The decoder is similar but includes the cross-attention to the encoder outputs:
+
+```
+class Decoder(nn.Module):
+    def __init__(self, layer: TransformerLayer, n_layers: int):
+        super().__init__()
+        self.layers = clone_module_list(layer, n_layers)
+        self.norm = nn.LayerNorm([layer.size])
+
+    def forward(self, x: torch.Tensor, memory: torch.Tensor, src_mask: torch.Tensor, tgt_mask: torch.Tensor):
+        for layer in self.layers:
+            x = layer(x=x, mask=tgt_mask, src=memory, src_mask=src_mask)
+        return self.norm(x)
+```
+
+The `memory` parameter refers to the encoded representation from the encoder.
+
+## Generator for Token Prediction
+
+After processing through the encoder and decoder, we need to map the final representations back to token probabilities:
+
+```
+class Generator(nn.Module):
+    def __init__(self, n_vocab: int, d_model: int):
+        super().__init__()
+        self.projection = nn.Linear(d_model, n_vocab)
+
+    def forward(self, x):
+        return self.projection(x)
+```
+
+This simple linear layer projects from the model dimension to the vocabulary size, which gives us logits for each token in the vocabulary.
+
+## The Complete Encoder-Decoder Model
+
+Finally, we have the full model that ties everything together:
+
+```
+class EncoderDecoder(nn.Module):
+    def __init__(self, encoder: Encoder, decoder: Decoder, src_embed: nn.Module, tgt_embed: nn.Module, generator: nn.Module):
+        super().__init__()
+        self.encoder = encoder
+        self.decoder = decoder
+        self.src_embed = src_embed
+        self.tgt_embed = tgt_embed
+        self.generator = generator
+
+        # Initialize parameters with Xavier uniform
+        for p in self.parameters():
+            if p.dim() > 1:
+                nn.init.xavier_uniform_(p)
+```
+
+The forward pass connects all these components:
+
+```
+def forward(self, src: torch.Tensor, tgt: torch.Tensor, src_mask: torch.Tensor, tgt_mask: torch.Tensor):
+    # Run the source through encoder
+    enc = self.encode(src, src_mask)
+    # Run encodings and targets through decoder
+    return self.decode(enc, src_mask, tgt, tgt_mask)
+
+def encode(self, src: torch.Tensor, src_mask: torch.Tensor):
+    return self.encoder(self.src_embed(src), src_mask)
+
+def decode(self, memory: torch.Tensor, src_mask: torch.Tensor, tgt: torch.Tensor, tgt_mask: torch.Tensor):
+    return self.decoder(self.tgt_embed(tgt), memory, src_mask, tgt_mask)
+```
+
+The flow is:
+
+* Embed source tokens and add positional encoding
+* Process through the encoder
+* Embed target tokens and add positional encoding
+* Process through the decoder while attending to encoder outputs
+* Generate output probabilities with the generator (not shown in the forward pass)
+
+## Understanding the Masking
+
+One aspect I haven't touched on yet is the masks. There are two types:
+
+* `src_mask`: Used to mask out padding tokens in the source sequence
+* `tgt_mask`: Used in the decoder to prevent attending to future tokens (causal masking) and to mask padding
+
+These masks are crucial for maintaining the autoregressive property in the decoder (not seeing future tokens) and for handling variable-length sequences.
+
+## Transformer is All You Need
+
+This implementation follows the original "Attention is All You Need" paper quite closely. It uses pre-norm architecture (layer normalization before attention), has separate embedding layers for source and target, and includes all the essential transformer components.
+
+What's nice about this implementation is how modular it is. You can easily swap out components (like using learned positional encodings instead of fixed ones) or modify the architecture (like adjusting the number of layers or the model dimension).
+
+If you want to use this for a specific task, you'd need to define the appropriate vocabulary, create masks, and add task-specific processing before and after the transformer.
+
+---
+
+*full implementation > colab notebook*
+
+*\* The following series of articles are a deeper walkthrough+implementation of Annotated Research Paper Implementations from labml.*

@@ -1,0 +1,129 @@
+# Source: https://www.k-a.in/pyt-knn.html
+
+Alright so today we dive into this fascinating paper implementation of Generalization through Memorization: Nearest Neighbor Language Models and we build a k-Nearest Neighbor Language Model from scratch. This is one of those papers that sounds complex but is actually quite fun to implement once you break it down.
+
+Lesfgoooo.
+
+### What are we building?
+
+The core idea about this paper is, Traditional language models predict the next token using  $ p(w\_t | c\_t) $ , where  $ w\_t $  is our target token and  $ c\_t $  is our context (all the previous tokens). But what if we could leverage a massive memory bank of similar contexts we've seen before?
+
+That's exactly what k-NN Language Models do, they take the final layer embeddings from a transformer and use them to search through a database of context-token pairs. It's like giving your language model a photographic memory of everything it's ever seen during training.
+
+The math is surprisingly straightforward. We're looking for key-value pairs  $ (f(c\_i), w\_i) $  where  $ f(c\_i) $  is an embedding of context  $ c\_i $  and  $ w\_i $  is the token that followed. When we want to predict the next token for a new context  $ c\_t $ , we find the most similar contexts using  $ f(c\_t) $  as our search key.
+
+### Step 1: Training the Base Transformer
+
+Lets start bt writing the training code. The approach is that we can use any pre-trained transformer as our base model, we're building a standard autoregressive transformer:
+
+```
+class AutoregressiveModel(Module):
+    def __init__(self, src_embed: Module, encoder: Encoder, generator: Generator, *,
+                 is_save_ff_input: bool = False):
+        super().__init__()
+        self.src_embed = src_embed
+        self.encoder = encoder
+        # This is crucial - we need to save the feed-forward input
+        self.encoder.layers[-1].is_save_ff_input = is_save_ff_input
+        self.generator = generator
+        self.src_mask = None
+```
+
+This tells the final transformer layer to save the input to its feed-forward network. This saved input becomes our  $ f(c\_t) $ , the context embedding we'll use for k-NN search.
+The feed-forward input in the final layer has already been processed by all the attention mechanisms. It's a contextualized representation that captures both local and global dependencies.
+
+### Step 2: Building the Memory Index
+
+we need to build a FAISS index containing all our  $ (f(c\_i), w\_i) $  pairs from the training data.
+
+```
+def gather_keys(conf: Configs):
+    d_model = conf.transformer.d_model
+    data_loader = conf.trainer.data_loader
+    n_keys = data_loader.data.shape[0] * data_loader.data.shape[1] - 1
+    
+    # Memory-mapped arrays for efficiency
+    keys_store = np.memmap(str(lab.get_data_path() / 'keys.npy'), 
+                          dtype=np.float32, mode='w+', shape=(n_keys, d_model))
+    vals_store = np.memmap(str(lab.get_data_path() / 'vals.npy'), 
+                          dtype=np.int, mode='w+', shape=(n_keys, 1))
+```
+
+using memory-mapped arrays here because we're dealing with potentially gigabytes of data.
+For each token in our training data (except the first), we store its context embedding and the token that actually came next.
+
+The FAISS indexing part:
+
+```
+def build_index(conf: Configs, n_centeroids: int = 2048, code_size: int = 64):
+    quantizer = faiss.IndexFlatL2(d_model)
+    index = faiss.IndexIVFPQ(quantizer, d_model, n_centeroids, code_size, 8)
+```
+
+using an `IndexIVFPQ` here, which is FAISS's inverted file index with product quantization. This gives us fast approximate nearest neighbor search with compressed storage. The trade-off is between speed, memory usage, and accuracy.
+
+### Step 3: k-NN Prediction
+
+Now for the core algorithm. this is where everything comes together:
+
+```
+def knn(queries: torch.Tensor, index: faiss.IndexFlatL2, 
+        keys_store: np.ndarray, vals_store: np.ndarray, n_tokens: int):
+    queries = queries.view(-1, queries.shape[-1])
+    
+    # Find 10 nearest neighbors
+    distance, idx = index.search(queries.numpy(), 10)
+    
+    # Get the actual context embeddings and tokens
+    keys_found = queries.new_tensor(keys_store[idx])
+    vals_found = torch.tensor(vals_store[idx]).squeeze(-1)
+```
+
+what's happening step by step:
+For each query context  $ f(c\_t) $ , we're finding the 10 most similar training contexts. But instead of using the raw L2 distances from FAISS, we're computing cosine similarity:
+
+```
+# Normalize vectors for cosine similarity
+keys_found_n = keys_found / torch.sqrt((keys_found ** 2).sum(-1, keepdims=True) + 1e-10)
+queries_n = queries / torch.sqrt((queries ** 2).sum(-1, keepdims=True) + 1e-10)
+
+# Cosine similarity via dot product
+dot_prod = (keys_found_n * queries_n.unsqueeze(1)).sum(-1)
+```
+
+final step creates a probability distribution over our vocabulary:
+
+```
+logits_token = dot_prod.new_zeros(queries.shape[0], n_tokens)
+logits_token.scatter_(dim=1, index=vals_found, src=dot_prod, reduce='add')
+```
+
+This scatter operation is accumulating similarities for each token. If multiple nearest neighbors point to the same token, their similarities get summed up.
+
+### Final Boss
+
+Combining the transformer's predictions with our k-NN predictions:
+
+```
+loss = conf.loss_func(res_knn * c + (1 - c) * res, target)
+```
+
+We're linearly interpolating between the transformer output `res` and k-NN output `res_knn` with weight `c`.
+
+Check the full implementation below.
+
+The paper experiments with different values of `c` to find the optimal blend.
+
+Whats interesting about this approach is how it gives the model access to its entire training memory without changing the architecture. During inference, we are essentially asking "what tokens followed similar contexts in training?" and using that to inform our predictions.
+
+The results are pretty impressive too. The paper shows significant perplexity improvements, especially for rare tokens and domain-specific text. It's particularly effective for domain adaptation since you can build a new index on domain-specific data without retraining the transformer.
+
+#### wrap up
+
+'m struck by how this bridges the gap between parametric and non-parametric models. The transformer learns general patterns and representations, while the k-NN component provides specific, retrievable memories. It's like giving an AI both intuition and perfect recall. Crazy.
+
+---
+
+*full implementation > colab notebook*
+
+*\* The following series of articles are a deeper walkthrough+implementation of Annotated Research Paper Implementations from labml.*

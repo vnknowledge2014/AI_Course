@@ -1,0 +1,150 @@
+# Source: https://www.k-a.in/
+
+# Arjun Kocher
+
+Independent AI Researcher (Lambda). I study deep neural architectures, and their underlying mathematics.
+
+## Blogs
+
+* ### Why Attention Is All You Need
+
+  A brief introduction to the seminal Transformer paper.
+
+  ♡983
+
+  ◉70.6k
+* ### GRPO
+
+  A groundbreaking training approach from DeepSeek.
+
+  ♡1k
+
+  ◉62.3k
+* ### Muon
+
+  A Brand New Optimizer from Kimi Moonshot.
+
+  ♡349
+
+  ◉21.1k
+* ### Chain of Thought
+
+  How reasoning emerges in large language models.
+
+  ♡460
+
+  ◉29.4k
+* ### LoZA
+
+  LongCat ZigZag Attention.
+
+  ♡335
+
+  ◉16.8k
+* ### XSA
+
+  Exclusive Self Attention.
+
+  ♡425
+
+  ◉19.2k
+* ### Nested Learning
+
+  A new learning paradigm.
+
+  ♡1.5k
+
+  ◉92.9k
+* ### HOPE
+
+  Architecture behind Nested Learning.
+
+  ♡362
+
+  ◉22.2k
+* ### DDL
+
+  Deep Delta Learning.
+
+  ♡470
+
+  ◉31k
+* ### RLM
+
+  Recursive Language Models.
+
+  ♡1.6k
+
+  ◉67.6
+* ### mHC
+
+  Understanding Manifold Constrained Hyper Connections.
+
+  ♡1.8k
+
+  ◉95.4k
+* ### mHC math
+
+  Deriving Manifold Constrained Hyper Connections.
+
+  ♡683
+
+  ◉34.5
+* ### Engram
+
+  A Memory technique introduced by DeepSeek.
+
+  ♡306
+
+  ◉16k
+* ### Attention Residuals
+
+  Understanding and Implementation.
+
+  ♡1.6k
+
+  ◉247.4k
+
+## PyTorch Implementations
+
+Transformer
+
+Multi-Head Attention
+
+RoPE
+
+ALiBi
+
+Transformer-XL
+
+RETRO
+
+Compressive Transformer
+
+miniGPT
+
+SwiGLU
+
+kNN-LM
+
+GLU
+
+Feedback Transformer
+
+## Notes
+
+![](images/mHC-notes.JPG)
+
+‹›
+
+## Connect
+
+Twitter
+AMA
+
+×
+‹
+![Enlarged note]()
+›
+
+1 / 1

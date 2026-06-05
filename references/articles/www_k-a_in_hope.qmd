@@ -1,0 +1,548 @@
+# Source: https://www.k-a.in/hope.html
+
+#### from the paper, Nested Learning: The Illusion of Deep Learning Architecture by: Ali Behrouz, Meisam Razaviyayn, Peilin Zhong, and Vahab Mirrokni — Google Research, NeurIPS 2025
+
+---
+
+To understand the architecture we should start from the beginning.
+You know what's broken about language models? They have amnesia. Not the kind where you forget your past. They remember their pre-training just fine. It's a specific kind called *anterograde amnesia* where the long-term memory from before the condition is intact and their ability to experience the present moment is perfect. But they can't transfer anything from short-term to long-term memory. After 30 seconds, whatever just happened is gone. They experience the present for the first time, evertime, with no bridge to tomorrow.
+
+This is *exactly* what happens in current LLMs.
+
+They have two types of knowledge:
+
+* Persistent knowledge stored in MLP blocks and projection weights. Everything from pre-training
+* Context knowledge that exists only while tokens are in the attention window
+
+When the context is gone, that knowledge vanishes. There's no mechanism to move information from the temporary (attention) to the permanent (MLPs).
+
+That realization was the starting point of this paper.
+
+The paper presents three core contributions to address this:
+
+1. **Expressive Optimizers**: Showing that gradient-based optimizers like Adam and SGD with Momentum are actually associative memory modules compressing gradient information
+2. **Self-Modifying Learning Module**: A sequence model that learns how to modify itself by learning its own update algorithm
+3. **Continuum Memory System**: A new formulation that generalizes beyond the traditional "long-term/short-term memory" dichotomy
+
+## Everything is Associative Memory
+
+Before we build anything, we need to understand what memory actually *is* in neural networks. And it turns out there's a beautiful unifying framework: **associative memory**.
+
+What's associative memory? It's learning mappings between events. When you learn someone's name, you're mapping their face to their name. Keys to values. Events to events.
+
+Formally, we can write this as an optimization problem:
+
+$$$
+\mathcal{M}^\* = \arg\min\_{\mathcal{M}} \tilde{\mathcal{L}}(\mathcal{M}(\mathbf{K}); \mathbf{V})
+$$$
+> ##### Find the best memory function M that maps keys (like faces) to values (like names) with minimum error.
+
+We have keys $ \mathbf{K} $ , values $ \mathbf{V} $ , and a memory function $ \mathcal{M} $ that maps keys to values. The loss $ \tilde{\mathcal{L}} $ measures how good that mapping is.
+
+**Most architectures we know can be reformulated as associative memory**. The choice of objective and the optimization process determines what architecture you get.
+
+### Example 1: Linear Attention
+
+Say $ \mathcal{M} $ is just a matrix (a linear layer). Choose the objective as dot-product similarity:
+
+$$$
+\tilde{\mathcal{L}} = -\langle \mathcal{M}\mathbf{K}, \mathbf{V}^\top \rangle
+$$$
+> ##### Measure similarity: the more aligned the memory's output is with the values, the better.
+
+If you optimize this with gradient descent you get **Linear attention.** and the recurrence update becomes:
+
+  
+
+$$$
+\mathcal{M}\_t = \mathcal{M}\_{t-1} + \mathbf{v}\_t \mathbf{k}\_t^\top
+$$$
+> ##### Each step, add the association between the current key and value to memory. Simple accumulation.
+
+So linear attention is just gradient descent on a dot-product objective.
+
+### Example 2: Delta Rule
+
+Now change the objective to L2 regression loss:
+
+$$$
+\tilde{\mathcal{L}} = \|\mathcal{M}\mathbf{K} - \mathbf{V}\|^2\_2
+$$$
+> ##### Squared error: how far is memory's prediction from the actual value? Smaller is better.
+
+Optimize with gradient descent, you get the **delta rule**:
+
+  
+
+$$$
+\mathcal{M}\_t = \mathcal{M}\_{t-1} - \eta\_t (\mathcal{M}\_{t-1}\mathbf{k}\_t - \mathbf{v}\_t)\mathbf{k}\_t^\top
+$$$
+> ##### Correct memory based on its prediction error. If wrong, adjust proportionally to how wrong.
+
+Different objective, different architecture. But same underlying structure. Associative memory optimized with gradient descent.
+
+When we look at architectures from the *deep learnin perspective*, we only see the solution, the final update rule. But from the *nested learning perspective*, we see the **internal learning process**. We see that there's an optimization problem inside the architecture, and we're solving it with some optimizer.
+
+We can improve architectures by chosing objectives or optimizers which becomes design choices we can manipulate.
+
+## Gradient Descent is Also Associative Memory
+
+Take a simple MLP and train it with gradient descent. The update rule is:
+
+$$$
+W\_{t+1} = W\_t - \eta\_t \nabla\_W \mathcal{L}(W\_t; \mathbf{x}\_t)
+$$$
+> ##### Move weights opposite to the error gradient. Like rolling downhill to find the lowest point.
+
+Using the chain rule:
+
+$$$
+W\_{t+1} = W\_t - \eta\_t \nabla\_{y\_t}\mathcal{L}(W\_t; \mathbf{x}\_t) \otimes \mathbf{x}\_t
+$$$
+> ##### Update = learning rate × error signal × input. The outer product connects inputs to outputs.
+
+We can rewrite this as:
+
+  
+
+$$$
+W\_{t+1} = \arg\min\_W \langle W\mathbf{x}\_t, \nabla\_{y\_t}\mathcal{L}(W\_t; \mathbf{x}\_t) \rangle + \frac{1}{2\eta\_t}\|W - W\_t\|^2\_2
+$$$
+> ##### Balance two goals: follow the gradient AND don't change too much from current weights.
+
+We're trying to map input $ \mathbf{x}t $ to the gradient (or "error signal") $ \nabla\_{y\_t}\mathcal{L} $ , measuring the quality with dot-product similarity. This looks just like linear attention!
+
+But there's a crucial difference, in linear attention, keys and values are *independent of the memory state* $ \mathcal{M} $ . You can pre-compute them. But here the value i.e., the gradient **depends on the current state** $ W\_t $ .
+
+The memory generates its own learning targets. This is called a **self-referential model**. The model controls its own learning process by generating its own values.
+
+## *Self-Referential Learning*
+
+$$$
+W\_{t+1} = W\_t + \eta\_{t+1} \mathbf{v}\_t \otimes \mathbf{x}\_t
+$$$
+> ##### Update weights by adding the connection between the self-generated target and input.
+
+where
+
+  
+
+$$$
+\mathbf{v}\_t = \mathbf{f}\_{W\_t}(\mathbf{x}\_t) = -\nabla\_{y\_t}\mathcal{L}(W\_t; \mathbf{x}\_t)
+$$$
+> ##### The memory generates its own learning target! v is what the model thinks it should learn next.
+
+At each step, $ \mathbf{v}\_t $ is *generated by the memory* $ W\_t $ itself. The memory decides what to learn next based on where it currently is. This is much more powerful than simple linear attention, where you're just mapping pre-given keys to pre-given values.
+
+**Gradient descent is a form of associative memory, but it's a self-referential associative memory.** It's not learning how to map.It's learning how to generate the right things to map, and then learning that mapping.
+
+## Momentum: Memory for Gradients
+
+Add momentum to gradient descent:
+
+  
+
+$$$
+W\_{t+1} = W\_t + \mathbf{m}\_{t+1}
+$$$
+> ##### Weights change by the momentum amount, accumulated past gradient information.
+
+$$$
+\mathbf{m}\_{t+1} = \alpha\_{t+1}\mathbf{m}\_t - \eta\_{t+1}\nabla\_W \mathcal{L}(W\_t; \mathbf{x}\_{t+1})
+$$$
+> ##### Momentum = (keep some of last momentum) + (add new gradient). Like a ball rolling with inertia.
+
+What is momentum doing? It's an **associative memory for gradients**.
+
+Up until now, the memories described were for *tokens* which mapped input tokens to output values. But momentum operates on a different context which are *gradients*. It's compressing past gradients into its parameters.
+
+And we can formulate momentum as solving its own optimization problem:
+
+$$$
+\min\_{\mathbf{m}} -\langle \mathbf{m}, \nabla\_W \mathcal{L}(W\_t; \mathbf{x}\_t) \rangle
+$$$
+> ##### Momentum is itself solving an optimization: compress past gradients into a useful direction.
+
+Optimize with gradient descent, you get the momentum update.
+
+## Nested Optimization Problems
+
+When you train a neural network, the **architecture** is an optimization problem (associative memory mapping tokens to outputs). The **optimizer** is also an optimization problem (associative memory mapping gradients to weight updates)
+
+They're the same thing, just operating on different contexts. The architecture operates on tokens. The optimizer operates on gradients, they're **interconnected**. The architecture *generates the context* for the optimizer. The gradients that the optimizer sees? Those come from the architecture. So you can't design them independently they're part of one system.
+
+> This is **nested learning**: viewing a machine learning model as a set of nested (or parallel) optimization problems, each with its own context flow.
+
+This interconnection has real consequences. If you choose a bad optimization problem for one component, it might contradict other components, and the whole design collapses. Different layers might fight each other. Understanding deep learning architectures means seeing everything as an interconnected system where each component's context depends on the others.
+
+It's also why you can't just say "I've designed Adam, let's use it for every architecture." The gradients generated by a Transformer are fundamentally different from gradients generated by an MLP. A Transformer's Hessian is far more complex. The optimizer needs to match the architecture that generates its context.
+
+## Hidden Dimension, Frequency
+
+In the nested learning view, every component has an **update frequency**, how often it changes.
+
+In Transformers, **Attention** updates every token. Frequency = $ \infty $ (non-parametric, recomputed each time). **MLP blocks** update during pre-training, then freeze. Frequency = 0 after pre-training.
+
+**Pre-training is itself a form of in-context learning**, just with a context of billions or trillions of tokens. We're compressing the entire pre-training dataset into the persistent components (MLPs, projections). Then attention provides another form of in-context learning, but with a much shorter context of thousands of tokens.
+
+Two extreme cases. Nothing in between. Why not have many things in between?
+
+But human brains don't work like this. Brain oscillations happen at multiple frequencies. Gamma waves (30-150 Hz) for sensory processing, Beta waves (13-30 Hz) for active thinking, Theta/delta waves (0.5-8 Hz) for memory consolidation.
+
+Multiple time scales. Multiple frequencies. The uniform and reusable structure, combined with multi-time-scale updates in the brain, are the key components that unlock continual learning in humans. Nested Learning allows for multi-time-scale updates for each component, while revealing that well-known architectures like Transformers are in fact linear layers with different frequency updates. That's what we need to build.
+
+## Continuum Memory System: The Spectrum of Forgetting
+
+Instead of just one MLP block (frequency 0), let's have *multiple* MLP blocks, each updating at different frequencies:
+
+  
+
+$$$
+\mathbf{y}\_t = \text{MLP}^{(f\_k)}(\text{MLP}^{(f\_{k-1})}(\cdots \text{MLP}^{(f\_1)}(\mathbf{x}\_t)))
+$$$
+> ##### Chain of MLPs, each updating at different speeds. Fast → medium → slow, like brain waves.
+
+Each $ \text{MLP}^{(f\_\ell)} $ has its own chunk size $ C^{(\ell)} $ that determines its update frequency. Here's the crucial update rule:
+
+  
+
+$$$
+\theta^{(f\_\ell)}\_{i+1} = \begin{cases}
+\theta^{(f\_\ell)}\_i - \sum\_{t=i-C^{(\ell)}}^{i} \eta^{(\ell)}\_t f(\theta^{(f\_\ell)}\_t; \mathbf{x}\_t) & \text{if } i \equiv 0 \pmod{C^{(\ell)}} \\
+0 & \text{otherwise}
+\end{cases}
+$$$
+> ##### Parameters update only at chunk boundaries. Fast memory updates every 512 tokens, slow memory every 8192.
+
+Let me decode what this is saying. The parameters $ \theta^{(f\_\ell)} $ at level $ \ell $ only update when $ i $ is divisible by the chunk size $ C^{(\ell)} $ . When that happens, they accumulate all the gradients (or more generally, the error signal $ f(\theta^{(f\_\ell)}\_t; \mathbf{x}\_t) $ ) from the past $ C^{(\ell)} $ tokens and apply them all at once. Otherwise, the update is zero, the parameters freeze.
+
+What does this give you? Say you have three levels:
+
+* Level 1: $ C^{(1)} = 512 $ tokens (high frequency, adapts quickly, forgets quickly)
+* Level 2: $ C^{(2)} = 2048 $ tokens (medium frequency)
+* Level 3: $ C^{(3)} = 8192 $ tokens (low frequency, most persistent)
+
+When you process a long sequence; **Level 1** updates every 512 tokens. It sees local patterns, adapts fast, but forgets fast too. **Level 2** updates every 2048 tokens. It accumulates information over a longer window, more stable, less reactive. **Level 3** updates every 8192 tokens. It captures the slowest-changing patterns, the most persistent knowledge.
+
+Something learned 512 tokens ago might be forgotten by Level 1 (because it updated and moved on), but Level 2 still has it. Something from 2K tokens ago might be gone from Level 2, but Level 3 has it.
+
+And because all levels connect through backpropagation during training, knowledge can *circle back*. Level 3 can remind Level 1 of what it forgot. Level 2 can consolidate information from Level 1 before it vanishes. This creates a **loop through the time dimension**.
+
+The frequency $ f\_\ell = \frac{L\_{\text{max}}}{C^{(\ell)}} $ determines how many times a level updates over the maximum sequence length. High frequency means many updates (local, adaptive). Low frequency means few updates (global, persistent). And by stacking multiple levels, each with its own $ C^{(\ell)} $ , you create a spectrum which is the **Continuum Memory System**.
+
+This is memory that degrades gracefully across multiple time scales, with the ability to recover forgotten information from slower-updating levels. Not two extremes (frozen MLPs and ephemeral attention), but a cascade of consolidation just like how the brain transfers information from working memory to intermediate storage to long-term memory through different frequency bands.
+
+## Delta Gradient Descent: Adaptive Forgetting
+
+Standard gradient descent assumes data samples are independent. But tokens in a sequence are correlated.
+
+Standard gradient descent:
+$$$
+W\_{t+1} = \arg\min\_W \langle W\mathbf{x}\_t, \mathbf{u}\_t \rangle + \frac{1}{2\eta\_t}\|W - W\_t\|^2\_2
+$$$
+
+> ##### Standard gradient descent: follow the gradient direction while staying near current weights.
+
+  
+  
+where $ \mathbf{u}\_t = -\nabla\_{y\_t}\mathcal{L}(W\_t; \mathbf{x}\_t) $ .
+> ##### u is the negative gradient, the direction that reduces error.
+
+Replace the dot-product with L2 regression:
+
+$$$
+W\_{t+1} = \arg\min\_W \frac{1}{2}\|W\mathbf{x}\_t - \mathbf{u}\_t\|^2\_2 + \frac{1}{2\eta\_t}\|W - W\_t\|^2\_2
+$$$
+> ##### Regression version: minimize prediction error while not moving too far from current weights.
+
+Take the gradient, set to zero (assuming normalized $ \|\mathbf{x}\_t\|\_2 = \lambda $ ):
+
+  
+
+$$$
+2(W\_{t+1}\mathbf{x}\_t - \mathbf{u}\_t)\mathbf{x}\_t^\top + 2\eta\_t(W\_{t+1} - W\_t) = 0
+$$$
+> ##### Setting the gradient to zero to find the optimal update. Standard calculus optimization.
+
+$$$
+W\_{t+1}(\mathbf{x}\_t\mathbf{x}\_t^\top + \eta\_t I) = \mathbf{u}\_t\mathbf{x}\_t^\top + \eta\_t W\_t
+$$$
+> ##### Rearranged form: W\_new times something = target. Need to invert to solve.
+
+Use Sherman-Morrison to invert:
+
+$$$
+(\mathbf{x}\_t\mathbf{x}\_t^\top + \eta\_t I)^{-1} = \frac{1}{\eta\_t}\left(I - \frac{1}{\lambda^2 + \eta\_t}\mathbf{x}\_t\mathbf{x}\_t^\top\right)
+$$$
+> ##### Matrix inversion shortcut (Sherman-Morrison). Avoids expensive computation.
+
+Substitute back:
+
+  
+
+$$$
+W\_{t+1} = W\_t\left(I - \frac{1}{\lambda^2+\eta\_t}\mathbf{x}\_t\mathbf{x}\_t^\top\right) - \beta\_t \nabla\_{y\_t}\mathcal{L}(W\_t; \mathbf{x}\_t) \mathbf{x}\_t^\top
+$$$
+> ##### Delta GD: adaptively forget based on input similarity. Repeated inputs → forget more.
+
+where $ \beta\_t = \frac{1}{\eta\_t} - \frac{\lambda^2}{\eta\_t(\lambda^2 + \eta\_t)} $ .
+
+Look at that first term: $ W\_t(I - \alpha\_t\mathbf{x}\_t\mathbf{x}\_t^\top) $ where $ \alpha\_t = \frac{1}{\lambda^2+\eta\_t} $ .
+
+This is an **adaptive decay** based on the current input! When you see similar inputs repeatedly, $ \mathbf{x}\_t\mathbf{x}\_t^\top $ has large values, and you decay more strongly, you forget more aggressively. When inputs are diverse, you decay less.
+
+> This is **Delta Gradient Descent** (DGD). The memory learns to selectively forget based on the statistics of the data stream.
+
+## Self-Modifying Titans: Learning How to Learn
+
+Now we're ready to build the core of HOPE. But, what are Titans?
+
+Titans arise when you choose L2 regression as your objective and optimize with gradient descent plus momentum and weight decay. That's the recipe: a specific loss function and a specific optimizer, and you get the Titan architecture.
+
+HOPE extends Titans into a **self-referential** model. We don't want to assume keys and values are given we want to generate our own values and learn from that. And we want every component to be adaptive: learning rates, decay factors, everything generated by the model itself.
+
+The standard recipe for a sequence model:
+
+$$$
+\mathbf{k}\_t = \mathbf{x}\_t W\_k, \quad \mathbf{v}\_t = \mathbf{x}\_t W\_v, \quad \mathbf{q}\_t = \mathbf{x}\_t W\_q
+$$$
+> ##### Standard projections: transform input into keys (what to match), values (what to return), queries (what to look for).
+
+$$$
+\min\_{\mathcal{M}} \mathcal{L}(\mathcal{M}; \mathbf{k}\_t, \mathbf{v}\_t)
+$$$
+> ##### Find the best memory that maps keys to values.
+
+$$$
+\mathbf{y}\_t = \mathcal{M}\_t \mathbf{q}\_t
+$$$
+> ##### Output = memory applied to query. 'What does memory say about this query?'
+
+Fixed projection matrices $ W\_k, W\_v, W\_q $ from pre-training. but we want them to adapt
+
+Make each projection a memory module that updates in context:
+
+  
+
+$$$
+\mathbf{k}\_t = \mathcal{M}\_{k,t-1}(\mathbf{x}\_t), \quad \mathbf{v}\_t = \mathcal{M}\_{v,t-1}(\mathbf{x}\_t)
+$$$
+> ##### Keys and values now come from adaptive memories, they change based on context!
+
+We also want adaptive learning rates and decay factors:
+
+  
+
+$$$
+\eta\_t = \mathcal{M}\_{\eta,t-1}(\mathbf{x}\_t), \quad \alpha\_t = \mathcal{M}\_{\alpha,t-1}(\mathbf{x}\_t)
+$$$
+> ##### Learning rate and decay are now generated by the model itself. It decides how fast to learn.
+
+**generate your own values**. Instead of learning from pre-given values, generate them from the current memory state
+
+  
+
+$$$
+\hat{\mathbf{v}}\_{\square,t} = \mathcal{M}\_{\square,t-1}(\mathbf{v}\_t) \quad \text{for } \square \in \{k, v, q, \eta, \alpha, \text{memory}\}
+$$$
+> ##### Each component generates its own learning target. The model teaches itself what to learn.
+
+Each memory $ \mathcal{M}\_{\square} $ is a 2-layer MLP:
+
+  
+
+$$$
+\mathcal{M}\_{\square}(\cdot) = (\cdot) + W\_{\square,1}\sigma(W\_{\square,2}(\cdot))
+$$$
+> ##### 2-layer MLP with residual: output = input + learned transformation. Simple but powerful.
+
+And they all update using Delta Gradient Descent with self-generated targets:
+
+  
+
+$$$
+\mathcal{M}\_{\square,t} = \mathcal{M}\_{\square,t-1}\left(\alpha\_t I - \eta\_t\mathbf{k}\_t\mathbf{k}\_t^\top\right) - \eta\_t \nabla\_{\mathcal{M}\_{\square,t-1}} \mathcal{L}(\mathcal{M}\_{\square,t-1}; \mathbf{k}\_t, \hat{\mathbf{v}}\_{\square,t})
+$$$
+> ##### Full adaptive update: decay old memory + learn from self-generated targets. Everything adapts.
+
+Every component is adaptive:
+
+* Learning rate $ \eta\_t $ ? Generated by the model
+* Decay factor $ \alpha\_t $ ? Generated by the model
+* Values $ \hat{\mathbf{v}}\_{\square,t} $ ? Generated by the model
+* The update rule? Uses adaptive decay from Delta GD
+
+This is a **self-referential Titan**. The model learns how to modify itself. It learns its own learning process.
+
+## HOPE: A Self-Referential Module with Continuum Memory
+
+The complete HOPE architecture:
+
+**Step 1: Self-Modifying Titan**
+
+  
+
+$$$
+\mathbf{k}\_t = \mathcal{M}\_{k,C \times \lceil t/C \rceil}(\mathbf{x}\_t), \quad \mathbf{v}\_t = \mathcal{M}\_{v,C \times \lceil t/C \rceil}(\mathbf{x}\_t)
+$$$
+> ##### Keys/values from adaptive memory, updated at chunk boundaries for efficient parallel processing.
+
+  
+
+$$$
+\eta\_t = \mathcal{M}\_{\eta,C \times \lceil t/C \rceil}(\mathbf{x}\_t), \quad \alpha\_t = \mathcal{M}\_{\alpha,C \times \lceil t/C \rceil}(\mathbf{x}\_t)
+$$$
+> ##### Learning rate and decay generated per chunk. The model controls its own learning speed.
+
+  
+
+$$$
+\hat{\mathbf{v}}\_{\square,t} = \mathcal{M}\_{\square,C \times \lceil t/C \rceil}(\mathbf{v}\_t)
+$$$
+> ##### Self-generated targets at chunk boundaries. The model creates its own curriculum.
+
+  
+
+$$$
+\mathcal{M}\_{\square,t} = \mathcal{M}\_{\square,t-1}\left(\alpha\_t I - \eta\_t\mathbf{k}\_t\mathbf{k}\_t^\top\right) - \eta\_t \nabla\mathcal{L}\_{\mathcal{M}\_{\square,C \times \lceil t/C \rceil}}
+$$$
+> ##### Memory update: adaptive forgetting + gradient step. Balances retention and learning.
+
+  
+
+$$$
+\mathbf{o}\_t = \mathcal{M}\_{\text{memory},t}(\mathbf{q}\_t)
+$$$
+> ##### Final output from the self-modifying Titan: query the updated memory.
+
+(The $ C \times \lceil t/C \rceil $ notation means we update memory states at chunk boundaries for parallelization)
+
+**Step 2: Continuum Memory System**
+
+  
+
+$$$
+\mathbf{y}\_t = \text{MLP}^{(f\_k)}(\text{MLP}^{(f\_{k-1})}(\cdots \text{MLP}^{(f\_1)}(\mathbf{o}\_t)))
+$$$
+> ##### Continuum memory cascade: output flows through MLPs at different update frequencies.
+
+Each MLP level updates at its own frequency using Delta GD.
+
+The information flow:
+
+Input → Self-modifying Titan (adaptive projections, self-generated targets, learned learning rates)
+
+Titan output → Multiple memory levels (different time scales)
+
+Knowledge persists and can circle back through backpropagation
+
+## M3: Continuum Memory for Optimizers
+
+If we can have continuum memory for architectures, why not for optimizers?
+
+The insight: in Adam, we have first-order momentum and second-order momentum. But can Adam consider longer and longer information in its momentum term? It seems not very effective for understanding the *global* loss landscape, momentum only captures local structure.
+
+So we add additional momentum terms that update at different frequencies:
+
+$$$
+\mathbf{m}^{(1)}\_{t+1} = \beta\_1 \mathbf{m}^{(1)}\_t + (1-\beta\_1)\nabla\_W\mathcal{L}
+$$$
+> ##### First momentum: fast-updating, captures local gradient structure. Updates every step.
+
+$$$
+\mathbf{m}^{(K)}\_{i+1} = \begin{cases}
+\beta\_K \mathbf{m}^{(K)}\_i + (1-\beta\_K) \sum\_{j} \nabla\_W\mathcal{L}\_j & \text{if } i \equiv 0 \pmod{K} \\
+\mathbf{m}^{(K)}\_i & \text{otherwise}
+\end{cases}
+$$$
+> ##### K-th momentum: slow-updating, captures global landscape. Only updates every K steps.
+
+The first momentum $ \mathbf{m}^{(1)} $ is responsible for local structure in the loss landscape it updates every step. The second momentum $ \mathbf{m}^{(K)} $ is responsible for more global understanding it only updates every $ K $ steps. Then we take a weighted combination for the final update.
+
+Why does this matter, imagine a continual learner navigating a complicated loss landscape. If you have weak memory management, you can only consider local gradients. The momentum term can't understand the global perspective. But with a more powerful memory on gradients, the optimizer can understand global properties of the loss landscape and find more effective solutions.
+
+There's a beautiful example in the paper; a loss function that oscillates wildly. Simple gradient descent (or even momentum) takes forever to converge because it keeps exploring the same regions. But an optimizer with better memory management *remembers* "I've passed this point already in the past, I don't need to go from this direction, I can go from that direction." It's learning from its own optimization history.
+
+**Self-modification** is what happens when these memories generate their own learning targets. Instead of being told "map this key to that value," they decide "based on where I am now, here's what I should learn next." The memory controls its own learning process.
+
+They're all the same underlying structure. Literally. The differences are just three questions:
+
+**What's the context?** Tokens or gradients or something else?
+
+**What's the frequency?** How often do you update? Every token? Every 512 tokens? Never?
+
+**What's the learning rule?** Gradient descent? Delta rule? Self-referential generation?
+
+That's the entire design space.
+
+## *Why This Architecture Works*
+
+**Multiple Levels of Adaptation (Higher-Order In-Context Learning)**
+
+The self-modifying Titan has nested optimization problems.
+
+Regular in-context learning: "I adapt my outputs to examples."
+
+HOPE achieves **higher-order in-context learning**: "I adapt how I process examples, I adapt how quickly I adapt, I adapt what I consider worth adapting to."
+
+Each level of the hierarchy learns from the level below it.
+
+**The Loop Through Time**
+
+When Level 1 forgets something, Level 2 still has it. When Level 2 forgets, Level 3 has it. Backpropagation lets knowledge flow backward: Level 1 can query Level 2, Level 2 can query Level 3.
+
+**Self-Generated Curriculum**
+
+Early in a sequence, the Titan generates "easier" targets. As it refines, it generates harder targets for itself. Implicit curriculum learning.
+
+**Adaptive Forgetting**
+
+Delta GD makes forgetting context-dependent. See repeated patterns? Forget more aggressively. See diverse patterns? Retain more.
+
+## The Nested Learning Perspective
+
+Let's step back and see the forest for the trees.
+
+What nested learning reveals is almost absurdly simple: **everything is associative memory**. Every component in a neural network, whether we call it an "architecture" or an "optimizer" or a "learning rule" is just an associative memory operating at some frequency on some context.
+
+**Architecture components** are associative memories for tokens. Attention operates at frequency ∞. It recomputes from scratch every time, storing nothing persistent. Traditional frozen MLP blocks operate at frequency 0, they never update after pre-training. These are the two extremes.
+
+**Optimizers** are associative memories for gradients. Momentum compresses past gradients. Adam compresses gradient statistics. They're solving the same kind of optimization problem as the architecture, just on a different context flow. The architecture sees tokens; the optimizer sees gradients.
+
+And here's a fascinating implication: **why can't you train Transformers with vanilla gradient descent?** From the associative memory perspective, gradient descent is the *simplest* associative memory among optimizers. It's not capable of properly compressing gradients when those gradients are super complicated and Transformers generate complicated gradients. There's recent work showing that the Hessian of gradients generated by Transformers is far more complex than, say, an MLP block.
+
+Adam works because it's a *much more powerful* associative memory. In the paper, they show that Adam is the optimal solution of associative memories to the regression loss. It has better memory management for gradients. When your architecture generates complex gradient landscapes, you need an optimizer with enough memory capacity to compress that information effectively.
+
+**The Continuum Memory System** fills in everything between those extremes. Multiple MLP blocks updating at frequencies like 512 tokens, 2048 tokens, 8192 tokens. A spectrum between 0 and ∞. Each one is still associative memory, just operating at its own time scale.
+
+## *The Intuition that makes it all click*
+
+Traditional deep learning says: "Stack layers vertically to get depth. Make them deeper and wider to get more parameters."
+
+Nested learning says: "Stack *optimization processes* at different time scales. Make them update at different frequencies to get persistent memory consolidation."
+
+And here's the practical payoff: **everything we've learned in one domain transfers to the other**. All those discussions about long context modeling for architectures? They apply directly to optimizers. The context for an optimizer is gradients, and if your optimizer has weak memory management, it can only see local gradients, it can't understand the global loss landscape.
+
+Think about it: a continual learner needs to navigate a complicated loss landscape. With short-context memory for gradients, the optimizer is myopic. With long-context memory, it can recognize "I've been here before" and make better decisions. The same techniques that extend context length for tokens can extend context length for gradients.
+
+When you train a Transformer with Adam optimizer, you don't have "one neural network being optimized." You have nested memories: Adam's momentum (fast memory for gradients, updates every step), Attention weights (infinite-frequency memory for tokens, recomputes every forward pass) and MLP blocks (zero-frequency memory for tokens, frozen after training)
+
+HOPE just makes this explicit and fills in the gaps. It says: "What if we had memories updating at 512, 2048, 8192 token intervals? What if those memories could generate their own learning targets? What if every component could adapt its own learning rate?"
+
+The illusion of deep learning architecture is thinking these are fundamentally different things. Attention versus MLPs versus optimizers. The reality of nested learning is seeing they're all the same thing: **associative memories compressing their context flow at different frequencies**.
+
+Transformers gave us two frequencies. HOPE gives us a spectrum. That's the bridge from short-term to long-term memory. Not one mechanism, but a cascade of memories operating at different speeds, each learning from the one before it, each capable of reminding the others of what they've forgotten.
+
+That's how you solve anterograde amnesia in neural networks. Not by building a single perfect memory, but by building a *hierarchy* of memories that naturally consolidate information across time scales.
+
+## How Far to Continual Learning Intelligence?
+
+How close does this get us to true continual learning? The honest answer is there's still a lot to explore.
+
+This is one direction and it's *orthogonal* to other approaches. We need more powerful optimizers for better memory management. We need sparse memory mechanisms. We need to understand continual learning from multiple aspects.
+
+But the beauty of nested learning is that it's composable. Better optimizers can plug into this framework. Sparse memory techniques can combine with it. Everything learned about long-context architectures applies to optimizers. Everything learned about optimizer momentum applies to architectural memory.
+
+The path forward isn't finding one silver bullet. It's building a toolkit of orthogonal techniques that can combine: nested learning, continuum memory systems, self-referential modules, better optimizer memory, sparse retrieval, and whatever else emerges from understanding the deep unity between architectures and optimizers.
+
+We're not at nirvana yet. But we've built a bridge, the first real mechanism for transferring information from the ephemeral to the persistent. And that's the part that was broken all along.
