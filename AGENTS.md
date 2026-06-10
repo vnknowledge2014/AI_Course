@@ -47,3 +47,9 @@ Trong đó <hành_động> thường là: `ingest`, `query`, `lint`, `initialize
 
 ---
 LLM hãy luôn tuân thủ nguyên tắc: **Con người ra lệnh và định hướng, LLM thực thi việc tóm tắt, tổng hợp, tạo link chéo và bảo trì wiki**.
+
+## 4. Hướng dẫn Đồng bộ Đa người dùng / Đa thiết bị (Git Sync)
+Để hệ thống LLM Wiki này hoạt động trơn tru trên nhiều máy khác nhau, Agent và Người dùng phải tuân thủ luồng làm việc sau:
+1. **Khi Clone sang máy mới:** Thư mục `repos/` trên GitHub chỉ chứa "gitlinks" (subprojects), KHÔNG chứa mã nguồn bên trong. Người dùng hoặc Agent phải chạy `python3 clone_repos.py` để tải toàn bộ mã nguồn về máy local trước khi làm việc.
+2. **Luôn Pull trước khi Ingest:** Trước khi chạy `auto_ingest.py` hoặc thêm log mới, luôn phải thực hiện `git pull --rebase` để đảm bảo file `wiki/log.md` và `wiki/index.md` lấy bản mới nhất, tránh conflict.
+3. **Đường dẫn tương đối (Relative Paths):** Các Agent khi sinh ra file markdown mới tuyệt đối KHÔNG ĐƯỢC dùng đường dẫn tuyệt đối (như `/Volumes/...` hoặc `C:\...`). Hãy luôn dùng đường dẫn tương đối (ví dụ: `../../repos/Tên_Repo`) để link vẫn hoạt động trên mọi thiết bị.

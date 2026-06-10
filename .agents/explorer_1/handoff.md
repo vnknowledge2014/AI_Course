@@ -4,7 +4,7 @@
 
 I executed directory listings (`list_dir`) and deep searches (`find_by_name`) on both directories. Additionally, I read the core manifest/outline files for each project (`view_file` on `AI_Course/resource.md` and `Rust/Rust_Books/book_outline.md`).
 
-**Directory 1: `/Volumes/Lexar/01_Projects/Personal_Projects/AI_Course`**
+**Directory 1: `./AI_Course`**
 - **Contents:** 
   - `resource.md` (8.1 KB) - A comprehensive markdown list of source URLs, YouTube videos, GitHub repositories, educational platforms, and articles related to AI, LLMs, and Agentic engineering.
   - `references/` - A directory containing cloned GitHub repositories (e.g., `LLMs-from-scratch`, `Agentic-Design-Patterns`) and saved articles (`.qmd` files scraped from K-A.in, TowardsDataScience, etc.).
@@ -12,7 +12,7 @@ I executed directory listings (`list_dir`) and deep searches (`find_by_name`) on
 - **Main Topics:** LLMs from scratch, Transformer architectures (ALiBi, RoPE, SwiGLU), Agentic Design Patterns, AI Engineering, PyTorch implementations, RAG, and AI Interview prep.
 - **Structure:** Unstructured aggregate resource repository. The entry point is `resource.md` which categorizes external resources, while the filesystem acts as a local cache for repositories and articles.
 
-**Directory 2: `/Volumes/Lexar/01_Projects/Personal_Projects/Rust`**
+**Directory 2: `../Rust`**
 - **Contents:**
   - `Origin/` - Contains original PDF/text books like "F# for Fun and Profit", "Domain Modeling Made Functional", and "Learn Go with Tests".
   - Multiple language-specific directories: `Rust_Books/`, `TypeScript_Books/`, `Roc_Books/`, `Zig_Books/`, `Gleam_Books/`, `Ocaml_Books/`, `Python_Books/`.
@@ -75,5 +75,5 @@ To accommodate both a Resource Collection and a Structured Curriculum, the JSON 
 ```
 
 ## 5. Verification Method
-- **To verify AI_Course:** Read `/Volumes/Lexar/01_Projects/Personal_Projects/AI_Course/resource.md` to confirm the categorization of links, and run `ls -R` on the `references` folder to see the cloned repos and articles.
-- **To verify Rust:** Read `/Volumes/Lexar/01_Projects/Personal_Projects/Rust/Rust_Books/book_outline.md` to confirm the 7-part curriculum structure, and check the subdirectories to see that they map exactly to this outline.
+- **To verify AI_Course:** Read `./AI_Course/resource.md` to confirm the categorization of links, and run `ls -R` on the `references` folder to see the cloned repos and articles.
+- **To verify Rust:** Read `../Rust/Rust_Books/book_outline.md` to confirm the 7-part curriculum structure, and check the subdirectories to see that they map exactly to this outline.
