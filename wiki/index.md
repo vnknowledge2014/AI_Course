@@ -29,6 +29,7 @@ Danh mục phân loại toàn bộ nội dung trong LLM Wiki.
 - [Repo: all-agentic-architectures](sources/Summary_all-agentic-architectures.md)
 - [Repo: build-your-own-openclaw](sources/Summary_build-your-own-openclaw.md)
 - [Repo: deepseek-from-scratch](sources/Summary_deepseek-from-scratch.md)
+- [Repo: easy-vibe](sources/Summary_easy-vibe.md)
 - [Repo: generative-ai-for-beginners](sources/Summary_generative-ai-for-beginners.md)
 - [Repo: hello-agents](sources/Summary_hello-agents.md)
 - [Repo: learn-harness-engineering](sources/Summary_learn-harness-engineering.md)

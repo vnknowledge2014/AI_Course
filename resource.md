@@ -19,6 +19,7 @@ This file contains a comprehensive list of source URLs, repositories, and educat
 *   **Hello Agents (Datawhale):** [https://github.com/datawhalechina/hello-agents](https://github.com/datawhalechina/hello-agents)
 *   **Adam Optimizer Implementation:** [https://github.com/theroyakash/Adam](https://github.com/theroyakash/Adam)
 *   **AI Agents from Scratch:** [https://github.com/pguso/ai-agents-from-scratch](https://github.com/pguso/ai-agents-from-scratch.git)
+*   **Easy Vibe:** [https://github.com/datawhalechina/easy-vibe](https://github.com/datawhalechina/easy-vibe.git)
 
 ### LLM & Transformer Implementations
 *   **LLMs from Scratch:** [https://github.com/rasbt/LLMs-from-scratch](https://github.com/rasbt/LLMs-from-scratch)
