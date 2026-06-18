@@ -1,8 +1,9 @@
-# Chapter 3C — Hardware, Compute & LeetGPU Basics
+# Chapter 3C — Hardware, Compute: LeetCPU & LeetGPU
 
 > **Bạn sẽ học được**:
 > - Phân cấp bộ nhớ: Từ Cache đến VRAM
 > - Sự khác biệt giữa môi trường Node.js/V8 và GPU Compute
+> - LeetCPU (SIMD, Branch Prediction)
 > - Tại sao GPU lại vô địch trong AI
 > - Memory Bandwidth Bound vs Compute Bound
 >
@@ -50,7 +51,19 @@ Mạng Nơ-ron AI, thực chất là một chuỗi các phép tính ma trận kh
 
 ---
 
-## 3C.5 — Compute Bound vs Memory Bound
+
+
+## 3C.4 — LeetCPU: Tối ưu hóa cực hạn trên CPU
+
+Mặc dù GPU thống trị AI, CPU vẫn đảm nhận khâu tiền xử lý dữ liệu (Data Preprocessing, Tokenization, RAG chunking). Nền tảng `LeetCPU` dạy ta cách vắt kiệt sức mạnh của CPU thông qua:
+
+1. **Vectorization (SIMD trên CPU)**: Thay vì cộng từng cặp số trong một mảng bằng vòng lặp `for`, các tập lệnh AVX-512 (Advanced Vector Extensions) cho phép CPU cộng 16 cặp số (32-bit) trong đúng 1 chu kỳ máy.
+2. **Branch Prediction (Dự đoán rẽ nhánh)**: CPU có một bộ phận chuyên đoán xem lệnh `if` sẽ rẽ đi đâu. Nếu đoán sai (Branch Misprediction), CPU phải vứt bỏ toàn bộ luồng xử lý và làm lại từ đầu. Kỹ thuật LeetCPU hướng dẫn ta hạn chế dùng `if/else` trong vòng lặp lớn (dùng bitwise operations thay thế).
+3. **Loop Unrolling**: Tự động mở cuộn vòng lặp để giảm bớt chi phí kiểm tra điều kiện nhảy (jump condition) của CPU.
+
+Để CPU chạy nhanh không kém GPU trong các tác vụ nhất định, bạn phải viết code sao cho trình biên dịch (Compiler) có thể tự động áp dụng các tối ưu này!
+
+## 3C.6 — Compute Bound vs Memory Bound
 
 Điều tối quan trọng khi triển khai LLM cho người dùng:
 

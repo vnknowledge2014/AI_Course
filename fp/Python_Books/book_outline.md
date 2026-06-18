@@ -20,7 +20,7 @@ Big-O: `list.append` O(1), `list.insert(0)` O(n), `dict` O(1). Recursion limit (
 ### Chapter 3B — Advanced Algorithms & LeetCode Patterns ✅
 Two Pointers, Sliding Window, DP, Graph Traversal. Functional approach to algorithms.
 
-### Chapter 3C — Hardware, Compute & LeetGPU Basics ✅
+### Chapter 3C — Hardware, Compute: LeetCPU & LeetGPU ✅
 Memory Hierarchy, CPU vs GPU, Tensor Cores, Memory Bandwidth vs Compute Bound. ✅
 Immutable: `tuple`, `frozenset`, `frozen=True`. `MappingProxyType`. `pyrsistent`: PVector, PMap. Graph: `dict[str, set[str]]`.
 

@@ -26,7 +26,7 @@ Big-O. `Array.push` O(1), `unshift` O(n). Recursion + HOFs. Binary search, memoi
 ### [Chapter 3B — Advanced Algorithms & LeetCode Patterns](part_0_cs_foundations/chapter_03b_leetcode_patterns.md) ✅
 Two Pointers, Sliding Window, DP, Graph Traversal in TypeScript.
 
-### [Chapter 3C — Hardware, Compute & LeetGPU Basics](part_0_cs_foundations/chapter_03c_hardware_leetgpu.md) ✅
+### [Chapter 3C — Hardware, Compute: LeetCPU & LeetGPU](part_0_cs_foundations/chapter_03c_hardware_leetgpu.md) ✅
 CPU Caches, Memory Hierarchy, V8 optimizations, GPU Compute concepts. ✅
 Immutable updates: spread `{...obj}` = O(n). **Immer** structural sharing. `immutable-js` HAMT. Graph: `Map<string, Set<string>>`.
 *731 lines · 38 code blocks · 27 assertions*
