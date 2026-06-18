@@ -3,7 +3,7 @@
 > Kết hợp: DDD Functional + FP Made Easier + Learn Go with Tests + F# Fun & Profit
 > Coverage: **~70%** FP/DDD · Full CS foundations included
 > Approach: Quick Primer → Foundations → Beginner → Intermediate → Advanced → Principal
-> Tổng: **46 chapters** (0–44 + 36B) + Appendices
+> Tổng: **49 chapters** (0–44 + 36B) + Appendices
 
 ---
 

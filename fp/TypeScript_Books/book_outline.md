@@ -21,7 +21,13 @@ Lambda Calculus: `(x) => x+1`. Curry-Howard. Discrete Math: Product (objects) = 
 Big-O. `Array.push` O(1), `unshift` O(n). Recursion + HOFs. Binary search, memoization. Sorting.
 *708 lines · 48 code blocks · 32 assertions*
 
-### [Chapter 3 — Functional Data Structures](part_0_cs_foundations/chapter_03_functional_data_structures.md) ✅
+### [Chapter 3 — Functional Data Structures](part_0_cs_foundations/chapter_03_functional_data_structures.md)
+
+### [Chapter 3B — Advanced Algorithms & LeetCode Patterns](part_0_cs_foundations/chapter_03b_leetcode_patterns.md) ✅
+Two Pointers, Sliding Window, DP, Graph Traversal in TypeScript.
+
+### [Chapter 3C — Hardware, Compute & LeetGPU Basics](part_0_cs_foundations/chapter_03c_hardware_leetgpu.md) ✅
+CPU Caches, Memory Hierarchy, V8 optimizations, GPU Compute concepts. ✅
 Immutable updates: spread `{...obj}` = O(n). **Immer** structural sharing. `immutable-js` HAMT. Graph: `Map<string, Set<string>>`.
 *731 lines · 38 code blocks · 27 assertions*
 

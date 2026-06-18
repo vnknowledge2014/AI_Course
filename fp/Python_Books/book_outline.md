@@ -3,7 +3,7 @@
 > Kết hợp: DDD Functional + FP Made Easier + Learn Go with Tests + F# Fun & Profit
 > Coverage: **~60%** FP/DDD · Full CS foundations included
 > Approach: Foundations → Beginner → Intermediate → Advanced → Principal
-> Tổng: **39 chapters** + Appendices
+> Tổng: **42 chapters** + Appendices
 
 ---
 
@@ -15,7 +15,13 @@ Lambda Calculus: `lambda x: x+1`. Curry-Howard (relaxed). Discrete Math. Algebra
 ### Chapter 2 — Algorithmic Thinking & Complexity ✅
 Big-O: `list.append` O(1), `list.insert(0)` O(n), `dict` O(1). Recursion limit (`sys.setrecursionlimit`). `@lru_cache`. Sorting: Timsort.
 
-### Chapter 3 — Functional Data Structures ✅
+### Chapter 3 — Functional Data Structures
+
+### Chapter 3B — Advanced Algorithms & LeetCode Patterns ✅
+Two Pointers, Sliding Window, DP, Graph Traversal. Functional approach to algorithms.
+
+### Chapter 3C — Hardware, Compute & LeetGPU Basics ✅
+Memory Hierarchy, CPU vs GPU, Tensor Cores, Memory Bandwidth vs Compute Bound. ✅
 Immutable: `tuple`, `frozenset`, `frozen=True`. `MappingProxyType`. `pyrsistent`: PVector, PMap. Graph: `dict[str, set[str]]`.
 
 ---
@@ -153,7 +159,10 @@ Frozen dataclasses domain, `returns.Result` pipelines, Pydantic DTOs, CQRS.
 ### Chapter 38 — System Design Thinking ✅
 **Capacity estimation**. **Load balancing**: Nginx, Gunicorn workers. **Caching**: CDN, Redis, `@lru_cache`. **API design**: REST (FastAPI) vs gRPC (`grpcio`) vs GraphQL (`strawberry`). **Microservices**: monolith-first. **ASGI servers**: Uvicorn, Hypercorn. **Serverless**: AWS Lambda, Vercel. **Design exercises**: URL shortener, chat, rate limiter.
 
-### Chapter 39 — Capstone Part 2: Production Deployment ⭐ ✅
+### Chapter 39 — AI System Design & Infrastructure ✅
+LLM Inference, vLLM, RAG System Design, Vector DB Scaling, Agent Orchestration.
+
+### Chapter 40 — Capstone Part 2: Production Deployment ⭐ ✅
 FastAPI + PostgreSQL (SQLAlchemy), Redis cache, JWT auth, CORS, rate limiting, `structlog`, Docker + docker-compose, CI/CD (GitHub Actions), Fly.io/Railway deployment.
 
 ---
