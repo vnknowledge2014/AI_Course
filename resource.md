@@ -20,6 +20,8 @@ This file contains a comprehensive list of source URLs, repositories, and educat
 *   **Adam Optimizer Implementation:** [https://github.com/theroyakash/Adam](https://github.com/theroyakash/Adam)
 *   **AI Agents from Scratch:** [https://github.com/pguso/ai-agents-from-scratch](https://github.com/pguso/ai-agents-from-scratch.git)
 *   **Easy Vibe:** [https://github.com/datawhalechina/easy-vibe](https://github.com/datawhalechina/easy-vibe.git)
+*   **Agent from Scratch (hexo-ai):** [https://github.com/hexo-ai/agent-from-scratch](https://github.com/hexo-ai/agent-from-scratch.git)
+*   **Designing Multiagent Systems:** [https://github.com/victordibia/designing-multiagent-systems](https://github.com/victordibia/designing-multiagent-systems.git)
 
 ### LLM & Transformer Implementations
 *   **LLMs from Scratch:** [https://github.com/rasbt/LLMs-from-scratch](https://github.com/rasbt/LLMs-from-scratch)
@@ -40,6 +42,7 @@ This file contains a comprehensive list of source URLs, repositories, and educat
 *   **Math/CS/AI Compendium:** [https://github.com/HenryNdubuaku/maths-cs-ai-compendium](https://github.com/HenryNdubuaku/maths-cs-ai-compendium)
 *   **LeetCode Patterns:** [https://github.com/seanprashad/leetcode-patterns](https://github.com/seanprashad/leetcode-patterns.git)
 *   **Prompt Engineering Interactive Tutorial (Anthropic):** [https://github.com/anthropics/prompt-eng-interactive-tutorial](https://github.com/anthropics/prompt-eng-interactive-tutorial.git)
+*   **Ultimate AI Engineer Roadmap 2026:** [https://github.com/PrinceSinghhub/Ultimate-AI-Engineer-Roadmap-2026](https://github.com/PrinceSinghhub/Ultimate-AI-Engineer-Roadmap-2026.git)
 
 ### Microsoft "For Beginners" Series
 *   **AI for Beginners:** [https://github.com/microsoft/AI-For-Beginners](https://github.com/microsoft/AI-For-Beginners)
