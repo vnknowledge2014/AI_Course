@@ -165,5 +165,26 @@ function bfs(graph: Graph, startNode: number, target: number): boolean {
 - [x] **Dynamic Programming**: Tối ưu bài toán tối ưu hóa, nhớ dùng Tabulation để tránh Stack Overflow.
 - [x] **Graphs**: Tránh object trỏ vòng tròn phức tạp. Sử dụng Adjacency List (mảng ID) thân thiện với bộ nhớ và dễ serialize.
 
+## 3B.5 — Lộ trình luyện tập với NeetCode
+
+Để thành thạo các pattern trên, thực hành là điều bắt buộc. Chúng tôi khuyến nghị bạn theo sát lộ trình **NeetCode 150** (danh sách 150 bài toán LeetCode thiết yếu) để tối ưu hóa thời gian học. 
+
+Dưới đây là các phân nhóm quan trọng nhất đối với AI Engineer:
+
+1. **Arrays, Hashing & Two Pointers**: 
+   - Bài toán tiêu biểu: *Two Sum (Easy)*, *Valid Anagram (Easy)*, *3Sum (Medium)*, *Container With Most Water (Medium)*.
+   - Ứng dụng: Xử lý mảng token, tính toán chỉ số độ tương đồng văn bản, thao tác string chunking.
+2. **Sliding Window**:
+   - Bài toán tiêu biểu: *Best Time to Buy And Sell Stock (Easy)*, *Longest Substring Without Repeating Characters (Medium)*.
+   - Ứng dụng: Duyệt cửa sổ trạng thái, xử lý chuỗi streaming.
+3. **1-D & 2-D Dynamic Programming**:
+   - Bài toán tiêu biểu: *Climbing Stairs (Easy)*, *House Robber (Medium)*, *Longest Common Subsequence (Medium)*.
+   - Ứng dụng: Giải các bài toán tối ưu (Optimization problems), sequence alignment trong DNA hoặc đối chiếu text (RAG).
+4. **Graphs & Trees**:
+   - Bài toán tiêu biểu: *Number of Islands (Medium)*, *Clone Graph (Medium)*, *Lowest Common Ancestor (Medium)*.
+   - Ứng dụng: Knowledge Graph, cây quyết định (Decision Trees), luồng duyệt AST (Abstract Syntax Trees).
+
+---
+
 ## Tiếp theo
 Tiếp theo ở Chapter 3C, chúng ta sẽ tạm gác lại phần mềm để nhìn vào nền tảng vật lý: Hardware, Memory Hierarchy và sức mạnh của GPU. Tại sao JS/NodeJS không phải là ngôn ngữ lý tưởng cho tính toán AI lõi, nhưng lại tuyệt vời ở tầng điều phối?

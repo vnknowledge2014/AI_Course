@@ -1,573 +1,172 @@
 # Chapter 39 — Advanced Data Patterns
 
 > **Bạn sẽ học được**:
-> - **Migrations**: schema versioning, zero-downtime strategies
-> - **CQRS persistence**: separate read/write databases
-> - **Event Store**: append-only table, snapshots, replay
-> - **NoSQL khi nào**: Document, Key-Value, Column, Graph
-> - **Caching**: read-through, write-through, invalidation
-> - **Redis patterns**: cache, pub/sub, rate limiting
+> - **Zero-downtime Migrations**: Nâng cấp Database không làm sập hệ thống.
+> - **CQRS**: Tách biệt hoàn toàn Database Đọc và Ghi.
+> - **Event Sourcing**: Lưu trữ mọi thay đổi (Append-only) thay vì ghi đè.
+> - **Caching Patterns**: Các chiến lược Read-Through, Write-Through.
+> - **NoSQL vs SQL**: Khi nào dùng Redis, MongoDB, hay ScyllaDB?
 >
 > **Yêu cầu trước**: Chapter 19 (CQRS/ES), Chapter 38 (Database).
 > **Thời gian đọc**: ~45 phút | **Level**: Principal
-> **Kết quả cuối cùng**: Bạn chọn đúng data pattern cho từng bài toán.
+> **Kết quả cuối cùng**: Nắm vững các pattern thiết kế Dữ liệu cấp độ Production, vượt xa khỏi các ứng dụng CRUD thông thường.
 
 ---
 
-## Advanced Data Patterns — Vượt qua CRUD
+Hầu hết các khóa học chỉ dạy bạn CRUD (Create, Read, Update, Delete). Đó là bước đầu tiên. 
+Nhưng ở môi trường Production với hàng triệu users, CRUD là không đủ. Làm sao nâng cấp schema DB mà không dừng Server? Làm sao xử lý khi lượng request ĐỌC gấp 100 lần request GHI? Làm sao khôi phục lại trạng thái giỏ hàng của user vào 2 ngày trước? 
 
-Hầu hết tutorials dạy bạn CRUD — Create, Read, Update, Delete. Đó là bước đầu, nhưng production systems cần nhiều hơn: migrations, CQRS (tách read/write), event sourcing, caching layers, NoSQL khi SQL không đủ.
+Chương này sẽ trang bị cho bạn tư duy thiết kế Dữ liệu (Data Design) của một Principal Engineer.
 
-Chapter này trang bị cho bạn toolkit xử lý data ở mức production: từ schema migrations an toàn đến caching strategies giảm load database 10-100x.
+## 39.1 — Schema Migrations & Zero Downtime
 
----
-
-Ch38 dạy SQL fundamentals. Chapter này đi xa hơn — vào lãnh thổ mà production systems thực sự cần.
-
-**Schema migrations**: database thay đổi theo thời gian. Thêm column, rename table, split data — tất cả cần migration scripts an toàn, reversible, và tracked trong version control.
-
-**CQRS persistence**: khi read patterns khác write patterns (100:1 read/write ratio phổ biến), bạn tách read store và write store để optimize riêng.
-
-**Caching**: database query mất 10-100ms. Redis cache query mất 0.1ms. Caching layers giảm load database 10-100x — nhưng cache invalidation là "one of the two hard things in computer science" (Phil Karlton). Chapter này dạy bạn strategies: cache-aside, write-through, TTL.
-
-**NoSQL**: khi relational model không phù hợp — document stores (MongoDB), key-value stores (Redis), time-series — bạn cần biết khi nào chọn gì.
-
-## 39.1 — Migrations: Schema Versioning
-
-### Tại sao cần migrations
-
-```
-Dev:    CREATE TABLE users (id, name, email)
-V2:     ALTER TABLE users ADD COLUMN avatar_url
-V3:     CREATE TABLE orders (...)
-V4:     ALTER TABLE users ADD COLUMN role DEFAULT 'user'
-
-PROBLEM: Làm sao đảm bảo MỌI environment (dev, staging, prod)
-         có CÙNG schema?
-ANSWER:  Migrations = ordered, versioned SQL scripts
-```
-
-### Migration files
-
-```
-migrations/
-├── 001_create_users.sql
-├── 002_create_products.sql
-├── 003_create_orders.sql
-├── 004_add_user_avatar.sql
-└── 005_add_user_role.sql
-```
+Ở môi trường Dev, nếu bạn muốn thêm cột, bạn có thể dễ dàng xóa bảng và tạo lại (`DROP TABLE`). Ở Production, làm vậy đồng nghĩa với đuổi việc.
+**Migrations** là tập hợp các file SQL được đánh số thứ tự, diễn tả sự thay đổi của Database theo thời gian.
 
 ```sql
 -- migrations/001_create_users.sql
-CREATE TABLE users (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
+CREATE TABLE users (id SERIAL PRIMARY KEY, name VARCHAR);
 
--- migrations/004_add_user_avatar.sql
-ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500);
-
--- migrations/005_add_user_role.sql
-ALTER TABLE users ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'user';
-CREATE INDEX idx_users_role ON users(role);
+-- migrations/002_add_avatar.sql
+ALTER TABLE users ADD COLUMN avatar_url VARCHAR;
 ```
 
-### Zero-downtime migration strategies
+### Chiến lược Zero-downtime (Không sập mạng khi update)
 
-| Chiến lược | Cách làm | Khi nào |
-|----------|-----|---------|
-| **Thêm cột** | `ALTER TABLE ADD COLUMN` (nullable/default) | Thêm field mới ✅ |
-| **Đổi tên cột** | Thêm mới → copy data → xóa cũ (3 bước!) | Đổi tên ⚠️ |
-| **Xóa cột** | Deploy code bỏ dùng → rồi mới drop column | Xóa field |
-| **Thêm index** | `CREATE INDEX CONCURRENTLY` | Tránh lock table |
-| **Đổi kiểu** | Thêm cột mới → migrate data → swap | Thay đổi type |
+Khi bạn gõ lệnh `ALTER TABLE users DROP COLUMN phone;`, database sẽ bị khóa (Lock) và toàn bộ Server sập ngay lập tức. Hãy áp dụng **Backward-Compatible Transitions** (Chuyển đổi tương thích ngược).
 
-> **💡 Rule**: Thêm = safe. Xóa/đổi = multi-step. **Luôn backward-compatible** trong transition period.
+Ví dụ: Đổi tên cột từ `name` sang `full_name`.
+1. **Tuyệt đối KHÔNG gõ `ALTER TABLE users RENAME COLUMN name TO full_name;`** (Sập Server vì app cũ chưa cập nhật kịp sẽ báo lỗi cột name bị mất).
+2. **Bước 1**: Thêm cột `full_name` mới (`ALTER TABLE ADD COLUMN`).
+3. **Bước 2**: Sửa code App để ghi vào CẢ 2 cột (Dual write). Deploy App mới.
+4. **Bước 3**: Chạy script Copy dữ liệu cũ từ `name` sang `full_name`.
+5. **Bước 4**: Sửa code App chỉ đọc/ghi `full_name`. Deploy.
+6. **Bước 5**: Xóa cột `name` cũ (`ALTER TABLE DROP COLUMN`). 
+
+Nghe có vẻ dài dòng? Đúng vậy. Nhưng đó là cách DUY NHẤT để hệ thống tỷ đô sống sót. Thêm (Add) luôn an toàn. Sửa/Xóa (Modify/Delete) phải làm nhiều bước.
 
 ---
 
-## 39.2 — CQRS Persistence
+## 39.2 — CQRS: Chia rẽ để trị
 
-### Tách Read và Write Databases
+Trong 90% hệ thống, lượng ĐỌC (Query) gấp 10-100 lần lượng GHI (Command). Cấu trúc bảng tối ưu cho Ghi (Chuẩn hóa thứ 3 - 3NF) lại cực kỳ chậm cho Đọc (Phải JOIN chằng chịt).
 
-```
-                    ┌──────────────┐
-   Commands ───────▶│ Write DB     │──── Events ────▶ Projections
-   (INSERT/UPDATE)  │ (PostgreSQL) │                      │
-                    └──────────────┘                      ▼
-                                                   ┌──────────┐
-   Queries ────────────────────────────────────────▶│ Read DB   │
-   (SELECT)                                        │ (denorm)  │
-                                                   └──────────┘
-```
+**CQRS (Command Query Responsibility Segregation)** giải quyết bằng cách: Cắt đôi Database!
 
-### Write side: normalized, consistent
-
-```sql
--- Write database: normalized, ACID
-CREATE TABLE accounts (
-    id BIGSERIAL PRIMARY KEY,
-    owner_id BIGINT NOT NULL REFERENCES users(id),
-    balance BIGINT NOT NULL DEFAULT 0 CHECK (balance >= 0),
-    currency VARCHAR(3) NOT NULL DEFAULT 'VND'
-);
-
-CREATE TABLE transactions (
-    id BIGSERIAL PRIMARY KEY,
-    from_account BIGINT REFERENCES accounts(id),
-    to_account BIGINT REFERENCES accounts(id),
-    amount BIGINT NOT NULL CHECK (amount > 0),
-    type VARCHAR(20) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-```
-
-### Read side: denormalized, fast
-
-```sql
--- Read database: denormalized for queries
-CREATE TABLE account_summaries (
-    account_id BIGINT PRIMARY KEY,
-    owner_name VARCHAR(100),
-    owner_email VARCHAR(255),
-    balance BIGINT,
-    currency VARCHAR(3),
-    transaction_count INTEGER,
-    last_transaction_at TIMESTAMP
-);
-
--- Projection: rebuild from events/transactions
--- UPDATE account_summaries SET ... after each transaction
-```
-
-### Rust implementation sketch
+1. **Write DB (PostgreSQL)**: Tối ưu cho Ghi. Các bảng được chuẩn hóa chặt chẽ (ACID).
+2. **Read DB (Elasticsearch / Redis / Materialized View)**: Tối ưu cho Đọc. Dữ liệu được gộp sẵn (Denormalized) thành 1 cục JSON, client gọi phát ăn ngay không cần JOIN.
 
 ```rust
-// filename: src/main.rs
-
-// ═══ CQRS: separate command and query models ═══
-
-// Command side
+// Rust implementation sketch cho CQRS
 trait AccountCommands {
+    // Chỉ nhận lệnh cập nhật (Mutation), không trả về dữ liệu (trừ Ok/Err)
     fn deposit(&mut self, account_id: u64, amount: u64) -> Result<(), String>;
-    fn withdraw(&mut self, account_id: u64, amount: u64) -> Result<(), String>;
     fn transfer(&mut self, from: u64, to: u64, amount: u64) -> Result<(), String>;
 }
 
-// Query side (different model, optimized for reads)
 trait AccountQueries {
+    // Chỉ lấy dữ liệu (Read-only), tuyệt đối không sửa state
     fn get_summary(&self, account_id: u64) -> Option<AccountSummary>;
-    fn get_top_accounts(&self, limit: usize) -> Vec<AccountSummary>;
     fn get_monthly_report(&self, year: u32, month: u32) -> MonthlyReport;
 }
-
-#[derive(Debug)]
-struct AccountSummary {
-    account_id: u64,
-    owner: String,
-    balance: i64,
-    transaction_count: u32,
-}
-
-#[derive(Debug)]
-struct MonthlyReport {
-    total_deposits: u64,
-    total_withdrawals: u64,
-    active_accounts: u32,
-}
-
-fn main() {
-    println!("CQRS: Commands (write, normalized) vs Queries (read, denormalized)");
-    println!("Write DB: PostgreSQL (ACID, consistent)");
-    println!("Read DB: Materialized views or separate store (fast queries)");
-}
 ```
+
+Vấn đề duy nhất của CQRS là **Eventual Consistency** (Nhất quán trễ). Khi Write DB cập nhật xong, phải mất 1-2 giây để đồng bộ (sync) sang Read DB. Người dùng vừa đổi Tên, F5 lại vẫn thấy Tên cũ. Bạn cần thiết kế UX khéo léo để che giấu sự delay này.
 
 ---
 
-## 39.3 — Event Store
+## 39.3 — Event Sourcing: Cỗ máy thời gian
 
-### Append-only event log
+Các hệ thống CRUD truyền thống mang bản chất **Destructive Update** (Ghi đè phá hủy). Khi số dư tài khoản đổi từ 10$ sang 50$, con số 10$ biến mất VĨNH VIỄN. Nếu có lỗi xảy ra, bạn không biết tại sao tài khoản lại có 50$.
+
+**Event Sourcing** thay đổi hoàn toàn tư duy: ĐỪNG lưu trạng thái cuối cùng. Hãy lưu **TOÀN BỘ SỰ KIỆN** (Events) đã xảy ra dưới dạng Append-Only (Chỉ thêm vào cuối).
 
 ```sql
--- Event Store: append-only, immutable
+-- Thay vì bảng `accounts` có cột `balance`
 CREATE TABLE events (
-    id          BIGSERIAL PRIMARY KEY,
-    stream_id   VARCHAR(100) NOT NULL,  -- e.g. "order-123"
-    event_type  VARCHAR(100) NOT NULL,  -- e.g. "OrderPlaced"
-    data        JSONB NOT NULL,
-    metadata    JSONB DEFAULT '{}',
-    version     INTEGER NOT NULL,
-    created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
-    UNIQUE(stream_id, version)
-);
-
-CREATE INDEX idx_events_stream ON events(stream_id, version);
-
--- Snapshots: periodic state capture (optimization)
-CREATE TABLE snapshots (
-    stream_id   VARCHAR(100) PRIMARY KEY,
-    state       JSONB NOT NULL,
-    version     INTEGER NOT NULL,
-    created_at  TIMESTAMP NOT NULL DEFAULT NOW()
+    stream_id VARCHAR(100),  -- Ví dụ: "acc_123"
+    event_type VARCHAR(50),  -- Ví dụ: "MoneyDeposited"
+    data JSONB,              -- Ví dụ: {"amount": 40}
+    created_at TIMESTAMP
 );
 ```
 
-### Rust Event Store
+Để biết số dư hiện tại của `acc_123`, hệ thống sẽ lấy tất cả Events của `acc_123` và **Replay** (Chiếu lại từ đầu).
+`0$ (Khởi tạo) + 10$ (Deposit) + 40$ (Deposit) = 50$`.
+
+Trong Rust, Fold (Reduce) là công cụ hoàn hảo để tính toán Event Sourcing:
 
 ```rust
-// filename: src/main.rs
-
-use serde::{Serialize, Deserialize};
-use std::collections::HashMap;
-
-// ═══ Events ═══
-#[derive(Debug, Clone, Serialize, Deserialize)]
-enum OrderEvent {
-    OrderPlaced { order_id: String, customer: String, items: Vec<(String, u32)> },
-    OrderConfirmed { order_id: String, total: u64 },
-    OrderShipped { order_id: String, tracking: String },
-    OrderCancelled { order_id: String, reason: String },
+enum AccountEvent {
+    Created { id: String },
+    Deposited { amount: u32 },
+    Withdrawn { amount: u32 },
 }
 
-// ═══ Event Store ═══
-#[derive(Debug)]
-struct StoredEvent {
-    stream_id: String,
-    event_type: String,
-    data: String, // JSON
-    version: u32,
+#[derive(Default, Debug)]
+struct AccountState {
+    balance: u32,
 }
 
-struct InMemoryEventStore {
-    events: Vec<StoredEvent>,
-}
-
-impl InMemoryEventStore {
-    fn new() -> Self { InMemoryEventStore { events: vec![] } }
-
-    fn append(&mut self, stream_id: &str, event: &OrderEvent) {
-        let version = self.events.iter()
-            .filter(|e| e.stream_id == stream_id)
-            .count() as u32 + 1;
-
-        let event_type = match event {
-            OrderEvent::OrderPlaced { .. } => "OrderPlaced",
-            OrderEvent::OrderConfirmed { .. } => "OrderConfirmed",
-            OrderEvent::OrderShipped { .. } => "OrderShipped",
-            OrderEvent::OrderCancelled { .. } => "OrderCancelled",
-        };
-
-        self.events.push(StoredEvent {
-            stream_id: stream_id.into(),
-            event_type: event_type.into(),
-            data: serde_json::to_string(event).unwrap(),
-            version,
-        });
-    }
-
-    fn get_stream(&self, stream_id: &str) -> Vec<&StoredEvent> {
-        self.events.iter()
-            .filter(|e| e.stream_id == stream_id)
-            .collect()
+// Pure function: (State, Event) -> NewState
+fn apply_event(state: AccountState, event: &AccountEvent) -> AccountState {
+    match event {
+        AccountEvent::Created { .. } => state,
+        AccountEvent::Deposited { amount } => AccountState { balance: state.balance + amount },
+        AccountEvent::Withdrawn { amount } => AccountState { balance: state.balance - amount },
     }
 }
 
-// ═══ Rebuild state from events ═══
-#[derive(Debug, Default)]
-struct OrderState {
-    order_id: String,
-    customer: String,
-    items: Vec<(String, u32)>,
-    total: u64,
-    status: String,
-    tracking: Option<String>,
-}
-
-fn rebuild_order(events: &[&StoredEvent]) -> OrderState {
-    let mut state = OrderState::default();
-
-    for stored in events {
-        let event: OrderEvent = serde_json::from_str(&stored.data).unwrap();
-        match event {
-            OrderEvent::OrderPlaced { order_id, customer, items } => {
-                state.order_id = order_id;
-                state.customer = customer;
-                state.items = items;
-                state.status = "placed".into();
-            }
-            OrderEvent::OrderConfirmed { total, .. } => {
-                state.total = total;
-                state.status = "confirmed".into();
-            }
-            OrderEvent::OrderShipped { tracking, .. } => {
-                state.tracking = Some(tracking);
-                state.status = "shipped".into();
-            }
-            OrderEvent::OrderCancelled { .. } => {
-                state.status = "cancelled".into();
-            }
-        }
-    }
-
-    state
-}
-
-fn main() {
-    let mut store = InMemoryEventStore::new();
-
-    // Record events
-    store.append("order-1", &OrderEvent::OrderPlaced {
-        order_id: "order-1".into(), customer: "Minh".into(),
-        items: vec![("Coffee".into(), 2), ("Tea".into(), 1)],
-    });
-    store.append("order-1", &OrderEvent::OrderConfirmed {
-        order_id: "order-1".into(), total: 215_000,
-    });
-    store.append("order-1", &OrderEvent::OrderShipped {
-        order_id: "order-1".into(), tracking: "VN123456".into(),
-    });
-
-    // Rebuild current state
-    let events = store.get_stream("order-1");
-    let state = rebuild_order(&events);
-    println!("Order state: {:?}", state);
-    println!("Events count: {}", events.len());
+// Lấy danh sách events từ DB và tính toán
+fn rebuild_state(events: &[AccountEvent]) -> AccountState {
+    events.iter().fold(AccountState::default(), |state, event| apply_event(state, event))
 }
 ```
+
+Nhờ Event Sourcing, ngân hàng có thể biết chính xác số dư của bạn vào lúc 2h chiều ngày 1/1/2023 bằng cách chỉ Replay các event trước thời điểm đó.
 
 ---
 
-## 39.4 — NoSQL: Khi nào dùng
+## 39.4 — Caching Patterns
 
-Không phải bài toán nào cũng cần bảng quan hệ. Khi dữ liệu lồng nhau phức tạp (document), cần tốc độ cực nhanh (key-value), ghi liên tục hàng triệu dòng/giây (column), hoặc quan hệ chằng chịt (graph) — SQL truyền thống không phải lựa chọn tối ưu. Bảng dưới giúp bạn chọn đúng công cụ:
+Để tối ưu hóa Đọc, Cache là vũ khí mạnh nhất. Có 3 chiến lược chính:
 
-| Loại | Engine | Tốt cho | Không phù hợp khi |
-|------|--------|---------|---------|
-| **Document** | MongoDB | Schema linh hoạt, data lồng nhau | Cần JOIN phức tạp |
-| **Key-Value** | Redis | Cache, sessions, counters | Query phức tạp |
-| **Column** | ScyllaDB, Cassandra | Time-series, ghi nhiều | Query ad-hoc |
-| **Graph** | Neo4j | Quan hệ (social, recommendation) | Data dạng bảng |
-| **Relational** | PostgreSQL | Đa năng, ACID, JOIN | Ghi cực lớn (extreme scale) |
+### 1. Read-Through (Phổ biến nhất)
+App kiểm tra Cache (Redis). Nếu CÓ (Hit) -> Trả về ngay. Nếu KHÔNG (Miss) -> App chọc vào DB -> Lưu vào Cache -> Trả về.
+- *Ưu điểm*: Đơn giản, logic nằm hết ở App.
+- *Lỗi hay gặp*: **Cache Stampede** (Hàng ngàn user cùng Miss cache 1 lúc, lao vào DB làm sập DB).
 
-### Hướng dẫn chọn nhanh
+### 2. Write-Through
+Mỗi khi App ghi dữ liệu vào DB, App đồng bộ ghi luôn vào Cache. 
+- *Ưu điểm*: Cache LUÔN MỚI. Gần như không bao giờ có Cache Miss.
+- *Nhược điểm*: Ghi chậm hơn (Phải ghi 2 nơi).
 
-```
-Cần ACID + complex queries?        → PostgreSQL
-Cần cache + real-time?             → Redis
-Schema thay đổi liên tục?          → MongoDB
-Write-heavy time-series?           → ScyllaDB
-Complex relationships?             → Neo4j
-Default choice (khi chưa biết)?    → PostgreSQL ✅
-```
+### 3. Write-Behind (Dùng cho Ghi số lượng khủng)
+Thay vì ghi thẳng vào DB, App chỉ ghi vào Cache/Memory. Sau đó có 1 background job sẽ gom (batch) hàng ngàn record từ Cache ghi xuống DB 1 lần.
+- *Ưu điểm*: Tốc độ Ghi khủng khiếp (Phù hợp đếm lượt View Youtube, đếm Like).
+- *Nhược điểm*: Nếu Redis sập, dữ liệu chưa kịp flush xuống DB sẽ mất sạch!
 
 ---
 
-## 39.5 — Caching Patterns
+## 39.5 — Quyết định NoSQL
 
-### Read-through cache
+Đừng dùng MongoDB chỉ vì "Viết JSON cho nhanh". Mặc định, **LUÔN BẮT ĐẦU VỚI POSTGRESQL**. Chỉ dùng NoSQL khi SQL thực sự bộc lộ giới hạn:
 
-```rust
-// filename: src/main.rs
-
-use std::collections::HashMap;
-use std::time::{Duration, Instant};
-
-struct CacheEntry<T> {
-    value: T,
-    expires_at: Instant,
-}
-
-struct Cache<T: Clone> {
-    entries: HashMap<String, CacheEntry<T>>,
-    ttl: Duration,
-}
-
-impl<T: Clone> Cache<T> {
-    fn new(ttl_secs: u64) -> Self {
-        Cache { entries: HashMap::new(), ttl: Duration::from_secs(ttl_secs) }
-    }
-
-    fn get(&self, key: &str) -> Option<T> {
-        self.entries.get(key).and_then(|entry| {
-            if Instant::now() < entry.expires_at {
-                Some(entry.value.clone())
-            } else {
-                None // expired
-            }
-        })
-    }
-
-    fn set(&mut self, key: String, value: T) {
-        self.entries.insert(key, CacheEntry {
-            value,
-            expires_at: Instant::now() + self.ttl,
-        });
-    }
-}
-
-// Read-through pattern
-fn get_product(cache: &mut Cache<Product>, db: &Database, id: u64) -> Option<Product> {
-    let key = format!("product:{}", id);
-
-    // 1. Check cache
-    if let Some(product) = cache.get(&key) {
-        println!("  Cache HIT: {}", key);
-        return Some(product);
-    }
-
-    // 2. Cache miss → query DB
-    println!("  Cache MISS: {}", key);
-    if let Some(product) = db.find_product(id) {
-        cache.set(key, product.clone());
-        Some(product)
-    } else {
-        None
-    }
-}
-
-#[derive(Debug, Clone)]
-struct Product { id: u64, name: String, price: u32 }
-
-struct Database {
-    products: HashMap<u64, Product>,
-}
-
-impl Database {
-    fn find_product(&self, id: u64) -> Option<Product> {
-        self.products.get(&id).cloned()
-    }
-}
-
-fn main() {
-    let mut cache = Cache::new(300); // 5 min TTL
-    let mut db_products = HashMap::new();
-    db_products.insert(1, Product { id: 1, name: "Coffee".into(), price: 85_000 });
-    let db = Database { products: db_products };
-
-    println!("First call (miss):");
-    let _ = get_product(&mut cache, &db, 1);
-
-    println!("Second call (hit):");
-    let _ = get_product(&mut cache, &db, 1);
-
-    println!("Not found:");
-    let _ = get_product(&mut cache, &db, 99);
-}
-```
-
-### Caching strategies
-
-| Chiến lược | Cách hoạt động | Dùng khi |
-|----------|-----|----------|
-| **Read-through** | Cache miss → đọc từ DB → lưu cache | Phổ biến nhất ✅ |
-| **Write-through** | Ghi cache + DB cùng lúc | Ưu tiên nhất quán |
-| **Write-behind** | Ghi cache → flush async xuống DB | Ưu tiên hiệu năng |
-| **Cache-aside** | App tự quản lý cache | Cần kiểm soát chi tiết |
-
-### Cache invalidation
-
-```
-"There are only two hard things in CS:
- cache invalidation and naming things."
-
-Strategies:
-1. TTL (Time-To-Live)          — simplest, eventual consistency
-2. Event-based invalidation    — on write, invalidate related keys
-3. Version tags                — cache key includes version number
-```
-
----
-
-## 🏋️ Bài tập
-
-**Bài 1** (5 phút): Lên kế hoạch migration
-
-Bạn cần thêm `phone` column vào `users` table (production, 1M rows). Describe migration strategy.
-
-<details><summary>✅ Lời giải</summary>
-
-```sql
--- Step 1: Add nullable column (no lock, instant)
-ALTER TABLE users ADD COLUMN phone VARCHAR(20);
-
--- Step 2: Deploy code that writes phone (optional for now)
--- Step 3: Backfill existing rows (batched!)
--- UPDATE users SET phone = '' WHERE phone IS NULL LIMIT 10000;
-
--- Step 4 (optional): Add NOT NULL after backfill
--- ALTER TABLE users ALTER COLUMN phone SET NOT NULL DEFAULT '';
-```
-Key: nullable first → backfill → then add constraint. Never add NOT NULL column without default on large tables.
-
-</details>
-
----
-
-**Bài 2** (10 phút): Thiết kế Event Store
-
-Design event store cho `ShoppingCart`:
-- Events: `ItemAdded`, `ItemRemoved`, `QuantityChanged`, `CartCleared`
-- Write `rebuild_cart(events) -> CartState`
-
-<details><summary>✅ Lời giải Bài 2</summary>
-
-```rust
-enum CartEvent {
-    ItemAdded { product_id: u64, name: String, price: u32, qty: u32 },
-    ItemRemoved { product_id: u64 },
-    QuantityChanged { product_id: u64, new_qty: u32 },
-    CartCleared,
-}
-
-struct CartItem { product_id: u64, name: String, price: u32, qty: u32 }
-struct CartState { items: HashMap<u64, CartItem>, total: u64 }
-
-fn rebuild_cart(events: &[CartEvent]) -> CartState {
-    let mut items = HashMap::new();
-    for event in events {
-        match event {
-            CartEvent::ItemAdded { product_id, name, price, qty } => {
-                items.insert(*product_id, CartItem { product_id: *product_id, name: name.clone(), price: *price, qty: *qty });
-            }
-            CartEvent::ItemRemoved { product_id } => { items.remove(product_id); }
-            CartEvent::QuantityChanged { product_id, new_qty } => {
-                if let Some(item) = items.get_mut(product_id) { item.qty = *new_qty; }
-            }
-            CartEvent::CartCleared => { items.clear(); }
-        }
-    }
-    let total = items.values().map(|i| i.price as u64 * i.qty as u64).sum();
-    CartState { items, total }
-}
-```
-
-</details>
-
----
-
-## 🔧 Troubleshooting
-
-| Vấn đề | Nguyên nhân | Giải pháp |
-|---------|-------------|-----------|
-| "Migration khóa bảng" | ALTER TABLE trên bảng lớn | `ADD COLUMN` nullable, `CREATE INDEX CONCURRENTLY` |
-| "Event store phình to" | Không dọn dẹp | Snapshots + archive events cũ |
-| "Cache stampede" | Nhiều thread miss cache cùng lúc | Lock per key, hoặc refresh sớm xác suất |
-| "Cache cũ" | TTL quá dài | Invalidation dựa trên event |
-
----
+| Hệ quản trị | Loại NoSQL | Khi nào nên dùng? | Khi nào KHÔNG dùng? |
+|-------------|-------------|-------------------|---------------------|
+| **Redis** | Key-Value | Caching siêu tốc, Rate Limiting, Đếm số (Counters). | Lưu dữ liệu bền vững, Query phức tạp. |
+| **MongoDB** | Document | Dữ liệu dạng lồng ghép (Cây/JSON), Schema linh hoạt không xác định. | Cần JOIN nhiều bảng. Cần Transaction phức tạp (ACID). |
+| **ScyllaDB** | Column | Ghi cực kỳ khổng lồ (Metrics, IoT). Tốc độ ghi bàn thờ. | Đọc dữ liệu linh tinh, Query có WHERE đa dạng. |
+| **Neo4j** | Graph | Phân tích quan hệ (Mạng xã hội X quen Y, AI Recommendation). | Lưu dữ liệu bảng biểu bình thường. |
 
 ## Tóm tắt
 
-- ✅ **Migrations**: Versioned SQL scripts. Add = safe. Rename/Delete = multi-step.
-- ✅ **CQRS Persistence**: Write DB (normalized, ACID) vs Read DB (denormalized, fast).
-- ✅ **Event Store**: Append-only events + rebuild state. Snapshots for performance.
-- ✅ **NoSQL decision**: PostgreSQL default. Redis cache. MongoDB flexible. ScyllaDB scale.
-- ✅ **Caching**: Read-through (most common), TTL + event invalidation, cache-aside for control.
+- ✅ **Zero-Downtime Migration**: Thêm cột là an toàn. Xóa/Đổi tên cột phải làm qua nhiều bước trung gian.
+- ✅ **CQRS**: Cắt đôi hệ thống. Dùng RDBMS cho Write, và Elastic/Redis/View cho Read.
+- ✅ **Event Sourcing**: Lưu History thay vì ghi đè State. Cực mạnh kết hợp với `fold` trong Functional Programming.
+- ✅ **Caching**: Read-through là mặc định. Chú ý nguy cơ Cache Stampede.
+- ✅ **NoSQL**: Dùng khi và chỉ khi PostgreSQL đạt giới hạn vật lý về scale.
 
 ## Tiếp theo
 
-→ Chapter 40: **Security Essentials** — password hashing (argon2), JWT, OAuth 2.0, RBAC authorization.
+Dữ liệu đã được lưu trữ, nhưng chúng có an toàn không? Hãy bước vào chiến trường khốc liệt nhất của Backend Engineer trong **Chapter 40: Security Essentials**.

@@ -135,9 +135,11 @@ Repository interface. Prisma, Drizzle. DI via `Effect` services.
 
 ## Part V: FP Patterns with fp-ts / Effect (Advanced)
 
-### [Chapter 25 — Introduction to `fp-ts` / `Effect`](part_5_fp_patterns/chapter_25_intro_fpts_effect.md) ✅
-`Option`, `Either`, `Task`, `TaskEither`. `pipe()`, `flow()`.
-*877 lines · 28 code blocks · 31 assertions*
+### [Chapter 25 — Introduction to fp-ts (Legacy) and Effect (Modern)](part_5_fp_patterns/chapter_25_intro_fpts_effect.md) ✅
+`Effect<A, E, R>`, `Effect.gen`. fp-ts types (`Option`, `Either`, `TaskEither`). Migration decision framework.
+
+### [Chapter 25b — Abstract Algebra: Equivalence & Order (Effect-TS)](part_5_fp_patterns/chapter_25b_eq_ord.md) ✅
+`Data.struct`, `Equivalence` via `mapInput`, `Order` combinators for structural sorting.
 
 ### [Chapter 26 — Functors & Map](part_5_fp_patterns/chapter_26_functors_map.md) ✅
 `Option.map`, `Either.map`. Functor laws.
@@ -158,6 +160,12 @@ Fail-fast vs collect ALL errors. `sequenceT`.
 ### [Chapter 30 — Traverse & Sequence](part_5_fp_patterns/chapter_30_traverse_sequence.md) ✅
 `Array.traverse`. `Array<Option<A>>` → `Option<Array<A>>`.
 *384 lines · 14 code blocks · 18 assertions*
+
+### [Chapter 30b — Advanced Effect: Context (DI), Fibers & Scheduling](part_5_fp_patterns/chapter_30b_effect_advanced.md) ✅
+The `R` in `Effect`. `Context.GenericTag`, `Layer`, `Effect.provide`. `Effect.fork`, `Effect.all`, `Schedule`.
+
+### [Chapter 30c — Recursive Types & Folds](part_5_fp_patterns/chapter_30c_recursive_types_folds.md) ✅
+Catamorphisms. Trees, LinkedLists, AST. Factoring out recursion via `fold`. AST Evaluator.
 
 ---
 

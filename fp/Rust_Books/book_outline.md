@@ -130,6 +130,9 @@ Adding features without breaking design. Refactoring with compiler guidance. Fea
 
 > *Book 2 Intermediate + Book 4 Functional Patterns, adapted*
 
+### [Chapter 27b — Abstract Algebra: Eq, PartialEq, Ord, PartialOrd](part_5_fp_patterns/chapter_27b_eq_ord.md) ✅
+Why Rust splits equality and ordering traits (handling NaN). Deriving structural equality. Implementing custom sorting.
+
 ### [Chapter 28 — Abstract Algebra for Rust Developers](part_5_fp_patterns/chapter_28_abstract_algebra.md) ✅
 **Semigroup**: trait `Append { fn append(self, other: Self) -> Self }`. **Monoid**: `Append` + `fn empty() -> Self`. Rust std examples: `String`, `Vec`, `Option`. Derive patterns. (Book 2 Ch 8, Book 4 Monoids).
 
@@ -142,8 +145,14 @@ Adding features without breaking design. Refactoring with compiler guidance. Fea
 ### [Chapter 31 — Parser Combinators with `nom` / `chumsky`](part_5_fp_patterns/chapter_31_parser_combinators.md) ✅
 Parser = `&str → Result<(T, &str)>`. Combinators: `tag`, `alt`, `many0`, `map`, `pair`. Build JSON parser. **nom** (macro-based) vs **chumsky** (type-based). (Book 4 Parser Combinators, Book 2 Ch 17, 19).
 
+### [Chapter 31b — Applicative Functor: Thu thập Lỗi với Validation](part_5_fp_patterns/chapter_31b_applicative_validation.md) ✅
+Fail-fast (Monad `?`) vs Collect-all (Applicative `Validated`). Zipping independent results to collect multiple errors.
+
 ### [Chapter 32 — Recursive Types & Folds](part_5_fp_patterns/chapter_32_recursive_types_folds.md) ✅
 `enum Expr { Lit(i32), Add(Box<Expr>, Box<Expr>) }`. `Box` cho recursive types. Implementing `fold` / catamorphisms. Tree traversal. Expression evaluators (Book 4 Fold & Recursive Types, Book 2 Ch 10).
+
+### [Chapter 32b — Traverse & Sequence: Lộn ngược cấu trúc dữ liệu](part_5_fp_patterns/chapter_32b_traverse_sequence.md) ✅
+Monadic Sequence in Rust via `.collect::<Result<Vec<T>, E>>()`. Applicative Traverse using custom `.fold()` for collecting all errors.
 
 ---
 

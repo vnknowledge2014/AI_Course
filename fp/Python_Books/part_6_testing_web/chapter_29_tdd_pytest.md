@@ -1,35 +1,116 @@
-# Chapter 29 — TDD with pytest
+# Chapter 29 — TDD & Test Pyramid với pytest
 
 > **Bạn sẽ học được**:
-> - TDD cycle: Red → Green → Refactor
-> - `pytest` basics: `assert`, fixtures, parametrize
-> - Testing pure functions — simple and fast
-> - Test organization: arrange-act-assert
+> - Khái niệm **Test Pyramid** và tại sao Functional Programming thống trị ở tầng Unit Test.
+> - Vòng lặp **TDD (Test-Driven Development)**: Red → Green → Refactor.
+> - Cấu trúc một bài test chuẩn mực: **Arrange - Act - Assert** (AAA).
+> - Tại sao Pure Functions giúp bạn nói không với Mocking/Stubbing.
+> - Tận dụng sức mạnh của **`pytest`**: Fixtures và Parametrize.
 >
-> **Yêu cầu trước**: Chapter 28 (Parser Combinators)
-> **Thời gian đọc**: ~30 phút | **Level**: Principal
+> **Yêu cầu trước**: Nắm vững Pure Functions (Chapter 11).
+> **Thời gian đọc**: ~35 phút | **Level**: Principal
+> **Kết quả cuối cùng**: Hiểu sâu sắc triết lý viết test, không chỉ dừng lại ở cú pháp `assert`.
 
 ---
 
-## 29.1 — TDD Cycle
+Khi bước vào giai đoạn Production (Part VI và Part VII), khả năng viết mã không còn quan trọng bằng khả năng **chứng minh mã của bạn chạy đúng**. 
+Testing không phải là "việc vặt" sau khi code xong. Trong những hệ thống lớn, **Testing là thiết kế** (Testing is Design).
+
+## 29.1 — Test Pyramid & TDD Philosophy
+
+Test Pyramid (Kim tự tháp kiểm thử) là một mô hình nổi tiếng giúp định hình chiến lược viết test:
+1. **Unit Tests (Đáy kim tự tháp)**: Chiếm số lượng lớn nhất (70-80%). Chạy cực nhanh, test các hàm độc lập.
+2. **Integration Tests (Giữa)**: Kiểm tra sự giao tiếp giữa các module (ví dụ: code của bạn kết nối với Database hoặc API bên thứ ba). Chạy chậm hơn.
+3. **E2E Tests (Đỉnh)**: (End-to-End). Mô phỏng thao tác của người dùng trên UI hoặc luồng API hoàn chỉnh. Chiếm số lượng ít nhất vì chạy rất chậm và dễ bị "flaky" (lúc pass lúc fail).
+
+**Functional Programming tỏa sáng rực rỡ nhất ở tầng Unit Test**. Nhờ tính thuần khiết (Purity), bạn có thể nhét đầu vào (Input) và dự đoán chính xác đầu ra (Output) mà không cần quan tâm đến trạng thái của hệ thống hay các kết nối bên ngoài.
+
+### Vòng lặp TDD (Red → Green → Refactor)
+
+TDD (Test-Driven Development) lật ngược quy trình truyền thống. Bạn **không viết code trước**. Bạn viết test trước!
+
+1. **🔴 RED (Viết Test trước)**: Nghĩ về *yêu cầu* (requirement). Viết một bài test cho yêu cầu đó. Chạy test, và tất nhiên nó phải **FAIL** (báo lỗi màu đỏ), vì hàm thậm chí còn chưa tồn tại.
+2. **🟢 GREEN (Viết Code để Pass)**: Viết một đoạn code *đơn giản nhất, xấu xí nhất* miễn là làm cho test vượt qua (màu xanh). Mục tiêu lúc này không phải là hoàn hảo, mà là đúng.
+3. **♻️ REFACTOR (Tối ưu Code)**: Dọn dẹp lại đoạn code vừa viết. Áp dụng Design Patterns, cấu trúc lại thuật toán. Nhờ có bài test (Green) bảo vệ, bạn có thể tự tin sửa code mà không sợ làm hỏng logic.
 
 ```python
-# Step 1: RED — Write failing test
-# test_calculator.py
+# 🔴 Step 1: RED
 def test_add():
+    # Hàm add chưa tồn tại, trình biên dịch sẽ chửi hoặc test sẽ fail
     assert add(2, 3) == 5
 
-# Step 2: GREEN — Minimal code to pass
+# 🟢 Step 2: GREEN
 def add(a: int, b: int) -> int:
+    # Viết hàm ngu ngốc nhất có thể để pass
     return a + b
 
-# Step 3: REFACTOR — Improve without changing behavior
-assert add(2, 3) == 5
-assert add(0, 0) == 0
-assert add(-1, 1) == 0
+# ♻️ Step 3: REFACTOR
+# Thêm Type hints, xử lý edge cases... Test vẫn PASS.
+def test_add_edge_cases():
+    assert add(2, 3) == 5
+    assert add(0, 0) == 0
+    assert add(-1, 1) == 0
 ```
 
-## 29.2 — pytest Features
+---
+
+## 29.2 — Tại sao FP làm Testing trở nên dễ dàng?
+
+Trong OOP truyền thống hoặc mã Imperative (mệnh lệnh), hàm thường có **Side Effects** (gọi API, đọc file, đổi global variable). Để test chúng, bạn phải sử dụng **Mocks** (Giả mạo hành vi) hoặc **Stubs** (Dữ liệu giả).
+
+Nhược điểm của Mock là nó khiến bài test bị gắn chặt (coupled) vào *cách cài đặt* (implementation details) thay vì kết quả. Khi bạn refactor code, test bị vỡ dù logic vẫn đúng!
+
+Ngược lại, **Pure Functions** (Hàm thuần khiết) là một giấc mơ đối với TDD.
+- Không cần setup database.
+- Không cần Mock `requests.get`.
+- Không cần dọn dẹp (teardown) sau khi chạy.
+
+```python
+# MỘT HÀM PURE FUNCTION TRONG FP
+def calculate_discount(price: float, percent: float) -> float:
+    return price * (1 - percent / 100)
+
+# Việc test cực kỳ nhàm chán (và đó là một điều TỐT!)
+def test_discount_10_percent():
+    assert calculate_discount(100_000, 10) == 90_000
+
+def test_discount_zero():
+    assert calculate_discount(100_000, 0) == 100_000
+
+def test_discount_100_percent():
+    assert calculate_discount(100_000, 100) == 0
+```
+
+---
+
+## 29.3 — Arrange-Act-Assert (AAA Pattern)
+
+Bất kỳ bài Unit Test nào cũng nên được chia làm 3 khối rõ ràng:
+1. **Arrange**: Chuẩn bị dữ liệu đầu vào, khởi tạo object.
+2. **Act**: Thực thi hành động cần test (chỉ nên gọi đúng 1 hàm duy nhất).
+3. **Assert**: Kiểm tra kết quả có đúng như kỳ vọng hay không.
+
+```python
+def test_confirm_order():
+    # 1. Arrange: Chuẩn bị state ban đầu
+    order = {"status": "pending", "items": ["Coffee"]}
+
+    # 2. Act: Gọi pure function để tạo state mới (Immutable update)
+    confirmed = {**order, "status": "confirmed"}
+
+    # 3. Assert: Kiểm tra state mới
+    assert confirmed["status"] == "confirmed"
+    assert confirmed["items"] == order["items"]
+```
+
+---
+
+## 29.4 — Pytest: Vũ khí tối thượng
+
+`pytest` là framework testing phổ biến và mạnh mẽ nhất của Python. Bạn không cần dùng `unittest` rườm rà của thư viện chuẩn.
+
+### 1. Parametrize: Test theo lô
+Thay vì viết 10 hàm `test_xxx` cho 10 trường hợp, bạn có thể truyền data dạng bảng. Rất hữu dụng khi test Data-driven workflows!
 
 ```python
 import pytest
@@ -39,81 +120,59 @@ from dataclasses import dataclass
 class Money:
     amount: int
     currency: str = "VND"
+    
     def add(self, other: "Money") -> "Money":
-        assert self.currency == other.currency
+        if self.currency != other.currency:
+            raise ValueError("Mismatched currencies")
         return Money(self.amount + other.amount, self.currency)
 
-# Basic test
-def test_money_add():
-    a = Money(100)
-    b = Money(200)
-    assert a.add(b) == Money(300)
-
-# Parametrize — multiple test cases
-@pytest.mark.parametrize("a,b,expected", [
+# Test theo bảng (Data-Driven Testing)
+@pytest.mark.parametrize("a, b, expected", [
     (100, 200, 300),
     (0, 0, 0),
     (1000, -500, 500),
 ])
-def test_money_add_parametrize(a: int, b: int, expected: int):
+def test_money_add_success(a: int, b: int, expected: int):
     assert Money(a).add(Money(b)) == Money(expected)
-
-# Test exceptions
-def test_money_negative():
-    with pytest.raises(ValueError):
-        Money(-1)
-
-# Fixture
-@pytest.fixture
-def sample_order():
-    return {"customer": "An", "items": [("Coffee", 35_000)], "total": 35_000}
-
-def test_order_total(sample_order):
-    assert sample_order["total"] == 35_000
-
-# Arrange-Act-Assert pattern
-def test_confirm_order():
-    # Arrange
-    order = {"status": "pending", "items": ["Coffee"]}
-
-    # Act
-    confirmed = {**order, "status": "confirmed"}
-
-    # Assert
-    assert confirmed["status"] == "confirmed"
-    assert confirmed["items"] == order["items"]
+    
+# Test bắt lỗi (Exception)
+def test_money_add_error():
+    a = Money(100, "VND")
+    b = Money(200, "USD")
+    with pytest.raises(ValueError, match="Mismatched currencies"):
+        a.add(b)
 ```
 
-## 29.3 — Testing Pure Functions
+### 2. Fixtures: Chia sẻ Setup Data
+Trong FP, chúng ta thường làm việc với các Value Objects lớn (như một cái Cart chứa nhiều Item). Bạn có thể dùng `fixture` để tạo data dùng chung cho nhiều test.
 
 ```python
-# Pure functions are TRIVIAL to test — no setup, no mocks!
+@pytest.fixture
+def sample_cart():
+    # Setup data
+    return {"customer": "An", "items": [("Coffee", 35_000)], "total": 35_000}
 
-def discount(price: float, percent: float) -> float:
-    return price * (1 - percent / 100)
-
-def test_discount_10_percent():
-    assert discount(100_000, 10) == 90_000
-
-def test_discount_zero():
-    assert discount(100_000, 0) == 100_000
-
-def test_discount_100_percent():
-    assert discount(100_000, 100) == 0
-
-# Compare with impure function — needs mock, setup, teardown...
-# FP makes testing EASY by default.
+# Truyền tên fixture vào làm tham số, pytest sẽ tự động inject (DI)
+def test_order_total(sample_cart):
+    assert sample_cart["total"] == 35_000
+    
+def test_add_item_to_cart(sample_cart):
+    # Act
+    new_cart = add_item(sample_cart, ("Tea", 20_000))
+    # Assert
+    assert new_cart["total"] == 55_000
 ```
 
 ---
 
 ## Tóm tắt
 
-- ✅ **TDD**: Red → Green → Refactor.
-- ✅ **pytest**: `assert`, `@pytest.mark.parametrize`, `@pytest.fixture`.
-- ✅ **Pure functions**: Trivial to test — no mocks needed.
-- ✅ **Arrange-Act-Assert**: Standard test structure.
+- ✅ **TDD (Red → Green → Refactor)**: Giúp bạn tự tin đập đi xây lại code (Refactor) mà không sợ sinh bug mới.
+- ✅ **Pure Functions**: Là chìa khóa để giảm bớt Mock/Stub rườm rà. Test của FP chạy độc lập, cực nhanh và dễ bảo trì.
+- ✅ **Arrange-Act-Assert**: Đảm bảo mỗi bài test đều trong suốt, dễ đọc như một câu chuyện.
+- ✅ **pytest**: Dùng `@pytest.mark.parametrize` cho Data-driven test, và `@pytest.fixture` để chia sẻ dữ liệu mô phỏng.
 
 ## Tiếp theo
 
-→ Chapter 30: **Property-Based Testing** — Hypothesis, random inputs.
+Đôi khi, việc viết Parametrize với 5-10 test case vẫn chưa đủ an toàn. Nhỡ có một trường hợp (edge case) như số âm, `NaN`, hoặc chuỗi unicode kỳ dị lọt vào thì sao? 
+Thay vì tự nghĩ ra test case, làm sao để máy tính **tự động sinh ra hàng vạn test case ngẫu nhiên** để bẻ gãy hàm của bạn? Hẹn gặp bạn ở **Chapter 30: Property-Based Testing**.

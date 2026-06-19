@@ -145,5 +145,26 @@ Dùng `deque` cho BFS là nguyên tắc bắt buộc trong Python vì `list.pop(
 - [x] **Dynamic Programming**: `@cache` trong Python biến đệ quy thường thành thuật toán tối ưu $O(N)$ cực kỳ dễ dàng.
 - [x] **Graphs**: Tránh dùng objects lồng nhau vòng tròn. Luôn dùng `dict` của các Node ID, và `deque` cho BFS.
 
+## 3B.5 — Lộ trình luyện tập với NeetCode
+
+Để thành thạo các pattern trên, thực hành là điều bắt buộc. Chúng tôi khuyến nghị bạn theo sát lộ trình **NeetCode 150** (danh sách 150 bài toán LeetCode thiết yếu) để tối ưu hóa thời gian học. 
+
+Dưới đây là các phân nhóm quan trọng nhất đối với AI Engineer:
+
+1. **Arrays, Hashing & Two Pointers**: 
+   - Bài toán tiêu biểu: *Two Sum (Easy)*, *Valid Anagram (Easy)*, *3Sum (Medium)*, *Container With Most Water (Medium)*.
+   - Ứng dụng: Xử lý mảng token, tính toán chỉ số độ tương đồng văn bản, thao tác string chunking.
+2. **Sliding Window**:
+   - Bài toán tiêu biểu: *Best Time to Buy And Sell Stock (Easy)*, *Longest Substring Without Repeating Characters (Medium)*.
+   - Ứng dụng: Duyệt cửa sổ trạng thái, xử lý chuỗi streaming.
+3. **1-D & 2-D Dynamic Programming**:
+   - Bài toán tiêu biểu: *Climbing Stairs (Easy)*, *House Robber (Medium)*, *Longest Common Subsequence (Medium)*.
+   - Ứng dụng: Giải các bài toán tối ưu (Optimization problems), sequence alignment trong DNA hoặc đối chiếu text (RAG).
+4. **Graphs & Trees**:
+   - Bài toán tiêu biểu: *Number of Islands (Medium)*, *Clone Graph (Medium)*, *Lowest Common Ancestor (Medium)*.
+   - Ứng dụng: Knowledge Graph, cây quyết định (Decision Trees), luồng duyệt AST (Abstract Syntax Trees).
+
+---
+
 ## Tiếp theo
 Khả năng code thuật toán xịn đã có. Nhưng tại sao mô hình AI viết bằng Python lại vẫn có thể tính toán hàng tỷ parameter mỗi giây? Đó là nhờ C++ và kiến trúc GPU. Hãy sang Chapter 3C để tìm hiểu sâu về Hardware dưới nắp capo.

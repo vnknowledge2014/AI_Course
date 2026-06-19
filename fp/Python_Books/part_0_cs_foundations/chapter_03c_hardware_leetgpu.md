@@ -123,5 +123,24 @@ Code Triton chạy nhanh ngang ngửa, thậm chí **nhanh hơn cả CUDA C++** 
 - GPU thống trị AI nhờ hàng vạn lõi SIMD và kiến trúc Tensor Cores chuyên dùng để nhân ma trận.
 - Điểm yếu "chí mạng" của quá trình chạy mô hình LLM (Inference) không phải là nó tính toán chậm, mà là băng thông bộ nhớ truyền dữ liệu lên chip không đủ (Memory Bound).
 
+## 3C.8 — Thử thách tối ưu Hardware: LeetCPU & LeetGPU
+
+Để thực sự nắm bắt giới hạn của phần cứng, bạn nên luyện tập các bài toán vi kiến trúc (micro-architecture) thông qua **LeetCPU** và **LeetGPU**. Thay vì viết thuật toán chuẩn O(N), mục tiêu là viết code chạy *nhanh nhất có thể trên máy tính*.
+
+### LeetCPU: Tối ưu kiến trúc CPU
+Khắc phục các điểm yếu về Pipeline và Cache:
+- **[Easy] Stable Partition / Grade Bands**: Xóa bỏ Branch Prediction mispredicts bằng cách dùng Branchless code hoặc Lookup Tables.
+- **[Medium] Matrix Multiply — Cache Tiling**: Cải thiện L1/L2 Cache Locality khi duyệt ma trận.
+- **[Medium] Histogram / SAXPY**: Tối ưu ILP (Instruction-Level Parallelism) và bẻ gãy Write Dependency Chains.
+
+### LeetGPU: Làm chủ CUDA/Triton
+Làm quen với tính toán Tensor Core và xử lý siêu song song, đặc biệt dùng Triton trong Python:
+- **[Easy] Vector Add & Relu**: Viết Kernel tính toán phép cộng/hàm kích hoạt song song cơ bản.
+- **[Medium] GEMM (General Matrix Multiplication)**: Thuật toán kinh điển nhất trong AI. 
+- **[Medium] RMS Normalization / Batched Matmul**: Các kernel hiện diện trong mọi Transformer model.
+- **[Hard] Casual (Masked) Self-Attention / Multi-Head Attention**: Thử thách cốt lõi để thấu hiểu cách Attention layer thực sự hoạt động trên VRAM.
+
+---
+
 ## Tiếp theo
 Chúng ta đã đi qua toàn bộ phần nền tảng khoa học máy tính và phần cứng lõi. Kể từ Chapter 4 trở đi, bạn sẽ chính thức bước vào thế giới thiết kế phần mềm, học cách dùng Python với tư duy Hàm (Functional Programming).

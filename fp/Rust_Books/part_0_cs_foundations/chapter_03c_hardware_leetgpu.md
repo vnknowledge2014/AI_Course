@@ -128,5 +128,24 @@ Rust giúp kiểm soát vòng đời của buffer bộ nhớ VRAM cực kỳ ch�
 - **CPU vs GPU**: CPU giỏi logic phức tạp, rẽ nhánh. GPU là ông hoàng nhân ma trận song song (SIMD).
 - **VRAM Bandwidth**: Trong thế giới LLMs, nút thắt lớn nhất không phải là chip tính chậm, mà là đường ống bơm dữ liệu từ bộ nhớ VRAM vào chip không đủ to (Memory Bound ở Decoding Phase).
 
+## 3C.8 — Thử thách tối ưu Hardware: LeetCPU & LeetGPU
+
+Để thực sự nắm bắt giới hạn của phần cứng, bạn nên luyện tập các bài toán vi kiến trúc (micro-architecture) thông qua **LeetCPU** và **LeetGPU**. Thay vì viết thuật toán chuẩn O(N), mục tiêu là viết code chạy *nhanh nhất có thể trên máy tính*.
+
+### LeetCPU: Tối ưu kiến trúc CPU
+Khắc phục các điểm yếu về Pipeline và Cache (Rất phù hợp cho Rust compiler và `slice`):
+- **[Easy] Stable Partition / Grade Bands**: Xóa bỏ Branch Prediction mispredicts bằng cách dùng Branchless code hoặc Lookup Tables.
+- **[Medium] Matrix Multiply — Cache Tiling**: Cải thiện L1/L2 Cache Locality khi duyệt ma trận (vốn là thế mạnh tuyệt đối của Rust `Vec`).
+- **[Medium] Histogram / SAXPY**: Tối ưu ILP (Instruction-Level Parallelism) và bẻ gãy Write Dependency Chains.
+
+### LeetGPU: Làm chủ GPGPU bằng Rust
+Sử dụng `wgpu` (WebGPU) hoặc `cudarc` (Rust bọc CUDA) để thực thi Compute Shaders:
+- **[Easy] Vector Add & Relu**: Viết Compute Shader tính toán phép cộng/hàm kích hoạt song song.
+- **[Medium] GEMM (General Matrix Multiplication)**: Thuật toán kinh điển nhất trong AI, tính trên WGSL hoặc PTX.
+- **[Medium] RMS Normalization / Batched Matmul**: Các block hiện diện trong mọi Transformer model.
+- **[Hard] Casual (Masked) Self-Attention**: Hiểu cặn kẽ Memory Bandwidth khi chạy Attention.
+
+---
+
 ## Tiếp theo
 Bạn đã có đủ hành trang CS Foundations (Toán, Thuật toán, Phần cứng). Bước tiếp theo, chúng ta sẽ bắt đầu học ngôn ngữ lập trình cụ thể để hiện thực hóa những kiến thức này (Part 1).

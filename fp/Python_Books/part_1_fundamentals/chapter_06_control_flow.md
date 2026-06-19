@@ -46,16 +46,21 @@ assert classify(85) == "B"
 assert classify(60) == "F"
 ```
 
-## 6.2 — Loops
+## 6.2 — Lặp không có Side-effects (Comprehensions & Recursion)
+
+Trong FP, vòng lặp `for/while` truyền thống thường bị tránh né vì nó dựa trên việc thay đổi state biến tạm (`total += x`). Thay vào đó, chúng ta dùng **Comprehensions** hoặc các hàm toán học.
 
 ```python
-# for loop — iterate over sequences
-total = 0
-for x in [1, 2, 3, 4, 5]:
-    total += x
+# ❌ Bad (Imperative) — Thay đổi state của biến total
+# total = 0
+# for x in [1, 2, 3, 4, 5]:
+#     total += x
+
+# ✅ Good (FP) — Sử dụng hàm tích hợp hoặc Comprehensions
+total = sum([1, 2, 3, 4, 5])
 assert total == 15
 
-# Comprehensions — FP-style loops
+# Comprehensions — FP-style loops (Tạo array mới thay vì mutate)
 squares = [x**2 for x in range(5)]
 assert squares == [0, 1, 4, 9, 16]
 
@@ -66,14 +71,15 @@ assert evens == [0, 2, 4, 6, 8]
 word_lengths = {w: len(w) for w in ["hello", "world", "python"]}
 assert word_lengths["python"] == 6
 
-# enumerate, zip
+# zip
 names = ["An", "Binh"]
 scores = [95, 87]
 paired = list(zip(names, scores))
 assert paired == [("An", 95), ("Binh", 87)]
 
-for i, name in enumerate(names):
-    print(f"{i}: {name}")
+# Lưu ý: Python KHÔNG hỗ trợ Tail Call Optimization (TCO). 
+# Do đó đệ quy sâu có thể gây RecursionError.
+# Ở các chương sau ta sẽ học `map`, `filter`, `reduce`.
 ```
 
 ## 6.3 — Pattern Matching (Python 3.10+)

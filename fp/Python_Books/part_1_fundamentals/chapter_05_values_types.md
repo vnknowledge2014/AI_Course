@@ -32,34 +32,38 @@ z = [1, 2, 3]   # mypy biết z: list[int]
 print(f"name={name}, age={age}, pi={pi:.2f}")
 ```
 
-## 5.2 — Collection Types
+## 5.2 — Collection Types (Góc nhìn FP)
+
+Trong FP, chúng ta ưu tiên sự **Bất biến (Immutability)**. Thay vì thay đổi (mutate) dữ liệu gốc, chúng ta tạo ra bản sao mới.
 
 ```python
-# List — mutable, ordered
-names: list[str] = ["An", "Binh"]
-names.append("Cuong")
-assert len(names) == 3
+# ❌ Bad (Imperative) — Mutating list, dict, set
+# names = ["An", "Binh"]
+# names.append("Cuong")  <- Side effect
+# scores["Cuong"] = 92   <- Side effect
 
+# ✅ Good (FP) — Dùng Tuple/Frozenset, hoặc tạo copy khi cần update
 # Tuple — immutable, ordered
 coords: tuple[float, float] = (3.0, 4.0)
 # coords[0] = 5.0  ← TypeError
 
-# Dict — mutable, key-value
-scores: dict[str, int] = {"An": 95, "Binh": 87}
-scores["Cuong"] = 92
+# Cập nhật danh sách bằng cách tạo list/tuple mới
+names: tuple[str, ...] = ("An", "Binh")
+new_names = names + ("Cuong",) 
 
-# Set — mutable, unique, unordered
-tags: set[str] = {"python", "fp"}
-tags.add("ddd")
+# Dict — Dùng toán tử merge (|) trong Python 3.9+ thay vì gán trực tiếp
+scores: dict[str, int] = {"An": 95, "Binh": 87}
+new_scores = scores | {"Cuong": 92} 
 
 # Frozenset — immutable set
-immutable_tags: frozenset[str] = frozenset({"python", "fp"})
+tags: frozenset[str] = frozenset({"python", "fp"})
+new_tags = tags.union({"ddd"})
 
 # Nested types
-matrix: list[list[int]] = [[1, 2], [3, 4]]
-user_roles: dict[str, list[str]] = {"An": ["admin", "user"]}
+matrix: tuple[tuple[int, ...], ...] = ((1, 2), (3, 4))
+user_roles: dict[str, frozenset[str]] = {"An": frozenset({"admin", "user"})}
 
-print(f"scores = {scores}")
+print(f"new_scores = {new_scores}")
 ```
 
 ## 5.3 — Advanced Type Hints

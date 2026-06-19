@@ -1,574 +1,184 @@
 # Chapter 40 — Security Essentials
 
 > **Bạn sẽ học được**:
-> - **Password hashing**: argon2, bcrypt — NEVER SHA/MD5
-> - **JWT**: header.payload.signature, refresh tokens
-> - **OAuth 2.0**: Authorization Code flow, PKCE
-> - **Authorization**: RBAC (roles), ABAC (attributes)
-> - **Sessions vs Tokens**: khi nào dùng gì
-> - Rust crates: `argon2`, `jsonwebtoken`, `axum-login`
+> - Tại sao MD5 và SHA-256 đã "chết" trong việc lưu trữ mật khẩu.
+> - Kỹ thuật mã hóa mật khẩu hiện đại: Salt, Pepper và thuật toán cố tình làm chậm (Argon2id).
+> - Bản chất thực sự của JWT (JSON Web Token) và cách nó giải quyết bài toán Session phân tán.
+> - OAuth 2.0: Luồng xác thực an toàn nhất hiện nay (Authorization Code + PKCE).
+> - Phân quyền hệ thống: RBAC (Theo vai trò) và ABAC (Theo thuộc tính).
 >
 > **Yêu cầu trước**: Chapter 35 (DI), Chapter 38 (Database).
-> **Thời gian đọc**: ~40 phút | **Level**: Principal
-> **Kết quả cuối cùng**: Bạn implement authentication + authorization **đúng cách** — không reinvent the wheel.
+> **Thời gian đọc**: ~45 phút | **Level**: Principal
+> **Kết quả cuối cùng**: Nắm vững các nguyên tắc bảo mật cốt lõi, không bao giờ tự "phát minh lại bánh xe" (reinvent the wheel) trong bảo mật.
 
 ---
 
-## 40.1 — Password Hashing
+Bảo mật không phải là cài đặt một bức tường lửa đắt tiền. Bảo mật là một chuỗi các quyết định thiết kế cẩn trọng. Một lỗ hổng nhỏ ở thuật toán Hash mật khẩu có thể khiến hàng triệu tài khoản người dùng bị rao bán trên dark web (như sự kiện LinkedIn lộ 117 triệu mật khẩu năm 2012).
 
-### Tại sao KHÔNG dùng SHA/MD5
+Trong chương này, chúng ta sẽ đi qua các trụ cột của bảo mật: Xác thực (Ai đang đăng nhập?) và Phân quyền (Họ được làm gì?).
 
-Năm 2012, LinkedIn bị hack và lộ 117 triệu passwords. Vấn đề không phải họ không mã hóa — họ có hash bằng SHA-1. Vấn đề là SHA quá nhanh: một GPU trung bình có thể thử 10 tỷ SHA hash mỗi giây. Trong vài giờ, kẻ tấn công đã khôi phục hầu hết passwords.
+## 40.1 — Nghệ thuật lưu trữ Mật khẩu
 
-Biện pháp đúng: dùng hash function **cố tình chậm** (100ms+ mỗi lần) và thêm **salt** ngẫu nhiên vào mỗi password. Chậm = kẻ tấn công chỉ thử được vài trăm lần/giây. Salt = cùng password nhưng hash ra khác nhau cho mỗi user, không thể dùng bảng đã tính sẵn.
+Nhiều lập trình viên nghĩ rằng: "Chỉ cần băm (hash) mật khẩu bằng SHA-256 là an toàn". **Sai lầm chết người!**
 
-```
-SHA-256("password123") = ef92b778bafe771e...
-SHA-256("password123") = ef92b778bafe771e...  ← CÙNG hash → rainbow table attack!
+Thuật toán SHA-256 được sinh ra để chạy *càng nhanh càng tốt*. Một card đồ họa (GPU) trung bình hiện nay có thể thử **hàng chục tỷ** phép tính SHA-256 mỗi giây. Nếu hacker lấy được Database của bạn, chúng chỉ mất vài giờ để dịch ngược toàn bộ mật khẩu bằng phương pháp Brute-force hoặc Rainbow Tables (Bảng tra cứu hash định sẵn).
 
-Argon2("password123", random_salt) = $argon2id$v=19$m=19456,t=2,p=1$...
-Argon2("password123", random_salt) = $argon2id$v=19$m=19456,t=2,p=1$...  ← KHÁC hash!
-```
+### Giải pháp 1: Salt (Muối)
+Để chống lại Rainbow Tables, trước khi Hash, chúng ta rắc thêm một chuỗi ngẫu nhiên (Salt) vào mật khẩu. 
+Mỗi User có một Salt khác nhau lưu ngay trong Database.
 
-### Password hashing rules
+`Hash("password123" + "RandomSaltABC") = 8f9a3...`
 
-| ❌ Never | ✅ Always |
-|----------|----------|
-| SHA-256, SHA-512, MD5 | **Argon2id**, bcrypt, scrypt |
-| Store plaintext | Store salted hash |
-| Same salt for all | **Random salt per user** |
-| Fast hash (μs) | **Slow hash (100ms+)** — intentional! |
-
-### Rust implementation
+### Giải pháp 2: Thuật toán Cố-tình-chậm (Argon2id)
+Dù có Salt, GPU vẫn có thể đoán 10 tỷ lần/giây. Để chặn GPU, các nhà mật mã học tạo ra các thuật toán *cố tình chạy chậm* và ngốn rất nhiều RAM (Memory-hard).
+**Argon2id** là tiêu chuẩn vàng hiện tại. Nó bắt CPU phải tốn 100-200ms và chiếm vài chục MB RAM chỉ để tính toán 1 cái hash.
+Với tốc độ rùa bò này, hacker có siêu máy tính cũng phải khóc thét khi định Brute-force.
 
 ```rust
-// filename: src/main.rs
-
-// Cargo.toml: argon2 = "0.5"
-
-// Simulated argon2 (conceptual — real crate handles salt internally)
-mod password {
+// Mô phỏng cách Argon2 hoạt động (Chỉ dùng để học, Production hãy dùng crate `argon2`)
+mod password_security {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
+    use std::time::SystemTime;
 
-    /// Hash password with random salt (simulated)
+    // 1. Tạo Salt ngẫu nhiên
+    fn generate_salt() -> String {
+        let nanos = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_nanos();
+        format!("{:x}", nanos)
+    }
+
+    // 2. Hàm Hash chậm (Mô phỏng)
     pub fn hash_password(password: &str) -> String {
-        let salt: u64 = rand_simple();
+        let salt = generate_salt();
         let mut hasher = DefaultHasher::new();
+        
+        // Trộn Password + Salt
         format!("{}:{}", salt, password).hash(&mut hasher);
-        let hash = hasher.finish();
-        // Format: $algo$salt$hash
-        format!("$sim${}${:016x}", salt, hash)
+        let hash_result = format!("{:016x}", hasher.finish());
+        
+        // Chuỗi lưu vào DB: Thuật toán $ Salt $ Hash
+        format!("$argon2_sim${}${}", salt, hash_result)
     }
 
-    /// Verify password against stored hash
-    pub fn verify_password(password: &str, stored: &str) -> bool {
-        let parts: Vec<&str> = stored.split('$').collect();
+    // 3. Hàm Verify
+    pub fn verify_password(input_password: &str, db_hash: &str) -> bool {
+        let parts: Vec<&str> = db_hash.split('$').collect();
         if parts.len() != 4 { return false; }
+        
         let salt = parts[2];
+        let original_hash = parts[3];
+        
         let mut hasher = DefaultHasher::new();
-        format!("{}:{}", salt, password).hash(&mut hasher);
-        let hash = format!("{:016x}", hasher.finish());
-        hash == parts[3]
+        format!("{}:{}", salt, input_password).hash(&mut hasher);
+        let current_hash = format!("{:016x}", hasher.finish());
+        
+        current_hash == original_hash
     }
-
-    fn rand_simple() -> u64 {
-        use std::time::SystemTime;
-        SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_nanos() as u64
-    }
-}
-
-fn main() {
-    let pw = "MyStr0ng!Pass";
-
-    // Hash (registration)
-    let hash = password::hash_password(pw);
-    println!("Hash: {}", hash);
-
-    // Verify (login)
-    println!("Correct: {}", password::verify_password(pw, &hash));
-    println!("Wrong: {}", password::verify_password("wrong", &hash));
 }
 ```
 
-> **Production**: Dùng crate `argon2` thật:
-> ```rust
-> use argon2::{Argon2, PasswordHasher, PasswordVerifier};
-> let salt = SaltString::generate(&mut OsRng);
-> let hash = Argon2::default().hash_password(pw.as_bytes(), &salt)?;
-> ```
+> **💡 Best Practice**: Tuyệt đối không tự viết thuật toán mã hóa. Hãy dùng Crate `argon2` hoặc `bcrypt` có sẵn của cộng đồng Rust.
 
 ---
 
-## 40.2 — JWT (JSON Web Tokens)
+## 40.2 — Kỷ nguyên của Tokens (JWT)
 
-Sau khi user login thành công (password đúng), làm sao server biết các request tiếp theo cũng từ người đó? Cách truyền thống: server lưu session và gửi session ID cho client. Nhưng với hệ thống nhiều servers (load-balanced), session lưu ở server nào? Chia sẻ session giữa các server rất phức tạp.
+Khi có 1 máy chủ (Server), dùng Session rất dễ. User login -> Server cấp 1 Session_ID lưu trong RAM -> Trả về Cookie cho user. Lần sau User mang Cookie lên, Server tra RAM là biết ai.
 
-JWT giải quyết bằng cách đặt mọi thứ vào **trong token** — giống như thẻ VIP của câu lạc bộ: thẻ ghi tên bạn, hạng thành viên, ngày hết hạn, và có dấu mộc của quản lý (chữ ký). Khi bạn đưa thẻ, bảo vệ chỉ cần kiểm tra dấu mộc và hạn — không cần gọi về văn phòng hỏi.
+Nhưng khi bạn có 100 Server (Load Balancing), User login ở Server 1, sau đó request thứ hai trúng vào Server 2. Server 2 không có Session đó trong RAM! Bắt User login lại ư? Bạn có thể dùng Redis để share Session, nhưng nó tạo ra nút thắt cổ chai.
 
-### Structure: 3 parts
+**JWT (JSON Web Token)** ra đời để giải quyết triệt để bài toán này. JWT là một cái thẻ căn cước *không cần tra cứu*. Mọi thông tin (Tên, Role) được ghi trực tiếp lên thẻ, và được đóng dấu (Signature) bằng Secret Key của Server. Khi Server 2 nhận thẻ, nó chỉ cần check chữ ký hợp lệ là cho qua!
 
-```
-eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NSIsImVtYWlsIjoibWluaEBjby5jb20ifQ.signature
-│                      │                                                 │
-└── Header (algo)      └── Payload (claims)                              └── Signature
-```
-
-### Rust JWT
+### Cấu trúc 3 phần của JWT:
+1. **Header**: Thuật toán ký (Ví dụ: HS256).
+2. **Payload**: Thông tin User (Claims) (Ví dụ: `{"user_id": 123, "role": "admin"}`). Chú ý: Phần này AI CŨNG ĐỌC ĐƯỢC, cấm lưu mật khẩu ở đây!
+3. **Signature**: Bằng chứng chống giả mạo. Tính bằng công thức: `Hash(Header + Payload + Secret_Key)`.
 
 ```rust
-// filename: src/main.rs
-
+// Mô phỏng JWT (Conceptual)
 use serde::{Serialize, Deserialize};
-use std::time::{SystemTime, UNIX_EPOCH};
 
-// ═══ JWT Claims ═══
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 struct Claims {
-    sub: String,       // subject (user ID)
-    email: String,
+    user_id: u64,
     role: String,
-    exp: u64,          // expiration (unix timestamp)
-    iat: u64,          // issued at
+    exp: u64, // Hạn sử dụng (Expiration)
 }
 
-// ═══ JWT (simplified, conceptual) ═══
-mod jwt {
-    use super::*;
-    use std::collections::hash_map::DefaultHasher;
-    use std::hash::{Hash, Hasher};
-
-    const SECRET: &str = "super-secret-key-never-hardcode-in-production";
-
-    pub fn encode(claims: &Claims) -> String {
-        let header = r#"{"alg":"HS256","typ":"JWT"}"#;
-        let payload = serde_json::to_string(claims).unwrap();
-
-        let header_b64 = base64_encode(header);
-        let payload_b64 = base64_encode(&payload);
-
-        let signature = sign(&format!("{}.{}", header_b64, payload_b64));
-        format!("{}.{}.{}", header_b64, payload_b64, signature)
-    }
-
-    pub fn decode(token: &str) -> Result<Claims, String> {
-        let parts: Vec<&str> = token.split('.').collect();
-        if parts.len() != 3 { return Err("Invalid token format".into()); }
-
-        // Verify signature
-        let expected_sig = sign(&format!("{}.{}", parts[0], parts[1]));
-        if expected_sig != parts[2] { return Err("Invalid signature".into()); }
-
-        // Decode payload
-        let payload = base64_decode(parts[1])?;
-        let claims: Claims = serde_json::from_str(&payload)
-            .map_err(|e| format!("Invalid payload: {}", e))?;
-
-        // Check expiration
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
-        if claims.exp < now { return Err("Token expired".into()); }
-
-        Ok(claims)
-    }
-
-    fn sign(data: &str) -> String {
-        let mut hasher = DefaultHasher::new();
-        format!("{}:{}", data, SECRET).hash(&mut hasher);
-        format!("{:016x}", hasher.finish())
-    }
-
-    fn base64_encode(s: &str) -> String {
-        // Simplified: hex encode
-        s.as_bytes().iter().map(|b| format!("{:02x}", b)).collect()
-    }
-
-    fn base64_decode(hex: &str) -> Result<String, String> {
-        let bytes: Result<Vec<u8>, _> = (0..hex.len())
-            .step_by(2)
-            .map(|i| u8::from_str_radix(&hex[i..i+2], 16))
-            .collect();
-        String::from_utf8(bytes.map_err(|e| e.to_string())?)
-            .map_err(|e| e.to_string())
-    }
-}
-
-fn main() {
-    let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
-
-    let claims = Claims {
-        sub: "user-123".into(),
-        email: "minh@co.com".into(),
-        role: "admin".into(),
-        exp: now + 3600, // 1 hour
-        iat: now,
-    };
-
-    // Encode
-    let token = jwt::encode(&claims);
-    println!("Token: {}...", &token[..50]);
-
-    // Decode
-    match jwt::decode(&token) {
-        Ok(claims) => println!("Decoded: {} ({})", claims.sub, claims.role),
-        Err(e) => println!("Error: {}", e),
-    }
-
-    // Tampered token
-    let tampered = format!("{}X", token);
-    println!("Tampered: {:?}", jwt::decode(&tampered));
-}
+// Nếu User sửa "role": "admin", Signature sẽ bị sai ngay lập tức vì họ không có Secret_Key của Server để tính lại Signature mới!
 ```
 
-### Access Token + Refresh Token
-
-```
-┌──────────┐         ┌──────────┐         ┌──────────┐
-│  Login   │ ──────▶ │  Server  │ ──────▶ │  Client  │
-│          │         │          │         │          │
-│ email+pw │         │ verify   │         │ receives │
-│          │         │ password │         │ 2 tokens │
-└──────────┘         └──────────┘         └──────────┘
-                                              │
-                         Access Token  ◄──────┤ (short: 15min)
-                         Refresh Token ◄──────┘ (long: 7 days)
-
-Access expired?
-  → Use Refresh Token to get new Access Token
-  → No re-login needed!
-
-Refresh expired?
-  → User must login again
-```
+> ⚠️ **Hố tử thần**: JWT đã cấp ra thì **không thể thu hồi** cho đến khi hết hạn. Do đó, Access Token phải có tuổi thọ cực ngắn (15 phút). Để user không phải đăng nhập liên tục, ta dùng cặp **Access Token (Ngắn hạn) + Refresh Token (Dài hạn 7 ngày, lưu vào Database để có thể thu hồi/Revoke)**.
 
 ---
 
-## 40.3 — OAuth 2.0
+## 40.3 — OAuth 2.0 và Đăng nhập Google
 
-### Authorization Code Flow (with PKCE)
+Bạn có bao giờ thắc mắc nút "Log in with Google" hoạt động như nào không? Nó dùng giao thức **OAuth 2.0**.
+Nguyên tắc tối thượng: **App của bạn tuyệt đối không được nhìn thấy Mật khẩu Google của User.**
 
-```
-┌──────┐     1. Login with Google      ┌──────────┐
-│ User │ ────────────────────────────▶ │ Auth     │
-│      │                               │ Provider │
-│      │ ◀──── 2. Auth Code ────────── │ (Google) │
-│      │                               └──────────┘
-│      │                                    │
-│      │     3. Exchange Code               │
-│      │        for Token                   │
-└──────┘                                    │
-    │                                       │
-    ▼                                       ▼
-┌──────┐     4. Code + Client Secret   ┌──────────┐
-│ Your │ ────────────────────────────▶ │ Auth     │
-│ App  │                               │ Provider │
-│      │ ◀──── 5. Access Token ─────── │          │
-│      │                               └──────────┘
-│      │
-│      │     6. Use Token to get user info
-│      │        GET /userinfo
-└──────┘
-```
+Luồng **Authorization Code Flow** an toàn nhất:
+1. User bấm nút -> App của bạn chuyển hướng họ sang trang web của Google.
+2. User gõ Pass vào Google. Google hỏi: "App này muốn xin email của bạn, đồng ý không?"
+3. User bấm Đồng Ý -> Google chuyển hướng về App của bạn kèm theo một mã số rác gọi là **Auth Code**.
+4. Frontend của bạn gửi Auth Code này xuống Backend.
+5. Backend của bạn cầm cái Auth Code đó, lén chạy cửa sau (Back-channel HTTP) lên Google, nộp kèm với `Client_Secret` (Chìa khóa bí mật của bạn).
+6. Google check đúng, trả về **Access Token**. Đăng nhập thành công!
 
-### Các khái niệm OAuth 2.0 chính
-
-| Thuật ngữ | Ý nghĩa |
-|------|---------|
-| **Client ID** | Mã định danh công khai của ứng dụng |
-| **Client Secret** | Mã bí mật của ứng dụng (chỉ phía server!) |
-| **Auth Code** | Mã tạm thời, đổi lấy token |
-| **PKCE** | Proof Key for Code Exchange (cho mobile/SPA) |
-| **Scope** | Quyền truy cập (`email`, `profile`, `openid`) |
-| **Redirect URI** | URL mà Auth Provider gửi code về |
+> **Tại sao phải vòng vèo sinh ra Auth Code?** Để ngăn chặn hacker ở trình duyệt (Frontend) chôm được Access Token. Token thực sự chỉ được trao đổi ở Backend thông qua Back-channel an toàn.
 
 ---
 
-## 40.4 — Authorization: RBAC & ABAC
+## 40.4 — Phân Quyền (Authorization)
 
-Authentication trả lời "bạn là ai?" (login). Authorization trả lời "bạn được làm gì?" (quyền hạn). Hai cách phổ biến nhất để quản lý quyền hạn:
+Xác thực (Authentication) chỉ trả lời câu hỏi: "Bạn là ai?". Còn Phân Quyền (Authorization) trả lời câu hỏi: "Bạn được phép làm gì?".
 
-**RBAC** gán quyền theo **vai trò**: Admin được làm mọi thứ, Editor được sửa bài, Viewer chỉ được xem. Đơn giản, dễ hình dung — phù hợp phần lớn ứng dụng.
-
-**ABAC** gán quyền theo **thuộc tính**: phòng ban, thời gian, loại tài nguyên, chủ sở hữu. Ví dụ: "Nhân viên phòng tài chính chỉ được truy cập báo cáo tài chính, trong giờ hành chính, nếu là dữ liệu của phòng mình." Phức tạp hơn, nhưng linh hoạt hơn nhiều.
-
-### RBAC (Role-Based Access Control)
+### 1. RBAC (Role-Based Access Control)
+Phân quyền theo **Vai trò**. Cách này cực kỳ phổ biến vì đơn giản.
+Bạn định nghĩa các Role (Admin, Editor, Viewer). Mỗi Role có một danh sách Permissions (Delete Post, Write Post, Read Post).
 
 ```rust
-// filename: src/main.rs
+enum Role { Admin, Editor, Viewer }
+enum Permission { DeletePost, WritePost, ReadPost }
 
-use std::collections::HashSet;
-
-// ═══ RBAC ═══
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum Role { Admin, Editor, Viewer, Moderator }
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-enum Permission {
-    ReadContent,
-    WriteContent,
-    DeleteContent,
-    ManageUsers,
-    ViewAnalytics,
-    ModerateComments,
-}
-
-fn role_permissions(role: &Role) -> HashSet<Permission> {
+// Pure function ánh xạ Role -> Permissions
+fn get_permissions(role: &Role) -> Vec<Permission> {
     match role {
-        Role::Admin => [
-            Permission::ReadContent, Permission::WriteContent,
-            Permission::DeleteContent, Permission::ManageUsers,
-            Permission::ViewAnalytics, Permission::ModerateComments,
-        ].into(),
-        Role::Editor => [
-            Permission::ReadContent, Permission::WriteContent,
-            Permission::ViewAnalytics,
-        ].into(),
-        Role::Moderator => [
-            Permission::ReadContent, Permission::ModerateComments,
-        ].into(),
-        Role::Viewer => [
-            Permission::ReadContent,
-        ].into(),
+        Role::Admin => vec![Permission::DeletePost, Permission::WritePost, Permission::ReadPost],
+        Role::Editor => vec![Permission::WritePost, Permission::ReadPost],
+        Role::Viewer => vec![Permission::ReadPost],
     }
-}
-
-struct User {
-    id: u64,
-    name: String,
-    roles: Vec<Role>,
-}
-
-impl User {
-    fn permissions(&self) -> HashSet<Permission> {
-        self.roles.iter()
-            .flat_map(|r| role_permissions(r))
-            .collect()
-    }
-
-    fn has_permission(&self, perm: &Permission) -> bool {
-        self.permissions().contains(perm)
-    }
-
-    fn can(&self, perm: &Permission) -> Result<(), String> {
-        if self.has_permission(perm) { Ok(()) }
-        else { Err(format!("{} lacks {:?}", self.name, perm)) }
-    }
-}
-
-fn main() {
-    let admin = User {
-        id: 1, name: "Minh".into(), roles: vec![Role::Admin],
-    };
-    let editor = User {
-        id: 2, name: "Lan".into(), roles: vec![Role::Editor],
-    };
-    let viewer = User {
-        id: 3, name: "An".into(), roles: vec![Role::Viewer],
-    };
-
-    println!("Admin delete: {:?}", admin.can(&Permission::DeleteContent));
-    println!("Editor delete: {:?}", editor.can(&Permission::DeleteContent));
-    println!("Viewer write: {:?}", viewer.can(&Permission::WriteContent));
-    println!("Editor analytics: {:?}", editor.can(&Permission::ViewAnalytics));
-
-    println!("\nAdmin perms: {:?}", admin.permissions().len());
-    println!("Viewer perms: {:?}", viewer.permissions().len());
 }
 ```
 
-### ABAC (Attribute-Based Access Control)
+### 2. ABAC (Attribute-Based Access Control)
+RBAC bất lực trước các yêu cầu phức tạp: *"Tài khoản Editor được sửa bài viết, NHƯNG chỉ được sửa bài DO CHÍNH HỌ VIẾT"*.
+Lúc này ta dùng **ABAC**: Phân quyền dựa trên **Thuộc tính** (Ai? Của ai? Mấy giờ?).
 
 ```rust
-// filename: src/main.rs
-
-use std::collections::HashMap;
-
-// ═══ ABAC: policy-based ═══
-#[derive(Debug)]
 struct AccessRequest {
     user_id: u64,
-    user_role: String,
-    user_department: String,
-    resource_type: String,
-    resource_owner: u64,
-    action: String,
-    time_hour: u32, // 0-23
+    resource_owner_id: u64,
+    action: String, // "edit"
 }
 
+// Hàm Policy đánh giá theo Logic thay vì Roles
 fn evaluate_policy(req: &AccessRequest) -> Result<(), String> {
-    // Policy 1: Admin can do anything
-    if req.user_role == "admin" { return Ok(()); }
-
-    // Policy 2: Users can only read/write own resources
-    if req.action == "delete" && req.user_id != req.resource_owner {
-        return Err("Can only delete own resources".into());
+    if req.action == "edit" && req.user_id != req.resource_owner_id {
+        return Err("Bạn chỉ được sửa tài nguyên của chính mình!".into());
     }
-
-    // Policy 3: No access outside business hours for non-admins
-    if req.time_hour < 8 || req.time_hour > 18 {
-        return Err("Access denied: outside business hours".into());
-    }
-
-    // Policy 4: Sensitive resources require specific department
-    if req.resource_type == "financial" && req.user_department != "finance" {
-        return Err("Financial resources: finance dept only".into());
-    }
-
     Ok(())
 }
-
-fn main() {
-    let requests = vec![
-        AccessRequest {
-            user_id: 1, user_role: "admin".into(), user_department: "tech".into(),
-            resource_type: "document".into(), resource_owner: 2, action: "delete".into(), time_hour: 22,
-        },
-        AccessRequest {
-            user_id: 2, user_role: "user".into(), user_department: "tech".into(),
-            resource_type: "document".into(), resource_owner: 3, action: "delete".into(), time_hour: 10,
-        },
-        AccessRequest {
-            user_id: 3, user_role: "user".into(), user_department: "sales".into(),
-            resource_type: "financial".into(), resource_owner: 3, action: "read".into(), time_hour: 10,
-        },
-    ];
-
-    for req in &requests {
-        match evaluate_policy(req) {
-            Ok(_) => println!("✅ User {} {} {}: allowed", req.user_id, req.action, req.resource_type),
-            Err(e) => println!("❌ User {} {} {}: {}", req.user_id, req.action, req.resource_type, e),
-        }
-    }
-}
 ```
-
-### RBAC vs ABAC
-
-| | RBAC | ABAC |
-|---|---|---|
-| **Dựa trên** | Vai trò (Admin, Editor) | Thuộc tính (phòng ban, thời gian, tài nguyên) |
-| **Mức chi tiết** | Thô (coarse) | Tinh (fine-grained) |
-| **Độ phức tạp** | Đơn giản | Phức tạp (nhiều policy) |
-| **Khi nào dùng** | Phần lớn ứng dụng ✅ | Enterprise, multi-tenant |
-
----
-
-## 🏋️ Bài tập
-
-**Bài 1** (5 phút): Bảo mật mật khẩu
-
-Bạn thấy code: `hash = sha256(password)`. Liệt kê 3 vấn đề.
-
-<details><summary>✅ Lời giải</summary>
-
-1. **Không có salt** → tấn công rainbow table (cùng password = cùng hash)
-2. **Quá nhanh** → brute-force hàng tỷ lần/giây (GPU attack)
-3. **Không adaptive** → không thể tăng chi phí khi phần cứng mạnh hơn
-
-Cách sửa: Dùng `argon2id` với random salt và cost parameters phù hợp.
-
-</details>
-
----
-
-**Bài 2** (10 phút): JWT middleware
-
-Viết function `authenticate(token: &str) -> Result<Claims, AuthError>` cho middleware:
-- Decode JWT
-- Check expiration
-- Check role is at least "user"
-- Return Claims or AuthError enum
-
-<details><summary>✅ Lời giải Bài 2</summary>
-
-```rust
-enum AuthError { InvalidToken, Expired, InsufficientRole }
-
-fn authenticate(token: &str) -> Result<Claims, AuthError> {
-    let claims = jwt::decode(token).map_err(|e| {
-        if e.contains("expired") { AuthError::Expired }
-        else { AuthError::InvalidToken }
-    })?;
-
-    let valid_roles = ["user", "editor", "admin"];
-    if !valid_roles.contains(&claims.role.as_str()) {
-        return Err(AuthError::InsufficientRole);
-    }
-
-    Ok(claims)
-}
-```
-
-</details>
-
----
-
-**Bài 3** (15 phút): Bảo vệ quyền truy cập (Permission guard)
-
-Build generic `require_permission` guard:
-```rust
-fn require_permission<T>(
-    user: &User,
-    perm: Permission,
-    action: impl FnOnce() -> Result<T, String>,
-) -> Result<T, String>
-```
-Kiểm tra permission trước khi chạy action. Test với 3 scenarios.
-
-<details><summary>✅ Lời giải Bài 3</summary>
-
-```rust
-fn require_permission<T>(
-    user: &User,
-    perm: Permission,
-    action: impl FnOnce() -> Result<T, String>,
-) -> Result<T, String> {
-    user.can(&perm)?;
-    action()
-}
-
-// Usage
-fn delete_post(post_id: u64) -> Result<String, String> {
-    Ok(format!("Deleted post {}", post_id))
-}
-
-fn main() {
-    let admin = User { id: 1, name: "Minh".into(), roles: vec![Role::Admin] };
-    let viewer = User { id: 2, name: "An".into(), roles: vec![Role::Viewer] };
-
-    // Admin: OK
-    let r = require_permission(&admin, Permission::DeleteContent, || delete_post(1));
-    assert!(r.is_ok());
-
-    // Viewer: Denied
-    let r = require_permission(&viewer, Permission::DeleteContent, || delete_post(1));
-    assert!(r.is_err());
-}
-```
-
-</details>
-
----
-
-## 🔧 Troubleshooting
-
-| Vấn đề | Nguyên nhân | Giải pháp |
-|---------|-------------|-----------|
-| "JWT trong localStorage" | XSS có thể đánh cắp token | HttpOnly cookie + SameSite |
-| "Hash password quá nhanh" | Config yếu | argon2: `m=19456, t=2, p=1` tối thiểu |
-| "Tấn công redirect OAuth" | Open redirect | Whitelist redirect URIs |
-| "Bùng nổ roles" | Quá nhiều roles | Dùng permission-based thay vì role-based |
-
----
 
 ## Tóm tắt
 
-- ✅ **Password hashing**: Argon2id, never SHA/MD5. Random salt, slow hash.
-- ✅ **JWT**: header.payload.signature. Short-lived access + long-lived refresh.
-- ✅ **OAuth 2.0**: Auth Code + PKCE flow. Never expose Client Secret to frontend.
-- ✅ **RBAC**: Role → Permissions. Simple, covers most apps.
-- ✅ **ABAC**: Attribute-based policies. Fine-grained, enterprise.
-- ✅ **Rust crates**: `argon2`, `jsonwebtoken`, `oauth2`.
+- ✅ **Băm mật khẩu**: MD5/SHA quá nhanh. Hãy dùng Argon2/Bcrypt vì chúng có Salt và cố tình chạy rất chậm.
+- ✅ **JWT**: Giải quyết việc Load Balancing mà không cần share Session. Nhớ bài toán thu hồi bằng Refresh Token.
+- ✅ **OAuth 2.0**: Luôn dùng luồng Authorization Code để Access Token không bao giờ lộ trên trình duyệt.
+- ✅ **RBAC vs ABAC**: RBAC dễ hiểu, ABAC tinh tế. Hãy dùng RBAC làm nền, và ABAC để rào các trường hợp đặc biệt.
 
 ## Tiếp theo
 
-→ Chapter 41: **Application Security & Hardening** — OWASP Top 10, input validation, HTTPS, headers, rate limiting.
+Security không chỉ có mật khẩu và token. Hệ thống của bạn có chống được SQL Injection, XSS, hay CSRF không? 
+Hãy cùng trang bị áo giáp cho máy chủ ở **Chapter 41: Application Security**.

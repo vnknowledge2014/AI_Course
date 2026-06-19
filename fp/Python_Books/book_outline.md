@@ -105,19 +105,28 @@ Pydantic `BaseModel`. `.model_dump()`, `.model_validate_json()`.
 
 ---
 
-## Part V: FP Patterns with `returns` (Advanced)
+## Part V: FP Patterns (Advanced)
 
-### Chapter 25 — The `returns` Ecosystem ✅
-`Maybe`, `Result`, `IO`, `IOResult`, `FutureResult`. `@safe`, `@impure_safe`.
+### Chapter 25 — Abstract Algebra & Type Classes ✅
+`Eq`, `Ord`, `Semigroup`, `Monoid`. Protocols for structural comparison and merging. MapReduce parallel fold.
 
-### Chapter 26 — Functors & Monads ✅
-`.map()` = Functor. `.bind()` = Monad. Concrete per type (no HKTs).
+### Chapter 26 — Functors ✅
+Mappable containers. Functor Laws. The Nesting Problem. Protocol-based Functors (`Box`, `Validated`, `Tree`).
 
-### Chapter 27 — Applicative & Validation ✅
-`ResultE` for collecting errors. Pydantic validators as alternative.
+### Chapter 27 — Monads ✅
+Solving the Nesting Problem with `bind`/`flatMap`. Monad Laws. Generator-based do-notation (`do()` helper).
 
-### Chapter 28 — Monadic Stacking ✅
-`IOResult`, `FutureResult`, `RequiresContextIOResult`. Pre-built stacks.
+### Chapter 27b — Applicative & Validation ✅
+Fail-fast vs Collect-all. `Validated` type. `validate_all` combinator. `ap` operation.
+
+### Chapter 28 — Parser Combinators ✅
+Recursive parsing. Combinators: `then`, `or_else`, `many`, `between`. `bind_parser` (Parser as Monad).
+
+### Chapter 28b — Traverse & Sequence ✅
+Inverting structures (`list[Result]` → `Result[list]`). Applicative Traverse for collecting all errors in a list.
+
+### Chapter 28c — Recursive Types & Folds ✅
+Catamorphisms. Separating traversal from computation. Tree fold and AST Evaluator.
 
 ---
 

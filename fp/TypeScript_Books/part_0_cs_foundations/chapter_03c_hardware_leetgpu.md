@@ -111,5 +111,24 @@ Nhờ WebGPU, TypeScript đang dần trở thành một thế lực mới trong 
 - GPU mạnh mẽ nhờ kiến trúc SIMD xử lý song song hàng ngàn luồng.
 - "Sát thủ" của LLM trên Production thường không phải tính toán chậm, mà là băng thông VRAM không tải kịp dữ liệu (Memory Bound).
 
+## 3C.8 — Thử thách tối ưu Hardware: LeetCPU & LeetGPU
+
+Để thực sự nắm bắt giới hạn của phần cứng, bạn nên luyện tập các bài toán vi kiến trúc thông qua **LeetCPU** và **LeetGPU**. 
+
+### LeetCPU: Tối ưu V8 Engine
+Node.js và V8 Engine có trình biên dịch JIT, nhưng bạn vẫn có thể giúp nó chạy nhanh hơn:
+- **[Easy] Stable Partition / Grade Bands**: Tối ưu Branch Prediction (Dự đoán rẽ nhánh) khi duyệt mảng.
+- **[Medium] Matrix Multiply — Cache Tiling**: Truy cập mảng 1D một cách có thứ tự bằng TypedArrays (`Float32Array`) để tận dụng L1/L2 Cache.
+- **[Medium] SAXPY**: Hiểu cách V8 thực hiện vòng lặp và tối ưu ILP.
+
+### LeetGPU: Trở thành chiến thần WebGPU
+Với WebGPU API chuẩn bị bùng nổ, TypeScript/JS sẽ thành ngôn ngữ có thể chạy inference AI mạnh mẽ ngay trên trình duyệt:
+- **[Easy] Vector Add & Relu**: Viết mã WGSL (WebGPU Shading Language) để tính toán song song trực tiếp từ trình duyệt.
+- **[Medium] GEMM (General Matrix Multiplication)**: Thuật toán cốt lõi để chạy LLM cục bộ trên máy client.
+- **[Medium] RMS Normalization / Batched Matmul**: Hiện thực hóa Transformer pipeline trên GPU qua TS.
+- **[Hard] Multi-Head Attention**: Đỉnh cao của WebGPU Compute Shader để chạy LLaMA trực tiếp trên Chrome.
+
+---
+
 ## Tiếp theo
 Khóa nền tảng CS của bạn đã hoàn chỉnh! Từ bài sau, ta sẽ bắt đầu tìm hiểu sâu về cú pháp và sức mạnh thực sự của TypeScript Type System.

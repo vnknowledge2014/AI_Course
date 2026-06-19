@@ -1,64 +1,74 @@
-# Chapter 30 — Property-Based Testing
+# Chapter 30 — Property-Based Testing (PBT) với Hypothesis
 
 > **Bạn sẽ học được**:
-> - PBT: test PROPERTIES, not examples
-> - `hypothesis` library
-> - Strategies for generating test data
-> - Shrinking — tìm minimal failing case
+> - Sự khác biệt cốt lõi giữa Example-based testing và Property-based testing.
+> - Sử dụng thư viện `hypothesis` để tự động sinh ra hàng vạn test case.
+> - Cơ chế **Shrinking** — phép thuật tìm ra lỗi nhỏ nhất có thể.
+> - 4 mẫu Property thường gặp: Round-trip, Idempotent, Invariant, Oracle.
 >
 > **Yêu cầu trước**: Chapter 29 (TDD)
-> **Thời gian đọc**: ~25 phút | **Level**: Principal
+> **Thời gian đọc**: ~35 phút | **Level**: Principal
+> **Kết quả cuối cùng**: Chuyển từ việc tự nghĩ ra test case sang việc định nghĩa luật (rules) và để máy tính tìm ra các góc chết (edge cases) hộ bạn.
 
 ---
 
-## 30.1 — Example vs Property
+Trong Chapter trước, bạn đã học cách dùng `@pytest.mark.parametrize` để cung cấp 3-5 test case. Đó gọi là **Example-based Testing**. Bạn tự nghĩ ra input và tự tính output.
+Nhược điểm lớn nhất là: Trí tưởng tượng của con người có hạn. Bạn rất dễ quên test với chuỗi rỗng `""`, số âm `-1`, số `0`, hoặc một chuỗi Unicode kỳ dị `🤔`.
+
+**Property-Based Testing (PBT)** thay đổi hoàn toàn cuộc chơi. 
+Thay vì viết: *"Nếu tôi đưa vào 2 và 3, kết quả phải là 5"*.
+Bạn viết: *"Nếu tôi đưa vào hai số nguyên `a` và `b` BẤT KỲ, kết quả `a + b` phải bằng `b + a`"*.
+
+Bạn định nghĩa **Luật (Properties)**, còn framework (`hypothesis`) sẽ nã hàng vạn test case ngẫu nhiên vào hàm của bạn để cố gắng phá vỡ luật đó.
+
+## 30.1 — Từ Example đến Property
+
+Hãy xem cách kiểm tra một hàm đảo ngược danh sách (`reversed`).
 
 ```python
-# Example-based: test specific values
+# 1. EXAMPLE-BASED: Bạn tự nghĩ ra một ví dụ cụ thể
 def test_reverse_example():
     assert list(reversed([1, 2, 3])) == [3, 2, 1]
+    assert list(reversed([])) == []
 
-# Property-based: test INVARIANT for ALL inputs
-# "reverse(reverse(lst)) == lst" — for ANY list
+# 2. PROPERTY-BASED: Bạn định nghĩa TÍNH CHẤT (Property)
 from hypothesis import given
 from hypothesis import strategies as st
 
+# Định nghĩa luật: Đảo ngược một danh sách 2 lần thì sẽ trở về như cũ!
+# Cho BẤT KỲ danh sách số nguyên nào (st.lists(st.integers()))
 @given(st.lists(st.integers()))
 def test_reverse_involution(lst):
     assert list(reversed(list(reversed(lst)))) == lst
 
+# Định nghĩa luật: Đảo ngược danh sách không làm thay đổi độ dài!
 @given(st.lists(st.integers()))
 def test_reverse_preserves_length(lst):
     assert len(list(reversed(lst))) == len(lst)
-
-@given(st.lists(st.integers()))
-def test_sort_is_idempotent(lst):
-    assert sorted(sorted(lst)) == sorted(lst)
-
-@given(st.integers(), st.integers())
-def test_addition_commutative(a, b):
-    assert a + b == b + a
 ```
 
-## 30.2 — Strategies
+Khi chạy `pytest`, `hypothesis` sẽ tự động thử nghiệm mảng rỗng `[]`, mảng 1 phần tử `[0]`, mảng chứa số âm `[-1, -5]`, mảng cực lớn... Nếu có bất kỳ trường hợp nào làm fail `assert`, nó sẽ dừng lại và báo cho bạn!
+
+---
+
+## 30.2 — Strategies: Dạy máy tính cách sinh dữ liệu
+
+Để `hypothesis` ném data vào hàm của bạn, bạn phải dùng các `strategies` (chiến lược sinh data) do thư viện cung cấp. 
 
 ```python
 from hypothesis import strategies as st
 
-# Primitives
-# st.integers()            → any int
-# st.integers(0, 100)      → int in [0, 100]
-# st.floats()              → any float
-# st.text()                → any string
-# st.booleans()            → True/False
+# -- CÁC KIỂU CƠ BẢN --
+# st.integers(min_value=0, max_value=100) # Số nguyên từ 0 đến 100
+# st.floats(allow_nan=False)              # Số thực, không chứa NaN
+# st.text(min_size=1)                     # Chuỗi không rỗng
+# st.booleans()                           # True / False
 
-# Collections
-# st.lists(st.integers())          → [int, ...]
-# st.lists(st.integers(), min_size=1) → non-empty list
-# st.tuples(st.integers(), st.text()) → (int, str)
-# st.dictionaries(st.text(), st.integers()) → {str: int}
+# -- CÁC KIỂU TẬP HỢP --
+# st.lists(st.integers())                 # [1, 5, -2, ...]
+# st.dictionaries(st.text(), st.integers()) # {"abc": 1, "xyz": 2}
 
-# Custom: domain types
+# -- KẾT HỢP VỚI DOMAIN MODEL --
 from dataclasses import dataclass
 
 @dataclass(frozen=True)
@@ -66,6 +76,7 @@ class Money:
     amount: int
     currency: str
 
+# Dùng st.builds để sinh ra Object phức tạp
 money_strategy = st.builds(
     Money,
     amount=st.integers(min_value=0, max_value=1_000_000),
@@ -80,31 +91,71 @@ def test_money_add_commutative(a: Money, b: Money):
         assert sum1 == sum2
 ```
 
-## 30.3 — Testing Monoid Laws
+---
 
+## 30.3 — Shrinking: Phép thuật tìm kiếm lỗi
+
+Đây là tính năng đáng giá ngàn vàng của `hypothesis`.
+Giả sử thuật toán tính tổng của bạn bị lỗi khi `a + b > 500`. 
+
+Ban đầu, `hypothesis` ném ngẫu nhiên hai số `a = 4328` và `b = 9812` và phát hiện ra lỗi.
+Thay vì báo ngay cho bạn hai con số khổng lồ kia (rất khó debug), `hypothesis` bắt đầu quá trình **Shrinking (Thu nhỏ)**. Nó sẽ giảm dần `a` và `b` xuống: thử `(0, 0)` -> pass, thử `(100, 100)` -> pass, thử `(300, 300)` -> fail... Cứ thế cho đến khi nó tìm ra **test case thất bại nhỏ nhất có thể**.
+
+Cuối cùng nó sẽ báo lỗi cho bạn: `Falsifying example: test_addition(a=0, b=501)`.
+Tính năng này giúp bạn debug cực kỳ nhàn nhã!
+
+---
+
+## 30.4 — Bốn mẫu Property thường gặp
+
+Viết tính chất (Property) đôi khi khá khó vì bạn không thể dùng lại chính code của hàm cần test để test kết quả (như vậy là vô nghĩa). Dưới đây là 4 mẫu tư duy phổ biến:
+
+### 1. Round-Trip (Đi rồi trở lại)
+Test các quá trình có tính chất 2 chiều: `encode/decode`, `serialize/deserialize`.
 ```python
-@given(st.integers(), st.integers(), st.integers())
-def test_addition_associativity(a, b, c):
-    assert (a + b) + c == a + (b + c)
+import json
+@given(st.dictionaries(st.text(), st.integers()))
+def test_json_roundtrip(data):
+    # Biến dict thành chuỗi JSON, rồi biến ngược lại thành dict phải ra cái cũ!
+    assert json.loads(json.dumps(data)) == data
+```
 
-@given(st.integers())
-def test_addition_identity(a):
-    assert a + 0 == a
-    assert 0 + a == a
+### 2. Idempotent (Làm nhiều lần cũng như 1 lần)
+Test các hàm thao tác trên dữ liệu mà gọi lần thứ 2 không làm thay đổi trạng thái.
+```python
+@given(st.lists(st.integers()))
+def test_sort_is_idempotent(lst):
+    # Sort một mảng đã sort thì kết quả vẫn vậy!
+    assert sorted(sorted(lst)) == sorted(lst)
+```
 
-# These tests run 100 random examples by default
-# Hypothesis finds edge cases you'd never think of!
+### 3. Invariant (Đặc tính bất biến)
+Cho dù dữ liệu biến đổi thế nào, một số thuộc tính nhất định không bao giờ thay đổi. Ví dụ: map một mảng không bao giờ làm thay đổi số phần tử của nó.
+```python
+@given(st.lists(st.integers()))
+def test_map_preserves_length(lst):
+    mapped = list(map(lambda x: x * 2, lst))
+    assert len(mapped) == len(lst)
+```
+
+### 4. Test Oracle (Kiểm chứng bằng cách khác)
+So sánh một thuật toán mới (nhanh, phức tạp) với một thuật toán cũ (chậm, đơn giản, nhưng chắc chắn đúng).
+```python
+@given(st.lists(st.integers()))
+def test_my_fancy_sort_against_builtin(lst):
+    assert my_fancy_quicksort(lst) == sorted(lst)
 ```
 
 ---
 
 ## Tóm tắt
 
-- ✅ **PBT**: Test properties/invariants, not specific examples.
-- ✅ **Hypothesis**: `@given` + `st.` strategies = auto-generate test data.
-- ✅ **Shrinking**: Finds minimal failing case automatically.
-- ✅ **Monoid laws**: PBT is perfect for testing algebraic properties.
+- ✅ **PBT**: Đẩy trách nhiệm nghĩ test case cho máy tính, con người chỉ định nghĩa luật (Properties).
+- ✅ **Hypothesis**: Thư viện số 1 của Python cho PBT. Dùng `@given` và `st.<strategy>`.
+- ✅ **Shrinking**: `hypothesis` không chỉ tìm lỗi, nó tìm lỗi nhỏ nhất và đơn giản nhất để bạn dễ debug.
+- ✅ **4 Patterns**: Round-trip, Idempotent, Invariant, Oracle là những mẫu thiết kế tính chất phổ biến nhất để áp dụng PBT.
 
 ## Tiếp theo
 
-→ Chapter 31: **FastAPI & Async** — Building web APIs with FastAPI.
+Testing đã xong. Giờ là lúc biến domain logic của chúng ta thành những dịch vụ Web Service. Làm sao để áp dụng toàn bộ kiến thức FP (Pure Functions, Results, Pydantic) vào một Framework nổi tiếng nhất hiện nay? 
+Mời bạn đến với **Chapter 31: FastAPI + DDD**.
