@@ -1,6 +1,6 @@
-# Appendix C — Cargo & Ecosystem Guide
+# Appendix C — Cargo & Ecosystem Guide: Đi chợ đồ nghề Rust
 
-> Essential crates cho mỗi domain. Curated, battle-tested, production-ready.
+> Bước vào hệ sinh thái Rust cũng giống như bước vào một siêu thị khổng lồ. Có hàng ngàn `crates` (thư viện), nhưng bạn chỉ cần vài món đồ chất lượng nhất để bắt đầu. Dưới đây là danh sách những thư viện "chuẩn công nghiệp", đã được thử lửa qua vô số dự án thực tế, giúp bạn không phải đau đầu lựa chọn.
 
 ---
 
@@ -161,7 +161,22 @@ regex = "1"
 
 ---
 
-## C.9 — DevOps & Observability
+## C.9a — Agentic AI
+
+| Crate | Mô tả | Dùng khi |
+|-------|--------|----------|
+| **`rig-core`** | Nền tảng xây dựng LLM applications | Tích hợp AI Agent, RAG, Tool Calling ⭐ |
+| **`rig-lancedb`** | Vector Database adapter cho Rig | Lưu trữ embeddings, Context search |
+| **`rig-qdrant`** | Vector Database adapter cho Rig | Lựa chọn thay thế LanceDB |
+
+```toml
+[dependencies]
+rig-core = "0.6"
+```
+
+---
+
+## C.9b — DevOps & Observability
 
 | Crate | Mô tả | Dùng khi |
 |-------|--------|----------|

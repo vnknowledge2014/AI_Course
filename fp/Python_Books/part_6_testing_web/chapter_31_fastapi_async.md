@@ -124,6 +124,44 @@ def test_create_order():
 
 ---
 
+---
+
+## ✅ Checkpoint 31
+
+1. Khi nào dùng `def` và khi nào dùng `async def` cho một FastAPI endpoint?
+2. Gọi một hàm blocking bên trong `async def` thì chuyện gì xảy ra?
+3. Hệ thống DI của FastAPI liên quan gì tới `RequiresContext` ở Chapter 22?
+
+<details>
+<summary>Đáp án</summary>
+
+1. `async def` khi bên trong toàn `await` (httpx, asyncpg). `def` thường khi có lời gọi blocking — FastAPI sẽ tự đẩy nó ra threadpool. Chọn sai chiều nào cũng hại.
+2. Nó **chặn cả event loop**. Không chỉ request đó chậm — **mọi** request đang chờ trên worker đó đều đứng. Đây là lỗi hiệu năng phổ biến nhất trong FastAPI.
+3. Cùng một ý tưởng: hàm khai báo thứ nó **cần**, và ai đó bên ngoài cung cấp. `Depends()` là bản chạy lúc runtime với cú pháp riêng của framework; `RequiresContext` là bản thuần hàm, kiểm được bằng type checker.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Viết hai endpoint: một dùng `time.sleep(2)` trong `async def`, một dùng `asyncio.sleep(2)`. Bắn 10 request đồng thời vào từng cái và so tổng thời gian.
+
+**Bài 2 (15 phút).** Dùng `app.dependency_overrides` để thay repository thật bằng in-memory trong test. Chạy `TestClient` không cần database.
+
+**Bài 3 (20 phút).** Viết exception handler chuyển `Result` failure của domain thành mã HTTP đúng: validation → 422, not found → 404, permission → 403. Đây là ROP chạm tới ranh giới HTTP.
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Endpoint async nhưng vẫn chậm | Có lời gọi blocking bên trong | Đổi sang thư viện async, hoặc `run_in_executor` |
+| `RuntimeError: Event loop is closed` trong test | Trộn sync/async fixture | Dùng `pytest-asyncio` với `asyncio_mode = "auto"` |
+| Dependency chạy lại nhiều lần mỗi request | Đó là hành vi mặc định | `Depends(..., use_cache=True)` là mặc định; kiểm tra chưa tạo mới object mỗi lần |
+| Response model để lộ field nội bộ | Trả thẳng domain object | Khai báo `response_model` là DTO |
+| 422 mà không rõ lý do | Pydantic validation lỗi | Đọc `exc.errors()`; thêm handler tuỳ biến |
+
 ## Tóm tắt
 
 - ✅ **FastAPI**: Modern Python web framework — Pydantic + async.

@@ -335,7 +335,11 @@ const execute = (state: EditorState, command: EditorCommand): EditorState => {
             return { ...state, cursor: command.position };
     }
 };
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 // Undo = reverse command (data → data, not behavior → behavior)
 const reverseCommand = (state: EditorState, command: EditorCommand): EditorCommand => {
     switch (command.tag) {

@@ -1,6 +1,6 @@
-# Appendix E — Glossary & Index
+# Appendix E — Glossary & Index: Từ điển thuật ngữ Rust
 
-> Thuật ngữ chính trong cuốn sách, sắp xếp theo nhóm. Mỗi entry có: **Term** | Giải thích ngắn | Chapter reference.
+> Dù bạn đang ở chương nào, đôi khi bạn sẽ bắt gặp những thuật ngữ lạ lẫm hoặc tạm quên mất ý nghĩa của chúng. Đừng lo lắng! Phần phụ lục này chính là cuốn "từ điển mini" gom nhặt toàn bộ các khái niệm chính yếu trong cuốn sách. Các thuật ngữ được phân nhóm hợp lý, đi kèm giải thích siêu ngắn gọn và chỉ dẫn ngược về chương gốc để bạn dễ dàng tra cứu.
 
 ---
 
@@ -88,3 +88,20 @@
 | **Structured Logging** | JSON logs với fields. `tracing` crate | Ch 44 |
 | **thiserror** | Derive macro cho custom error types. Dùng trong libraries | Ch 10 |
 | **anyhow** | Catch-all error type. Dùng trong applications | Ch 10 |
+
+---
+
+## Agentic AI Concepts
+
+| Term | Giải thích | Chapter |
+|------|-----------|---------|
+| **Agent** | Một thực thể AI tự trị, có khả năng dùng Tool và suy luận | Ch 45 |
+| **Tool Calling** | Khả năng của LLM tự quyết định gọi function bên ngoài (API/CLI) | Ch 47 |
+| **Extractor** | Ép LLM trả về dữ liệu có cấu trúc (thường là JSON schema) | Ch 46 |
+| **RAG** | Retrieval-Augmented Generation — cung cấp thêm Context từ DB cho LLM | Ch 49 |
+| **MCP** | Model Context Protocol — chuẩn kết nối LLM với external tools | Ch 51 |
+| **LTM / STM** | Long-Term Memory / Short-Term Memory của Agent | Ch 54 |
+| **Lossless Memory** | Bộ nhớ lưu dữ liệu gốc (Verbatim) thay vì bản tóm tắt bị mất mát | Ch 54 |
+| **Incremental Sync** | Chỉ mục gia tăng. Chỉ update phần $\Delta$ bị thay đổi, tiết kiệm cost | Ch 54 |
+| **AST-Aware Chunking** | Băm dữ liệu dựa trên Cây cú pháp (AST) để bảo toàn logic của Code | Ch 54 |
+| **Dreaming Loop** | Vòng lặp tự tiến hóa của Agent (đánh giá STM, chuyển lên LTM) | Ch 54 |

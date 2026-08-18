@@ -137,6 +137,36 @@ assert transaction_count(events) == 3  # 3 transactions (deposit, withdraw, depo
 
 ---
 
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Cài `rebuild_state(events) -> State` bằng `functools.reduce`. Chứng minh cùng một chuỗi event luôn cho cùng một state.
+
+**Bài 2 (15 phút).** Thêm snapshot: cứ mỗi 100 event thì lưu state, và rebuild bắt đầu từ snapshot gần nhất. Đo thời gian rebuild trước và sau.
+
+**Bài 3 (25 phút).** Cài một projection: từ event stream sinh ra bảng đọc `customer_totals`. Xử lý cả việc build lại projection từ đầu khi bạn đổi cấu trúc bảng đọc.
+
+<details>
+<summary>Gợi ý bài 3</summary>
+
+Khả năng **build lại projection từ đầu** chính là siêu năng lực của Event Sourcing:
+thay đổi hình dạng read model không cần migration — chỉ xoá bảng đọc rồi replay.
+Điều đó chỉ đúng nếu event store là bất biến và append-only.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Rebuild ngày càng chậm | Số event tăng tuyến tính | Thêm snapshot định kỳ |
+| Đổi schema event làm hỏng event cũ | Event cũ là bất biến, không migrate được | Đánh version cho event, giữ upcaster cho bản cũ |
+| Read model lệch với write model | Projection lỗi lặng lẽ | Theo dõi độ trễ projection; có nút replay |
+| Event lưu cả state hiện tại | Nhầm event với snapshot | Event ghi **điều đã xảy ra**, không ghi kết quả tổng |
+| Không truy được thứ tự | Thiếu số thứ tự trong stream | Thêm `sequence_number` cho mỗi aggregate |
+
 ## Tóm tắt
 
 - ✅ **CQRS**: Tách read/write — optimize independently.

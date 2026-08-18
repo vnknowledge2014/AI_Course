@@ -525,6 +525,44 @@ if (typeof data === "string") {
 
 ---
 
+---
+
+## ✅ Checkpoint 0
+
+1. `type` và `interface` — khác nhau thực chất ở đâu?
+2. `unknown` khác `any` thế nào, và vì sao `unknown` gần như luôn tốt hơn?
+3. Vì sao `as` (type assertion) nguy hiểm hơn nhiều so với nó trông có vẻ?
+
+<details>
+<summary>Đáp án</summary>
+
+1. `interface` hỗ trợ declaration merging và extends nhiều lần; `type` làm được union, intersection, mapped type, conditional type. Quy tắc thực dụng: `interface` cho hình dạng object, `type` cho mọi thứ còn lại.
+2. `any` **tắt** kiểm kiểu — mọi thao tác đều được cho qua. `unknown` giữ nguyên kiểm tra: bạn buộc phải thu hẹp kiểu trước khi dùng. Cùng mức "chưa biết kiểu", nhưng `unknown` bắt bạn xử lý còn `any` để lỗi trôi tới runtime.
+3. Vì `as` **không kiểm tra gì cả** — nó chỉ bảo compiler im lặng. `data as User` khi `data` thực ra là `null` sẽ nổ ở dòng nào đó rất xa chỗ bạn viết `as`. Dùng type guard hoặc Zod để kiểm thật.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (5 phút).** Viết union `type Status = "draft" | "sent" | "paid"` và một hàm `switch` trên nó, kèm nhánh `never` để ép vét cạn.
+
+**Bài 2 (10 phút).** Viết type guard `function isUser(x: unknown): x is User`. Dùng nó thay cho `as User` và so sánh mức an toàn.
+
+**Bài 3 (10 phút).** Dùng `as const` trên một object và quan sát kiểu suy ra thay đổi thế nào. Vì sao nó hữu ích khi làm cấu hình?
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| `Object is possibly 'null'` | `strictNullChecks` đang bật (tốt!) | Thu hẹp bằng `if (x)`, hoặc `?.`/`??` |
+| `switch` không vét cạn mà không báo | Thiếu nhánh `never` | `default: const _exhaustive: never = x` |
+| Kiểu suy ra là `string` thay vì literal | Không có `as const` | Thêm `as const`, hoặc annotate tường minh |
+| `as any` rải khắp code | Đang chống lại type system | Thay bằng type guard hoặc validation runtime (Zod) |
+| Type lỗi mà app vẫn chạy | Bundler chỉ strip type | Chạy `tsc --noEmit` — type error không chặn bundler |
+
 ## Tóm tắt
 
 Chapter này chỉ cung cấp **đủ syntax** để bạn đọc hiểu code trong Part 0. Bạn **không cần nhớ hết** — hãy dùng bảng tham chiếu ở trên khi cần.

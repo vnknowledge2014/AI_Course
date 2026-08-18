@@ -195,6 +195,35 @@ except ValueError:
 
 ---
 
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (5 phút).** Mô hình `PaymentMethod` gồm `Cash`, `Card(last4)`, `BankTransfer(account)` bằng frozen dataclass + union. Viết `describe()` dùng `match` với `assert_never`.
+
+**Bài 2 (10 phút).** Thêm variant `CryptoWallet(address)` và chạy mypy **trước khi** sửa `describe()`. Quan sát lỗi mypy — đó chính là giá trị của `assert_never`.
+
+**Bài 3 (15 phút).** Tính "kích thước" (số trạng thái khả dĩ) của `tuple[bool, Literal["a","b","c"]]` và của union `bool | Literal["a","b","c"]`. Liên hệ với product/sum type ở Chapter 1.
+
+<details>
+<summary>Đáp án bài 3</summary>
+
+Product (tuple): 2 × 3 = **6**. Sum (union): 2 + 3 = **5**. Đó chính là lý do
+người ta gọi chúng là *product type* và *sum type* — phép toán trên số lượng
+trạng thái đúng bằng phép nhân và phép cộng.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| `match` không phân biệt được hai dataclass | Dùng `case Circle()` mà quên field | Match theo keyword: `case Circle(radius=r)` |
+| mypy không báo khi thiếu nhánh | Không có `assert_never` | Thêm `case _: assert_never(shape)` |
+| `isinstance` với union tại runtime | Union type không dùng cho `isinstance` trực tiếp | Kiểm từng thành phần, hoặc dùng `match` |
+| Union type dài dòng | Liệt kê lặp lại nhiều nơi | Đặt `type Shape = Circle \| Rect` (PEP 695, 3.12+) |
+
 ## Tóm tắt
 
 - ✅ **Product types**: `@dataclass(frozen=True)` — AND of fields.

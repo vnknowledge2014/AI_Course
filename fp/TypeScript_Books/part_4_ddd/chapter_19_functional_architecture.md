@@ -220,7 +220,11 @@ type OrderSummary = {
     readonly tax: number;
     readonly total: number;
 };
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 // Application service — orchestrates FC + IS
 const placeOrder = async (
     cart: { customerId: string; items: readonly CartItem[] },
@@ -691,14 +695,17 @@ console.log("Reader pattern OK ✅");
 
 Ví dụ tổng hợp kết nối mọi tầng: Domain (pure types + functions) → Infrastructure interfaces (defined in domain) → Application (use cases = shell) → Test (object literals = test doubles). Chú ý: domain KHÔNG import gì ngoài chính nó. Application import domain + infra interfaces. Test tạo fake deps bằng object literal — zero mock library.
 
+#### Bước 1: Tầng Domain (Pure — Innermost)
+
+Chứa type định nghĩa và pure functions. Không có side effects.
+
 ```typescript
-// filename: src/architecture_complete.ts
+// filename: src/architecture_step1.ts
 import assert from "node:assert/strict";
 
 // =============================================
 // LAYER 1: DOMAIN (Pure — innermost)
 // =============================================
-
 type Money = number & { readonly __brand: "Money" };
 const Money = (amount: number): Money => amount as Money;
 
@@ -718,44 +725,34 @@ type Order = {
     readonly status: "draft" | "confirmed" | "shipped";
 };
 
-type Result<T, E> =
-    | { readonly tag: "ok"; readonly value: T }
-    | { readonly tag: "err"; readonly error: E };
-
+type Result<T, E> = { readonly tag: "ok"; readonly value: T } | { readonly tag: "err"; readonly error: E };
 const ok = <T>(value: T): Result<T, never> => ({ tag: "ok", value });
 const err = <E>(error: E): Result<never, E> => ({ tag: "err", error });
 
 // Pure domain functions
-const calculateItemTotal = (item: OrderItem): Money =>
-    Money(item.unitPrice * item.quantity);
-
-const calculateOrderTotal = (order: Order): Money =>
-    Money(order.items.reduce((sum, item) => sum + calculateItemTotal(item), 0));
+const calculateItemTotal = (item: OrderItem): Money => Money(item.unitPrice * item.quantity);
+const calculateOrderTotal = (order: Order): Money => Money(order.items.reduce((sum, item) => sum + calculateItemTotal(item), 0));
 
 const canConfirm = (order: Order): Result<Order, string> =>
-    order.status === "draft"
-        ? ok(order)
-        : err(`Cannot confirm order with status: ${order.status}`);
+    order.status === "draft" ? ok(order) : err(`Cannot confirm order with status: ${order.status}`);
 
-const confirmOrder = (order: Order): Order => ({
-    ...order,
-    status: "confirmed",
-});
+const confirmOrder = (order: Order): Order => ({ ...order, status: "confirmed" });
 
 const canShip = (order: Order): Result<Order, string> =>
-    order.status === "confirmed"
-        ? ok(order)
-        : err(`Cannot ship order with status: ${order.status}`);
+    order.status === "confirmed" ? ok(order) : err(`Cannot ship order with status: ${order.status}`);
 
-const shipOrder = (order: Order): Order => ({
-    ...order,
-    status: "shipped",
-});
+const shipOrder = (order: Order): Order => ({ ...order, status: "shipped" });
+```
 
+#### Bước 2: Infrastructure Interfaces & Application Shell
+
+Khai báo dependencies và điều phối (orchestrate) luồng làm việc.
+
+```typescript
+// filename: src/architecture_step2.ts
 // =============================================
 // LAYER 2: INFRASTRUCTURE INTERFACES (in Domain)
 // =============================================
-
 type OrderRepository = {
     readonly findById: (id: OrderId) => Promise<Order | null>;
     readonly save: (order: Order) => Promise<void>;
@@ -769,7 +766,6 @@ type NotificationService = {
 // =============================================
 // LAYER 3: APPLICATION (Use Cases — Shell)
 // =============================================
-
 const confirmOrderUseCase = async (
     orderId: OrderId,
     repo: OrderRepository,
@@ -791,11 +787,17 @@ const confirmOrderUseCase = async (
 
     return ok(confirmed);
 };
+```
 
+#### Bước 3: Testing với FP Dependency Injection
+
+Không dùng mock framework nào, chỉ fake implementation cho deps.
+
+```typescript
+// filename: src/architecture_step3.ts
 // =============================================
 // TEST (no real DB, no real email — FP DI!)
 // =============================================
-
 const testOrder: Order = {
     id: "ORD-1" as OrderId,
     customerId: "C-1" as CustomerId,
@@ -1086,7 +1088,11 @@ const processPayment = async (
         await deps.audit.log("fraud_detected", { amount, score: fraudCheck.score });
         return err("Payment flagged as fraud");
     }
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
     // IO: charge
     try {
         const result = await deps.gateway.charge(amount, cardToken);

@@ -1,6 +1,7 @@
-# Appendix B — From F#/PureScript to Rust
+# Appendix B — Từ F# và PureScript đến Rust: Cây cầu nối liền hai thế giới
 
-> Translation table cho developers đến từ F#, PureScript, Haskell. Tìm khái niệm quen thuộc → Rust equivalent.
+> Dành riêng cho những lữ khách đến từ các vùng đất thuần Functional như F#, PureScript hay Haskell. 
+> Khi chuyển sang Rust, có thể bạn sẽ thấy đôi chút bỡ ngỡ với các khái niệm mới. Phần này chính là "từ điển dịch thuật" giúp bạn đối chiếu những thứ đã quen thuộc sang ngôn ngữ Rust một cách tự nhiên nhất. Hãy coi đây là chiếc la bàn để bạn không bị lạc lối nhé!
 
 ---
 

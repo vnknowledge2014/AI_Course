@@ -1,4 +1,4 @@
-# Chapter 31 — Parser Combinators
+# Chapter 31 — Parser Combinators: Xây lâu đài từ những viên gạch nhỏ
 
 > **Bạn sẽ học được**:
 > - **Parser** = function `&str → Result<(T, &str)>` — ăn input, trả value + remaining
@@ -15,38 +15,58 @@
 
 ## Parser Combinators — Xây dựng parsers từ building blocks
 
-Nếu bạn từng viết parser bằng regex hoặc manual string splitting, bạn biết nó dễ vỡ, khó maintain, và gần như không thể test riêng lẻ. Parser combinators là cách FP giải quyết bài toán parsing: xây dựng parsers phức tạp từ **những parsers nhỏ, đơn giản**, kết hợp chúng bằng combinators (map, and_then, or, many).
+Nếu bạn từng phải bóc tách dữ liệu (parsing) bằng các biểu thức chính quy (Regex) dài ngoằng hoặc dùng hàm `split` thủ công, bạn hẳn đã nếm mùi đau khổ. Regex cực kỳ dễ vỡ, khó bảo trì, và gần như không thể test riêng lẻ từng thành phần. "Hôm nay chạy ngon, ngày mai thêm một khoảng trắng là sập."
 
-Kết quả: mỗi parser nhỏ test được riêng, parser lớn composable, và tất cả type-safe. Đây là ứng dụng thực tế đẹp nhất của FP concepts (functors, monads) mà bạn học ở chapters trước.
+Parser combinators là cách lập trình hàm (FP) giải quyết bài toán này một cách thanh lịch: Thay vì viết một cỗ máy phân tích khổng lồ, chúng ta viết những máy phân tích **cực kỳ nhỏ và đơn giản**. Sau đó, ta dùng các chất keo dính (combinators như `map`, `or`, `many`) để ghép chúng lại với nhau.
+
+Giống như trò xếp hình Lego: Bạn không tự đúc một khối lâu đài bằng nhựa. Bạn lấy những viên gạch 1x1, 2x2 lắp lại với nhau. Kết quả: mỗi viên gạch đều có thể test riêng, lâu đài vững chắc, và hệ thống type-safe tuyệt đối!
 
 ---
 
-## 31.1 — Parser = Function
+## 31.1 — Parser bản chất chỉ là một Function
 
-Bạn có một string JSON, CSV, hoặc query. Cách thường thấy: regex hoặc split bằng tay, rồi fix bugs vì edge cases. Cách FP: viết từng parser nhỏ ("parse 1 chữ số", "parse 1 string") rồi **gắp chúng lại** thành parser lớn. Giống làm bánh: không cần 1 công thức khổng lồ, chỉ cần biết trộn bột, đánh kem, và lắp ráp.
+Một Parser thực chất là gì? Hãy tưởng tượng nó như một cái máy xay thịt. Bạn nhét vào một miếng thịt dài (String input). Máy cắn một miếng, nhả ra viên thịt viên (giá trị đã parse được), và nhả ra phần thịt còn lại chưa xử lý. Nếu miếng thịt có xương (lỗi cú pháp), máy báo lỗi.
 
-Parser đơn giản nhất là một function: nhận string input, trả về **(giá trị parsed, phần còn lại)** hoặc error.
-
-### Parser cơ bản
+Bằng code Rust, chúng ta định nghĩa kiểu `ParseResult` để thể hiện khái niệm này:
 
 ```rust
 // filename: src/main.rs
 
-// Parser type: ăn &str, trả (parsed_value, remaining_input)
+// Parser type: ăn &str, trả (parsed_value, remaining_input) hoặc Lỗi
 type ParseResult<'a, T> = Result<(T, &'a str), String>;
+```
 
-// ═══ Basic parsers (building blocks) ═══
+Bây giờ, hãy tạo "viên gạch Lego" cơ bản nhất: Một hàm phân tích duy nhất một ký tự thỏa mãn điều kiện nào đó.
 
+```rust
 /// Parse 1 ký tự thỏa condition
 fn satisfy(input: &str, pred: impl Fn(char) -> bool) -> ParseResult<char> {
     match input.chars().next() {
-        Some(c) if pred(c) => Ok((c, &input[c.len_utf8()..])),
+        Some(c) if pred(c) => Ok((c, &input[c.len_utf8()..])), // Cắn 1 miếng, trả phần còn lại
         Some(c) => Err(format!("Unexpected '{}'", c)),
         None => Err("Unexpected end of input".into()),
     }
 }
+```
 
-/// Parse exact string
+Có viên gạch này rồi, việc tạo ra các parser cụ thể như "đọc số" hay "đọc chữ" trở nên dễ dàng như trở bàn tay:
+
+```rust
+/// Parse đúng 1 chữ số
+fn digit(input: &str) -> ParseResult<char> {
+    satisfy(input, |c| c.is_ascii_digit())
+}
+
+/// Parse đúng 1 chữ cái
+fn letter(input: &str) -> ParseResult<char> {
+    satisfy(input, |c| c.is_alphabetic())
+}
+```
+
+Đôi khi ta cần đọc một chuỗi cụ thể, ví dụ như từ khóa "true" hoặc "false". Ta viết một parser `tag`:
+
+```rust
+/// Parse chính xác một chuỗi cho trước
 fn tag<'a>(input: &'a str, expected: &str) -> ParseResult<'a, &'a str> {
     if input.starts_with(expected) {
         Ok((&input[..expected.len()], &input[expected.len()..]))
@@ -54,73 +74,61 @@ fn tag<'a>(input: &'a str, expected: &str) -> ParseResult<'a, &'a str> {
         Err(format!("Expected '{}', got '{}'", expected, &input[..input.len().min(10)]))
     }
 }
+```
 
-/// Parse 1 digit
-fn digit(input: &str) -> ParseResult<char> {
-    satisfy(input, |c| c.is_ascii_digit())
-}
+Hãy thử chạy chúng xem sao:
 
-/// Parse 1 letter
-fn letter(input: &str) -> ParseResult<char> {
-    satisfy(input, |c| c.is_alphabetic())
-}
-
-/// Skip whitespace
-fn whitespace(input: &str) -> ParseResult<&str> {
-    let trimmed = input.trim_start();
-    let consumed = input.len() - trimmed.len();
-    Ok((&input[..consumed], trimmed))
-}
-
+```rust
 fn main() {
     println!("digit: {:?}", digit("42abc"));       // Ok(('4', "2abc"))
     println!("letter: {:?}", letter("hello"));      // Ok(('h', "ello"))
     println!("tag: {:?}", tag("hello world", "hello")); // Ok(("hello", " world"))
-    println!("ws: {:?}", whitespace("  hello"));    // Ok(("  ", "hello"))
 
     // Error cases
-    println!("digit err: {:?}", digit("abc"));      // Err
-    println!("tag err: {:?}", tag("hi", "hello"));  // Err
+    println!("digit err: {:?}", digit("abc"));      // Err: Unexpected 'a'
 }
 ```
 
+Rất gọn gàng! Nhưng đây chỉ mới là những viên gạch. Làm sao để xây nhà?
+
 ---
 
-## 31.2 — Combinators: Compose Parsers
+## 31.2 — Combinators: Chất keo dính vạn năng
 
-Có parser cơ bản rồi — làm sao gắp chúng lại? Dùng **combinators**: functions nhận parser(s) và trả parser mới. `map` biến đổi kết quả (Functor!). `pair` chạy 2 parsers liên tiếp. `alt` thử parser này, nếu fail thì thử parser kia. `many1` lặp lại 1+ lần.
+Có parser cơ bản rồi, chúng ta cần các **combinators**: đây là những function nhận vào parser và trả về một parser lớn hơn.
 
-### `map`: Transform parser output (Functor!)
+### `map`: Biến đổi kết quả (Xin chào Functor!)
+
+Giả sử `digit` trả về ký tự `'7'`, nhưng bạn lại muốn con số `7` kiểu `u32`. Bạn cần một cách để ánh xạ (map) kết quả bên trong. Đây chính là khái niệm Functor mà ta học ở chương 29!
 
 ```rust
-// filename: src/main.rs
-
-type ParseResult<'a, T> = Result<(T, &'a str), String>;
-
-fn digit(input: &str) -> ParseResult<char> {
-    match input.chars().next() {
-        Some(c) if c.is_ascii_digit() => Ok((c, &input[c.len_utf8()..])),
-        _ => Err("Expected digit".into()),
-    }
-}
-
-// map: transform parser output
+// map: Chạy parser gốc, nếu thành công thì lấy kết quả chạy qua hàm f
 fn map<'a, A, B>(
     parser: impl Fn(&'a str) -> ParseResult<'a, A>,
     f: impl Fn(A) -> B,
 ) -> impl Fn(&'a str) -> ParseResult<'a, B> {
     move |input| {
-        parser(input).map(|(val, rest)| (f(val), rest))
+        // Cú pháp `?` giúp dừng sớm nếu parser gốc lỗi
+        let (val, rest) = parser(input)?; 
+        Ok((f(val), rest))
     }
 }
+```
 
-// many1: parse 1+ times, collect results
+### `many1`: Lặp đi lặp lại
+
+Một chữ số thì không làm được gì nhiều. Chúng ta cần đọc số `42` (gồm nhiều chữ số). Hãy viết hàm `many1`, yêu cầu parse ít nhất 1 lần, và gom tất cả kết quả lại thành `Vec`.
+
+```rust
+// many1: Parse ít nhất 1 lần, lặp lại cho đến khi lỗi, thu thập kết quả
 fn many1<'a, T>(
     parser: impl Fn(&'a str) -> ParseResult<'a, T>,
 ) -> impl Fn(&'a str) -> ParseResult<'a, Vec<T>> {
     move |input| {
-        let (first, mut remaining) = parser(input)?;
+        let (first, mut remaining) = parser(input)?; // Ít nhất 1 lần phải thành công
         let mut results = vec![first];
+        
+        // Cứ chạy tiếp chừng nào còn thành công
         while let Ok((val, rest)) = parser(remaining) {
             results.push(val);
             remaining = rest;
@@ -128,49 +136,31 @@ fn many1<'a, T>(
         Ok((results, remaining))
     }
 }
-
-fn main() {
-    // digit → char, map → u32
-    let digit_num = map(digit, |c| c.to_digit(10).unwrap());
-    println!("digit_num: {:?}", digit_num("7abc")); // Ok((7, "abc"))
-
-    // many1(digit) → Vec<char>
-    let digits = many1(digit);
-    println!("digits: {:?}", digits("42abc")); // Ok((['4','2'], "abc"))
-
-    // Compose: many1(digit) → map → number
-    let number = map(many1(digit), |chars| {
-        chars.iter().collect::<String>().parse::<i64>().unwrap()
-    });
-    println!("number: {:?}", number("12345+67")); // Ok((12345, "+67"))
-}
 ```
 
-### `pair`: Parse A then B
+Giờ hãy kết hợp chúng lại để parse một con số hoàn chỉnh từ chuỗi:
 
 ```rust
-// filename: src/main.rs
+fn main() {
+    // Bước 1: Parse nhiều chữ số -> Vec<char>
+    let digits_parser = many1(digit);
+    
+    // Bước 2: Dùng map để nối Vec<char> thành String rồi ép kiểu sang i64
+    let number_parser = map(digits_parser, |chars| {
+        chars.iter().collect::<String>().parse::<i64>().unwrap()
+    });
 
-type ParseResult<'a, T> = Result<(T, &'a str), String>;
-
-fn tag<'a>(expected: &'a str) -> impl Fn(&'a str) -> ParseResult<'a, &'a str> {
-    move |input| {
-        if input.starts_with(expected) {
-            Ok((&input[..expected.len()], &input[expected.len()..]))
-        } else {
-            Err(format!("Expected '{}'", expected))
-        }
-    }
+    println!("number: {:?}", number_parser("12345+67")); // Ok((12345, "+67"))
 }
+```
+Nhìn kìa! Không hề có vòng lặp for thủ công hay cắt chuỗi lằng nhằng trong code gọi hàm. Mọi thứ được định nghĩa theo hướng khai báo (declarative).
 
-fn digit(input: &str) -> ParseResult<char> {
-    match input.chars().next() {
-        Some(c) if c.is_ascii_digit() => Ok((c, &input[c.len_utf8()..])),
-        _ => Err("Expected digit".into()),
-    }
-}
+### `pair` và `alt`: Tuần tự và Lựa chọn
 
-// pair: run parser A, then parser B on remaining
+Đôi khi bạn cần đọc chuỗi A **rồi đến** chuỗi B. Hoặc bạn cần đọc chữ **hoặc** số. Chúng ta định nghĩa `pair` (tuần tự) và `alt` (thay thế).
+
+```rust
+// pair: Chạy parser A, rồi lấy phần còn lại nạp vào parser B
 fn pair<'a, A, B>(
     pa: impl Fn(&'a str) -> ParseResult<'a, A>,
     pb: impl Fn(&'a str) -> ParseResult<'a, B>,
@@ -182,7 +172,7 @@ fn pair<'a, A, B>(
     }
 }
 
-// alt: try parser A, if fails try parser B
+// alt: Thử chạy A, nếu A lỗi thì thử chạy B
 fn alt<'a, T>(
     pa: impl Fn(&'a str) -> ParseResult<'a, T>,
     pb: impl Fn(&'a str) -> ParseResult<'a, T>,
@@ -190,23 +180,6 @@ fn alt<'a, T>(
     move |input| {
         pa(input).or_else(|_| pb(input))
     }
-}
-
-fn main() {
-    // pair: digit + digit
-    let two_digits = pair(digit, digit);
-    println!("pair: {:?}", two_digits("42abc"));  // Ok((('4','2'), "abc"))
-
-    // alt: digit OR letter
-    let letter = |input: &str| -> ParseResult<char> {
-        match input.chars().next() {
-            Some(c) if c.is_alphabetic() => Ok((c, &input[c.len_utf8()..])),
-            _ => Err("Expected letter".into()),
-        }
-    };
-    let digit_or_letter = alt(digit, letter);
-    println!("alt '5': {:?}", digit_or_letter("5x"));   // Ok(('5', "x"))
-    println!("alt 'a': {:?}", digit_or_letter("ax"));   // Ok(('a', "x"))
 }
 ```
 
@@ -216,102 +189,71 @@ fn main() {
 
 > Ghi nhớ:
 > 1. **Parser** = `&str → Result<(T, &str)>`. Ăn input, trả value + remaining.
-> 2. **`map`** = Functor! Transform output.
-> 3. **`pair`** = Sequence. Parse A rồi B.
-> 4. **`alt`** = Choice. Try A, fallback to B.
-> 5. **`many1`** = Repetition. Parse 1+ times.
+> 2. **`map`** = Functor! Biến đổi kết quả (A -> B).
+> 3. **`pair`** = Sequence. Parse A rồi tới B.
+> 4. **`alt`** = Choice. Thử A, nếu hỏng thì chuyển sang B.
+> 5. **`many1`** = Repetition. Lặp lại 1 hoặc nhiều lần.
 >
-> Nhận ra pattern? `map` = Functor, `and_then` = Monad. Parser combinators **IS** FP in action!
+> Bạn có thấy sự tương đồng? `map` chính là Functor, và nếu bạn viết `and_then` nó chính là Monad. Parser combinators **CHÍNH LÀ** FP trong thực tế!
 
 ---
 
-## 31.3 — Build: Number & String Parsers
+## 31.3 — Xây dựng Parser thực tế: Số và Chuỗi
 
-Bây giờ gắp các combinators lại để parse những thứ thực tế: số (có dấu, có phần thập phân) và strings (có escape sequences). Mỗi parser vẫn chỉ là function nhỏ, dùng `many1` và `satisfy` để xây.
+Với các viên gạch đã có, hãy thử phân tích (parse) một số thập phân (float) hỗ trợ cả dấu âm. Cách tư duy:
+1. Đọc dấu trừ (nếu có).
+2. Đọc phần nguyên (các chữ số).
+3. Đọc dấu chấm `.`.
+4. Đọc phần thập phân.
 
 ```rust
-// filename: src/main.rs
-
-type ParseResult<'a, T> = Result<(T, &'a str), String>;
-
-// ═══ Primitive parsers ═══
-fn satisfy(input: &str, pred: impl Fn(char) -> bool, desc: &str) -> ParseResult<char> {
-    match input.chars().next() {
-        Some(c) if pred(c) => Ok((c, &input[c.len_utf8()..])),
-        _ => Err(format!("Expected {}", desc)),
-    }
-}
-
-fn many0<'a, T>(
-    parser: impl Fn(&'a str) -> ParseResult<'a, T>,
-) -> impl Fn(&'a str) -> ParseResult<'a, Vec<T>> {
-    move |mut input| {
-        let mut results = vec![];
-        while let Ok((val, rest)) = parser(input) {
-            results.push(val);
-            input = rest;
-        }
-        Ok((results, input))
-    }
-}
-
-fn many1<'a, T>(
-    parser: impl Fn(&'a str) -> ParseResult<'a, T>,
-) -> impl Fn(&'a str) -> ParseResult<'a, Vec<T>> {
-    move |input| {
-        let (first, mut remaining) = parser(input)?;
-        let mut results = vec![first];
-        while let Ok((val, rest)) = parser(remaining) {
-            results.push(val);
-            remaining = rest;
-        }
-        Ok((results, remaining))
-    }
-}
-
-// ═══ Number parser ═══
 fn parse_number(input: &str) -> ParseResult<f64> {
+    // 1. Lấy dấu
     let (sign, rest) = match input.starts_with('-') {
         true => (-1.0, &input[1..]),
         false => (1.0, input),
     };
 
-    let integer = many1(|i| satisfy(i, |c| c.is_ascii_digit(), "digit"));
+    // 2. Lấy phần nguyên
+    let integer = many1(digit);
     let (int_chars, rest) = integer(rest)?;
     let int_str: String = int_chars.iter().collect();
 
-    // Optional decimal part
+    // 3. Nếu có dấu chấm, lấy phần thập phân
     if rest.starts_with('.') {
-        let decimal = many1(|i| satisfy(i, |c| c.is_ascii_digit(), "digit"));
+        let decimal = many1(digit);
         let (dec_chars, rest) = decimal(&rest[1..])?;
         let dec_str: String = dec_chars.iter().collect();
+        
         let full = format!("{}.{}", int_str, dec_str);
         let num: f64 = full.parse().unwrap();
         Ok((sign * num, rest))
     } else {
+        // Chỉ là số nguyên
         let num: f64 = int_str.parse().unwrap();
         Ok((sign * num, rest))
     }
 }
+```
 
-// ═══ String parser (quoted) ═══
+Đối với chuỗi được bọc trong ngoặc kép (String parser), logic hơi khác một chút vì chúng ta phải đối mặt với các ký tự escape như `\n` hoặc `\"`. Trong trường hợp này, viết một vòng lặp `loop` bên trong parser sẽ tối ưu và dễ đọc hơn là cố nhồi nhét quá nhiều combinator:
+
+```rust
 fn parse_string(input: &str) -> ParseResult<String> {
     if !input.starts_with('"') {
         return Err("Expected opening quote".into());
     }
     let rest = &input[1..];
-
     let mut result = String::new();
     let mut chars = rest.char_indices();
 
     loop {
         match chars.next() {
             Some((i, '"')) => {
-                // i = vị trí của closing quote trong `rest`
-                // input offset = 1 (open quote) + i (content) + 1 (close quote)
+                // Gặp ngoặc đóng -> Hoàn thành. Trả về kết quả và chuỗi còn lại.
                 return Ok((result, &input[1 + i + 1..]));
             }
-            Some((_, '\\')) => {
+            Some((_, '\\')) => { // Ký tự escape
                 match chars.next() {
                     Some((_, 'n')) => result.push('\n'),
                     Some((_, 't')) => result.push('\t'),
@@ -321,37 +263,22 @@ fn parse_string(input: &str) -> ParseResult<String> {
                     None => return Err("Unexpected end in escape".into()),
                 }
             }
-            Some((_, c)) => result.push(c),
+            Some((_, c)) => result.push(c), // Ký tự thường
             None => return Err("Unterminated string".into()),
         }
     }
-}
-
-fn main() {
-    // Numbers
-    println!("Integer: {:?}", parse_number("42 rest"));
-    println!("Float: {:?}", parse_number("3.14xyz"));
-    println!("Negative: {:?}", parse_number("-99.5!"));
-
-    // Strings
-    println!("\nString: {:?}", parse_string(r#""hello" rest"#));
-    println!("Escape: {:?}", parse_string(r#""line\nnew""#));
-    println!("Empty: {:?}", parse_string(r#""""#));
 }
 ```
 
 ---
 
-## 31.4 — Build: Key-Value & Mini JSON Parser
+## 31.4 — Đỉnh cao: Xây dựng Mini JSON Parser
 
-và đây là điểm đỉnh: gắp tất cả parsers đã viết thành một JSON parser hoàn chỉnh — parse null, boolean, number, string, array, và object (lồng nhau). Tất cả chỉ ~100 dòng, không dùng regex hay library bên ngoài.
+Bây giờ là màn trình diễn ngoạn mục nhất. Chúng ta sẽ "xếp Lego" tất cả những thứ trên thành một JSON Parser hoàn chỉnh. Không Regex, không thư viện ngoài.
+
+Đầu tiên, hãy định nghĩa kiểu dữ liệu JSON:
 
 ```rust
-// filename: src/main.rs
-
-type ParseResult<'a, T> = Result<(T, &'a str), String>;
-
-// ═══ JSON Value type ═══
 #[derive(Debug, Clone, PartialEq)]
 enum JsonValue {
     Null,
@@ -361,8 +288,11 @@ enum JsonValue {
     Array(Vec<JsonValue>),
     Object(Vec<(String, JsonValue)>),
 }
+```
 
-// ═══ Helper parsers ═══
+Tiếp theo là viết các parser cơ bản cho Null và Boolean. Hãy nhớ luôn "ăn" các khoảng trắng thừa bằng hàm `ws` (whitespace).
+
+```rust
 fn ws(input: &str) -> &str { input.trim_start() }
 
 fn parse_null(input: &str) -> ParseResult<JsonValue> {
@@ -380,285 +310,74 @@ fn parse_bool(input: &str) -> ParseResult<JsonValue> {
         Ok((JsonValue::Bool(false), &input[5..]))
     } else { Err("Expected bool".into()) }
 }
+```
 
-fn parse_number(input: &str) -> ParseResult<JsonValue> {
-    let input = ws(input);
-    let end = input.find(|c: char| !c.is_ascii_digit() && c != '.' && c != '-' && c != '+' && c != 'e' && c != 'E')
-        .unwrap_or(input.len());
-    if end == 0 { return Err("Expected number".into()); }
-    let num: f64 = input[..end].parse().map_err(|_| "Invalid number".to_string())?;
-    Ok((JsonValue::Number(num), &input[end..]))
-}
+Tương tự, ta tái sử dụng hàm `parse_string` ở trên và bọc nó vào `JsonValue::Str`.
+Nhưng JSON thú vị nhất là ở Mảng (Array) và Đối tượng (Object), vì chúng có tính **đệ quy**. Một Array chứa các `JsonValue`, mà bản thân `JsonValue` lại có thể là một Array khác!
 
-fn parse_string_raw(input: &str) -> ParseResult<String> {
-    let input = ws(input);
-    if !input.starts_with('"') { return Err("Expected string".into()); }
-    let mut end = 1;
-    let bytes = input.as_bytes();
-    while end < bytes.len() {
-        if bytes[end] == b'\\' { end += 2; continue; }
-        if bytes[end] == b'"' {
-            let s = &input[1..end];
-            return Ok((s.to_string(), &input[end+1..]));
-        }
-        end += 1;
-    }
-    Err("Unterminated string".into())
-}
+Hãy xem cách chúng ta parse một Array: đọc `[`, sau đó lặp lại việc đọc `JsonValue` và dấu phẩy `,`, kết thúc khi gặp `]`.
 
-fn parse_string(input: &str) -> ParseResult<JsonValue> {
-    parse_string_raw(input).map(|(s, r)| (JsonValue::Str(s), r))
-}
-
+```rust
 fn parse_array(input: &str) -> ParseResult<JsonValue> {
     let input = ws(input);
     if !input.starts_with('[') { return Err("Expected [".into()); }
     let mut rest = ws(&input[1..]);
     let mut items = vec![];
 
-    if rest.starts_with(']') {
+    if rest.starts_with(']') { // Mảng rỗng
         return Ok((JsonValue::Array(items), &rest[1..]));
     }
 
     loop {
+        // parse_value là hàm tổng, sẽ định nghĩa bên dưới
         let (val, r) = parse_value(rest)?;
         items.push(val);
         rest = ws(r);
-        if rest.starts_with(',') { rest = ws(&rest[1..]); }
-        else if rest.starts_with(']') { return Ok((JsonValue::Array(items), &rest[1..])); }
+        
+        if rest.starts_with(',') { 
+            rest = ws(&rest[1..]); // Ăn dấu phẩy và đi tiếp
+        }
+        else if rest.starts_with(']') { 
+            return Ok((JsonValue::Array(items), &rest[1..])); // Xong!
+        }
         else { return Err("Expected , or ]".into()); }
     }
 }
+```
 
-fn parse_object(input: &str) -> ParseResult<JsonValue> {
-    let input = ws(input);
-    if !input.starts_with('{') { return Err("Expected {".into()); }
-    let mut rest = ws(&input[1..]);
-    let mut pairs = vec![];
+Với Object, logic hoàn toàn tương tự, chỉ khác là ta phải đọc thêm Key (một chuỗi) và dấu hai chấm `:`.
+Và cuối cùng, "Bộ não" của toàn bộ Parser này chính là hàm `parse_value`. Hàm này kết nối tất cả các parser con lại bằng combinator `or_else` (tương đương với `alt`):
 
-    if rest.starts_with('}') {
-        return Ok((JsonValue::Object(pairs), &rest[1..]));
-    }
-
-    loop {
-        let (key, r) = parse_string_raw(rest)?;
-        let r = ws(r);
-        if !r.starts_with(':') { return Err("Expected :".into()); }
-        let r = ws(&r[1..]);
-        let (val, r) = parse_value(r)?;
-        pairs.push((key, val));
-        let r = ws(r);
-        if r.starts_with(',') { rest = ws(&r[1..]); }
-        else if r.starts_with('}') { return Ok((JsonValue::Object(pairs), &r[1..])); }
-        else { return Err("Expected , or }".into()); }
-    }
-}
-
+```rust
 // ═══ Main parser: alt over all value types ═══
 fn parse_value(input: &str) -> ParseResult<JsonValue> {
     let input = ws(input);
+    
+    // Thử lần lượt. Nếu hỏng cái này, thử cái kia!
     parse_null(input)
         .or_else(|_| parse_bool(input))
-        .or_else(|_| parse_number(input))
+        .or_else(|_| parse_number(input)) // Bỏ qua implement chi tiết vì giống ở trên
         .or_else(|_| parse_string(input))
         .or_else(|_| parse_array(input))
-        .or_else(|_| parse_object(input))
-}
-
-fn main() {
-    let json = r#"{
-        "name": "Minh",
-        "age": 28,
-        "active": true,
-        "scores": [95, 87, 92],
-        "address": {
-            "city": "HCM",
-            "zip": "70000"
-        },
-        "nickname": null
-    }"#;
-
-    match parse_value(json) {
-        Ok((value, remaining)) => {
-            println!("✅ Parsed JSON:");
-            print_json(&value, 0);
-            println!("\nRemaining: '{}'", remaining.trim());
-        }
-        Err(e) => println!("❌ {}", e),
-    }
-}
-
-fn print_json(val: &JsonValue, indent: usize) {
-    let pad = "  ".repeat(indent);
-    match val {
-        JsonValue::Null => print!("null"),
-        JsonValue::Bool(b) => print!("{}", b),
-        JsonValue::Number(n) => print!("{}", n),
-        JsonValue::Str(s) => print!("\"{}\"", s),
-        JsonValue::Array(items) => {
-            println!("[");
-            for (i, item) in items.iter().enumerate() {
-                print!("{}  ", pad);
-                print_json(item, indent + 1);
-                if i < items.len() - 1 { print!(","); }
-                println!();
-            }
-            print!("{}]", pad);
-        }
-        JsonValue::Object(pairs) => {
-            println!("{{");
-            for (i, (key, val)) in pairs.iter().enumerate() {
-                print!("{}  \"{}\": ", pad, key);
-                print_json(val, indent + 1);
-                if i < pairs.len() - 1 { print!(","); }
-                println!();
-            }
-            print!("{}}}", pad);
-        }
-    }
+        .or_else(|_| parse_object(input)) // Tương tự array nhưng parse cặp key-value
 }
 ```
 
+Tuyệt vời! Chỉ với chưa đầy 150 dòng code, bạn đã tự tay viết một JSON Parser đệ quy hoàn chỉnh. 
+
 ---
 
-## 31.5 — Connection to FP Concepts
+## 31.5 — Mối liên kết với các khái niệm FP
 
-Nếu bạn đọc đến đây và nhận ra `map`, `and_then`, `alt` quen quen — đúng vậy. Parser combinators là Functor + Monad + Alternative đang hoạt động. Đây là bảng mapping:
+Nếu bạn đọc đến đây và nhận ra `map`, `or_else`, `alt` quen quen — đúng vậy. Parser combinators là Functor, Monad và Alternative đang hoạt động trong thế giới thực! Dưới đây là bảng đối chiếu để bạn củng cố kiến thức:
 
-### Parser combinator = Functor + Monad in action
-
-| Combinator | FP Concept | Ý nghĩa |
+| Combinator | Khái niệm FP | Ý nghĩa trong ngữ cảnh Parser |
 |------------|-----------|---------|
-| `map(parser, f)` | **Functor** | Transform parsed value |
-| `and_then(pa, f)` | **Monad** | Use parsed value to choose next parser |
-| `pair(pa, pb)` | **Applicative** | Run both, combine results |
-| `alt(pa, pb)` | **Alternative** | Try first, fallback to second |
-| `many0(p)` | **MonadPlus** | Repeat 0+ times |
-| `or_else` | **MonadError** | Error recovery |
-
-```
-parse_value  =  alt(null, bool, number, string, array, object)
-                 ↑ Alternative pattern
-
-parse_object =  '{' → many(pair(string, ':', value)) → '}'
-                       ↑ Monad (pair) + Repetition (many)
-
-parse_array  =  '[' → many(value, ',') → ']'
-                       ↑ Repetition + Separator
-```
-
----
-
-## 🏋️ Bài tập
-
-**Bài 1** (5 phút): Basic parser
-
-Viết `parse_identifier`: chữ cái đầu, sau đó chữ/số/underscore. Return `String`.
-
-<details><summary>✅ Lời giải</summary>
-
-```rust
-fn parse_identifier(input: &str) -> ParseResult<String> {
-    let mut chars = input.char_indices();
-    match chars.next() {
-        Some((_, c)) if c.is_alphabetic() || c == '_' => {
-            let mut end = c.len_utf8();
-            for (i, c) in chars {
-                if c.is_alphanumeric() || c == '_' { end = i + c.len_utf8(); }
-                else { break; }
-            }
-            Ok((input[..end].to_string(), &input[end..]))
-        }
-        _ => Err("Expected identifier".into()),
-    }
-}
-```
-
-</details>
-
----
-
-**Bài 2** (10 phút): CSV parser
-
-Viết parser cho CSV line: `"Minh,28,HCM"` → `vec!["Minh", "28", "HCM"]`.
-- Fields separated by `,`
-- Dùng combinator approach
-
-<details><summary>✅ Lời giải Bài 2</summary>
-
-```rust
-fn parse_field(input: &str) -> ParseResult<String> {
-    let end = input.find(',').unwrap_or(input.len());
-    let end = end.min(input.find('\n').unwrap_or(input.len()));
-    if end == 0 { return Err("Empty field".into()); }
-    Ok((input[..end].to_string(), &input[end..]))
-}
-
-fn parse_csv_line(input: &str) -> ParseResult<Vec<String>> {
-    let (first, mut rest) = parse_field(input)?;
-    let mut fields = vec![first];
-    while rest.starts_with(',') {
-        let (field, r) = parse_field(&rest[1..])?;
-        fields.push(field);
-        rest = r;
-    }
-    Ok((fields, rest))
-}
-
-fn main() {
-    println!("{:?}", parse_csv_line("Minh,28,HCM,Active"));
-    // Ok((["Minh", "28", "HCM", "Active"], ""))
-}
-```
-
-</details>
-
----
-
-**Bài 3** (15 phút): Expression parser
-
-Viết parser cho biểu thức toán đơn giản: `"3 + 5 * 2"`.
-- Parse numbers (integers)
-- Parse operators: `+`, `-`, `*`, `/`
-- Trả `Vec<Token>` where `Token = Num(i64) | Op(char)`
-
-<details><summary>✅ Lời giải Bài 3</summary>
-
-```rust
-#[derive(Debug)]
-enum Token { Num(i64), Op(char) }
-
-fn parse_tokens(input: &str) -> ParseResult<Vec<Token>> {
-    let mut tokens = vec![];
-    let mut rest = input.trim();
-
-    while !rest.is_empty() {
-        rest = rest.trim_start();
-        if rest.is_empty() { break; }
-
-        if rest.starts_with(|c: char| c.is_ascii_digit()) {
-            let end = rest.find(|c: char| !c.is_ascii_digit()).unwrap_or(rest.len());
-            let num: i64 = rest[..end].parse().unwrap();
-            tokens.push(Token::Num(num));
-            rest = &rest[end..];
-        } else if rest.starts_with(['+', '-', '*', '/']) {
-            tokens.push(Token::Op(rest.chars().next().unwrap()));
-            rest = &rest[1..];
-        } else {
-            return Err(format!("Unexpected: '{}'", &rest[..1]));
-        }
-    }
-
-    Ok((tokens, rest))
-}
-
-fn main() {
-    println!("{:?}", parse_tokens("3 + 5 * 2 - 10"));
-    // Ok(([Num(3), Op('+'), Num(5), Op('*'), Num(2), Op('-'), Num(10)], ""))
-}
-```
-
-</details>
+| `map(parser, f)` | **Functor** | Biến đổi giá trị lấy ra được mà không làm hỏng chuỗi còn lại |
+| `and_then(pa, f)` | **Monad** | Dùng giá trị vừa parse được để "quyết định" xem sẽ dùng parser nào tiếp theo |
+| `pair(pa, pb)` | **Applicative** | Chạy cả hai, gộp kết quả lại |
+| `alt(pa, pb)` | **Alternative** | Thử phương án A, nếu thất bại thì lui lại và thử phương án B |
+| `many0(p)` | **MonadPlus** | Lặp lại 0 hoặc nhiều lần (List Monad) |
 
 ---
 
@@ -666,22 +385,38 @@ fn main() {
 
 | Vấn đề | Nguyên nhân | Giải pháp |
 |---------|-------------|-----------|
-| Infinite loop trong `many0` | Parser không consume input | Đảm bảo parser luôn consume ≥1 byte khi Ok |
-| Lifetime errors | `&str` references phức tạp | Dùng owned `String` cho output, `&str` cho input |
-| "Backtracking chậm" | `alt` thử rồi bỏ | Dùng `peek` (nhìn char đầu) để chọn nhanh |
-| "Parser quá dài" | Monolithic function | Tách thành tiny parsers, compose bằng combinators |
+| Lặp vô tận (Infinite loop) trong `many0` | Parser không chịu tiêu thụ (consume) input, nên nó lặp mãi ở một vị trí. | Đảm bảo parser luôn tiêu thụ ít nhất 1 byte khi trả về `Ok`. |
+| Lỗi Lifetime | `&str` references quá phức tạp khi trả về. | Dùng `String` sở hữu (owned) cho kết quả output, chỉ dùng `&str` cho input đầu vào. |
+| "Backtracking chậm quá!" | Dùng `alt` quá đà khiến chương trình phải thử đi thử lại nhiều lần. | Dùng `peek` (nhìn trước ký tự đầu tiên) để chuyển hướng logic nhanh thay vì thử mù quáng. |
+| Hàm parser quá dài | Bạn đang cố nhét mọi logic vào một hàm. | Cắt nó ra thành các hàm parser siêu nhỏ, rồi gom lại bằng `pair` và `map`. |
 
 ---
 
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Viết parser cho số nguyên có dấu (`-42`, `+7`, `13`) bằng `nom`. Test cả input hợp lệ lẫn không hợp lệ.
+
+**Bài 2 (20 phút).** Mở rộng JSON parser trong chương để hỗ trợ escape sequence trong chuỗi (`\n`, `\t`, `\"`, `\uXXXX`).
+
+**Bài 3 (30 phút).** Viết parser cho biểu thức số học có độ ưu tiên đúng: `1 + 2 * 3` phải ra `7`, không phải `9`. Gợi ý: tách thành `expr → term → factor`.
+
+<details>
+<summary>Gợi ý bài 3</summary>
+
+Độ ưu tiên được mã hoá bằng **tầng của ngữ pháp**, không phải bằng bảng ưu tiên:
+`expr = term (('+' | '-') term)*`, `term = factor (('*' | '/') factor)*`,
+`factor = số | '(' expr ')'`. Phép nào nằm ở tầng sâu hơn thì buộc chặt hơn.
+</details>
+
 ## Tóm tắt
 
-- ✅ **Parser** = `&str → Result<(T, &str)>`. Consume input, produce value.
-- ✅ **Combinators**: `map` (Functor), `pair` (sequence), `alt` (choice), `many0/many1` (repeat).
-- ✅ **Compose**: Tiny parsers → complex parsers. `parse_value = alt(null, bool, number, string, array, object)`.
-- ✅ **JSON parser** hoàn chỉnh: ~100 LOC, parse nested objects/arrays — all from combinators!
-- ✅ **FP in action**: Parser combinators **ARE** Functors + Monads + Alternatives.
-- ✅ **Production**: Dùng crate `nom` (macro-style) hoặc `chumsky` (type-based) cho real projects.
+- ✅ **Parser** = `&str → Result<(T, &str)>`. Tiêu thụ chuỗi, tạo ra giá trị.
+- ✅ **Combinators**: `map` (Functor), `pair` (sequence), `alt` (choice), `many0/many1` (repeat). Chúng là chất keo dính.
+- ✅ **Sức mạnh của sự kết hợp**: Từ những parser tí hon, ta lắp ráp thành parser khổng lồ như JSON mà code vẫn sạch và testable.
+- ✅ **Sản xuất thực tế**: Trong dự án thật, đừng tự viết combinators. Hãy dùng các thư viện nổi tiếng như `nom` (hướng macro) hoặc `chumsky` (hướng type-based).
 
 ## Tiếp theo
 
-→ Chapter 32: **Recursive Types & Folds** — chapter cuối Part V! Bạn sẽ model trees, expressions, và recursive data structures. `fold` trở thành universal pattern cho processing recursive types.
+→ Chapter 32: **Recursive Types & Folds** — chapter cuối cùng của Part V! Bạn sẽ học cách mô hình hóa cây dữ liệu (Trees), biểu thức toán học, và các cấu trúc đệ quy. `fold` sẽ trở thành công cụ vạn năng để xử lý mọi dữ liệu đệ quy.

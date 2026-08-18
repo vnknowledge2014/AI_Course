@@ -122,7 +122,11 @@ const ap = <E, A, B>(
     return success(ff.value(fa.value));
 };
 
-// --- sequenceT-style: validate all, combine results ---
+```
+
+#### sequenceT-style: validate all, combine results
+
+```typescript
 type FormError = { field: string; message: string };
 
 const validateName = (name: string): Validation<FormError, string> =>

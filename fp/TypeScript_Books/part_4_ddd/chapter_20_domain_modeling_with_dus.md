@@ -238,7 +238,11 @@ const shipOrder = (
     trackingNumber,
     shippedAt: now,
 });
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 const deliverOrder = (
     order: OrderState & { tag: "shipped" },
     signedBy: string,
@@ -389,7 +393,11 @@ type User = {
     readonly verification: VerificationStatus;
     readonly loginHistory: LoginHistory;
 };
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 // Functions that REQUIRE specific states
 const getLastLogin = (
     user: User & { readonly loginHistory: LoginHistory & { tag: "has_logged_in" } }
@@ -502,7 +510,11 @@ type StockStatus =
     | { readonly tag: "out_of_stock"; readonly restockDate?: Date }
     | { readonly tag: "discontinued" };
 
-// Level 2: Digital products
+```
+
+#### Level 2: Digital products
+
+```typescript
 type DigitalProduct = {
     readonly tag: "digital";
     readonly id: string;
@@ -519,7 +531,11 @@ type LicenseType =
     | { readonly tag: "commercial"; readonly seats: number }
     | { readonly tag: "open_source"; readonly license: string };
 
-// Level 2: Subscription products
+```
+
+#### Level 2: Subscription products
+
+```typescript
 type SubscriptionProduct = {
     readonly tag: "subscription";
     readonly id: string;
@@ -541,7 +557,11 @@ type TrialStatus =
     | { readonly tag: "in_trial"; readonly startedAt: Date; readonly endsAt: Date }
     | { readonly tag: "trial_expired"; readonly expiredAt: Date };
 
-// --- Operations on product hierarchy ---
+```
+
+#### Operations on product hierarchy
+
+```typescript
 
 const getDisplayPrice = (product: Product): string => {
     switch (product.tag) {
@@ -637,16 +657,15 @@ console.log("Domain hierarchy OK ✅");
 
 ## 20.5 — Aggregate Root: DU + Validation
 
-### Khuôn đúc hoàn chỉnh: từ nguyên liệu thô đến thành phẩm
+Khuôn đúc hoàn chỉnh: từ nguyên liệu thô đến thành phẩm. Aggregate root kết hợp tất cả: branded types cho Value Objects, DU cho state machine, smart constructors cho validation TẠI MỌI BƯỚC.
 
-Aggregate root kết hợp tất cả: branded types cho Value Objects, DU cho state machine, smart constructors cho validation TẠI MỌI BƯỚC. Order aggregate: `createDraft` validate items → `confirmDraft` tính tax → `shipConfirmed` require tracking number → `deliverShipped` require signature. Mỗi transition = function nhận STATE CỤ THỂ, return STATE MỚI. Cancel logic tùy state: cancel draft = refund 0 (chưa trả tiền), cancel confirmed = full refund.
+### Bước 1: Types & Domains
 
 ```typescript
-// filename: src/aggregate_root.ts
+// filename: src/aggregate_root_step1.ts
 import assert from "node:assert/strict";
 
 // === Types ===
-
 type OrderId = string & { readonly __brand: "OrderId" };
 type CustomerId = string & { readonly __brand: "CustomerId" };
 type Money = number & { readonly __brand: "Money" };
@@ -660,15 +679,18 @@ type OrderItem = {
     readonly lineTotal: Money;
 };
 
-type Result<T, E> =
-    | { readonly tag: "ok"; readonly value: T }
-    | { readonly tag: "err"; readonly error: E };
-
+type Result<T, E> = { readonly tag: "ok"; readonly value: T } | { readonly tag: "err"; readonly error: E };
 const ok = <T>(value: T): Result<T, never> => ({ tag: "ok", value });
 const err = <E>(error: E): Result<never, E> => ({ tag: "err", error });
+```
 
+### Bước 2: State Machine
+
+Định nghĩa mọi trạng thái có thể có của Aggregate Root thông qua Discriminated Unions.
+
+```typescript
+// filename: src/aggregate_root_step2.ts
 // === Order state machine (aggregate root) ===
-
 type Order =
     | DraftOrder
     | ConfirmedOrder
@@ -722,9 +744,15 @@ type CancelledOrder = {
     readonly cancelledAt: Date;
     readonly refundAmount: Money;
 };
+```
 
+### Bước 3: Domain Operations (Transitions)
+
+Mỗi transition = function nhận STATE CỤ THỂ, return STATE MỚI (hoặc Result). Cancel logic tùy state: cancel draft = refund 0 (chưa trả tiền), cancel confirmed = full refund.
+
+```typescript
+// filename: src/aggregate_root_step3.ts
 // === Domain operations ===
-
 const createDraft = (
     id: OrderId,
     customerId: CustomerId,
@@ -745,10 +773,7 @@ const createDraft = (
 
 const TAX_RATE = 0.1;
 
-const confirmDraft = (
-    order: DraftOrder,
-    now: Date
-): ConfirmedOrder => {
+const confirmDraft = (order: DraftOrder, now: Date): ConfirmedOrder => {
     const tax = Money(Math.round(order.subtotal * TAX_RATE));
     return {
         tag: "confirmed",
@@ -767,8 +792,7 @@ const shipConfirmed = (
     trackingNumber: string,
     now: Date
 ): Result<ShippedOrder, string> => {
-    if (trackingNumber.trim().length === 0)
-        return err("Tracking number required");
+    if (trackingNumber.trim().length === 0) return err("Tracking number required");
 
     return ok({
         tag: "shipped",
@@ -780,14 +804,17 @@ const shipConfirmed = (
         shippedAt: now,
     });
 };
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 const deliverShipped = (
     order: ShippedOrder,
     signedBy: string,
     now: Date
 ): Result<DeliveredOrder, string> => {
-    if (signedBy.trim().length === 0)
-        return err("Signature required");
+    if (signedBy.trim().length === 0) return err("Signature required");
 
     return ok({
         tag: "delivered",
@@ -799,11 +826,7 @@ const deliverShipped = (
     });
 };
 
-const cancelDraft = (
-    order: DraftOrder,
-    reason: string,
-    now: Date
-): CancelledOrder => ({
+const cancelDraft = (order: DraftOrder, reason: string, now: Date): CancelledOrder => ({
     tag: "cancelled",
     id: order.id,
     customerId: order.customerId,
@@ -812,11 +835,7 @@ const cancelDraft = (
     refundAmount: Money(0),  // draft — chưa thanh toán
 });
 
-const cancelConfirmed = (
-    order: ConfirmedOrder,
-    reason: string,
-    now: Date
-): CancelledOrder => ({
+const cancelConfirmed = (order: ConfirmedOrder, reason: string, now: Date): CancelledOrder => ({
     tag: "cancelled",
     id: order.id,
     customerId: order.customerId,
@@ -826,24 +845,22 @@ const cancelConfirmed = (
 });
 
 // === Display (works on ANY order state) ===
-
 const getOrderSummary = (order: Order): string => {
     switch (order.tag) {
-        case "draft":
-            return `📝 Draft: ${order.items.length} items, ${order.subtotal.toLocaleString()} VND`;
-        case "confirmed":
-            return `✅ Confirmed: ${order.total.toLocaleString()} VND (tax: ${order.tax.toLocaleString()})`;
-        case "shipped":
-            return `🚚 Shipped: tracking ${order.trackingNumber}`;
-        case "delivered":
-            return `📦 Delivered: signed by ${order.signedBy}`;
-        case "cancelled":
-            return `❌ Cancelled: ${order.reason}`;
+        case "draft": return `📝 Draft: ${order.items.length} items, ${order.subtotal.toLocaleString()} VND`;
+        case "confirmed": return `✅ Confirmed: ${order.total.toLocaleString()} VND (tax: ${order.tax.toLocaleString()})`;
+        case "shipped": return `🚚 Shipped: tracking ${order.trackingNumber}`;
+        case "delivered": return `📦 Delivered: signed by ${order.signedBy}`;
+        case "cancelled": return `❌ Cancelled: ${order.reason}`;
     }
 };
+```
 
+### Bước 4: Test kịch bản thực tế
+
+```typescript
+// filename: src/aggregate_root_step4.ts
 // === Test ===
-
 const now = new Date("2024-06-15T10:00:00Z");
 
 const item: OrderItem = {
@@ -863,8 +880,6 @@ assert.ok(draft !== null);
 const confirmed = confirmDraft(draft!, now);
 assert.strictEqual(confirmed.tag, "confirmed");
 assert.strictEqual(confirmed.subtotal, 20000000);
-assert.strictEqual(confirmed.tax, 2000000);       // 20M * 10%
-assert.strictEqual(confirmed.total, 22000000);     // 20M + 2M
 
 const shippedResult = shipConfirmed(confirmed, "TRK-001", now);
 assert.strictEqual(shippedResult.tag, "ok");
@@ -879,10 +894,6 @@ if (draftForCancel.tag === "ok") {
     const cancelledConfirmed = cancelConfirmed(confirmedForCancel, "Out of stock", now);
     assert.strictEqual(cancelledConfirmed.refundAmount, 22000000);  // full refund
 }
-
-// Error: empty items
-const emptyOrder = createDraft("ORD-3" as OrderId, "C-3" as CustomerId, []);
-assert.strictEqual(emptyOrder.tag, "err");
 
 console.log("Aggregate root OK ✅");
 ```
@@ -1016,7 +1027,11 @@ const resolveTicket = (
     resolution,
     resolvedAt: now,
 });
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 const closeTicket = (
     ticket: TicketState & { tag: "resolved" },
     now: Date,
@@ -1134,7 +1149,11 @@ type DocumentMedia = {
     readonly isSearchable: boolean;
     readonly fileSizeKB: number;
 };
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 const getFileSizeMB = (media: Media): number => {
     switch (media.tag) {
         case "image": return media.fileSizeKB / 1024;

@@ -224,7 +224,11 @@ class ListMonad:
             result.extend(fn(x))
         return result
 
-# ── Tests: List flatMap = Monad bind! ──
+```
+
+#### Tests: List flatMap = Monad bind!
+
+```python
 # map: each element → element (same length)
 assert ListMonad.map([1, 2, 3], lambda x: x * 2) == [2, 4, 6]
 
@@ -235,7 +239,11 @@ assert ListMonad.bind([1, 2, 3], lambda x: [x, x * 10]) == [1, 10, 2, 20, 3, 30]
 assert ListMonad.map([1, 2, 3], lambda x: [x, x * 10]) == [[1, 10], [2, 20], [3, 30]]
 # ^^^ nested! bind flattens.
 
-# ── Practical: cartesian product via List Monad ──
+```
+
+#### Practical: cartesian product via List Monad
+
+```python
 colors = ["Red", "Blue"]
 sizes = ["S", "M", "L"]
 
@@ -351,14 +359,22 @@ def map_result(r: Result, fn: Callable) -> Result:
         case Ok(value=v): return Ok(fn(v))
         case Err(): return r
 
-# ── pipe helper ──
+```
+
+#### pipe helper
+
+```python
 def pipe(value, *fns):
     result = value
     for fn in fns:
         result = fn(result)
     return result
 
-# ── Domain: User registration ──
+```
+
+#### Domain: User registration
+
+```python
 @dataclass(frozen=True)
 class UserInput:
     name: str
@@ -393,7 +409,11 @@ def validate_age(input: UserInput) -> Result:
         return Err(f"Age {age} out of range (0-150)")
     return Ok(ValidUser(name=input.name.strip(), email=input.email.lower(), age=age))
 
-# ── Pipeline: bind chains ──
+```
+
+#### Pipeline: bind chains
+
+```python
 def register_user(raw: UserInput) -> Result:
     """Chain validations — short-circuit on first error."""
     return pipe(
@@ -464,7 +484,11 @@ def do(gen_fn: Callable[[], Generator]) -> Result:
     except StopIteration as e:
         return Ok(e.value)  # generator returned = success
 
-# ── Domain ──
+```
+
+#### Domain
+
+```python
 users = {"U1": {"name": "Minh", "dept_id": "D1"}, "U2": {"name": "Lan"}}
 depts = {"D1": {"name": "Engineering", "manager_id": "M1"}}
 managers = {"M1": {"name": "Cường", "email": "cuong@co.com"}}
@@ -486,7 +510,11 @@ def get_manager_id(dept: dict) -> Result:
 def find_manager(mid: str) -> Result:
     return Ok(managers[mid]) if mid in managers else Err(f"Manager {mid} not found")
 
-# ── Without do-notation: nested binds (ugly!) ──
+```
+
+#### Without do-notation: nested binds (ugly!)
+
+```python
 def bind(r, fn):
     match r:
         case Ok(value=v): return fn(v)
@@ -505,7 +533,11 @@ def get_manager_email_ugly(uid: str) -> Result:
         )
     )
 
-# ── WITH do-notation: clean sequential code! ──
+```
+
+#### WITH do-notation: clean sequential code!
+
+```python
 def get_manager_email(uid: str) -> Result:
     def gen():
         user = yield find_user(uid)
@@ -547,7 +579,7 @@ print("Do-notation OK ✅")
 
 ## 27.6 — The `returns` Library: Production-grade Monads
 
-### Beyond self-written code
+### The `returns` Library
 
 Chúng ta đã tự viết `bind`, `map`, `do` — giống việc tự đóng bàn để hiểu gỗ. Nhưng production code cần library battle-tested. **`returns`** (dry-python) cung cấp:
 
@@ -558,8 +590,10 @@ Chúng ta đã tự viết `bind`, `map`, `do` — giống việc tự đóng b�
 - `RequiresContext` (= Reader Monad — DI)
 - `@safe` decorator — auto-wrap exceptions into Result
 
+#### Bước 1: Ý tưởng từ thư viện returns (Maybe & Result)
+
 ```python
-# filename: returns_library.py
+# filename: src/monad/returns_step1.py
 # NOTE: This is conceptual code showing returns library API.
 # Install: pip install returns
 
@@ -595,19 +629,15 @@ Chúng ta đã tự viết `bind`, `map`, `do` — giống việc tự đóng b�
 #
 # result = parse_json("invalid json")
 # assert isinstance(result, Failure)  # auto-wrapped exception
-#
-# # Pipeline with .bind()
-# result = (
-#     parse_json('{"age": "25"}')
-#     .bind(lambda d: Success(d["age"]) if "age" in d else Failure("no age"))
-#     .map(int)
-#     .map(lambda a: f"Age: {a}")
-# )
-# assert result == Success("Age: 25")
+```
 
+#### Bước 2: Tự tạo một API tương tự
+
+(Dành cho những bạn chưa thể cài đặt thư viện ngay lúc này).
+
+```python
+# filename: src/monad/returns_step2.py
 # ── Simulated returns-style API ──
-# (For readers who can't install returns right now)
-
 from dataclasses import dataclass
 from typing import Union, Callable
 
@@ -618,7 +648,7 @@ class Success:
     def map(self, fn: Callable) -> "Success":
         return Success(fn(self._value))
 
-    def bind(self, fn: Callable) -> "Result":
+    def bind(self, fn: Callable) -> "ResultType":
         return fn(self._value)
 
     @property
@@ -649,7 +679,12 @@ def safe(fn: Callable) -> Callable:
         except Exception as e:
             return Failure(e)
     return wrapper
+```
 
+#### Bước 3: Ứng dụng Method Chaining với Monad
+
+```python
+# filename: src/monad/returns_step3.py
 # ── Using returns-style API ──
 @safe
 def parse_int(s: str) -> int:
@@ -669,21 +704,21 @@ result = (
 assert result == Success("Result: 12.0")
 
 # Error propagation
-result = (
+result_err = (
     parse_int("abc")
-    .map(lambda x: x * 2)     # skipped!
+    .map(lambda x: x * 2)          # skipped!
     .bind(lambda x: divide(x, 7))  # skipped!
-    .map(lambda x: f"Result: {x}")  # skipped!
+    .map(lambda x: f"Result: {x}") # skipped!
 )
-assert isinstance(result, Failure)
+assert isinstance(result_err, Failure)
 
 # Division by zero
-result = (
+result_zero = (
     parse_int("42")
-    .bind(lambda x: divide(x, 0))  # Failure(ZeroDivisionError)
+    .bind(lambda x: divide(x, 0))   # Failure(ZeroDivisionError)
     .map(lambda x: f"Result: {x}")  # skipped!
 )
-assert isinstance(result, Failure)
+assert isinstance(result_zero, Failure)
 
 print("returns-style API OK ✅")
 ```

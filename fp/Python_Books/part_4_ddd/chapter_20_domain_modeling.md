@@ -120,6 +120,36 @@ class ShippingInfo:
 
 ---
 
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (5 phút).** Chuyển `email: str` thành một Value Object `Email` có smart constructor trả `Result`. Chứng minh không thể tạo `Email` không hợp lệ.
+
+**Bài 2 (15 phút).** Mô hình hoá vòng đời `Order` bằng enum trạng thái sao cho **không thể** gọi `ship()` trên một đơn `Draft` — ép bằng kiểu, không bằng `if`.
+
+**Bài 3 (20 phút).** Xác định ranh giới Aggregate cho `Order` và `OrderLine`: bất biến nào phải đúng trong **cùng một transaction**? Bất biến đó chính là định nghĩa của aggregate.
+
+<details>
+<summary>Gợi ý bài 2</summary>
+
+Cách mạnh nhất trong Python: mỗi trạng thái là một class riêng
+(`DraftOrder`, `ConfirmedOrder`, `ShippedOrder`), và `ship()` chỉ tồn tại trên
+`ConfirmedOrder`, trả về `ShippedOrder`. Trạng thái sai không còn là lỗi runtime —
+nó là lỗi type-check.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Value Object vẫn sửa được | Quên `frozen=True` | `@dataclass(frozen=True, slots=True)` |
+| Hai Value Object bằng nhau lại không `==` | Tự viết `__eq__` sai | Để dataclass sinh; đừng viết tay |
+| Aggregate quá lớn, khoá quá nhiều | Gộp thứ không cần nhất quán tức thì | Tách aggregate, nối bằng domain event |
+| Entity không dùng được làm key dict | `frozen=True` nhưng có field mutable | Dùng `tuple` thay `list` cho field bên trong |
+
 ## Tóm tắt
 
 - ✅ **Value Object**: `frozen=True`, validated, equal by value.

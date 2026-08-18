@@ -108,6 +108,43 @@ assert result2.total == 120_000
 
 ---
 
+---
+
+## ✅ Checkpoint 21
+
+1. Vì sao mô hình workflow thành pipeline hàm lại dễ test hơn một hàm `process_order()` dài 200 dòng?
+2. `flow()` và `pipe()` của `returns` khác nhau ở đâu?
+3. Một bước trong pipeline cần gọi database. Đặt nó ở đâu để lõi vẫn thuần?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Vì mỗi bước là một hàm nhỏ, thuần, có chữ ký rõ ràng — test được độc lập, không cần dựng toàn bộ ngữ cảnh. Hàm 200 dòng buộc bạn phải mock mọi thứ chỉ để kiểm một nhánh.
+2. `flow(value, f, g)` **áp dụng ngay** lên một giá trị. `pipe(f, g)` **tạo ra một hàm mới** để dùng sau. Cùng một phép hợp thành, khác thời điểm.
+3. Đưa dữ liệu vào **trước** khi vào pipeline (đọc xong rồi truyền vào), hoặc tiêm hàm qua `RequiresContext`. Không gọi I/O ở giữa chuỗi hàm thuần.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Viết pipeline `validate → apply_discount → calculate_tax → build_receipt`, mỗi bước trả `Result`. Test riêng từng bước.
+
+**Bài 2 (15 phút).** Chèn thêm một bước `check_inventory` vào giữa pipeline mà **không** sửa các bước khác. Đây chính là phép thử cho một thiết kế composable.
+
+**Bài 3 (20 phút).** Dùng `RequiresContext` để `check_inventory` nhận repository qua DI thay vì import trực tiếp. So sánh độ khó khi viết test cho hai cách.
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| `flow()` báo lỗi kiểu | Bước sau nhận kiểu khác bước trước trả về | Vẽ chữ ký từng bước ra giấy; kiểu phải nối được |
+| Dùng `map` khi lẽ ra phải `bind` | Hàm trả `Result` nhưng gọi bằng `map` → `Result[Result[...]]` | Hàm trả `Result` thì dùng `bind`; hàm trả giá trị thuần thì dùng `map` |
+| Pipeline khó debug | Không thấy giá trị trung gian | Chèn một bước `tap` chỉ log rồi trả nguyên giá trị |
+| Bước cần hai đầu vào | Pipeline chỉ chuyền một giá trị | Gói vào dataclass ngữ cảnh, hoặc `partial` tham số cố định |
+
 ## Tóm tắt
 
 - ✅ **Workflow**: Input → Validate → Process → Output/Event

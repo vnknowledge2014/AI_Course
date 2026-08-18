@@ -365,7 +365,11 @@ const getManagerEmail_chain = (userId: string): Option<string> =>
             )),
         )),
     );
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 // ✅ "Do-notation" style — simulated with helper
 const Do = <A>(gen: () => Generator<Option<unknown>, A, unknown>): Option<A> => {
     const iterator = gen();

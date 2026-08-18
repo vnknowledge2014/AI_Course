@@ -178,8 +178,10 @@ print("Eq factory + utilities OK ✅")
 
 `sorted()` dùng `<` operator — hoạt động cho numbers, strings. Nhưng khi bạn cần sắp xếp **domain objects** (users by age, orders by priority, tasks by deadline), bạn cần Ord — "cách so sánh thứ tự" tùy chỉnh.
 
+#### Bước 1: Ord Protocol
+
 ```python
-# filename: ord_protocol.py
+# filename: src/algebra/ord_step1.py
 from dataclasses import dataclass
 from typing import Callable, TypeVar
 from enum import IntEnum
@@ -202,7 +204,12 @@ class Ord:
     def equals(self, x, y) -> bool:
         """Ord implies Eq — equal if compare returns EQ."""
         return self.compare(x, y) == Ordering.EQ
+```
 
+#### Bước 2: Factory & Utilities
+
+```python
+# filename: src/algebra/ord_step2.py
 # ── Factory ──
 def ord_by_key(key_fn: Callable) -> Ord:
     def compare(x, y) -> Ordering:
@@ -248,7 +255,12 @@ def clamp(o: Ord, lo, hi, value):
     if o.compare(value, lo) == Ordering.LT: return lo
     if o.compare(value, hi) == Ordering.GT: return hi
     return value
+```
 
+#### Bước 3: Áp dụng vào Domain
+
+```python
+# filename: src/algebra/ord_step3.py
 # ── Domain ──
 @dataclass(frozen=True)
 class Task:
@@ -462,12 +474,20 @@ class MonoidDict:
     def combine(self, x: dict, y: dict) -> dict: return {**x, **y}
     def empty(self) -> dict: return {}
 
-# ── concat_all = reduce with Monoid ──
+```
+
+#### concat_all = reduce with Monoid
+
+```python
 def concat_all(monoid, values: list):
     """Fold a list using a Monoid. Like reduce() but explicit."""
     return reduce(monoid.combine, values, monoid.empty())
 
-# ── Tests ──
+```
+
+#### Tests
+
+```python
 m_sum = MonoidSum()
 assert concat_all(m_sum, [1, 2, 3, 4, 5]) == 15
 assert concat_all(m_sum, []) == 0  # empty list → identity

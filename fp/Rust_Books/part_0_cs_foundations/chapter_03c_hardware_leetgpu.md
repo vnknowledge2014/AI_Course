@@ -118,7 +118,7 @@ Rust giúp kiểm soát vòng đời của buffer bộ nhớ VRAM cực kỳ ch�
 - **Khi nào xảy ra**: Khi model bắt đầu **Generate token từng chữ một** (Decoding phase). Mỗi lần sinh ra 1 chữ, nó phải tải TOÀN BỘ trọng số (Weights) của mô hình (hàng chục GB) từ VRAM qua chip xử lý. 
 - **Cách giải quyết**: Tăng Batch Size (sinh ra cho 10 người dùng cùng lúc để tái sử dụng một lần nạp Weights), sử dụng **PagedAttention** hoặc FlashAttention để tối ưu hóa bộ nhớ KV Cache.
 
-> Kỹ thuật **vLLM** mà chúng ta sẽ học ở phần Production (Chapter 44) ra đời chính là để giải quyết bài toán Memory Bandwidth Bound này!
+> Kỹ thuật **vLLM** mà chúng ta sẽ học ở phần Production (Chapter 43B) ra đời chính là để giải quyết bài toán Memory Bandwidth Bound này!
 
 ---
 
@@ -149,3 +149,49 @@ Sử dụng `wgpu` (WebGPU) hoặc `cudarc` (Rust bọc CUDA) để thực thi C
 
 ## Tiếp theo
 Bạn đã có đủ hành trang CS Foundations (Toán, Thuật toán, Phần cứng). Bước tiếp theo, chúng ta sẽ bắt đầu học ngôn ngữ lập trình cụ thể để hiện thực hóa những kiến thức này (Part 1).
+
+---
+
+## ✅ Checkpoint 3C
+
+1. Memory-bandwidth-bound khác compute-bound thế nào? Sinh token của LLM thuộc loại nào?
+2. Vì sao rẽ nhánh làm GPU chậm nhưng gần như không ảnh hưởng CPU hiện đại?
+3. Cache line thường là 64 byte. Điều đó ảnh hưởng gì tới cách bố trí struct?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Compute-bound nghẽn ở số phép tính; bandwidth-bound nghẽn ở việc chuyển dữ liệu. Sinh **một** token phải đọc **toàn bộ** trọng số model — cực nặng về băng thông, rất nhẹ về tính toán. Đó là lý do batching hiệu quả đến vậy: cùng một lần đọc trọng số phục vụ nhiều token.
+2. GPU chạy theo SIMT: các luồng trong một warp thực thi cùng một lệnh. Rẽ nhánh khiến chúng phân kỳ và phải chạy tuần tự từng nhánh. CPU thì có branch predictor rất tốt, đoán đúng trên 95% nên gần như không mất gì.
+3. Nên nhóm các field hay dùng cùng nhau vào cùng một cache line, và cân nhắc struct-of-arrays thay vì array-of-structs khi chỉ duyệt một field. Duyệt `Vec<f32>` nhanh hơn nhiều so với duyệt `Vec<StructBéo>` chỉ để lấy một field.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Duyệt ma trận 2D theo hàng và theo cột trên mảng 4000×4000. Đo chênh lệch và giải thích bằng cache line.
+
+**Bài 2 (15 phút).** So sánh Array-of-Structs và Struct-of-Arrays khi chỉ cần cộng một field. Đo trên 10 triệu phần tử ở bản `--release`.
+
+**Bài 3 (15 phút).** Ước lượng: model 7B ở fp16 cần bao nhiêu băng thông để sinh 50 token/giây? So với băng thông thực tế của GPU bạn có.
+
+<details>
+<summary>Đáp án bài 3</summary>
+
+7 tỷ × 2 byte = **14 GB** đọc cho **mỗi** token. 50 token/s ⇒ **700 GB/s**.
+RTX 4090 có ~1.000 GB/s. Con số cho thấy rõ: đây là bài toán băng thông, không
+phải bài toán sức tính. Vì thế quantize (giảm số byte mỗi tham số) hiệu quả hơn
+hẳn so với mua GPU nhiều TFLOPS hơn.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Benchmark cho kết quả vô lý | Đang chạy debug build | Luôn `--release`; dùng `criterion` để đo tử tế |
+| Compiler tối ưu mất cả vòng lặp benchmark | Kết quả không được dùng | `std::hint::black_box(...)` |
+| SIMD không được sinh ra | Vòng lặp có rẽ nhánh hoặc phụ thuộc | Viết vòng lặp phẳng; kiểm tra bằng `cargo asm` |
+| GPU dùng thấp mà vẫn chậm | Bandwidth-bound | Tăng batch; quantize model |

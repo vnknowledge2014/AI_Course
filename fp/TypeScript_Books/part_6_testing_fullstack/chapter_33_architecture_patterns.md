@@ -230,6 +230,44 @@ Khi module `Users` muốn tương tác với `Orders`, nó BẮT BUỘC phải i
 
 ---
 
+---
+
+## ✅ Checkpoint 33
+
+1. Hexagonal Architecture và Functional Core / Imperative Shell — chúng bổ sung hay thay thế nhau?
+2. Trong TypeScript, Port nên là `interface` hay `type`? Vì sao?
+3. Làm sao **ép** ranh giới kiến trúc thay vì chỉ mong mọi người tôn trọng nó?
+
+<details>
+<summary>Đáp án</summary>
+
+1. **Bổ sung**. Hexagonal nói về *hướng phụ thuộc* (mũi tên chỉ vào trong). Functional Core nói về *bản chất code* (thuần ở lõi, hiệu ứng ở vỏ). Bạn có thể hexagonal mà lõi vẫn đầy side effect — và lúc đó mất phần lớn lợi ích.
+2. `interface` — nó hỗ trợ declaration merging và cho thông báo lỗi dễ đọc hơn khi không khớp. `type` hợp hơn cho union, mapped type và các phép biến đổi kiểu.
+3. Bằng công cụ: `eslint-plugin-boundaries` hoặc `dependency-cruiser` trong CI, cộng với `paths` trong `tsconfig`. Ranh giới không được máy kiểm tra sẽ bị vi phạm trong vài sprint.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Vẽ sơ đồ hexagonal cho một API bạn từng viết. Đánh dấu mọi mũi tên đi từ trong ra ngoài — đó là các vi phạm.
+
+**Bài 2 (15 phút).** Cấu hình `dependency-cruiser` chặn `domain/` import từ `infrastructure/`. Chứng minh CI đỏ khi cố tình vi phạm.
+
+**Bài 3 (25 phút).** Refactor một hàm lẫn I/O và logic thành `core` thuần + `shell` mỏng. Đếm số dòng test cần viết trước và sau.
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Domain import Prisma type | Repository trả về type do Prisma sinh | Map sang domain type trong adapter |
+| Circular import giữa các tầng | Phụ thuộc hai chiều | Đặt interface ở tầng trong, implement ở tầng ngoài |
+| Barrel file (`index.ts`) gây import vòng | Re-export toàn bộ | Import trực tiếp từ module cụ thể |
+| `import type` vẫn xuất hiện ở bundle | Dùng `import` thường cho type | Dùng `import type`; bật `verbatimModuleSyntax` |
+| Quá nhiều tầng cho một CRUD nhỏ | Áp kiến trúc nặng cho bài toán nhẹ | Kiến trúc này dành cho domain phức tạp |
+
 ## Tóm tắt
 
 - ✅ **Hexagonal** = Domain (Ở giữa) + Ports (Ổ cắm giao tiếp) + Adapters (Phích cắm thực thi). Thay Adapter (DB, Framework) không làm ảnh hưởng Domain.

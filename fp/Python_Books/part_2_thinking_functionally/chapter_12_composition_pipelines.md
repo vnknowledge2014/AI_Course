@@ -185,6 +185,18 @@ assert result == "An, Cuong"
 
 ---
 
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| `pipe` báo lỗi kiểu | Đầu ra bước trước không khớp đầu vào bước sau | Viết chữ ký từng bước ra; kiểu phải nối liền |
+| Generator "rỗng" ở lần dùng thứ hai | Generator chỉ duyệt được một lần | Ép `list()` nếu cần dùng lại |
+| Pipeline khó debug | Không thấy giá trị trung gian | Chèn `tap = lambda x: (print(x), x)[1]` |
+| `compose` áp dụng ngược thứ tự mong đợi | `compose` chạy phải-sang-trái | Dùng `compose_left` cho thứ tự đọc tự nhiên |
+| Chuỗi comprehension lồng nhau khó đọc | Nhồi quá nhiều bước vào một biểu thức | Tách thành các generator đặt tên rồi nối lại |
+
 ## Tóm tắt
 
 - ✅ **Compose**: Right-to-left function composition.

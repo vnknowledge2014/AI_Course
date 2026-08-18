@@ -101,6 +101,43 @@ assert result.amount_vnd == 2_500_000
 
 ---
 
+---
+
+## ✅ Checkpoint 23
+
+1. Vì sao DTO và domain model nên là hai kiểu riêng, dù ban đầu chúng giống hệt nhau?
+2. Anti-Corruption Layer bảo vệ khỏi điều gì cụ thể?
+3. API bên ngoài đổi tên field. Bao nhiêu file trong dự án bạn phải sửa?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Vì chúng thay đổi vì **những lý do khác nhau**: DTO đổi khi API contract đổi, domain đổi khi quy tắc nghiệp vụ đổi. Gộp chung thì một thay đổi ở phía client sẽ kéo theo sửa domain — đúng thứ mà DDD cố tránh.
+2. Khỏi việc mô hình dữ liệu của hệ thống khác **rò rỉ** vào domain của bạn — kể cả những chỗ nó dùng `""` thay cho null, dùng string cho ngày tháng, hay đặt tên khó hiểu.
+3. Nếu có ACL: đúng **một** — file mapper. Nếu không: mọi nơi chạm tới field đó.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Viết `OrderDTO` (Pydantic) và `Order` (frozen dataclass) riêng biệt, cùng hàm `to_domain()` trả `Result`.
+
+**Bài 2 (15 phút).** Giả lập một API bên ngoài trả `{"amt": "120000", "dt": "27/10/2023"}`. Viết ACL chuyển nó thành `Money` và `date` chuẩn, trả `Result` khi dữ liệu bẩn.
+
+**Bài 3 (15 phút).** Thêm một field mới vào API bên ngoài mà domain **không** cần. Chứng minh domain không phải sửa dòng nào.
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Pydantic model dùng luôn làm domain | Tiện lúc đầu | Tách khi bắt đầu có quy tắc nghiệp vụ; ranh giới rẻ khi làm sớm |
+| `datetime` mất timezone sau round-trip | Serialize naive datetime | Luôn dùng aware datetime, serialize ISO-8601 có offset |
+| Số tiền lệch sau JSON | Dùng `float` | Dùng `int` (đơn vị nhỏ nhất) hoặc `Decimal` với `str` khi serialize |
+| Mapper phình to | Nhồi cả business logic vào mapper | Mapper chỉ chuyển dạng; validation nghiệp vụ để trong domain |
+
 ## Tóm tắt
 
 - ✅ **DTO**: Pydantic model for serialization boundaries.

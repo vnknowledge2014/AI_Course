@@ -196,6 +196,18 @@ assert take(10, primes()) == [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
 
 ---
 
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| `list.insert(0, x)` chậm khủng khiếp | O(n) vì phải dời toàn bộ | Dùng `collections.deque` cho thao tác hai đầu |
+| `in` trên list rất chậm | O(n) tuyến tính | Đổi sang `set`/`dict` — O(1) |
+| Dict mất thứ tự (Python cũ) | Trước 3.7 dict không đảm bảo thứ tự | Từ 3.7 dict giữ thứ tự chèn; code cũ có thể dùng `OrderedDict` |
+| Comprehension lồng ba tầng không đọc nổi | Nhồi quá nhiều logic | Tách thành generator đặt tên |
+| `NamedTuple` vs `dataclass` chọn nhầm | Không rõ khác biệt | Cần unpack như tuple → `NamedTuple`; cần method/field mặc định phong phú → `dataclass` |
+
 ## Tóm tắt
 
 - ✅ **Lists**: Slicing, unpacking, `sorted()` (immutable sort).

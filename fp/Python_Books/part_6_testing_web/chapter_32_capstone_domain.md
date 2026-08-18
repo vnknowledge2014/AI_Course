@@ -169,6 +169,51 @@ def test_empty_order(repo, notifier):
 
 ---
 
+---
+
+## ✅ Checkpoint 32
+
+1. Trong kiến trúc này, tầng nào **không** được import bất cứ thứ gì từ tầng khác?
+2. Vì sao Ports là `Protocol` chứ không phải abstract base class?
+3. Bạn muốn đổi từ PostgreSQL sang MongoDB. Những file nào phải sửa?
+
+<details>
+<summary>Đáp án</summary>
+
+1. **Domain**. Nó chỉ import thư viện chuẩn (và có thể `returns`). Đó là phép thử nhanh nhất xem kiến trúc onion có còn nguyên vẹn không.
+2. Vì `Protocol` là **structural**: một class thoả interface mà không cần kế thừa, nên adapter không phải import từ domain. Ít khớp nối hơn, và mock trong test chỉ cần đúng hình dạng.
+3. Chỉ các file adapter. Domain, Ports và Application layer không đổi dòng nào — nếu có, tức là hạ tầng đã rò rỉ vào chỗ không nên.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (15 phút).** Thêm use case mới `cancel_order` đi trọn các tầng: domain rule → port → application → adapter → test.
+
+**Bài 2 (20 phút).** Viết một adapter thứ hai (in-memory) cho cùng port, rồi chạy **cùng một** bộ test application cho cả hai adapter.
+
+**Bài 3 (30 phút).** Thêm domain event `OrderCancelled` phát ra từ domain và được xử lý ở application layer (gửi email giả lập). Giữ domain hoàn toàn thuần — nó chỉ **trả về** event, không tự gửi.
+
+<details>
+<summary>Gợi ý bài 3</summary>
+
+Mẹo then chốt: domain trả `tuple[Order, list[DomainEvent]]` thay vì tự phát.
+Nhờ vậy nó vẫn thuần và test được, còn việc phát event là chuyện của imperative
+shell — đúng mô hình Functional Core / Imperative Shell.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Domain lỡ import từ adapter | Cần một helper tiện tay | Chuyển helper vào domain, hoặc đảo phụ thuộc qua port |
+| Quá nhiều tầng cho một CRUD nhỏ | Áp kiến trúc nặng cho bài toán nhẹ | Kiến trúc này dành cho domain phức tạp; CRUD thuần thì dùng thẳng |
+| Test application phải mock quá nhiều | Use case ôm quá nhiều trách nhiệm | Tách use case nhỏ hơn |
+| Circular import giữa domain và port | Port đặt sai chỗ | Port thuộc về domain; adapter mới ở ngoài |
+
 ## Tóm tắt
 
 - ✅ **Full stack**: Domain → Ports → Adapters → Use Cases → Tests.

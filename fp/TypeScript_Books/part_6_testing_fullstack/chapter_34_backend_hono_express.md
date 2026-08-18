@@ -22,17 +22,17 @@ Bạn biết quầy phục vụ bureau (reception desk) trong khách sạn khôn
 
 ## Backend Development — Hono & Express
 
-Đây là chapter thực hành — xây dựng REST API hoàn chỉnh.
+Đây là chapter thực hành: xây dựng một REST API hoàn chỉnh.
 
-Hono là framework web mới, nhẹ, type-safe, chạy trên mọi runtime (Node, Deno, Bun, Cloudflare Workers). Express là standard trong 10 năm qua. Chapter này dạy cả hai — Hono cho type-safety và edge deployment, Express cho legacy compatibility và ecosystem.
+**Hono** là framework web nhẹ, type-safe, chạy trên mọi runtime (Node, Deno, Bun,
+Cloudflare Workers, Vercel Edge). **Express** là chuẩn mực suốt 10 năm qua.
+Chapter này dạy cả hai — Hono cho type-safety và edge deployment, Express cho
+tương thích với hệ sinh thái sẵn có.
 
-Pattern chung: routes → middleware → handlers → services → repositories. Mỗi layer testable riêng biệt. Error handling dùng `Result` pattern từ Ch22. Validation dùng Zod từ Ch14.
-
-
-## Backend with Hono — API as pipelines
-
-Hono = lightweight TypeScript framework. Routes = functions. Middleware = composition. Request → validate → process → respond = pipeline từ Ch21. Type-safe, edge-ready, 10x faster than Express.
-
+Cấu trúc xuyên suốt: `routes → middleware → handlers → services → repositories`.
+Mỗi tầng test được độc lập. Request → validate → process → respond chính là
+pipeline của Chapter 21, chỉ khác là nó chạy qua dây mạng. Error handling dùng
+`Result` (Ch22), validation dùng Zod (Ch14).
 
 ## 34.1 — Hono: Modern TypeScript API Framework
 
@@ -123,7 +123,11 @@ const validateCreateProduct = (body: unknown): Result<CreateProductRequest, Vali
     if (typeof obj.stock !== "number" || !Number.isInteger(obj.stock) || obj.stock < 0) {
         errors.push({ field: "stock", message: "Non-negative integer" });
     }
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
     return errors.length > 0
         ? { tag: "err", error: errors }
         : { tag: "ok", value: obj as unknown as CreateProductRequest };
@@ -241,7 +245,11 @@ const withAuth: Middleware = (next) => async (req) => {
     }
     return next(req);
 };
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 // Error handling middleware
 const withErrorHandling: Middleware = (next) => async (req) => {
     try {
@@ -389,6 +397,18 @@ run();
 </details>
 
 ---
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Middleware không chạy | Đăng ký sau route | Middleware phải khai báo **trước** route nó bảo vệ |
+| `c.req.json()` ném lỗi | Body rỗng hoặc sai Content-Type | Bọc trong try/catch, trả 400 với thông điệp rõ ràng |
+| Type của route param bị `any` | Không dùng validator có type | Dùng `zValidator` của Hono để giữ suy luận kiểu |
+| Lỗi async không vào error handler | Quên `await`/`return` trong handler | Luôn `return` promise từ handler |
+| CORS lỗi trên preflight | Chưa xử lý `OPTIONS` | Đăng ký `cors()` trước mọi route |
 
 ## Tóm tắt
 

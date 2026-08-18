@@ -303,7 +303,11 @@ const map = <T, U, E>(r: Result<T, E>, fn: (v: T) => U): Result<U, E> =>
 const mapErr = <T, E, F>(r: Result<T, E>, fn: (e: E) => F): Result<T, F> =>
     r.tag === "err" ? err(fn(r.error)) : r;
 
-// --- Domain example: User registration ---
+```
+
+#### Domain example: User registration
+
+```typescript
 
 type RegistrationError =
     | { readonly type: "INVALID_EMAIL"; readonly email: string }
@@ -425,7 +429,11 @@ const mapAsync = <T, U, E>(
 ): ResultAsync<U, E> =>
     resultAsync.then(r => r.tag === "ok" ? ok(fn(r.value)) : r);
 
-// --- Domain: Order processing with async steps ---
+```
+
+#### Domain: Order processing with async steps
+
+```typescript
 
 type OrderError =
     | { readonly type: "NOT_FOUND"; readonly orderId: string }
@@ -568,7 +576,11 @@ type ValidUser = {
     readonly age: number;
     readonly password: string;
 };
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 const validateUserForm = (form: UserForm): Result<ValidUser, readonly ValidationError[]> => {
     const results = [
         validateName(form.name),
@@ -696,7 +708,11 @@ const fetchUser = (id: string): Effect<{ name: string }, HttpError> =>
     id === "1"
         ? succeed({ name: "An" })
         : fail({ _tag: "HttpError", status: 404 });
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 const parseAge = (input: string): Effect<number, ParseError> => {
     const age = Number(input);
     return Number.isNaN(age)
@@ -958,7 +974,11 @@ const reserveStock = async (items: readonly Item[]): Promise<Result<readonly Ite
 
 const createOrder = async (order: ValidOrder): Promise<Result<Order, OrderError>> =>
     ok({ ...order, orderId: `ORD-${Date.now()}` });
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 // Full workflow
 const processOrder = async (customerId: string, items: readonly Item[]): Promise<Result<Order, OrderError>> => {
     const customerResult = await findCustomer(customerId);

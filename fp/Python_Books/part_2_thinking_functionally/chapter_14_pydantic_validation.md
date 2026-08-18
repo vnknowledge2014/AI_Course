@@ -197,6 +197,18 @@ assert pn.value == "+84912345678"
 
 ---
 
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Pydantic ép kiểu ngoài ý muốn (`"1"` → `1`) | Chế độ lax mặc định | Bật `model_config = ConfigDict(strict=True)` |
+| `@validator` không chạy | Cú pháp v1 trên Pydantic v2 | Đổi sang `@field_validator` / `@model_validator` |
+| Validate chéo nhiều field không được | `field_validator` chỉ thấy một field | Dùng `@model_validator(mode="after")` |
+| Model vẫn sửa được sau khi tạo | Pydantic model mặc định mutable | `model_config = ConfigDict(frozen=True)` |
+| Validate chậm ở đường nóng | Validate lại dữ liệu nội bộ đã tin cậy | Validate ở **ranh giới**; bên trong dùng `model_construct` |
+
 ## Tóm tắt
 
 - ✅ **Pydantic BaseModel**: Auto-validation on construction.

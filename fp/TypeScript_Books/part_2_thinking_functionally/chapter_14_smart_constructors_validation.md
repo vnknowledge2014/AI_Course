@@ -426,7 +426,11 @@ const combineResults = <T extends readonly Result<unknown, readonly string[]>[]>
         : ok(values as any);
 };
 
-// --- Validators ---
+```
+
+#### Validators
+
+```typescript
 const validateName = (name: string): Result<string, readonly string[]> =>
     name.length >= 2 ? ok(name) : err(["Tên >= 2 ký tự"]);
 
@@ -441,7 +445,11 @@ const validateAge = (age: number): Result<number, readonly string[]> => {
     return errors.length === 0 ? ok(age) : err(errors);
 };
 
-// --- Thu thập TẤT CẢ lỗi cùng lúc ---
+```
+
+#### Thu thập TẤT CẢ lỗi cùng lúc
+
+```typescript
 type User = {
     readonly name: string;
     readonly email: string;
@@ -629,7 +637,11 @@ const addError = (
     return new Map([...errors, [field, [...existing, message]]]);
 };
 
-// --- Validate form ---
+```
+
+#### Validate form
+
+```typescript
 type RegistrationForm = {
     readonly username: string;
     readonly email: string;
@@ -676,7 +688,11 @@ const validateRegistration = (form: RegistrationForm): Result<Registration, Fiel
         errors = addError(errors, "age", "Tuổi: 18-120");
 
     if (errors.size > 0) return err(errors);
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
     return ok({
         username,
         email,
@@ -791,7 +807,11 @@ const parseEmail = (input: string): Result<Email, string> => {
     if (!trimmed.includes("@")) return err("Invalid email");
     return ok(trimmed as Email);
 };
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 const parseMoney = (input: number): Result<Money, string> => {
     if (!Number.isFinite(input)) return err("Invalid amount");
     if (input < 0) return err("Amount must be >= 0");
@@ -1050,7 +1070,11 @@ const validateProduct = (form: ProductForm): Result<Product, FieldErrors> => {
     const category = form.category.trim().toLowerCase();
     if (!VALID_CATEGORIES.includes(category as typeof VALID_CATEGORIES[number]))
         errors = addError(errors, "category", "Danh mục: electronics, clothing, food");
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
     // Stock (string → integer)
     const stock = Number(form.stock);
     if (form.stock.trim() === "" || Number.isNaN(stock))

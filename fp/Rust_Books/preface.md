@@ -99,6 +99,14 @@ Mỗi chapter tuân theo nguyên tắc:
     |   Ch 37-44  |  Database, Security,          |
     |               System Design, Capstone       |
     |   Level: Principal                          |
+    +----------------------+---------------------+
+                           |
+                           v
+    +--------------------------------------------+
+    |       PART VIII: Agentic AI in Rust         |
+    |   Ch 45-55  |  Rig Core, Tools, RAG, MCP,   |
+    |               Self-Evolving Rusty-Context   |
+    |   Level: Principal                          |
     +--------------------------------------------+
 ```
 
@@ -160,17 +168,17 @@ Mỗi chapter tuân theo nguyên tắc:
 > *"Tôi muốn system design, production patterns, security."*
 
 ```
-    Ch0+Ch9 ----> Ch18-27 ----> Ch33-36 -----> Ch37-44
-    Syntax +      DDD core      Testing        PRODUCTION
-    Ownership     patterns      engineering    The goal
-    1 ngày        1 tuần        3 ngày         2 tuần
+    Ch0+Ch9 ----> Ch18-27 ----> Ch33-36 -----> Ch37-44 -----> Ch45-55
+    Syntax +      DDD core      Testing        PRODUCTION     AGENTIC AI
+    Ownership     patterns      engineering    The goal       The future
+    1 ngày        1 tuần        3 ngày         2 tuần         2 tuần
 ```
 
 **Cách đọc:**
 - Syntax + Ownership = 1 ngày (Ch0 + Ch9)
 - Skip thẳng tới Part III-IV cho DDD patterns
 - Part VI (Testing): đọc kỹ Ch34 (PBT) và Ch35 (Hexagonal)
-- **Part VII: ĐÂY LÀ MỤC TIÊU** — DB, Security, Distributed Systems, Capstone
+- **Part VII & VIII: ĐÂY LÀ MỤC TIÊU** — DB, Security, Distributed Systems, và đặc biệt là hệ thống Agentic AI (Rusty-Context).
 
 ---
 
@@ -212,8 +220,8 @@ fn main() {
 | Beginner | Part 0-I (Ch0-11) | 2-3 tuần |
 | Intermediate | Part II (Ch12-17) | 1 tuần |
 | Advanced | Part III-V (Ch18-32) | 3-4 tuần |
-| Principal | Part VI-VII (Ch33-44) | 2-3 tuần |
-| **Toàn bộ sách** | **Ch0-44** | **~8-11 tuần** |
+| Principal | Part VI-VIII (Ch33-55) | 4-5 tuần |
+| **Toàn bộ sách** | **Ch0-55** | **~10-13 tuần** |
 
 > **Lời khuyên cuối**: Đừng vội. Mỗi chapter là một viên gạch. Xây chắc nền tảng trước, tầng trên tự vững.
 

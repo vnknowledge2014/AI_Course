@@ -18,17 +18,15 @@
 
 ---
 
-## Capstone Part 1: Full Domain Model
-
-Mọi concept từ 35 chapters trước kết hợp lại.
-
-Bạn sẽ xây dựng domain model cho hệ thống order management: branded types cho domain values, discriminated unions cho states, `pipe()` + `Result` cho workflows, Zod cho validation, vitest cho TDD. Đây là blueprint mà bạn sẽ copy-paste cho mọi dự án production.
-
-
 ## Capstone Part 1 — Full Domain Model
 
-Tổng hợp tất cả patterns: Branded types (Ch15) + DUs (Ch20) + State machines (Ch20) + Workflows (Ch21) + Error handling (Ch22) → complete e-commerce order system. Code chạy được, test được, production-ready domain logic.
+Mọi khái niệm từ 35 chapter trước gom lại thành một hệ thống.
 
+Bạn sẽ xây domain model cho một hệ order management: branded types cho domain
+value (Ch15), discriminated union cho state (Ch20), state machine cho vòng đời
+đơn hàng (Ch20), `pipe()` + `Result` cho workflow (Ch21–22), Zod cho validation
+(Ch14), vitest cho TDD (Ch31). Code chạy được, test được — đây là blueprint bạn
+mang sang mọi dự án production sau này.
 
 ## 36.1 — Project: E-Commerce Order System
 
@@ -108,7 +106,11 @@ type Order =
     | { readonly status: "delivered"; readonly id: OrderId; readonly deliveredAt: Date; }
     | { readonly status: "cancelled"; readonly id: OrderId; readonly reason: string;
         readonly cancelledAt: Date; };
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 // === Domain Events ===
 type OrderEvent =
     | { type: "OrderConfirmed"; orderId: OrderId; total: Money; confirmedAt: Date }
@@ -217,7 +219,11 @@ const confirmOrder = (draft: DraftOrder, now: Date): Result<ConfirmedOrder, Conf
 
 // === Transition: Confirmed → Paid ===
 type PayError = "payment_failed";
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 const markAsPaid = (
     order: ConfirmedOrder,
     paymentId: string,
@@ -357,7 +363,11 @@ const confirmAndPayOrder = async (
     // Step 2: Validate
     if (order.status !== "draft") return err({ step: "validate", error: "not_draft" });
     if (order.items.length === 0) return err({ step: "validate", error: "empty_items" });
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
     // Step 3: Calculate (pure)
     const total = Money(order.items.reduce((s, i) => s + i.lineTotal, 0));
 
@@ -455,6 +465,18 @@ run();
 </details>
 
 ---
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Branded type vẫn gán được từ `string` | Thiếu brand thật sự | Dùng `string & { readonly __brand: unique symbol }` |
+| `switch` trên DU không vét cạn | Thiếu nhánh `default` với `never` | `default: const _: never = x; throw ...` |
+| Zod schema và domain type lệch nhau | Khai báo hai lần | Suy ra type từ schema bằng `z.infer<typeof Schema>` |
+| Test domain phải mock DB | I/O rò vào domain | Domain nhận dữ liệu thuần; I/O ở tầng ngoài |
+| `readonly` không ngăn được mutate lồng sâu | `readonly` chỉ nông một tầng | Dùng `DeepReadonly` tự viết, hoặc thư viện immutable |
 
 ## Tóm tắt — Part VI & Book Journey
 

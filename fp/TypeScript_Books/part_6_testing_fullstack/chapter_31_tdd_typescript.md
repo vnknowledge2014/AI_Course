@@ -334,7 +334,11 @@ const registerUser = async (
 
     await deps.userRepo.save(user);
     await deps.emailService.sendWelcome(user);
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
     return { tag: "ok", value: user };
 };
 

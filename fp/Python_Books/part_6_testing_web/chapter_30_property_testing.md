@@ -148,6 +148,44 @@ def test_my_fancy_sort_against_builtin(lst):
 
 ---
 
+---
+
+## ✅ Checkpoint 30
+
+1. Nêu ba loại property phổ biến và một ví dụ cho mỗi loại.
+2. Shrinking làm gì, và vì sao thiếu nó thì PBT gần như vô dụng?
+3. PBT thay thế hay bổ sung cho example-based test?
+
+<details>
+<summary>Đáp án</summary>
+
+1. **Round-trip**: `decode(encode(x)) == x`. **Idempotent**: `sort(sort(x)) == sort(x)`. **Oracle**: so kết quả với một cài đặt chậm-nhưng-chắc-đúng. (Còn: invariant, metamorphic.)
+2. Thu nhỏ ca lỗi về bản tối giản nhất còn fail. Thiếu nó, bạn nhận được một mảng 500 phần tử ngẫu nhiên và không biết phần tử nào gây lỗi — về cơ bản là không debug được.
+3. **Bổ sung**. Example test ghi lại các ca cụ thể mà bạn quan tâm (và làm tài liệu); PBT lùng những ca bạn chưa nghĩ ra. Cần cả hai.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Viết property round-trip cho `to_dto`/`from_dto` của bạn bằng `hypothesis`. Nó có tìm ra ca lỗi nào không?
+
+**Bài 2 (15 phút).** Viết strategy sinh `Email` hợp lệ, dùng nó test smart constructor. Rồi viết strategy sinh chuỗi **không** hợp lệ và khẳng định constructor luôn từ chối.
+
+**Bài 3 (25 phút).** Dùng oracle: cài một `sort` ngây thơ O(n²) rồi so kết quả với `sorted()` trên 1.000 input ngẫu nhiên. Đây là mẫu dùng khi bạn tối ưu một hàm có sẵn.
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| `Unsatisfiable` từ hypothesis | `assume()` lọc quá gắt | Viết strategy sinh trực tiếp dữ liệu hợp lệ thay vì lọc |
+| Test PBT chạy quá lâu | Số ví dụ mặc định quá cao cho hàm nặng | `@settings(max_examples=50)` |
+| Fail không tái hiện được | Seed ngẫu nhiên | Bật `.hypothesis` database, dùng `@reproduce_failure` |
+| PBT tìm ra "lỗi" mà thực ra không phải | Property phát biểu sai | Kiểm lại property trước khi sửa code — thường property mới là chỗ sai |
+| Float so sánh luôn fail | Sai số dấu phẩy động | Dùng `math.isclose`; hoặc tránh float trong domain |
+
 ## Tóm tắt
 
 - ✅ **PBT**: Đẩy trách nhiệm nghĩ test case cho máy tính, con người chỉ định nghĩa luật (Properties).

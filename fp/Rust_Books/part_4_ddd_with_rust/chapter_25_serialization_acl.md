@@ -1,30 +1,36 @@
 # Chapter 25 — Serialization & Anti-Corruption Layer
 
 > **Bạn sẽ học được**:
-> - **`serde`** — derive `Serialize`/`Deserialize` cho Rust types
-> - **Domain types ↔ DTOs** — tách domain model khỏi wire format
-> - **`From`/`Into`** trait cho mapping giữa layers
-> - **Anti-Corruption Layer** — bảo vệ domain khỏi external systems
-> - JSON, TOML, các format khác
-> - Validation tại boundaries
+> - **`serde`** — Thần khí của Rust để tự động biến đổi (Serialize/Deserialize) Dữ liệu.
+> - **Domain types ↔ DTOs** — Tuyệt kỹ tách biệt Hoàn toàn Code cốt lõi khỏi định dạng của API.
+> - Sử dụng Trait **`From`/`Into`** để làm trạm trung chuyển giữa các lớp (Layers).
+> - **Anti-Corruption Layer (Lớp chống suy đồi)** — Xây dựng một Bức tường thành bảo vệ Code của bạn khỏi đống rác từ các hệ thống cũ (Legacy Systems).
+> - Cách xử lý JSON, TOML một cách nhẹ nhàng.
+> - Validate ngay tại Biên giới (Boundaries).
 >
 > **Yêu cầu trước**: Chapter 16 (Traits, From/Into), Chapter 21 (Architecture), Chapter 22 (Domain Modeling).
 > **Thời gian đọc**: ~40 phút | **Level**: Advanced
-> **Kết quả cuối cùng**: Domain model **độc lập** khỏi wire format — thay API, đổi format, domain không đổi.
+> **Kết quả cuối cùng**: Domain Model của bạn sẽ **hoàn toàn độc lập** với thế giới bên ngoài. Cho dù API đổi cấu trúc, hay sếp yêu cầu đổi JSON sang XML, Code Cốt lõi của bạn KHÔNG PHẢI SỬA MỘT DÒNG NÀO!
 
 ---
 
-## 25.1 — `serde`: Serialize Everything
+## 25.1 — `serde`: Trạm Hải Quan của Rust
 
-### Biên giới và hải quan
+### Khái niệm Biên giới và Hải quan
 
-Hãy tưởng tượng domain của bạn là một quốc gia. Bên trong, mọi thứ gọn gàng: `Email`, `Money`, `OrderStatus` — types có nghĩa, validated, immutable. Nhưng thế giới bên ngoài không nói ngôn ngữ của bạn. API gửi JSON. Client gửi form data. Legacy system gửi CSV với field names đầy viết tắt. File cấu hình dùng TOML.
+Hãy tưởng tượng Domain (Code Cốt Lõi) của bạn là một Vương quốc. Bên trong Vương quốc, mọi thứ được quy định rất nghiêm ngặt: `Email`, `Money`, `OrderStatus` — Các kiểu dữ liệu này được xác thực kỹ càng, có nghĩa rõ ràng, và bất biến (Immutable).
 
-**Serialization** là trạm biên giới: nơi dữ liệu được "dịch" từ ngôn ngữ nội địa (Rust types) sang ngôn ngữ quốc tế (JSON, TOML), và ngược lại. **Anti-Corruption Layer** là hải quan: kiểm tra hàng hóa nhập khẩu (data từ bên ngoài), từ chối hàng không đạt chuẩn, và dịch sang format nội địa.
+Nhưng thế giới bên ngoài thì hỗn loạn và không nói ngôn ngữ của bạn. API của Front-end thì gửi JSON. Client cũ rích thì gửi form data. Hệ thống Legacy của đối tác thì gửi file CSV với những cái tên viết tắt xấu xí như `cust_no`, `cr_limit`.
 
-`serde` là công cụ để xây trạm biên giới này trong Rust.
+**Serialization (Tuần tự hóa)** chính là Trạm Biên giới: Nơi dữ liệu được "dịch" từ ngôn ngữ nội địa (Rust Structs) sang ngôn ngữ quốc tế (JSON, TOML), và ngược lại. 
 
-### Setup
+**Anti-Corruption Layer (Lớp chống suy đồi)** chính là Nhân viên Hải quan: Kiểm tra hàng hóa nhập khẩu, từ chối hàng lậu (dữ liệu sai), và phiên dịch sang ngôn ngữ nội địa.
+
+Trong Rust, `serde` là công cụ quyền năng nhất để xây dựng Trạm Biên Giới này.
+
+### Setup (Thiết lập)
+
+Thêm các dòng sau vào file cấu hình:
 
 ```toml
 # Cargo.toml
@@ -34,7 +40,9 @@ serde_json = "1"
 toml = "0.8"
 ```
 
-### Derive cơ bản
+### Derive Cơ bản: Phép màu tự động
+
+Chỉ cần gắn thẻ `#[derive(Serialize, Deserialize)]`, Rust sẽ tự động viết code dịch Struct của bạn ra đủ mọi loại ngôn ngữ!
 
 ```rust
 // filename: src/main.rs
@@ -50,100 +58,64 @@ struct Config {
 
 fn main() {
     let config = Config {
-        host: "localhost".into(),
-        port: 8080,
-        debug: true,
-        max_connections: 100,
+        host: "localhost".into(), port: 8080,
+        debug: true, max_connections: 100,
     };
 
-    // Struct → JSON
+    // Dịch từ Struct → JSON
     let json = serde_json::to_string_pretty(&config).unwrap();
     println!("JSON:\n{}\n", json);
 
-    // JSON → Struct
+    // Dịch từ JSON → Struct (Đọc từ file hoặc mạng)
     let parsed: Config = serde_json::from_str(&json).unwrap();
-    println!("Parsed: {:?}\n", parsed);
-
-    // Struct → TOML
-    let toml_str = toml::to_string_pretty(&config).unwrap();
-    println!("TOML:\n{}", toml_str);
+    println!("Đọc ngược lại: {:?}\n", parsed);
 }
 ```
 
-### Serde attributes
+### Trang điểm cho JSON (Serde Attributes)
+
+Thế giới bên ngoài thường thích dùng kiểu chữ `camelCase` (Ví dụ: `userId`), trong khi Rust lại dùng `snake_case` (Ví dụ: `user_id`). Serde cho phép bạn "Hóa trang" dữ liệu lúc đi qua biên giới cực kỳ dễ dàng bằng các Attributes:
 
 ```rust
 // filename: src/main.rs
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]  // JSON convention
+#[serde(rename_all = "camelCase")]  // Ép TẤT CẢ các tên biến thành camelCase khi xuất ra JSON
 struct UserResponse {
     user_id: u64,
     full_name: String,
-    email_address: String,
-
+    
+    // Nếu biến này bằng None, đừng in nó ra JSON luôn cho đỡ rác
     #[serde(skip_serializing_if = "Option::is_none")]
     phone_number: Option<String>,
 
-    #[serde(default)]  // nếu thiếu → dùng default
+    // Nếu JSON người ta gửi không có trường này, thì tự động gán false (hoặc giá trị mặc định)
+    #[serde(default)]
     is_active: bool,
 
-    #[serde(rename = "type")]  // "type" là reserved keyword
+    // Trong Rust chữ `type` bị cấm, nên đặt là `user_type`, nhưng xuất ra JSON thì đổi thành `type`
+    #[serde(rename = "type")]
     user_type: String,
 }
+```
 
+Và đây là kết quả khi nạp JSON vào:
+
+```rust
 fn main() {
-    // Deserialize từ JSON (camelCase)
+    // Nhận JSON chuẩn Front-end (camelCase, thiếu vài field)
     let json = r#"{
         "userId": 1,
         "fullName": "Minh Nguyen",
-        "emailAddress": "minh@co.com",
-        "isActive": true,
         "type": "admin"
     }"#;
 
     let user: UserResponse = serde_json::from_str(json).unwrap();
     println!("{:#?}", user);
-    // phone_number = None (missing in JSON, skip when serialize)
-
-    // Serialize back (camelCase, skip None)
-    println!("\n{}", serde_json::to_string_pretty(&user).unwrap());
-}
-```
-
-### Enum serialization
-
-```rust
-// filename: src/main.rs
-use serde::{Serialize, Deserialize};
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(tag = "type", content = "data")]  // adjacently tagged
-enum PaymentEvent {
-    Charged { amount: u32, currency: String },
-    Refunded { amount: u32, reason: String },
-    Failed { error_code: String },
-}
-
-fn main() {
-    let events = vec![
-        PaymentEvent::Charged { amount: 500_000, currency: "VND".into() },
-        PaymentEvent::Refunded { amount: 100_000, reason: "Damaged".into() },
-        PaymentEvent::Failed { error_code: "INSUFFICIENT_FUNDS".into() },
-    ];
-
-    let json = serde_json::to_string_pretty(&events).unwrap();
-    println!("{}", json);
-    // [
-    //   { "type": "Charged", "data": { "amount": 500000, "currency": "VND" } },
-    //   { "type": "Refunded", "data": { "amount": 100000, "reason": "Damaged" } },
-    //   ...
-    // ]
-
-    // Roundtrip: JSON → Vec<PaymentEvent>
-    let parsed: Vec<PaymentEvent> = serde_json::from_str(&json).unwrap();
-    println!("\nParsed {} events", parsed.len());
+    // Nhờ có attribute, nó sẽ tự động hiểu:
+    // - is_active = false (Do thiếu trong JSON)
+    // - phone_number = None
 }
 ```
 
@@ -152,42 +124,37 @@ fn main() {
 ## ✅ Checkpoint 25.1
 
 > Ghi nhớ:
-> 1. `#[derive(Serialize, Deserialize)]` = auto JSON/TOML/etc
-> 2. `#[serde(rename_all = "camelCase")]` cho API conventions
-> 3. `#[serde(tag = "type")]` cho enum = discriminated union trong JSON
-> 4. `skip_serializing_if`, `default`, `rename` = fine-tune
+> 1. `#[derive(Serialize, Deserialize)]` là phép thuật để chuyển đổi Struct ↔ JSON/TOML.
+> 2. Dùng `#[serde(rename_all = "camelCase")]` để chiều lòng Front-end dev.
+> 3. Các attributes như `skip_serializing_if`, `default`, `rename` giúp bạn tinh chỉnh biên giới mà không cần đổi tên biến trong Code Rust.
 
 ---
 
-## 25.2 — Domain Types ≠ DTOs
+## 25.2 — Domain Types ≠ DTOs (Sự khác biệt sống còn)
 
-### Tại sao không nên để domain types đi qua biên giới?
+### Tại sao không nên cho Công Dân đi ra nước ngoài?
 
-Hãy nghĩ thế này: nếu bạn cho công dân (domain types) đi ra nước ngoài mà không có hộ chiếu (DTO) — họ phải mang theo GIẤY Tờ GỐC. Nước ngoài thay đổi luật nhập cảnh? Domain types bị ảnh hưởng trực tiếp. Ngược lại, domain thêm field mới? API break vì client chưa biết field đó.
+Bạn đã biết dùng Serde. Bạn nghĩ: *"Ôi dễ thế, tôi sẽ gắn thẳng cái `#derive(Serialize)` vào cái Struct Core Domain của tôi để ném ra thành API luôn!"*
 
-DTO (Data Transfer Object) là "hộ chiếu" — một bản sao đơn giản của domain data, chỉ chứa thông tin cần thiết cho chuyến đi (API call). Domain thay đổi? Chỉ cập nhật mapping, client không biết. API thay đổi? Chỉ cập nhật DTO, domain không biết.
+**ĐỪNG LÀM THẾ! Đó là một thảm họa.**
 
-### Vấn đề: Domain types + serde = coupling
+Hãy nghĩ thế này: Nếu bạn cho Công dân (Domain Types) của bạn đi ra nước ngoài, mà bạn lại ép họ phải mang bộ mặt của nước ngoài (Dùng `rename_all="camelCase"` vào Core Domain). Rồi nhỡ API đổi chuẩn, bắt buộc phải trả về `snake_case` thì sao? Bạn phải chui sâu vào Code Cốt lõi để sửa một cái Attribute râu ria? Ngược lại, nếu Core Domain cần thêm một biến `secret_password` cho thuật toán, chẳng lẽ bạn lại vô tình làm lọt nó ra API chỉ vì quên gắn thẻ `skip`?
 
-```rust
-// ❌ BAD: Domain type trực tiếp serialize
-#[derive(Debug, Clone, Serialize, Deserialize)]
-struct Order {
-    id: u64,
-    customer: String,
-    total: u32,
-    // API thay đổi? → Domain thay đổi!
-    // Domain thêm field? → API break!
-}
-```
+### Giải pháp: DTO (Hộ chiếu)
 
-### Giải pháp: DTO = Data Transfer Object
+**DTO (Data Transfer Object)** đóng vai trò là "Hộ chiếu". Nó là một bản sao Đơn Giản Hóa của Domain Data, chỉ chứa đúng những thông tin mà phía bên kia mạng cần, và được định dạng chuẩn theo ý họ.
+
+Khi Core Domain thay đổi? Bạn chỉ cập nhật cách chép dữ liệu (Mapping), API Client không bị ảnh hưởng.
+Khi API thay đổi? Bạn sửa DTO, Core Domain không hề hay biết!
+
+### Tách biệt 2 Thế Giới
+
+**Thế giới 1: Domain Tinh khiết (Không hề có Serde)**
 
 ```rust
 // filename: src/main.rs
-use serde::{Serialize, Deserialize};
 
-// ═══ DOMAIN (pure, no serde) ═══
+// ═══ DOMAIN (Hoàn toàn Tinh khiết, Không có tí Serde nào) ═══
 mod domain {
     #[derive(Debug, Clone)]
     pub struct Email(String);
@@ -200,26 +167,17 @@ mod domain {
     }
 
     #[derive(Debug, Clone)]
-    pub struct Money(u64);
-    impl Money {
-        pub fn new(amount: u64) -> Self { Money(amount) }
-        pub fn value(&self) -> u64 { self.0 }
-    }
-
-    #[derive(Debug, Clone)]
     pub struct Order {
         pub id: u64,
-        pub customer_name: String,
-        pub customer_email: Email,
-        pub total: Money,
-        pub status: OrderStatus,
+        pub customer_email: Email, // Dùng Value Object xịn
     }
-
-    #[derive(Debug, Clone)]
-    pub enum OrderStatus { Draft, Confirmed, Shipped }
 }
+```
 
-// ═══ DTOs (serde, API format) ═══
+**Thế giới 2: DTO (Đầy đủ đồ nghề Serde, nhưng ngu ngốc về mặt Logic)**
+
+```rust
+// ═══ DTOs (Nơi giao tiếp với API) ═══
 mod dto {
     use serde::{Serialize, Deserialize};
 
@@ -227,159 +185,115 @@ mod dto {
     #[serde(rename_all = "camelCase")]
     pub struct OrderDto {
         pub id: u64,
-        pub customer_name: String,
-        pub customer_email: String,  // String, không phải Email!
-        pub total_amount: u64,       // u64, không phải Money!
-        pub status: String,          // String, không phải enum!
-    }
-
-    #[derive(Debug, Deserialize)]
-    #[serde(rename_all = "camelCase")]
-    pub struct CreateOrderRequest {
-        pub customer_name: String,
-        pub customer_email: String,
-        pub items: Vec<OrderItemDto>,
-    }
-
-    #[derive(Debug, Deserialize)]
-    #[serde(rename_all = "camelCase")]
-    pub struct OrderItemDto {
-        pub product_name: String,
-        pub price: u64,
-        pub quantity: u32,
-    }
-}
-
-// ═══ MAPPING: Domain ↔ DTO ═══
-impl From<domain::Order> for dto::OrderDto {
-    fn from(order: domain::Order) -> Self {
-        dto::OrderDto {
-            id: order.id,
-            customer_name: order.customer_name,
-            customer_email: order.customer_email.value().to_string(),
-            total_amount: order.total.value(),
-            status: format!("{:?}", order.status).to_lowercase(),
-        }
-    }
-}
-
-impl TryFrom<dto::CreateOrderRequest> for (String, domain::Email) {
-    type Error = String;
-    fn try_from(req: dto::CreateOrderRequest) -> Result<Self, String> {
-        let email = domain::Email::new(&req.customer_email)?;
-        Ok((req.customer_name, email))
-    }
-}
-
-fn main() {
-    // Domain → DTO → JSON (outbound)
-    let order = domain::Order {
-        id: 42,
-        customer_name: "Minh".into(),
-        customer_email: domain::Email::new("minh@co.com").unwrap(),
-        total: domain::Money::new(500_000),
-        status: domain::OrderStatus::Confirmed,
-    };
-
-    let dto: dto::OrderDto = order.into();
-    let json = serde_json::to_string_pretty(&dto).unwrap();
-    println!("Outbound JSON:\n{}\n", json);
-
-    // JSON → DTO → Domain (inbound)
-    let input_json = r#"{
-        "customerName": "Lan",
-        "customerEmail": "lan@co.com",
-        "items": [
-            {"productName": "Coffee", "price": 35000, "quantity": 2}
-        ]
-    }"#;
-
-    let request: dto::CreateOrderRequest = serde_json::from_str(input_json).unwrap();
-    match <(String, domain::Email)>::try_from(request) {
-        Ok((name, email)) => {
-            println!("Inbound: {} <{}>", name, email.value());
-        }
-        Err(e) => println!("❌ {}", e),
+        pub customer_email: String,  // Chỉ là String rỗng tuếch, để vứt qua mạng cho lẹ
     }
 }
 ```
 
-### Tại sao tách?
+### Trạm Trung Chuyển: Biến Hình với Trait `From`
 
-| | Domain trực tiếp | DTO riêng |
+Để DTO và Domain nói chuyện được với nhau, chúng ta dùng Trait `From` và `TryFrom` của Rust để dịch qua dịch lại.
+
+```rust
+// ═══ MAPPING: Dịch từ Domain → DTO (Để xuất JSON ra ngoài) ═══
+impl From<domain::Order> for dto::OrderDto {
+    fn from(order: domain::Order) -> Self {
+        dto::OrderDto {
+            id: order.id,
+            customer_email: order.customer_email.value().to_string(), // Mở hộp Email ra lấy String
+        }
+    }
+}
+```
+
+Và đây là cách chúng hoạt động mượt mà:
+
+```rust
+fn main() {
+    // 1. Bên trong hệ thống xử lý logic xịn
+    let order = domain::Order {
+        id: 42,
+        customer_email: domain::Email::new("minh@co.com").unwrap(),
+    };
+
+    // 2. Tới biên giới, Biến hình thành DTO (.into)
+    let dto: dto::OrderDto = order.into();
+    
+    // 3. Đóng gói ra Tàu hỏa (Thành JSON)
+    let json = serde_json::to_string_pretty(&dto).unwrap();
+    println!("Outbound JSON:\n{}", json);
+}
+```
+
+### Tại sao phải khổ sở tách làm 2 vậy?
+
+| Tình huống | Dùng chung 1 Struct (Sai) | Tách riêng DTO (Đúng) |
 |---|---|---|
-| API thay đổi? | Domain phải sửa ❌ | Chỉ sửa DTO ✅ |
-| Domain thêm field? | API có thể break ❌ | Mapping quyết định expose gì ✅ |
-| Validation? | Ai validate? ❌ | DTO → Domain = validate tại boundary ✅ |
-| Testing? | Cần JSON fixtures ❌ | Domain test pure, DTO test riêng ✅ |
+| **API đổi luật (VD: Đổi tên field)** | Code Cốt Lõi bị dơ dáy vì phải sửa theo API ❌ | Chỉ sửa DTO, Core Domain vẫn thanh cao ✅ |
+| **Bảo mật** | Vô tình trả lọt `password` ra API ❌ | Mapping quyết định chỉ expose cái gì an toàn ✅ |
+| **Test** | Viết Test rất khó vì phải mồi bằng chuỗi JSON rườm rà ❌ | Code Cốt lõi Test siêu nhanh vì không dính tới JSON ✅ |
 
 ---
 
-## 25.3 — Anti-Corruption Layer
+## 25.3 — Anti-Corruption Layer (Bức Tường Chống Suy Đồi)
 
-### Bảo vệ domain khỏi external systems
+### Hệ thống Đối Tác Gửi Đống Rác (Legacy Systems)
 
-Bây giờ hãy nói về hải quan — Anti-Corruption Layer. Legacy system từ đối tác gửi data với field names như `cust_no`, `first_nm`, `acct_status: -1`. Bạn có muốn vứt rác này vào giữa domain không? Không. ACL là trạm hải quan: nhận hàng (JSON xấu), kiểm định (validate), dịch sang format nội địa (domain types), từ chối hàng lỗi:
+Hãy nói sâu hơn về Hải quan — **Anti-Corruption Layer (ACL)**. Giả sử hệ thống Ngân hàng cũ rích của Đối tác gọi vào API của bạn. Họ gửi một cục JSON xấu đau đớn với tên biến chắp vá như: `cust_no`, `first_nm`, `acct_status: -1`. 
+
+Bạn có muốn cho "Cái thứ hôi hám" đó bò vào trong Logic Đẹp Đẽ của bạn không? Chắc chắn KHÔNG.
+
+ACL chính là lớp Hải quan: Nhận hàng (JSON xấu) → Kiểm định → Lau chùi, Đánh bóng (Dịch sang format nội địa) → Từ chối hàng lậu.
+
+### Xây dựng ACL bằng Code
 
 ```rust
 // filename: src/main.rs
-use serde::{Serialize, Deserialize};
 
-// ═══ External system format (legacy, ugly) ═══
+// 1. Định dạng Của Hệ Thống Cũ (Xấu xí, ngu ngốc)
 mod external {
     use serde::Deserialize;
-
     #[derive(Debug, Deserialize)]
     pub struct LegacyCustomer {
-        pub cust_no: String,       // "C-00042"
-        pub first_nm: String,      // "MINH"
-        pub last_nm: String,       // "NGUYEN"
-        pub email_addr: String,    // "MINH@CO.COM  "
+        pub cust_no: String,       // VD: "C-00042"
+        pub first_nm: String,      // VD: "MINH"
         pub acct_status: i32,      // 1=active, 0=inactive, -1=suspended
-        pub cr_limit: f64,         // 5000000.0
     }
 }
 
-// ═══ Our domain (clean) ═══
+// 2. Định dạng Tinh Hoa của bạn
 mod domain {
-    #[derive(Debug, Clone)]
-    pub struct CustomerId(pub u64);
-
-    #[derive(Debug, Clone)]
+    #[derive(Debug)]
     pub struct Customer {
-        pub id: CustomerId,
+        pub id: u64,
         pub name: String,
-        pub email: String,
         pub status: CustomerStatus,
-        pub credit_limit: u64,
     }
-
-    #[derive(Debug, Clone, PartialEq)]
+    
+    #[derive(Debug)]
     pub enum CustomerStatus { Active, Inactive, Suspended }
 }
+```
 
-// ═══ Anti-Corruption Layer ═══
+**Đây chính là Lớp ACL:** Nơi nó hốt rác và biến thành Vàng.
+
+```rust
 mod acl {
     use super::{external, domain};
 
+    // Hàm Dịch Thuật
     pub fn translate_customer(legacy: external::LegacyCustomer) -> Result<domain::Customer, String> {
-        // Parse ID: "C-00042" → 42
+        
+        // Cắt bỏ chữ "C-", lấy số 42 ra
         let id = legacy.cust_no
             .strip_prefix("C-")
             .and_then(|s| s.parse::<u64>().ok())
-            .ok_or_else(|| format!("Invalid customer number: {}", legacy.cust_no))?;
+            .ok_or_else(|| format!("Invalid ID: {}", legacy.cust_no))?;
 
-        // Name: "MINH" "NGUYEN" → "Minh Nguyen"
-        let name = format!(
-            "{} {}",
-            capitalize(&legacy.first_nm),
-            capitalize(&legacy.last_nm),
-        );
+        // Format lại tên cho đẹp: "MINH" -> "Minh"
+        let name = capitalize(&legacy.first_nm);
 
-        // Email: normalize
-        let email = legacy.email_addr.trim().to_lowercase();
-
-        // Status: int → enum
+        // Map số xấu xí thành Enum Xịn
         let status = match legacy.acct_status {
             1 => domain::CustomerStatus::Active,
             0 => domain::CustomerStatus::Inactive,
@@ -387,157 +301,93 @@ mod acl {
             other => return Err(format!("Unknown status: {}", other)),
         };
 
-        // Credit limit: f64 → u64
-        let credit_limit = legacy.cr_limit as u64;
-
-        Ok(domain::Customer {
-            id: domain::CustomerId(id),
-            name, email, status, credit_limit,
-        })
+        Ok(domain::Customer { id, name, status })
     }
 
     fn capitalize(s: &str) -> String {
-        let lower = s.to_lowercase();
-        let mut chars = lower.chars();
+        let mut chars = s.to_lowercase().chars();
         match chars.next() {
             Some(c) => c.to_uppercase().to_string() + chars.as_str(),
             None => String::new(),
         }
     }
 }
+```
 
+Khi chạy thực tế:
+
+```rust
 fn main() {
-    // Simulate receiving legacy data
-    let legacy_json = r#"{
-        "cust_no": "C-00042",
-        "first_nm": "MINH",
-        "last_nm": "NGUYEN",
-        "email_addr": "MINH@CO.COM  ",
-        "acct_status": 1,
-        "cr_limit": 5000000.0
-    }"#;
-
+    let legacy_json = r#"{ "cust_no": "C-00042", "first_nm": "MINH", "acct_status": 1 }"#;
     let legacy: external::LegacyCustomer = serde_json::from_str(legacy_json).unwrap();
-    println!("Legacy: {:?}\n", legacy);
-
+    
+    // Tường lửa ACL sẽ xử lý
     match acl::translate_customer(legacy) {
-        Ok(customer) => {
-            println!("Domain: {:?}", customer);
-            // Customer { id: CustomerId(42), name: "Minh Nguyen",
-            //   email: "minh@co.com", status: Active, credit_limit: 5000000 }
-        }
-        Err(e) => println!("❌ Translation failed: {}", e),
+        Ok(customer) => println!("Tài sản Domain Sạch Sẽ: {:?}", customer),
+        Err(e) => println!("❌ Bắt được Hàng Lậu: {}", e),
     }
 }
 ```
 
-### ACL Pattern diagram
+### Sơ đồ Chiến Thuật ACL
 
-```
+```text
 ┌──────────────┐     ┌──────────────────┐     ┌──────────────┐
-│  External    │     │  Anti-Corruption  │     │   Domain     │
-│  System      │────→│  Layer (ACL)      │────→│   Model      │
-│  (legacy)    │     │  translate()      │     │  (clean)     │
-│              │     │  validate()       │     │              │
-│  cust_no     │     │  normalize()      │     │  CustomerId  │
-│  first_nm    │     │                   │     │  Customer    │
-│  acct_status │     │  From/TryFrom     │     │  Status enum │
+│  Hệ Thống Cũ │     │  Anti-Corruption │     │   Domain     │
+│  (Bên Ngoài) │────→│  Layer (ACL)     │────→│   Model      │
+│              │     │  translate()     │     │  (Xịn xò)    │
+│  cust_no     │     │  normalize()     │     │  Customer    │
+│  acct_status │     │                  │     │  Status Enum │
 └──────────────┘     └──────────────────┘     └──────────────┘
-     Ugly format          Translation              Clean types
+  Dữ liệu Rác           Dịch & Lau Chùi           Ngọc quý
 ```
 
 ---
 
-## 25.4 — Validation at Boundaries
+## 25.4 — Validation ngay tại Biên Giới
 
-DTO chấp nhận mọi thứ từ bên ngoài (strings, numbers âm, giá trị vô nghĩa). Domain types chỉ chấp nhận giá trị hợp lệ. Phần chuyển đổi giữa hai lớp này — boundary — là nơi validate và thu gom lỗi:
+DTO là đứa "Nhận mọi thứ". Nó sẽ vui vẻ nhận một chuỗi `name: "A"` hay `price: -100` từ mạng. Nhưng Domain Types thì RẤT KÉN CHỌN (Nó dùng Newtype/Smart Constructors để đảm bảo đã được tạo ra thì chắc chắn phải đúng).
+
+Vì vậy, **Ranh giới giữa DTO và Domain chính là nơi Tốt nhất để Validate và Bắt lỗi đầu vào**.
 
 ```rust
 // filename: src/main.rs
 use serde::Deserialize;
 
-// DTO: chấp nhận MỌI input từ user
+// DTO: Ngu ngốc, ai cho gì lấy nấy
 #[derive(Debug, Deserialize)]
 struct CreateProductRequest {
-    name: String,
-    price: f64,
-    category: String,
-    stock: i32,
+    name: String, price: f64,
 }
 
-// Domain: chỉ valid values
+// Domain: Tinh xảo, chặt chẽ
 #[derive(Debug)]
 struct Product {
-    name: String,
-    price: u32,
-    category: ProductCategory,
-    stock: u32,
+    name: String, price: u32,
 }
 
-#[derive(Debug)]
-enum ProductCategory { Electronics, Books, Food, Clothing }
-
-// Validate + convert tại boundary
+// Validation tại Biên Giới: Thu gom lỗi
 fn validate_product(req: CreateProductRequest) -> Result<Product, Vec<String>> {
     let mut errors = vec![];
 
-    let name = req.name.trim().to_string();
-    if name.len() < 2 || name.len() > 200 {
-        errors.push("Name: 2-200 chars required".into());
-    }
-
-    if req.price <= 0.0 || req.price > 1_000_000_000.0 {
-        errors.push("Price: must be positive and under 1 billion".into());
-    }
-
-    let category = match req.category.to_lowercase().as_str() {
-        "electronics" => Some(ProductCategory::Electronics),
-        "books" => Some(ProductCategory::Books),
-        "food" => Some(ProductCategory::Food),
-        "clothing" => Some(ProductCategory::Clothing),
-        other => { errors.push(format!("Unknown category: {}", other)); None }
-    };
-
-    if req.stock < 0 {
-        errors.push("Stock cannot be negative".into());
-    }
+    if req.name.trim().len() < 2 { errors.push("Tên quá ngắn".into()); }
+    if req.price <= 0.0 { errors.push("Giá phải lớn hơn 0".into()); }
 
     if errors.is_empty() {
-        Ok(Product {
-            name,
-            price: req.price as u32,
-            category: category.unwrap(),
-            stock: req.stock as u32,
-        })
+        Ok(Product { name: req.name, price: req.price as u32 })
     } else {
         Err(errors)
     }
 }
-
-fn main() {
-    // Valid input
-    let json = r#"{"name": "Laptop Pro", "price": 25000000, "category": "Electronics", "stock": 50}"#;
-    let req: CreateProductRequest = serde_json::from_str(json).unwrap();
-    println!("Valid: {:?}\n", validate_product(req));
-
-    // Invalid input — multiple errors
-    let json = r#"{"name": "X", "price": -500, "category": "toys", "stock": -10}"#;
-    let req: CreateProductRequest = serde_json::from_str(json).unwrap();
-    match validate_product(req) {
-        Err(errors) => {
-            println!("Errors:");
-            for e in &errors { println!("  ❌ {}", e); }
-        }
-        Ok(_) => unreachable!(),
-    }
-}
 ```
 
-> **💡 Boundary rule**: External data (JSON, CSV, user input) = **untrusted**. Validate + convert ở boundary. Bên trong domain = **trusted** types (newtypes, smart constructors).
+> **💡 Quy luật Bất Bãi**: Mọi dữ liệu từ bên ngoài (JSON, CSV, Input người dùng) đều là **Kẻ Dối Trá (Untrusted)**. Phải dùng DTO để hứng lấy nó, sau đó Kiểm Định ở Biên giới, rồi mới biến nó thành Công dân (Domain) **Trusted**.
 
 ---
 
-## 25.5 — Multiple Formats
+## 25.5 — Multiple Formats (Khả năng Đa Ngôn Ngữ)
+
+Một khi bạn đã tách Domain khỏi DTO, bạn có thể biến DTO thành mọi loại định dạng mà các hệ thống khác yêu cầu (JSON cho Web, TOML cho cấu hình Server, MessagePack cho tốc độ cao) chỉ bằng 1 dòng code!
 
 ```rust
 // filename: src/main.rs
@@ -547,43 +397,18 @@ use serde::{Serialize, Deserialize};
 struct AppConfig {
     app_name: String,
     version: String,
-    database: DatabaseConfig,
-    features: Vec<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct DatabaseConfig {
-    host: String,
-    port: u16,
-    name: String,
-    pool_size: u32,
 }
 
 fn main() {
-    let config = AppConfig {
-        app_name: "MyApp".into(),
-        version: "1.0.0".into(),
-        database: DatabaseConfig {
-            host: "localhost".into(),
-            port: 5432,
-            name: "mydb".into(),
-            pool_size: 10,
-        },
-        features: vec!["auth".into(), "cache".into(), "metrics".into()],
-    };
+    let config = AppConfig { app_name: "MyApp".into(), version: "1.0.0".into() };
 
-    // JSON
+    // Bắn ra JSON
     let json = serde_json::to_string_pretty(&config).unwrap();
-    println!("═══ JSON ═══\n{}\n", json);
+    println!("JSON:\n{}", json);
 
-    // TOML
+    // Bắn ra TOML (Dành cho DevOps)
     let toml_str = toml::to_string_pretty(&config).unwrap();
-    println!("═══ TOML ═══\n{}\n", toml_str);
-
-    // Roundtrip: TOML → struct → JSON
-    let from_toml: AppConfig = toml::from_str(&toml_str).unwrap();
-    let back_to_json = serde_json::to_string_pretty(&from_toml).unwrap();
-    println!("═══ TOML → JSON roundtrip ═══\n{}", back_to_json);
+    println!("TOML:\n{}", toml_str);
 }
 ```
 
@@ -591,157 +416,17 @@ fn main() {
 
 ## 🏋️ Bài tập
 
-**Bài 1** (5 phút): Serde attributes
+**Bài 1** (15 phút): Hệ thống Cổng thanh toán (Payment Gateway ACL)
 
-Làm sao để struct sau serialize thành JSON `{"firstName": "Minh", "age": 25}` (bỏ `None` fields)?
+Viết Lớp ACL cho một Cổng thanh toán.
+- Bên ngoài gửi JSON siêu xấu: `{"tx_id": "TX001", "amt_cents": 50000, "curr": "VND", "stat": "OK"}`
+- Bên trong Domain muốn gọn gàng: `Payment { id, amount: u64, currency: Enum, status: Enum }`
+- Viết 1 Struct DTO để hứng JSON, và 1 hàm `translate` để biến DTO thành Domain. Trả về Lỗi nếu tiền < 0 hoặc sai Enum.
 
-```rust
-struct User { first_name: String, last_name: Option<String>, age: u32 }
-```
+<details><summary>✅ Gợi ý Lời giải</summary>
 
-<details><summary>✅ Lời giải</summary>
-
-```rust
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct User {
-    first_name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    last_name: Option<String>,
-    age: u32,
-}
-```
-
-</details>
-
----
-
-**Bài 2** (10 phút): DTO mapping
-
-External API trả:
-```json
-{"usr_id": 42, "usr_name": "MINH NGUYEN", "usr_email": "MINH@CO.COM", "is_del": false}
-```
-
-Viết: (1) `ExternalUserDto` với serde, (2) `User` domain type, (3) `From<ExternalUserDto> for User`.
-
-<details><summary>✅ Lời giải Bài 2</summary>
-
-```rust
-#[derive(Deserialize)]
-struct ExternalUserDto {
-    usr_id: u64,
-    usr_name: String,
-    usr_email: String,
-    is_del: bool,
-}
-
-#[derive(Debug)]
-struct User {
-    id: u64,
-    name: String,
-    email: String,
-    is_active: bool,
-}
-
-impl From<ExternalUserDto> for User {
-    fn from(dto: ExternalUserDto) -> Self {
-        User {
-            id: dto.usr_id,
-            name: title_case(&dto.usr_name),
-            email: dto.usr_email.trim().to_lowercase(),
-            is_active: !dto.is_del,  // invert
-        }
-    }
-}
-
-fn title_case(s: &str) -> String {
-    s.split_whitespace()
-        .map(|w| {
-            let mut c = w.to_lowercase().chars();
-            match c.next() {
-                Some(first) => first.to_uppercase().to_string() + c.as_str(),
-                None => String::new(),
-            }
-        })
-        .collect::<Vec<_>>()
-        .join(" ")
-}
-```
-
-</details>
-
----
-
-**Bài 3** (15 phút): Full ACL pipeline
-
-Viết Anti-Corruption Layer cho payment gateway:
-- External format: `{"tx_id": "TX001", "amt_cents": 50000, "curr": "VND", "stat": "OK", "ts": "2024-01-15T10:30:00Z"}`
-- Domain: `Payment { id, amount: Money, currency: Currency, status: PaymentStatus, timestamp }`
-- ACL: parse, validate, normalize. Handle errors.
-
-<details><summary>✅ Lời giải Bài 3</summary>
-
-```rust
-use serde::Deserialize;
-
-#[derive(Deserialize)]
-struct ExternalPayment {
-    tx_id: String,
-    amt_cents: i64,
-    curr: String,
-    stat: String,
-    ts: String,
-}
-
-#[derive(Debug)]
-struct Payment {
-    id: String,
-    amount: u64,
-    currency: Currency,
-    status: PaymentStatus,
-    timestamp: String,
-}
-
-#[derive(Debug)]
-enum Currency { VND, USD, EUR }
-
-#[derive(Debug)]
-enum PaymentStatus { Success, Failed, Pending }
-
-fn translate(ext: ExternalPayment) -> Result<Payment, Vec<String>> {
-    let mut errors = vec![];
-
-    if ext.amt_cents <= 0 { errors.push("Amount must be positive".into()); }
-
-    let currency = match ext.curr.as_str() {
-        "VND" => Some(Currency::VND),
-        "USD" => Some(Currency::USD),
-        "EUR" => Some(Currency::EUR),
-        c => { errors.push(format!("Unknown currency: {}", c)); None }
-    };
-
-    let status = match ext.stat.as_str() {
-        "OK" | "SUCCESS" => Some(PaymentStatus::Success),
-        "FAIL" | "ERROR" => Some(PaymentStatus::Failed),
-        "PENDING" => Some(PaymentStatus::Pending),
-        s => { errors.push(format!("Unknown status: {}", s)); None }
-    };
-
-    if errors.is_empty() {
-        Ok(Payment {
-            id: ext.tx_id,
-            amount: ext.amt_cents as u64,
-            currency: currency.unwrap(),
-            status: status.unwrap(),
-            timestamp: ext.ts,
-        })
-    } else {
-        Err(errors)
-    }
-}
-```
-
+Viết `struct ExternalPayment` có derive `Deserialize`. 
+Sau đó viết hàm `translate` dùng chuỗi `match` để kiểm tra `curr` (VND/USD) và `stat` (OK/FAIL). Nếu lọt cờ mờ thì trả `Err("Unknown status")`.
 </details>
 
 ---
@@ -750,25 +435,22 @@ fn translate(ext: ExternalPayment) -> Result<Payment, Vec<String>> {
 
 | Vấn đề | Nguyên nhân | Giải pháp |
 |---------|-------------|-----------|
-| `unknown field` khi deserialize | JSON có fields không trong struct | `#[serde(deny_unknown_fields)]` hoặc bỏ qua |
-| Domain type dùng serde trực tiếp | Coupling domain ↔ wire format | Tách DTO, dùng `From`/`TryFrom` |
-| Enum serialize không đẹp | Mặc định: `{"Variant": {...}}` | `#[serde(tag = "type")]` hoặc `rename_all` |
-| Float → int precision | `f64` → `u32` mất precision | Dùng cents/đồng (integer), không dùng float cho tiền |
+| Báo lỗi `unknown field` khi lấy JSON | Front-end gửi dư rác | Thêm `#[serde(deny_unknown_fields)]` nếu bạn muốn làm gắt, hoặc bỏ qua là xong. |
+| Code dơ vì dính Serde vào Domain | Áp Serde lên Domain Struct | Tách làm đôi, viết thêm DTO, và cắn răng viết hàm `From` để đổi qua đổi lại. Tốn thời gian lúc đầu nhưng an toàn mãi mãi. |
+| Ép Float (Tiền) vào Int bị mất số lẻ | `f64` → `u32` | Đừng bao giờ dùng Float cho Tiền Tệ. Luôn yêu cầu Front-end gửi Cents/Đồng (Số nguyên). |
 
 ---
 
 ## Tóm tắt
 
-Chapter này dạy bạn xây **trạm biên giới** cho domain — nơi dữ liệu ra vào được kiểm soát chặt chẽ:
-
-- ✅ **`serde`**: `#[derive(Serialize, Deserialize)]` + attributes — xây trạm biên giới nhanh chóng.
-- ✅ **Domain ≠ DTO**: Domain types là công dân, DTOs là hộ chiếu. Map qua `From`/`TryFrom` — domain và API độc lập.
-- ✅ **Anti-Corruption Layer**: Hải quan kiểm hàng nhập. Legacy format (xấu) → ACL (dịch, validate) → Domain (sạch).
-- ✅ **Validation at boundaries**: External data = untrusted. Validate + convert ở biên giới. Bên trong domain = trusted.
-- ✅ **Multiple formats**: Cùng struct → JSON, TOML, MessagePack. Serde makes it trivial.
+Chapter này đã cấp cho bạn Tấm Khiên Chống Đạn vững chắc nhất trong Thiết Kế Hệ Thống:
+- ✅ **`serde`**: Phép màu chuyển đổi Dữ liệu một cách dễ dàng.
+- ✅ **Domain ≠ DTO**: Code cốt lõi là Vàng, DTO là hộp Carton. Bỏ Vàng vào Hộp để ship đi, đừng bắt Vàng tự biến thành hộp Carton. Dùng `From`/`TryFrom` để ship.
+- ✅ **Anti-Corruption Layer (ACL)**: Hải quan ngăn rác thải từ hệ thống cũ chui vào bộ máy mới của bạn.
+- ✅ **Validate at Boundaries**: Biên giới là nơi thích hợp nhất để soi lỗi, bên trong Vương quốc thì mọi thứ phải tinh sạch.
 
 ## Tiếp theo
 
-Dữ liệu đã qua biên giới an toàn — giờ cần **lưu trữ** nó. Như thư viện lưu sách: bạn mang sách đến, thủ thư biết xếp ở đâu, và tìm lại khi bạn cần.
+Dữ liệu đã qua biên giới an toàn, đã được nhào nặn sạch sẽ — giờ ta cần **Cất Giữ (Lưu trữ)** nó. Giống như một cái Thư viện, bạn mang sách đến, thủ thư biết xếp ở đâu và tìm lại thế nào.
 
-→ Chapter 26: **Persistence & Repository Pattern** — bạn sẽ implement Repository trait với real database, mapping Domain ↔ Persistence models, transaction handling, và testing với in-memory stores.
+→ Chapter 26: **Persistence & Repository Pattern** — Nơi bạn sẽ học cách giấu Database đằng sau Interface, và biến việc Lưu/Đọc dữ liệu trở nên nhẹ nhàng, độc lập, và siêu dễ Test.

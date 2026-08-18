@@ -188,3 +188,44 @@ Dưới đây là các phân nhóm quan trọng nhất đối với AI Engineer:
 
 ## Tiếp theo
 Tiếp theo ở Chapter 3C, chúng ta sẽ tạm gác lại phần mềm để nhìn vào nền tảng vật lý: Hardware, Memory Hierarchy và sức mạnh của GPU. Tại sao JS/NodeJS không phải là ngôn ngữ lý tưởng cho tính toán AI lõi, nhưng lại tuyệt vời ở tầng điều phối?
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Giải "Two Sum" bằng `Map` một lượt. So với bản hai vòng lặp trên mảng 100.000 phần tử.
+
+**Bài 2 (15 phút).** Giải "Longest Substring Without Repeating Characters" bằng sliding window với `Set`. Viết bản không mutate input.
+
+**Bài 3 (20 phút).** Giải một bài DP bằng hai cách: đệ quy + memo (`Map`), và bottom-up. So sánh và giải thích vì sao bản đệ quy dễ `RangeError` hơn.
+
+<details>
+<summary>Gợi ý bài 3</summary>
+
+V8 giới hạn stack khoảng 10.000–15.000 khung và **không** có tối ưu đệ quy đuôi
+(TCO nằm trong chuẩn ES6 nhưng chỉ Safari triển khai). Với đầu vào lớn, bottom-up
+là lựa chọn duy nhất an toàn.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| `RangeError: Maximum call stack size exceeded` | Đệ quy quá sâu, V8 không có TCO | Chuyển sang lặp, hoặc dùng stack tường minh |
+| `sort()` sắp sai số | `Array.sort` mặc định so theo chuỗi | `arr.sort((a, b) => a - b)` |
+| `Map` chậm hơn kỳ vọng | Dùng object làm key (so sánh theo tham chiếu) | Dùng key nguyên thuỷ, hoặc chuỗi hoá key |
+| Kết quả sai với số lớn | Vượt `Number.MAX_SAFE_INTEGER` | Dùng `BigInt` |
+| Benchmark không ổn định | JIT chưa warm up | Chạy nhiều vòng, bỏ vài vòng đầu |
+
+---
+
+## Tóm tắt
+
+- **Nhận ra pattern quan trọng hơn nhớ lời giải.** Two Pointers, Sliding Window,
+  DP, Graph Traversal phủ phần lớn bài phỏng vấn.
+- **`Map`/`Set` là công cụ chính** để hạ O(n²) xuống O(n) — biết Big-O của chúng
+  quan trọng hơn mọi mẹo vặt.
+- **V8 không có TCO**, nên đệ quy sâu là đường cụt. Bottom-up DP là mặc định an toàn.
+- **Cẩn thận với số**: `sort()` mặc định so theo chuỗi, và số nguyên vượt 2⁵³ thì mất chính xác.

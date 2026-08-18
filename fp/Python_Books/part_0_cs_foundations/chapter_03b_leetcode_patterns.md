@@ -168,3 +168,46 @@ Dưới đây là các phân nhóm quan trọng nhất đối với AI Engineer:
 
 ## Tiếp theo
 Khả năng code thuật toán xịn đã có. Nhưng tại sao mô hình AI viết bằng Python lại vẫn có thể tính toán hàng tỷ parameter mỗi giây? Đó là nhờ C++ và kiến trúc GPU. Hãy sang Chapter 3C để tìm hiểu sâu về Hardware dưới nắp capo.
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Giải "Two Sum" bằng hai cách: brute force O(n²) và hash map O(n). Đo thời gian trên mảng 10.000 phần tử.
+
+**Bài 2 (15 phút).** Giải "Longest Substring Without Repeating Characters" bằng sliding window. Viết bản thuần (không mutate input).
+
+**Bài 3 (20 phút).** Chọn một bài DP và viết hai bản: đệ quy + `@lru_cache`, và bottom-up lặp. So sánh về bộ nhớ và về khả năng đọc hiểu.
+
+<details>
+<summary>Gợi ý bài 3</summary>
+
+Bản `@lru_cache` thường gần với **định nghĩa toán học** của bài toán hơn, nên dễ
+kiểm tra tính đúng. Bản bottom-up nhanh hơn và không đụng giới hạn đệ quy. Với
+Python — nơi không có tail-call optimization — bottom-up là lựa chọn an toàn cho
+đầu vào lớn.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| `RecursionError` | Python giới hạn ~1.000 khung, không có TCO | Chuyển sang lặp, hoặc `sys.setrecursionlimit` (chỉ tạm) |
+| `@lru_cache` báo `unhashable type` | Tham số là `list`/`dict` | Đổi sang `tuple`/`frozenset` |
+| TLE dù đúng thuật toán | Hằng số lớn do thao tác list tốn kém | Tránh `insert(0)`, `in` trên list; dùng `deque`/`set` |
+| Sliding window sai kết quả biên | Nhầm nửa mở/nửa đóng | Cố định quy ước `[left, right)` và bám suốt |
+
+---
+
+## Tóm tắt
+
+- **Pattern quan trọng hơn lời giải.** Two Pointers, Sliding Window, DP và Graph
+  Traversal phủ phần lớn bài phỏng vấn — nhận ra pattern là nửa phần việc.
+- **FP không mâu thuẫn với thuật toán.** Hầu hết pattern viết được bằng hàm thuần;
+  chỉ những vòng lặp thật nóng mới cần mutate cục bộ.
+- **Python thiếu TCO**, nên đệ quy sâu là đường cụt. `@lru_cache` cho memoization
+  gần như miễn phí, nhưng vẫn nằm dưới trần đệ quy.
+- **Biết Big-O của kiểu dữ liệu chuẩn** (Chapter 2) tiết kiệm nhiều thời gian hơn
+  mọi mẹo tối ưu.

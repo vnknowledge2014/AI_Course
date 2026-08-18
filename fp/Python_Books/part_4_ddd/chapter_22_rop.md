@@ -150,6 +150,35 @@ assert isinstance(safe_divide_strings("abc", "2"), Failure)
 
 ---
 
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (5 phút).** Thêm hàm `map_error` cho `Result` tự viết, đổi `Err(str)` thành `Err(ValidationError)` mà không đụng nhánh `Ok`.
+
+**Bài 2 (15 phút).** Viết `sequence(results: list[Result]) -> Result[list]`: trả `Ok` chứa mọi giá trị nếu tất cả `Ok`, ngược lại trả `Err` **đầu tiên**. So sánh với bản thu-hết-lỗi ở Chapter 27b.
+
+**Bài 3 (20 phút).** Chuyển một hàm dùng exception trong dự án bạn sang trả `Result`. Ghi lại: chữ ký hàm nói thêm được điều gì mà trước đó phải đọc docstring mới biết?
+
+<details>
+<summary>Gợi ý bài 3</summary>
+
+Đó chính là luận điểm trung tâm của ROP: `def f(x: str) -> User` che giấu việc nó
+có thể ném `ValueError`, `KeyError`, hay `HTTPError`. `def f(x: str) -> Result[User, ValidationError]`
+nói thẳng ra — và trình kiểm kiểu **ép** người gọi phải xử lý.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| `Result[Result[T, E], E]` lồng nhau | Dùng `map` với hàm trả `Result` | Đổi sang `bind` |
+| mypy không vét cạn được `match` | Thiếu `assert_never` ở nhánh cuối | Thêm `case _: assert_never(result)` |
+| Exception vẫn lọt qua | Thư viện bên thứ ba vẫn ném | Bọc bằng `@safe` ở ranh giới |
+| Kiểu lỗi phình thành union khổng lồ | Mỗi hàm định nghĩa một kiểu lỗi riêng | Gom thành một cây lỗi theo tầng, map ở ranh giới |
+
 ## Tóm tắt
 
 - ✅ **Result type**: Explicit error handling in type signature.

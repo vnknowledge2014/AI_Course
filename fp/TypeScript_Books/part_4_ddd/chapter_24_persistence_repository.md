@@ -159,7 +159,11 @@ const createInMemoryOrderRepo = (
     for (const order of initial) {
         store.set(order.id, order);
     }
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
     return {
         findById: async (id) => store.get(id) ?? null,
 
@@ -198,7 +202,11 @@ const confirmOrder = async (
     return ok(confirmed);
 };
 
-// --- Tests ---
+```
+
+#### Tests
+
+```typescript
 const run = async () => {
     const draftOrder: Order = {
         id: "ORD-1" as OrderId,
@@ -275,8 +283,10 @@ Không có database. Không có Prisma. Không có connection string. Chỉ `Map
 
 Production cần database thật. Prisma = type-safe ORM (generated types from schema). Drizzle = SQL-like query builder. Cả hai implement cùng `OrderRepository` interface — domain không biết cái nào đang chạy.
 
+#### Bước 1: Types & Khai báo Prisma
+
 ```typescript
-// filename: src/repository/prisma_example.ts
+// filename: src/repository/prisma_step1.ts
 import assert from "node:assert/strict";
 
 // Types
@@ -334,7 +344,14 @@ type PrismaClient = {
         delete: (args: { where: { id: string } }) => Promise<PrismaOrder>;
     };
 };
+```
 
+#### Bước 2: Data Mappers
+
+Dịch data từ Database format (Prisma) sang Domain format và ngược lại.
+
+```typescript
+// filename: src/repository/prisma_step2.ts
 // Mappers: Prisma ↔ Domain (from Ch23)
 const prismaToDomain = (row: PrismaOrder): Order => ({
     id: row.id as OrderId,
@@ -363,7 +380,12 @@ const domainToPrisma = (order: Order): PrismaOrder => ({
         unit_price: i.unitPrice,
     })),
 });
+```
 
+#### Bước 3: Prisma Repository Implementation
+
+```typescript
+// filename: src/repository/prisma_step3.ts
 // Factory: create Prisma repository
 const createPrismaOrderRepo = (prisma: PrismaClient): OrderRepository => ({
     findById: async (id) => {
@@ -485,8 +507,10 @@ run();
 
 Đôi khi bạn cần thay đổi NHIỀU "kệ sách" cùng lúc: tạo order + giảm stock + ghi log. Nếu giảm stock thành công nhưng tạo order thất bại → inconsistent! **Unit of Work** (UoW) đảm bảo: tất cả thay đổi commit cùng lúc hoặc rollback cùng lúc. Trong database = transaction. Trong code = gom repositories vào 1 unit.
 
+#### Bước 1: Types & Repositories
+
 ```typescript
-// filename: src/repository/unit_of_work.ts
+// filename: src/repository/uow_step1.ts
 import assert from "node:assert/strict";
 
 // Domain types
@@ -527,7 +551,12 @@ type UnitOfWork = {
     readonly commit: () => Promise<void>;
     readonly rollback: () => Promise<void>;
 };
+```
 
+#### Bước 2: In-memory Unit of Work
+
+```typescript
+// filename: src/repository/uow_step2.ts
 // === In-memory UoW (for testing) ===
 const createInMemoryUow = (
     initialOrders: readonly Order[] = [],
@@ -567,7 +596,12 @@ const createInMemoryUow = (
         },
     };
 };
+```
 
+#### Bước 3: Domain Workflow Using UoW
+
+```typescript
+// filename: src/repository/uow_step3.ts
 // === Domain workflow using UoW ===
 
 type Result<T, E> =
@@ -606,14 +640,21 @@ const placeOrder = async (
         stock: product.stock - quantity,
     };
 
-    // Save both atomically
+    // Save both atomically (to pending state)
     await uow.orders.save(order);
     await uow.products.save(updatedProduct);
+    
+    // Commit to database
     await uow.commit();  // both or nothing!
 
     return ok(order);
 };
+```
 
+#### Bước 4: Kiểm thử Unit of Work
+
+```typescript
+// filename: src/repository/uow_step4.ts
 // === Test ===
 const run = async () => {
     const uow = createInMemoryUow(
@@ -742,7 +783,11 @@ const registerUser = async (
         email: emailResult.value,
         isActive: true,
     };
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
     // Step 4: Save (IO)
     await deps.userRepo.save(user);
 
@@ -952,7 +997,11 @@ const ok = <T>(v: T): Result<T, never> => ({ tag: "ok", value: v });
 const err = <E>(e: E): Result<never, E> => ({ tag: "err", error: e });
 
 type TransferError = "account_not_found" | "insufficient_funds";
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 const transferMoney = async (
     uow: TransferUow,
     fromId: AccountId,
@@ -1078,7 +1127,11 @@ const createCourse = async (
     // Validate course data
     if (title.trim().length < 5 || title.length > 200) return err("invalid_title");
     if (price < 0) return err("invalid_price");
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
     // Create
     const course: Course = {
         id: deps.generateId(),

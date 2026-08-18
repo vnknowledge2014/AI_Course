@@ -195,6 +195,18 @@ assert len(s2.log) == 2
 
 ---
 
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| `frozen=True` vẫn sửa được nội dung | Field là `list`/`dict` — bản thân chúng mutable | Dùng `tuple`/`frozenset`, hoặc bọc `MappingProxyType` |
+| `unhashable type` khi cho vào `set` | Có field mutable bên trong frozen dataclass | Đổi mọi field sang kiểu bất biến |
+| Tham số mặc định bị chia sẻ giữa các lời gọi | `def f(items=[])` — Python đánh giá mặc định một lần | `def f(items=None)` rồi `items = items or []` |
+| Copy vẫn ảnh hưởng bản gốc | `copy.copy` là shallow | `copy.deepcopy`, hoặc thiết kế bất biến từ đầu |
+| Hiệu năng kém khi copy dữ liệu lớn | Sao chép toàn bộ mỗi lần cập nhật | `pyrsistent` (structural sharing) — xem Chapter 3 |
+
 ## Tóm tắt
 
 - ✅ **Immutability**: Prevents shared mutable state bugs.

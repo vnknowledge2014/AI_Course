@@ -403,7 +403,11 @@ const getOrThrow = <T, E>(result: Result<T, E>): T => {
     }
 };
 
-// --- Railway: chain nhiều validations ---
+```
+
+#### Railway: chain nhiều validations
+
+```typescript
 type User = {
     readonly name: string;
     readonly email: string;
@@ -842,7 +846,11 @@ type Result<T, E> =
 const ok = <T>(value: T): Result<T, never> => ({ tag: "ok", value });
 const err = <E>(error: E): Result<never, E> => ({ tag: "err", error });
 
-// --- Pure functions ---
+```
+
+#### Pure functions
+
+```typescript
 const itemTotal = (item: OrderItem): Money =>
     Money(item.unitPrice * item.quantity);
 
@@ -890,7 +898,11 @@ const validateOrder = (
     return ok(items);
 };
 
-// --- Test ---
+```
+
+#### Test
+
+```typescript
 const products: readonly Product[] = [
     { id: ProductId("P1"), name: "Laptop", price: Money(20000000), stock: 5 },
     { id: ProductId("P2"), name: "Mouse", price: Money(500000), stock: 10 },

@@ -12,13 +12,17 @@
 
 ---
 
-## Tại sao cần toán cho lập trình?
+## Lời khuyên chân thành: BẠN CÓ NÊN ĐỌC CHƯƠNG NÀY NGAY BÂY GIỜ?
 
-Bạn có thể nghĩ: "Tôi muốn code, không muốn học toán." Hoàn toàn hợp lý. Nhưng hãy tưởng tượng thế này: bạn muốn xây nhà mà không biết vật lý cơ bản. Có thể xây được — nhưng khi nào nhà sập, bạn không hiểu tại sao.
+> ⚠️ **NẾU BẠN MỚI HỌC LẬP TRÌNH HOẶC KHÔNG THÍCH LÝ THUYẾT:**
+> Hãy BỎ QUA toàn bộ Part 0 và nhảy thẳng đến **[Chapter 4: The Python Ecosystem & Tooling](../part_1_fundamentals/chapter_04_getting_started.md)** để cài đặt Python, công cụ Type Hinting và code thực hành ngay lập tức. Đừng ép bản thân đọc lý thuyết Toán học khi chưa quen với code, vì nó rất dễ gây nản lòng! Bạn hoàn toàn có thể quay lại đây đọc sau khi đã thành thạo cú pháp cơ bản.
 
-FP không phải là toán — nhưng FP **ĐƯỢC PHÁT MINH TỪ TOÁN**. Lambda Calculus ra đời năm 1936, trước khi máy tính đầu tiên xuất hiện. Hiểu nền tảng giúp bạn hiểu tại sao `map`, `filter`, `reduce` hoạt động — không chỉ biết dùng.
+Nếu bạn quyết định ở lại đọc, đừng lo. Toàn bộ "toán" ở đây chỉ cần 3 thứ:
+- Biết **cộng**: 2 + 3 = 5
+- Biết **nhân**: 2 × 3 = 6
+- Hiểu câu: "Nếu trời mưa **thì** mang ô"
 
-Chapter này **KHÔNG** dạy toán nặng. Chỉ đủ để bạn có intuition đúng. Mỗi phần đều có code Python minh họa.
+Nếu bạn hiểu được 3 thứ trên — kể cả bạn mới học lớp 3 — bạn đã đủ nền tảng cho toàn bộ chapter này rồi. Mình sẽ đi từng bước nhỏ, với rất nhiều ví dụ từ đời thường.
 
 ---
 

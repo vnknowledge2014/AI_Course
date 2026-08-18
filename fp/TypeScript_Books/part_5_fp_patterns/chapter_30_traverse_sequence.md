@@ -181,7 +181,11 @@ const traverseEither = <A, B, E>(fn: (a: A) => Either<E, B>) => (as: readonly A[
 const traversePromise = <A, B>(fn: (a: A) => Promise<B>) => (as: readonly A[]): Promise<readonly B[]> =>
     Promise.all(as.map(fn));
 
-// --- Practical: parse array of strings to numbers ---
+```
+
+#### Practical: parse array of strings to numbers
+
+```typescript
 const parseNumber = (s: string): Option<number> => {
     const n = Number(s);
     return isNaN(n) ? none : some(n);
@@ -193,7 +197,11 @@ assert.deepStrictEqual(allValid, some([1, 2, 3]));
 const hasInvalid = traverseOption(parseNumber)(["1", "abc", "3"]);
 assert.deepStrictEqual(hasInvalid, none);
 
-// --- Practical: validate array of order items ---
+```
+
+#### Practical: validate array of order items
+
+```typescript
 type ItemError = { index: number; message: string };
 type RawItem = { productId: string; quantity: number };
 type ValidItem = { productId: string; quantity: number; valid: true };

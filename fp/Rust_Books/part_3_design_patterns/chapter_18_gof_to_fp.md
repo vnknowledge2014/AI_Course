@@ -642,6 +642,22 @@ fn main() {
 
 ---
 
+---
+
+## ✅ Checkpoint 18
+
+1. Vì sao Strategy pattern gần như biến mất trong Rust?
+2. `From`/`Into` thay thế pattern GoF nào, và nó tốt hơn ở điểm gì?
+3. Pattern GoF nào **không** biến mất khi chuyển sang FP?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Vì closure là first-class: `Box<dyn Fn(i32) -> i32>` hoặc generic `F: Fn(...)` truyền hành vi trực tiếp. Strategy vốn chỉ là cách mô phỏng điều đó bằng object.
+2. **Adapter**. Tốt hơn vì `From` là một trait chuẩn của cả hệ sinh thái — mọi thư viện đều nhận ra nó, và `?` tự động dùng `From` để chuyển kiểu lỗi. Adapter tự viết thì không có ưu đãi đó.
+3. Những pattern về **cấu trúc và tài nguyên**: Facade, Proxy, Object Pool, Builder. Riêng Builder còn phổ biến hơn trong Rust vì nó bù cho việc thiếu tham số mặc định và tham số keyword.
+</details>
+
 ## Tóm tắt
 
 - ✅ **Strategy** = `impl Fn` param. Không cần interface + classes.

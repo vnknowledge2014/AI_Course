@@ -1,654 +1,235 @@
-# Chapter 4 — Getting Started with Rust
+# Chapter 4 — The Rust Ecosystem & Tooling
 
 > **Bạn sẽ học được**:
-> - Rust toolchain: `rustup`, `rustc`, `cargo` — và vai trò của từng tool
-> - Cấu trúc project Rust từ đơn giản đến workspace
-> - `Cargo.toml` — file cấu hình quan trọng nhất
-> - Viết, build, run, test chương trình Rust
-> - REPL với `evcxr` — thử nghiệm nhanh không cần tạo project
+> - Hệ sinh thái công cụ của Rust: `rustup`, `rustc`, và `cargo` — và vai trò của từng công cụ.
+> - Cấu trúc một project Rust chuẩn.
+> - **Linh hồn của trải nghiệm lập trình**: Cài đặt IDE với `rust-analyzer` — tại sao không có nó thì học Rust cực kỳ khó.
+> - `clippy` — Không chỉ là bộ kiểm tra mã (linter), mà là một "Senior Developer" miễn phí luôn bên cạnh dạy bạn viết code chuẩn.
+> - `rustfmt` — Tự động định dạng code.
+> - REPL với `evcxr` — Môi trường chạy code nhanh.
 >
-> **Yêu cầu trước**: Chapter 0 (Rust in 10 Minutes) — bạn đã cài Rust và chạy `cargo run` thành công.
+> **Yêu cầu trước**: Không cần! Nếu bạn bỏ qua Part 0 vì quá nhiều lý thuyết, bạn đang ở đúng chỗ để bắt đầu thực hành.
 > **Thời gian đọc**: ~30 phút | **Level**: Beginner
-> **Kết quả cuối cùng**: Bạn tự tin tạo project mới, hiểu mọi file Cargo sinh ra, và có workflow phát triển mượt mà.
+> **Kết quả cuối cùng**: Bạn có một môi trường lập trình Rust chuẩn chỉ, chuyên nghiệp, với trợ lý ảo `rust-analyzer` và `clippy` sẵn sàng giúp bạn sửa mọi lỗi cú pháp.
 
 ---
 
-## Tại sao Rust đáng để học?
+## 4.1 — Tại sao Rust đáng để học?
 
-Bạn có thể đang tự hỏi: đã có Python, JavaScript, Go — tại sao thêm Rust? Câu trả lời nằm ở **trade-off cơ bản** mà mọi ngôn ngữ phải chọn: an toàn hay nhanh, dễ viết hay dễ maintain.
+Bạn có thể đang tự hỏi: đã có Python, JavaScript, Go — tại sao lại thêm Rust? Câu trả lời nằm ở **trade-off cơ bản** mà mọi ngôn ngữ phải chọn: **an toàn hay nhanh, dễ viết hay dễ bảo trì?**
 
-Python dễ viết nhưng chậm và thiếu type safety. C/C++ nhanh nhưng memory bugs là cơn ác mộng. Go cân bằng tốt nhưng garbage collector thêm latency. Rust là ngôn ngữ đầu tiên giải quyết trade-off này: **an toàn bộ nhớ tại compile time** mà không cần garbage collector. Zero-cost abstractions nghĩa là bạn viết code high-level nhưng chạy nhanh như C.
+Python dễ viết nhưng chậm và dễ phát sinh lỗi ngầm do không ép kiểu. C/C++ nhanh nhưng rò rỉ bộ nhớ (memory leaks) là cơn ác mộng. Go cân bằng tốt nhưng hệ thống thu gom rác (garbage collector) thỉnh thoảng làm giật lag.
 
-Trong cuộc khảo sát Stack Overflow 8 năm liên tiếp, Rust được bình chọn là "ngôn ngữ được yêu thích nhất". Không phải vì hype — mà vì developers trải nghiệm rồi không muốn quay lại. Compiler Rust khắt khe, nhưng khi code compile thành công, bạn có confidence rất cao rằng nó chạy đúng.
+Rust là ngôn ngữ hiếm hoi giải quyết được mâu thuẫn này: **An toàn bộ nhớ tuyệt đối tại compile time (lúc biên dịch)** mà không cần garbage collector. Code bạn viết bằng Rust sẽ chạy nhanh như C/C++, nhưng an toàn tuyệt đối khỏi các lỗi sập chương trình đột ngột.
 
-Chapter này giúp bạn setup môi trường và viết chương trình Rust đầu tiên. Đến cuối chapter, bạn sẽ có Rust toolchain sẵn sàng và hiểu workflow cơ bản.
+Và để làm được điều đó, hệ sinh thái công cụ của Rust được thiết kế cực kỳ xuất sắc.
 
 ---
 
-## 4.1 — Toolchain: Bộ đồ nghề của thợ Rust
+## 4.2 — Toolchain: Bộ Đồ Nghề Của Thợ Lập Trình Rust
 
-### Ba công cụ chính
+Khi bạn cài đặt Rust qua lệnh chuẩn từ trang chủ `rustup.rs`, bạn thực chất nhận được một "Hộp đồ nghề" (Toolchain) gồm 3 công cụ chính:
 
-Khi cài Rust qua `rustup`, bạn có 3 công cụ:
-
-| Công cụ | Vai trò | Ẩn dụ |
+| Công cụ | Vai trò thực tế | Tương đương trong ngôn ngữ khác |
 |---------|---------|-------|
-| `rustup` | Quản lý phiên bản Rust | Giống `nvm` cho Node.js |
-| `rustc` | Compiler — biên dịch `.rs` thành binary | Giống `gcc` cho C |
-| `cargo` | Build tool + package manager | Giống `npm` + `webpack` gộp lại |
+| `rustup` | Quản lý phiên bản Rust trên máy bạn. Dùng để cập nhật Rust lên bản mới. | Giống `nvm` cho Node.js |
+| `rustc` | Trình biên dịch (Compiler) — dịch code chữ thành file chạy `*.exe`. | Giống `gcc` cho C |
+| `cargo` | Trình quản lý dự án & gói (Package manager). Bạn sẽ dùng cái này 99% thời gian. | Giống `npm` + `webpack` gộp lại |
 
-Trong thực tế, bạn **gần như chỉ dùng `cargo`**. `cargo` tự gọi `rustc` cho bạn.
-
-### `rustup` — Quản lý versions
-
-```bash
-# Xem version hiện tại
-rustup show
-
-# Update lên version mới nhất
-rustup update
-
-# Cài thêm components
-rustup component add clippy     # linter
-rustup component add rustfmt    # code formatter
-```
-
-### `cargo` — Mọi thứ bạn cần
-
-```bash
-# Tạo project mới
-cargo new my_project        # binary (chạy được)
-cargo new my_lib --lib      # library (dùng lại được)
-
-# Build & Run
-cargo build                 # compile → target/debug/
-cargo build --release       # compile tối ưu → target/release/
-cargo run                   # build + chạy
-cargo run -- arg1 arg2      # chạy với arguments
-
-# Kiểm tra
-cargo check                 # kiểm tra lỗi nhanh (không tạo binary)
-cargo test                  # chạy tests
-cargo clippy                # lint — gợi ý code tốt hơn
-cargo fmt                   # format code tự động
-```
-
-> **💡 Pro tip**: Dùng `cargo check` thay `cargo build` khi đang code. Nhanh hơn nhiều vì không tạo binary — chỉ kiểm tra lỗi.
+Trong thực tế, bạn **gần như không bao giờ** gọi lệnh `rustc` trực tiếp. Mọi thao tác đều thông qua `cargo`.
 
 ---
 
-## 4.2 — Project Structure: Anatomy của một Rust project
+## 4.3 — Cargo: Trái Tim Của Mọi Dự Án Rust
 
-### `cargo new` tạo ra gì?
+Hãy thử tạo dự án đầu tiên của bạn:
 
 ```bash
+# Tạo một dự án mới có tên là `cafe_order`
 cargo new cafe_order
+
+# Di chuyển vào thư mục dự án
 cd cafe_order
 ```
 
-```
+Lệnh `cargo new` tạo ra cấu trúc như sau:
+
+```text
 cafe_order/
-├── Cargo.toml       # "Hộ khẩu" của project — tên, version, dependencies
-├── .gitignore       # Bỏ qua target/ khi commit
+├── Cargo.toml       # "Sổ hộ khẩu" của dự án — chứa tên, version, và thư viện bên thứ 3
+├── .gitignore       # (Nếu dùng git) Bỏ qua file rác
 └── src/
-    └── main.rs      # Entry point — function main() bắt đầu từ đây
+    └── main.rs      # File nguồn chính — Chương trình bắt đầu chạy từ đây
 ```
 
-### `Cargo.toml` — File quan trọng nhất
-
-```toml
-# filename: Cargo.toml
-[package]
-name = "cafe_order"
-version = "0.1.0"
-edition = "2021"       # Rust edition — dùng 2021 cho mọi project mới
-
-[dependencies]
-# Dependencies sẽ được thêm ở đây
-# Ví dụ:
-# serde = { version = "1", features = ["derive"] }
-# im = "15"
-```
-
-Mỗi phần:
-- **`[package]`**: Metadata — tên, version, edition
-- **`edition`**: Rust có 3 editions: 2015, 2018, 2021. Luôn dùng `2021`
-- **`[dependencies]`**: Các thư viện bên ngoài (gọi là **crates**)
-
-### Thêm dependency
+### Các lệnh Cargo bạn sẽ dùng hàng ngày
 
 ```bash
-# Cách 1: CLI (khuyên dùng)
-cargo add serde --features derive
-cargo add im
-
-# Cách 2: Sửa trực tiếp Cargo.toml rồi chạy cargo build
-```
-
-Cargo tự tải crate từ [crates.io](https://crates.io) — kho thư viện chính thức của Rust.
-
-### `Cargo.lock` — "Khóa" versions
-
-Sau khi build lần đầu, Cargo tạo `Cargo.lock` — file ghi **chính xác** version đã dùng. Giống `package-lock.json` trong Node.js.
-
-- **Binary project**: commit `Cargo.lock` vào git ✅
-- **Library**: *không* commit, để người dùng tự resolve ❌
-
-### Cấu trúc project lớn hơn
-
-```
-cafe_system/
-├── Cargo.toml
-├── src/
-│   ├── main.rs          # entry point
-│   ├── lib.rs           # library root (optional — khi muốn cả binary + library)
-│   ├── order.rs         # module: domain logic cho orders
-│   └── payment.rs       # module: payment processing
-├── tests/
-│   └── integration_test.rs  # integration tests
-├── examples/
-│   └── quick_demo.rs    # cargo run --example quick_demo
-└── benches/
-    └── performance.rs   # benchmarks
-```
-
-> **💡 Convention**: Rust dùng file system làm module system. File `order.rs` = module `order`. Sẽ học chi tiết ở Chapter 11.
-
----
-
-## ✅ Checkpoint 4.2
-
-> Ghi nhớ:
-> 1. `Cargo.toml` = metadata + dependencies. `Cargo.lock` = khóa versions chính xác
-> 2. `src/main.rs` = entry point binary. `src/lib.rs` = entry point library
-> 3. `cargo check` nhanh hơn `cargo build` — dùng khi đang phát triển
->
-> **Test nhanh**: `cargo new my_app --lib` tạo `main.rs` hay `lib.rs`?
-> <details><summary>Đáp án</summary><code>lib.rs</code> — flag <code>--lib</code> tạo library project, không có <code>main()</code>.</details>
-
----
-
-## 4.3 — Hello World chi tiết
-
-### Phân tích từng dòng
-
-```rust
-// filename: src/main.rs
-
-// fn = khai báo function
-// main = tên function đặc biệt — Rust bắt đầu chạy từ đây
-fn main() {
-    // println! là MACRO (có dấu !), không phải function
-    // Macro = code sinh ra code, mạnh hơn function thường
-    println!("Hello, World!");
-}
-```
-
-Tại sao `println!` có dấu `!`? Vì nó là **macro** — nó nhận format string và biến số arguments:
-
-```rust
-// filename: src/main.rs
-fn main() {
-    let name = "Rust";
-    let version = 1.84;
-    let features = vec!["ownership", "traits", "async"];
-
-    // {} = Display format (đẹp, cho người đọc)
-    println!("Hello, {}!", name);
-
-    // {:.2} = số thực với 2 chữ số thập phân
-    println!("Version: {:.2}", version);
-
-    // {:?} = Debug format (chi tiết, cho dev)
-    println!("Features: {:?}", features);
-
-    // {:#?} = Debug format đẹp (xuống dòng, thụt lề)
-    println!("Features (pretty):\n{:#?}", features);
-
-    // Đặt tên cho placeholders
-    println!("{language} is {adjective}!", language = "Rust", adjective = "awesome");
-
-    // Output:
-    // Hello, Rust!
-    // Version: 1.84
-    // Features: ["ownership", "traits", "async"]
-    // Features (pretty):
-    // [
-    //     "ownership",
-    //     "traits",
-    //     "async",
-    // ]
-    // Rust is awesome!
-}
-```
-
-### Comments
-
-```rust
-// filename: src/main.rs
-
-// Dòng comment — giải thích logic
-fn add(a: i32, b: i32) -> i32 {
-    a + b // inline comment
-}
-
-/// Doc comment — tạo documentation tự động
-/// Dùng cho public API: functions, structs, enums
-///
-/// # Examples
-///
-/// ```
-/// let result = add(2, 3);
-/// assert_eq!(result, 5);
-/// ```
-fn documented_add(a: i32, b: i32) -> i32 {
-    a + b
-}
-
-fn main() {
-    println!("{}", add(2, 3));
-    println!("{}", documented_add(2, 3));
-    // Output:
-    // 5
-    // 5
-}
-```
-
-Doc comments `///` đặc biệt: `cargo doc --open` sẽ tạo HTML documentation từ chúng. Code trong `/// # Examples` còn được chạy như test khi `cargo test`!
-
----
-
-## 4.4 — REPL: Thử nghiệm nhanh với `evcxr`
-
-Không phải lúc nào cũng cần tạo project mới. **`evcxr`** là REPL (Read-Eval-Print Loop) cho Rust:
-
-```bash
-# Cài đặt
-cargo install evcxr_repl
-
-# Chạy
-evcxr
-```
-
-```
->> let x = 42;
->> x * 2
-84
->> let names = vec!["Rust", "Go", "Zig"];
->> names.iter().map(|n| n.len()).collect::<Vec<_>>()
-[4, 2, 3]
->> :quit
-```
-
-Rất hữu ích khi muốn thử nhanh một expression mà không cần tạo project.
-
-> **💡 Alternative**: Nếu không muốn cài `evcxr`, dùng [Rust Playground](https://play.rust-lang.org/) trên trình duyệt — không cần cài gì.
-
----
-
-## 4.5 — Workflow thực tế
-
-### Development loop
-
-```
-1. cargo new my_project          ← tạo project
-2. Viết code trong src/main.rs
-3. cargo check                   ← kiểm tra lỗi nhanh
-4. Sửa lỗi compiler báo
-5. cargo run                     ← chạy thử
-6. cargo test                    ← chạy tests
-7. cargo clippy                  ← lint gợi ý cải thiện
-8. cargo fmt                     ← format code
-9. Lặp lại từ bước 2
-```
-
-### Ví dụ thực hành: Cafe Order System
-
-Hãy tạo project thật và chạy:
-
-```bash
-cargo new cafe_order
-cd cafe_order
-```
-
-Sửa `src/main.rs`:
-
-```rust
-// filename: src/main.rs
-
-#[derive(Debug)]
-enum DrinkType {
-    Coffee,
-    Tea,
-    Smoothie,
-}
-
-#[derive(Debug)]
-enum Size {
-    Small,
-    Medium,
-    Large,
-}
-
-#[derive(Debug)]
-struct Order {
-    drink: DrinkType,
-    size: Size,
-    customer: String,
-}
-
-fn price(order: &Order) -> u32 {
-    let base = match order.drink {
-        DrinkType::Coffee => 35_000,
-        DrinkType::Tea => 25_000,
-        DrinkType::Smoothie => 45_000,
-    };
-
-    // Size markup
-    match order.size {
-        Size::Small => base,
-        Size::Medium => base + 5_000,
-        Size::Large => base + 10_000,
-    }
-}
-
-fn receipt(order: &Order) -> String {
-    format!(
-        "🧾 {}:\n   {:?} {:?} — {}đ",
-        order.customer,
-        order.size,
-        order.drink,
-        price(order)
-    )
-}
-
-fn main() {
-    let orders = vec![
-        Order {
-            drink: DrinkType::Coffee,
-            size: Size::Medium,
-            customer: "Minh".to_string(),
-        },
-        Order {
-            drink: DrinkType::Smoothie,
-            size: Size::Large,
-            customer: "Lan".to_string(),
-        },
-        Order {
-            drink: DrinkType::Tea,
-            size: Size::Small,
-            customer: "Hùng".to_string(),
-        },
-    ];
-
-    println!("☕ Cafe Order System\n");
-
-    let mut total = 0;
-    for order in &orders {
-        println!("{}", receipt(order));
-        total += price(order);
-    }
-
-    println!("\n💰 Total: {}đ", total);
-    println!("📊 Orders: {}", orders.len());
-}
-```
-
-```bash
+# 1. Chạy thử chương trình (Sẽ tự động biên dịch rồi chạy)
 cargo run
+
+# 2. Chỉ biên dịch (Không chạy), kết quả tạo ra file chạy ở `target/debug/`
+cargo build
+
+# 3. Biên dịch phiên bản siêu tối ưu (Chạy nhanh nhất, dùng khi mang lên Server)
+cargo build --release
+
+# 4. Kiểm tra lỗi nhanh (Rất quan trọng!)
+cargo check
 ```
 
-```
-☕ Cafe Order System
+> **💡 Mẹo cực hay (Pro tip)**: Khi đang viết code, đừng dùng `cargo build` để xem code có lỗi không. Hãy dùng `cargo check`. Lệnh này chỉ đọc code và báo lỗi (nếu có), không tốn thời gian tạo file chạy nên tốc độ siêu nhanh!
 
-🧾 Minh:
-   Medium Coffee — 40000đ
-🧾 Lan:
-   Large Smoothie — 55000đ
-🧾 Hùng:
-   Small Tea — 25000đ
+---
 
-💰 Total: 120000đ
-📊 Orders: 3
-```
+## 4.4 — IDE & rust-analyzer: Không Có Nó, Học Rust Rất Khổ!
 
-### Thêm test
+Rust là một ngôn ngữ "giao tiếp" rất nhiều với lập trình viên thông qua Compiler. Nếu bạn dùng Notepad hoặc một trình soạn thảo cơ bản để viết Rust, bạn sẽ thấy nó cực kỳ khó học.
 
+Bạn **bắt buộc** phải cài đặt **rust-analyzer** vào IDE của mình (VSCode, RustRover, hoặc Zed).
+
+### Hướng dẫn cài đặt trên VSCode (Phổ biến nhất):
+1. Mở VSCode, vào tab **Extensions** (phím tắt `Ctrl + Shift + X`).
+2. Gõ tìm kiếm `rust-analyzer` (của tác giả *The Rust Programming Language*).
+3. Bấm **Install**.
+
+### Tại sao rust-analyzer lại thần thánh đến vậy?
+
+Tính năng quan trọng nhất của nó là **Inlay Hints (Gợi ý kiểu dữ liệu ngầm)**.
+Trong Rust, bạn không cần khai báo kiểu dữ liệu cho mọi biến, Rust sẽ tự suy ra (Type Inference). 
+
+Ví dụ bạn viết:
 ```rust
-// filename: src/main.rs (thêm ở cuối file)
+let age = 25;
+let name = "Minh";
+```
+Nhờ `rust-analyzer`, trên màn hình VSCode của bạn sẽ tự động hiện chữ xám mờ mờ để báo cho bạn biết kiểu dữ liệu thực sự:
+```text
+let age: i32 = 25;
+let name: &str = "Minh";
+```
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+Nhờ những "chữ xám mờ" này, bạn sẽ **học được cách Rust hiểu dữ liệu** mà không cần phải đoán. Khi code bạn bị lỗi kiểu dữ liệu (chuyện xảy ra như cơm bữa khi mới học), `rust-analyzer` sẽ gạch chân đỏ ngay lập tức và gợi ý cách sửa *ngay trên IDE* trước cả khi bạn lưu file.
 
-    #[test]
-    fn test_coffee_small_price() {
-        let order = Order {
-            drink: DrinkType::Coffee,
-            size: Size::Small,
-            customer: "Test".to_string(),
-        };
-        assert_eq!(price(&order), 35_000);
-    }
+---
 
-    #[test]
-    fn test_smoothie_large_price() {
-        let order = Order {
-            drink: DrinkType::Smoothie,
-            size: Size::Large,
-            customer: "Test".to_string(),
-        };
-        // Base 45_000 + Large 10_000 = 55_000
-        assert_eq!(price(&order), 55_000);
-    }
+## 4.5 — Clippy: Vị "Senior Developer" Khó Tính Nhưng Tốt Bụng
 
-    #[test]
-    fn test_tea_medium_price() {
-        let order = Order {
-            drink: DrinkType::Tea,
-            size: Size::Medium,
-            customer: "Test".to_string(),
-        };
-        // Base 25_000 + Medium 5_000 = 30_000
-        assert_eq!(price(&order), 30_000);
-    }
+Nếu `rust-analyzer` giúp bạn viết code không bị lỗi, thì **Clippy** giúp bạn viết code **chuẩn phong cách Rust (Idiomatic Rust)**.
+
+Clippy là một linter (bộ soi lỗi phong cách). Để dùng Clippy, gõ lệnh:
+```bash
+cargo clippy
+```
+
+Nếu bạn viết một đoạn code "chạy được, nhưng ngốc nghếch", Clippy sẽ hiện cảnh báo.
+
+**Ví dụ:**
+```rust
+let pi = 3.14;
+if pi == 3.14 {
+    println!("Bằng nhau!");
 }
 ```
+Clippy sẽ báo ngay:
+> `warning: strict comparison of f32 or f64`
+> *Giải thích: Bạn không bao giờ nên dùng dấu `==` để so sánh hai số thập phân, vì sai số máy tính sẽ làm nó chạy sai. Hãy kiểm tra xem khoảng cách giữa chúng có đủ nhỏ không.*
 
+Clippy chứa hàng ngàn quy tắc kiểm tra như vậy. **Khi mới học, việc đọc các thông báo của Clippy là cách học Rust nhanh nhất.** Nó giống như có một Senior Developer luôn đứng sau lưng review code cho bạn miễn phí vậy.
+
+---
+
+## 4.6 — Rustfmt: Tạm Biệt Cãi Vã Về Xuống Dòng
+
+Code của bạn trông lộn xộn, khoảng trắng thò ra thụt vào? Không cần tự sửa tay.
+Chạy lệnh:
 ```bash
-cargo test
+cargo fmt
+```
+Toàn bộ dự án sẽ tự động được format lại gọn gàng, đẹp mắt theo đúng tiêu chuẩn chung của cộng đồng Rust.
+*Mẹo:* Bạn có thể cấu hình VSCode tự động chạy format mỗi khi bấm `Ctrl + S` (Format On Save).
+
+---
+
+## 4.7 — Tổng hợp: Workflow Làm Việc Hàng Ngày
+
+Để trải nghiệm học Rust được mượt mà nhất, hãy thiết lập thói quen làm việc như sau:
+
+1. **Luôn mở project trong VSCode có cài sẵn `rust-analyzer`.**
+2. Cài thêm package `cargo-watch` (chạy lệnh: `cargo install cargo-watch`).
+3. Mở Terminal trong VSCode, gõ:
+   ```bash
+   cargo watch -q -c -x 'clippy'
+   ```
+   *Lệnh này nghĩa là: Cứ mỗi khi bạn lưu file, nó sẽ xóa màn hình (`-c`), và tự động chạy `cargo clippy`. Bạn sẽ thấy mọi lỗi cú pháp hoặc gợi ý tối ưu hiện ra tức thì ở terminal phía dưới màn hình!*
+
+---
+
+## 4.8 — Chạy Thử Code Nhanh (REPL) với evcxr
+
+Đôi khi bạn chỉ muốn gõ `1 + 1` hoặc thử nghiệm 1 hàm nhỏ mà không muốn tạo hẳn một dự án bằng `cargo new`. Giống như màn hình Console của Python hay Chrome.
+Rust cũng có công cụ đó, tên là `evcxr` (đọc là "eviscerator").
+
+Cài đặt:
+```bash
+cargo install evcxr_repl
 ```
 
+Sử dụng: Mở terminal, gõ `evcxr`.
+```rust
+Welcome to evcxr. For help, type :help
+>> let x = 5;
+>> let y = 10;
+>> x + y
+15
+>> 
 ```
-running 3 tests
-test tests::test_coffee_small_price ... ok
-test tests::test_smoothie_large_price ... ok
-test tests::test_tea_medium_price ... ok
+Bấm `Ctrl + D` hoặc gõ `:quit` để thoát.
 
-test result: ok. 3 passed; 0 failed; 0 ignored
-```
+---
 
-> **💡 `#[cfg(test)]`**: Block này chỉ được compile khi chạy `cargo test`. Không ảnh hưởng binary production.
+## 🎉 Tóm tắt
+- Bắt đầu với lệnh `cargo new ten_du_an`.
+- Chạy code bằng `cargo run`. Soi lỗi nhanh bằng `cargo check`.
+- Bắt buộc cài đặt **rust-analyzer** vào IDE.
+- Tập thói quen dùng `cargo clippy` để cải thiện tư duy viết code Rust.
+
+Môi trường của bạn đã hoàn hảo. Hãy chuyển sang **Chapter 5** để học những dòng code đầu tiên nhé!
+
+---
+
+## ✅ Checkpoint 4
+
+1. `cargo check` và `cargo build` khác nhau ở đâu, và khi nào dùng cái nào?
+2. Vì sao Inlay Hints của rust-analyzer lại đặc biệt hữu ích khi **học** Rust?
+3. Clippy khác gì rustc warning?
+
+<details>
+<summary>Đáp án</summary>
+
+1. `cargo check` chỉ phân tích và kiểm kiểu, **không** sinh mã máy — nhanh hơn nhiều lần. Dùng nó trong vòng lặp viết code; chỉ `build` khi thật sự cần chạy.
+2. Vì Rust suy luận kiểu rất mạnh, nên code thường không viết kiểu ra. Inlay Hints hiển thị kiểu mà compiler đã suy ra — bạn thấy được `&str` hay `String`, `i32` hay `usize`, ngay tại chỗ. Đó là kênh phản hồi tốt nhất khi mới học ownership.
+3. rustc báo thứ **sai hoặc nguy hiểm**. Clippy báo thứ **đúng nhưng không idiomatic** — ví dụ `if x == true`, hoặc `.iter().count()` khi đã có `.len()`. Clippy dạy bạn viết Rust như người Rust.
+</details>
 
 ---
 
 ## 🏋️ Bài tập
 
-**Bài 1** (5 phút): Cargo commands
+**Bài 1 (5 phút).** `cargo new hello`, viết chương trình in ra 10 số Fibonacci đầu tiên. Chạy `cargo clippy` và sửa mọi gợi ý.
 
-Ghép đúng command:
+**Bài 2 (10 phút).** Bật Inlay Hints trong editor. Viết `let x = vec![1,2,3].iter().sum();` và xem compiler đòi bạn annotate gì — vì sao nó không tự suy ra được?
 
-| Muốn làm gì | Command |
-|---|---|
-| Kiểm tra lỗi nhanh, không tạo binary | ? |
-| Chạy tests | ? |
-| Format code tự động | ? |
-| Build bản production tối ưu | ? |
-| Thêm dependency `serde` | ? |
-
-<details><summary>✅ Lời giải Bài 1</summary>
-
-| Muốn làm gì | Command |
-|---|---|
-| Kiểm tra lỗi nhanh | `cargo check` |
-| Chạy tests | `cargo test` |
-| Format code | `cargo fmt` |
-| Build production | `cargo build --release` |
-| Thêm dependency | `cargo add serde` |
-
-</details>
-
----
-
-**Bài 2** (10 phút): Tạo project "temperature converter"
-
-Tạo `cargo new temp_converter`, viết function `celsius_to_fahrenheit(c: f64) -> f64` và `fahrenheit_to_celsius(f: f64) -> f64`. Thêm ít nhất 2 tests.
-
-<details><summary>💡 Gợi ý</summary>Công thức: F = C × 9/5 + 32. C = (F - 32) × 5/9.</details>
-
-<details><summary>✅ Lời giải Bài 2</summary>
-
-```rust
-// filename: src/main.rs
-
-fn celsius_to_fahrenheit(c: f64) -> f64 {
-    c * 9.0 / 5.0 + 32.0
-}
-
-fn fahrenheit_to_celsius(f: f64) -> f64 {
-    (f - 32.0) * 5.0 / 9.0
-}
-
-fn main() {
-    let temps_c = [0.0, 20.0, 37.0, 100.0];
-
-    for &c in &temps_c {
-        let f = celsius_to_fahrenheit(c);
-        println!("{:.1}°C = {:.1}°F", c, f);
-    }
-    // Output:
-    // 0.0°C = 32.0°F
-    // 20.0°C = 68.0°F
-    // 37.0°C = 98.6°F
-    // 100.0°C = 212.0°F
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_boiling_point() {
-        assert!((celsius_to_fahrenheit(100.0) - 212.0).abs() < 0.01);
-    }
-
-    #[test]
-    fn test_freezing_point() {
-        assert!((celsius_to_fahrenheit(0.0) - 32.0).abs() < 0.01);
-    }
-
-    #[test]
-    fn test_roundtrip() {
-        let original = 37.5;
-        let converted = fahrenheit_to_celsius(celsius_to_fahrenheit(original));
-        assert!((converted - original).abs() < 0.01);
-    }
-}
-```
-
-</details>
-
----
-
-**Bài 3** (15 phút): Mở rộng Cafe Order System
-
-Thêm vào project `cafe_order`:
-1. Enum `Topping { None, BubblePearl, Jelly }` — có thêm giá (0, 5000, 3000)
-2. Thêm field `topping` vào `Order`
-3. Cập nhật `price()` và `receipt()`
-4. Thêm tests cho tổ hợp mới
-
-<details><summary>✅ Lời giải Bài 3</summary>
-
-```rust
-// Thêm Topping enum
-#[derive(Debug)]
-enum Topping {
-    None,
-    BubblePearl,
-    Jelly,
-}
-
-fn topping_price(topping: &Topping) -> u32 {
-    match topping {
-        Topping::None => 0,
-        Topping::BubblePearl => 5_000,
-        Topping::Jelly => 3_000,
-    }
-}
-
-// Cập nhật Order struct
-#[derive(Debug)]
-struct Order {
-    drink: DrinkType,
-    size: Size,
-    topping: Topping,
-    customer: String,
-}
-
-// Cập nhật price
-fn price(order: &Order) -> u32 {
-    let base = match order.drink {
-        DrinkType::Coffee => 35_000,
-        DrinkType::Tea => 25_000,
-        DrinkType::Smoothie => 45_000,
-    };
-    let size_markup = match order.size {
-        Size::Small => 0,
-        Size::Medium => 5_000,
-        Size::Large => 10_000,
-    };
-    base + size_markup + topping_price(&order.topping)
-}
-
-// Test
-#[test]
-fn test_coffee_medium_bubble() {
-    let order = Order {
-        drink: DrinkType::Coffee,
-        size: Size::Medium,
-        topping: Topping::BubblePearl,
-        customer: "Test".to_string(),
-    };
-    // 35_000 + 5_000 + 5_000 = 45_000
-    assert_eq!(price(&order), 45_000);
-}
-```
-
-</details>
+**Bài 3 (10 phút).** So sánh thời gian `cargo check` và `cargo build` trên cùng một project. Chênh lệch bao nhiêu lần?
 
 ---
 
 ## 🔧 Troubleshooting
 
-| Lỗi | Nguyên nhân | Cách sửa |
-|-----|-------------|----------|
-| `command not found: cargo` | Rust chưa cài hoặc PATH chưa set | Cài lại: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
-| `error[E0601]: main function not found` | Thiếu `fn main()` | Thêm `fn main() { }` vào `src/main.rs` |
-| `cargo build` chậm lần đầu | Download + compile dependencies | Bình thường — lần sau nhanh hơn (cached) |
-| `cargo test` chạy cả doc tests | Doc comments có code block | Bình thường — hoặc dùng `cargo test --lib` chỉ chạy unit tests |
-| `evcxr` không cài được | Cần nightly hoặc thiếu dependencies | Dùng [play.rust-lang.org](https://play.rust-lang.org) thay thế |
-
----
-
-## Tóm tắt
-
-- ✅ **Toolchain**: `rustup` (version manager) + `cargo` (build tool + package manager). Gần như chỉ dùng `cargo`.
-- ✅ **Project structure**: `Cargo.toml` (metadata + deps) + `src/main.rs` (entry point). `cargo new` tạo sẵn.
-- ✅ **Development workflow**: `cargo check` → sửa → `cargo run` → `cargo test` → `cargo clippy` → `cargo fmt`.
-- ✅ **`println!`** là macro: `{}` = Display, `{:?}` = Debug, `{:.2}` = 2 decimal places. Doc comments `///` tạo docs + tests.
-- ✅ **REPL**: `evcxr` hoặc Rust Playground — thử nhanh không cần project.
-
-## Tiếp theo
-
-→ Chapter 5: **Variables, Types & Operators** — bạn sẽ học sâu hơn về `let`, `mut`, shadowing, scalar types, compound types (tuples, arrays), và type inference. Nền tảng để hiểu tại sao Rust là "statically typed nhưng viết ít type annotations".
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| rust-analyzer không hoạt động | Không thấy `Cargo.toml` ở root workspace | Mở đúng thư mục chứa `Cargo.toml` |
+| Build lần đầu rất lâu | Biên dịch toàn bộ dependency | Bình thường; lần sau đã có cache trong `target/` |
+| `target/` chiếm hàng GB | Artifact tích luỹ | `cargo clean` định kỳ; thêm `target/` vào `.gitignore` |
+| Clippy báo quá nhiều trên code cũ | Bật hết lint cùng lúc | Bật theo nhóm; `#[allow(...)]` tạm cho từng chỗ |
+| `edition` khác nhau gây lỗi lạ | Trộn edition giữa các crate | Thống nhất `edition` trong workspace |

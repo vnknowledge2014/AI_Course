@@ -152,6 +152,28 @@ def process(order_id: int) -> "Order":
 
 ---
 
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (5 phút).** Tạo package `myapp` với `domain/`, `application/`, `infrastructure/`. Thêm `__init__.py` và import chéo đúng chiều (chỉ từ ngoài vào trong).
+
+**Bài 2 (10 phút).** Cố tình tạo circular import rồi sửa nó bằng cách chuyển kiểu dùng chung sang một module thứ ba.
+
+**Bài 3 (15 phút).** Cấu hình `pyproject.toml` để package cài được bằng `uv pip install -e .`, rồi import nó từ một script bên ngoài thư mục dự án.
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| `ImportError: attempted relative import` | Chạy file trực tiếp thay vì như module | `python -m myapp.main` |
+| Circular import | Hai module import lẫn nhau | Tách phần dùng chung ra module thứ ba; hoặc import trong hàm |
+| `ModuleNotFoundError` dù file tồn tại | Không nằm trong `sys.path` | Cài editable (`-e .`), hoặc đặt `pythonpath` trong cấu hình pytest |
+| `__init__.py` re-export gây import nặng | Import mọi thứ ở package root | Chỉ export những gì thật sự công khai |
+| Type-only import gây vòng lặp | Import chỉ để annotate | `if TYPE_CHECKING:` + chuỗi annotation |
+
 ## Tóm tắt
 
 - ✅ **Imports**: `import`, `from ... import`, relative `..`

@@ -159,6 +159,44 @@ const UserProfile = ({ userId }: { userId: string }) => {
 
 ---
 
+---
+
+## ✅ Checkpoint 35
+
+1. Vì sao "component là hàm thuần từ props sang UI" lại là một mô hình hữu ích, dù React có state và effect?
+2. `useEffect` là side effect. Nó nên nằm ở "core" hay "shell" theo mô hình Functional Core / Imperative Shell?
+3. Vì sao state bất biến lại là **bắt buộc** trong React, không chỉ là phong cách?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Vì phần lớn component thật sự thuần: cùng props cho ra cùng cây UI. State và effect là **ngoại lệ có chủ đích** nên gom vào ít component nhất có thể — phần còn lại test được như hàm thường, không cần render toàn app.
+2. **Shell**. `useEffect` chạm vào thế giới bên ngoài (mạng, DOM, timer). Logic thuần nên tách ra thành hàm riêng, test độc lập, rồi effect chỉ còn là vài dòng gọi hàm đó.
+3. Vì React phát hiện thay đổi bằng so sánh **tham chiếu** (`Object.is`). `state.items.push(x)` giữ nguyên tham chiếu → React kết luận "không có gì đổi" → không re-render. Bất biến không phải sở thích, nó là điều kiện để cơ chế phát hiện thay đổi hoạt động.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Tách một component có `useEffect` fetch dữ liệu thành: một hàm thuần biến đổi dữ liệu (test riêng) + một component mỏng chỉ gọi nó.
+
+**Bài 2 (15 phút).** Viết custom hook `useResult<T, E>` trả về `Result` thay vì cặp `{data, error}`. So sánh cách hai kiểu API buộc bạn xử lý lỗi.
+
+**Bài 3 (20 phút).** Tìm một chỗ mutate state trong dự án của bạn (hoặc tự tạo), quan sát React **không** re-render, rồi sửa bằng cách tạo object mới.
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| State đổi mà UI không cập nhật | Mutate trực tiếp, tham chiếu không đổi | Tạo object/mảng mới: `[...items, x]` |
+| `useEffect` chạy vô hạn | Dependency là object/mảng tạo mới mỗi render | `useMemo`/`useCallback`, hoặc đưa giá trị nguyên thuỷ vào deps |
+| Stale closure trong `useEffect` | Bắt biến cũ, thiếu deps | Thêm đủ dependency, hoặc dùng functional update `setX(prev => ...)` |
+| `key` cảnh báo khi render list | Thiếu key ổn định | Dùng id nghiệp vụ, **không** dùng index khi list sắp xếp lại được |
+| Re-render lan rộng không cần thiết | Context chứa object mới mỗi render | Chia nhỏ context; `useMemo` cho value |
+
 ## Tóm tắt
 
 - ✅ **React Components = Pure Functions**: UI là kết quả tất yếu của việc mapping (biến đổi) State/Props.

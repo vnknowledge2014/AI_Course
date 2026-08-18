@@ -165,6 +165,44 @@ def test_add_item_to_cart(sample_cart):
 
 ---
 
+---
+
+## ✅ Checkpoint 29
+
+1. Vì sao code FP dễ test hơn code OOP có trạng thái?
+2. Bước "Refactor" trong Red-Green-Refactor hay bị bỏ qua nhất. Bỏ nó đi thì mất gì?
+3. Khi nào nên dùng `pytest.fixture` thay vì tạo dữ liệu ngay trong test?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Vì hàm thuần chỉ cần *đầu vào → kiểm đầu ra*. Không phải dựng object, không phải mock dependency, không phải dọn state giữa các test. Test trở thành bảng ánh xạ.
+2. Mất chính lợi ích chính của TDD. Test là **lưới an toàn cho phép refactor**; không refactor thì bạn chỉ đang trả giá cho lưới mà không bao giờ dùng.
+3. Khi việc chuẩn bị dữ liệu lặp lại **và** không phải trọng tâm của test. Nếu giá trị cụ thể quan trọng cho việc hiểu test, hãy để ngay trong test — fixture giấu nó đi sẽ khiến test khó đọc.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (5 phút).** Viết test **trước** cho hàm `slugify(title: str) -> str`, chạy để thấy đỏ, rồi mới cài đặt.
+
+**Bài 2 (10 phút).** Dùng `@pytest.mark.parametrize` gộp 6 test gần giống nhau thành một. So sánh số dòng.
+
+**Bài 3 (20 phút).** Chọn một hàm trong dự án bạn có coverage 0%. Viết test cho nó **trước khi** đọc phần cài đặt — chỉ dựa vào tên hàm và chữ ký. Bạn đoán sai chỗ nào? Đó là chỗ thiết kế đang không tự giải thích được.
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Test pass riêng, fail khi chạy cả bộ | Chia sẻ state giữa các test | Dùng fixture với scope `function`; tránh biến module-level |
+| `ModuleNotFoundError` khi chạy pytest | Thiếu cấu hình rootdir | Đặt `[tool.pytest.ini_options] pythonpath = ["src"]` |
+| Test chậm | Mỗi test dựng lại DB/app | Nâng scope fixture lên `session` cho thứ bất biến |
+| Coverage cao nhưng bug vẫn lọt | Test gọi code mà không assert gì đáng kể | Đo chất lượng assertion, không chỉ đo % dòng |
+| Test phụ thuộc thứ tự chạy | Có state ngầm | `pytest -p no:randomly` để xác nhận, rồi sửa gốc |
+
 ## Tóm tắt
 
 - ✅ **TDD (Red → Green → Refactor)**: Giúp bạn tự tin đập đi xây lại code (Refactor) mà không sợ sinh bug mới.

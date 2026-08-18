@@ -1,6 +1,6 @@
-# Appendix D — Macros Essentials
+# Appendix D — Macros Essentials: Phép thuật đằng sau tấm rèm
 
-> Appendix này là **reference**, không phải tutorial. Bạn không cần viết macros để dùng Rust hiệu quả — nhưng CẦN HIỂU chúng vì hệ sinh thái phụ thuộc rất nhiều vào macros.
+> Xin lưu ý: Phần phụ lục này đóng vai trò như một **cuốn cẩm nang tham khảo** hơn là một bài hướng dẫn chi tiết. Bạn hoàn toàn có thể viết mã Rust cực kỳ hiệu quả mà không bao giờ cần tự viết một Macro nào. Tuy nhiên, bạn **BẮT BUỘC PHẢI HIỂU** cách chúng hoạt động, bởi vì toàn bộ hệ sinh thái Rust (từ `println!` đến `#[derive(Debug)]`) đều được xây dựng dựa trên "phép thuật" này. Hãy cùng xé toạc bức rèm bí mật nhé!
 
 ---
 

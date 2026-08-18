@@ -11,7 +11,7 @@
 
 ---
 
-## Strategy → Higher-Order Function
+## 16.1 — Strategy → Higher-Order Function
 
 ```python
 from typing import Callable
@@ -38,7 +38,7 @@ assert calculate(100_000, percent_off(10)) == 90_000
 assert calculate(100_000, flat_off(15_000)) == 85_000
 ```
 
-## Command → Dataclass
+## 16.2 — Command → Dataclass
 
 ```python
 from dataclasses import dataclass
@@ -80,7 +80,7 @@ cart = execute(cart, RemoveItem("Tea"))
 assert cart == {"Coffee": 2}
 ```
 
-## Visitor → Pattern Match
+## 16.3 — Visitor → Pattern Match
 
 ```python
 from dataclasses import dataclass
@@ -115,7 +115,7 @@ assert abs(area(c) - 78.54) < 0.01
 assert abs(perimeter(c) - 31.42) < 0.01
 ```
 
-## Decorator → Python @decorator (native!)
+## 16.4 — Decorator → Python @decorator (native!)
 
 ```python
 import time
@@ -156,6 +156,51 @@ assert slow_add(3, 4) == 7
 ```
 
 ---
+
+---
+
+## ✅ Checkpoint 16
+
+1. Vì sao Strategy pattern trong Python thường chỉ cần một hàm, không cần class?
+2. Visitor pattern tồn tại để giải quyết vấn đề gì mà `match` giải quyết trực tiếp hơn?
+3. Pattern nào trong GoF **không** biến mất khi chuyển sang FP?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Vì Python có first-class function. Strategy vốn là cách mô phỏng "truyền hành vi" trong ngôn ngữ chỉ truyền được object. Có hàm là giá trị rồi thì lớp bọc kia trở nên thừa.
+2. Thêm thao tác mới lên một cây kiểu cố định mà không sửa từng class. `match` làm thẳng: một hàm, một `match`, xong — không cần `accept()`/`visit()` rải khắp nơi.
+3. Những pattern nói về **cấu trúc và tài nguyên**, không phải về mô phỏng hàm: Adapter, Facade, Proxy, Object Pool. Chúng vẫn còn giá trị nguyên vẹn.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (5 phút).** Chuyển một Strategy dạng class trong dự án bạn thành một dict ánh xạ tên → hàm. Đếm số dòng giảm được.
+
+**Bài 2 (10 phút).** Cài Command pattern bằng frozen dataclass + `match`, sao cho thêm một command mới sẽ khiến mypy báo lỗi ở mọi chỗ chưa xử lý (nhờ `assert_never`).
+
+**Bài 3 (20 phút).** Viết decorator `@retry(times=3)` và `@timed`. Xếp chồng chúng lên một hàm và trả lời: thứ tự áp dụng có quan trọng không, và vì sao?
+
+<details>
+<summary>Gợi ý bài 3</summary>
+
+Có. `@timed` ngoài `@retry` đo tổng thời gian gồm mọi lần thử; `@retry` ngoài
+`@timed` đo từng lần riêng. Đây là function composition — và thứ tự hợp thành
+luôn quan trọng.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Decorator làm mất type hint | Thiếu `functools.wraps` và annotation | `@wraps(fn)` + `ParamSpec`/`TypeVar` |
+| `match` không vét cạn mà mypy im lặng | Thiếu `assert_never` | Thêm nhánh `case _: assert_never(x)` |
+| Closure bắt sai biến trong vòng lặp | Late binding của Python | `partial(fn, x)` hoặc tham số mặc định `lambda x=x:` |
+| Dict-of-functions khó debug | Mất stack trace có ý nghĩa | Đặt `__name__` rõ ràng cho từng hàm |
 
 ## Tóm tắt — GoF → FP Cheat Sheet
 

@@ -661,6 +661,22 @@ fn main() {
 
 ---
 
+---
+
+## ✅ Checkpoint 27
+
+1. Thêm một variant vào enum public là breaking change. Cách nào giảm nhẹ?
+2. Vì sao "compiler-driven refactoring" mạnh hơn hẳn trong Rust so với Python?
+3. Đổi một field từ `String` sang newtype `Email` — làm sao migrate mà không đứng hình cả tuần?
+
+<details>
+<summary>Đáp án</summary>
+
+1. `#[non_exhaustive]` trên enum, buộc mọi `match` bên ngoài crate phải có nhánh `_`. Nhờ đó thêm variant sau này không phá code người dùng.
+2. Vì đổi một kiểu sẽ khiến compiler liệt kê **mọi** chỗ bị ảnh hưởng. Refactor trở thành "sửa cho tới khi hết đỏ" — có điểm dừng rõ ràng. Với Python bạn chỉ biết mình sót chỗ nào khi chạy tới đó ở production.
+3. Đổi kiểu trước, để compiler chỉ ra danh sách lỗi, rồi sửa từ tầng trong ra ngoài. Nếu quá nhiều chỗ, thêm `impl From<Email> for String` tạm thời làm cầu, sửa dần, rồi gỡ cầu đi ở cuối.
+</details>
+
 ## Tóm tắt
 
 Chapter này dạy bạn **cập nhật bản đồ** mà không làm ai đi lạc — kỹ năng quan trọng nhất khi domain liên tục biến đổi:

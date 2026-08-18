@@ -193,7 +193,11 @@ def validate_password(password: str) -> Validated:
         errors.append("Password must contain a digit")
     return Invalid(tuple(errors)) if errors else Valid(password)
 
-# ── Combine independent validations ──
+```
+
+#### Combine independent validations
+
+```python
 def validate_all(*validations: Validated) -> Validated:
     """Run ALL validations, collect ALL errors."""
     errors: list[str] = []
@@ -208,7 +212,11 @@ def validate_all(*validations: Validated) -> Validated:
 
     return Invalid(tuple(errors)) if errors else Valid(tuple(values))
 
-# ── Form validator ──
+```
+
+#### Form validator
+
+```python
 @dataclass(frozen=True)
 class UserRegistration:
     name: str
@@ -227,7 +235,11 @@ def validate_registration(name: str, email: str, password: str) -> Validated:
         case Invalid():
             return result
 
-# ── Tests ──
+```
+
+#### Tests
+
+```python
 
 # All valid → success
 result = validate_registration("Minh", "minh@co.com", "SecureP@ss1")
@@ -648,7 +660,11 @@ class Config:
     host: str
     port: int
     debug: bool
+```
 
+#### Tiếp tục phân tích...
+
+```python
 # Step 1: Parse JSON (Monad — dependent)
 def parse_json(raw: str) -> Result:
     try: return Ok(json.loads(raw))

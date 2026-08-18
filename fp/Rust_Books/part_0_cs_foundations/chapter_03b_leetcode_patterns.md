@@ -204,3 +204,46 @@ Dưới đây là các phân nhóm quan trọng nhất đối với AI Engineer:
 ## Tiếp theo
 
 Bạn đã biết cách viết thuật toán an toàn và tối ưu. Ở Chapter tiếp theo (3C), chúng ta sẽ rời khỏi tầng Software và nhìn vào kiến trúc **Phần cứng (Hardware)**: Tại sao CPU tính toán AI lại chậm? CUDA là gì? Và tại sao bộ nhớ (VRAM) lại quyết định sức mạnh của LLM?
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Giải "Two Sum" bằng `HashMap` một lượt. So với bản hai vòng lặp lồng nhau trên mảng 100.000 phần tử.
+
+**Bài 2 (15 phút).** Giải "Longest Substring Without Repeating Characters" bằng sliding window với `HashSet`. Chú ý: chuỗi Rust là UTF-8, nên dùng `.chars()` chứ không index byte.
+
+**Bài 3 (20 phút).** Giải một bài DP bằng hai cách: đệ quy + `HashMap` memo, và bottom-up với `Vec`. So sánh về hiệu năng và về rủi ro stack overflow.
+
+<details>
+<summary>Gợi ý bài 2</summary>
+
+`s[i]` không biên dịch được với `String` trong Rust — và đó là **tính năng**,
+không phải hạn chế. Index byte vào UTF-8 sẽ cắt giữa một ký tự nhiều byte.
+Dùng `.chars()`, hoặc `.as_bytes()` khi bạn chắc chắn dữ liệu là ASCII.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| `cannot borrow as mutable more than once` | Hai con trỏ mutable vào cùng `Vec` | Tách chỉ số ra trước, hoặc dùng `split_at_mut` |
+| `String` không index được bằng `s[i]` | UTF-8 nhiều byte mỗi ký tự | `.chars().nth(i)`, hoặc `.as_bytes()[i]` khi chắc là ASCII |
+| Stack overflow với đệ quy sâu | Rust không bảo đảm tối ưu đệ quy đuôi | Chuyển sang lặp, hoặc dùng `Vec` làm stack tường minh |
+| Chậm dù đúng thuật toán | Đang chạy bản debug | Đo bằng `cargo run --release` — chênh lệch thường 10–50 lần |
+| Tràn số nguyên khi cộng dồn | Debug build panic, release build wrap | Dùng `i64`/`u64`, hoặc `checked_add`/`saturating_add` |
+
+---
+
+## Tóm tắt
+
+- **Nhận ra pattern quan trọng hơn nhớ lời giải.** Two Pointers, Sliding Window,
+  DP, Graph Traversal phủ phần lớn bài phỏng vấn.
+- **Iterator chain thường vừa idiomatic vừa nhanh**: `.iter().filter().map().sum()`
+  được compiler tối ưu ngang vòng lặp tay.
+- **Luôn benchmark ở bản `--release`.** Debug build của Rust chậm hơn hàng chục lần
+  và cho kết luận sai hoàn toàn.
+- **Chuỗi UTF-8 không index được bằng byte** — hạn chế này chặn sẵn một lớp bug
+  mà các ngôn ngữ khác để bạn tự gánh.

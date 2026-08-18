@@ -746,7 +746,11 @@ namespace Billing {
         readonly total: number;
     };
 }
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 // Anti-Corruption Layer: Kitchen → Billing
 const toBill = (
     kitchenOrder: Kitchen.KitchenOrder,

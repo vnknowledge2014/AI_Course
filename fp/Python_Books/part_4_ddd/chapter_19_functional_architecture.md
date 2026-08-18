@@ -152,6 +152,38 @@ cafe_order/
 
 ---
 
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Lấy một hàm trong dự án của bạn có lẫn I/O và logic. Tách nó thành một hàm thuần + một vỏ mỏng làm I/O. Đếm số dòng test cần viết trước và sau.
+
+**Bài 2 (15 phút).** Vẽ sơ đồ onion cho một API bạn từng viết. Có mũi tên nào đi từ trong ra ngoài không? Đó là chỗ vi phạm.
+
+**Bài 3 (20 phút).** Cấu hình `ruff` chặn import từ tầng ngoài vào tầng trong (`flake8-tidy-imports.banned-api`). Chứng minh CI đỏ khi cố tình vi phạm.
+
+<details>
+<summary>Gợi ý bài 3</summary>
+
+```toml
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"myapp.infrastructure".msg = "domain/ không được import từ infrastructure/"
+```
+Ranh giới kiến trúc chỉ tồn tại nếu có thứ gì đó **ép** nó. Lời hứa trong tài liệu
+sẽ bị vi phạm trong vòng ba sprint.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Domain import SQLAlchemy | Repository trả về ORM object | Repository phải trả domain type, map ở adapter |
+| Không test được domain nếu không có DB | I/O rò vào lõi | Đưa I/O ra rìa; domain nhận dữ liệu thuần |
+| Circular import giữa các tầng | Phụ thuộc hai chiều | Định nghĩa Protocol ở tầng trong, implement ở tầng ngoài |
+| Application layer phình to | Business logic trôi ra khỏi domain | Kéo bất biến về lại domain object |
+
 ## Tóm tắt
 
 - ✅ **Hexagonal**: Core ← Ports → Adapters.

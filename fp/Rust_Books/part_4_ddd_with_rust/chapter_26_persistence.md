@@ -1,45 +1,48 @@
 # Chapter 26 — Persistence & Side Effects at Edges
 
 > **Bạn sẽ học được**:
-> - **Repository pattern** — trait abstraction cho data access
-> - **Dependency Injection** qua traits — không cần DI container
-> - **CQS** — Command Query Separation tại repository level
-> - **Transaction boundaries** — consistency across operations
+> - **Repository pattern** — trait abstraction cho thao tác truy xuất dữ liệu
+> - **Dependency Injection** qua traits — không cần DI container rườm rà
+> - **CQS** — Command Query Separation tại cấp độ repository
+> - **Transaction boundaries** — Đảm bảo tính toàn vẹn (consistency) khi thao tác nhiều bảng
 > - In-memory vs real database implementations
-> - Testing: mock repos, no DB required
+> - Testing: Dùng Mock Repositories để kiểm thử siêu tốc (không cần DB)
 >
 > **Yêu cầu trước**: Chapter 21 (Architecture), Chapter 22 (Domain Modeling), Chapter 25 (Serialization).
 > **Thời gian đọc**: ~40 phút | **Level**: Advanced
-> **Kết quả cuối cùng**: Domain logic **không biết** database nào đang dùng — swap Postgres ↔ SQLite ↔ in-memory tự do.
+> **Kết quả cuối cùng**: Domain logic **không hề biết** dữ liệu đang được lưu vào hệ quản trị cơ sở dữ liệu nào — bạn có thể hoán đổi giữa Postgres ↔ SQLite ↔ in-memory một cách tự do.
 
 ---
 
-## Persistence — Kết nối Domain Model với Database
+## Persistence — Kết nối Domain Model với Thế Giới Thực (Database)
 
-Đến chapter này, bạn có domain model đẹp (Ch22), workflows rõ ràng (Ch23), error handling an toàn (Ch24), serialization boundaries (Ch25). Nhưng tất cả đều ở in-memory. Để ứng dụng hoạt động thực tế, data phải được lưu xuống database và đọc lại.
+Đến chapter này, bạn đã xây dựng được một Domain Model tuyệt đẹp (Ch22), quy trình nghiệp vụ rõ ràng (Ch23), bắt lỗi cực kì an toàn (Ch24), và có Serialization sạch sẽ (Ch25). 
 
-Thách thức: domain model (enums, newtypes, value objects) không map trực tiếp sang SQL tables (rows, columns, foreign keys). Chương này dạy bạn cách xây dựng **Repository pattern** — tầng trung gian giữ domain model pure và cô lập database implementation details.
+Thế nhưng... tất cả mọi thứ vẫn chỉ đang nằm trên RAM (in-memory). Khi bạn tắt máy, dữ liệu bay hơi. Để ứng dụng sống sót trên Production, dữ liệu phải được **Lưu xuống (Persist)** Database và sau đó **Đọc lại (Load)**.
+
+Sự thách thức lớn nhất ở đây là: Domain Model (gồm Enums, Newtypes, Value Objects) **không thể ăn khớp 1-1** với thiết kế Bảng (Tables, Rows, Columns, Foreign Keys) của SQL. Ví dụ, `OrderStatus::Paid { amount, payment_id }` trong Rust là một biến thể của Enum, nhưng trong SQL nó có thể dàn ra thành nhiều cột (`status`, `amount`, `payment_id`) và các cột này chứa giá trị `NULL` nếu đơn hàng có trạng thái khác.
+
+Chương này sẽ hướng dẫn bạn xây dựng **Repository Pattern** — một tầng trung gian vững chắc. Nó giữ cho Domain Model của bạn trong sạch (Pure), và cách ly hoàn toàn các chi tiết rườm rà của Database. Khi muốn chuyển từ PostgreSQL sang MongoDB, bạn chỉ cần viết Repository mới, còn Code Logic cốt lõi thì không đổi một dòng nào!
 
 ---
-
-Domain model đẹp (Ch22), workflows rõ ràng (Ch23), errors an toàn (Ch24), serialization boundaries (Ch25). Nhưng tất cả in-memory. Production cần **persistence** — lưu data xuống database, đọc lại.
-
-Thách thức: domain model (enums, newtypes, value objects) không map 1:1 sang SQL tables (rows, columns). `OrderStatus::Paid { amount, payment_id }` trong Rust = 1 enum variant. Trong SQL = row với columns `status`, `amount`, `payment_id` + NULL cho fields của variants khác.
-
-Repository pattern giải quyết: tầng trung gian convert domain ↔ SQL. Domain stays pure, database details isolated. Swap PostgreSQL sang MongoDB? Viết Repository mới, domain không đổi.
 
 ## 26.1 — Repository = Trait
 
-### Ẩn dụ: Thủ thư
+### Ẩn dụ: Cô Thủ thư
 
-Repository giống **thủ thư** (librarian). Bạn nói: "Tìm sách ID 42" hoặc "Lưu sách mới". Thủ thư biết sách ở đâu (kệ nào, tầng nào) — bạn **không cần biết**.
+Repository hoạt động giống hệt một **cô thủ thư** trong thư viện.
+Bạn nói với cô ấy: "Lấy cho tôi cuốn sách ID 42", hoặc "Ghi chú cuốn sách mới này vào danh sách". Bạn **không cần phải biết** cô ấy sắp xếp nó lên kệ nào, ở tầng thứ mấy, mã hóa hệ thập phân Dewey ra sao.
 
-### Domain-first Repository
+Trong lập trình, Repository chính là Cô thủ thư. Ứng dụng đưa cho Repo một `Product` (Entity), Repo tự biết cách "dịch" nó thành 2 câu lệnh `INSERT` và `UPDATE` vào SQL.
+
+### Bước 1: Domain Models và Logic Thuần túy
+
+Đầu tiên, hãy định nghĩa Domain Object. Nó không chứa thư viện cơ sở dữ liệu nào (không Diesel, không SQLx).
 
 ```rust
 // filename: src/main.rs
 
-// ═══ DOMAIN (pure, no IO) ═══
+// ═══ LỚP 1: DOMAIN (Pure, No IO) ═══
 mod domain {
     #[derive(Debug, Clone, PartialEq)]
     pub struct ProductId(pub u64);
@@ -52,6 +55,7 @@ mod domain {
         pub stock: u32,
     }
 
+    // Các nghiệp vụ cốt lõi
     impl Product {
         pub fn restock(&self, amount: u32) -> Self {
             Product { stock: self.stock + amount, ..self.clone() }
@@ -66,8 +70,14 @@ mod domain {
         }
     }
 }
+```
 
-// ═══ REPOSITORY TRAIT (port) ═══
+### Bước 2: Khai báo Hợp đồng (Trait)
+
+Ở biên của Domain, ta định nghĩa một Trait. Nó là một bản Hợp đồng quy định rõ: "Bất kỳ ai muốn làm Thủ thư cho dữ liệu Product, đều phải cung cấp các tính năng này".
+
+```rust
+// ═══ LỚP 2: REPOSITORY TRAIT (Cổng giao tiếp - Port) ═══
 mod ports {
     use super::domain::*;
 
@@ -80,8 +90,14 @@ mod ports {
         fn delete(&mut self, id: &ProductId) -> Result<(), String>;
     }
 }
+```
 
-// ═══ IN-MEMORY IMPLEMENTATION (adapter) ═══
+### Bước 3: Tạo Adapter giả lập (In-memory)
+
+Để viết Code và Test liền mạch mà không cần cài đặt Cơ sở dữ liệu thật, ta tạo ra một bản Implementation bằng RAM (sử dụng Hashmap).
+
+```rust
+// ═══ LỚP 3: IN-MEMORY IMPLEMENTATION (Adapter) ═══
 mod infrastructure {
     use super::domain::*;
     use super::ports::*;
@@ -98,10 +114,9 @@ mod infrastructure {
         }
     }
 
+    // Cô thủ thư bằng RAM
     impl ProductRepository for InMemoryProductRepo {
-        fn next_id(&self) -> ProductId {
-            ProductId(self.counter + 1)
-        }
+        fn next_id(&self) -> ProductId { ProductId(self.counter + 1) }
 
         fn save(&mut self, product: &Product) -> Result<(), String> {
             self.counter = self.counter.max(product.id.0);
@@ -126,52 +141,41 @@ mod infrastructure {
         }
 
         fn delete(&mut self, id: &ProductId) -> Result<(), String> {
-            self.products.remove(&id.0)
-                .map(|_| ())
-                .ok_or_else(|| format!("Product {:?} not found", id))
+            self.products.remove(&id.0).map(|_| ()).ok_or_else(|| format!("Product {:?} not found", id))
         }
     }
 }
+```
 
-// ═══ APPLICATION (use case) ═══
+### Bước 4: Ứng dụng ghép nối (Application)
+
+Lớp Application chứa các Use case (Kịch bản sử dụng). Nó yêu cầu truyền vào một cái `dyn ProductRepository`. Khi đó, nó có thể ra lệnh cho cơ sở dữ liệu làm việc mà không cần biết đó là MySQL, Redis hay chỉ là Hashmap ở bước 3!
+
+```rust
+// ═══ LỚP 4: APPLICATION (Use case) ═══
 mod application {
     use super::domain::*;
     use super::ports::*;
 
     pub fn add_product(
-        repo: &mut dyn ProductRepository,
-        name: &str,
-        price: u32,
-        initial_stock: u32,
+        repo: &mut dyn ProductRepository, // Nhận bất kì Thủ thư nào!
+        name: &str, price: u32, initial_stock: u32,
     ) -> Result<Product, String> {
         if name.trim().len() < 2 { return Err("Name too short".into()); }
         if price == 0 { return Err("Price must be > 0".into()); }
 
         let product = Product {
-            id: repo.next_id(),
-            name: name.trim().into(),
-            price, stock: initial_stock,
+            id: repo.next_id(), name: name.trim().into(), price, stock: initial_stock,
         };
-        repo.save(&product)?;
+        repo.save(&product)?; // Ra lệnh lưu
         Ok(product)
-    }
-
-    pub fn restock_product(
-        repo: &mut dyn ProductRepository,
-        id: &ProductId,
-        amount: u32,
-    ) -> Result<Product, String> {
-        let product = repo.find_by_id(id).ok_or("Product not found")?;
-        let updated = product.restock(amount);
-        repo.save(&updated)?;
-        Ok(updated)
     }
 
     pub fn purchase(
         repo: &mut dyn ProductRepository,
-        id: &ProductId,
-        qty: u32,
+        id: &ProductId, qty: u32,
     ) -> Result<Product, String> {
+        // Tìm → Chạy logic Pure → Lưu lại
         let product = repo.find_by_id(id).ok_or("Product not found")?;
         let updated = product.reserve(qty)?;
         repo.save(&updated)?;
@@ -179,35 +183,11 @@ mod application {
     }
 }
 
+// Chạy thử!
 fn main() {
-    use domain::*;
-    use ports::ProductRepository;
-
     let mut repo = infrastructure::InMemoryProductRepo::new();
-
-    // Add products
     let coffee = application::add_product(&mut repo, "Premium Coffee", 85_000, 50).unwrap();
-    let tea = application::add_product(&mut repo, "Green Tea", 45_000, 100).unwrap();
     println!("Added: {:?}", coffee);
-    println!("Added: {:?}\n", tea);
-
-    // Purchase
-    let updated = application::purchase(&mut repo, &coffee.id, 5).unwrap();
-    println!("After purchase 5: stock={}\n", updated.stock);
-
-    // Restock
-    let updated = application::restock_product(&mut repo, &coffee.id, 20).unwrap();
-    println!("After restock 20: stock={}\n", updated.stock);
-
-    // Search
-    let results = repo.find_by_name("coffee");
-    println!("Search 'coffee': {} results", results.len());
-
-    // List all
-    println!("\nAll products:");
-    for p in repo.find_all() {
-        println!("  {} — {}đ (stock: {})", p.name, p.price, p.stock);
-    }
 }
 ```
 
@@ -216,184 +196,121 @@ fn main() {
 ## ✅ Checkpoint 26.1
 
 > Ghi nhớ:
-> 1. **Repository trait** = port. Domain/Application định nghĩa.
-> 2. **In-memory implementation** = adapter cho testing.
-> 3. Application **chỉ thấy trait**, không biết implementation cụ thể.
-> 4. Swap `InMemoryProductRepo` → `PostgresProductRepo` → **không sửa application code**!
+> 1. **Repository trait** = Giao thức (port). Được định nghĩa bởi lớp Application/Domain.
+> 2. **In-memory implementation** = Adapter để kiểm thử hoặc tạo Prototype nhanh chóng.
+> 3. Lớp Application **chỉ thấy trait**, không quan tâm tới cách thức lưu trữ.
+> 4. Khi nâng cấp hệ thống: Bạn viết `PostgresProductRepo` và ném vào hàm `main()`. **Không cần sửa một dòng nào trong code Application**!
 
 ---
 
-## 26.2 — CQS: Command Query Separation
+## 26.2 — CQS: Tách bạch Command và Query
 
-### Tách Read và Write
+Khi hệ thống lớn lên, một Trait duy nhất chứa cả hàm Đọc (Read) lẫn Ghi (Write) sẽ phình to khủng khiếp.
+Nên nhớ, Đọc và Ghi là hai nhu cầu trái ngược: Đọc thường cần Tốc độ, Join nhiều bảng, và Giao diện tìm kiếm linh hoạt. Ghi thường tập trung vào Tính chính xác (Validation) và Transaction.
+
+CQS (Command Query Separation) khuyên ta tách đôi Repository.
+
+### Ví dụ về tách Read / Write
 
 ```rust
 // filename: src/main.rs
 
 use std::collections::HashMap;
 
-// ═══ Domain ═══
 #[derive(Debug, Clone)]
 struct Order {
-    id: u64,
-    customer: String,
-    items: Vec<(String, u32, u32)>,
-    status: OrderStatus,
+    id: u64, customer: String, status: OrderStatus,
 }
-
 #[derive(Debug, Clone, PartialEq)]
 enum OrderStatus { Draft, Confirmed, Shipped }
 
-// ═══ CQS: tách Command và Query ═══
-
-// COMMANDS — thay đổi state, không return data (trừ ID/confirmation)
+// ═══ COMMANDS (Ghi) — thay đổi State ═══
 trait OrderCommands {
     fn save(&mut self, order: &Order) -> Result<(), String>;
     fn update_status(&mut self, id: u64, status: OrderStatus) -> Result<(), String>;
-    fn delete(&mut self, id: u64) -> Result<(), String>;
 }
 
-// QUERIES — đọc data, không thay đổi state
+// ═══ QUERIES (Đọc) — Đọc Data, không có side effects ═══
 trait OrderQueries {
     fn find_by_id(&self, id: u64) -> Option<Order>;
     fn find_by_customer(&self, customer: &str) -> Vec<Order>;
-    fn find_by_status(&self, status: &OrderStatus) -> Vec<Order>;
     fn count(&self) -> usize;
-    fn total_revenue(&self) -> u64;
 }
 
-// ═══ Implementation ═══
-struct OrderStore {
-    orders: HashMap<u64, Order>,
-}
-
-impl OrderStore {
-    fn new() -> Self { OrderStore { orders: HashMap::new() } }
-}
+// Implementation
+struct OrderStore { orders: HashMap<u64, Order> }
+impl OrderStore { fn new() -> Self { OrderStore { orders: HashMap::new() } } }
 
 impl OrderCommands for OrderStore {
     fn save(&mut self, order: &Order) -> Result<(), String> {
-        self.orders.insert(order.id, order.clone());
-        Ok(())
+        self.orders.insert(order.id, order.clone()); Ok(())
     }
-
     fn update_status(&mut self, id: u64, status: OrderStatus) -> Result<(), String> {
         let order = self.orders.get_mut(&id).ok_or("Not found")?;
-        order.status = status;
-        Ok(())
-    }
-
-    fn delete(&mut self, id: u64) -> Result<(), String> {
-        self.orders.remove(&id).map(|_| ()).ok_or("Not found".into())
+        order.status = status; Ok(())
     }
 }
 
 impl OrderQueries for OrderStore {
-    fn find_by_id(&self, id: u64) -> Option<Order> {
-        self.orders.get(&id).cloned()
+    fn find_by_id(&self, id: u64) -> Option<Order> { self.orders.get(&id).cloned() }
+    fn find_by_customer(&self, c: &str) -> Vec<Order> { 
+        self.orders.values().filter(|o| o.customer == c).cloned().collect() 
     }
-
-    fn find_by_customer(&self, customer: &str) -> Vec<Order> {
-        self.orders.values()
-            .filter(|o| o.customer == customer)
-            .cloned().collect()
-    }
-
-    fn find_by_status(&self, status: &OrderStatus) -> Vec<Order> {
-        self.orders.values()
-            .filter(|o| o.status == *status)
-            .cloned().collect()
-    }
-
     fn count(&self) -> usize { self.orders.len() }
-
-    fn total_revenue(&self) -> u64 {
-        self.orders.values()
-            .filter(|o| o.status == OrderStatus::Shipped)
-            .map(|o| o.items.iter().map(|(_, p, q)| *p as u64 * *q as u64).sum::<u64>())
-            .sum()
-    }
 }
+```
 
+Bây giờ, Use case nào làm nhiệm vụ gì thì sẽ chỉ yêu cầu Trait tương ứng:
+
+```rust
 // Use case cần WRITE → nhận &mut dyn OrderCommands
 fn place_order(cmds: &mut dyn OrderCommands, order: Order) -> Result<(), String> {
     cmds.save(&order)
 }
 
-// Use case cần READ → nhận &dyn OrderQueries
+// Use case cần READ → nhận &dyn OrderQueries (Tuyệt đối an toàn, không sợ hàm này vô tình sửa DB!)
 fn generate_report(queries: &dyn OrderQueries) -> String {
-    format!(
-        "Orders: {} | Revenue: {}đ | Shipped: {}",
-        queries.count(),
-        queries.total_revenue(),
-        queries.find_by_status(&OrderStatus::Shipped).len(),
-    )
-}
-
-fn main() {
-    let mut store = OrderStore::new();
-
-    store.save(&Order {
-        id: 1, customer: "Minh".into(),
-        items: vec![("Coffee".into(), 85_000, 2)],
-        status: OrderStatus::Shipped,
-    }).unwrap();
-
-    store.save(&Order {
-        id: 2, customer: "Lan".into(),
-        items: vec![("Tea".into(), 45_000, 1)],
-        status: OrderStatus::Confirmed,
-    }).unwrap();
-
-    println!("{}", generate_report(&store));
-
-    // Update status
-    store.update_status(2, OrderStatus::Shipped).unwrap();
-    println!("{}", generate_report(&store));
+    format!("Total orders: {}", queries.count())
 }
 ```
 
-### CQS rules
+### So sánh Command vs Query
 
 | | Command | Query |
 |---|---|---|
-| **Purpose** | Thay đổi state | Đọc state |
-| **Return** | `Result<(), E>` hoặc ID | Data (struct, Vec, aggregate) |
-| **Side effect** | Yes (writes) | No (reads only) |
-| **Rust trait** | `&mut self` | `&self` |
-| **Cacheable?** | No | Yes ✅ |
+| **Mục đích** | Đổi dữ liệu | Đọc dữ liệu |
+| **Giá trị trả về** | `Result<(), Error>` hoặc ID | Struct, Dto, Vector... |
+| **Rust Trait Ref** | `&mut self` | `&self` |
+| **Có thể Cache không?**| Không! (Write) | Có! Rất nên (Read) |
 
 ---
 
-## 26.3 — Transaction Boundaries
+## 26.3 — Transaction Boundaries (Ranh giới giao dịch)
 
-### Unit of Work pattern
+Khi chuyển tiền, bạn Trừ tiền của A và Cộng tiền cho B. Cả 2 thao tác này phải **cùng thành công** hoặc **cùng thất bại (Rollback)**. 
+Nếu dùng Repository từng hàm đơn lẻ, rủi ro lỗi nằm ở giữa (A bị trừ, B chưa được cộng) là rất lớn.
+
+Chúng ta cần `UnitOfWork` (Đơn vị công việc) để đóng gói Transaction.
 
 ```rust
 // filename: src/main.rs
 
 use std::collections::HashMap;
 
-// ═══ Transaction abstraction ═══
-
+// ═══ Transaction Abstraction ═══
 trait UnitOfWork {
     fn begin(&mut self);
     fn commit(&mut self) -> Result<(), String>;
     fn rollback(&mut self);
 }
 
-// ═══ Transactional Repository ═══
+// ═══ Mock Implementation ═══
 #[derive(Clone)]
-struct Account {
-    id: u64,
-    name: String,
-    balance: i64,
-}
+struct Account { id: u64, name: String, balance: i64 }
 
 struct AccountStore {
     accounts: HashMap<u64, Account>,
-    // Staged changes
-    pending: HashMap<u64, Account>,
+    pending: HashMap<u64, Account>, // Dữ liệu nháp
     in_transaction: bool,
 }
 
@@ -401,52 +318,49 @@ impl AccountStore {
     fn new() -> Self {
         AccountStore { accounts: HashMap::new(), pending: HashMap::new(), in_transaction: false }
     }
-
-    fn seed(&mut self, account: Account) {
-        self.accounts.insert(account.id, account);
-    }
-
+    fn seed(&mut self, account: Account) { self.accounts.insert(account.id, account); }
+    
     fn find(&self, id: u64) -> Option<Account> {
-        // In transaction? Check pending first
         if self.in_transaction {
-            if let Some(a) = self.pending.get(&id) { return Some(a.clone()); }
+            if let Some(a) = self.pending.get(&id) { return Some(a.clone()); } // Đọc từ bản nháp
         }
         self.accounts.get(&id).cloned()
     }
-
+    
     fn save(&mut self, account: Account) {
         if self.in_transaction {
-            self.pending.insert(account.id, account);
+            self.pending.insert(account.id, account); // Chỉ ghi nháp
         } else {
             self.accounts.insert(account.id, account);
         }
     }
 }
 
+// Implement Transaction logic cho RAM
 impl UnitOfWork for AccountStore {
     fn begin(&mut self) {
         self.pending.clear();
         self.in_transaction = true;
-        println!("  [TX] Begin");
     }
 
     fn commit(&mut self) -> Result<(), String> {
-        // Apply all pending changes
         for (id, account) in self.pending.drain() {
-            self.accounts.insert(id, account);
+            self.accounts.insert(id, account); // Đổ nháp vào thật
         }
         self.in_transaction = false;
-        println!("  [TX] Committed");
         Ok(())
     }
 
     fn rollback(&mut self) {
-        self.pending.clear();
+        self.pending.clear(); // Xóa sạch nháp
         self.in_transaction = false;
-        println!("  [TX] Rolled back");
     }
 }
+```
 
+Bây giờ hãy xem Use Case thực thi Giao dịch an toàn:
+
+```rust
 // ═══ Use case: Transfer money (transactional) ═══
 fn transfer(store: &mut AccountStore, from_id: u64, to_id: u64, amount: i64) -> Result<(), String> {
     store.begin();
@@ -455,49 +369,30 @@ fn transfer(store: &mut AccountStore, from_id: u64, to_id: u64, amount: i64) -> 
     let to = store.find(to_id).ok_or("Target account not found")?;
 
     if from.balance < amount {
-        store.rollback();
-        return Err(format!("Insufficient funds: {}đ < {}đ", from.balance, amount));
+        store.rollback(); // Hủy bỏ ngay lập tức!
+        return Err(format!("Insufficient funds"));
     }
 
+    // Sửa đổi trên RAM nháp
     store.save(Account { balance: from.balance - amount, ..from });
     store.save(Account { balance: to.balance + amount, ..to });
 
-    store.commit()?;
+    store.commit()?; // Ghi thật
     Ok(())
-}
-
-fn main() {
-    let mut store = AccountStore::new();
-    store.seed(Account { id: 1, name: "Minh".into(), balance: 1_000_000 });
-    store.seed(Account { id: 2, name: "Lan".into(), balance: 500_000 });
-
-    // Successful transfer
-    println!("Transfer 200k:");
-    transfer(&mut store, 1, 2, 200_000).unwrap();
-    println!("  Minh: {}đ", store.find(1).unwrap().balance);
-    println!("  Lan: {}đ\n", store.find(2).unwrap().balance);
-
-    // Failed transfer (insufficient funds)
-    println!("Transfer 2M (should fail):");
-    match transfer(&mut store, 1, 2, 2_000_000) {
-        Err(e) => println!("  ❌ {}", e),
-        Ok(_) => println!("  ✅ ok"),
-    }
-    // Balances unchanged after rollback
-    println!("  Minh: {}đ (unchanged)", store.find(1).unwrap().balance);
-    println!("  Lan: {}đ (unchanged)", store.find(2).unwrap().balance);
 }
 ```
 
 ---
 
-## 26.4 — Persistence Model vs Domain Model
+## 26.4 — Mô hình Dữ Liệu (Domain Model vs Persistence Model)
+
+Domain Model thường được thiết kế phân cấp, đóng gói mạnh bằng Enum và NewType để bảo vệ Logic.
+Nhưng Database SQL thì lại chuộng dạng phẳng (Flat), các kiểu nguyên thủy (String, Integer).
+
+Không nên ép Database phải hiểu Domain, cũng không nên làm Domain xấu đi để chiều ý DB. Giải pháp: **Hai Mô Hình**.
 
 ```rust
-// filename: src/main.rs
-use serde::{Serialize, Deserialize};
-
-// ═══ DOMAIN MODEL (rich, validated) ═══
+// ═══ 1. DOMAIN MODEL (Rich, Validated) ═══
 mod domain {
     #[derive(Debug, Clone)]
     pub struct UserId(pub u64);
@@ -512,203 +407,30 @@ mod domain {
     }
 
     #[derive(Debug, Clone)]
-    pub struct User {
-        pub id: UserId,
-        pub name: String,
-        pub email: Email,
-        pub role: Role,
-    }
+    pub enum Role { Admin, Editor, Viewer }
 
     #[derive(Debug, Clone)]
-    pub enum Role { Admin, Editor, Viewer }
+    pub struct User { pub id: UserId, pub email: Email, pub role: Role }
 }
 
-// ═══ PERSISTENCE MODEL (flat, DB-friendly) ═══
+// ═══ 2. PERSISTENCE MODEL (Flat, DB-friendly) ═══
 mod persistence {
     use serde::{Serialize, Deserialize};
 
     #[derive(Debug, Serialize, Deserialize)]
     pub struct UserRow {
         pub id: u64,
-        pub name: String,
         pub email: String,
-        pub role: String,          // "admin" | "editor" | "viewer"
+        pub role: String, // "admin" | "editor" | "viewer"
         pub created_at: String,
-        pub updated_at: String,
     }
-}
-
-// ═══ MAPPING ═══
-impl From<domain::User> for persistence::UserRow {
-    fn from(user: domain::User) -> Self {
-        persistence::UserRow {
-            id: user.id.0,
-            name: user.name,
-            email: user.email.0,
-            role: match user.role {
-                domain::Role::Admin => "admin",
-                domain::Role::Editor => "editor",
-                domain::Role::Viewer => "viewer",
-            }.into(),
-            created_at: "2024-01-01T00:00:00Z".into(), // DB handles this
-            updated_at: "2024-01-01T00:00:00Z".into(),
-        }
-    }
-}
-
-impl TryFrom<persistence::UserRow> for domain::User {
-    type Error = String;
-
-    fn try_from(row: persistence::UserRow) -> Result<Self, String> {
-        let email = domain::Email::new(&row.email)?;
-        let role = match row.role.as_str() {
-            "admin" => domain::Role::Admin,
-            "editor" => domain::Role::Editor,
-            "viewer" => domain::Role::Viewer,
-            other => return Err(format!("Unknown role: {}", other)),
-        };
-
-        Ok(domain::User {
-            id: domain::UserId(row.id),
-            name: row.name,
-            email,
-            role,
-        })
-    }
-}
-
-fn main() {
-    // Domain → Persistence (save)
-    let user = domain::User {
-        id: domain::UserId(1),
-        name: "Minh".into(),
-        email: domain::Email::new("minh@co.com").unwrap(),
-        role: domain::Role::Admin,
-    };
-    let row: persistence::UserRow = user.into();
-    let json = serde_json::to_string_pretty(&row).unwrap();
-    println!("Save to DB:\n{}\n", json);
-
-    // Persistence → Domain (load)
-    let loaded_row: persistence::UserRow = serde_json::from_str(&json).unwrap();
-    let loaded_user = domain::User::try_from(loaded_row).unwrap();
-    println!("Load from DB: {:?}", loaded_user);
 }
 ```
 
-### Ba models
-
-```
-┌──────────────┐    From     ┌──────────────┐    serde    ┌──────────┐
-│  Domain      │ ──────────→ │  Persistence │ ──────────→ │  Database│
-│  Model       │ ←────────── │  Model       │ ←────────── │  (JSON)  │
-│  (rich)      │   TryFrom   │  (flat)      │   deser     │          │
-└──────────────┘             └──────────────┘             └──────────┘
-   Email, Money,                UserRow,                    SQL rows,
-   Role enum                    Strings, ints               JSON docs
-```
-
----
-
-## 26.5 — Testing Repository
-
-```rust
-// filename: src/main.rs
-
-use std::collections::HashMap;
-
-// ═══ Simplified example for testing ═══
-#[derive(Debug, Clone, PartialEq)]
-struct Task { id: u64, title: String, done: bool }
-
-trait TaskRepository {
-    fn save(&mut self, task: &Task) -> Result<(), String>;
-    fn find(&self, id: u64) -> Option<Task>;
-    fn find_all(&self) -> Vec<Task>;
-    fn find_pending(&self) -> Vec<Task>;
-}
-
-struct InMemoryTaskRepo {
-    tasks: HashMap<u64, Task>,
-}
-
-impl InMemoryTaskRepo {
-    fn new() -> Self { InMemoryTaskRepo { tasks: HashMap::new() } }
-}
-
-impl TaskRepository for InMemoryTaskRepo {
-    fn save(&mut self, task: &Task) -> Result<(), String> {
-        self.tasks.insert(task.id, task.clone());
-        Ok(())
-    }
-    fn find(&self, id: u64) -> Option<Task> { self.tasks.get(&id).cloned() }
-    fn find_all(&self) -> Vec<Task> { self.tasks.values().cloned().collect() }
-    fn find_pending(&self) -> Vec<Task> {
-        self.tasks.values().filter(|t| !t.done).cloned().collect()
-    }
-}
-
-// Use case under test
-fn complete_task(repo: &mut dyn TaskRepository, id: u64) -> Result<Task, String> {
-    let task = repo.find(id).ok_or("Not found")?;
-    if task.done { return Err("Already completed".into()); }
-    let updated = Task { done: true, ..task };
-    repo.save(&updated)?;
-    Ok(updated)
-}
-
-// ═══ TESTS ═══
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn setup() -> InMemoryTaskRepo {
-        let mut repo = InMemoryTaskRepo::new();
-        repo.save(&Task { id: 1, title: "Write code".into(), done: false }).unwrap();
-        repo.save(&Task { id: 2, title: "Review PR".into(), done: false }).unwrap();
-        repo.save(&Task { id: 3, title: "Deploy".into(), done: true }).unwrap();
-        repo
-    }
-
-    #[test]
-    fn complete_task_marks_as_done() {
-        let mut repo = setup();
-        let task = complete_task(&mut repo, 1).unwrap();
-        assert!(task.done);
-        assert_eq!(repo.find(1).unwrap().done, true);
-    }
-
-    #[test]
-    fn complete_already_done_returns_error() {
-        let mut repo = setup();
-        let result = complete_task(&mut repo, 3);
-        assert_eq!(result.unwrap_err(), "Already completed");
-    }
-
-    #[test]
-    fn complete_nonexistent_returns_error() {
-        let mut repo = setup();
-        let result = complete_task(&mut repo, 999);
-        assert_eq!(result.unwrap_err(), "Not found");
-    }
-
-    #[test]
-    fn find_pending_excludes_done() {
-        let repo = setup();
-        let pending = repo.find_pending();
-        assert_eq!(pending.len(), 2);
-        assert!(pending.iter().all(|t| !t.done));
-    }
-}
-
-fn main() {
-    let mut repo = InMemoryTaskRepo::new();
-    repo.save(&Task { id: 1, title: "Write code".into(), done: false }).unwrap();
-
-    let completed = complete_task(&mut repo, 1).unwrap();
-    println!("Completed: {:?}", completed);
-}
-```
+Sau đó, hãy viết các hàm Convert (chuyển đổi) qua lại giữa 2 dạng này nằm ở lớp Adapter (Infrastructure).
+Repository sẽ dùng các hàm Convert này:
+- Lấy `Domain` → Đổi thành `Persistence` → Nhét vào Database.
+- Đọc Database → Trả ra `Persistence` → Đổi thành `Domain` → Gửi về cho Ứng dụng xử lý.
 
 ---
 
@@ -716,126 +438,16 @@ fn main() {
 
 **Bài 1** (5 phút): CQS Identification
 
-Phân loại các methods sau thành Command hoặc Query:
-
-```rust
-fn get_balance(id: u64) -> Option<u64> { ... }
-fn deposit(id: u64, amount: u64) -> Result<(), Error> { ... }
-fn list_transactions(id: u64) -> Vec<Transaction> { ... }
-fn transfer(from: u64, to: u64, amount: u64) -> Result<(), Error> { ... }
-fn count_active_accounts() -> usize { ... }
-```
+Phân loại các methods sau thành Command hay Query:
+- `fn deposit(id: u64, amount: u64) -> Result<(), Error>`
+- `fn list_transactions(id: u64) -> Vec<Transaction>`
+- `fn transfer(from: u64, to: u64, amount: u64) -> Result<(), Error>`
 
 <details><summary>✅ Lời giải</summary>
 
-- `get_balance` → **Query** (đọc, &self)
-- `deposit` → **Command** (ghi, &mut self)
-- `list_transactions` → **Query** (đọc)
-- `transfer` → **Command** (ghi, thay đổi 2 accounts)
-- `count_active_accounts` → **Query** (đọc, aggregate)
-
-</details>
-
----
-
-**Bài 2** (10 phút): Generic Repository
-
-Viết generic `Repository<T>` trait:
-```rust
-trait Repository<T> {
-    type Id;
-    fn save(&mut self, entity: &T) -> Result<(), String>;
-    fn find_by_id(&self, id: &Self::Id) -> Option<T>;
-    fn delete(&mut self, id: &Self::Id) -> Result<(), String>;
-}
-```
-Implement cho `InMemoryRepo<T>` sử dụng `HashMap`.
-
-<details><summary>✅ Lời giải Bài 2</summary>
-
-```rust
-use std::collections::HashMap;
-use std::hash::Hash;
-
-trait HasId {
-    type Id: Eq + Hash + Clone;
-    fn id(&self) -> &Self::Id;
-}
-
-struct InMemoryRepo<T: HasId> {
-    data: HashMap<T::Id, T>,
-}
-
-impl<T: HasId + Clone> InMemoryRepo<T> {
-    fn new() -> Self { InMemoryRepo { data: HashMap::new() } }
-
-    fn save(&mut self, entity: &T) -> Result<(), String> {
-        self.data.insert(entity.id().clone(), entity.clone());
-        Ok(())
-    }
-
-    fn find_by_id(&self, id: &T::Id) -> Option<T> {
-        self.data.get(id).cloned()
-    }
-
-    fn delete(&mut self, id: &T::Id) -> Result<(), String> {
-        self.data.remove(id).map(|_| ()).ok_or("Not found".into())
-    }
-
-    fn find_all(&self) -> Vec<T> {
-        self.data.values().cloned().collect()
-    }
-}
-```
-
-</details>
-
----
-
-**Bài 3** (15 phút): Transactional workflow
-
-Viết "Place Order" workflow với transaction:
-1. Begin transaction
-2. Check stock → reserve items
-3. Charge payment → create receipt
-4. Save order
-5. Commit (hoặc rollback nếu bất kỳ step fail)
-
-Dùng in-memory repos cho Product + Order.
-
-<details><summary>✅ Lời giải Bài 3</summary>
-
-```rust
-fn place_order(
-    products: &mut InMemoryRepo<Product>,
-    orders: &mut InMemoryRepo<Order>,
-) -> Result<Order, String> {
-    // Pseudo-transactional (save original state for rollback)
-    let original_products: Vec<_> = products.find_all();
-
-    // Step 1: Reserve stock
-    let product = products.find_by_id(&ProductId(1)).ok_or("Product not found")?;
-    let reserved = product.reserve(2).map_err(|e| {
-        // No rollback needed: nothing changed yet
-        e
-    })?;
-    products.save(&reserved).unwrap();
-
-    // Step 2: Create order
-    let order = Order { id: OrderId(1), product_id: ProductId(1), quantity: 2, status: "confirmed".into() };
-
-    // Step 3: Charge payment (simulate failure)
-    let payment_ok = true; // toggle to test rollback
-    if !payment_ok {
-        // Rollback: restore original products
-        for p in original_products { products.save(&p).unwrap(); }
-        return Err("Payment failed".into());
-    }
-
-    orders.save(&order).unwrap();
-    Ok(order)
-}
-```
+- `deposit` → **Command** (Ghi)
+- `list_transactions` → **Query** (Đọc)
+- `transfer` → **Command** (Ghi vào 2 account)
 
 </details>
 
@@ -845,21 +457,19 @@ fn place_order(
 
 | Vấn đề | Nguyên nhân | Giải pháp |
 |---------|-------------|-----------|
-| "Repository có quá nhiều methods" | Fat interface | Tách: `ReaderRepo` + `WriterRepo` (CQS) |
-| "Generic repo khó dùng" | `T` constraints quá phức | Dùng `HasId` trait bound |
-| "In-memory khác behavior với real DB" | Khác query semantics | Test critical queries với real DB riêng |
-| "Transaction rollback phức tạp" | Manual state management | Dùng pattern: save originals → try → restore on error |
+| "Repository của tôi có tận 50 methods, quá lớn!" | Vi phạm SRP, nhồi cả Read lẫn Write vào một cục. | Tách đôi thành `ReaderRepo` và `WriterRepo` (Mô hình CQS). |
+| "Mock Database In-Memory thỉnh thoảng hoạt động khác Database thật" | Truy vấn LIKE, JSON trong HashMap không giống DB. | Những Use Case quan trọng phải được test bằng DB Thật. Mock chỉ dùng cho Domain Logic! |
+| "Code mapping giữa Domain và Persistence quá thủ công" | Đúng vậy. Sự tự do đi kèm với cái giá là Boilerplate. | Bạn có thể xài Macro, hoặc dùng ORM (như Diesel/SeaORM) làm Persistence Model để giảm bớt việc. |
 
 ---
 
 ## Tóm tắt
 
-- ✅ **Repository = Trait**: Domain/App định nghĩa, Infrastructure implement. Swap DB tự do.
-- ✅ **CQS**: Commands (`&mut self`, write) vs Queries (`&self`, read). Tách rõ ràng.
-- ✅ **Transaction boundaries**: Begin → operations → Commit/Rollback. Consistency guaranteed.
-- ✅ **3 models**: Domain (rich, validated) ↔ Persistence (flat, serde) ↔ Database (rows/JSON).
-- ✅ **Testing**: In-memory repos = fast, no DB setup. Test use cases trực tiếp.
+- ✅ **Repository = Trait**: Che giấu hoàn toàn SQL/Database khỏi Core Logic. Có thể "đóng - mở" các loại DB tùy thích.
+- ✅ **CQS**: Phân tách rõ ràng giữa Việc thay đổi (Command) và Việc truy xuất (Query).
+- ✅ **Transaction**: Sử dụng Unit of Work để đảm bảo tính an toàn Atomic khi chỉnh sửa hệ thống.
+- ✅ **3 Models**: Bạn học được nghệ thuật chuyển đổi `Domain Model (Rich)` ↔ `Persistence Model (Flat)` ↔ `Database`.
 
 ## Tiếp theo
 
-→ Chapter 27: **Evolving the Design** — chapter cuối Part IV! Bạn sẽ học thêm features mà không break design, refactoring với compiler guidance, feature flags bằng enums, và backward-compatible type evolution.
+→ Chapter 27: **Evolving the Design** — chapter cuối cùng của Part IV! Bạn sẽ học cách nâng cấp kiến trúc mà không làm gãy vỡ hệ thống: thêm features an toàn qua cờ tính năng (Feature Flags), tận dụng Type System để ép buộc các bản Update phải tương thích ngược (Backward Compatibility).

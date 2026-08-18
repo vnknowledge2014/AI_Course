@@ -117,6 +117,51 @@ Code Triton chạy nhanh ngang ngửa, thậm chí **nhanh hơn cả CUDA C++** 
 
 ---
 
+---
+
+## ✅ Checkpoint 3C
+
+1. Memory-bandwidth-bound và compute-bound khác nhau ra sao? Tại sao inference LLM thường rơi vào loại đầu?
+2. Vì sao GPU nhanh hơn CPU cho phép nhân ma trận nhưng chậm hơn cho logic nhiều rẽ nhánh?
+3. Cache L1 nhanh hơn RAM khoảng bao nhiêu lần, và điều đó ảnh hưởng gì tới cách bạn duyệt mảng?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Compute-bound = nghẽn ở số phép tính; bandwidth-bound = nghẽn ở việc chuyển dữ liệu vào/ra bộ nhớ. Sinh từng token của LLM phải đọc **toàn bộ** trọng số model cho **một** token — cực kỳ nặng về băng thông, rất nhẹ về tính toán. Đó chính là lý do batching giúp nhiều đến vậy.
+2. GPU có hàng nghìn nhân đơn giản chạy theo lối SIMT — cùng một lệnh trên nhiều dữ liệu. Rẽ nhánh khiến các luồng trong một warp đi khác đường (divergence), buộc chúng chạy tuần tự và mất sạch lợi thế song song.
+3. Khoảng 100 lần (≈1ns so với ≈100ns). Vì thế duyệt mảng **liên tục theo bộ nhớ** nhanh hơn nhiều so với đuổi con trỏ lung tung — cùng độ phức tạp Big-O nhưng khác hàng chục lần thời gian thực.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Cộng hai mảng 10 triệu phần tử bằng vòng lặp Python thuần và bằng NumPy. Đo và giải thích khoảng cách.
+
+**Bài 2 (15 phút).** Duyệt ma trận 2D theo hàng và theo cột. Đo chênh lệch thời gian và liên hệ với cache line.
+
+**Bài 3 (15 phút).** Ước lượng: một model 7B ở fp16 cần bao nhiêu băng thông bộ nhớ để sinh 50 token/giây? So với băng thông thực tế của một GPU tiêu dùng.
+
+<details>
+<summary>Đáp án bài 3</summary>
+
+7 tỷ tham số × 2 byte = **14 GB** phải đọc cho **mỗi** token. 50 token/giây ⇒
+**700 GB/s**. Một RTX 4090 có khoảng 1.000 GB/s — vừa đủ, và điều đó cho thấy vì
+sao con số này gần như hoàn toàn do băng thông quyết định, không phải do sức tính toán.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| GPU dùng có 20% mà vẫn chậm | Bandwidth-bound, không phải compute-bound | Tăng batch size; dùng model đã quantize |
+| Tăng batch không nhanh thêm | Đã chạm trần băng thông | Quantize, hoặc chuyển sang GPU có băng thông cao hơn |
+| Vòng lặp NumPy vẫn chậm | Còn lặp ở tầng Python | Vector hoá; loại bỏ vòng `for` |
+| CUDA OOM dù model vừa VRAM | KV cache tăng theo độ dài ngữ cảnh | Giới hạn `max_model_len`; dùng paged attention |
+
 ## Tóm tắt
 
 - Viết Python giỏi là chưa đủ. Bạn cần hiểu dữ liệu đang nằm ở RAM hay VRAM, và chip nào đang xử lý.

@@ -441,7 +441,11 @@ f = lambda x: x + 1
 g = lambda x: x * 2
 assert box.map(lambda x: f(g(x))) == box.map(g).map(f)  # Composition ✅
 
-# ── Validated: Functor for validation results ──
+```
+
+#### Validated: Functor for validation results
+
+```python
 from typing import Union
 
 @dataclass(frozen=True)
@@ -469,7 +473,11 @@ def map_validated(v: Validated, fn: Callable) -> Validated:
 assert map_validated(Valid(10), lambda x: x + 5) == Valid(15)
 assert map_validated(Invalid(("too short",)), lambda x: x + 5) == Invalid(("too short",))
 
-# ── Tree: recursive Functor ──
+```
+
+#### Tree: recursive Functor
+
+```python
 @dataclass(frozen=True)
 class Leaf(Generic[T]):
     value: T

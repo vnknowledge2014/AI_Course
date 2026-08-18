@@ -261,7 +261,11 @@ ast = Mul(
     Negate(Literal(4))
 )
 
-# ── Hàm Fold cho AST ──
+```
+
+#### Hàm Fold cho AST
+
+```python
 def fold_expr(
     expr: Expr,
     on_literal: Callable[[float], T],
@@ -285,7 +289,11 @@ def fold_expr(
         case Negate(e):
             return on_negate(fold_expr(e, on_literal, on_add, on_mul, on_negate))
 
-# ── Ứng dụng: AST Evaluator ──
+```
+
+#### Ứng dụng: AST Evaluator
+
+```python
 def evaluate(expr: Expr) -> float:
     return fold_expr(
         expr,

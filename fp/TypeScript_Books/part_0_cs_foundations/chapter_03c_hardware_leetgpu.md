@@ -105,6 +105,51 @@ Nhờ WebGPU, TypeScript đang dần trở thành một thế lực mới trong 
 
 ---
 
+---
+
+## ✅ Checkpoint 3C
+
+1. Memory-bandwidth-bound khác compute-bound thế nào? Sinh token của LLM thuộc loại nào?
+2. Vì sao rẽ nhánh làm GPU chậm nhưng gần như không ảnh hưởng CPU?
+3. JavaScript chạy trên V8 — bạn còn kiểm soát được bao nhiêu về cache locality?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Compute-bound nghẽn ở số phép tính; bandwidth-bound nghẽn ở việc chuyển dữ liệu. Sinh **một** token phải đọc **toàn bộ** trọng số model — cực nặng băng thông, rất nhẹ tính toán. Đó là lý do batching hiệu quả đến vậy.
+2. GPU chạy SIMT: các luồng trong warp thực thi cùng lệnh; rẽ nhánh làm chúng phân kỳ và phải chạy tuần tự. CPU có branch predictor đoán đúng trên 95% nên gần như không mất gì.
+3. Ít hơn nhiều so với C/Rust, nhưng không phải bằng không: `TypedArray` (`Float32Array`) cho bộ nhớ **liên tục** thay vì mảng con trỏ, và duyệt tuần tự vẫn nhanh hơn hẳn duyệt ngẫu nhiên. Đó là lý do thư viện tính toán JS luôn dùng TypedArray.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Cộng hai mảng 10 triệu phần tử bằng `Array` thường và bằng `Float32Array`. Đo và giải thích khoảng cách.
+
+**Bài 2 (15 phút).** Duyệt ma trận 2D theo hàng và theo cột. Đo chênh lệch và liên hệ với cache line.
+
+**Bài 3 (15 phút).** Ước lượng: model 7B ở fp16 cần bao nhiêu băng thông để sinh 50 token/giây?
+
+<details>
+<summary>Đáp án bài 3</summary>
+
+7 tỷ × 2 byte = **14 GB** đọc cho **mỗi** token. 50 token/s ⇒ **700 GB/s**. Một
+RTX 4090 có ~1.000 GB/s. Con số cho thấy đây là bài toán băng thông chứ không phải
+sức tính — nên quantize hiệu quả hơn nhiều so với mua GPU nhiều TFLOPS hơn.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Benchmark JS dao động mạnh | JIT chưa warm up, GC xen vào | Chạy nhiều vòng, bỏ vòng đầu; dùng `tinybench` |
+| `Array` chậm hơn `TypedArray` nhiều lần | `Array` lưu con trỏ, không liên tục | Dùng `Float32Array`/`Int32Array` cho dữ liệu số |
+| WebGPU không khả dụng | Trình duyệt chưa hỗ trợ | Kiểm tra `navigator.gpu` trước khi dùng |
+| GPU dùng thấp mà vẫn chậm | Bandwidth-bound | Tăng batch; quantize model |
+
 ## Tóm tắt
 
 - Node/TS tuyệt vời ở I/O và điều phối, nhưng cực yếu ở tính toán toán học dày đặc. Đó là lý do ta thường gọi API đến các Inference Servers (GPU).

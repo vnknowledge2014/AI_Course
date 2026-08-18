@@ -124,6 +124,35 @@ CafeDomainEvent = Union[OrderPlaced, PaymentReceived, OrderShipped]
 
 ---
 
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (5 phút).** Chọn một hệ thống bạn đang làm và viết ra 10 danh từ mà **cả** dân kỹ thuật lẫn dân nghiệp vụ đều dùng. Có từ nào hai bên hiểu khác nhau không? Đó chính là chỗ Ubiquitous Language đang rò rỉ.
+
+**Bài 2 (15 phút).** Làm Event Storming cho luồng "đặt món ăn online": liệt kê Command (mệnh lệnh), Event (sự kiện đã xảy ra), và Aggregate. Nhớ viết Event ở **thì quá khứ**.
+
+**Bài 3 (20 phút).** Nhận diện ít nhất hai Bounded Context trong bài 2 và chỉ ra một khái niệm mang **nghĩa khác nhau** ở hai context đó (ví dụ: "Order" với bộ phận bếp và với bộ phận giao hàng).
+
+<details>
+<summary>Gợi ý bài 3</summary>
+
+Đây chính là điểm cốt lõi của Bounded Context: cùng một từ mang nghĩa khác nhau
+là chuyện **bình thường và lành mạnh**. Sai lầm là cố ép một model "Order" duy
+nhất phục vụ mọi phòng ban — kết quả luôn là một class khổng lồ mà không ai hiểu trọn.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề thường gặp | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Domain model biến thành túi getter/setter | Bắt đầu từ bảng database thay vì từ nghiệp vụ | Mô hình hoá hành vi trước, lưu trữ sau |
+| Một model dùng cho mọi phòng ban | Chưa tách Bounded Context | Chấp nhận vài model, nối bằng ACL (Ch23) |
+| Event đặt tên như mệnh lệnh | Nhầm Command với Event | Event ở quá khứ (`OrderPlaced`), Command ở mệnh lệnh (`PlaceOrder`) |
+| Dân nghiệp vụ không hiểu tên class | Đặt tên theo thuật ngữ kỹ thuật | Đổi sang chính từ họ dùng — đó là Ubiquitous Language |
+
 ## Tóm tắt
 
 - ✅ **DDD**: Domain model = source of truth. Code mirrors business.

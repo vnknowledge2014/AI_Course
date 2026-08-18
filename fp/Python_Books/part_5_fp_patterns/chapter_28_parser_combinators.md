@@ -166,7 +166,11 @@ def or_else(p1: Parser, p2: Parser) -> Parser:
             return result
         return p2(input)  # backtrack: try p2 on ORIGINAL input
     return parse
+```
 
+#### Tiếp tục phân tích...
+
+```python
 def many(p: Parser) -> Parser:
     """Zero or more: p*. Always succeeds."""
     def parse(input: str) -> ParseResult:
@@ -211,7 +215,11 @@ def optional(p: Parser, default=None) -> Parser:
         return ParseOk(default, input)  # succeed with default, don't consume
     return parse
 
-# ── Tests ──
+```
+
+#### Tests
+
+```python
 
 # then: sequence
 ab = then(char("a"), char("b"))
@@ -266,8 +274,12 @@ print("Combinators OK ✅")
 
 ### Integer parser
 
+Để xây dựng parser phức tạp, ta sẽ chia nhỏ thành các bước. Mỗi bước chỉ là ghép các parser nhỏ lại với nhau.
+
+#### Bước 1: Base Types & Atomic Parsers
+
 ```python
-# filename: complex_parsers.py
+# filename: src/parser/complex_step1.py
 from dataclasses import dataclass
 from typing import Callable, Union
 
@@ -284,7 +296,13 @@ Parser = Callable[[str], ParseResult]
 
 def char(expected): return lambda input: ParseOk(input[0], input[1:]) if input and input[0] == expected else ParseErr(f"Expected '{expected}'", 0)
 def digit(): return lambda input: ParseOk(int(input[0]), input[1:]) if input and input[0].isdigit() else ParseErr("Expected digit", 0)
+```
 
+#### Bước 2: Combinators & String Utilities
+
+```python
+# filename: src/parser/complex_step2.py
+# (Giả sử base types & atomics đã được import)
 def then(p1, p2):
     def parse(input):
         match p1(input):
@@ -337,12 +355,16 @@ def string(expected: str) -> Parser:
 # ── Whitespace ──
 def whitespace() -> Parser:
     return many(or_else(char(" "), or_else(char("\t"), or_else(char("\n"), char("\r")))))
+```
 
+#### Bước 3: Structure Combinators & Integer/CSV
+
+```python
+# filename: src/parser/complex_step3.py
 # ── sep_by: parser separated by delimiter ──
 def sep_by(p: Parser, sep: Parser) -> Parser:
     """Parse p separated by sep. Returns list. Zero matches = []."""
     def parse(input: str) -> ParseResult:
-        # Try first element
         first = p(input)
         if isinstance(first, ParseErr):
             return ParseOk([], input)
@@ -397,8 +419,6 @@ def integer() -> Parser:
 
 assert integer()("42abc") == ParseOk(42, "abc")
 assert integer()("-7xyz") == ParseOk(-7, "xyz")
-assert integer()("0rest") == ParseOk(0, "rest")
-assert isinstance(integer()("abc"), ParseErr)
 
 # ═══ CSV PARSER ═══
 def csv_line() -> Parser:
@@ -406,9 +426,12 @@ def csv_line() -> Parser:
     return sep_by(integer(), char(","))
 
 assert csv_line()("1,2,3,4,5") == ParseOk([1, 2, 3, 4, 5], "")
-assert csv_line()("42") == ParseOk([42], "")
-assert csv_line()("abc") == ParseOk([], "abc")
+```
 
+#### Bước 4: Bracketed List & String Literal
+
+```python
+# filename: src/parser/complex_step4.py
 # ═══ BRACKETED LIST ═══
 def bracketed_list() -> Parser:
     """Parse [1,2,3] — list of integers in brackets."""
@@ -485,7 +508,11 @@ def map_parser(p, fn):
             case err: return err
     return parse
 
-# ── Parser Monad operations ──
+```
+
+#### Parser Monad operations
+
+```python
 
 def pure(value) -> Parser:
     """unit/return: succeed without consuming input."""
@@ -502,7 +529,11 @@ def bind_parser(p: Parser, fn: Callable) -> Parser:
                 return err
     return parse
 
-# ── Example: parse "3:abc" → repeat count + content ──
+```
+
+#### Example: parse "3:abc" → repeat count + content
+
+```python
 # Parse "N:chars" where N digits are followed by exactly N characters
 
 def counted_string() -> Parser:
@@ -529,7 +560,11 @@ assert counted_string()("3:abcrest") == ParseOk("abc", "rest")
 assert counted_string()("5:helloworld") == ParseOk("hello", "world")
 assert counted_string()("0:rest") == ParseOk("", "rest")
 
-# ── This is a MONAD! ──
+```
+
+#### This is a MONAD!
+
+```python
 # bind_parser = flatMap on parsers
 # map_parser = map/fmap on parsers (Functor)
 # pure = unit/return

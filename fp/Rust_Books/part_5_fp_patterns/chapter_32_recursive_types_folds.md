@@ -1,4 +1,4 @@
-# Chapter 32 — Recursive Types & Folds
+# Chapter 32 — Recursive Types & Folds: Búp bê Nga và Nghệ thuật "Gấp" Dữ liệu
 
 > **Bạn sẽ học được**:
 > - **Recursive types** — `enum Expr { Lit(i32), Add(Box<Expr>, Box<Expr>) }`
@@ -16,35 +16,45 @@
 
 ## Recursive Types & Folds — Cấu trúc dữ liệu đệ quy
 
-Trees, lists, ASTs, file systems, HTML DOM — tất cả đều là **recursive data structures**: cấu trúc chứa chính mình. Trong OOP, bạn xử lý chúng bằng Visitor pattern + dynamic dispatch. Trong FP, bạn dùng **folds** (catamorphisms) — hàm duyệt cấu trúc đệ quy và "gấp" nó thành giá trị đơn.
+Trees, lists, AST (Cây cú pháp trừu tượng), hệ thống tập tin (file systems), HTML DOM — tất cả chúng đều chia sẻ một điểm chung kỳ diệu: chúng là **cấu trúc dữ liệu đệ quy (recursive data structures)**. Nghĩa là, cấu trúc này có thể chứa một phiên bản nhỏ hơn của chính nó.
 
-Fold là tổng quát hóa của `iter().fold()` mà bạn đã dùng với lists — nhưng áp dụng cho bất kỳ recursive type nào: trees, expressions, JSON...
+Trong lập trình Hướng đối tượng (OOP), bạn thường xử lý các cấu trúc đệ quy này bằng **Visitor pattern** kết hợp với dynamic dispatch (đa hình động qua interface). 
+
+Nhưng trong lập trình Hàm (FP), chúng ta sử dụng một công cụ thanh lịch hơn nhiều: **folds (catamorphisms)**. Fold là một hàm đi dạo quanh cấu trúc đệ quy, "gấp" (collapse) từng nhánh nhỏ lại cho đến khi toàn bộ cấu trúc biến thành một giá trị đơn nhất. 
+
+Chương này sẽ giúp bạn nhận ra rằng: `iter().fold()` mà bạn vẫn dùng hàng ngày để tính tổng một danh sách, thực chất chỉ là "bề nổi của tảng băng chìm" cho một khái niệm toán học khổng lồ và mạnh mẽ.
 
 ---
 
 ## 32.1 — Recursive Types & Box
 
-### Búp bê Matryoshka
+### Ẩn dụ: Búp bê Matryoshka
 
-Bạn biết búp bê Nga Matryoshka? Mở búp bê ngoài — bên trong có búp bê nhỏ hơn. Mở tiếp — thêm một búp bê. Cứ thế cho đến búp bê cuối cùng — nhỏ nhất, rỗng, không chứa gì nữa.
+Bạn đã bao giờ chơi búp bê Nga (Matryoshka) chưa? Mở con búp bê to nhất ra — bên trong có một con búp bê nhỏ hơn. Mở con búp bê nhỏ hơn — lại có một con búp bê khác. Cứ thế lặp lại cho đến con búp bê cuối cùng — nhỏ nhất, đặc ruột, không thể chứa thêm con nào nữa.
 
-Recursive types trong Rust giống hệt: `Expr::Add` chứa 2 `Expr` bên trong, mỗi `Expr` lại có thể chứa `Expr` khác. Búp bê cuối cùng (base case) là `Expr::Lit(42)` — không chứa `Expr` nào nữa.
+Recursive types (kiểu dữ liệu đệ quy) trong Rust giống hệt như vậy. Chẳng hạn, một biểu thức toán học `Expr::Add` sẽ chứa 2 biểu thức `Expr` bên trong. Mỗi `Expr` con này lại có thể là một `Expr::Add` khác, hoặc là một phép nhân `Expr::Mul`. Con búp bê đặc ruột cuối cùng (base case) chính là những con số tĩnh `Expr::Lit(42)`.
 
-Nhưng có vấn đề: Rust cần biết **kích thước** mỗi type lúc compile. Búp bê lồng vô hạn = kích thước vô hạn. `Box<T>` giải quyết: thay vì chứa búp bê con trực tiếp, bạn để búp bê con trên kệ (heap) và giữ **tấm thẻ ghi địa chỉ** (pointer). Tấm thẻ luôn cùng kích thước — 8 bytes.
+### Vấn đề "Kích thước vô hạn" trong Rust
 
-### Vấn đề: Enum tham chiếu chính nó
+Hãy thử mô hình hóa búp bê Matryoshka bằng code Rust một cách ngây thơ nhất:
 
 ```rust
-// ❌ KHÔNG COMPILE!
+// ❌ KHÔNG COMPILE ĐƯỢC!
 // enum Expr {
 //     Lit(i32),
-//     Add(Expr, Expr),  // Error: recursive type has infinite size
+//     Add(Expr, Expr),  // Lỗi: recursive type has infinite size
 // }
 ```
 
-Rust cần biết **size** lúc compile time. `Expr` chứa `Expr` chứa `Expr`... = infinite.
+Tại sao Rust lại nổi giận? Rust là một ngôn ngữ quản lý bộ nhớ cực kỳ chặt chẽ. Để phân bổ bộ nhớ trên Stack một cách hiệu quả, trình biên dịch **phải biết trước kích thước chính xác** của mọi biến ngay từ lúc compile.
 
-### Giải pháp: `Box<T>` = heap allocation
+Nhưng `Expr` chứa `Expr`, con này lại chứa `Expr` khác... Chuỗi này có thể kéo dài vô tận! Do đó, kích thước của kiểu `Expr` bị đánh giá là **infinite (vô hạn)**.
+
+### Giải pháp: Chiếc hộp `Box<T>` 
+
+Làm sao để phá vỡ vòng lặp vô hạn này? Giải pháp là **không chứa trực tiếp** con búp bê bên trong nữa. Thay vì giấu con búp bê nhỏ trong bụng con to, ta mang con nhỏ đem cất lên kho (Heap memory), và chỉ bỏ một **tấm thẻ ghi địa chỉ** vào trong bụng con to.
+
+Tấm thẻ địa chỉ này chính là `Box<T>` (một smart pointer). Dù cái kho (Heap) có chứa thứ to đến đâu, tấm thẻ địa chỉ luôn luôn có kích thước cố định (8 bytes trên hệ thống 64-bit). Vấn đề kích thước vô hạn được giải quyết!
 
 ```rust
 // filename: src/main.rs
@@ -52,12 +62,16 @@ Rust cần biết **size** lúc compile time. `Expr` chứa `Expr` chứa `Expr`
 // ═══ Arithmetic expressions ═══
 #[derive(Debug, Clone)]
 enum Expr {
-    Lit(i32),                           // number literal: 42
-    Add(Box<Expr>, Box<Expr>),          // a + b
-    Mul(Box<Expr>, Box<Expr>),          // a * b
-    Neg(Box<Expr>),                     // -a
+    Lit(i32),                           // Con búp bê cuối cùng: số 42
+    Add(Box<Expr>, Box<Expr>),          // Tấm thẻ trỏ đến a + b trên Heap
+    Mul(Box<Expr>, Box<Expr>),          // Tấm thẻ trỏ đến a * b trên Heap
+    Neg(Box<Expr>),                     // Tấm thẻ trỏ đến -a
 }
+```
 
+Để code không bị vướng víu bởi hàng tá chữ `Box::new`, ta viết vài hàm helper (hàm tiện ích) nhỏ gọn:
+
+```rust
 // Helper: tạo Box<Expr> gọn hơn
 fn lit(n: i32) -> Box<Expr> { Box::new(Expr::Lit(n)) }
 fn add(a: Box<Expr>, b: Box<Expr>) -> Box<Expr> { Box::new(Expr::Add(a, b)) }
@@ -65,7 +79,7 @@ fn mul(a: Box<Expr>, b: Box<Expr>) -> Box<Expr> { Box::new(Expr::Mul(a, b)) }
 fn neg(a: Box<Expr>) -> Box<Expr> { Box::new(Expr::Neg(a)) }
 
 fn main() {
-    // (3 + 4) * -(5 + 2)
+    // Biểu diễn: (3 + 4) * -(5 + 2)
     let expr = mul(
         add(lit(3), lit(4)),
         neg(add(lit(5), lit(2)))
@@ -74,38 +88,31 @@ fn main() {
 }
 ```
 
-> **💡 `Box<T>`** = pointer tới heap. Size cố định (8 bytes trên 64-bit). Giải quyết infinite size problem.
+> **💡 Mẹo nhớ**: Bất cứ khi nào bạn định nghĩa một cấu trúc dữ liệu A mà bên trong nó chứa tham chiếu trực tiếp đến chính A, bạn bắt buộc phải dùng `Box<A>` (hoặc `Rc`, `Arc`).
 
 ---
 
-## 32.2 — Evaluate: Pattern Matching Recursive
+## 32.2 — Đọc dữ liệu đệ quy bằng Pattern Matching
+
+Chúng ta đã xây xong cấu trúc cây biểu thức đệ quy. Giờ làm sao để đọc nó, đánh giá nó, hoặc in nó ra màn hình? Công cụ tự nhiên nhất để đi đôi với đệ quy chính là... hàm đệ quy kết hợp với `match`.
+
+Đầu tiên, hãy viết hàm tính toán (`eval`) để trả về kết quả cuối cùng:
 
 ```rust
-// filename: src/main.rs
-
-#[derive(Debug, Clone)]
-enum Expr {
-    Lit(i32),
-    Add(Box<Expr>, Box<Expr>),
-    Mul(Box<Expr>, Box<Expr>),
-    Neg(Box<Expr>),
-}
-
-fn lit(n: i32) -> Box<Expr> { Box::new(Expr::Lit(n)) }
-fn add(a: Box<Expr>, b: Box<Expr>) -> Box<Expr> { Box::new(Expr::Add(a, b)) }
-fn mul(a: Box<Expr>, b: Box<Expr>) -> Box<Expr> { Box::new(Expr::Mul(a, b)) }
-fn neg(a: Box<Expr>) -> Box<Expr> { Box::new(Expr::Neg(a)) }
-
 // ═══ Evaluate: recursive pattern matching ═══
 fn eval(expr: &Expr) -> i32 {
     match expr {
-        Expr::Lit(n) => *n,
-        Expr::Add(a, b) => eval(a) + eval(b),
+        Expr::Lit(n) => *n,                       // Base case: trả về con số
+        Expr::Add(a, b) => eval(a) + eval(b),     // Tính a, tính b, cộng lại
         Expr::Mul(a, b) => eval(a) * eval(b),
         Expr::Neg(a) => -eval(a),
     }
 }
+```
 
+Rất gọn gàng! Còn nếu ta muốn in nó ra thành chuỗi để người dùng đọc thì sao? Ta chỉ thay đổi logic tính toán thành logic nối chuỗi:
+
+```rust
 // ═══ Pretty-print ═══
 fn display(expr: &Expr) -> String {
     match expr {
@@ -115,7 +122,11 @@ fn display(expr: &Expr) -> String {
         Expr::Neg(a) => format!("(-{})", display(a)),
     }
 }
+```
 
+Điều gì xảy ra nếu ta muốn đếm xem biểu thức này có bao nhiêu "nút" (node), hoặc độ sâu tối đa của nó là bao nhiêu?
+
+```rust
 // ═══ Count nodes ═══
 fn count_nodes(expr: &Expr) -> usize {
     match expr {
@@ -133,44 +144,31 @@ fn depth(expr: &Expr) -> usize {
         Expr::Neg(a) => 1 + depth(a),
     }
 }
-
-fn main() {
-    // (3 + 4) * -(5 + 2)
-    let expr = mul(add(lit(3), lit(4)), neg(add(lit(5), lit(2))));
-
-    println!("Expression: {}", display(&expr));
-    println!("Result: {}", eval(&expr));  // 7 * -7 = -49
-    println!("Nodes: {}", count_nodes(&expr));
-    println!("Depth: {}", depth(&expr));
-}
 ```
 
-> **Nhận ra pattern?** `eval`, `display`, `count_nodes`, `depth` — tất cả cùng structure: match mỗi variant, recurse vào children, combine kết quả. Đó là **fold**!
+Hãy dừng lại và nhìn kỹ 4 hàm chúng ta vừa viết: `eval`, `display`, `count_nodes`, `depth`. 
+Bạn có nhận ra điểm bất thường nào không?
+Đúng vậy! Cấu trúc (Skeleton) của chúng **giống hệt nhau**. 
+- Bước 1: `match expr`. 
+- Bước 2: Với base case (`Lit`), làm việc X. 
+- Bước 3: Với đệ quy (`Add`, `Mul`, `Neg`), gọi đệ quy vào các nút con, sau đó gom kết quả lại bằng hành động Y.
+
+Chúng ta đang lặp lại logic duyệt cây (traversal logic). Liệu ta có thể tách riêng việc "duyệt" (traverse) và việc "xử lý" (operate) ra không?
+Câu trả lời là CÓ. Đó chính là ý nghĩa thực sự của Fold.
 
 ---
 
-## 32.3 — Fold: Universal Pattern (Catamorphism)
+## 32.3 — Fold: Khuôn mẫu tối thượng (Catamorphism)
 
-### Fold = "collapse recursive structure thành 1 value"
+### Fold = "Ép cấu trúc đệ quy thành một giá trị duy nhất"
+
+Thuật ngữ toán học cho hành động này là **Catamorphism**. Đừng sợ cái tên này. Catamorphism có nghĩa là "phá vỡ hình dạng". Nó nhận vào một cấu trúc dữ liệu phức tạp (như cây đệ quy) và phá vỡ nó, gấp gọn nó lại thành một giá trị đơn giản (chẳng hạn như 1 con số, hoặc 1 chuỗi).
+
+Để viết một hàm fold tổng quát, chúng ta cần nó nhận vào cách thức xử lý cho **TỪNG** biến thể (variant) của Enum:
 
 ```rust
-// filename: src/main.rs
-
-#[derive(Debug, Clone)]
-enum Expr {
-    Lit(i32),
-    Add(Box<Expr>, Box<Expr>),
-    Mul(Box<Expr>, Box<Expr>),
-    Neg(Box<Expr>),
-}
-
-fn lit(n: i32) -> Box<Expr> { Box::new(Expr::Lit(n)) }
-fn add(a: Box<Expr>, b: Box<Expr>) -> Box<Expr> { Box::new(Expr::Add(a, b)) }
-fn mul(a: Box<Expr>, b: Box<Expr>) -> Box<Expr> { Box::new(Expr::Mul(a, b)) }
-fn neg(a: Box<Expr>) -> Box<Expr> { Box::new(Expr::Neg(a)) }
-
 // ═══ Generic fold (catamorphism) ═══
-// Thay vì viết eval, display, count riêng → 1 fold function
+// T là kiểu dữ liệu đầu ra mong muốn (i32, String, usize...)
 fn fold<T>(
     expr: &Expr,
     on_lit: &dyn Fn(i32) -> T,
@@ -181,8 +179,10 @@ fn fold<T>(
     match expr {
         Expr::Lit(n) => on_lit(*n),
         Expr::Add(a, b) => {
+            // Bước 1: Duyệt đệ quy (tự động)
             let va = fold(a, on_lit, on_add, on_mul, on_neg);
             let vb = fold(b, on_lit, on_add, on_mul, on_neg);
+            // Bước 2: Áp dụng hàm kết hợp
             on_add(va, vb)
         }
         Expr::Mul(a, b) => {
@@ -196,72 +196,52 @@ fn fold<T>(
         }
     }
 }
+```
 
+Bây giờ, với DUY NHẤT một hàm `fold` này, chúng ta có thể tái tạo lại toàn bộ 4 hàm ở phần trước một cách gọn gàng đến ngỡ ngàng:
+
+```rust
 fn main() {
     let expr = mul(add(lit(3), lit(4)), neg(add(lit(5), lit(2))));
 
-    // eval = fold with arithmetic operations
-    let result = fold(&expr,
+    // 1. Tính toán (Eval)
+    let eval_result = fold(&expr,
         &|n| n,
         &|a, b| a + b,
         &|a, b| a * b,
         &|a| -a,
     );
-    println!("Eval: {}", result);  // -49
+    println!("Eval: {}", eval_result);  // -49
 
-    // display = fold with string formatting
-    let text = fold(&expr,
+    // 2. In chuỗi (Display)
+    let display_text = fold(&expr,
         &|n| n.to_string(),
         &|a, b| format!("({} + {})", a, b),
         &|a, b| format!("({} × {})", a, b),
         &|a| format!("(-{})", a),
     );
-    println!("Display: {}", text);
+    println!("Display: {}", display_text);
 
-    // count = fold with counting
-    let nodes = fold(&expr,
-        &|_| 1_usize,
-        &|a, b| 1 + a + b,
+    // 3. Đếm số nút (Count)
+    let node_count = fold(&expr,
+        &|_| 1_usize,         // Lá tính là 1 nút
+        &|a, b| 1 + a + b,    // Nút cha tính là 1, cộng với tổng nút con
         &|a, b| 1 + a + b,
         &|a| 1 + a,
     );
-    println!("Nodes: {}", nodes);
-
-    // depth = fold with max
-    let d = fold(&expr,
-        &|_| 1_usize,
-        &|a, b| 1 + a.max(b),
-        &|a, b| 1 + a.max(b),
-        &|a| 1 + a,
-    );
-    println!("Depth: {}", d);
-
-    // all_literals = fold collecting values
-    let lits = fold(&expr,
-        &|n| vec![n],
-        &|mut a, b| { a.extend(b); a },
-        &|mut a, b| { a.extend(b); a },
-        &|a| a,
-    );
-    println!("Literals: {:?}", lits);  // [3, 4, 5, 2]
+    println!("Nodes: {}", node_count);
 }
 ```
 
-> **💡 Catamorphism**: 1 fold function → vô số operations. Thay callback → thay behavior. **"Tell me what to do at each node, I'll traverse for you."**
+> **💡 Tại sao Pattern này đỉnh cao?**: "Fold" cho phép chúng ta nói với máy tính: *"Đây là việc anh cần làm khi gặp lá, và đây là việc anh cần làm khi gặp cành. Tôi không quan tâm cấu trúc cây ra sao, anh tự lặn xuống và áp dụng luật này cho tôi!"* Trách nhiệm duyệt cây đã được tách bạch hoàn toàn khỏi Business Logic!
 
 ---
 
-## ✅ Checkpoint 32.3
+## 32.4 — Ứng dụng: Cây Tìm Kiếm Nhị Phân (BST)
 
-> Ghi nhớ:
-> 1. **Fold** = "define handler cho mỗi variant → fold traverses + combines"
-> 2. `eval` = fold with `(+, *, -, id)`. `display` = fold with `(format, format, format, to_string)`.
-> 3. Fold **tách traversal khỏi logic** — same traversal, different operations.
-> 4. Catamorphism = fold cho recursive types. Bạn đã dùng `fold` cho `Vec` (Chapter 13) — đây là generalization!
+Để hiểu sâu hơn, hãy áp dụng tư duy Búp bê Matryoshka này vào một cấu trúc kinh điển: Cây tìm kiếm nhị phân (Binary Search Tree).
 
----
-
-## 32.4 — Trees: Binary Search Tree
+Đầu tiên là định nghĩa cây đệ quy:
 
 ```rust
 // filename: src/main.rs
@@ -275,7 +255,13 @@ enum BST<T> {
         right: Box<BST<T>>,
     },
 }
+```
 
+Chúng ta sẽ không cần Box nếu cây rỗng (`Empty`). Nhưng nếu nó là `Node`, nó phải giữ địa chỉ trỏ tới cây con trái và phải. Hãy viết vài thao tác cơ bản: thêm (insert) và kiểm tra tồn tại (contains). 
+
+Lưu ý rằng FP ưu tiên **tính bất biến (immutability)**, do đó thay vì sửa đổi (mutate) cây hiện tại, hàm `insert` sẽ tạo ra một cây mới toanh ở những nhánh có sự thay đổi.
+
+```rust
 impl<T: Ord + Clone + std::fmt::Debug> BST<T> {
     fn new() -> Self { BST::Empty }
 
@@ -288,55 +274,33 @@ impl<T: Ord + Clone + std::fmt::Debug> BST<T> {
             },
             BST::Node { value, left, right } => {
                 if val < *value {
-                    BST::Node { value: value.clone(), left: Box::new(left.insert(val)), right: right.clone() }
+                    BST::Node { 
+                        value: value.clone(), 
+                        left: Box::new(left.insert(val)), // Nhánh phải giữ nguyên, nhánh trái tự rẽ đệ quy
+                        right: right.clone() 
+                    }
                 } else if val > *value {
-                    BST::Node { value: value.clone(), left: left.clone(), right: Box::new(right.insert(val)) }
+                    BST::Node { 
+                        value: value.clone(), 
+                        left: left.clone(), 
+                        right: Box::new(right.insert(val)) 
+                    }
                 } else {
-                    self.clone() // duplicate: no change
+                    self.clone() // Nếu đã tồn tại, không làm gì cả
                 }
             }
         }
     }
+}
+```
 
-    fn contains(&self, target: &T) -> bool {
-        match self {
-            BST::Empty => false,
-            BST::Node { value, left, right } => {
-                if target == value { true }
-                else if target < value { left.contains(target) }
-                else { right.contains(target) }
-            }
-        }
-    }
+Bây giờ là lúc chứng tỏ sức mạnh của Fold. Thay vì viết lẻ tẻ các hàm đếm số nút, tính tổng, thu thập phần tử... ta chỉ viết một hàm `fold` mạnh nhất:
 
-    // In-order traversal → sorted output
-    fn to_sorted_vec(&self) -> Vec<T> {
-        match self {
-            BST::Empty => vec![],
-            BST::Node { value, left, right } => {
-                let mut result = left.to_sorted_vec();
-                result.push(value.clone());
-                result.extend(right.to_sorted_vec());
-                result
-            }
-        }
-    }
+```rust
+impl<T: Ord + Clone + std::fmt::Debug> BST<T> {
+    // ... code trước đó ...
 
-    fn size(&self) -> usize {
-        match self {
-            BST::Empty => 0,
-            BST::Node { left, right, .. } => 1 + left.size() + right.size(),
-        }
-    }
-
-    fn height(&self) -> usize {
-        match self {
-            BST::Empty => 0,
-            BST::Node { left, right, .. } => 1 + left.height().max(right.height()),
-        }
-    }
-
-    // Fold for BST
+    // Hàm Fold thần thánh cho cây BST
     fn fold<R>(&self, on_empty: R, on_node: &dyn Fn(R, &T, R) -> R) -> R
     where R: Clone {
         match self {
@@ -349,38 +313,33 @@ impl<T: Ord + Clone + std::fmt::Debug> BST<T> {
         }
     }
 }
+```
 
+Và sử dụng nó trong `main`:
+
+```rust
 fn main() {
     let tree = BST::new()
-        .insert(5)
-        .insert(3)
-        .insert(7)
-        .insert(1)
-        .insert(4)
-        .insert(6)
-        .insert(9);
+        .insert(5).insert(3).insert(7).insert(1).insert(4).insert(6).insert(9);
 
-    println!("Sorted: {:?}", tree.to_sorted_vec());
-    println!("Size: {}", tree.size());
-    println!("Height: {}", tree.height());
-    println!("Contains 4: {}", tree.contains(&4));
-    println!("Contains 8: {}", tree.contains(&8));
-
-    // Fold: sum all values
+    // Tính tổng tất cả giá trị
     let sum = tree.fold(0, &|l, val, r| l + val + r);
-    println!("Sum: {}", sum);
+    println!("Sum: {}", sum); // 35
 
-    // Fold: count leaves
+    // Đếm số lượng lá (leaf nodes)
     let leaves = tree.fold(0_usize, &|l, _, r| {
+        // Nút lá là nút mà hai con trái phải đều rỗng (0)
         if l == 0 && r == 0 { 1 } else { l + r }
     });
-    println!("Leaves: {}", leaves);
+    println!("Leaves: {}", leaves); // 4
 }
 ```
 
 ---
 
-## 32.5 — File System: Recursive Directory Tree
+## 32.5 — Ứng dụng: File System (Hệ thống tập tin)
+
+Cuối cùng, một ví dụ cực kỳ thực tiễn: Thư mục và File. Một thư mục (Dir) có thể chứa nhiều thư mục con và file con. Đây là đệ quy đa phân (nhiều nhánh).
 
 ```rust
 // filename: src/main.rs
@@ -390,24 +349,22 @@ enum FSEntry {
     File { name: String, size: u64 },
     Dir { name: String, children: Vec<FSEntry> },
 }
+```
 
+Một lần nữa, chúng ta phó mặc toàn bộ quá trình duyệt thư mục cho một hàm `fold`. Cấu trúc của hàm `fold` luôn bám sát theo định nghĩa của Enum:
+
+```rust
 impl FSEntry {
-    fn file(name: &str, size: u64) -> Self {
-        FSEntry::File { name: name.into(), size }
-    }
-    fn dir(name: &str, children: Vec<FSEntry>) -> Self {
-        FSEntry::Dir { name: name.into(), children }
-    }
+    // Tạo data giả cho gọn
+    fn file(name: &str, size: u64) -> Self { FSEntry::File { name: name.into(), size } }
+    fn dir(name: &str, children: Vec<FSEntry>) -> Self { FSEntry::Dir { name: name.into(), children } }
 
-    fn name(&self) -> &str {
-        match self { FSEntry::File { name, .. } | FSEntry::Dir { name, .. } => name }
-    }
-
-    // Fold for file system
+    // Hàm fold: Nếu là File làm gì, nếu là Dir làm gì?
     fn fold<T>(&self, on_file: &dyn Fn(&str, u64) -> T, on_dir: &dyn Fn(&str, Vec<T>) -> T) -> T {
         match self {
             FSEntry::File { name, size } => on_file(name, *size),
             FSEntry::Dir { name, children } => {
+                // Đi sâu vào thư mục con, gom kết quả thành Vec<T>
                 let child_results: Vec<T> = children.iter()
                     .map(|c| c.fold(on_file, on_dir))
                     .collect();
@@ -416,61 +373,32 @@ impl FSEntry {
         }
     }
 }
+```
 
+Hãy tạo một File System ảo và tính toán tổng dung lượng của toàn bộ hệ thống dự án:
+
+```rust
 fn main() {
     let project = FSEntry::dir("my_project", vec![
         FSEntry::file("Cargo.toml", 250),
         FSEntry::dir("src", vec![
             FSEntry::file("main.rs", 1200),
             FSEntry::file("lib.rs", 800),
-            FSEntry::dir("models", vec![
-                FSEntry::file("user.rs", 500),
-                FSEntry::file("order.rs", 650),
-            ]),
-        ]),
-        FSEntry::dir("tests", vec![
-            FSEntry::file("integration_test.rs", 900),
         ]),
         FSEntry::file("README.md", 400),
     ]);
 
-    // Total size (fold!)
-    let total = project.fold(
-        &|_, size| size,
-        &|_, sizes| sizes.iter().sum(),
+    // Tính tổng kích thước
+    let total_size = project.fold(
+        &|_, size| size,                     // Nếu là file, trả về kích thước của nó
+        &|_, sizes| sizes.iter().sum(),      // Nếu là thư mục, tính tổng kết quả các con
     );
-    println!("Total size: {} bytes", total);
-
-    // File count
-    let files = project.fold(
-        &|_, _| 1_usize,
-        &|_, counts| counts.iter().sum(),
-    );
-    println!("Files: {}", files);
-
-    // Directory listing (fold into strings!)
-    let listing = project.fold(
-        &|name, size| format!("📄 {} ({}B)", name, size),
-        &|name, children| {
-            let items: String = children.iter()
-                .map(|c| format!("  {}", c.replace('\n', "\n  ")))
-                .collect::<Vec<_>>()
-                .join("\n");
-            format!("📁 {}/\n{}", name, items)
-        },
-    );
-    println!("\n{}", listing);
-
-    // Find large files (> 600 bytes)
-    let large = project.fold(
-        &|name, size| {
-            if size > 600 { vec![format!("{} ({}B)", name, size)] } else { vec![] }
-        },
-        &|_, lists| lists.into_iter().flatten().collect(),
-    );
-    println!("\nLarge files: {:?}", large);
+    
+    println!("Total size: {} bytes", total_size); // 2650 bytes
 }
 ```
+
+Bạn có thể thêm dễ dàng các logic kinh doanh khác: lọc ra file quá nặng, tạo cây thư mục để in ra console, đếm số lượng file... tất cả chỉ thông qua hàm `fold` được viết đúng 1 lần!
 
 ---
 
@@ -506,35 +434,18 @@ Implement `eval` và `display` cho cả 2.
 
 ```rust
 enum Expr {
-    Lit(i32),
-    Add(Box<Expr>, Box<Expr>),
+    // ... cũ ...
     Sub(Box<Expr>, Box<Expr>),
-    Mul(Box<Expr>, Box<Expr>),
-    Neg(Box<Expr>),
     If(Box<Expr>, Box<Expr>, Box<Expr>),
 }
 
 fn eval(expr: &Expr) -> i32 {
     match expr {
-        Expr::Lit(n) => *n,
-        Expr::Add(a, b) => eval(a) + eval(b),
+        // ... cũ ...
         Expr::Sub(a, b) => eval(a) - eval(b),
-        Expr::Mul(a, b) => eval(a) * eval(b),
-        Expr::Neg(a) => -eval(a),
         Expr::If(cond, then, else_) => {
             if eval(cond) != 0 { eval(then) } else { eval(else_) }
         }
-    }
-}
-
-fn display(expr: &Expr) -> String {
-    match expr {
-        Expr::Lit(n) => n.to_string(),
-        Expr::Add(a, b) => format!("({} + {})", display(a), display(b)),
-        Expr::Sub(a, b) => format!("({} - {})", display(a), display(b)),
-        Expr::Mul(a, b) => format!("({} × {})", display(a), display(b)),
-        Expr::Neg(a) => format!("(-{})", display(a)),
-        Expr::If(c, t, e) => format!("(if {} then {} else {})", display(c), display(t), display(e)),
     }
 }
 ```
@@ -560,11 +471,6 @@ Implement:
 <details><summary>✅ Lời giải Bài 3</summary>
 
 ```rust
-enum Html {
-    Text(String),
-    Element { tag: String, attrs: Vec<(String, String)>, children: Vec<Html> },
-}
-
 impl Html {
     fn render(&self) -> String {
         match self {
@@ -575,26 +481,6 @@ impl Html {
                     .collect();
                 let inner: String = children.iter().map(|c| c.render()).collect();
                 format!("<{}{}>{}  </{}>", tag, attr_str, inner, tag)
-            }
-        }
-    }
-
-    fn count_elements(&self) -> usize {
-        match self {
-            Html::Text(_) => 0,
-            Html::Element { children, .. } =>
-                1 + children.iter().map(|c| c.count_elements()).sum::<usize>(),
-        }
-    }
-
-    fn find_by_tag(&self, target: &str) -> Vec<&Html> {
-        match self {
-            Html::Text(_) => vec![],
-            Html::Element { tag, children, .. } => {
-                let mut found = vec![];
-                if tag == target { found.push(self); }
-                for child in children { found.extend(child.find_by_tag(target)); }
-                found
             }
         }
     }
@@ -609,38 +495,54 @@ impl Html {
 
 | Vấn đề | Nguyên nhân | Giải pháp |
 |---------|-------------|-----------|
-| "Infinite size" lúc compile | Recursive enum không dùng Box | Wrap recursive field trong `Box<T>` |
-| Stack overflow | Tree quá sâu | Dùng iterative approach hoặc increase stack size |
-| "Fold phải viết nhiều callbacks" | Generic fold cần 1 fn per variant | Dùng struct `ExprVisitor` thay vì nhiều closures |
-| Clone overhead | `Clone` toàn bộ tree | Dùng `Rc<T>` cho shared subtrees |
+| Lỗi "Infinite size" lúc compile | Recursive enum gọi trực tiếp kiểu của mình nhưng không bọc trong Box | Wrap các node con đệ quy trong `Box<T>` |
+| Tràn bộ nhớ (Stack overflow) lúc chạy | Cây dữ liệu quá sâu (deep tree), đệ quy bị tràn bộ nhớ stack | Sử dụng vòng lặp (iterative) với mảng `Vec` làm stack nhân tạo, hoặc cân bằng lại cây |
+| "Hàm Fold này phải viết quá nhiều closure rắc rối" | Hàm generic fold cần truyền 1 closure cho mỗi variant, khó đọc. | Sử dụng Struct `ExprVisitor` và định nghĩa Trait (Visitor pattern của Rust) thay vì dùng closure tự do. |
+| Overhead vì Clone nhiều | Gọi `.clone()` toàn bộ cây gây tốn RAM | Thay `Box<T>` bằng `Rc<T>` hoặc `Arc<T>` để chia sẻ nhánh cây (shared subtrees) mà không copy. |
 
 ---
 
+---
+
+## ✅ Checkpoint 32
+
+1. Vì sao `enum Expr { Add(Expr, Expr) }` không biên dịch được, mà `Add(Box<Expr>, Box<Expr>)` thì được?
+2. Catamorphism (fold) tách bạch hai thứ gì?
+3. Fold đệ quy trên cây rất sâu có rủi ro gì trong Rust?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Vì compiler phải tính kích thước của mỗi kiểu lúc biên dịch. `Expr` chứa `Expr` cho ra kích thước vô hạn. `Box` là con trỏ có kích thước cố định, cắt đứt chuỗi đệ quy đó.
+2. Tách **cách duyệt** cấu trúc khỏi **việc cần tính**. Viết fold một lần, rồi mọi phép tính mới chỉ là truyền vào một hàm khác — không phải viết lại đệ quy.
+3. **Stack overflow**. Rust không có tối ưu đệ quy đuôi được bảo đảm, và fold trên cây thì vốn không phải tail-recursive. Với cây có thể rất sâu, hãy chuyển sang duyệt tường minh bằng một `Vec` làm stack.
+</details>
+
 ## Tóm tắt
 
-Chapter này dạy bạn làm việc với **búp bê Matryoshka** — data chứa chính nó:
+Chapter này dạy bạn cách giải phẫu **búp bê Matryoshka** — thứ mà dữ liệu được nhét vào trong chính nó:
 
-- ✅ **Recursive types**: `Box<T>` = tấm thẻ địa chỉ, giải quyết infinite size.
-- ✅ **Pattern matching**: Recursive match = tự nhiên nhất để đọc recursive types.
-- ✅ **Fold (Catamorphism)**: 1 function, cho callback mỗi variant, fold traverses + combines. "Mở từng búp bê và làm gì đó với mỗi cái."
-- ✅ **BST**: Cây tìm kiếm nhị phân — insert, contains, sorted output, tất cả recursive.
-- ✅ **File System**: `File | Dir` — fold để tính total size, đếm files, tạo listing.
-- ✅ **Insight**: `Vec::fold` (Ch 13) → `Tree::fold` (Ch 32) → **cùng ý tưởng**, khác hình dạng!
+- ✅ **Recursive types**: Để vượt qua rào cản Infinite Size của trình biên dịch, hãy dùng tấm thẻ địa chỉ `Box<T>`.
+- ✅ **Pattern matching**: Lối thoát tự nhiên nhất khỏi vòng đệ quy chính là dùng recursive match.
+- ✅ **Fold (Catamorphism)**: 1 hàm duy nhất nhận nhiệm vụ thám hiểm rừng cây. Bạn chỉ việc giao cho nó tấm bản đồ (closures mô tả việc cần làm ở mỗi kiểu nút) — fold duyệt và nối kết quả hộ bạn.
+- ✅ **Thực tiễn**: Mọi cấu trúc như BST (cây nhị phân) hay File System (cây đa phân) đều được xử lý thanh lịch bởi Fold.
+- ✅ **Insight (Ngộ ra)**: `Vec::fold` (Chapter 13) và `Tree::fold` (Chapter 32) **hoàn toàn là một**! Chúng có chung linh hồn, chỉ khác cái vỏ bọc mà thôi.
 
 ---
 
 ## 🎉 Kết thúc Part V — FP Patterns in Rust!
 
-Hãy nhìn lại hành trình qua vùng đất lý thuyết FP:
+Thật đáng tự hào! Hãy nhìn lại hành trình phi thường qua vùng đất "khó nhai" nhất của lập trình Hàm:
 
-- **Ch 28**: Trộn màu — Abstract Algebra, Semigroups, Monoids
-- **Ch 29**: Hộp quà — Functors, `.map()` biến đổi thứ bên trong
-- **Ch 30**: Gỡ giấy gói — Monads, `.and_then()` không lồng
-- **Ch 31**: Làm bánh — Parser Combinators, compose từ nhỏ lên lớn
-- **Ch 32**: Búp bê Matryoshka — Recursive Types, fold mở từng lớp
+- **Chapter 28**: Trộn màu — Nhận thức về Semigroups, Monoids (Abstract Algebra).
+- **Chapter 29**: Hộp quà bí ẩn — Functors, và cách `.map()` can thiệp thế giới bên trong.
+- **Chapter 30**: Nghệ thuật gỡ rối — Monads, và cách `.and_then()` làm phẳng sự hỗn loạn.
+- **Chapter 31**: Xếp Lego — Parser Combinators, lắp những bộ não khổng lồ từ các hạt bụi.
+- **Chapter 32**: Búp bê Nga — Recursive Types, và vũ khí tối thượng Fold.
 
-Bạn giờ hiểu **TẠI SAO** code FP hoạt động, không chỉ CÁCH viết. Đây là nền tảng vững chắc cho mọi thứ tiếp theo.
+Giờ đây bạn không chỉ biết CÁCH viết code FP (vốn đã học ở Part I, II), bạn còn hiểu sâu thẳm **TẠI SAO** các thư viện lại được thiết kế như vậy. Bạn đang nhìn code bằng "Matrix vision".
 
 ## Tiếp theo
 
-→ **Part VI: Testing & Software Engineering** — Chapter 33: **TDD with Rust** — `#[test]`, `assert_eq!`, Red→Green→Refactor cycle.
+Đã đến lúc trở lại thế giới thực và chiến đấu trong môi trường sản xuất! 
+→ **Part VI: Testing & Software Engineering** — Chapter 33: **TDD with Rust** — Học cách tạo nhịp điệu Red→Green→Refactor hoàn hảo.

@@ -144,6 +144,35 @@ assert make_noise(Cat()) == "Meow!"  # Cat doesn't inherit Speaker!
 
 ---
 
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Định nghĩa `Protocol` cho `Repository` với `get`/`save`. Cài hai lớp thoả nó mà **không** kế thừa từ đâu cả.
+
+**Bài 2 (10 phút).** Thêm `@runtime_checkable` rồi thử `isinstance`. Sau đó đổi chữ ký một method cho sai và kiểm tra lại — `isinstance` có bắt được không? Kết luận gì?
+
+**Bài 3 (15 phút).** Viết một hàm generic nhận `Protocol` làm bound. Chứng minh mypy chặn được lớp không thoả, trong khi runtime thì không.
+
+<details>
+<summary>Đáp án bài 2</summary>
+
+`isinstance` với `runtime_checkable` **chỉ kiểm tra sự tồn tại của method**, không
+kiểm tra chữ ký. Đó là lý do Protocol phải được kiểm bằng mypy — `isinstance` chỉ
+là lưới thô, không phải bảo đảm.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| `Protocols with non-method members don't support issubclass()` | Protocol có thuộc tính dữ liệu | Chỉ `isinstance` được, không `issubclass` |
+| Lớp "trông giống" mà mypy vẫn từ chối | Chữ ký lệch (tên tham số, kiểu) | Đối chiếu từng tham số; tên keyword cũng tính |
+| Protocol không bắt lỗi gì | Chưa chạy mypy | Protocol là công cụ static — không chạy type checker thì vô nghĩa |
+| Muốn dùng chung code mặc định | Protocol không nhằm để kế thừa | Viết hàm helper riêng, hoặc dùng ABC nếu thực sự cần |
+
 ## Tóm tắt
 
 - ✅ **Protocol**: Structural subtyping — PEP 544.

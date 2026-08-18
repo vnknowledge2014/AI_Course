@@ -93,7 +93,11 @@ type ApiUserResponse = {
 
 // Mapping: DB → Domain
 const ROLE_MAP: Record<number, UserRole> = { 1: "admin", 2: "editor", 3: "viewer" };
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 const dbToDomain = (row: DbUserRow): DomainUser => ({
     id: String(row.id) as UserId,
     name: row.name,
@@ -216,7 +220,11 @@ type DomainOrder = {
     readonly total: Money;
     readonly createdAt: Date;
 };
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 // === Mappers ===
 
 // Domain → Response DTO
@@ -369,7 +377,11 @@ const number = () => ({
 //     couponCode: z.string().optional(),
 // });
 // type CreateOrderDto = z.infer<typeof CreateOrderSchema>;
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 // Manual implementation showing the CONCEPT
 type CreateOrderDto = {
     readonly customerId: string;
@@ -537,7 +549,11 @@ const dtoToDomainProduct = (
     if (!VALID_CATEGORIES.has(dto.category)) {
         errors.push({ field: "category", message: `Invalid category: ${dto.category}` });
     }
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
     if (errors.length > 0) return err(errors);
 
     return ok({
@@ -694,7 +710,11 @@ const validateCreateOrder = (body: unknown): Result<CreateOrderRequest, ApiError
     }
     const obj = body as Record<string, unknown>;
     const details: { field: string; message: string }[] = [];
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
     if (typeof obj.customerId !== "string" || obj.customerId.length === 0) {
         details.push({ field: "customerId", message: "Required" });
     }
@@ -833,7 +853,11 @@ const parseCreateUser = (input: unknown): ParseResult<DomainUser> => {
             },
         };
     }
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
     if ("name" in obj) {
         // V1 or V2 format — split name
         const fullName = String(obj.name).trim();
@@ -980,7 +1004,11 @@ type CreateBlogPostDto = {
 type Result<T, E> = { tag: "ok"; value: T } | { tag: "err"; error: E };
 const ok = <T>(v: T): Result<T, never> => ({ tag: "ok", value: v });
 const err = <E>(e: E): Result<never, E> => ({ tag: "err", error: e });
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
 const fromCreateDto = (
     dto: CreateBlogPostDto,
     authorId: UserId,

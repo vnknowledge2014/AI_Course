@@ -12,11 +12,12 @@
 
 ---
 
-## Trước khi bắt đầu: Bạn không cần "giỏi toán"
+## Lời khuyên chân thành: BẠN CÓ NÊN ĐỌC CHƯƠNG NÀY NGAY BÂY GIỜ?
 
-Nếu bạn đọc tên chapter — "Math Foundations" — và thấy hơi lo, hoàn toàn bình thường. Nhưng chapter này **không** yêu cầu bạn giải phương trình hay nhớ công thức phức tạp.
+> ⚠️ **NẾU BẠN MỚI HỌC LẬP TRÌNH HOẶC KHÔNG THÍCH LÝ THUYẾT:**
+> Hãy BỎ QUA toàn bộ Part 0 và nhảy thẳng đến **[Chapter 4: The Rust Ecosystem & Tooling](../part_1_rust_fundamentals/chapter_04_getting_started.md)** để cài đặt Rust và code thực hành ngay lập tức. Đừng ép bản thân đọc lý thuyết Toán học khi chưa quen với code, vì nó rất dễ gây nản lòng! Bạn hoàn toàn có thể quay lại đây đọc sau khi đã thành thạo cú pháp cơ bản.
 
-Toàn bộ "toán" ở đây chỉ cần 3 thứ:
+Nếu bạn quyết định ở lại đọc, đừng lo. Toàn bộ "toán" ở đây chỉ cần 3 thứ:
 - Biết **cộng**: 2 + 3 = 5
 - Biết **nhân**: 2 × 3 = 6
 - Hiểu câu: "Nếu trời mưa **thì** mang ô"

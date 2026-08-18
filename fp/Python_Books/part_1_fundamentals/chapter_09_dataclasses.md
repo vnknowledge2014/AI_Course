@@ -231,6 +231,18 @@ assert acc2.balance == 150_000
 
 ---
 
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| `mutable default is not allowed` | `field: list = []` | `field: list = dataclasses.field(default_factory=list)` |
+| `frozen=True` mà `__post_init__` cần gán | Frozen chặn `self.x = ...` | `object.__setattr__(self, "x", ...)` — dùng dè, chỉ trong `__post_init__` |
+| Kế thừa dataclass báo lỗi thứ tự field | Field có mặc định phải đứng sau field không mặc định | Sắp lại, hoặc dùng `kw_only=True` |
+| So sánh dataclass chậm | `eq` sinh tự động duyệt mọi field | `field(compare=False)` cho field không cần so |
+| Tốn bộ nhớ khi tạo hàng triệu object | Mỗi instance có `__dict__` | Bật `slots=True` |
+
 ## Tóm tắt
 
 - ✅ **`@dataclass`**: Auto-generates `__init__`, `__repr__`, `__eq__`.
