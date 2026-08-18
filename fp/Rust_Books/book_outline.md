@@ -3,7 +3,7 @@
 > Kết hợp: DDD Functional + FP Made Easier + Learn Go with Tests + F# Fun & Profit
 > Coverage: **~70%** FP/DDD · Full CS foundations included
 > Approach: Quick Primer → Foundations → Beginner → Intermediate → Advanced → Principal
-> Tổng: **49 chapters** (0–44 + 36B) + Appendices
+> Tổng: **68 chương** (Ch0–Ch55, gồm các chương phụ 3B/3C/27b/31b/32b/36B/43B) + **5 phụ lục**
 
 ---
 
@@ -15,9 +15,11 @@ Setup (`rustup`, `cargo new`). `let`, `fn`, return values. Scalar types (`i32`, 
 
 ---
 
-## Part 0: CS Foundations (Pre-requisite)
+## Part 0: CS Foundations (Lý thuyết Khoa học Máy tính)
 
-> *Nền tảng CS cần thiết — không phụ thuộc ngôn ngữ nhưng ví dụ bằng Rust. Đọc Chapter 0 trước nếu chưa biết Rust.*
+> ⚠️ **LƯU Ý DÀNH CHO NGƯỜI MỚI (BEGINNERS)**:
+> Phần này chứa nhiều lý thuyết và tư duy hệ thống. Nếu bạn không có nền tảng toán học hoặc mới học lập trình, việc đọc phần này có thể gây "ngợp".
+> **HÃY BỎ QUA PART 0 VÀ NHẢY THẲNG ĐẾN PART 1 (RUST FUNDAMENTALS)** để bắt tay vào cài đặt và code thực hành ngay. Bạn có thể quay lại đọc Part 0 sau khi đã quen với Rust!
 
 ### [Chapter 1 — Math Foundations for FP](part_0_cs_foundations/chapter_01_math_foundations.md) ✅
 **Lambda Calculus**: `λx.x+1` = closures, β-reduction = function application, Church encoding. **Curry-Howard Correspondence**: Types = Propositions, Programs = Proofs → giải thích tại sao "make illegal states unrepresentable" works. **Discrete Math**: Set theory (Product = Cartesian product, Sum = Disjoint union), relations, partial orders. **Algebraic type sizes**: `bool × bool` = 4 states — dùng toán để tính domain space.
@@ -28,14 +30,20 @@ Setup (`rustup`, `cargo new`). `let`, `fn`, return values. Scalar types (`i32`, 
 ### [Chapter 3 — Functional Data Structures](part_0_cs_foundations/chapter_03_functional_data_structures.md) ✅
 **Persistent DS**: structural sharing — update O(log n) thay vì copy O(n). **HAMT** (Hash Array Mapped Trie): nền tảng của `im` crate. **Amortized Queue**: 2 stacks = O(1) amortized queue (Okasaki). **Finger Trees**: deque + priority queue + sequence. **Graph as ADT**: `HashMap<Node, HashSet<Node>>`. **Big-O trong FP**: tại sao `List::append` O(n), `Vec::push` O(1), persistent `HashMap` O(log₃₂ n).
 
+### [Chapter 3B — Advanced Algorithms & LeetCode Patterns](part_0_cs_foundations/chapter_03b_leetcode_patterns.md) ✅
+Two Pointers, Sliding Window, Dynamic Programming, Graph Traversal — giải LeetCode bằng tư duy functional thay vì vòng lặp mutate.
+
+### [Chapter 3C — Hardware & Compute: LeetCPU / LeetGPU](part_0_cs_foundations/chapter_03c_hardware_leetgpu.md) ✅
+Memory Hierarchy, CPU vs GPU, Tensor Cores, Memory-Bandwidth-Bound vs Compute-Bound. Nền tảng phần cứng cho Chapter 43B.
+
 ---
 
 ## Part I: Rust Fundamentals (Beginner)
 
 > *Nền tảng ngôn ngữ — tham khảo programiz.com/rust*
 
-### [Chapter 4 — Getting Started with Rust](part_1_rust_fundamentals/chapter_04_getting_started.md) ✅
-Setup toolchain (`rustup`, `cargo`), Hello World, `cargo new`, project structure. Comments, `println!` macro. REPL via `evcxr`.
+### [Chapter 4 — The Rust Ecosystem & Tooling](part_1_rust_fundamentals/chapter_04_getting_started.md) ✅
+Setup toolchain (`rustup`, `cargo`), `cargo new`, cấu trúc project. **IDE & rust-analyzer** — tại sao Inlay Hints quan trọng để học Rust. **clippy** (linter/người thầy) và **rustfmt**. REPL via `evcxr`. Workflow: `cargo check` vs `cargo build`.
 
 ### [Chapter 5 — Variables, Types & Operators](part_1_rust_fundamentals/chapter_05_variables_types.md) ✅
 `let` bindings (immutable by default), `mut`, shadowing. Scalar types (`i32`, `f64`, `bool`, `char`), compound types (tuples, arrays). Type casting, operators. **So sánh với F#**: `let` binding tương tự, nhưng Rust cần `mut` explicit.
@@ -202,9 +210,51 @@ HTTP basics (request/response). **Axum** web framework: Router, Handlers, Extrac
 ### [Chapter 43 — System Design Thinking](part_7_production/chapter_43_system_design.md) ✅
 **Capacity estimation**: QPS, storage, bandwidth — back-of-envelope. **Load balancing**: L4 (TCP) vs L7 (HTTP), round-robin, consistent hashing, health checks. **Caching layers**: client cache, CDN, application cache (Redis), database cache (query cache). **CDN**: static assets, edge computing. **API design**: REST (resource-oriented), gRPC (binary, streaming), GraphQL (flexible queries) — khi nào dùng cái nào. **Microservices**: khi nào split (Conway's Law), service mesh, API gateway. **Monolith first** → Modular monolith → Microservices (evolutionary). **Database scaling**: read replicas, connection pooling, sharding. **Design exercises**: URL shortener, chat system, notification service, rate limiter — practice thinking through trade-offs.
 
+### [Chapter 43B — AI System Design & Infrastructure](part_7_production/chapter_43b_ai_system_design.md) ✅
+LLM Inference Gateway viết bằng Rust, vLLM ở tầng GPU, RAG System Design quy mô lớn, Multi-Agent Orchestration. Cầu nối từ System Design tổng quát (Ch43) sang Part VIII.
+
 ### [Chapter 44 — Capstone Part 2: Production Deployment ⭐](part_7_production/chapter_44_capstone_production.md) ✅
 Kết hợp toàn bộ: Order-Taking System + PostgreSQL (`sqlx`), Redis cache, JWT auth, HTTPS, rate limiting, structured logging (`tracing`), Docker deployment, CI/CD pipeline, monitoring dashboard.
-*1,081 lines · 20 code blocks*
+
+---
+
+## Part VIII: Agentic AI in Rust (New)
+
+> *Building LLM-powered applications natively in Rust using Rig. Ăn khớp với tư duy DDD, FP, và Production Engineering từ các phần trước.*
+
+### [Chapter 45 — Bản chất của Agentic AI & Kiến trúc Rig](part_8_agentic_ai/chapter_45_intro_to_rig.md)
+Tại sao chọn Rust cho AI Orchestration? (Type-Safety, Concurrency). Giải phẫu kiến trúc Rig (`CompletionModel`, `ProviderClient`, `Agent`). Viết ứng dụng "Hello World". Giới thiệu dự án RustyOps.
+
+### [Chapter 46 — Core Abstractions: Extractors và Streaming](part_8_agentic_ai/chapter_46_extractors_streaming.md)
+Hỗ trợ đa nền tảng (OpenAI, Anthropic, Gemini). Structured Output với Extractors (ép LLM trả về JSON Schema). Bắt lỗi tại network boundary. Xử lý Streaming Response tối ưu UX.
+
+### [Chapter 47 — Quyền Năng Của Tools (Tool Calling)](part_8_agentic_ai/chapter_47_tool_calling.md)
+Định nghĩa Tool bằng `#[tool]` macro và trait `Tool`. Xử lý lỗi với Railway-Oriented Programming: tự sửa lỗi (Self-correction) thông qua `Result`. Kiểm soát `max_turns`.
+
+### [Chapter 48 — Nâng Cao Tool Use: Context, Memory & Hooks](part_8_agentic_ai/chapter_48_memory_hooks.md)
+Quản lý ngữ cảnh qua `ChatHistory`. Đăng ký `ToolHook` và `PromptHook`. Approval Policy (Human-in-the-Loop) bảo vệ hệ thống. Tích hợp OpenTelemetry (Observability).
+
+### [Chapter 49 — Retrieval-Augmented Generation (RAG) và Vector Stores](part_8_agentic_ai/chapter_49_rag_vector_stores.md)
+Embeddings model. Tích hợp LanceDB, Qdrant. Dynamic Tool Retrieval (Tool-RAG) cấp phát tool động dựa trên Context.
+
+### [Chapter 50 — Multi-Agent Workflows & Orchestration](part_8_agentic_ai/chapter_50_multi_agent_workflows.md)
+Đóng gói Agent thành Tool. Mô hình Manager - Worker (Orchestrator). Phân nhánh (Agent Routing) và Multi-agent Debate cải thiện độ chính xác.
+
+### [Chapter 51 — Khám Phá Model Context Protocol (MCP)](part_8_agentic_ai/chapter_51_mcp.md)
+Tiêu chuẩn MCP của Anthropic. Sử dụng `rmcp` để kết nối Agent với các tool ngoại vi (như Chrome DevTools, File System).
+
+### [Chapter 52 — Evaluation, Testing và Tool Servers](part_8_agentic_ai/chapter_52_evaluation_testing.md)
+Giải quyết Lock contention với `ToolServer`. Hệ thống AI đánh giá AI (Evaluators). Xây dựng Agent Optimizer.
+
+### [Chapter 53 — Tích Hợp Mô Hình Cục Bộ (Local Models)](part_8_agentic_ai/chapter_53_local_models.md)
+Bảo mật dữ liệu bằng Local Models. Chạy GGUF qua `rig-llama-cpp`. Tự implement `CompletionModel` (thực hành Traits).
+
+### [Chapter 54 — Capstone Project: Xây Dựng Hệ Sinh Thái "Rusty-Context"](part_8_agentic_ai/chapter_54_rusty_context.md)
+Xây dựng Core AI Infrastructure cho Agentic Context Engineering (STM/LTM, AST-Aware Chunking, Incremental Sync, Dreaming loop).
+
+### [Chapter 55 — Hệ Sinh Thái Rig & Ứng Dụng Thực Tế (Awesome Rig)](part_8_agentic_ai/chapter_55_awesome_rig.md)
+Phân tích kiến trúc production: `agent-governance-toolkit`, `vtcode`, `solagent.rs`. AWS Lambda deployment.
+
 
 ---
 
@@ -229,16 +279,26 @@ Declarative macros (`macro_rules!`), attribute macros (`#[derive]`, `#[tokio::ma
 
 ## 📊 Book Statistics
 
-| Part | Chapters | Lines | Code Blocks |
-|------|----------|-------|-------------|
-| **Part 0** CS Foundations | Ch0-3 (4) | 2,772 | 68 |
-| **Part I** Rust Fundamentals | Ch4-11 (8) | 5,730 | 171 |
-| **Part II** Thinking Functionally | Ch12-17 (6) | 4,922 | 108 |
-| **Part III** Design Patterns | Ch18-19 (2) | 1,532 | 24 |
-| **Part IV** DDD with Rust | Ch20-27 (8) | 6,219 | 95 |
-| **Part V** FP Patterns | Ch28-32 (5) | 3,099 | 60 |
-| **Part VI** Testing & Engineering | Ch33-36B (5) | 4,001 | 79 |
-| **Part VII** Production | Ch37-44 (8) | 5,245 | 110 |
-| **Appendices** | A-E (5) | 795 | — |
-| **TOTAL** | **46 chapters + 5 appendices** | **~34,315** | **~715** |
+> Số liệu đo trực tiếp từ file `.md` trong repo.
 
+| Part | Chương | Dòng | Code blocks |
+|------|--------|------|-------------|
+| **Part 0** CS Foundations | Ch0–3C (6) | 3.118 | 74 |
+| **Part I** Rust Fundamentals | Ch4–11 (8) | 5.281 | 156 |
+| **Part II** Thinking Functionally | Ch12–17 (6) | 4.928 | 108 |
+| **Part III** Design Patterns | Ch18–19 (2) | 1.192 | 27 |
+| **Part IV** DDD with Rust | Ch20–27 (8) | 4.708 | 107 |
+| **Part V** FP Patterns | Ch27b–32b (8) | 3.470 | 104 |
+| **Part VI** Testing & Engineering | Ch33–36B (5) | 2.991 | 85 |
+| **Part VII** Production | Ch37–44 (9) | 3.801 | 93 |
+| **Part VIII** Agentic AI | Ch45–55 (11) | 1.636 | 44 |
+| **Phụ lục** | A–E (5) | 833 | 33 |
+| **TỔNG** | **68 chương + 5 phụ lục** | **31.958** | **831** |
+
+---
+
+## ⚠️ Ghi chú phiên bản (Part VIII)
+
+Code Part VIII bám theo **Rig 0.41** (`rig-core` + `rig-agent` + `rig-candle`).
+Rig đổi API khá thường xuyên; hãy đối chiếu [docs.rs/rig-core](https://docs.rs/rig-core)
+đúng phiên bản bạn cài trước khi copy code.
