@@ -111,6 +111,52 @@ Quản lý luồng này bằng Apache Kafka hoặc Temporal Workflow, hệ thố
 
 ---
 
+---
+
+## ✅ Checkpoint 39
+
+1. Vì sao không nên cho client gọi thẳng vLLM mà phải qua một AI Gateway?
+2. Hệ AI khác hệ web truyền thống ở ba ràng buộc nào?
+3. Trong RAG quy mô lớn, khâu nào thường là nút cổ chai — embedding, vector search, hay LLM inference?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Vì Gateway là chỗ đặt xác thực, rate limit theo token (không phải theo request), tính chi phí, ghi log prompt, kiểm duyệt nội dung và định tuyến model. Không có nó thì mọi chính sách phải nhét vào từng client.
+2. (a) **Độ trễ**: một request tính bằng giây–chục giây, không phải mili-giây; (b) **Chi phí**: GPU đắt gấp trăm lần CPU nên batching quyết định kinh tế; (c) **Không tất định**: cùng đầu vào cho ra đầu ra khác nhau, nên test và cache đều phải nghĩ lại.
+3. Hầu như luôn là **LLM inference** — nó chiếm phần lớn thời gian và gần như toàn bộ chi phí. Embedding và vector search thường tính bằng mili-giây. Vì vậy tối ưu nên bắt đầu ở caching và batching phía LLM.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Thêm rate limit **theo token** (không phải theo request) vào AI Gateway. Vì sao giới hạn theo request là sai chỗ này?
+
+**Bài 2 (15 phút).** Cài semantic cache: trước khi gọi LLM, tìm trong vector store xem có prompt tương tự (cosine > 0,95) đã trả lời chưa. Đo tỉ lệ cache hit trên một tập câu hỏi thật.
+
+**Bài 3 (25 phút).** Thiết kế (bằng sơ đồ + kiểu dữ liệu) một hàng đợi ưu tiên cho request LLM: người dùng trả phí được phục vụ trước. Xử lý cả trường hợp starvation của hàng đợi thấp.
+
+<details>
+<summary>Gợi ý bài 1</summary>
+
+Một request "tóm tắt 3 câu" và một request "phân tích 200 trang PDF" đều là **một**
+request, nhưng chênh nhau hàng nghìn lần về chi phí. Rate limit theo request sẽ
+vừa quá chặt với người dùng nhẹ, vừa quá lỏng với người dùng nặng.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Triệu chứng | Nguyên nhân | Cách xử lý |
+|---|---|---|
+| GPU OOM khi tải cao | Batch size / context length quá lớn | Giảm `max_model_len`, bật paged attention của vLLM |
+| Độ trễ cao dù GPU rảnh | Request xử lý tuần tự | Bật continuous batching |
+| Chi phí tăng bất thường | Không cache, prompt lặp lại nhiều | Thêm semantic cache + prompt caching |
+| Kết quả RAG lệch chủ đề | Chunking kém hoặc thiếu re-ranking | Giảm chunk size, thêm bước re-rank |
+| Timeout ở tầng gateway | Request LLM dài hơn timeout mặc định | Tăng timeout **và** chuyển sang streaming |
+
 ## Tóm tắt
 
 - Các thành phần của Hệ thống AI: Backend App (FastAPI), GPU Inference (vLLM), Task Queue (Celery/Kafka), và Vector DB (Qdrant).

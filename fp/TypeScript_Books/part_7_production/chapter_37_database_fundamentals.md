@@ -20,21 +20,19 @@ Bạn biết thư viện không? Sách xếp theo KỆ (tables), mỗi kệ có 
 
 ## Database Fundamentals & SQL — Persistence cho TypeScript developers
 
-TypeScript developers thường né SQL — dùng ORM rồi hy vọng nó generate đúng queries. Approach đó hoạt động 80% trường hợp. 20% còn lại — performance queries, complex joins, aggregate reports — bạn **phải** biết SQL.
+Rất nhiều TypeScript developer né SQL: dùng Prisma/TypeORM rồi mong nó sinh ra
+truy vấn đúng. Cách đó ổn cho khoảng 80% trường hợp. 20% còn lại — truy vấn
+nặng, join phức tạp, báo cáo tổng hợp, migration dữ liệu — bạn **bắt buộc** phải
+hiểu SQL.
 
-Chapter này dạy SQL fundamentals qua TypeScript lens: Prisma (type-safe ORM — generate types từ schema), Drizzle (SQL-like, closer to metal), và Kysely (query builder, full type inference). Bạn sẽ thấy: biết SQL + type-safe ORM = superpower.
+Tin tốt: kỹ năng SQL chuyển được giữa mọi ORM. Khi đã nắm `JOIN`, `GROUP BY`,
+`INDEX`, bạn đọc được truy vấn mà Prisma sinh ra và hiểu vì sao nó chậm — thay
+vì thêm index bừa rồi hy vọng.
 
-
-Nhiều TypeScript developers có tâm lý "ORM handles everything" — dùng Prisma/TypeORM rồi không bao giờ viết SQL. Điều này hoạt động cho 80% use cases. Nhưng 20% còn lại — performance queries, complex aggregations, data migrations — bạn **phải** hiểu SQL.
-
-Tin tốt: SQL skills transfer giữa mọi ORM. Khi bạn biết `JOIN`, `GROUP BY`, `INDEX`, bạn đọc Prisma-generated queries và hiểu tại sao chúng chậm. Bạn biết khi nào cần raw query thay vì ORM abstractions.
-
-Chapter này dạy SQL theo cách practical: mỗi concept đi kèm TypeScript implementation bằng Prisma (type-safe ORM) hoặc Kysely (type-safe query builder). Bạn sẽ thấy: biết SQL + type-safe tools = debug queries trong seconds thay vì hours.
-
-## Database Fundamentals — SQL, NoSQL, and ORMs
-
-Relational model (SQL) cho data có relationships. Document stores (NoSQL) cho flexiblility. ORMs (Prisma) = type-safe database access. Indexing = performance. Normalization vs denormalization = trade-off. Chapter này dạy CHỌN đúng tool cho đúng job.
-
+Chapter này dạy SQL qua lăng kính TypeScript: **Prisma** (ORM type-safe, sinh
+type từ schema), **Drizzle** (cú pháp sát SQL), và **Kysely** (query builder,
+suy luận kiểu đầy đủ). Kèm theo là phần chọn công cụ: quan hệ vs document store,
+chuẩn hoá vs phá chuẩn.
 
 ## 37.1 — Relational Model
 

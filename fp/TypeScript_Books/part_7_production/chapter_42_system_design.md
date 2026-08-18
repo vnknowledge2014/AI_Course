@@ -153,6 +153,44 @@ const modules: Module[] = [
 
 ---
 
+---
+
+## ✅ Checkpoint 42
+
+1. Node.js chạy đơn luồng. Điều đó ảnh hưởng gì tới quyết định thiết kế?
+2. BFF (Backend for Frontend) giải quyết vấn đề gì mà một API chung không giải quyết được?
+3. Khi nào serverless **đắt hơn** một server thường?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Một tác vụ CPU nặng sẽ **chặn event loop** và làm đứng mọi request khác trên process đó. Vì thế: đẩy việc nặng sang worker thread hoặc queue, và scale bằng nhiều process (`cluster`, PM2) chứ không bằng thread.
+2. Mỗi client cần shape dữ liệu khác nhau: mobile cần payload nhỏ, web cần nhiều field, smart TV cần khác nữa. API chung buộc phải là mẫu số chung — hoặc over-fetch, hoặc phải gọi nhiều lần. BFF cho mỗi client một tầng ghép riêng.
+3. Khi lưu lượng **đều và cao**. Serverless tính theo lượt gọi và thời gian chạy; ở mức tải ổn định 24/7, một VM thường rẻ hơn nhiều lần. Serverless thắng khi tải rất thất thường hoặc gần bằng không phần lớn thời gian.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Tính peak QPS cho hệ 2 triệu DAU, mỗi người 15 request/ngày, hệ số peak ×4.
+
+**Bài 2 (15 phút).** Viết một endpoint cố tình chặn event loop (vòng lặp bận 3 giây) rồi bắn 10 request đồng thời. Đo và giải thích. Sau đó chuyển sang `worker_threads`.
+
+**Bài 3 (25 phút).** Thiết kế caching cho một trang sản phẩm: quyết định TTL cho từng tầng (browser, CDN, Redis) và chiến lược invalidate khi giá thay đổi.
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Toàn bộ API đứng khi một request chạy | Tác vụ CPU chặn event loop | `worker_threads`, hoặc đẩy sang queue |
+| Cold start chậm trên serverless | Bundle lớn, nhiều dependency | Tree-shaking, giảm dependency, cân nhắc edge runtime |
+| Cache CDN không được xoá | Thiếu cơ chế purge khi deploy | Dùng URL có hash cho asset; purge API cho dữ liệu động |
+| Memory leak sau vài ngày | Cache trong RAM không có giới hạn | Dùng LRU có `maxSize`; đo bằng heap snapshot |
+| `EMFILE: too many open files` | Rò rỉ file descriptor / connection | Đóng stream; giới hạn concurrency |
+
 ## Tóm tắt
 
 - ✅ **Capacity estimation**: Luôn nhẩm tính traffic và storage trước khi gõ phím. Đừng mua xe lu để giết muỗi.

@@ -171,6 +171,44 @@ fn evaluate_policy(req: &AccessRequest) -> Result<(), String> {
 }
 ```
 
+---
+
+## ✅ Checkpoint 40
+
+1. Vì sao dùng SHA-256 để hash mật khẩu là sai, dù nó là hàm băm mã hoá?
+2. PASETO khắc phục điểm yếu nào của JWT?
+3. Type system của Rust giúp gì cho bảo mật mà ngôn ngữ động không có?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Vì nó được thiết kế để **nhanh**. GPU thử được hàng tỷ hash/giây. Hash mật khẩu phải chậm có chủ đích và tốn bộ nhớ: `argon2id`.
+2. Sự linh hoạt nguy hiểm của header JWT — đặc biệt là `alg: none` và các đợt tấn công đổi thuật toán. PASETO cố định bộ thuật toán theo version, nên cả một lớp lỗ hổng biến mất.
+3. Newtype: `struct HashedPassword(String)` khác kiểu với `struct PlainPassword(String)`. Vô tình log hoặc lưu nhầm cái này thay cái kia trở thành **lỗi biên dịch**. Thêm nữa, không implement `Debug`/`Display` cho kiểu bí mật là chặn được rò rỉ qua log.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Tạo `struct Secret<T>(T)` không implement `Debug`/`Display`, và `impl Debug` thủ công in ra `Secret(***)`. Chứng minh nó không lọt vào `tracing`.
+
+**Bài 2 (15 phút).** Cài đăng ký + đăng nhập với `argon2`. Chỉnh tham số để hash mất ~250ms trên máy bạn.
+
+**Bài 3 (25 phút).** Cài refresh token rotation với `jsonwebtoken`: mỗi lần refresh thì cấp mới và vô hiệu cái cũ; token cũ bị tái sử dụng → thu hồi cả họ.
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Mật khẩu lọt vào log | Kiểu bí mật có `#[derive(Debug)]` | Viết `Debug` thủ công che giá trị |
+| `argon2` làm đăng nhập chậm rõ rệt | Tham số quá nặng | Giảm `m_cost`/`t_cost`, nhắm ~250ms |
+| JWT hợp lệ sau khi user logout | JWT stateless | Access token ngắn hạn + denylist Redis |
+| Verify JWT luôn thất bại | Sai thuật toán hoặc sai key | Cố định `Algorithm` khi decode; không tin `alg` từ header |
+| Secret nằm trong `Cargo.toml`/source | Hardcode | Đọc từ env; xoay ngay key đã lộ |
+
 ## Tóm tắt
 
 - ✅ **Băm mật khẩu**: MD5/SHA quá nhanh. Hãy dùng Argon2/Bcrypt vì chúng có Salt và cố tình chạy rất chậm.

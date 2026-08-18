@@ -112,6 +112,53 @@ async def add_security_headers(request: Request, call_next):
 
 ---
 
+---
+
+## ✅ Checkpoint 36
+
+1. SQLAlchemy tự escape tham số. Vậy còn cách nào để vẫn dính SQL injection không?
+2. Vì sao "CORS không phải là bảo mật"?
+3. `Content-Security-Policy` chặn được loại XSS nào, và **không** chặn được loại nào?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Có. `text(f"SELECT * FROM t WHERE id = {user_input}")` — f-string nối chuỗi thì không có tham số hoá nào cả. Ngoài ra tên bảng/cột động cũng không tham số hoá được, phải whitelist.
+2. Vì CORS chỉ ràng buộc **trình duyệt**. `curl`, Postman, hay bất kỳ HTTP client nào cũng bỏ qua nó hoàn toàn. CORS bảo vệ người dùng của bạn khỏi trang web khác, chứ không bảo vệ API của bạn.
+3. Chặn tốt inline script và script từ nguồn lạ. **Không** chặn được lỗ hổng ở phía server (ví dụ template render dữ liệu chưa escape thành HTML hợp lệ đúng nguồn cho phép). CSP là lớp phòng thủ thứ hai, không thay thế việc escape output.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (5 phút).** Viết một endpoint FastAPI **cố tình** dính SQL injection bằng f-string, khai thác nó, rồi sửa bằng tham số hoá. Chạy trên SQLite local.
+
+**Bài 2 (10 phút).** Cấu hình `secure` library để thêm đủ bộ security header. Kiểm tra kết quả bằng `curl -I` và đối chiếu với securityheaders.com.
+
+**Bài 3 (20 phút).** Cài rate limiting bằng `slowapi` cho endpoint login: 5 lần thử/phút theo IP. Rồi trả lời: vì sao giới hạn theo IP là **chưa đủ**, và bạn còn nên giới hạn theo chiều nào nữa?
+
+<details>
+<summary>Gợi ý bài 3</summary>
+
+Theo IP chặn được một kẻ tấn công dò nhiều tài khoản. Nhưng **credential stuffing**
+đến từ hàng nghìn IP khác nhau, mỗi IP thử đúng một lần vào một tài khoản. Cần
+giới hạn thêm theo **username** — và cảnh báo khi tỉ lệ đăng nhập thất bại toàn
+hệ thống tăng bất thường.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Triệu chứng | Nguyên nhân | Cách xử lý |
+|---|---|---|
+| Lỗi CORS trên trình duyệt dù đã bật middleware | Preflight `OPTIONS` chưa được cho phép | Thêm `allow_methods=["*"]`, kiểm tra `allow_credentials` |
+| `allow_origins=["*"]` + cookie không hoạt động | Chuẩn cấm dùng wildcard cùng credentials | Liệt kê origin cụ thể |
+| CSP làm hỏng giao diện | Có inline style/script | Dùng nonce/hash, hoặc tách ra file riêng |
+| `slowapi` không giới hạn gì | Thiếu middleware hoặc sai key function | Đăng ký `SlowAPIMiddleware`; xác nhận `get_remote_address` lấy đúng IP sau proxy |
+| Sau reverse proxy, mọi request cùng một IP | Không đọc `X-Forwarded-For` | Bật `ProxyHeadersMiddleware` của Uvicorn |
+
 ## Tóm tắt
 
 - ✅ **SQL Injection**: Luôn dùng ORM hoặc Parameterized Queries. Không bao giờ format chuỗi SQL.

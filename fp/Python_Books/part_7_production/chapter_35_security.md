@@ -141,6 +141,52 @@ class LoginRequest(BaseModel):
 
 ---
 
+---
+
+## ✅ Checkpoint 35
+
+1. Vì sao **không bao giờ** dùng SHA-256 để hash mật khẩu, dù nó là hàm băm mã hoá?
+2. JWT lưu ở `localStorage` hay cookie `HttpOnly`? Mỗi lựa chọn phơi bày rủi ro gì?
+3. Access token và refresh token nên có thời hạn thế nào, và vì sao lại tách hai loại?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Vì SHA-256 được thiết kế để **nhanh** — GPU thử được hàng tỷ lần/giây. Hash mật khẩu phải **chậm có chủ đích** và tốn bộ nhớ: `argon2id`, `bcrypt`, `scrypt`.
+2. `localStorage` → JavaScript đọc được → dính XSS. Cookie `HttpOnly` → JS không đọc được, nhưng trình duyệt tự gửi kèm → dính CSRF. Thực tế: cookie `HttpOnly` + `SameSite=Lax` + CSRF token là cân bằng tốt nhất.
+3. Access token ngắn (5–15 phút), refresh token dài (ngày–tuần) và **thu hồi được**. Tách ra vì access token không thể thu hồi (server không giữ state), nên phải để nó hết hạn nhanh; refresh token thì có lưu ở server nên thu hồi được ngay khi phát hiện bất thường.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (5 phút).** Đo thời gian `argon2` hash một mật khẩu trên máy bạn. Chỉnh tham số để mất ~250ms. Vì sao mốc đó là cân bằng hợp lý giữa UX và chống brute-force?
+
+**Bài 2 (15 phút).** Cài refresh token rotation: mỗi lần dùng refresh token thì cấp cái mới và vô hiệu cái cũ. Nếu một token cũ được dùng lại → thu hồi cả họ token đó.
+
+**Bài 3 (20 phút).** Viết FastAPI dependency `require_role("admin")` trả 403 khi thiếu quyền. Dùng nó như một guard — đây chính là smart constructor của Chapter 14 áp vào tầng HTTP.
+
+<details>
+<summary>Gợi ý bài 2</summary>
+
+Token cũ bị dùng lại gần như luôn nghĩa là nó đã bị đánh cắp: người dùng thật đã
+đổi sang token mới rồi. Thu hồi cả họ token là phản ứng đúng, dù nó buộc người
+dùng thật phải đăng nhập lại.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Triệu chứng | Nguyên nhân | Cách xử lý |
+|---|---|---|
+| JWT hợp lệ sau khi user đã logout | JWT stateless, không thu hồi được | Access token ngắn hạn + denylist trên Redis |
+| `passlib` cảnh báo về bcrypt | Không tương thích bcrypt 4.x | Ghim `bcrypt<4`, hoặc chuyển sang `argon2` |
+| Đăng nhập chậm hẳn | Tham số argon2 quá nặng | Giảm `time_cost`/`memory_cost`, nhắm ~250ms |
+| Token hết hạn sớm bất thường | Lệch đồng hồ giữa các server | Đồng bộ NTP; đặt `leeway` nhỏ khi verify |
+| Secret key nằm trong git | Hardcode trong source | `pydantic-settings` + biến môi trường; xoay key đã lộ |
+
 ## Tóm tắt
 
 - ✅ **Hashing**: Password phải được băm bằng thuật toán chậm (Bcrypt/Argon2) kèm theo Salt ngẫu nhiên.

@@ -1,4 +1,4 @@
-# Chapter 44 — AI System Design & Infrastructure
+# Chapter 43B — AI System Design & Infrastructure
 
 > **Bạn sẽ học được**:
 > - Kiến trúc của LLM Inference Gateway (Tại sao lại cần Proxy bằng Rust?)
@@ -11,7 +11,7 @@
 
 ---
 
-## 44.1 — Tại sao Software Engineering truyền thống chưa đủ cho AI?
+## 43B.1 — Tại sao Software Engineering truyền thống chưa đủ cho AI?
 
 Trong web backend thông thường (CRUD), request gửi tới server sẽ lấy dữ liệu từ DB, parse ra JSON và trả về. Quá trình này mất vài chục ms, tiêu tốn rất ít RAM và CPU. Hệ thống stateless scale cực kỳ dễ dàng.
 
@@ -25,7 +25,7 @@ Chính vì vậy, thiết kế hệ thống AI là một nghệ thuật về ph�
 
 ---
 
-## 44.2 — LLM Inference Gateway (Rust ở Frontline)
+## 43B.2 — LLM Inference Gateway (Rust ở Frontline)
 
 Khi bạn deploy model cho triệu người dùng, bạn không mở port PyTorch trực tiếp ra internet. Bạn cần một **Inference Gateway**.
 
@@ -80,7 +80,7 @@ Bản thân việc chạy Pytorch thuần rất kém trong việc gộp nhiều 
 
 ---
 
-## 44.3 — RAG System Design quy mô lớn
+## 43B.3 — RAG System Design quy mô lớn
 
 Retrieval-Augmented Generation (RAG) không chỉ là việc gọi API OpenAI và nhét text vào. Ở scale lớn (hàng triệu file PDF của enterprise), kiến trúc của bạn cần:
 
@@ -95,7 +95,7 @@ Retrieval-Augmented Generation (RAG) không chỉ là việc gọi API OpenAI v�
 
 ---
 
-## 44.4 — Multi-Agent Orchestration
+## 43B.4 — Multi-Agent Orchestration
 
 Khi có nhiều Agent AI tự động hoạt động (VD: Agent Coding, Agent Tester, Agent Reviewer), bạn không thể để chúng gọi hàm trực tiếp cho nhau. Quá trình sinh token chậm sẽ làm treo toàn bộ hệ thống.
 
@@ -122,6 +122,44 @@ Kiến trúc này giúp bạn scale từng loại agent riêng biệt và giữ 
 
 ---
 
+---
+
+## ✅ Checkpoint 43B
+
+1. Vì sao Rust hợp làm AI Gateway nhưng không hợp làm nơi huấn luyện model?
+2. Continuous batching của vLLM cải thiện điều gì mà batching tĩnh không làm được?
+3. Nút cổ chai chi phí của một hệ RAG nằm ở đâu?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Gateway là bài toán I/O + concurrency + độ trễ ổn định — đúng sở trường của Rust. Huấn luyện thì cần hệ sinh thái CUDA/autograd và vòng lặp thử nghiệm nhanh, nơi Python đang thống trị vì lý do chính đáng.
+2. Batching tĩnh phải chờ đủ N request rồi mới chạy, và cả batch kết thúc cùng lúc — request ngắn bị request dài giữ lại. Continuous batching cho request mới nhập vào giữa chừng và request xong thì rời đi ngay, nên GPU không có khoảng trống.
+3. **LLM inference**, gần như luôn luôn. Embedding và vector search tính bằng mili-giây. Vì vậy tối ưu chi phí nên bắt đầu từ caching, batching và chọn kích thước model — không phải từ việc tinh chỉnh vector store.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (15 phút).** Viết AI Gateway bằng Axum: nhận request, kiểm ngân sách token của user, chuyển tiếp tới vLLM, ghi log chi phí.
+
+**Bài 2 (20 phút).** Thêm streaming SSE cho gateway. Đo TTFT (time-to-first-token) trước và sau.
+
+**Bài 3 (30 phút).** Cài semantic cache: embed prompt, tìm trong vector store, dùng lại câu trả lời khi cosine > 0,95. Đo tỉ lệ hit trên một tập câu hỏi thật.
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| Gateway timeout với prompt dài | Timeout mặc định quá ngắn | Tăng timeout **và** chuyển sang streaming |
+| GPU chỉ dùng 20% mà vẫn chậm | Bandwidth-bound | Tăng batch; dùng model quantize |
+| Chi phí tăng bất thường | Không có rate limit theo token | Giới hạn theo token, không theo request |
+| Backpressure không hoạt động | Hàng đợi không giới hạn | Dùng `tokio::sync::Semaphore` giới hạn số request song song |
+| SSE bị buffer ở proxy | Nginx đệm response | `proxy_buffering off` cho route stream |
+
 ## Tóm tắt
 
 - Hạ tầng AI (AI Infrastructure) là nơi Software Engineering tỏa sáng. LLMs chỉ là động cơ, bạn cần làm toàn bộ khung xe, bánh xe và tay lái.
@@ -131,4 +169,4 @@ Kiến trúc này giúp bạn scale từng loại agent riêng biệt và giữ 
 
 ## Lời kết
 
-Đây là phần cuối cùng cho các kiến thức về Production AI Systems. Mời bạn bước sang Chapter 45 (Capstone) để hoàn tất việc kết nối mọi thứ lại với nhau bằng một dự án hoàn chỉnh.
+Đây là phần cuối cùng cho các kiến thức về Production AI Systems. Mời bạn bước sang Chapter 44 (Capstone) để hoàn tất việc kết nối mọi thứ lại với nhau bằng một dự án hoàn chỉnh.

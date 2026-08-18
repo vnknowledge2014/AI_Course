@@ -146,6 +146,44 @@ Quy tắc quản lý Secrets chuẩn Production:
 2. Ở môi trường Production: Bơm bí mật vào ứng dụng thông qua **Environment Variables** (Biến môi trường) khi khởi chạy container Docker.
 3. Ở các hệ thống cực lớn: Sử dụng các dịch vụ Secret Manager chuyên dụng (như AWS Secrets Manager hoặc HashiCorp Vault). Ứng dụng sẽ gọi API để mượn chìa khóa tạm thời.
 
+---
+
+## ✅ Checkpoint 41
+
+1. `sqlx` tham số hoá query. Vẫn còn cách nào dính SQL injection không?
+2. Vì sao CORS không phải là biện pháp bảo mật cho API?
+3. `rustls` so với OpenSSL — lợi ích về mặt an toàn bộ nhớ là gì?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Có: `format!("SELECT * FROM {table}")` cho tên bảng/cột động — thứ không tham số hoá được. Phải whitelist danh sách tên hợp lệ.
+2. Vì CORS chỉ ràng buộc trình duyệt. `curl` bỏ qua nó hoàn toàn. CORS bảo vệ người dùng của bạn khỏi trang web khác, không bảo vệ API của bạn khỏi kẻ tấn công.
+3. `rustls` viết bằng Rust an toàn, nên cả lớp lỗi tràn bộ đệm (kiểu Heartbleed) là bất khả thi về mặt cấu trúc. OpenSSL là C, và lịch sử CVE của nó phần lớn là lỗi bộ nhớ.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Viết handler Axum **cố tình** nối chuỗi query, khai thác nó, rồi sửa bằng `sqlx::query!`.
+
+**Bài 2 (15 phút).** Thêm middleware security header cho Axum (`tower-http::set_header`): CSP, HSTS, X-Frame-Options, X-Content-Type-Options.
+
+**Bài 3 (25 phút).** Cài rate limit token-bucket bằng `tower::limit` hoặc tự viết middleware. Giới hạn theo IP **và** theo user để chặn credential stuffing.
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| CORS lỗi dù đã thêm layer | Chưa xử lý preflight `OPTIONS` | `CorsLayer` phải cho phép method và header tương ứng |
+| `unsafe` xuất hiện trong dependency | Crate nền tảng có FFI | `cargo geiger` để soi; ưu tiên crate pure-Rust |
+| Sau reverse proxy mọi request cùng IP | Không đọc `X-Forwarded-For` | Dùng `axum-client-ip` với cấu hình proxy tin cậy |
+| Panic trong handler làm sập cả server | Không có catch panic | Thêm `tower_http::catch_panic::CatchPanicLayer` |
+| Thông báo lỗi lộ chi tiết nội bộ | `impl IntoResponse` trả nguyên lỗi gốc | Log chi tiết ở server, trả về client thông điệp chung |
+
 ## Tóm tắt
 
 - ✅ **SQL Injection**: Luôn luôn, LUÔN LUÔN dùng Parameterized Queries. Không bao giờ nối chuỗi SQL.

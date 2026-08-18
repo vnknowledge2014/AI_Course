@@ -540,6 +540,22 @@ Capacity:
 
 ---
 
+---
+
+## ✅ Checkpoint 43
+
+1. Hệ 1 triệu DAU, mỗi người 20 request/ngày. Peak QPS xấp xỉ bao nhiêu?
+2. Vì sao Rust cho phép mật độ triển khai cao hơn hẳn so với runtime có GC?
+3. Khi nào **không** nên chọn microservices dù đội đã lớn?
+
+<details>
+<summary>Đáp án</summary>
+
+1. `1.000.000 × 20 / 86.400 ≈ 231` QPS trung bình; peak ×5 ≈ **1.150 QPS**. Vẫn nằm trong tầm vài instance.
+2. Không có GC pause và bộ nhớ dùng gần sát nhu cầu thật. Một service Rust thường chạy trong vài chục MB nơi JVM cần vài trăm MB, nên cùng một máy chứa được nhiều instance hơn — và p99 không bị GC làm gai.
+3. Khi các service sẽ vẫn dùng **chung một database**. Lúc đó bạn có đủ chi phí vận hành của phân tán mà không có lợi ích nào: vẫn khớp cứng ở tầng schema, vẫn phải deploy đồng bộ khi schema đổi.
+</details>
+
 ## Tóm tắt
 
 - ✅ **Capacity estimation**: QPS, storage, bandwidth — back-of-envelope with known numbers.

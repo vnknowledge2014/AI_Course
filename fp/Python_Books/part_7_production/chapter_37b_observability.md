@@ -1,4 +1,4 @@
-# Chapter 38 — Observability: Thấu thị Hệ thống
+# Chapter 37B — Observability: Thấu thị Hệ thống
 
 > **Bạn sẽ học được**:
 > - Tại sao Monitoring (Giám sát) là chưa đủ, và bạn cần **Observability** (Thấu thị) để tìm ra các lỗi "chưa từng biết đến".
@@ -13,7 +13,7 @@
 
 ---
 
-## 38.1 — Monitoring vs Observability
+## 37B.1 — Monitoring vs Observability
 
 - **Monitoring (Giám sát)**: Trả lời câu hỏi *"Hệ thống có đang hỏng không?"*. Bạn đặt cảnh báo (Alert) cho những thứ bạn *biết trước là có thể hỏng* (Ví dụ: CPU > 90%, RAM > 80%).
 - **Observability (Thấu thị/Khả năng quan sát)**: Trả lời câu hỏi *"TẠI SAO nó lại hỏng?"*. Trong hệ thống phân tán, các lỗi thường rất kỳ lạ và bạn chưa từng lường trước (Unknown Unknowns). Observability cung cấp đủ dữ liệu để bạn debug mọi vấn đề xảy ra trên Production y như đang debug ở máy Local.
@@ -22,7 +22,7 @@
 
 ---
 
-## 38.2 — Trụ cột 1: Logs (Structured Logging)
+## 37B.2 — Trụ cột 1: Logs (Structured Logging)
 
 Log là những chuỗi văn bản ghi lại **những gì đã xảy ra**. 
 Nhưng nếu bạn dùng thư viện `logging` mặc định của Python, bạn đang tự làm khổ mình.
@@ -59,7 +59,7 @@ Bây giờ truy vấn cực kỳ đơn giản: `SELECT SUM(amount) FROM logs WHE
 
 ---
 
-## 38.3 — Trụ cột 2: Metrics (Đo lường với Prometheus)
+## 37B.3 — Trụ cột 2: Metrics (Đo lường với Prometheus)
 
 Logs tốn rất nhiều dung lượng ổ cứng. Bạn không thể dùng Logs để đếm xem có bao nhiêu request mỗi giây, vì nó sẽ làm sập server ghi log.
 Thay vào đó, ta dùng **Metrics**. Metrics là các con số thống kê được cộng dồn trên RAM. Thư viện phổ biến nhất là `prometheus_client`.
@@ -93,7 +93,7 @@ Grafana sẽ định kỳ (vd: 10 giây/lần) gọi vào API `/metrics` của b
 
 ---
 
-## 38.4 — Trụ cột 3: Distributed Tracing (OpenTelemetry)
+## 37B.4 — Trụ cột 3: Distributed Tracing (OpenTelemetry)
 
 Logs và Metrics là đủ cho một ứng dụng Monolith. Nhưng với Microservices, khi 1 user click nút "Mua hàng", Request của họ có thể đi qua: `API Gateway -> Auth Service -> Order Service -> Payment Service -> Database`.
 Làm sao biết Request đang tắc (chậm) ở đoạn nào? Làm sao nối log của 5 con server lại với nhau?
@@ -132,6 +132,52 @@ Bạn vừa tiết kiệm được 3 tiếng ngồi mò mẫm đọc log!
 
 ---
 
+---
+
+## ✅ Checkpoint 37B
+
+1. Monitoring và Observability khác nhau ở đâu — bằng một câu?
+2. Vì sao structured logging quan trọng hơn hẳn log dạng văn bản khi hệ thống lớn lên?
+3. Trace ID phải xuất hiện ở đâu để việc gỡ lỗi phân tán thực sự hoạt động?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Monitoring trả lời câu hỏi bạn **đã biết trước** (CPU có cao không?); Observability cho phép bạn hỏi câu **chưa từng nghĩ tới** (vì sao riêng khách hàng X ở region Y chậm sau 14h?).
+2. Vì log văn bản chỉ grep được. Log có cấu trúc thì **truy vấn** được: lọc theo `user_id`, gom theo `error_code`, tính p99 theo `endpoint`. Ở quy mô lớn, grep không còn là công cụ.
+3. Ở **cả ba trụ cột**: trong mọi dòng log, trên mọi span, và như một exemplar gắn với metric. Thiếu một chỗ là đứt mắt xích khi truy vết.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Thêm middleware sinh `trace_id` cho mỗi request và bind vào `structlog` context. Xác nhận mọi dòng log trong một request đều mang cùng trace_id.
+
+**Bài 2 (15 phút).** Thêm ba metric Prometheus: `http_requests_total` (Counter), `http_request_duration_seconds` (Histogram), `active_connections` (Gauge). Vì sao độ trễ phải là Histogram chứ không phải Gauge?
+
+**Bài 3 (20 phút).** Đặt cảnh báo trên **tỉ lệ lỗi**, không phải số lỗi tuyệt đối. Giải thích vì sao "hơn 100 lỗi/phút" là một cảnh báo tồi.
+
+<details>
+<summary>Gợi ý bài 3</summary>
+
+100 lỗi/phút trên tổng 1.000.000 request là hoàn toàn khoẻ mạnh; 100 lỗi/phút
+trên tổng 200 request là đang sập. Cảnh báo theo số tuyệt đối sẽ vừa báo nhầm
+lúc lưu lượng cao, vừa im lặng lúc lưu lượng thấp — sai cả hai chiều.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Triệu chứng | Nguyên nhân | Cách xử lý |
+|---|---|---|
+| Chi phí log tăng vọt | Log mọi request ở mức DEBUG | Lấy mẫu (sampling); DEBUG chỉ bật khi cần |
+| Không nối được log giữa các service | Không truyền trace context qua HTTP header | Dùng OpenTelemetry propagator (`traceparent`) |
+| Prometheus không thấy metric | Chưa expose `/metrics`, hoặc mỗi worker một registry | Expose endpoint; dùng multiprocess mode cho Gunicorn |
+| p99 trông đẹp bất thường | Đang tính trung bình của các trung bình | Dùng histogram quantile, không tính lại từ số đã tổng hợp |
+| Log lộ dữ liệu nhạy cảm | Log nguyên payload | Thêm processor của `structlog` để lọc/che field nhạy cảm |
+
 ## Tóm tắt
 
 - ✅ **Logs (structlog)**: Chuyển sang JSON để máy móc có thể dễ dàng query và thống kê.
@@ -141,4 +187,4 @@ Bạn vừa tiết kiệm được 3 tiếng ngồi mò mẫm đọc log!
 ## Tiếp theo
 
 Bạn đã có một hệ thống Code xịn, Test phủ kín, Bảo mật tận răng, Thấu thị rõ ràng. Giờ chỉ còn một bước cuối cùng: Đưa nó ra cho cả thế giới sử dụng.
-Hẹn gặp bạn ở chương cuối cùng của cuốn sách này: **Chapter 40: Deployment & DevOps**.
+Hẹn gặp bạn ở **Chapter 38: System Design Thinking** — nơi ta lùi lại một bước để nhìn toàn cảnh kiến trúc.

@@ -14,56 +14,54 @@
 
 ---
 
-## Capstone Project: Full Domain Model
-
-Đây là chapter tổng hợp — mọi concept từ Part I đến Part VI được áp dụng vào một dự án hoàn chỉnh. Thay vì examples nhỏ, bạn xây dựng **domain model thực tế** từ đầu đến cuối: types, workflows, error handling, testing, persistence.
-
-Mục tiêu: khi hoàn thành chapter này, bạn có thể áp dụng quy trình tương tự cho bất kỳ domain nào — e-commerce, fintech, SaaS, healthcare.
-
----
+## Capstone Project: Trái tim của Hệ thống
 
 Đã đến lúc kết hợp mọi thứ.
 
-Trong 36 chapters trước, bạn đã học riêng lẻ: types (Part I), FP thinking (Part II), design patterns (Part III), DDD (Part IV), abstractions (Part V), testing (Part VI). Giống như học nhạc — bạn biết từng nốt, từng hợp âm, từng kỹ thuật. Chapter này là buổi **trình diễn đầu tiên** — chơi một bài hoàn chỉnh.
+Trong 36 chương trước, bạn đã học riêng lẻ từng nốt nhạc: các loại biến (Part I), tư duy Hàm (Part II), mẫu thiết kế (Part III), Thiết kế hướng Domain - DDD (Part IV), đại số trừu tượng (Part V), và nghệ thuật kiểm thử (Part VI). 
+Giống như học nhạc, bây giờ là lúc bước lên sân khấu và chơi một **buổi hòa nhạc thực sự** — nơi tất cả các nhạc cụ hòa quyện vào nhau.
 
-Chúng ta sẽ xây dựng domain model cho hệ thống quản lý đơn hàng — đủ phức tạp để minh họa mọi concept, nhưng đủ nhỏ để hoàn thành trong 1 chapter. Bạn sẽ thấy types, workflows, error handling, testing, và persistence hoạt động cùng nhau.
+Chúng ta sẽ xây dựng hệ thống lõi (Domain Model) cho một ứng dụng Quản lý đơn hàng (Order-Taking System). Nó đủ phức tạp để minh họa sức mạnh của Rust: dùng Type để quy định luật kinh doanh, State Machines để chống lỗi chuyển trạng thái, Pipeline để xử lý luồng dữ liệu, và ROP để bắt lỗi thanh lịch.
 
-Mục tiêu: sau chapter này, bạn có **template** để áp dụng cho bất kỳ domain nào.
+Mục tiêu là sau chương này, bạn sẽ nắm trong tay một **khuôn mẫu (template)** hoàn hảo để tự tin xây dựng bất kỳ lĩnh vực nào: E-commerce, Fintech, SaaS, hay Y tế.
 
-36 chapters. Types, FP thinking, design patterns, DDD, abstractions, testing. Từng concept riêng lẻ — giống học từng nhạc cụ. Chapter này là **buổi hòa nhạc đầu tiên** — tất cả instruments chơi cùng nhau.
+---
 
-Bạn xây domain model cho hệ thống quản lý đơn hàng: types encode business rules (Ch14), state machines ngăn invalid transitions (Ch15), workflows pipeline data (Ch23), errors typed at each step (Ch24), tests verify behavior (Ch33). Đủ phức tạp để minh họa, đủ nhỏ để hoàn thành trong 1 chapter.
+## 37.1 — Khám phá Domain: Event Storming
 
-Khi hoàn thành: bạn có **template** — copy approach này cho bất kỳ domain: e-commerce, fintech, SaaS, healthcare.
+Trước khi viết bất kỳ dòng code nào, chúng ta phải hiểu business. 
+Kỹ thuật **Event Storming** giúp chúng ta vạch ra các luồng sự kiện chính trong hệ thống:
 
-## 37.1 — Domain Discovery: Event Storming
+### Events (Những gì xảy ra)
 
-### Bài toán: Order-Taking System
-
-Hệ thống nhận đơn hàng từ khách, validate, tính giá, fulfillment.
-
-### Events (những gì xảy ra)
-
-```
+```text
 OrderPlaced → OrderValidated → OrderPriced → OrderConfirmed → OrderShipped
          ↘                                            ↗
           ValidationFailed                    ShippingFailed
 ```
 
-### Commands (trigger events)
+### Commands (Lệnh gây ra sự kiện)
 
-```
+```text
 PlaceOrder → ValidateOrder → PriceOrder → ConfirmOrder → ShipOrder
 ```
 
-### Domain types emerge
+Từ những sự kiện này, các kiểu dữ liệu (Types) bắt đầu lộ diện.
+
+---
+
+## 37.2 — Xây dựng Value Objects (Đối tượng giá trị)
+
+Quy tắc tối thượng: **Parse, don't validate**. Chúng ta không truyền `String` hay `i32` chạy lung tung trong hệ thống. Chúng ta bọc chúng lại thành các Value Object có tính ràng buộc cao ngay từ lúc khởi tạo (Smart Constructors).
+
+Hãy bắt đầu với ID Đơn hàng và Email:
 
 ```rust
 // filename: src/main.rs
 
 // ═══ VALUE OBJECTS ═══
 
-/// Order ID — unique, non-empty
+/// Order ID — Không được rỗng, không quá dài
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct OrderId(String);
 
@@ -76,7 +74,7 @@ impl OrderId {
     }
 }
 
-/// Customer Email — validated format
+/// Customer Email — Phải đúng định dạng cơ bản
 #[derive(Debug, Clone, PartialEq)]
 struct EmailAddress(String);
 
@@ -89,8 +87,12 @@ impl EmailAddress {
         Ok(EmailAddress(trimmed))
     }
 }
+```
 
-/// Quantity — positive, bounded
+Tiếp theo là dữ liệu về Số lượng và Giá tiền. Lưu ý rằng Giá tiền (Price) luôn được lưu dưới dạng số nguyên (`u64` cents) để tránh sai số dấu phẩy động khét tiếng của Float.
+
+```rust
+/// Quantity — Luôn dương, có giới hạn tối đa
 #[derive(Debug, Clone, Copy, PartialEq)]
 struct Quantity(u32);
 
@@ -103,7 +105,7 @@ impl Quantity {
     fn value(&self) -> u32 { self.0 }
 }
 
-/// Price — non-negative cents
+/// Price — Tiền không bao giờ âm
 #[derive(Debug, Clone, Copy, PartialEq)]
 struct Price(u64);
 
@@ -113,6 +115,8 @@ impl Price {
         Ok(Price(cents))
     }
     fn cents(&self) -> u64 { self.0 }
+    
+    // Tính tổng tiền của một dòng sản phẩm
     fn multiply(&self, qty: Quantity) -> Price {
         Price(self.0 * qty.value() as u64)
     }
@@ -123,8 +127,12 @@ impl std::fmt::Display for Price {
         write!(f, "{}.{:02}đ", self.0 / 100, self.0 % 100)
     }
 }
+```
 
-/// Product Code
+Và cuối cùng là mã sản phẩm (Product Code). Hệ thống của chúng ta chỉ bán 2 loại hàng: Widget (mã W) và Gizmo (mã G):
+
+```rust
+/// Product Code — Định dạng khắt khe
 #[derive(Debug, Clone, PartialEq)]
 enum ProductCode {
     Widget(String),  // "W" + 4 digits
@@ -142,17 +150,18 @@ impl ProductCode {
         }
     }
 }
+```
 
+Hãy thử khởi tạo chúng để thấy sức mạnh của việc ép lỗi từ trong nôi:
+
+```rust
 fn main() {
-    // Smart constructors enforce ALL rules at creation
+    // Nếu tạo thành công, dữ liệu ĐẢM BẢO hợp lệ 100% trong toàn bộ app
     println!("{:?}", OrderId::new("ORD-001"));
     println!("{:?}", EmailAddress::new("minh@co.com"));
-    println!("{:?}", Quantity::new(5));
-    println!("{:?}", Price::new(85_000));
     println!("{:?}", ProductCode::new("W1234"));
-    println!("{:?}", ProductCode::new("G567"));
 
-    // Errors caught early
+    // Lỗi bị chặn đứng ngay lập tức!
     println!("{:?}", OrderId::new(""));        // Err
     println!("{:?}", Quantity::new(0));          // Err
     println!("{:?}", ProductCode::new("X999"));  // Err
@@ -161,35 +170,16 @@ fn main() {
 
 ---
 
-## 37.2 — Order State Machine
+## 37.3 — Order State Machine (Cỗ máy trạng thái)
+
+Một Đơn hàng không đứng im. Nó di chuyển từ trạng thái *Chưa xác thực* → *Đã xác thực* → *Đã tính giá* → *Đã xác nhận*.
+
+Thay vì dùng chung một `struct Order` to đùng kèm trường `status: String`, chúng ta định nghĩa **MỖI TRẠNG THÁI LÀ MỘT KIỂU DỮ LIỆU RIÊNG (Type)**. Điều này khiến cho việc "Tính giá một đơn hàng chưa xác thực" trở thành **lỗi biên dịch (Compile Error)** thay vì lỗi runtime!
 
 ```rust
-// filename: src/main.rs
+// ═══ STATE MACHINE: Mỗi trạng thái là 1 Type ═══
 
-// Re-use value objects from 37.1 (simplified here)
-#[derive(Debug, Clone)] struct OrderId(String);
-#[derive(Debug, Clone)] struct EmailAddress(String);
-#[derive(Debug, Clone, Copy)] struct Quantity(u32);
-#[derive(Debug, Clone, Copy)] struct Price(u64);
-#[derive(Debug, Clone)] struct ProductCode(String);
-
-// ═══ ORDER LINE ═══
-#[derive(Debug, Clone)]
-struct OrderLine {
-    product: ProductCode,
-    quantity: Quantity,
-    price: Price,
-}
-
-impl OrderLine {
-    fn line_total(&self) -> Price {
-        Price(self.price.0 * self.quantity.0 as u64)
-    }
-}
-
-// ═══ STATE MACHINE: each state = different type ═══
-
-/// Unvalidated — raw input from customer
+/// Unvalidated — Dữ liệu thô từ khách hàng gửi lên (API payload)
 #[derive(Debug)]
 struct UnvalidatedOrder {
     order_id: String,
@@ -203,7 +193,7 @@ struct UnvalidatedOrderLine {
     quantity: u32,
 }
 
-/// Validated — all fields parsed and validated
+/// Validated — Đã kiểm tra tính hợp lệ, biến thành Value Objects
 #[derive(Debug)]
 struct ValidatedOrder {
     order_id: OrderId,
@@ -216,8 +206,12 @@ struct ValidatedOrderLine {
     product: ProductCode,
     quantity: Quantity,
 }
+```
 
-/// Priced — prices looked up, totals calculated
+Tiếp đến là trạng thái Đã tính giá (Priced). Lúc này, đơn hàng sẽ có thêm trường `subtotal`, `tax` và `total`. Một đơn hàng Unvalidated hoàn toàn không có các trường này, nên không ai có thể truy cập nhầm!
+
+```rust
+/// Priced — Đã tra cứu giá cả và tính tổng tiền
 #[derive(Debug)]
 struct PricedOrder {
     order_id: OrderId,
@@ -236,7 +230,7 @@ struct PricedOrderLine {
     line_total: Price,
 }
 
-/// Confirmed — ready to ship
+/// Confirmed — Sẵn sàng để giao hàng
 #[derive(Debug)]
 struct ConfirmedOrder {
     order_id: OrderId,
@@ -244,76 +238,34 @@ struct ConfirmedOrder {
     total: Price,
     confirmation_number: String,
 }
-
-fn main() {
-    // Types ENFORCE the workflow:
-    // UnvalidatedOrder → ValidatedOrder → PricedOrder → ConfirmedOrder
-    //
-    // Cannot price an unvalidated order (different types!)
-    // Cannot confirm an unpriced order (different types!)
-    println!("State machine: types enforce workflow.");
-}
 ```
+
+> **💡 Triết lý FP**: State machine thông qua Types là cách tốt nhất để ép buộc luồng nghiệp vụ. Bạn không thể vo viên một chiếc bánh mì nếu nó chưa được nhào bột (vì kiểu `BotNhao` khác với kiểu `BanhMiChuaNuong`).
 
 ---
 
-## 37.3 — Workflow Pipeline
+## 37.4 — Workflow Pipeline: Chuyến tàu xuyên miền dữ liệu
+
+Giờ chúng ta sẽ viết các hàm đóng vai trò "chuyển đổi trạng thái" (State transition functions). Chúng giống như các ga tàu, nhận toa tàu đầu vào, xử lý và nhả ra toa tàu tiếp theo.
+
+Đầu tiên là định nghĩa bộ lỗi (Errors):
 
 ```rust
-// filename: src/main.rs
-
-use std::collections::HashMap;
-
-// ═══ Value Objects (simplified) ═══
-#[derive(Debug, Clone)] struct OrderId(String);
-#[derive(Debug, Clone)] struct EmailAddress(String);
-#[derive(Debug, Clone, Copy)] struct Quantity(u32);
-#[derive(Debug, Clone, Copy)] struct Price(u64);
-#[derive(Debug, Clone)] struct ProductCode(String);
-
-// ═══ States ═══
-#[derive(Debug)]
-struct UnvalidatedOrder {
-    order_id: String,
-    customer_email: String,
-    lines: Vec<(String, u32)>, // (product_code, qty)
-}
-
-#[derive(Debug)]
-struct ValidatedOrder {
-    order_id: OrderId,
-    customer_email: EmailAddress,
-    lines: Vec<(ProductCode, Quantity)>,
-}
-
-#[derive(Debug)]
-struct PricedOrder {
-    order_id: OrderId,
-    customer_email: EmailAddress,
-    lines: Vec<(ProductCode, Quantity, Price, Price)>, // product, qty, unit_price, line_total
-    subtotal: Price,
-    tax: Price,
-    total: Price,
-}
-
-#[derive(Debug)]
-struct ConfirmedOrder {
-    order_id: OrderId,
-    total: Price,
-    confirmation: String,
-}
-
 // ═══ ERRORS ═══
 #[derive(Debug)]
 enum OrderError {
-    Validation(Vec<String>),
+    Validation(Vec<String>), // Có thể gom nhiều lỗi validation cùng lúc
     Pricing(String),
     Confirmation(String),
 }
+```
 
-// ═══ WORKFLOW: Pipeline of pure functions ═══
+Ga tàu số 1: Validation. Chúng ta sẽ "bắt" (collect) tất cả các lỗi có thể xảy ra thay vì ngắt ngay lập tức ở lỗi đầu tiên, mang lại UX tốt hơn cho người dùng API.
 
-// Step 1: Validate (collect ALL errors)
+```rust
+use std::collections::HashMap;
+
+// Ga 1: Xác thực (Từ Unvalidated -> Validated)
 fn validate_order(input: UnvalidatedOrder) -> Result<ValidatedOrder, OrderError> {
     let mut errors = vec![];
 
@@ -326,12 +278,15 @@ fn validate_order(input: UnvalidatedOrder) -> Result<ValidatedOrder, OrderError>
     } else { Some(EmailAddress(input.customer_email.to_lowercase())) };
 
     let mut validated_lines = vec![];
-    for (i, (code, qty)) in input.lines.iter().enumerate() {
-        if code.is_empty() { errors.push(format!("Line {}: empty product code", i + 1)); }
-        if *qty == 0 { errors.push(format!("Line {}: quantity must be > 0", i + 1)); }
-        if *qty > 10_000 { errors.push(format!("Line {}: quantity too large", i + 1)); }
-        if !code.is_empty() && *qty > 0 && *qty <= 10_000 {
-            validated_lines.push((ProductCode(code.clone()), Quantity(*qty)));
+    for (i, line) in input.lines.iter().enumerate() {
+        if line.product_code.is_empty() { errors.push(format!("Line {}: empty product code", i + 1)); }
+        if line.quantity == 0 { errors.push(format!("Line {}: quantity must be > 0", i + 1)); }
+        
+        if !line.product_code.is_empty() && line.quantity > 0 {
+            validated_lines.push((
+                ProductCode(line.product_code.clone()), // Simplify cho ví dụ
+                Quantity(line.quantity)
+            ));
         }
     }
 
@@ -347,8 +302,12 @@ fn validate_order(input: UnvalidatedOrder) -> Result<ValidatedOrder, OrderError>
         lines: validated_lines,
     })
 }
+```
 
-// Step 2: Price (lookup prices, calculate totals)
+Ga tàu số 2: Pricing (Tính giá). Tại đây, ta cần tra cứu giá từ hệ thống Catalog (bảng giá).
+
+```rust
+// Ga 2: Tính giá (Từ Validated -> Priced)
 fn price_order(
     order: ValidatedOrder,
     catalog: &HashMap<String, u64>,
@@ -356,8 +315,10 @@ fn price_order(
     let mut priced_lines = vec![];
 
     for (product, qty) in &order.lines {
+        // Tra cứu giá từ Catalog, nếu không thấy -> báo lỗi
         let unit_price = catalog.get(&product.0)
             .ok_or_else(|| OrderError::Pricing(format!("Unknown product: {}", product.0)))?;
+            
         let line_total = unit_price * qty.0 as u64;
         priced_lines.push((product.clone(), *qty, Price(*unit_price), Price(line_total)));
     }
@@ -374,8 +335,12 @@ fn price_order(
         total: Price(subtotal + tax),
     })
 }
+```
 
-// Step 3: Confirm
+Ga tàu số 3: Xác nhận. Rất đơn giản, cấp cho nó một mã số xác nhận.
+
+```rust
+// Ga 3: Xác nhận (Từ Priced -> Confirmed)
 fn confirm_order(order: PricedOrder) -> Result<ConfirmedOrder, OrderError> {
     if order.total.0 == 0 {
         return Err(OrderError::Confirmation("Order total cannot be 0".into()));
@@ -383,13 +348,20 @@ fn confirm_order(order: PricedOrder) -> Result<ConfirmedOrder, OrderError> {
 
     Ok(ConfirmedOrder {
         order_id: order.order_id,
+        customer_email: order.customer_email,
         total: order.total,
-        confirmation: format!("CONF-{}", chrono_like_id()),
+        confirmation_number: format!("CONF-{}", chrono_like_id()),
     })
 }
 
 fn chrono_like_id() -> String { "20260304-001".into() }
+```
 
+### Hợp nhất (Compose): Luồng chảy mượt mà
+
+Nhờ Railway Oriented Programming (`and_then`), chúng ta nối ba ga tàu lại với nhau thành một dây chuyền sản xuất duy nhất:
+
+```rust
 // ═══ COMPOSE: Full workflow ═══
 fn place_order(
     input: UnvalidatedOrder,
@@ -399,7 +371,16 @@ fn place_order(
         .and_then(|validated| price_order(validated, catalog))
         .and_then(confirm_order)
 }
+```
+Nhìn hàm `place_order` này mà xem, nó thể hiện chính xác **nghiệp vụ** dưới dạng code. Bạn đọc code như đang đọc kịch bản.
 
+---
+
+## 37.5 — Biến đổi thành Domain Events
+
+Hệ thống DDD thường giao tiếp với bên ngoài bằng các Sự kiện (Events). Nếu đặt hàng thành công, ta phát ra `OrderPlaced`. Nếu lỗi, ta phát ra `ValidationFailed`.
+
+```rust
 // ═══ EVENTS ═══
 #[derive(Debug)]
 enum OrderEvent {
@@ -419,64 +400,36 @@ fn to_events(result: &Result<ConfirmedOrder, OrderError>) -> Vec<OrderEvent> {
         Err(_) => vec![],
     }
 }
+```
 
+Bạn có thể cắm luồng chạy thử này vào trong `main()` để thấy phép màu:
+
+```rust
 fn main() {
     let mut catalog = HashMap::new();
     catalog.insert("W1234".into(), 85_000_u64);
     catalog.insert("G567".into(), 45_000_u64);
-    catalog.insert("W5678".into(), 120_000_u64);
 
-    // ═══ Happy path ═══
-    println!("=== Happy Path ===");
+    // ═══ Happy path (Thành công mĩ mãn) ═══
     let order = UnvalidatedOrder {
         order_id: "ORD-001".into(),
         customer_email: "minh@company.com".into(),
         lines: vec![
-            ("W1234".into(), 2),
-            ("G567".into(), 5),
+            UnvalidatedOrderLine { product_code: "W1234".into(), quantity: 2 },
         ],
     };
 
     let result = place_order(order, &catalog);
-    for event in to_events(&result) { println!("  Event: {:?}", event); }
-    match &result {
-        Ok(confirmed) => {
-            println!("  ✅ Confirmed: {} — total: {}đ",
-                confirmed.confirmation,
-                confirmed.total.0);
-        }
-        Err(e) => println!("  ❌ {:?}", e),
-    }
-
-    // ═══ Validation failure ═══
-    println!("\n=== Validation Failure ===");
-    let bad_order = UnvalidatedOrder {
-        order_id: "".into(),
-        customer_email: "not-an-email".into(),
-        lines: vec![("".into(), 0)],
-    };
-
-    let result = place_order(bad_order, &catalog);
-    for event in to_events(&result) { println!("  Event: {:?}", event); }
-
-    // ═══ Pricing failure ═══
-    println!("\n=== Pricing Failure ===");
-    let unknown = UnvalidatedOrder {
-        order_id: "ORD-002".into(),
-        customer_email: "lan@co.com".into(),
-        lines: vec![("UNKNOWN".into(), 1)],
-    };
-
-    match place_order(unknown, &catalog) {
-        Err(e) => println!("  ❌ {:?}", e),
-        Ok(_) => println!("  ✅ ok"),
-    }
+    for event in to_events(&result) { println!("Event: {:?}", event); }
+    // Event: OrderPlaced { order_id: "ORD-001", total: 187000 }
 }
 ```
 
 ---
 
-## 37.4 — Testing the Domain
+## 37.6 — Testing the Domain (Kiểm thử)
+
+Vì Domain của chúng ta chứa **hoàn toàn các hàm thuần túy (Pure Functions)**, việc viết Unit Test vô cùng sung sướng. Không cần Mock database, không cần fake network. Chỉ là Input -> Output.
 
 ```rust
 // filename: src/lib.rs (tests section)
@@ -488,7 +441,6 @@ mod tests {
     fn sample_catalog() -> HashMap<String, u64> {
         let mut c = HashMap::new();
         c.insert("W1234".into(), 85_000);
-        c.insert("G567".into(), 45_000);
         c
     }
 
@@ -496,101 +448,54 @@ mod tests {
         UnvalidatedOrder {
             order_id: "ORD-TEST".into(),
             customer_email: "test@co.com".into(),
-            lines: vec![("W1234".into(), 2)],
+            lines: vec![UnvalidatedOrderLine { product_code: "W1234".into(), quantity: 2 }],
         }
     }
 
-    // ═══ Validation tests ═══
+    // --- Validation tests ---
     #[test]
     fn validates_good_order() {
         assert!(validate_order(valid_order()).is_ok());
     }
 
     #[test]
-    fn rejects_empty_order_id() {
-        let mut o = valid_order();
-        o.order_id = "".into();
-        let errs = validate_order(o).unwrap_err();
-        match errs {
-            OrderError::Validation(e) => assert!(e.iter().any(|s| s.contains("OrderId"))),
-            _ => panic!("Wrong error type"),
-        }
-    }
-
-    #[test]
-    fn rejects_invalid_email() {
-        let mut o = valid_order();
-        o.customer_email = "nope".into();
-        assert!(validate_order(o).is_err());
-    }
-
-    #[test]
-    fn rejects_zero_quantity() {
-        let mut o = valid_order();
-        o.lines = vec![("W1234".into(), 0)];
-        assert!(validate_order(o).is_err());
-    }
-
-    #[test]
     fn collects_all_validation_errors() {
-        let o = UnvalidatedOrder {
+        let bad = UnvalidatedOrder {
             order_id: "".into(),
             customer_email: "bad".into(),
-            lines: vec![("".into(), 0)],
+            lines: vec![UnvalidatedOrderLine { product_code: "".into(), quantity: 0 }],
         };
-        match validate_order(o) {
+        match validate_order(bad) {
             Err(OrderError::Validation(errors)) => assert!(errors.len() >= 3),
-            _ => panic!("Expected multiple errors"),
+            _ => panic!("Expected multiple validation errors"),
         }
     }
 
-    // ═══ Pricing tests ═══
+    // --- Pricing tests ---
     #[test]
     fn prices_order_correctly() {
         let validated = validate_order(valid_order()).unwrap();
         let priced = price_order(validated, &sample_catalog()).unwrap();
         assert_eq!(priced.subtotal.0, 170_000); // 85k * 2
         assert_eq!(priced.tax.0, 17_000);       // 10%
-        assert_eq!(priced.total.0, 187_000);     // subtotal + tax
+        assert_eq!(priced.total.0, 187_000);    // sub + tax
     }
 
     #[test]
     fn unknown_product_fails_pricing() {
-        let o = UnvalidatedOrder {
-            order_id: "ORD-X".into(),
-            customer_email: "x@co.com".into(),
-            lines: vec![("UNKNOWN".into(), 1)],
-        };
+        let mut o = valid_order();
+        o.lines[0].product_code = "UNKNOWN".into();
         let validated = validate_order(o).unwrap();
         assert!(price_order(validated, &sample_catalog()).is_err());
-    }
-
-    // ═══ Full workflow tests ═══
-    #[test]
-    fn full_happy_path() {
-        let result = place_order(valid_order(), &sample_catalog());
-        assert!(result.is_ok());
-        let confirmed = result.unwrap();
-        assert!(confirmed.confirmation.starts_with("CONF-"));
-    }
-
-    #[test]
-    fn full_validation_failure() {
-        let bad = UnvalidatedOrder {
-            order_id: "".into(),
-            customer_email: "bad".into(),
-            lines: vec![],
-        };
-        assert!(place_order(bad, &sample_catalog()).is_err());
     }
 }
 ```
 
 ---
 
-## 37.5 — Architecture Overview
+## 37.7 — Tóm lược Kiến trúc (Architecture Overview)
 
-```
+```text
 ┌──────────────────────────────────────────────────────┐
 │                    Application                       │
 │                                                      │
@@ -606,25 +511,22 @@ mod tests {
 │  │  → Valid   │  │  → Priced  │  │  → Confirmed  │   │
 │  └────────────┘  └────────────┘  └───────────────┘   │
 │                                                      │
-│  ═══ ALL PURE FUNCTIONS ═══                          │
-│  No IO, No side effects, No database                 │
-│  Just types + functions + Result                     │
+│  ═══ TẤT CẢ LÀ PURE FUNCTIONS ═══                    │
+│  Không IO, Không side effects, Không gọi Database    │
+│  Chỉ có Type + Function + Result                     │
 └──────────────────────────────────────────────────────┘
 ```
 
-### What we used from each chapter
+### Chúng ta đã triệu hồi những phép thuật nào?
 
-| Chapter | Concept | Used for |
+| Chapter đã học | Concept | Ứng dụng trong project này |
 |---------|---------|----------|
 | Ch 14 — Enums | `ProductCode::Widget\|Gizmo` | Typed product codes |
-| Ch 15 — Pattern Matching | `match` in validate/price | Branching |
-| Ch 22 — Domain Modeling | Newtypes, smart constructors | `OrderId`, `Email`, `Quantity`, `Price` |
-| Ch 23 — Workflows | Pipeline `→` | State transitions |
-| Ch 24 — ROP | `and_then` chain, collect errors | Validation + pricing flow |
-| Ch 25 — Serialization | Event types | `OrderEvent` |
-| Ch 27 — Evolution | Add variants safely | `ProductCode`, `OrderError` |
-| Ch 33 — TDD | Tests | 9 domain tests |
-| Ch 34 — PBT | Property tests | Round-trip, invariants |
+| Ch 15 — Pattern Matching | `match` trong validate/price | Rẽ nhánh an toàn |
+| Ch 22 — Domain Modeling | Newtypes, smart constructors | Khởi tạo `OrderId`, `Email`, `Price` |
+| Ch 23 — Workflows | Pipeline `→` | Các bước xử lý đơn hàng |
+| Ch 24 — ROP | Chuỗi `and_then`, bắt lỗi | Luồng Validation + pricing |
+| Ch 33 — TDD | Unit tests | Viết tests bao phủ mọi ngóc ngách logic |
 
 ---
 
@@ -632,11 +534,11 @@ mod tests {
 
 **Bài 1** (10 phút): Add shipping
 
-Thêm `ShippingMethod` vào order:
+Thêm phí vận chuyển (Shipping) vào đơn hàng:
 ```rust
 enum ShippingMethod { Standard, Express, SameDay }
 ```
-Mỗi method có shipping cost khác nhau. Thêm vào pipeline giữa price và confirm.
+Mỗi method có shipping cost khác nhau. Viết hàm `add_shipping` và chèn nó vào giữa bước `price` và `confirm` trong pipeline.
 
 <details><summary>✅ Lời giải</summary>
 
@@ -663,7 +565,7 @@ fn add_shipping(order: PricedOrder, method: ShippingMethod) -> PricedOrder {
 fn place_order_v2(input: UnvalidatedOrder, catalog: &HashMap<String, u64>, shipping: ShippingMethod) -> Result<ConfirmedOrder, OrderError> {
     validate_order(input)
         .and_then(|v| price_order(v, catalog))
-        .map(|p| add_shipping(p, shipping))
+        .map(|p| add_shipping(p, shipping)) // Map vì add_shipping không sinh ra lỗi
         .and_then(confirm_order)
 }
 ```
@@ -672,14 +574,14 @@ fn place_order_v2(input: UnvalidatedOrder, catalog: &HashMap<String, u64>, shipp
 
 ---
 
-**Bài 2** (15 phút): Discount rules
+**Bài 2** (15 phút): Quy tắc giảm giá
 
-Implement business rules:
-- Orders > 500.000đ → 5% discount
-- Orders > 1.000.000đ → 10% discount
-- VIP customers → extra 5% on top
+Thực hiện yêu cầu kinh doanh mới:
+- Đơn hàng > 500.000đ → Giảm 5%
+- Đơn hàng > 1.000.000đ → Giảm 10%
+- Khách VIP → Giảm thêm 5% cộng dồn
 
-Thêm `apply_discount` step vào pipeline.
+Hãy viết hàm `calculate_discount(subtotal: u64, is_vip: bool) -> u32` và viết Unit Test cho nó.
 
 <details><summary>✅ Lời giải Bài 2</summary>
 
@@ -692,19 +594,6 @@ fn calculate_discount(subtotal: u64, is_vip: bool) -> u32 {
     };
     let vip_bonus = if is_vip { 5 } else { 0 };
     volume_discount + vip_bonus
-}
-
-fn apply_discount(order: PricedOrder, is_vip: bool) -> PricedOrder {
-    let discount_pct = calculate_discount(order.subtotal.0, is_vip);
-    let discount_amount = order.subtotal.0 * discount_pct as u64 / 100;
-    let new_subtotal = order.subtotal.0 - discount_amount;
-    let new_tax = new_subtotal * 10 / 100;
-    PricedOrder {
-        subtotal: Price(new_subtotal),
-        tax: Price(new_tax),
-        total: Price(new_subtotal + new_tax),
-        ..order
-    }
 }
 
 // Tests
@@ -726,23 +615,36 @@ fn vip_gets_extra() { assert_eq!(calculate_discount(700_000, true), 10); }
 
 | Vấn đề | Nguyên nhân | Giải pháp |
 |---------|-------------|-----------|
-| "Quá nhiều types" | Mỗi state = type riêng | Đúng! Types = documentation. Compiler enforces transitions |
-| "Pipeline dài" | Nhiều steps | Tách helper functions, keep pipeline flat |
-| "Validation collect errors phức tạp" | Manual Vec<String> | Validated pattern (Ch 24) hoặc custom macro |
-| "Clone overhead" | Chuyển ownership qua steps | Dùng owned values, consume mỗi step |
+| "Sao phải tạo quá nhiều type Struct cho Order thế?" | Bạn thấy phiền vì mỗi State cần một Type riêng. | Đúng! Types sinh ra là để làm Tài liệu (Documentation). Nhờ nó, Compiler mới bảo vệ bạn khỏi việc xử lý sai thứ tự. |
+| "Pipeline dài và lồng nhau khó đọc" | Bạn xử lý quá nhiều logic phức tạp ngay bên trong `and_then`. | Tách chúng ra thành các hàm Helper độc lập, giữ cho dây chuyền (pipeline) luôn phẳng. |
+| "Phải Clone dữ liệu liên tục qua mỗi bước" | Bạn đang truyền reference và tốn công Copy. | Truyền Ownership thẳng tay (consume value) cho mỗi hàm (ví dụ hàm nhận `order: ValidatedOrder` thay vì `&ValidatedOrder`). |
 
 ---
 
+---
+
+## ✅ Checkpoint 37
+
+1. Trong capstone này, module nào **không** được import bất cứ crate bên ngoài nào ngoài `std` và `serde`?
+2. Vì sao smart constructor trả `Result` thay vì panic khi dữ liệu sai?
+3. Property-based test phù hợp với phần nào của domain model này nhất?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Module **domain**. Đó là phép thử nhanh nhất cho kiến trúc onion: nếu domain phải kéo theo `sqlx` hay `axum`, ranh giới đã vỡ.
+2. Vì dữ liệu sai là **tình huống nghiệp vụ được dự kiến**, không phải bug của lập trình viên. `panic!` dành cho bất biến bị vi phạm trong chính code của bạn; `Result` dành cho đầu vào từ thế giới bên ngoài.
+3. Round-trip serialize (`serde_json::from_str(&to_string(&x)) == x`) và bất biến của state machine (không đường đi hợp lệ nào dẫn tới trạng thái không hợp lệ).
+</details>
+
 ## Tóm tắt
 
-- ✅ **Event Storming** → Commands → Events → Types: Discovery → Design → Code.
-- ✅ **Value Objects**: `OrderId`, `EmailAddress`, `Quantity`, `Price`, `ProductCode` — smart constructors, validated at creation.
-- ✅ **State Machine**: `UnvalidatedOrder` → `ValidatedOrder` → `PricedOrder` → `ConfirmedOrder`. Compiler enforces transitions!
-- ✅ **Pipeline**: `validate.and_then(price).and_then(confirm)` — ROP in action.
-- ✅ **Error handling**: Collect ALL validation errors, `OrderError` enum.
-- ✅ **Testing**: 9 unit tests covering validation, pricing, full workflow.
-- ✅ **All pure functions**: No IO, no database — domain logic readable, testable, composable.
+- ✅ **Khám phá Domain**: Đi từ Yêu cầu nghiệp vụ → Sự kiện → Các kiểu dữ liệu.
+- ✅ **Value Objects**: Chặn đứng mọi dữ liệu bẩn từ vòng gửi xe bằng Smart constructors.
+- ✅ **State Machine**: Mọi bước chuyển mình (từ thô → đã duyệt → đã tính tiền) đều được ràng buộc chặt bởi Rust Compiler thông qua Type System.
+- ✅ **Pipeline**: Chắp nối dây chuyền sản xuất mượt mà bằng ROP (`and_then`).
+- ✅ **Lợi ích tối thượng**: Khi toàn bộ hệ thống Core Domain là Pure Functions, bạn test nó vô cùng dễ dàng, đọc nó như đọc tiểu thuyết và không bao giờ sợ hãi khi bảo trì!
 
 ## Tiếp theo
 
-→ Chapter 38: **Database Fundamentals & SQL** — relational model, JOINs, indexing, transactions, Rust crates (`sqlx`, `diesel`).
+→ Hãy chuyển sang **Chapter 44 — Capstone Part 2** (hay Chương Capstone cuối cùng) nơi chúng ta sẽ biến Domain tuyệt đẹp này thành một hệ thống Web hoàn chỉnh với Cơ sở dữ liệu và API!

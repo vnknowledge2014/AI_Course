@@ -582,6 +582,22 @@ Failure at step 2:
 
 ---
 
+---
+
+## ✅ Checkpoint 42
+
+1. CAP nói "chọn 2 trong 3", nhưng vì sao thực tế bạn chỉ được chọn giữa C và A?
+2. Exactly-once delivery có tồn tại thật không?
+3. Vector clock giải quyết điều gì mà timestamp không giải quyết được?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Vì **partition là chuyện xảy ra, không phải lựa chọn**. Mạng sẽ đứt, và khi đứt bạn buộc phải quyết định: từ chối phục vụ (giữ C) hay phục vụ với dữ liệu có thể cũ (giữ A). P luôn phải có.
+2. Không, ở tầng truyền tin thì không. Cái tồn tại là **at-least-once + xử lý idempotent**, cho ra hiệu ứng tương đương exactly-once. Mọi hệ thống quảng cáo "exactly-once" đều đang làm đúng điều này ở bên dưới.
+3. Xác định quan hệ **nhân quả**. Timestamp trên hai máy khác nhau không so được (đồng hồ lệch), và nó không cho biết sự kiện A có *biết* về sự kiện B hay không. Vector clock ghi lại chính điều đó, nên phân biệt được "xảy ra sau" với "xảy ra đồng thời".
+</details>
+
 ## Tóm tắt
 
 - ✅ **CAP**: Pick CP (bank) or AP (social). Partition tolerance = non-negotiable in distributed.

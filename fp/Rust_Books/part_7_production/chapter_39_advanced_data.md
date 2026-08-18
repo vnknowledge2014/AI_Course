@@ -159,6 +159,44 @@ Thay vì ghi thẳng vào DB, App chỉ ghi vào Cache/Memory. Sau đó có 1 ba
 | **ScyllaDB** | Column | Ghi cực kỳ khổng lồ (Metrics, IoT). Tốc độ ghi bàn thờ. | Đọc dữ liệu linh tinh, Query có WHERE đa dạng. |
 | **Neo4j** | Graph | Phân tích quan hệ (Mạng xã hội X quen Y, AI Recommendation). | Lưu dữ liệu bảng biểu bình thường. |
 
+---
+
+## ✅ Checkpoint 39
+
+1. Vì sao "cache invalidation" được gọi là một trong hai bài toán khó nhất?
+2. Event store append-only. Vậy làm sao sửa một event ghi sai?
+3. `sqlx` kiểm tra query lúc biên dịch. Điều đó đòi hỏi gì khi chạy CI?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Vì không có tín hiệu nào cho biết dữ liệu đã cũ — bạn phải tự suy ra từ mọi đường ghi có thể. Bỏ sót một đường là cache sai vĩnh viễn, mà lại không có lỗi nào nổ ra.
+2. **Không sửa.** Bạn ghi thêm một event bù trừ (`OrderAmountCorrected`). Lịch sử là bất biến — đó chính là tài sản của Event Sourcing, không phải hạn chế.
+3. Cần một database thật lúc biên dịch, hoặc file `.sqlx/` (offline mode) được commit. Trong CI, chạy `cargo sqlx prepare --check` để chắc chắn cache offline còn khớp với schema.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (10 phút).** Viết migration `sqlx` thêm cột `version` vào bảng `orders`, kèm cả bản `down`.
+
+**Bài 2 (15 phút).** Cài cache-aside với `redis-rs`: đọc cache → miss thì đọc DB → ghi lại kèm TTL có jitter.
+
+**Bài 3 (25 phút).** Cài event store tối giản: bảng append-only + hàm `rebuild(aggregate_id) -> Order` dùng `fold`. Thêm snapshot mỗi 100 event.
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| `sqlx` không biên dịch được trong CI | Không có DATABASE_URL, thiếu cache offline | `cargo sqlx prepare`, commit thư mục `.sqlx/` |
+| Deadlock trong connection pool | Giữ connection trong lúc chờ connection khác | Không lồng lời gọi cần pool; lấy connection sớm, trả sớm |
+| Redis timeout khi tải cao | Pool quá nhỏ | Tăng pool; dùng pipelining cho thao tác theo lô |
+| Rebuild event ngày càng chậm | Không có snapshot | Snapshot định kỳ, replay từ snapshot gần nhất |
+| Migration chạy hai lần trên nhiều instance | Không có khoá | Dùng advisory lock của PostgreSQL quanh bước migrate |
+
 ## Tóm tắt
 
 - ✅ **Zero-Downtime Migration**: Thêm cột là an toàn. Xóa/Đổi tên cột phải làm qua nhiều bước trung gian.

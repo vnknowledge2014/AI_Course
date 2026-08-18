@@ -155,6 +155,52 @@ asyncio.run(queue.run_worker())
 
 ---
 
+---
+
+## ✅ Checkpoint 34
+
+1. Cache-aside và write-through khác nhau ở chỗ nào? Cái nào có nguy cơ trả dữ liệu cũ?
+2. Vì sao phải **xoá** cache khi update chứ không **ghi đè** nó?
+3. Celery và `arq` — chọn cái nào cho một app FastAPI thuần async?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Cache-aside ghi DB rồi xoá cache; lần đọc sau mới nạp lại (lazy). Write-through ghi cả DB lẫn cache cùng lúc. Cache-aside có khoảng thời gian ngắn cache rỗng (chỉ chậm), còn write-through nếu ghi cache thành công mà ghi DB thất bại thì cache **sai** — nguy hiểm hơn nhiều.
+2. Vì hai request update đồng thời có thể ghi vào cache theo thứ tự ngược với thứ tự ghi vào DB, khiến cache giữ giá trị cũ vĩnh viễn. Xoá thì lần đọc sau luôn lấy lại sự thật từ DB.
+3. `arq` — nó async-native, dùng chung event loop và Redis pool với app. Celery vốn đồng bộ; chạy trong app async được nhưng phải qua thread pool, thêm một tầng phức tạp không cần thiết.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (5 phút).** Thêm jitter cho TTL: `ttl + random.randint(0, ttl // 10)`. Giải thích nó chặn kịch bản hỏng nào.
+
+**Bài 2 (10 phút).** Viết decorator `@cached(ttl=60)` bọc một hàm async, dùng tên hàm + tham số làm khoá Redis. Cẩn thận với tham số không serialize được.
+
+**Bài 3 (20 phút).** Cài Transactional Outbox tối giản: ghi event vào bảng `outbox` **trong cùng transaction** với thay đổi nghiệp vụ, rồi một worker riêng đọc và publish. Vì sao cách này chặn được "đã ghi DB nhưng mất event"?
+
+<details>
+<summary>Gợi ý bài 3</summary>
+
+Mấu chốt: ghi nghiệp vụ và ghi outbox **cùng một transaction**. Nếu publish trực
+tiếp lên message queue trong khi transaction chưa commit, bạn có hai hệ thống
+riêng biệt không có transaction chung — và mọi thứ ở giữa đều có thể sập.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Triệu chứng | Nguyên nhân | Cách xử lý |
+|---|---|---|
+| Latency p99 tăng vọt, p50 bình thường | Cache stampede trên key hot | Thêm jitter TTL, hoặc lock khi làm mới |
+| Redis đầy bộ nhớ | Key không có TTL | Luôn dùng `setex`, đặt `maxmemory-policy allkeys-lru` |
+| Background task chạy hai lần | Queue at-least-once, handler không idempotent | Thiết kế handler idempotent bằng khoá nghiệp vụ |
+| Task biến mất khi worker restart | Ack trước khi xử lý xong | Ack **sau** khi xử lý thành công |
+| `TypeError: Object of type X is not JSON serializable` | Cache object phức tạp | Serialize qua Pydantic `.model_dump_json()` |
+
 ## Tóm tắt
 
 - ✅ **Caching**: Cứu cánh của Database. Sử dụng Decorator Pattern (rất hợp với FP) để bọc các hàm tính toán nặng/đọc DB. Luôn nhớ quản lý Cache Invalidation (TTL).

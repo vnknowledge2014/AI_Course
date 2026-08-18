@@ -190,7 +190,11 @@ const createOrder = (req: CreateOrderRequest): Result<OrderResponse> => {
         amount: req.items.reduce((sum, i) => sum + i.quantity * 100, 0),  // $1 per unit placeholder
         currency: "USD",
     };
+```
 
+#### Tiếp tục phân tích...
+
+```typescript
     return {
         tag: "ok",
         value: {
@@ -511,3 +515,36 @@ Mỗi chương xây dựng trên chương trước: pure functions (Ch12) → co
 Bây giờ bạn có TƯ DUY và CÔNG CỤ. Đi build. Ship with confidence. 🚀
 
 **Build great software. Ship with confidence. 🚀**
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (15 phút).** Thêm `/healthz` (liveness) và `/readyz` (readiness) tách biệt. Giải thích vì sao `/healthz` **không** được kiểm tra database.
+
+**Bài 2 (25 phút).** Thêm graceful shutdown: bắt SIGTERM, ngừng nhận request mới, chờ request đang chạy xong, rồi đóng Prisma client và Redis.
+
+**Bài 3 (40 phút).** Bổ sung vào CI: `tsc --noEmit`, `eslint`, `vitest run --coverage`, build Docker image và quét bằng `trivy`. Fail pipeline nếu coverage dưới 80%.
+
+<details>
+<summary>Gợi ý bài 1</summary>
+
+`/healthz` fail ⇒ orchestrator **restart** container. Nếu nó kiểm database, thì
+database chớp tắt một nhịp sẽ khiến toàn bộ replica restart đồng loạt — biến một
+sự cố nhỏ thành sự cố toàn hệ thống. `/readyz` fail chỉ rút instance khỏi load
+balancer, đúng thứ bạn muốn.
+</details>
+
+---
+
+## Tóm tắt
+
+- **Multi-stage Docker + `node:*-alpine`** giữ image nhỏ; đừng copy `node_modules`
+  của môi trường dev vào image production.
+- **Domain không biết gì về HTTP.** Tầng API là chỗ duy nhất `Result` của domain
+  được dịch sang mã trạng thái.
+- **Structured logging (Pino) chứ không `console.log`** — ở production, log phải
+  truy vấn được, không chỉ đọc được.
+- **Graceful shutdown là nguyên nhân phổ biến nhất của lỗi 502 khi deploy**, và
+  cũng là thứ hay bị bỏ quên nhất.
+- **CI phải chặn được merge.** Pipeline chỉ cảnh báo thì tương đương không có.

@@ -1,4 +1,4 @@
-# Chapter 43 — AI System Design & Infrastructure
+# Chapter 42B — AI System Design & Infrastructure
 
 > **Bạn sẽ học được**:
 > - Kiến trúc hệ thống RAG (Retrieval-Augmented Generation) Scale Lớn
@@ -11,7 +11,7 @@
 
 ---
 
-## 43.1 — TypeScript/Node.js trong Kiến trúc AI
+## 42B.1 — TypeScript/Node.js trong Kiến trúc AI
 
 Hệ thống AI không chỉ có Python và CUDA. Để phục vụ 1 triệu requests mỗi giây, quản lý WebSockets cho Chat UI, và tích hợp với cơ sở dữ liệu doanh nghiệp, Node.js là ứng cử viên số một nhờ hệ sinh thái khổng lồ và Non-blocking I/O.
 
@@ -22,7 +22,7 @@ Vai trò chính của Backend TypeScript:
 
 ---
 
-## 43.2 — Thiết kế AI Gateway
+## 42B.2 — Thiết kế AI Gateway
 
 Gateway đứng giữa User và LLM Server (chạy vLLM/Ollama).
 
@@ -63,7 +63,7 @@ app.post('/api/chat/stream', async (c) => {
 
 ---
 
-## 43.3 — RAG System Design Scale Lớn
+## 42B.3 — RAG System Design Scale Lớn
 
 Retrieval-Augmented Generation (RAG) không chỉ là nhét file PDF vào Prompt. Khi thiết kế hệ thống đọc 1 tỷ tài liệu doanh nghiệp:
 
@@ -80,7 +80,7 @@ Retrieval-Augmented Generation (RAG) không chỉ là nhét file PDF vào Prompt
 
 ---
 
-## 43.4 — Multi-Agent Orchestration
+## 42B.4 — Multi-Agent Orchestration
 
 Nhiều Agent tương tác với nhau (Agent Coder, Agent Tester). Hệ thống này phải mang tính bất đồng bộ hoàn toàn.
 
@@ -102,6 +102,44 @@ Nhờ DDD và FP, việc mô hình hóa các State và Event này trong TypeScri
 
 ---
 
+---
+
+## ✅ Checkpoint 42B
+
+1. TypeScript/Node hợp ở tầng nào của hệ AI, và không hợp ở tầng nào?
+2. Vì sao streaming gần như bắt buộc với giao diện chat LLM?
+3. Nút cổ chai chi phí của hệ RAG nằm ở đâu?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Hợp ở **tầng điều phối**: gateway, ghép RAG, gọi tool, streaming ra client — toàn việc I/O-bound mà event loop xử lý rất tốt. Không hợp ở tầng **tính toán nặng**: inference và embedding nên để Python/Rust/dịch vụ chuyên dụng.
+2. Vì một câu trả lời hoàn chỉnh mất 5–30 giây. Không stream thì người dùng nhìn màn hình trắng suốt thời gian đó. Stream không làm nhanh hơn, nhưng đưa TTFT xuống dưới một giây — và đó là thứ người dùng cảm nhận.
+3. **LLM inference**. Embedding và vector search tính bằng mili-giây và gần như miễn phí so với token của LLM. Tối ưu chi phí phải bắt đầu từ caching, chọn model, và cắt bớt ngữ cảnh thừa.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (15 phút).** Viết AI Gateway bằng Hono có SSE streaming. Đo TTFT so với bản trả về một lần.
+
+**Bài 2 (20 phút).** Thêm rate limit **theo token** thay vì theo request. Giải thích vì sao theo request là sai chỗ này.
+
+**Bài 3 (30 phút).** Cài semantic cache bằng một vector store: embed prompt, dùng lại câu trả lời khi cosine > 0,95. Đo tỉ lệ hit.
+
+---
+
+## 🔧 Troubleshooting
+
+| Vấn đề | Vì sao xảy ra | Hướng xử lý |
+|---|---|---|
+| SSE không stream, gom hết ở cuối | Proxy đang buffer | `proxy_buffering off`; đặt `X-Accel-Buffering: no` |
+| Request LLM timeout | Timeout mặc định quá ngắn | Tăng timeout và chuyển sang streaming |
+| Chi phí tăng bất thường | Không cache, prompt lặp lại | Semantic cache + prompt caching |
+| Kết quả RAG lệch chủ đề | Chunk quá lớn | Giảm chunk size, thêm overlap, thêm re-ranking |
+| Event loop nghẽn khi embed nhiều | Embedding chạy tại chỗ | Đẩy sang service riêng hoặc worker thread |
+
 ## Tóm tắt
 
 - Node.js cực kỳ lý tưởng để xây dựng vỏ bọc (Control Plane) cho các hệ thống AI.
@@ -109,4 +147,4 @@ Nhờ DDD và FP, việc mô hình hóa các State và Event này trong TypeScri
 - Multi-Agent Orchestration thực chất là bài toán Hệ Phân Tán (Distributed Systems), giải quyết bằng Event Sourcing.
 
 ## Tiếp theo
-Đây là mảnh ghép Production cuối cùng. Hãy đến với Chapter 44 (Capstone) để đóng gói mọi kiến thức vào một dự án thực tế.
+Đây là mảnh ghép Production cuối cùng. Hãy đến với Chapter 43 (Capstone) để đóng gói mọi kiến thức vào một dự án thực tế.

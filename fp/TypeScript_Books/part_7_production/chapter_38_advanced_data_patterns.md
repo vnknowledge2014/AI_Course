@@ -19,25 +19,26 @@ Bạn biết kho hàng thông minh không? Kho truyền thống: lưu SỐ LƯ�
 
 ## Advanced Data Patterns — Vượt qua CRUD
 
-Production applications cần nhiều hơn CRUD: schema migrations an toàn, CQRS cho read/write optimization, event sourcing cho audit trails, caching layers cho performance, NoSQL khi relational model không phù hợp.
+CRUD là bước đầu. Khi ứng dụng lớn lên, bạn gặp bốn bài toán mới:
 
-Chapter này trang bị toolkit xử lý data ở mức production. Mỗi pattern đi kèm TypeScript implementation và use case rõ ràng — bạn sẽ biết khi nào dùng Redis cache, khi nào dùng Event Store, khi nào switch sang MongoDB.
+**1. Schema evolution.** Schema đổi mỗi khi có feature mới. Migration phải an
+toàn (lùi được), có version (nằm trong git), và được test (chạy trong CI).
 
+**2. Tách read/write (CQRS).** 90% request là đọc. Nếu đọc và ghi dùng chung một
+model, phía đọc chịu thiệt vì model đang tối ưu cho ghi. CQRS tách ra: write
+store chuẩn hoá, read store phá chuẩn và cache sẵn.
 
-CRUD (Create, Read, Update, Delete) là bước đầu. Khi ứng dụng scale, bạn gặp 4 bài toán mới:
+**3. Caching.** Một vòng tới database mất 10–100ms; Redis mất 0,1ms — nhanh hơn
+100 lần. Nhưng cache invalidation là "một trong hai bài toán khó nhất của khoa
+học máy tính" (Phil Karlton). Ba chiến lược: cache-aside (lazy), write-through
+(eager), TTL (theo thời gian).
 
-**1. Schema evolution**: Database schema thay đổi khi features thêm. Migration scripts phải safe (reversible), tracked (version control), và tested (CI/CD).
+**4. Event Sourcing.** Thay vì ghi đè state hiện tại, lưu **chuỗi sự kiện** rồi
+dựng lại state bằng replay. Được: audit trail đầy đủ, time travel, replay để
+debug. Mất: phía đọc phức tạp hơn hẳn.
 
-**2. Read/Write separation** (CQRS): 90% requests là reads. Nếu read và write dùng cùng model, read bị chậm vì model optimized cho writes. CQRS tách: write store normalized, read store denormalized + cached.
-
-**3. Caching**: Database roundtrip = 10-100ms. Redis cache = 0.1ms. 100x faster. Nhưng cache invalidation = "one of the two hard things in CS" (Phil Karlton). Strategies: cache-aside (lazy), write-through (eager), TTL (time-based).
-
-**4. Event sourcing**: Thay vì overwrite current state, lưu **stream of events**. Reconstruct state bằng replay. Benefits: full audit trail, time travel, event replay cho debugging. Trade-off: complex reads.
-
-## Advanced Data Patterns — CQRS, Event Sourcing, Caching
-
-Migrations cho schema evolution. CQRS tách read/write models. Event sourcing lưu events thay vì state. Caching strategies (Redis, TTL, invalidation). Patterns này xuất hiện trong MỌI hệ thống production phức tạp.
-
+Mỗi pattern dưới đây đi kèm cài đặt TypeScript và một use case rõ ràng — để bạn
+biết **khi nào** dùng, không chỉ **dùng thế nào**.
 
 ## 38.1 — Database Migrations
 

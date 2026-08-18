@@ -130,6 +130,52 @@ Kể cả khi dùng EDA, đôi khi bạn vẫn BẮT BUỘC phải gọi API đ�
 
 ---
 
+---
+
+## ✅ Checkpoint 37
+
+1. Vì sao chuỗi REST đồng bộ giữa 5 service lại kém tin cậy hơn nhiều so với 1 service?
+2. Transactional Outbox giải quyết chính xác vấn đề gì?
+3. Circuit breaker mở ra. Điều đó bảo vệ ai — service gọi hay service bị gọi?
+
+<details>
+<summary>Đáp án</summary>
+
+1. Vì độ khả dụng **nhân** vào nhau. Năm service mỗi cái 99,9% cho ra 0,999⁵ ≈ 99,5% — tức là gấp năm lần thời gian chết. Thêm nữa, độ trễ cộng dồn và một service chậm sẽ giữ kết nối của toàn bộ chuỗi phía trên.
+2. Vấn đề "dual write": ghi database **và** publish message là hai hệ thống riêng, không có transaction chung. Outbox gộp chúng thành một lần ghi database duy nhất; worker publish sau, và có thể thử lại an toàn.
+3. **Cả hai.** Service gọi không còn treo chờ timeout hàng loạt (giữ thread/connection). Service bị gọi được nghỉ để hồi phục thay vì tiếp tục nhận tải trong lúc đang gãy.
+</details>
+
+---
+
+## 🏋️ Bài tập
+
+**Bài 1 (5 phút).** Tính độ khả dụng của một chuỗi 8 service, mỗi cái 99,95%. So với một monolith 99,9%. Con số này nói gì về "monolith-first"?
+
+**Bài 2 (15 phút).** Cài retry với exponential backoff **và jitter** bằng `tenacity`. Giải thích vì sao thiếu jitter sẽ tạo ra "thundering herd".
+
+**Bài 3 (25 phút).** Cài outbox: bảng `outbox(id, aggregate_id, event_type, payload, published_at)`, ghi trong cùng transaction với thay đổi nghiệp vụ, worker `arq` poll và publish. Xử lý cả trường hợp worker crash giữa chừng.
+
+<details>
+<summary>Gợi ý bài 3</summary>
+
+Worker crash sau khi publish nhưng trước khi đánh dấu `published_at` → event
+được gửi hai lần. Đó là **at-least-once**, và đúng chuẩn. Việc còn lại thuộc về
+phía nhận: handler phải idempotent, thường bằng cách lưu `event_id` đã xử lý.
+</details>
+
+---
+
+## 🔧 Troubleshooting
+
+| Triệu chứng | Nguyên nhân | Cách xử lý |
+|---|---|---|
+| Một service chậm kéo sập cả hệ thống | Không có timeout / circuit breaker | Đặt timeout cho **mọi** lời gọi mạng; bọc `pybreaker` |
+| Event xử lý hai lần gây dữ liệu sai | Handler không idempotent | Khử trùng lặp theo `event_id` |
+| Retry làm service đang gãy càng gãy | Thiếu backoff/jitter | `tenacity` với `wait_random_exponential` |
+| Outbox tồn đọng | Worker chết lặng lẽ | Cảnh báo khi số bản ghi chưa publish vượt ngưỡng |
+| Thứ tự event bị đảo | Nhiều consumer song song | Phân vùng theo `aggregate_id` để cùng aggregate về cùng consumer |
+
 ## Tóm tắt
 
 - ✅ **Sync APIs**: Tránh gọi API đồng bộ nối tiếp nhau trong hệ thống phân tán.
@@ -141,4 +187,4 @@ Kể cả khi dùng EDA, đôi khi bạn vẫn BẮT BUỘC phải gọi API đ�
 
 Hệ thống phân tán giải quyết bài toán scale, nhưng tạo ra một cơn ác mộng mới: **Làm sao để Debug?**
 Khi một request đi qua 5 services và có 1 lỗi văng ra, bạn làm sao biết lỗi nằm ở máy chủ nào? 
-Mời bạn đến với **Chapter 38: Observability**.
+Mời bạn đến với **Chapter 37B: Observability**.
