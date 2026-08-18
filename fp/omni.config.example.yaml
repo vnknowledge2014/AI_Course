@@ -1,0 +1,194 @@
+# ─────────────────────────────────────────────────────────────────────
+# omni.config.EXAMPLE.yaml — bản mẫu AN TOÀN để commit.
+#
+# Cách dùng:
+#   cp omni.config.example.yaml omni.config.yaml
+#   export OLLAMA_API_KEY=...   SURREAL_PASS=...
+#
+# omni.config.yaml (bản thật, chứa credential) đã nằm trong .gitignore.
+# TUYỆT ĐỐI không hardcode API key vào file được git theo dõi.
+# ─────────────────────────────────────────────────────────────────────
+project:
+  name: "omni-project"
+  description: "An AI-powered project bootstrapped with OmniUltraAgent Kit"
+  version: "0.1.0"
+memory:
+  surreal_url: "http://127.0.0.1:18000/sql"
+  # ⚠️ WARNING: Change these credentials for production deployments! ⚠️
+  surreal_user: "${SURREAL_USER:-root}"
+  surreal_pass: "${SURREAL_PASS}"
+  surreal_ns: "omni"
+  # Per-project database name. Auto-set by 'omni setup' from directory name.
+  # All projects share namespace 'omni'; isolation is via separate databases.
+  # Default: "brain" (same as global DB). Override for multi-project setups.
+  surreal_db: "brain"
+  # Global namespace and database for shared data (skills, system metadata).
+  # All projects share these. Override only if running multiple Omni clusters.
+  global_ns: "omni"
+  global_db: "brain"
+  ollama_url: "http://127.0.0.1:11434"
+  ollama_api_key: "${OLLAMA_API_KEY}"
+  # embedding_url: Explicit endpoint for embedding model (always local Ollama).
+  # If not set, falls back to ollama_url. Set this to force local even when
+  # OLLAMA_HOST env var points to a cloud URL.
+  embedding_url: "http://127.0.0.1:11434"
+  embedding_model: "snowflake-arctic-embed2:568m"
+  # Embedding vector dimension. Must match the model's output.
+  # snowflake-arctic-embed2:568m = 1024, nomic-embed-text = 768, all-minilm = 384
+  embedding_dimension: 1024
+  # extraction_model: analyzer model used for RAG/knowledge extraction tasks.
+  # Routes via model_endpoints if listed there (same routing as agent models).
+  extraction_model: "glm-5.2:cloud"
+agents:
+  coder_model: "kimi-k2.7-code:cloud"
+  analyzer_model: "glm-5.2:cloud"
+  max_turns: 15
+  agentic_timeout_secs: 600
+  # Global DAG execution timeout (seconds). The entire swarm must complete within this.
+  # If timed out, completed task results are still persisted. Default: 1800 (30 min).
+  dag_timeout_secs: 1800
+  # Max agents running in parallel within one swarm wave.
+  # Must NOT exceed your Ollama Cloud plan's concurrent model limit:
+  #   Free plan:  1  (1 cloud model at a time)
+  #   $20 plan:   3  (3 cloud models at a time)
+  #   $200 plan: 10
+  # Exceeding this causes rate-limit timeouts and retry storms.
+  # NOTE: Both models are cloud — coder (deepseek-v4-pro) + analyzer (glm-5.2:cloud).
+  # All agents compete for the 3 cloud slots. Plan waves accordingly.
+  max_parallel_agents: 3
+  # Per-model context window overrides (tokens). Ollama supports up to 256K.
+  # Uncomment and adjust for your models:
+  context_window:
+    "kimi-k2.7-code:cloud": 256000
+    "glm-5.2:cloud": 976000
+  default_context_limit: 32000
+  context_overhead_tokens: 2000
+
+  # ─── Per-model API Endpoint Routing ────────────────────────────────────────
+  # Models listed here bypass local Ollama and call the endpoint directly.
+  # Models NOT listed fall back to memory.ollama_url (local Ollama at :11434).
+  # Embedding ALWAYS uses memory.embedding_url (local), never cloud.
+  # This lets you mix cloud and local models freely:
+  #   - Both cloud: list both models → api.ollama.com
+  #   - 1 cloud + 1 local: list only the cloud model
+  #   - Both local: leave empty or remove this section
+  model_endpoints:
+    "kimi-k2.7-code:cloud": "https://ollama.com"
+    "glm-5.2:cloud": "https://ollama.com"
+
+  # Resilience: drift detection, PAL routing, write-test cycle, RALPH loop
+  # (Ouroboros + BMALPH integration)
+  resilience:
+    drift_threshold: 0.4 # 0.0-1.0, trigger refocus above this
+    drift_check_interval: 3 # check every N turns (0 = disabled)
+    max_refocus: 2 # refocus attempts before stopping
+    max_escalations: 2 # PAL router max tier jumps
+    verify_after_write: false # auto write-test cycle
+    ralph_max_cycles: 3 # RALPH loop: max Retry→Adapt→Learn→Persist cycles before Halt
+    # Write Heartbeat: kills agents stuck in read-only analysis loops (BMALPH pattern)
+    write_heartbeat_warn_turns: 5 # warn agent after N turns without write_file/replace_in_file
+    write_heartbeat_kill_turns: 8 # stop agent after N turns without writing (0 = disabled)
+    # Circuit Breaker: stops agents making no progress or repeating errors (BMALPH pattern)
+    cb_no_progress_threshold: 3 # consecutive no-progress turns before circuit breaker opens
+    cb_same_error_threshold: 3 # consecutive identical errors before circuit breaker opens
+    cb_cooldown_turns: 1 # turns to wait before retrying after circuit breaker opens
+    # Max Iterations Warning: proactive urgency injection as turns run out (Strix pattern)
+    max_iter_warn_remaining: 3 # inject urgency warning when N turns remain
+    max_iter_critical_remaining: 1 # inject CRITICAL finish-now when N turns remain
+  
+  # Auto-inject Reviewer task if writing tasks exist. Default: true.
+  auto_review: true
+
+  # Optional validator model for dream Phase 3 validation gate.
+  # If empty or not set, falls back to analyzer_model.
+  validator_model: "glm-5.2:cloud"
+
+  # Per-model pricing overrides (in USD per 1M tokens: [input, output]).
+  model_pricing:
+    "kimi-k2.7-code:cloud": [1.5, 5.5]
+    "glm-5.2:cloud": [0.5, 0.5]
+
+# Post-Edit Diagnostics — Run compile/lint checks after file writes
+# Automatically detects Cargo (Rust), tsc (TS), pyright/ruff (Python), etc.
+diagnostics:
+  backend: "auto"        # "auto", "cargo", "tsc", "pyright", "ruff", "eslint", "govet", "none"
+  enabled: true          # Inject diagnostic results into tool response for self-correction
+  timeout_secs: 30       # Command timeout
+  # post_edit_command: "custom_command 2>&1 | head -n 30" # Override auto-detection
+
+# Lifecycle hooks — shell commands at specific events
+# Available events: pre_run, post_run, pre_wave, post_wave, pre_task, post_task, on_error
+# Environment vars: OMNI_HOOK_EVENT, OMNI_PROJECT_ROOT, OMNI_TASK_ID, OMNI_TASK_TITLE,
+#                   OMNI_TASK_ROLE, OMNI_TASK_STATUS, OMNI_WAVE_NUMBER, OMNI_ERROR
+hooks:
+  pre_run:
+    - command: "echo '[START] Run began' >> .agent/metrics.log"
+      fail_fast: false
+    # Create a virtual branch for this agent run
+    - command: "which but > /dev/null 2>&1 && but branch new agent/run-$(date +%Y%m%d-%H%M%S) -j 2>/dev/null || true"
+      timeout_secs: 10
+      fail_fast: false
+  post_run:
+    - command: "omni index --check-stale"
+      fail_fast: false
+    # Push all branches to remote
+    - command: "which but > /dev/null 2>&1 && but push -j 2>/dev/null || true"
+      timeout_secs: 30
+      fail_fast: false
+  post_task:
+    - command: "echo '[METRIC] task=$OMNI_TASK_TITLE role=$OMNI_TASK_ROLE status=$OMNI_TASK_STATUS' >> .agent/metrics.log"
+      timeout_secs: 5
+    # Auto-commit changes after each completed agent task with AI message
+    - command: "which but > /dev/null 2>&1 && but commit --ai -j 2>/dev/null || true"
+      timeout_secs: 15
+      fail_fast: false
+  on_error:
+    - command: "echo '[ERROR] task=$OMNI_TASK_TITLE error=$OMNI_ERROR' >> .agent/errors.log"
+    # Undo last operation on agent error (safer than git reset)
+    - command: "which but > /dev/null 2>&1 && but undo -j 2>/dev/null || true"
+      timeout_secs: 10
+      fail_fast: false
+# Security: sandbox execution and security pipeline settings
+security:
+  # Sandbox for security tools (sandbox_exec). Disabled by default.
+  # Enable for Red Team / Blue Team workflows.
+  sandbox:
+    enabled: false
+    image: "omni-sandbox:latest"
+    max_timeout_secs: 120
+    max_memory_mb: 512
+    # Override default allowed tools (Rust hardcodes 35+ tools when omitted):
+    # allowed_tools:
+    #   - nmap
+    #   - nuclei
+    #   - sqlmap
+    # Override default dangerous tools requiring HITL approval (Rust defaults: hydra, john, hashcat, medusa, sqlmap, metasploit):
+    # dangerous_tools:
+    #   - hydra
+    #   - hashcat
+
+search:
+  # Web Search integration — cascading strategy
+  # Options:
+  #   "auto"    — try SearXNG first, fallback to DuckDuckGo direct (recommended)
+  #   "searxng" — SearXNG only (requires Docker: omni brain start)
+  #   "ddg"     — DuckDuckGo HTML direct (no Docker needed, zero setup)
+  engine: "auto"
+  searxng_url: "http://127.0.0.1:8888" # Local SearXNG instance URL
+  max_results: 5                       # Maximum number of search results to return
+  timeout_secs: 15                     # HTTP request timeout for search APIs
+  # SearXNG engines filter (comma-separated). Empty = use all available engines.
+  # Available engines (70+): google, bing, duckduckgo, brave, startpage, qwant,
+  #   github, gitlab, stackoverflow, npm, pypi, crates.io, arxiv, pubmed,
+  #   semantic_scholar, wikipedia, youtube, google_images, bing_images, google_news
+  # Full list: https://docs.searxng.org/dev/engines/engines.html
+  # engines: "google,duckduckgo,github,stackoverflow,arxiv,wikipedia"
+
+# Dream — Memory consolidation settings (inspired by Claude Code AutoDream).
+# Periodically deduplicates, prunes stale entries, and cleans project memories.
+dream:
+  auto_enabled: true        # Auto-trigger after 'omni run' when conditions met
+  min_hours: 24             # Hours since last dream before auto-trigger
+  min_runs: 5               # 'omni run' executions since last dream
+  dedup_threshold: 0.92     # Cosine similarity threshold for duplicate detection
+  max_age_days: 90          # Max age (days) for memories before pruning

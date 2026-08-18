@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+vendor/
+target/
+.venv/
+venv/
+
+# Build output
+dist/
+build/
+.next/
+
+# ── Omni runtime & agent artifacts ───────────────────────────────
+# fallback_data chứa dump index tạm (có thể tới nhiều GB) — chỉ dùng cho
+# `omni index --import-fallback` rồi xoá. KHÔNG BAO GIỜ commit.
+.agent/fallback_data/
+.agent/memory/
+.agent/metrics.log
+.agent/errors.log
+.omni/
+.omni.pid
+.omni.log
+
+# ⚠️ omni.config.yaml chứa credential thật (ollama_api_key, surreal_pass).
+# Commit omni.config.example.yaml thay thế.
+omni.config.yaml
+
+# ── Raw reference sources (clone về để tra cứu, không phải nội dung sách) ──
+*_raw_data/
+.pageindex_raw_data/
+.rig_raw_data/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ── Game: dữ liệu sinh ra & runtime tải về ────────────────────────────────
+# src/data/ sinh từ markdown bằng `npm run ingest` — không commit bản sao.
+game/src/data/
+# Pyodide runtime tải bằng `npm run download-pyodide` (~13 MB).
+game/public/pyodide/

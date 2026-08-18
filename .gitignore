@@ -1,2 +1,9 @@
 venv/
 __pycache__/
+*.pyc
+
+# Raw sources: clone bằng `python3 clone_repos.py`, không commit nội dung
+repos/*/
+references/repos/
+
+.DS_Store
