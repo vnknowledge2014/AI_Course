@@ -299,6 +299,16 @@ impl<'a> BoKiemKieu<'a> {
                 }
                 Muc::Struct(s) => {
                     self.struct_co.push(s.ten.clone());
+                    // Struct dạng tuple `struct Email(String);` cũng phải nạp:
+                    // bỏ qua nó nghĩa là `e.1` trên một struct 1 trường lọt qua.
+                    if let ThanStruct::TheoViTri(cac) = &s.than {
+                        let m: HashMap<String, T> = cac
+                            .iter()
+                            .enumerate()
+                            .map(|(i, (k, _))| (i.to_string(), tu_kieu_ast(k)))
+                            .collect();
+                        self.truong_struct.insert(s.ten.clone(), m);
+                    }
                     if let ThanStruct::TheoTen(cac) = &s.than {
                         let m: HashMap<String, T> = cac
                             .iter()
@@ -363,10 +373,29 @@ impl<'a> BoKiemKieu<'a> {
                     }
                     T::Mo
                 } else {
-                    let cuoi = doan.last().unwrap();
-                    match self.thuoc_enum.get(cuoi) {
-                        Some(e) => T::Enum(e.clone()),
-                        None => T::Mo,
+                    let cuoi = doan.last().unwrap().clone();
+                    let truoc = doan[doan.len() - 2].clone();
+                    match self.thuoc_enum.get(&cuoi).cloned() {
+                        Some(e) => {
+                            // `Hinh::Tron` khi `Tron(i64)` cần payload: đó là
+                            // một hàm dựng chưa gọi, không phải giá trị `Hinh`.
+                            if let Some(n) = self.so_payload(&e, &cuoi) {
+                                if n > 0 {
+                                    self.bao_thieu_payload(bt.span(), &e, &cuoi, n);
+                                    return T::ChuaBiet("biến thể enum thiếu tham số");
+                                }
+                            }
+                            T::Enum(e)
+                        }
+                        None => {
+                            // `Mau::Tim` khi `Mau` có mà `Tim` không: gõ sai tên
+                            // biến thể — compiler biết chắc, phải nói ra.
+                            if self.enum_bien_the.contains_key(&truoc) {
+                                self.bao_khong_co_bien_the(bt.span(), &truoc, &cuoi);
+                                return T::ChuaBiet("biến thể enum không tồn tại");
+                            }
+                            T::Mo
+                        }
                     }
                 }
             }
@@ -425,20 +454,66 @@ impl<'a> BoKiemKieu<'a> {
                 )),
                 _ => T::Rong,
             },
-            BieuThuc::KhoiTaoStruct { duong_dan, .. } => {
+            BieuThuc::KhoiTaoStruct { duong_dan, truong, span, .. } => {
                 let ten = duong_dan.last().cloned().unwrap_or_default();
-                if self.struct_co.iter().any(|s| *s == ten) {
-                    T::Struct(ten)
-                } else {
-                    T::Mo
+                for (_, e) in truong {
+                    self.kieu_cua(e);
                 }
+
+                // Biến thể enum viết theo cú pháp struct: `Hinh::Tron { r: 5 }`
+                // trong khi `Tron` là biến thể dạng tuple.
+                if self.thuoc_enum.contains_key(&ten) && !self.struct_co.iter().any(|s| *s == ten) {
+                    let en = self.thuoc_enum[&ten].clone();
+                    self.bao_khoi_tao_sai_dang(*span, &en, &ten);
+                    return T::Enum(en);
+                }
+
+                if !self.struct_co.iter().any(|s| *s == ten) {
+                    self.bao_khong_co_struct(*span, &ten);
+                    return T::ChuaBiet("struct chưa khai báo");
+                }
+
+                if let Some(bang) = self.truong_struct.get(&ten).cloned() {
+                    for (k, e) in truong {
+                        match bang.get(k) {
+                            None => self.bao_truong_thua(e.span(), &ten, k, &bang),
+                            Some(mong) => {
+                                let thuc = self.kieu_cua(e);
+                                let mong = self.chuan_hoa(mong.clone());
+                                if thuc.chua_biet().is_none() && mong.chac_chan_lech(&thuc) {
+                                    self.bao_truong_sai_kieu(e.span(), &ten, k, &mong, &thuc);
+                                }
+                            }
+                        }
+                    }
+                    let mut khoa: Vec<&String> = bang.keys().collect();
+                    khoa.sort();
+                    for k in khoa {
+                        if !truong.iter().any(|(t, _)| t == k) {
+                            self.bao_thieu_truong(*span, &ten, k);
+                        }
+                    }
+                }
+                T::Struct(ten)
             }
             BieuThuc::GoiHam { ham, doi_so, span } => {
                 if let BieuThuc::DuongDan { doan, .. } = &**ham {
                     let cuoi = doan.last().cloned().unwrap_or_default();
                     if let Some(e) = self.thuoc_enum.get(&cuoi).cloned() {
                         for a in doi_so { self.kieu_cua(a); }
+                        if let Some(n) = self.so_payload(&e, &cuoi) {
+                            if n != doi_so.len() {
+                                self.bao_sai_arity_bien_the(*span, &e, &cuoi, n, doi_so.len());
+                                return T::ChuaBiet("biến thể enum sai số tham số");
+                            }
+                        }
                         return T::Enum(e);
+                    }
+                    if doan.len() >= 2 && self.enum_bien_the.contains_key(&doan[doan.len() - 2]) {
+                        let en = doan[doan.len() - 2].clone();
+                        for a in doi_so { self.kieu_cua(a); }
+                        self.bao_khong_co_bien_the(*span, &en, &cuoi);
+                        return T::ChuaBiet("biến thể enum không tồn tại");
                     }
                     if doan.len() >= 2 {
                         let k = &doan[doan.len() - 2];
@@ -488,8 +563,23 @@ impl<'a> BoKiemKieu<'a> {
                     },
                     _ => None,
                 };
-                match ten_struct.and_then(|n| self.truong_struct.get(&n).and_then(|m| m.get(ten).cloned())) {
-                    Some(t) => self.chuan_hoa(t),
+                match &ten_struct {
+                    Some(n) => match self.truong_struct.get(n) {
+                        Some(bang) => match bang.get(ten) {
+                            Some(t) => {
+                                let t = t.clone();
+                                self.chuan_hoa(t)
+                            }
+                            None => {
+                                // Đã biết CHẮC đây là struct nào; trường không có
+                                // thì đó là lỗi, không phải "chưa suy ra được".
+                                let bang = bang.clone();
+                                self.bao_truong_khong_co(bt.span(), n, ten, &bang);
+                                T::ChuaBiet("trường không tồn tại")
+                            }
+                        },
+                        None => T::Mo,
+                    },
                     None => T::Mo,
                 }
             }
@@ -750,6 +840,136 @@ impl<'a> BoKiemKieu<'a> {
         }
     }
 
+    /// Tên gần đúng nhất trong `co` so với `go` — để gợi ý "ý bạn là `x`?".
+    /// Khoảng cách Levenshtein; chỉ gợi ý khi đủ gần (≤ 1/3 độ dài).
+    fn gan_nhat<'b, I: Iterator<Item = &'b String>>(go: &str, co: I) -> Option<String> {
+        let mut tot: Option<(usize, String)> = None;
+        for ung in co {
+            let d = khoang_cach(go, ung);
+            if tot.as_ref().is_none_or(|(td, _)| d < *td) {
+                tot = Some((d, ung.clone()));
+            }
+        }
+        tot.filter(|(d, _)| *d * 3 <= go.chars().count().max(3)).map(|(_, s)| s)
+    }
+
+    /// Số tham số của một biến thể enum, `None` nếu chưa nạp được.
+    /// `Option`/`Result` dựng sẵn không nằm trong bảng nên trả `None` — đúng
+    /// ý: chưa mô hình hoá thì đừng phán.
+    fn so_payload(&self, en: &str, bien_the: &str) -> Option<usize> {
+        self.payload
+            .get(en)?
+            .iter()
+            .find(|(b, _)| b == bien_the)
+            .map(|(_, k)| k.len())
+    }
+
+    fn bao_khong_co_bien_the(&mut self, span: Span, en: &str, bien_the: &str) {
+        let ds_v = self.enum_bien_the.get(en).cloned().unwrap_or_default();
+        let ds = ds_v.iter().map(|s| format!("`{s}`")).collect::<Vec<_>>().join(", ");
+        let mut d = Diagnostic::loi("BR0326", format!("`{en}` không có biến thể `{bien_the}`"))
+            .tai(span, "biến thể này không nằm trong khai báo enum")
+            .vi_sao("Một enum liệt kê ĐẦY ĐỦ các khả năng — đó là toàn bộ sức mạnh của nó. Compiler biết chính xác danh sách ấy, nên tên lạ bị chặn ngay; cũng chính nhờ vậy `match` mới kiểm tra được bạn đã phủ hết hay chưa.");
+        if let Some(g) = Self::gan_nhat(bien_the, ds_v.iter()) {
+            d = d.sua(format!("có phải bạn muốn viết `{en}::{g}` không?"));
+        }
+        self.diags.push(d.sua(format!("`{en}` có: {ds}")).khai_niem("enum"));
+    }
+
+    fn bao_thieu_payload(&mut self, span: Span, en: &str, bien_the: &str, can: usize) {
+        self.diags.push(
+            Diagnostic::loi("BR0327", format!("`{en}::{bien_the}` cần {can} tham số nhưng đang dùng trần"))
+                .tai(span, "đây mới là hàm dựng, chưa phải một giá trị")
+                .vi_sao(format!("`{bien_the}` được khai báo là mang dữ liệu, nên bản thân cái tên chỉ là hàm để TẠO ra giá trị. Viết tên trần giống như nhắc đến `String::from` mà không gọi nó — bạn đang cầm công cụ chứ chưa cầm kết quả."))
+                .sua(format!("gọi nó: `{en}::{bien_the}(...)`"))
+                .khai_niem("enum"),
+        );
+    }
+
+    fn bao_sai_arity_bien_the(&mut self, span: Span, en: &str, bien_the: &str, can: usize, co: usize) {
+        self.diags.push(
+            Diagnostic::loi(
+                "BR0328",
+                format!("`{en}::{bien_the}` nhận {can} tham số nhưng được truyền {co}"),
+            )
+            .tai(span, format!("ở đây truyền {co}"))
+            .vi_sao("Số lượng dữ liệu mà mỗi biến thể mang theo được ghim lúc khai báo enum. Nhờ nó cố định, `match` mới tách được đúng từng phần ra mà không bao giờ trượt chỉ số.")
+            .sua(format!("truyền đúng {can} giá trị"))
+            .sua(format!("hoặc sửa khai báo `{bien_the}` cho khớp"))
+            .khai_niem("enum"),
+        );
+    }
+
+    fn bao_khong_co_struct(&mut self, span: Span, ten: &str) {
+        let mut d = Diagnostic::loi("BR0320", format!("không tìm thấy struct tên `{ten}`"))
+            .tai(span, "chưa có `struct` nào mang tên này")
+            .vi_sao("Rust không tự tạo kiểu khi bạn viết ra một cái tên lạ. Mọi struct phải được khai báo trước — đó là lý do gõ sai tên bị bắt ngay lúc biên dịch thay vì đẻ ra một object rỗng lúc chạy như trong JavaScript.");
+        if let Some(g) = Self::gan_nhat(ten, self.struct_co.iter()) {
+            d = d.sua(format!("có phải bạn muốn viết `{g}` không?"));
+        }
+        self.diags.push(d.sua(format!("hoặc khai báo `struct {ten} {{ ... }}`")).khai_niem("struct"));
+    }
+
+    fn bao_khoi_tao_sai_dang(&mut self, span: Span, en: &str, bien_the: &str) {
+        self.diags.push(
+            Diagnostic::loi("BR0321", format!("`{en}::{bien_the}` là biến thể dạng tuple, không phải dạng struct"))
+                .tai(span, "ở đây đang viết theo cú pháp `{ tên: giá_trị }`")
+                .vi_sao("Một biến thể enum mang dữ liệu theo VỊ TRÍ (`Tron(i64)`) hoặc theo TÊN (`Tron { r: i64 }`) — bạn chọn lúc khai báo enum, và phải dựng đúng theo cách đã chọn. Hai dạng không thay thế nhau được.")
+                .sua(format!("dựng theo vị trí: `{en}::{bien_the}(giá_trị)`"))
+                .sua(format!("hoặc đổi khai báo thành `{bien_the} {{ ... }}` nếu bạn muốn đặt tên trường"))
+                .khai_niem("enum"),
+        );
+    }
+
+    fn bao_truong_thua(&mut self, span: Span, ten: &str, truong: &str, bang: &HashMap<String, T>) {
+        let mut co: Vec<&String> = bang.keys().collect();
+        co.sort();
+        let ds = co.iter().map(|s| format!("`{s}`")).collect::<Vec<_>>().join(", ");
+        let mut d = Diagnostic::loi("BR0322", format!("struct `{ten}` không có trường `{truong}`"))
+            .tai(span, "trường này không nằm trong khai báo")
+            .vi_sao("Struct trong Rust có hình dạng cố định, quyết định lúc biên dịch. Không thể đính thêm trường lúc dựng như thêm key vào dict Python — bù lại compiler biết chính xác kích thước và bố cục của nó trong bộ nhớ.");
+        if let Some(g) = Self::gan_nhat(truong, bang.keys()) {
+            d = d.sua(format!("có phải bạn muốn viết `{g}` không?"));
+        }
+        self.diags.push(d.sua(format!("`{ten}` có các trường: {ds}")).khai_niem("struct"));
+    }
+
+    fn bao_thieu_truong(&mut self, span: Span, ten: &str, truong: &str) {
+        self.diags.push(
+            Diagnostic::loi("BR0323", format!("thiếu trường `{truong}` khi dựng `{ten}`"))
+                .tai(span, format!("chưa gán giá trị cho `{truong}`"))
+                .vi_sao("Rust không có `null` và không có giá trị mặc định ngầm. Muốn dựng một struct thì MỌI trường phải có giá trị — nhờ vậy không bao giờ tồn tại một giá trị nửa vời mà chương trình phải đoán xem đã khởi tạo xong chưa.")
+                .sua(format!("thêm `{truong}: ...` vào phần khởi tạo"))
+                .khai_niem("struct"),
+        );
+    }
+
+    fn bao_truong_sai_kieu(&mut self, span: Span, ten: &str, truong: &str, mong: &T, thuc: &T) {
+        self.diags.push(
+            Diagnostic::loi(
+                "BR0324",
+                format!("trường `{truong}` cần {} nhưng nhận {}", mong.hien_thi(), thuc.hien_thi()),
+            )
+            .tai(span, format!("giá trị này là {}", thuc.hien_thi()))
+            .vi_sao(format!("Khai báo `struct {ten}` đã ghim kiểu của `{truong}`. Kiểu của một trường là lời hứa với mọi đoạn mã đọc nó về sau; Rust không cho phá lời hứa đó ngay tại chỗ dựng."))
+            .sua(format!("đưa vào một giá trị {}", mong.hien_thi()))
+            .khai_niem("struct"),
+        );
+    }
+
+    fn bao_truong_khong_co(&mut self, span: Span, ten: &str, truong: &str, bang: &HashMap<String, T>) {
+        let mut co: Vec<&String> = bang.keys().collect();
+        co.sort();
+        let ds = co.iter().map(|s| format!("`{s}`")).collect::<Vec<_>>().join(", ");
+        let mut d = Diagnostic::loi("BR0325", format!("`{ten}` không có trường `{truong}`"))
+            .tai(span, "không đọc/ghi được trường không tồn tại")
+            .vi_sao(format!("Compiler biết chắc giá trị này là `{ten}` và biết đầy đủ danh sách trường của nó, nên nó bắt lỗi gõ sai tên ngay — không cần chạy tới dòng đó mới phát hiện."));
+        if let Some(g) = Self::gan_nhat(truong, bang.keys()) {
+            d = d.sua(format!("có phải bạn muốn viết `{g}` không?"));
+        }
+        self.diags.push(d.sua(format!("`{ten}` có các trường: {ds}")).khai_niem("struct"));
+    }
+
     fn bao_thieu_nhanh(&mut self, span: Span, t: &T, nhan_chung: &str) {
         self.diags.push(
             Diagnostic::loi("BR0300", "`match` chưa phủ hết mọi khả năng")
@@ -950,4 +1170,21 @@ pub fn kiem_tra(ct: &ChuongTrinh, diags: &mut Diagnostics) {
             }
         }
     }
+}
+
+/// Khoảng cách Levenshtein giữa hai chuỗi, đếm theo ký tự Unicode.
+fn khoang_cach(a: &str, b: &str) -> usize {
+    let a: Vec<char> = a.chars().collect();
+    let b: Vec<char> = b.chars().collect();
+    let mut truoc: Vec<usize> = (0..=b.len()).collect();
+    let mut nay = vec![0usize; b.len() + 1];
+    for (i, ca) in a.iter().enumerate() {
+        nay[0] = i + 1;
+        for (j, cb) in b.iter().enumerate() {
+            let doi = truoc[j] + usize::from(ca != cb);
+            nay[j + 1] = doi.min(truoc[j + 1] + 1).min(nay[j] + 1);
+        }
+        std::mem::swap(&mut truoc, &mut nay);
+    }
+    truoc[b.len()]
 }
