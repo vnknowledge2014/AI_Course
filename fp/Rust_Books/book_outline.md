@@ -3,7 +3,7 @@
 > Kết hợp: DDD Functional + FP Made Easier + Learn Go with Tests + F# Fun & Profit
 > Coverage: **~70%** FP/DDD · Full CS foundations included
 > Approach: Quick Primer → Foundations → Beginner → Intermediate → Advanced → Principal
-> Tổng: **68 chương** (Ch0–Ch55, gồm các chương phụ 3B/3C/27b/31b/32b/36B/43B) + **5 phụ lục**
+> Tổng: **63 chương** (Ch0–Ch55 là 56 chương chính, cộng 7 chương phụ 3B/3C/27b/31b/32b/36B/43B) + **5 phụ lục**
 
 ---
 
@@ -293,7 +293,7 @@ Declarative macros (`macro_rules!`), attribute macros (`#[derive]`, `#[tokio::ma
 | **Part VII** Production | Ch37–44 (9) | 3.801 | 93 |
 | **Part VIII** Agentic AI | Ch45–55 (11) | 1.636 | 44 |
 | **Phụ lục** | A–E (5) | 833 | 33 |
-| **TỔNG** | **68 chương + 5 phụ lục** | **31.958** | **831** |
+| **TỔNG** | **63 chương + 5 phụ lục** | **33.176** | **833** |
 
 ---
 

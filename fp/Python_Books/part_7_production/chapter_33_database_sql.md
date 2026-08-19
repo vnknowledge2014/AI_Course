@@ -199,7 +199,9 @@ và cũng là lý do đáng để học SQL cho tử tế.
 
 1. Số dấu phẩy động không biểu diễn chính xác được số thập phân hệ 10 — cộng dồn
    tiền sẽ lệch dần. Dùng số nguyên đơn vị nhỏ nhất, hoặc `NUMERIC`.
-2. ```sql
+2. Dùng `NOT EXISTS`:
+
+   ```sql
    SELECT DISTINCT c.email
    FROM customers c
    JOIN orders o ON o.customer_id = c.id
@@ -208,6 +210,7 @@ và cũng là lý do đáng để học SQL cho tử tế.
        WHERE o2.customer_id = c.id AND o2.status = 'confirmed'
    );
    ```
+
 3. `WHERE` — nó lọc được theo từng row, không cần chờ gom nhóm. Lọc sớm giúp
    `GROUP BY` xử lý ít dữ liệu hơn.
 </details>

@@ -209,8 +209,9 @@ So sánh ba hệ sinh thái Result/Either: tên method, cách compose, cách x�
 | **Part IV** DDD | Ch18–24 (7) | 973 | 21 |
 | **Part V** FP Patterns | Ch25–28c (7) | 5.118 | 113 |
 | **Part VI** Testing & Web | Ch29–32 (4) | 660 | 20 |
-| **Part VII** Production | Ch33–40 (9) | — | — |
-| **Phụ lục** | A–C (3) | — | — |
+| **Part VII** Production | Ch33–40 (9) | 2.594 | 54 |
+| **Phụ lục** | A–C (3) | 758 | 27 |
+| **TỔNG** | **46 chương + 3 phụ lục** | **15.177** | **354** |
 
 > ⚠️ Part V (FP Patterns) hiện dày hơn hẳn các phần còn lại. Part III, IV, VI là
 > các phần mỏng nhất và là ưu tiên mở rộng tiếp theo.

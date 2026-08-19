@@ -258,4 +258,4 @@ Full-stack: Next.js/Hono + PostgreSQL (Prisma), Redis cache, JWT auth, HTTPS, ra
 | **Part VI** Testing & Fullstack | Ch31–36 (6) | 2.274 | 44 |
 | **Part VII** Production | Ch37–43 (8) | 3.023 | 47 |
 | **Phụ lục** | A–B (2) | 244 | 4 |
-| **TỔNG** | **50 chương + 2 phụ lục** | **32.182** | **683** |
+| **TỔNG** | **50 chương + 2 phụ lục** | **32.550** | **683** |
