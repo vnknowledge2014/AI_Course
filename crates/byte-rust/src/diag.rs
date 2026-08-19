@@ -15,10 +15,15 @@ use core::fmt::Write as _;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Severity {
-    /// Chặn việc chạy chương trình.
+    /// Mã của người học sai. Chặn việc chạy.
     Loi,
     /// Chạy được nhưng gần như chắc chắn không phải ý người viết.
     CanhBao,
+    /// **Byte không đủ sức kiểm tra chỗ này.**
+    ///
+    /// Không phải lỗi của người học, nên không được hiển thị như lỗi và không
+    /// được trừ điểm. Đây là lời thú nhận của công cụ.
+    ChuaHoTro,
 }
 
 impl Severity {
@@ -26,6 +31,31 @@ impl Severity {
         match self {
             Severity::Loi => "lỗi",
             Severity::CanhBao => "cảnh báo",
+            Severity::ChuaHoTro => "chưa hỗ trợ",
+        }
+    }
+}
+
+/// Kết cục của một lần chạy — ba khả năng, không phải hai.
+///
+/// Engine cũ chỉ có `Đạt`/`Không đạt`, nên mọi thứ nó không hiểu đều bị ép vào
+/// một trong hai — và cả hai đều là lời nói dối. Xem `docs/decisions/ADR-002`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum KetCuc {
+    /// Byte đã chạy code và nó đúng.
+    Dat,
+    /// Byte đã chạy code và nó sai.
+    KhongDat,
+    /// Byte không đủ sức đưa ra phán quyết.
+    ChuaHoTro,
+}
+
+impl KetCuc {
+    pub fn ma(self) -> &'static str {
+        match self {
+            KetCuc::Dat => "dat",
+            KetCuc::KhongDat => "khong_dat",
+            KetCuc::ChuaHoTro => "chua_ho_tro",
         }
     }
 }
@@ -61,6 +91,11 @@ pub struct Diagnostic {
     pub cach_sua: Vec<String>,
     /// Khái niệm liên quan, để app mở đúng bài học.
     pub khai_niem: Option<&'static str>,
+    /// Tên tính năng chưa hỗ trợ, ví dụ `"borrow-check-cfg"`, `"async"`.
+    ///
+    /// Chỉ có khi `severity == ChuaHoTro`. App dùng nó để gợi ý lối đi khác
+    /// (đối chiếu `cargo` thật trên Desktop, hoặc chuyển sang bài khác).
+    pub tinh_nang: Option<&'static str>,
 }
 
 impl Diagnostic {
@@ -73,11 +108,28 @@ impl Diagnostic {
             vi_sao: None,
             cach_sua: Vec::new(),
             khai_niem: None,
+            tinh_nang: None,
         }
     }
 
     pub fn canh_bao(code: &'static str, message: impl Into<String>) -> Self {
         Self { severity: Severity::CanhBao, ..Self::loi(code, message) }
+    }
+
+    /// Byte không đủ sức kiểm tra chỗ này.
+    ///
+    /// `tinh_nang` là mã ổn định của thứ chưa hỗ trợ (`"async"`,
+    /// `"borrow-check-cfg"`, `"macro-nguoi-dung"`…) để app định tuyến.
+    pub fn chua_ho_tro(
+        code: &'static str,
+        tinh_nang: &'static str,
+        message: impl Into<String>,
+    ) -> Self {
+        Self {
+            severity: Severity::ChuaHoTro,
+            tinh_nang: Some(tinh_nang),
+            ..Self::loi(code, message)
+        }
     }
 
     pub fn nhan(mut self, label: Label) -> Self {
@@ -178,6 +230,26 @@ impl Diagnostics {
         self.items.iter().any(|d| d.severity == Severity::Loi)
     }
 
+    pub fn co_chua_ho_tro(&self) -> bool {
+        self.items.iter().any(|d| d.severity == Severity::ChuaHoTro)
+    }
+
+    /// Kết cục cuối cùng.
+    ///
+    /// **`ChuaHoTro` thắng `Loi`.** Nếu ta không hiểu hết chương trình thì không
+    /// có tư cách khẳng định nó sai — kể cả khi đã bắt được một lỗi trước đó.
+    /// Chọn ngược lại sẽ dẫn tới đúng chế độ hỏng của engine giả cũ: tự tin đưa
+    /// ra phán quyết về thứ mình không đọc nổi.
+    pub fn ket_cuc(&self) -> KetCuc {
+        if self.co_chua_ho_tro() {
+            KetCuc::ChuaHoTro
+        } else if self.co_loi() {
+            KetCuc::KhongDat
+        } else {
+            KetCuc::Dat
+        }
+    }
+
     pub fn is_empty(&self) -> bool {
         self.items.is_empty()
     }
@@ -199,6 +271,17 @@ impl Diagnostics {
     /// Người mới học mà nhận 12 lỗi cùng lúc thì bỏ cuộc; hơn nữa lỗi sau thường
     /// chỉ là hệ quả của lỗi đầu.
     pub fn rut_gon(mut self) -> Self {
+        // Chẩn đoán ChuaHoTro luôn được giữ: nó quyết định kết cục.
+        if self.co_chua_ho_tro() {
+            let giu: Vec<Diagnostic> = self
+                .items
+                .iter()
+                .filter(|d| d.severity != Severity::Loi)
+                .cloned()
+                .collect();
+            self.items = giu;
+            return self;
+        }
         if let Some(vi_tri) = self.items.iter().position(|d| d.severity == Severity::Loi) {
             let mut giu: Vec<Diagnostic> =
                 self.items.iter().take(vi_tri).cloned().collect();

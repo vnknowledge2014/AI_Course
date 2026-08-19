@@ -1,6 +1,10 @@
 # ADR-001 — Cách thực thi Rust của người học, offline, trên cả 7 nền tảng
 
-**Trạng thái:** Đã kiểm chứng bằng thực nghiệm · 2026-08-19
+**Trạng thái:** ⚠️ **BỊ THAY THẾ bởi [ADR-002](ADR-002-rust-scope.md)** · 2026-08-19
+
+> Giữ lại làm lịch sử. Quyết định nền (không dùng `rustc`, tự viết interpreter
+> biên dịch WASM) vẫn đứng vững và đã được đo. Nhưng **phạm vi** mà ADR này hứa
+> thì sai ở một điểm quan trọng — xem §"Sai sót của ADR này" ở cuối.
 **Bối cảnh:** Học liệu Byte Academy dạy Rust cho người mới, phải chạy offline trên
 macOS / Linux / Windows / Chrome / Firefox / Android / iOS.
 
@@ -39,8 +43,8 @@ viết bằng Rust rồi biên dịch sang `wasm32-unknown-unknown` và đóng g
 Tập con phủ đúng những gì giáo trình dạy, mở rộng dần theo từng Realm:
 `let`/`mut`, kiểu vô hướng, `fn`, `if`/`match`, `loop`/`while`/`for`, closure,
 `struct`/`enum`, `Option`/`Result`, `Vec`/`HashMap`, trait + generic cơ bản.
-Ownership/borrowing **được mô phỏng và kiểm tra** — đây chính là điểm dạy học quan
-trọng nhất của Rust, nên interpreter bắt buộc phải báo lỗi mượn giống compiler thật.
+~~Ownership/borrowing **được mô phỏng và kiểm tra** — interpreter bắt buộc phải báo
+lỗi mượn giống compiler thật.~~ ← **CÂU NÀY SAI, xem ADR-002.**
 
 ## Bằng chứng thực nghiệm
 
@@ -120,3 +124,28 @@ Không đổi: Python dùng **Pyodide** (CPython thật, biên dịch WASM), Typ
 1. Cùng nằm sau một interface `ExecutionEngine` chung.
 2. Cùng chạy trong **Web Worker** — hiện TypeScript đang chạy trên main thread bằng
    `new Function()`, nên một vòng lặp vô hạn của người học sẽ treo cả giao diện.
+
+
+---
+
+## Sai sót của ADR này
+
+ADR-001 hứa interpreter sẽ "báo lỗi mượn giống compiler thật". **Không làm được,
+và cố làm thì có hại.**
+
+Lý do kỹ thuật: **NLL (Non-Lexical Lifetimes) được định nghĩa trên MIR** — trên đồ
+thị luồng điều khiển cộng với phân tích vùng sống của region. Nó **không tái tạo
+trung thực được trên AST**. Một bản "NLL rút gọn chạy trên AST" sẽ từ chối đúng
+những chương trình mà `rustc` đã chấp nhận từ edition 2018 — tức là dạy người học
+một luật ownership **không tồn tại**. Với học liệu, dạy sai còn tệ hơn không dạy.
+
+Những gì thực sự giữ lại được, và đã cài trong `crates/byte-rust`:
+- **Move-check hẹp**: dùng lại một binding không-`Copy` sau khi đã move, trên chuỗi
+  câu lệnh thẳng hàng không rẽ nhánh. Quyết định được mà không cần CFG.
+- Mọi tình huống ownership khác (qua nhánh, qua vòng lặp, reborrow, lifetime tường
+  minh) phải trả kết cục thứ ba: **`ChuaHoTro`**, kèm tên tính năng.
+
+Ước lượng khối lượng cũng sai: ADR-001 ngầm định interpreter cỡ 1.200 dòng.
+Thực tế `byte-rust` v1 cần **9.000–13.000 dòng** (hiện có ~5.700).
+
+Chi tiết phạm vi đóng: [ADR-002](ADR-002-rust-scope.md).

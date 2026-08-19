@@ -53,7 +53,7 @@ pub unsafe extern "C" fn br_chay(ptr: *const u8, len: usize) -> u64 {
         Ok(s) => s,
         Err(_) => {
             return dong_goi(
-                r#"{"ok":false,"xuat":"","chan_doan":[{"ma":"BR0000","muc":"loi","thong_diep":"mã nguồn không phải UTF-8 hợp lệ","dong":1,"cot":1,"do_dai":0,"vi_sao":null,"cach_sua":[],"khai_niem":null,"van_ban":""}]}"#
+                r#"{"ok":false,"ket_cuc":"khong_dat","xuat":"","chan_doan":[{"ma":"BR0000","muc":"loi","thong_diep":"mã nguồn không phải UTF-8 hợp lệ","dong":1,"cot":1,"do_dai":0,"vi_sao":null,"cach_sua":[],"khai_niem":null,"tinh_nang":null,"van_ban":""}]}"#
                     .to_string(),
             )
         }
@@ -78,10 +78,13 @@ pub fn chay_thanh_json(src: &str) -> String {
     let (xuat, diags) = crate::interp::chay(src);
     let diags = diags.rut_gon();
 
+    let ket_cuc = diags.ket_cuc();
     let mut ra = String::with_capacity(512);
     ra.push_str("{\"ok\":");
-    ra.push_str(if diags.co_loi() { "false" } else { "true" });
-    ra.push_str(",\"xuat\":");
+    ra.push_str(if ket_cuc == crate::diag::KetCuc::Dat { "true" } else { "false" });
+    ra.push_str(",\"ket_cuc\":\"");
+    ra.push_str(ket_cuc.ma());
+    ra.push_str("\",\"xuat\":");
     json_chuoi(&mut ra, &xuat);
     ra.push_str(",\"chan_doan\":[");
 
@@ -99,6 +102,7 @@ pub fn chay_thanh_json(src: &str) -> String {
         ra.push_str(match d.severity {
             Severity::Loi => "loi",
             Severity::CanhBao => "canh_bao",
+            Severity::ChuaHoTro => "chua_ho_tro",
         });
         ra.push_str("\",\"thong_diep\":");
         json_chuoi(&mut ra, &d.message);
@@ -126,6 +130,12 @@ pub fn chay_thanh_json(src: &str) -> String {
 
         ra.push_str(",\"khai_niem\":");
         match d.khai_niem {
+            Some(k) => json_chuoi(&mut ra, k),
+            None => ra.push_str("null"),
+        }
+
+        ra.push_str(",\"tinh_nang\":");
+        match d.tinh_nang {
             Some(k) => json_chuoi(&mut ra, k),
             None => ra.push_str("null"),
         }

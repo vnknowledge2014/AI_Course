@@ -44,7 +44,14 @@ pub enum GiaTri {
     ///
     /// Không phải giá trị thật — chỉ là bia mộ, để khi người học dùng lại biến
     /// đã move ta chỉ đúng được chỗ nó bị chuyển đi.
-    DaChuyen { chuyen_tai: Span },
+    ///
+    /// `trong_nhanh` phân biệt hai tình huống rất khác nhau:
+    /// - `false` — move nằm trên chuỗi câu lệnh thẳng hàng. `rustc` chắc chắn
+    ///   từ chối, nên ta báo lỗi thật (E0382).
+    /// - `true` — move nằm trong `if`/`match`/vòng lặp/closure. Ta chỉ biết
+    ///   nhánh **đã chạy**, còn `rustc` xét **mọi** nhánh. Kiểm kiểu này cần
+    ///   CFG mà ta không có, nên phải trả `ChuaHoTro` thay vì đoán bừa.
+    DaChuyen { chuyen_tai: Span, trong_nhanh: bool },
 }
 
 #[derive(Debug)]

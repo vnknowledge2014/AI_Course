@@ -74,6 +74,12 @@ pub struct MayChay {
     /// không đẩy thêm, nên `pham.len()` luôn bằng 2 dù đệ quy sâu bao nhiêu.
     /// Đếm sai ở đây nghĩa là đệ quy vô hạn làm tràn stack và giết cả app.
     do_sau_goi: usize,
+    /// Độ sâu nhánh điều kiện / vòng lặp / closure hiện tại.
+    ///
+    /// Khi > 0, một phép move chỉ nói lên nhánh ĐÃ CHẠY, không nói lên mọi
+    /// nhánh. `rustc` xét mọi nhánh (trên CFG), ta thì không — nên move ở đây
+    /// phải dẫn tới `ChuaHoTro`, không được khẳng định đúng/sai. Xem ADR-002.
+    do_sau_nhanh: usize,
 }
 
 impl MayChay {
@@ -89,6 +95,7 @@ impl MayChay {
             nhien_lieu: NHIEN_LIEU_MAC_DINH,
             bi_cat_xuat: false,
             do_sau_goi: 0,
+            do_sau_nhanh: 0,
         }
     }
 
@@ -474,6 +481,17 @@ pub fn chay(src: &str) -> (String, Diagnostics) {
     if d.co_loi() {
         return (String::new(), d.rut_gon());
     }
+
+    // Kiểm tra chuyển quyền sở hữu TRƯỚC khi chạy — đúng như một compiler.
+    //
+    // Bắt buộc phải ở đây chứ không phải lúc chạy: kiểm-lúc-chạy chỉ thấy nhánh
+    // đã đi qua, nên `if false { let b = a; }` sẽ lọt và bị báo Đạt dù `rustc`
+    // từ chối. Xem `move_check.rs` và ADR-002.
+    crate::move_check::kiem_tra(&ct, &mut d);
+    if d.co_loi() || d.co_chua_ho_tro() {
+        return (String::new(), d.rut_gon());
+    }
+
     let mut may = MayChay::moi();
     match may.chay(&ct) {
         Ok(()) => (may.xuat, d),
@@ -626,13 +644,16 @@ impl MayChay {
                         "khác với Python hay JavaScript, Rust không coi số 0 hay chuỗi rỗng là `false`",
                     ));
                 };
-                if b {
+                self.do_sau_nhanh += 1;
+                let r = if b {
                     self.thuc_thi_khoi(than)
                 } else if let Some(nl) = nguoc_lai {
                     self.tinh(nl)
                 } else {
                     Ok(GiaTri::Rong)
-                }
+                };
+                self.do_sau_nhanh -= 1;
+                r
             }
 
             BieuThuc::KhopMau { gia_tri, nhanh, span } => {
@@ -646,7 +667,9 @@ impl MayChay {
                             None => true,
                         };
                         if qua {
+                            self.do_sau_nhanh += 1;
                             let r = self.tinh(&n.than);
+                            self.do_sau_nhanh -= 1;
                             self.roi_pham();
                             return r;
                         }
@@ -664,7 +687,10 @@ impl MayChay {
 
             BieuThuc::Lap { than, .. } => loop {
                 self.tieu_hao(than.span)?;
-                match self.thuc_thi_khoi(than) {
+                self.do_sau_nhanh += 1;
+                let buoc = self.thuc_thi_khoi(than);
+                self.do_sau_nhanh -= 1;
+                match buoc {
                     Ok(_) | Err(Ngat::TiepTuc) => {}
                     Err(Ngat::Thoat(v)) => return Ok(v.unwrap_or(GiaTri::Rong)),
                     Err(e) => return Err(e),
@@ -685,7 +711,10 @@ impl MayChay {
                     if !b {
                         break;
                     }
-                    match self.thuc_thi_khoi(than) {
+                    self.do_sau_nhanh += 1;
+                    let buoc = self.thuc_thi_khoi(than);
+                    self.do_sau_nhanh -= 1;
+                    match buoc {
                         Ok(_) | Err(Ngat::TiepTuc) => {}
                         Err(Ngat::Thoat(_)) => break,
                         Err(e) => return Err(e),
@@ -714,9 +743,11 @@ impl MayChay {
                 for gt in cac_gt {
                     self.tieu_hao(than.span)?;
                     self.vao_pham();
+                    self.do_sau_nhanh += 1;
                     let r = self
                         .khop_mau(mau, &gt, true)
                         .and_then(|_| self.thuc_thi_khoi_ngay(than));
+                    self.do_sau_nhanh -= 1;
                     self.roi_pham();
                     match r {
                         Ok(_) | Err(Ngat::TiepTuc) => {}
@@ -904,7 +935,10 @@ impl MayChay {
                         // đã bị chuyển từ trước — trường hợp đó `tinh` đã báo lỗi).
                         let can_danh_dau = !matches!(&*o.borrow(), GiaTri::DaChuyen { .. });
                         if can_danh_dau {
-                            *o.borrow_mut() = GiaTri::DaChuyen { chuyen_tai: *span };
+                            *o.borrow_mut() = GiaTri::DaChuyen {
+                                chuyen_tai: *span,
+                                trong_nhanh: self.do_sau_nhanh > 0,
+                            };
                         }
                     }
                 }
@@ -963,7 +997,24 @@ impl MayChay {
             let ten = &doan[0];
             if let Some(o) = self.tim_o(ten) {
                 let v = o.borrow().clone();
-                if let GiaTri::DaChuyen { chuyen_tai } = v {
+                if let GiaTri::DaChuyen { chuyen_tai, trong_nhanh } = v {
+                    if trong_nhanh {
+                        // Ta chỉ thấy nhánh đã chạy; rustc xét mọi nhánh. Không
+                        // đủ cơ sở để khẳng định đúng hay sai.
+                        return Err(Ngat::Loi(Box::new(
+                            Diagnostic::chua_ho_tro(
+                                "BR0531",
+                                "borrow-check-cfg",
+                                format!("Byte chưa kiểm được luật mượn cho `{ten}` trong tình huống này"),
+                            )
+                            .nhan(Label::chinh(span, "biến này được dùng ở đây"))
+                            .nhan(Label::phu(chuyen_tai, "và bị chuyển đi bên trong một nhánh/vòng lặp"))
+                            .vi_sao("Khi phép chuyển quyền sở hữu nằm trong `if`, `match` hay vòng lặp, việc xác định nó có thực sự xảy ra hay không cần phân tích toàn bộ luồng điều khiển (CFG) — thứ mà Byte cố tình không làm, vì làm nửa vời sẽ từ chối cả những chương trình `rustc` cho phép.")
+                            .sua("Mở bản Desktop và bấm “Đối chiếu với cargo” để có câu trả lời chính xác từ compiler thật")
+                            .sua("Hoặc viết lại cho phép chuyển nằm thẳng hàng, không nằm trong nhánh")
+                            .khai_niem("quyền sở hữu"),
+                        )));
+                    }
                     return Err(Ngat::Loi(Box::new(
                         Diagnostic::loi("BR0530", format!("`{ten}` đã bị chuyển quyền sở hữu đi nơi khác"))
                             .nhan(Label::chinh(span, "dùng lại ở đây thì không còn giá trị nữa"))
@@ -1285,9 +1336,9 @@ impl MayChay {
                 }
             }
             khac => Err(Ngat::Loi(Box::new(
-                Diagnostic::loi("BR0542", format!("chưa hỗ trợ macro `{khac}!`"))
-                    .tai(span, "macro này chưa dùng được trong bài học")
-                    .vi_sao("Byte Academy chỉ chạy phần Rust cần cho giáo trình, để thông báo lỗi luôn dễ hiểu")
+                Diagnostic::chua_ho_tro("BR0542", "macro", format!("Byte chưa chạy được macro `{khac}!`"))
+                    .tai(span, "macro này nằm ngoài phạm vi Byte hiểu")
+                    .vi_sao("Byte chỉ chạy phần Rust cần cho giáo trình. Gặp thứ nằm ngoài, Byte nói thẳng là chưa kiểm được — thay vì đoán bừa đúng hay sai.")
                     .sua("các macro dùng được: `println!`, `print!`, `format!`, `vec!`, `assert!`, `assert_eq!`")
                     .khai_niem("macro"),
             ))),

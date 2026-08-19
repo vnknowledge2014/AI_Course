@@ -355,3 +355,124 @@ fn cong_don_khong_lam_move() {
         "a 2\n"
     );
 }
+
+// ── Ba kết cục: Đạt / Không đạt / Chưa hỗ trợ ───────────────────────────────
+//
+// Đây là bất biến quan trọng nhất của cả engine. Xem docs/decisions/ADR-002.
+
+use byte_rust::diag::KetCuc;
+
+fn ket_cuc(src: &str) -> KetCuc {
+    let (ct, d) = byte_rust::parser::phan_tich(src);
+    if d.co_loi() {
+        return d.ket_cuc();
+    }
+    let mut d = d;
+    byte_rust::move_check::kiem_tra(&ct, &mut d);
+    if d.co_loi() || d.co_chua_ho_tro() {
+        return d.ket_cuc();
+    }
+    let mut may = byte_rust::interp::MayChay::moi();
+    if let Err(loi) = may.chay(&ct) {
+        d.push(loi);
+    }
+    d.ket_cuc()
+}
+
+#[test]
+fn code_dung_cho_ket_cuc_dat() {
+    assert_eq!(ket_cuc(r#"fn main() { println!("{}", 1 + 1); }"#), KetCuc::Dat);
+}
+
+#[test]
+fn code_sai_cho_ket_cuc_khong_dat() {
+    assert_eq!(ket_cuc("fn main() { let x = 1 / 0; }"), KetCuc::KhongDat);
+}
+
+#[test]
+fn move_thang_hang_van_la_loi_that() {
+    // Trên chuỗi câu lệnh thẳng hàng, rustc CHẮC CHẮN từ chối -> ta được phép khẳng định.
+    let src = r#"
+fn main() {
+    let a = String::from("x");
+    let b = a;
+    println!("{}", a);
+}"#;
+    assert_eq!(ket_cuc(src), KetCuc::KhongDat);
+    assert_eq!(loi(src), "BR0530");
+}
+
+#[test]
+fn move_trong_nhanh_cho_chua_ho_tro_chu_khong_doan_bua() {
+    // Ta chỉ thấy nhánh ĐÃ chạy; rustc xét MỌI nhánh. Không đủ cơ sở phán quyết.
+    let src = r#"
+fn main() {
+    let a = String::from("x");
+    if true {
+        let b = a;
+    }
+    println!("{}", a);
+}"#;
+    assert_eq!(
+        ket_cuc(src),
+        KetCuc::ChuaHoTro,
+        "move trong nhánh KHÔNG được khẳng định đúng hay sai"
+    );
+}
+
+#[test]
+fn move_trong_nhanh_khong_chay_cung_cho_chua_ho_tro() {
+    // Nhánh KHÔNG chạy: engine dynamic sẽ thấy `a` còn nguyên và báo Đạt —
+    // nhưng rustc vẫn từ chối. Đây đúng là chế độ false-accept nguy hiểm.
+    let src = r#"
+fn main() {
+    let a = String::from("x");
+    if false {
+        let b = a;
+    }
+    println!("{}", a);
+}"#;
+    let kq = ket_cuc(src);
+    assert_ne!(kq, KetCuc::Dat, "KHÔNG được báo Đạt cho code rustc từ chối");
+}
+
+#[test]
+fn move_trong_vong_lap_cho_chua_ho_tro() {
+    let src = r#"
+fn main() {
+    let a = String::from("x");
+    for i in 0..1 {
+        let b = a;
+    }
+}"#;
+    assert_eq!(ket_cuc(src), KetCuc::ChuaHoTro);
+}
+
+#[test]
+fn macro_ngoai_pham_vi_la_chua_ho_tro_khong_phai_loi() {
+    let src = r#"fn main() { write!("x"); }"#;
+    assert_eq!(ket_cuc(src), KetCuc::ChuaHoTro);
+    let (_o, d) = chay(src);
+    let cd = d.iter().next().unwrap();
+    assert_eq!(cd.severity, byte_rust::Severity::ChuaHoTro);
+    assert_eq!(cd.tinh_nang, Some("macro"));
+}
+
+#[test]
+fn chua_ho_tro_thang_loi_khi_ca_hai_cung_xuat_hien() {
+    // Nếu không hiểu hết chương trình thì không có tư cách khẳng định nó sai.
+    let mut d = byte_rust::Diagnostics::new();
+    d.push(byte_rust::Diagnostic::loi("BR9999", "một lỗi"));
+    d.push(byte_rust::Diagnostic::chua_ho_tro("BR9998", "async", "chưa hỗ trợ"));
+    assert_eq!(d.ket_cuc(), KetCuc::ChuaHoTro);
+}
+
+#[test]
+fn rut_gon_khong_lam_mat_chan_doan_chua_ho_tro() {
+    let mut d = byte_rust::Diagnostics::new();
+    d.push(byte_rust::Diagnostic::loi("BR9999", "lỗi hệ quả"));
+    d.push(byte_rust::Diagnostic::chua_ho_tro("BR9998", "async", "chưa hỗ trợ"));
+    let d = d.rut_gon();
+    assert_eq!(d.ket_cuc(), KetCuc::ChuaHoTro);
+    assert!(d.iter().any(|x| x.tinh_nang == Some("async")));
+}

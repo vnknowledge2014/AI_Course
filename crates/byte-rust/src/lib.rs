@@ -17,6 +17,7 @@ pub mod ast;
 pub mod diag;
 pub mod interp;
 pub mod lexer;
+pub mod move_check;
 pub mod parser;
 pub mod span;
 pub mod value;
