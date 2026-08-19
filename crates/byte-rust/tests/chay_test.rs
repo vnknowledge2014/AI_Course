@@ -245,7 +245,10 @@ fn de_quy_vo_han_bi_chan() {
 
 #[test]
 fn cong_chuoi_voi_so_bao_loi_ro_rang() {
-    assert_eq!(loi(&ct(r#"let s = String::from("a") + 1;"#)), "BR0531");
+    // Nay tyck bắt TĨNH (BR0305) trước khi interp kịp chạy (BR0531). Bắt tĩnh
+    // tốt hơn: đúng thời điểm rustc bắt, và người học không thấy nửa chương
+    // trình chạy rồi mới lỗi.
+    assert_eq!(loi(&ct(r#"let s = String::from("a") + 1;"#)), "BR0305");
 }
 
 #[test]

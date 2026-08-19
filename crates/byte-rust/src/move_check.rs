@@ -137,13 +137,31 @@ impl<'a> BoKiem<'a> {
         }
     }
 
-    /// Ghi nhận một phép move khỏi `bt`, nếu `bt` là một tên biến trần.
-    fn ghi_move(&mut self, bt: &BieuThuc) {
-        let BieuThuc::DuongDan { doan, span } = bt else { return };
-        if doan.len() != 1 {
-            return;
+    /// Tên biến gốc của một đường dẫn nơi chốn.
+    ///
+    /// `p` -> `p` · `p.ten` -> `p` · `t.0` -> `t` · `v[0]` -> `v`
+    ///
+    /// Bản trước chỉ nhận tên trần, nên mọi phép move qua đường dẫn thoát im
+    /// lặng ngay dòng đầu — kể cả khi nhánh duyệt phía trên đã làm đúng phần
+    /// của nó. Phải vá ở gốc, vá từng nhánh là chưa đủ.
+    fn goc_cua(bt: &BieuThuc) -> Option<(String, Span, bool)> {
+        match bt {
+            BieuThuc::DuongDan { doan, span } if doan.len() == 1 => {
+                Some((doan[0].clone(), *span, false))
+            }
+            BieuThuc::TruyCapTruong { doi_tuong, .. } | BieuThuc::ChiSo { doi_tuong, .. } => {
+                Self::goc_cua(doi_tuong).map(|(t, s, _)| (t, s, true))
+            }
+            _ => None,
         }
-        let ten = &doan[0];
+    }
+
+    /// Ghi nhận một phép move khỏi `bt`.
+    fn ghi_move(&mut self, bt: &BieuThuc) {
+        let Some((ten, span, mot_phan)) = Self::goc_cua(bt) else { return };
+        let span = bt.span().merge(span);
+        let _ = mot_phan;
+        let ten = &ten;
         if self.tra(ten) != Some(TrangThai::Song) {
             return;
         }
@@ -154,15 +172,15 @@ impl<'a> BoKiem<'a> {
         // trả `ChuaHoTro` thay vì khẳng định.
         if self.ngoai_vong_lap(ten) {
             let ten = ten.clone();
-            self.bao_chua_ho_tro_vong_lap(&ten, *span);
-            self.dat(&ten, TrangThai::DaMoveTrongNhanh(*span));
+            self.bao_chua_ho_tro_vong_lap(&ten, span);
+            self.dat(&ten, TrangThai::DaMoveTrongNhanh(span));
             return;
         }
 
         let tt = if self.do_sau_nhanh > 0 {
-            TrangThai::DaMoveTrongNhanh(*span)
+            TrangThai::DaMoveTrongNhanh(span)
         } else {
-            TrangThai::DaMoveThang(*span)
+            TrangThai::DaMoveThang(span)
         };
         self.dat(ten, tt);
     }
@@ -277,8 +295,14 @@ impl<'a> BoKiem<'a> {
             BieuThuc::HangSo { .. } | BieuThuc::TiepTuc { .. } => {}
 
             // `&x` là mượn, không phải move — nhưng vẫn là một lần đọc.
-            BieuThuc::Muon { gia_tri, .. } | BieuThuc::GiaiTham { gia_tri, .. } => {
-                self.bieu_thuc(gia_tri)
+            BieuThuc::Muon { gia_tri, .. } => self.bieu_thuc(gia_tri),
+            // `*x` LẤY HẲN giá trị ra. Gộp nó với `&x` đang dạy NGƯỢC đúng cái
+            // luật quan trọng nhất: "không lấy được đồ ra khỏi thứ mình chỉ mượn".
+            BieuThuc::GiaiTham { gia_tri, span } => {
+                let _ = span;
+                self.bieu_thuc(gia_tri);
+                // `*x` lấy hẳn giá trị; nếu `x` là `&T` thì đó là E0507.
+                // Chưa theo dõi được kiểu ở tầng này nên để `tyck` lo.
             }
 
             BieuThuc::GoiHam { ham, doi_so, .. } => {
@@ -329,9 +353,14 @@ impl<'a> BoKiem<'a> {
             }
 
             BieuThuc::MotNgoi { toan_hang, .. } => self.bieu_thuc(toan_hang),
-            BieuThuc::HaiNgoi { trai, phai, .. } => {
+            // `let b = a + "!";` với `a: String` nuốt `a` — `Add` cho String
+            // nhận `self` chứ không nhận `&self`.
+            BieuThuc::HaiNgoi { toan_tu, trai, phai, .. } => {
                 self.bieu_thuc(trai);
                 self.bieu_thuc(phai);
+                if matches!(toan_tu, ToanTuHai::Cong) {
+                    self.ghi_move(trai);
+                }
             }
             BieuThuc::TruyCapTruong { doi_tuong, .. } => self.bieu_thuc(doi_tuong),
             BieuThuc::ChiSo { doi_tuong, chi_so, .. } => {
@@ -341,9 +370,22 @@ impl<'a> BoKiem<'a> {
             BieuThuc::Ep { gia_tri, .. } | BieuThuc::LanTruyenLoi { gia_tri, .. } => {
                 self.bieu_thuc(gia_tri)
             }
-            BieuThuc::Tuple { phan_tu, .. } | BieuThuc::Macro { doi_so: phan_tu, .. } => {
+            // Tuple LẤY quyền sở hữu của từng phần tử: `let t = (s, 1);` nuốt `s`.
+            BieuThuc::Tuple { phan_tu, .. } => {
                 for e in phan_tu {
                     self.bieu_thuc(e);
+                    self.ghi_move(e);
+                }
+            }
+            // Macro phải tách theo tên: `vec![s]` nuốt `s`, còn `println!("{}", s)`
+            // thì chỉ MƯỢN. Gộp chung sẽ báo oan mọi lệnh in.
+            BieuThuc::Macro { ten, doi_so, .. } => {
+                let nuot = matches!(ten.as_str(), "vec");
+                for e in doi_so {
+                    self.bieu_thuc(e);
+                    if nuot {
+                        self.ghi_move(e);
+                    }
                 }
             }
             BieuThuc::Mang { phan_tu, lap_lai, .. } => {
@@ -383,6 +425,17 @@ impl<'a> BoKiem<'a> {
             }
             BieuThuc::KhopMau { gia_tri, nhanh, .. } => {
                 self.bieu_thuc(gia_tri);
+                // Đối tượng `match` được đánh giá THẲNG HÀNG trước khi rẽ nhánh,
+                // nên đây là ca luật 1 của ADR-002 §2 — không cần CFG.
+                // `match x { Some(s) => … }` nuốt `x` nếu mẫu ràng buộc theo giá trị.
+                let rang_buoc_gia_tri = nhanh.iter().any(|n| {
+                    let mut ten = Vec::new();
+                    n.mau.ten_rang_buoc(&mut ten);
+                    !ten.is_empty() && !matches!(n.mau, Mau::Ten { la_ref: true, .. })
+                });
+                if rang_buoc_gia_tri {
+                    self.ghi_move(gia_tri);
+                }
                 self.do_sau_nhanh += 1;
                 for n in nhanh {
                     self.vao();
@@ -416,6 +469,18 @@ impl<'a> BoKiem<'a> {
             }
             BieuThuc::Cho { mau, day, than, .. } => {
                 self.bieu_thuc(day);
+                // `for x in v` gọi `into_iter(self)` — NUỐT `v`. Đây là lỗi kinh
+                // điển bậc nhất của người mới, và tick xanh ở đúng chỗ này gây
+                // hại hơn bất cứ đâu: người học kết luận `for` không lấy quyền
+                // sở hữu, rồi mang niềm tin đó sang cargo thật.
+                //
+                // Ngoại lệ: `&v`, `v.iter()`, và dải `0..n` đều chỉ mượn.
+                let chi_muon = matches!(&**day, BieuThuc::Muon { .. } | BieuThuc::Dai { .. })
+                    || matches!(&**day, BieuThuc::GoiPhuongThuc { ten, .. }
+                                if matches!(ten.as_str(), "iter" | "iter_mut" | "chars"));
+                if !chi_muon {
+                    self.ghi_move(day);
+                }
                 self.do_sau_nhanh += 1;
                 // Mốc phải lấy TRƯỚC `vao()`: phạm vi mới sẽ nằm ở đúng chỉ số
                 // này, nên biến lặp `i` được tính là bên TRONG vòng lặp.

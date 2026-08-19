@@ -23,6 +23,7 @@ pub mod parser;
 pub mod span;
 pub mod tyck;
 pub mod value;
+pub mod vet_can;
 pub mod wasm;
 
 pub use diag::{Diagnostic, Diagnostics, Severity};

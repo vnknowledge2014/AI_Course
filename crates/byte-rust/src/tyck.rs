@@ -115,6 +115,7 @@ pub enum T {
     Chuoi,
     Rong,
     Vec(Box<T>),
+    Tuple(Vec<T>),
     Struct(String),
     Enum(String),
     Tham(Box<T>),
@@ -141,6 +142,7 @@ impl T {
             T::Chuoi => "String".into(),
             T::Rong => "()".into(),
             T::Vec(t) => format!("Vec<{}>", t.hien_thi()),
+            T::Tuple(cac) => format!("({})", cac.iter().map(|x| x.hien_thi()).collect::<Vec<_>>().join(", ")),
             T::Struct(n) | T::Enum(n) => n.clone(),
             T::Tham(t) => format!("&{}", t.hien_thi()),
             T::Mo => "?".into(),
@@ -214,6 +216,7 @@ fn tu_kieu_ast(k: &Kieu) -> T {
         }
         Kieu::ThamChieu { ben_trong, .. } => T::Tham(Box::new(tu_kieu_ast(ben_trong))),
         Kieu::Tuple { phan_tu, .. } if phan_tu.is_empty() => T::Rong,
+        Kieu::Tuple { phan_tu, .. } => T::Tuple(phan_tu.iter().map(tu_kieu_ast).collect()),
         _ => T::Mo,
     }
 }
@@ -228,6 +231,8 @@ pub struct BoKiemKieu<'a> {
     ham: HashMap<String, ChuKy>,
     /// tên enum -> danh sách biến thể
     enum_bien_the: HashMap<String, Vec<String>>,
+    /// tên enum -> [(biến thể, tên kiểu của từng payload)] — cho kiểm vét cạn lồng nhau
+    payload: HashMap<String, Vec<(String, Vec<String>)>>,
     /// tên biến thể -> tên enum
     thuoc_enum: HashMap<String, String>,
     struct_co: Vec<String>,
@@ -242,6 +247,7 @@ impl<'a> BoKiemKieu<'a> {
         Self {
             ham: HashMap::new(),
             enum_bien_the: HashMap::new(),
+            payload: HashMap::new(),
             thuoc_enum: HashMap::new(),
             struct_co: Vec::new(),
             truong_struct: HashMap::new(),
@@ -264,6 +270,27 @@ impl<'a> BoKiemKieu<'a> {
                     );
                 }
                 Muc::Enum(e) => {
+                    self.payload.insert(
+                        e.ten.clone(),
+                        e.bien_the
+                            .iter()
+                            .map(|b| {
+                                let kieu_con = match &b.than {
+                                    ThanStruct::TheoViTri(cac) => cac
+                                        .iter()
+                                        .map(|(k, _)| match k {
+                                            Kieu::DuongDan { doan, .. } => {
+                                                doan.last().cloned().unwrap_or_default()
+                                            }
+                                            khac => khac.hien_thi(),
+                                        })
+                                        .collect(),
+                                    _ => Vec::new(),
+                                };
+                                (b.ten.clone(), kieu_con)
+                            })
+                            .collect(),
+                    );
                     let ds: Vec<String> = e.bien_the.iter().map(|b| b.ten.clone()).collect();
                     for b in &ds {
                         self.thuoc_enum.insert(b.clone(), e.ten.clone());
@@ -286,6 +313,8 @@ impl<'a> BoKiemKieu<'a> {
         // Option/Result dựng sẵn
         self.enum_bien_the.insert("Option".into(), vec!["Some".into(), "None".into()]);
         self.enum_bien_the.insert("Result".into(), vec!["Ok".into(), "Err".into()]);
+        self.payload.insert("Option".into(), vec![("Some".into(), vec!["_".into()]), ("None".into(), vec![])]);
+        self.payload.insert("Result".into(), vec![("Ok".into(), vec!["_".into()]), ("Err".into(), vec!["_".into()])]);
         for (b, e) in [("Some", "Option"), ("None", "Option"), ("Ok", "Result"), ("Err", "Result")] {
             self.thuoc_enum.insert(b.into(), e.into());
         }
@@ -357,11 +386,22 @@ impl<'a> BoKiemKieu<'a> {
                             && !matches!(b, T::Mo | T::ChuaBiet(_));
                         if lech_tc {
                             self.bao_so_sanh_tham_chieu(*span, &a, &b);
+                        } else {
+                            let (x, y) = (bo_tham_chieu(&a), bo_tham_chieu(&b));
+                            if x.chac_chan_lech(&y) {
+                                self.bao_toan_hang_lech(*span, toan_tu.ky_hieu(), &x, &y);
+                            }
                         }
                         T::Bool
                     }
                     _ => {
+                        // Số học tự bỏ tham chiếu (Rust có impl cho &T), nhưng
+                        // hai vế vẫn phải CÙNG kiểu. Bản trước chỉ suy kiểu mà
+                        // không kiểm, nên `10 + 2.5` và `u32 + i64` đều lọt.
                         let (a, b) = (bo_tham_chieu(&a), bo_tham_chieu(&b));
+                        if a.chac_chan_lech(&b) {
+                            self.bao_toan_hang_lech(*span, toan_tu.ky_hieu(), &a, &b);
+                        }
                         if a == T::Mo { b } else { a }
                     }
                 }
@@ -467,6 +507,9 @@ impl<'a> BoKiemKieu<'a> {
             }
             BieuThuc::KhopMau { .. } => self.khop_mau(bt),
             BieuThuc::Tuple { phan_tu, .. } if phan_tu.is_empty() => T::Rong,
+            BieuThuc::Tuple { phan_tu, .. } => {
+                T::Tuple(phan_tu.iter().map(|e| self.kieu_cua(e)).collect())
+            }
             BieuThuc::Ep { kieu, gia_tri, .. } => {
                 self.kieu_cua(gia_tri);
                 tu_kieu_ast(kieu)
@@ -514,7 +557,13 @@ impl<'a> BoKiemKieu<'a> {
             }
             BieuThuc::ChiSo { doi_tuong, chi_so, .. } => {
                 self.kieu_cua(doi_tuong);
-                self.kieu_cua(chi_so);
+                let t_cs = bo_tham_chieu(&self.kieu_cua(chi_so));
+                // Chỉ số phải là `usize`, không phải "một số nguyên nào đó".
+                if let T::SoNguyen(k) = t_cs {
+                    if k != KieuNguyen::Usize && k != KieuNguyen::ChuaGhim {
+                        self.bao_chi_so_khong_usize(chi_so.span(), k);
+                    }
+                }
             }
             BieuThuc::LanTruyenLoi { gia_tri, .. } => {
                 self.kieu_cua(gia_tri);
@@ -603,39 +652,22 @@ impl<'a> BoKiemKieu<'a> {
             if kieu_nhanh == T::Mo { kieu_nhanh = t; }
         }
 
-        // Vét cạn: chỉ kiểm khi biết chắc đang match trên enum nào và không có
-        // nhánh bao quát. Nhánh có `if` không tính là phủ (rustc cũng vậy).
-        if !co_bao_quat {
-            if let T::Enum(ten_enum) = &t_gt {
-                if let Some(tat_ca) = self.enum_bien_the.get(ten_enum).cloned() {
-                    let phu_khong_dieu_kien: Vec<String> = nhanh
-                        .iter()
-                        .filter(|n| n.dieu_kien.is_none())
-                        .filter_map(|n| match &n.mau {
-                            Mau::BienThe { duong_dan, .. } => duong_dan.last().cloned(),
-                            _ => None,
-                        })
-                        .collect();
-                    let thieu: Vec<String> = tat_ca
-                        .iter()
-                        .filter(|v| !phu_khong_dieu_kien.contains(v))
-                        .cloned()
-                        .collect();
-                    if !thieu.is_empty() {
-                        let ds = thieu.iter().map(|v| format!("`{ten_enum}::{v}`"))
-                            .collect::<Vec<_>>().join(", ");
-                        self.diags.push(
-                            Diagnostic::loi("BR0300", format!("`match` chưa phủ hết mọi khả năng của `{ten_enum}`"))
-                                .tai(*span, format!("còn thiếu: {ds}"))
-                                .vi_sao("Đây chính là điều làm `match` an toàn hơn `switch` của các ngôn ngữ khác: compiler bắt buộc bạn xử lý MỌI trường hợp. Nhờ vậy khi ai đó thêm một biến thể mới vào enum, mọi chỗ quên xử lý sẽ báo lỗi ngay lúc biên dịch chứ không âm thầm chạy sai.")
-                                .sua(format!("thêm nhánh cho {ds}"))
-                                .sua("hoặc thêm `_ => ...` để bắt các trường hợp còn lại")
-                                .khai_niem("match"),
-                        );
-                    }
-                }
-            }
+        // Vét cạn — phủ không gian giá trị.
+        //
+        // Bản trước chỉ xử lý một hình dạng: match trên enum với mẫu biến thể
+        // phẳng, và bọc trong `if !co_bao_quat` mà `co_bao_quat` lại đặt bởi
+        // BẤT KỲ mẫu `_`/tên nào, kể cả nhánh CÓ guard. Nay dùng thuật toán:
+        // mỗi nhánh KHÔNG guard trừ đi phần nó phủ, còn sót thì báo kèm nhân chứng.
+        let khong_guard: Vec<&Mau> = nhanh
+            .iter()
+            .filter(|n| n.dieu_kien.is_none())
+            .map(|n| &n.mau)
+            .collect();
+        let kg = self.khong_gian(&t_gt);
+        if let Some(nhan_chung) = crate::vet_can::thieu(&kg, &khong_guard) {
+            self.bao_thieu_nhanh(*span, &t_gt, &nhan_chung);
         }
+        let _ = (co_bao_quat, da_phu);
         kieu_nhanh
     }
 
@@ -704,6 +736,32 @@ impl<'a> BoKiemKieu<'a> {
         ra
     }
 
+    /// Không gian giá trị của một kiểu, để kiểm vét cạn.
+    fn khong_gian(&self, t: &T) -> crate::vet_can::KhongGian {
+        use crate::vet_can::{kg_bool, kg_enum, KhongGian};
+        match t {
+            T::Bool => kg_bool(),
+            T::Enum(ten) => kg_enum(ten, &self.payload, 0),
+            // Số, chuỗi, ký tự: miền vô hạn — chỉ `_` hoặc một binding mới phủ nổi.
+            T::SoNguyen(_) | T::SoThuc(_) | T::KyTu | T::Chuoi => KhongGian::VoHan,
+            T::Tuple(cac) => KhongGian::Tich(cac.iter().map(|x| self.khong_gian(x)).collect()),
+            T::Tham(x) => self.khong_gian(x),
+            _ => KhongGian::KhongBiet,
+        }
+    }
+
+    fn bao_thieu_nhanh(&mut self, span: Span, t: &T, nhan_chung: &str) {
+        self.diags.push(
+            Diagnostic::loi("BR0300", "`match` chưa phủ hết mọi khả năng")
+                .tai(span, format!("chưa có nhánh nào bắt `{nhan_chung}`"))
+                .vi_sao("Đây chính là điều làm `match` an toàn hơn `switch` của các ngôn ngữ khác: compiler bắt buộc bạn xử lý MỌI trường hợp. Nhờ vậy khi ai đó thêm một biến thể mới vào enum, mọi chỗ quên xử lý sẽ báo lỗi ngay lúc biên dịch chứ không âm thầm chạy sai.")
+                .sua(format!("thêm nhánh cho `{nhan_chung}`"))
+                .sua("hoặc thêm `_ => ...` để bắt các trường hợp còn lại")
+                .khai_niem("match"),
+        );
+        let _ = t;
+    }
+
     fn bao_let_lech(&mut self, span_gt: Span, span_kieu: Span, khai: &T, thuc: &T) {
         self.diags.push(
             Diagnostic::loi(
@@ -716,6 +774,27 @@ impl<'a> BoKiemKieu<'a> {
             .sua("sửa chú thích kiểu cho khớp giá trị")
             .sua("hoặc ép kiểu tường minh, ví dụ `a as f64 / b as f64`")
             .khai_niem("kiểu dữ liệu"),
+        );
+    }
+
+    fn bao_chi_so_khong_usize(&mut self, span: Span, k: KieuNguyen) {
+        self.diags.push(
+            Diagnostic::loi("BR0306", format!("chỉ số phải là `usize`, không phải `{}`", k.ten()))
+                .tai(span, format!("đây là `{}`", k.ten()))
+                .vi_sao("Chỉ số vào `Vec` hay mảng luôn là `usize` — kiểu số nguyên không dấu có bề rộng bằng con trỏ. Dùng kiểu có dấu sẽ cho phép chỉ số âm, thứ không bao giờ hợp lệ.")
+                .sua("ép tường minh: `v[i as usize]`")
+                .sua("hoặc khai báo biến chỉ số là `usize` ngay từ đầu")
+                .khai_niem("chỉ số"),
+        );
+    }
+
+    fn bao_toan_hang_lech(&mut self, span: Span, ky_hieu: &str, a: &T, b: &T) {
+        self.diags.push(
+            Diagnostic::loi("BR0305", format!("`{}` không dùng được giữa {} và {}", ky_hieu, a.hien_thi(), b.hien_thi()))
+                .tai(span, "hai vế khác kiểu")
+                .vi_sao("Rust KHÔNG tự ép kiểu số. `10 + 2.5` là lỗi, `u32 + i64` cũng là lỗi. Khác Python và JavaScript, nơi ép ngầm âm thầm làm tròn hoặc mất chính xác mà không ai biết.")
+                .sua(format!("ép tường minh một vế, ví dụ `x as {}`", b.hien_thi()))
+                .khai_niem("kiểu dữ liệu"),
         );
     }
 
