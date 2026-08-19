@@ -10,7 +10,10 @@
     "test": "node --test test/*.test.mjs"
   },
   "devDependencies": {
-    "typescript": "^5.5.3",
-    "@types/node": "^26.1.2"
+    "@types/node": "^26.1.2",
+    "typescript": "^5.5.3"
+  },
+  "dependencies": {
+    "sucrase": "^3.35.1"
   }
 }
