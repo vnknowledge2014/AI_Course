@@ -1,0 +1,96 @@
+# ADR-001 — Cách thực thi Rust của người học, offline, trên cả 7 nền tảng
+
+**Trạng thái:** Đã kiểm chứng bằng thực nghiệm · 2026-08-19
+**Bối cảnh:** Học liệu Byte Academy dạy Rust cho người mới, phải chạy offline trên
+macOS / Linux / Windows / Chrome / Firefox / Android / iOS.
+
+---
+
+## Vấn đề
+
+`fp/game/src/engine/runner.ts` hiện có hàm `runRust()` **giả**:
+
+```ts
+// Note: Offline Rust compilation in browser is too heavy (requires >50MB WASM).
+async function runRust(code: string): Promise<RunResult> {
+  if (code.includes('fn ') && !code.includes('}')) { /* báo thiếu ngoặc */ }
+  return { success: true, output: "Compilation successful.\nTests passed.", ... };
+}
+```
+
+Nó trả `success: true` cho **mọi** input không thiếu dấu `}`. Người học viết Rust sai
+vẫn nhận dấu tick xanh. Với một học liệu, đây không phải thiếu sót — đây là dạy sai.
+
+## Các phương án đã cân nhắc
+
+| Phương án | Offline? | Mobile? | Kết luận |
+|---|---|---|---|
+| `rustc` tự host biên dịch sang WASM | ✅ | ❌ | Hàng trăm MB, vượt xa giới hạn app store. Loại. |
+| Gọi Rust Playground từ xa | ❌ | ✅ | Phá yêu cầu offline-first. Chỉ giữ làm tuỳ chọn nâng cao. |
+| Biên dịch trước từng bài tập ra WASM | ✅ | ✅ | Người học **không viết được code tuỳ ý**, chỉ chọn đáp án. Không đủ. |
+| Giữ nguyên bản giả | ✅ | ✅ | Dạy sai. Loại tuyệt đối. |
+| **Interpreter Rust-subset viết bằng Rust, biên dịch WASM** | ✅ | ✅ | **CHỌN** |
+
+## Quyết định
+
+Viết một **interpreter cho tập con Rust dùng trong giảng dạy**; bản thân interpreter
+viết bằng Rust rồi biên dịch sang `wasm32-unknown-unknown` và đóng gói vào app.
+
+Tập con phủ đúng những gì giáo trình dạy, mở rộng dần theo từng Realm:
+`let`/`mut`, kiểu vô hướng, `fn`, `if`/`match`, `loop`/`while`/`for`, closure,
+`struct`/`enum`, `Option`/`Result`, `Vec`/`HashMap`, trait + generic cơ bản.
+Ownership/borrowing **được mô phỏng và kiểm tra** — đây chính là điểm dạy học quan
+trọng nhất của Rust, nên interpreter bắt buộc phải báo lỗi mượn giống compiler thật.
+
+## Bằng chứng thực nghiệm
+
+Đã dựng prototype thật (`adr-001-probe/`): lexer + parser đệ quy xuống + evaluator
+cho biểu thức số học, viết bằng Rust thuần, không dependency.
+
+```
+cargo build --release --target wasm32-unknown-unknown
+  → Finished in 3.76s
+  → wasm_probe.wasm = 16 KB
+  → linear memory khởi tạo = 1.1 MB
+```
+
+Chạy trong host JS (Node 26.7 — cùng API `WebAssembly` mà Chrome, Firefox và WKWebView dùng):
+
+```
+✅ 1 + 2 * 3        => 7        ✅ 1 / 0  => LỖI
+✅ (1 + 2) * 3      => 9        ✅ 1 + @  => LỖI
+✅ 100 / 7          => 14
+✅ -5 + 10          => 5
+✅ 2 * (3 + 4) - 5  => 9
+7/7 pass
+```
+
+**Ngoại suy:** phần lõi ngôn ngữ (lex/parse/eval) chỉ tốn 16 KB. Một interpreter phủ
+tập con nêu trên, kèm bảng lỗi tiếng Việt, ước tính **300 KB – 1.5 MB** — nhỏ hơn
+Pyodide (13 MB) một bậc độ lớn, và nằm gọn trong ngân sách của mọi nền tảng đích.
+
+## Hệ quả
+
+**Được:**
+- Rust chạy thật, chấm thật, offline, trên cả 7 nền tảng — cùng một binary WASM.
+- Thông báo lỗi **bằng tiếng Việt và có tính sư phạm**, thay vì đổ nguyên lỗi `rustc`
+  vốn quá tải với người mới. Đây là ưu điểm, không phải thoả hiệp.
+- Kiểm soát được độ khó: interpreter chỉ chấp nhận phần cú pháp đã dạy, nên người học
+  không lạc vào vùng chưa học mà không hiểu vì sao lỗi.
+
+**Mất:**
+- Không phải Rust đầy đủ. Code chạy được trong app **có thể** không biên dịch được bằng
+  `rustc` thật nếu vượt tập con.
+  → Giảm thiểu: mỗi Realm công bố rõ tập con hiện hành; bài Capstone hướng dẫn chạy
+    `cargo` thật trên máy; thêm chế độ "đối chiếu với rustc" (tuỳ chọn, cần mạng).
+- Phải tự bảo trì interpreter.
+  → Giảm thiểu: bộ test đối chiếu — mọi snippet trong giáo trình phải cho **cùng kết quả**
+    ở interpreter và ở `rustc` thật; chạy trong CI trên runner có toolchain đầy đủ.
+
+## Áp dụng cho Python và TypeScript
+
+Không đổi: Python dùng **Pyodide** (CPython thật, biên dịch WASM), TypeScript dùng
+**Sucrase** transform rồi chạy. Cả hai đã hoạt động. Hai điểm cần thống nhất:
+1. Cùng nằm sau một interface `ExecutionEngine` chung.
+2. Cùng chạy trong **Web Worker** — hiện TypeScript đang chạy trên main thread bằng
+   `new Function()`, nên một vòng lặp vô hạn của người học sẽ treo cả giao diện.

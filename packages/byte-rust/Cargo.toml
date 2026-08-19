@@ -1,0 +1,17 @@
+[package]
+name = "byte-rust"
+version = "0.1.0"
+edition = "2021"
+description = "Interpreter cho tập con Rust dùng trong giảng dạy, biên dịch được sang WASM"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
