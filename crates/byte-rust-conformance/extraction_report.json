@@ -1,0 +1,44 @@
+{
+  "files_scanned": 63,
+  "total_rust_snippets": 662,
+  "kept_for_compile": 497,
+  "compiled_ok": 364,
+  "compile_failed": 133,
+  "prefilter_rejects": {
+    "external_crate": 70,
+    "ellipsis_or_pseudo": 58,
+    "no_main_no_item": 33,
+    "not_code": 2,
+    "not_standalone_item": 1,
+    "too_short": 1
+  },
+  "external_crate_breakdown": {
+    "serde": 11,
+    "tokio": 11,
+    "proptest": 10,
+    "axum": 10,
+    "rig": 9,
+    "serde_json": 7,
+    "im": 3,
+    "num": 2,
+    "sqlx": 2,
+    "wgpu": 1,
+    "serde/tokio-attr": 1,
+    "tracing": 1
+  },
+  "compile_failure_by_error": {
+    "E0425": 60,
+    "E0405": 18,
+    "E0433": 17,
+    "E0432": 10,
+    "E0583": 6,
+    "E-other": 4,
+    "E-syntax": 4,
+    "E0422": 3,
+    "E0599": 3,
+    "E0106": 2,
+    "E0282": 2,
+    "E0689": 1
+  },
+  "corpus_dir": "/Volumes/SEAGATE/Personal_Projects/AI_Course/crates/byte-rust-conformance/corpus"
+}

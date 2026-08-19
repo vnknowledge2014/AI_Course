@@ -1,0 +1,17 @@
+[toolchain]
+# Dùng kênh `stable` chứ không ghim số phiên bản chính xác: ghim "1.97.1" khiến
+# rustup cài một bản sao song song và đụng độ với toolchain sẵn có trên máy.
+# Phiên bản đã kiểm chứng ghi trong Cargo.toml (`rust-version = "1.97"`), và
+# CI dùng đúng bản đó.
+channel = "stable"
+components = ["rustfmt", "clippy"]
+targets = [
+  "wasm32-unknown-unknown",
+  "aarch64-apple-darwin",
+  "aarch64-apple-ios",
+  "aarch64-apple-ios-sim",
+  "aarch64-linux-android",
+  "armv7-linux-androideabi",
+  "x86_64-linux-android",
+  "i686-linux-android",
+]

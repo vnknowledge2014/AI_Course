@@ -1,8 +1,20 @@
+# Node
+node_modules/
+dist/
+.turbo/
+
+# Rust
+target/
+
+# Python
 venv/
 __pycache__/
 *.pyc
 
-# Raw sources: clone bằng `python3 clone_repos.py`, không commit nội dung
+# Nội dung sinh ra
+.content-cache/
+
+# Nguồn thô: clone bằng `python3 clone_repos.py`, không commit nội dung
 repos/*/
 references/repos/
 

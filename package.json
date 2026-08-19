@@ -1,0 +1,19 @@
+{
+  "name": "byte-academy",
+  "private": true,
+  "packageManager": "pnpm@10.34.5",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "turbo build",
+    "test": "turbo test",
+    "typecheck": "turbo typecheck",
+    "inventory": "python3 tools/inventory.py --check",
+    "conformance": "cargo run --release -p byte-rust-conformance"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "^5.9.0"
+  }
+}
