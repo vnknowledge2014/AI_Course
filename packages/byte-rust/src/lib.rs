@@ -20,6 +20,7 @@ pub mod lexer;
 pub mod parser;
 pub mod span;
 pub mod value;
+pub mod wasm;
 
 pub use diag::{Diagnostic, Diagnostics, Severity};
 pub use lexer::{Token, TokKind, TuKhoa};

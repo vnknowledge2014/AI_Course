@@ -65,9 +65,35 @@ Chạy trong host JS (Node 26.7 — cùng API `WebAssembly` mà Chrome, Firefox 
 7/7 pass
 ```
 
-**Ngoại suy:** phần lõi ngôn ngữ (lex/parse/eval) chỉ tốn 16 KB. Một interpreter phủ
-tập con nêu trên, kèm bảng lỗi tiếng Việt, ước tính **300 KB – 1.5 MB** — nhỏ hơn
-Pyodide (13 MB) một bậc độ lớn, và nằm gọn trong ngân sách của mọi nền tảng đích.
+**Ngoại suy lúc ra quyết định:** phần lõi ngôn ngữ (lex/parse/eval) chỉ tốn 16 KB.
+Một interpreter phủ tập con nêu trên, kèm bảng lỗi tiếng Việt, ước tính
+**300 KB – 1.5 MB**.
+
+### Kết quả thực tế sau khi cài đặt xong
+
+Crate `packages/byte-rust` đã hoàn thành lexer + parser + interpreter + ABI WASM
+(~5.700 dòng, 96 test). Số đo thật:
+
+| Chỉ số | Dự đoán | Thực tế |
+|---|---|---|
+| Kích thước `.wasm` | 300 KB – 1.5 MB | **306 KB** |
+| Thời gian build | — | 6,65 s |
+| Bộ nhớ lúc chạy | — | 1,1 MB |
+
+Chạy từ host JS (Node 26.7, cùng API `WebAssembly` mà Chrome/Firefox/WKWebView dùng):
+
+```
+✅ chạy đúng                  6,9 ms   "Xin chào từ WASM!\n"
+✅ tính tổng 1..=100          2,1 ms   "5050\n"
+⚠️  lỗi ownership              1,7 ms   BR0530 @ 1:66
+⚠️  vòng lặp vô hạn           91,4 ms   BR0500 — bị chặn, KHÔNG treo
+✅ tiếng Việt trong chuỗi     0,1 ms   "Nguyễn Văn A — 25 tuổi\n"
+
+sau 500 lần chạy liên tiếp: bộ nhớ vẫn 1,1 MB — không rò rỉ
+```
+
+306 KB nhỏ hơn Pyodide (13 MB) **42 lần**, nên nạp được cả trên mobile mà không
+cần tải thêm gì.
 
 ## Hệ quả
 
