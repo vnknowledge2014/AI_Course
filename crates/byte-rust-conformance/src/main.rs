@@ -67,6 +67,7 @@ fn chay_rustc(thu_muc: &Path, ten: &str, ma: &str) -> Option<KetQuaRustc> {
 fn chay_byte_rust(ma: &str) -> (KetCuc, Vec<String>) {
     let (ct, mut d) = byte_rust::parser::phan_tich(ma);
     if !d.co_loi() {
+        byte_rust::tyck::kiem_tra(&ct, &mut d);
         byte_rust::move_check::kiem_tra(&ct, &mut d);
         if !d.co_loi() && !d.co_chua_ho_tro() {
             let mut may = byte_rust::interp::MayChay::moi();

@@ -20,6 +20,7 @@ pub mod lexer;
 pub mod move_check;
 pub mod parser;
 pub mod span;
+pub mod tyck;
 pub mod value;
 pub mod wasm;
 

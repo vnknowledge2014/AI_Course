@@ -487,6 +487,9 @@ pub fn chay(src: &str) -> (String, Diagnostics) {
     // Bắt buộc phải ở đây chứ không phải lúc chạy: kiểm-lúc-chạy chỉ thấy nhánh
     // đã đi qua, nên `if false { let b = a; }` sẽ lọt và bị báo Đạt dù `rustc`
     // từ chối. Xem `move_check.rs` và ADR-002.
+    // Kiểm kiểu nhẹ + tính vét cạn của `match`. Cũng phải chạy TRƯỚC: đây là
+    // lớp lỗi mà interpreter động không bao giờ thấy, vì nó chỉ đi một đường.
+    crate::tyck::kiem_tra(&ct, &mut d);
     crate::move_check::kiem_tra(&ct, &mut d);
     if d.co_loi() || d.co_chua_ho_tro() {
         return (String::new(), d.rut_gon());
