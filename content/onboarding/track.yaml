@@ -1,0 +1,10 @@
+id: onboarding
+title: Gặp Byte
+subtitle: Từ chưa từng chạm vào lập trình, đến ra lệnh được cho máy tính
+level: intro
+order: 0
+# Realm 0 không đòi hỏi gì trước đó. Đây là cánh cửa.
+requires: []
+modules:
+  - 01-may-tinh-noi-gi
+  - 02-ra-lenh-cho-byte

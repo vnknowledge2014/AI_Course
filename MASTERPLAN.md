@@ -917,7 +917,15 @@ export interface EngineCapabilities {
 
 **Thang colon chốt cứng** (lint chặn nếu con ≥ cha):
 - Cấp Step: `::::` (4 dấu)
-- Cấp con (`hints`, `validate`, `opt`, `why`, `solution`): `:::` (3 dấu)
+- Cấp con của Step (`hints`, `validate`, `opt`, `solution`): `:::` (3 dấu)
+- Cấp con của `opt` (`why`): `::` (2 dấu)
+
+> **Đính chính 2026-08-19.** Bản đầu của mục này xếp `why` cùng cấp với `opt`
+> (đều 3 dấu) trong khi văn bản lại nói *"`:::why` bên trong `:::opt`"* — tức
+> đặc tả tự mâu thuẫn, và ví dụ golden lesson kèm theo **không parse được**.
+> `packages/content-compiler` phát hiện điều này ngay lần chạy đầu tiên: đúng
+> loại lỗi mà luật thang colon tồn tại để chặn, chỉ khác là lần này nó cắn
+> chính tác giả của luật. `why` nay ở cấp 2 dấu.
 
 ```markdown
 ---
@@ -967,8 +975,9 @@ chẵn
 :::
 :::opt
 lẻ
-:::why
+::why
 `42 % 2` bằng `0`, mà `0` là điều kiện SAI, nên… khoan, thử lại nhé.
+::
 :::
 ::::
 
@@ -1017,7 +1026,7 @@ assert classify(10) == "F"
 **Ba quy tắc thi công bắt buộc:**
 1. `content:new <track>/<module>/<slug>` sinh scaffold đúng thang colon — tác giả không bao giờ gõ tay `::::`.
 2. Lint pha PARSE **fail build** nếu directive con có số colon ≥ directive cha.
-3. **Không có text-directive tự chế** (`:why` là sai cú pháp). Giải thích option nằm trong container `:::why` bên trong `:::opt`.
+3. **Không có text-directive tự chế** (`:why` là sai cú pháp). Giải thích option nằm trong container `::why` (2 dấu) bên trong `:::opt` (3 dấu).
 
 ---
 

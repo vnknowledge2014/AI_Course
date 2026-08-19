@@ -1,0 +1,6 @@
+id: may-tinh-noi-gi
+title: Máy tính nói gì
+summary: >
+  Trước khi ra lệnh cho máy, phải hiểu máy trả lời thế nào. Module này dạy
+  đúng một việc: đọc được thứ máy in ra, và đoán trước nó sẽ in gì.
+order: 1
