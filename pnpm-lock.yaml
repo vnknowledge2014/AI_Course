@@ -15,6 +15,15 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
+  packages/content-schema:
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.2
+        version: 26.2.0
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+
   packages/exec-core:
     devDependencies:
       '@types/node':
