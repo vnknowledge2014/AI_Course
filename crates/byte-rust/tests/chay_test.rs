@@ -164,7 +164,9 @@ fn closure_va_iterator() {
     assert_eq!(
         xuat(&ct(r#"
 let v = vec![1, 2, 3, 4];
-let t: i64 = v.iter().map(|x| x * 2).filter(|x| x > 4).sum();
+// `iter()` mượn phần tử nên closure của `filter` nhận `&i64` — phải `*x`.
+// Bản trước viết `x > 4` và rustc TỪ CHỐI (E0308); test cũ đang dạy Rust sai.
+let t: i64 = v.iter().map(|x| x * 2).filter(|x| *x > 4).sum();
 println!("{}", t);"#)),
         "14\n" // 6 + 8
     );

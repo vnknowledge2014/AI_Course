@@ -18,6 +18,7 @@ pub mod diag;
 pub mod interp;
 pub mod lexer;
 pub mod move_check;
+pub mod mut_check;
 pub mod parser;
 pub mod span;
 pub mod tyck;
@@ -37,6 +38,43 @@ pub struct KetQua {
     pub chan_doan: String,
     /// Có lỗi chặn việc chạy hay không.
     pub co_loi: bool,
+}
+
+/// **Điểm vào duy nhất** của toàn bộ pipeline: phân tích → kiểm → chạy.
+///
+/// Mọi nơi cần chạy code của người học đều phải đi qua đây — app, bộ đối chiếu
+/// `rustc`, test. Trước đây bộ đối chiếu tự dựng lại chuỗi gọi của riêng nó, và
+/// khi thêm `mut_check` thì nó lặng lẽ đo một pipeline KHÁC với pipeline mà app
+/// chạy. Cổng merge đo nhầm thứ còn tệ hơn không có cổng.
+///
+/// Thứ tự các pha là cố ý:
+/// 1. **parse** — sai cú pháp thì mọi phân tích sau đều vô nghĩa
+/// 2. **tyck** — kiểu và tính vét cạn của `match`
+/// 3. **move_check** — chuyển quyền sở hữu
+/// 4. **mut_check** — tính khả biến
+/// 5. **interp** — chỉ chạy khi mọi pha tĩnh đều sạch, đúng như một compiler
+pub fn kiem_va_chay(src: &str) -> (String, Diagnostics) {
+    let (ct, mut d) = parser::phan_tich(src);
+    if d.co_loi() {
+        return (String::new(), d.rut_gon());
+    }
+
+    tyck::kiem_tra(&ct, &mut d);
+    move_check::kiem_tra(&ct, &mut d);
+    mut_check::kiem_tra(&ct, &mut d);
+    if d.co_loi() || d.co_chua_ho_tro() {
+        return (String::new(), d.rut_gon());
+    }
+
+    let mut may = interp::MayChay::moi();
+    match may.chay(&ct) {
+        Ok(()) => (may.xuat, d),
+        Err(loi) => {
+            let xuat = may.xuat.clone();
+            d.push(loi);
+            (xuat, d)
+        }
+    }
 }
 
 /// Quét mã nguồn thành token — bước 1 của pipeline.

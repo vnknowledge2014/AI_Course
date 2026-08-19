@@ -475,35 +475,12 @@ fn khoang_cach_sua(a: &str, b: &str) -> usize {
     truoc[b.len()]
 }
 
-/// Chạy một chương trình, trả về những gì nó in ra hoặc chẩn đoán lỗi.
+/// Chạy một chương trình.
+///
+/// Giữ lại cho tương thích; uỷ nhiệm cho [`crate::kiem_va_chay`] — điểm vào duy
+/// nhất, để không tồn tại hai pipeline khác nhau.
 pub fn chay(src: &str) -> (String, Diagnostics) {
-    let (ct, mut d) = crate::parser::phan_tich(src);
-    if d.co_loi() {
-        return (String::new(), d.rut_gon());
-    }
-
-    // Kiểm tra chuyển quyền sở hữu TRƯỚC khi chạy — đúng như một compiler.
-    //
-    // Bắt buộc phải ở đây chứ không phải lúc chạy: kiểm-lúc-chạy chỉ thấy nhánh
-    // đã đi qua, nên `if false { let b = a; }` sẽ lọt và bị báo Đạt dù `rustc`
-    // từ chối. Xem `move_check.rs` và ADR-002.
-    // Kiểm kiểu nhẹ + tính vét cạn của `match`. Cũng phải chạy TRƯỚC: đây là
-    // lớp lỗi mà interpreter động không bao giờ thấy, vì nó chỉ đi một đường.
-    crate::tyck::kiem_tra(&ct, &mut d);
-    crate::move_check::kiem_tra(&ct, &mut d);
-    if d.co_loi() || d.co_chua_ho_tro() {
-        return (String::new(), d.rut_gon());
-    }
-
-    let mut may = MayChay::moi();
-    match may.chay(&ct) {
-        Ok(()) => (may.xuat, d),
-        Err(loi) => {
-            let xuat = may.xuat.clone();
-            d.push(loi);
-            (xuat, d)
-        }
-    }
+    crate::kiem_va_chay(src)
 }
 
 // ── Tính biểu thức ──────────────────────────────────────────────────────────
@@ -586,13 +563,19 @@ impl MayChay {
 
             BieuThuc::GiaiTham { gia_tri, span } => {
                 let v = self.tinh(gia_tri)?;
+                let _ = span;
                 match v {
                     GiaTri::ThamChieu { o, .. } => Ok(o.borrow().clone()),
-                    khac => Err(loi_kieu(
-                        *span,
-                        format!("không thể dùng `*` với `{}`", khac.ten_kieu()),
-                        "dấu `*` chỉ dùng để lấy giá trị mà một tham chiếu đang trỏ tới",
-                    )),
+                    // `*x` trên một giá trị không phải tham chiếu: TRẢ CHÍNH NÓ.
+                    //
+                    // Đây là phân công có chủ đích giữa hai tầng. `tyck` đã cưỡng
+                    // chế kỷ luật tham chiếu ở mức tĩnh (nó biết `v.iter()` cho ra
+                    // `&T` và chặn `x > 4`), nên tới lúc chạy chương trình đã đúng
+                    // kiểu. Interpreter cố tình KHÔNG mô hình hoá tham chiếu cho
+                    // từng phần tử iterator — làm vậy chỉ để rồi báo lỗi lại một
+                    // điều `tyck` đã bắt là thừa, và tệ hơn: nó báo lỗi cho cả
+                    // chương trình ĐÚNG như `filter(|x| *x > 4)`.
+                    khac => Ok(khac),
                 }
             }
 

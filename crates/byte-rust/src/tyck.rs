@@ -29,11 +29,87 @@ use crate::diag::{Diagnostic, Diagnostics, Label};
 use crate::span::Span;
 use std::collections::HashMap;
 
-/// Kiểu ở mức đủ dùng để bắt lỗi thường gặp. `Mo` nghĩa là "không suy ra được".
+/// Bề rộng và tính dấu của một kiểu số nguyên.
+///
+/// Gộp mọi kiểu số nguyên thành một `SoNguyen` duy nhất là cách `byte-rust` từng
+/// hành xử — và nó xoá mất một trong những bài học trung tâm nhất khi chuyển từ
+/// Python/JavaScript sang Rust: **Rust không ép kiểu số ngầm**.
+///
+/// `usize`/`isize` cố định 64-bit cho MỌI build (ADR-002 §5): mượn `usize` của
+/// host sẽ khiến `usize::MAX` cho ba kết quả khác nhau giữa WASM32, native 64-bit
+/// và `rustc` trên CI.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum KieuNguyen {
+    I8, I16, I32, I64, I128, Isize,
+    U8, U16, U32, U64, U128, Usize,
+    /// Literal chưa bị ghim kiểu — linh hoạt, hợp với mọi bề rộng.
+    ///
+    /// `let x: u8 = 5;` hợp lệ vì `5` chưa ghim. Nhưng `let x: u8 = y;` với
+    /// `y: i64` thì không. Phân biệt được hai ca đó là toàn bộ lý do biến thể
+    /// này tồn tại.
+    ChuaGhim,
+}
+
+impl KieuNguyen {
+    pub fn ten(self) -> &'static str {
+        use KieuNguyen::*;
+        match self {
+            I8 => "i8", I16 => "i16", I32 => "i32", I64 => "i64",
+            I128 => "i128", Isize => "isize",
+            U8 => "u8", U16 => "u16", U32 => "u32", U64 => "u64",
+            U128 => "u128", Usize => "usize",
+            ChuaGhim => "{số nguyên}",
+        }
+    }
+
+    pub fn tu_ten(s: &str) -> Option<KieuNguyen> {
+        use KieuNguyen::*;
+        Some(match s {
+            "i8" => I8, "i16" => I16, "i32" => I32, "i64" => I64,
+            "i128" => I128, "isize" => Isize,
+            "u8" => U8, "u16" => U16, "u32" => U32, "u64" => U64,
+            "u128" => U128, "usize" => Usize,
+            _ => return None,
+        })
+    }
+
+    /// Hai kiểu nguyên này chắc chắn không dùng thay nhau được?
+    ///
+    /// `ChuaGhim` hợp với mọi bề rộng (giữ tính linh hoạt của literal, tránh báo
+    /// oan). Hai bề rộng cụ thể khác nhau thì lệch — đó chính là luật Rust.
+    pub fn lech(self, khac: KieuNguyen) -> bool {
+        use KieuNguyen::ChuaGhim;
+        !matches!(self, ChuaGhim) && !matches!(khac, ChuaGhim) && self != khac
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum KieuThuc {
+    F32,
+    F64,
+    /// Literal số thực chưa ghim.
+    ChuaGhim,
+}
+
+impl KieuThuc {
+    pub fn ten(self) -> &'static str {
+        match self {
+            KieuThuc::F32 => "f32",
+            KieuThuc::F64 => "f64",
+            KieuThuc::ChuaGhim => "{số thực}",
+        }
+    }
+    pub fn lech(self, khac: KieuThuc) -> bool {
+        use KieuThuc::ChuaGhim;
+        !matches!(self, ChuaGhim) && !matches!(khac, ChuaGhim) && self != khac
+    }
+}
+
+/// Kiểu ở mức đủ dùng để bắt lỗi thường gặp.
 #[derive(Debug, Clone, PartialEq)]
 pub enum T {
-    SoNguyen,
-    SoThuc,
+    SoNguyen(KieuNguyen),
+    SoThuc(KieuThuc),
     Bool,
     KyTu,
     Chuoi,
@@ -42,15 +118,24 @@ pub enum T {
     Struct(String),
     Enum(String),
     Tham(Box<T>),
-    /// Không suy ra được — không bao giờ báo lỗi dựa trên kiểu này.
+    /// Chưa suy ra được, nhưng hợp lệ. Không bao giờ sinh lỗi.
     Mo,
+    /// **Bộ kiểm không mô hình hoá được chỗ này.**
+    ///
+    /// Khác `Mo` ở chỗ: `Mo` nghĩa là "chưa cần biết", còn `ChuaBiet` nghĩa là
+    /// "Byte không hiểu". Gộp hai thứ này lại chính là lỗ hổng khiến hàng chục
+    /// chương trình sai lọt qua: mọi giá trị đi qua một chỗ không mô hình hoá
+    /// được đều được *giặt sạch* khỏi mọi phép kiểm hạ nguồn.
+    ///
+    /// Điểm kiểm nào gặp `ChuaBiet` phải phát `ChuaHoTro`, không được im lặng.
+    ChuaBiet(&'static str),
 }
 
 impl T {
     pub fn hien_thi(&self) -> String {
         match self {
-            T::SoNguyen => "số nguyên".into(),
-            T::SoThuc => "số thực".into(),
+            T::SoNguyen(k) => k.ten().into(),
+            T::SoThuc(k) => k.ten().into(),
             T::Bool => "bool".into(),
             T::KyTu => "char".into(),
             T::Chuoi => "String".into(),
@@ -59,6 +144,16 @@ impl T {
             T::Struct(n) | T::Enum(n) => n.clone(),
             T::Tham(t) => format!("&{}", t.hien_thi()),
             T::Mo => "?".into(),
+            T::ChuaBiet(_) => "?".into(),
+        }
+    }
+
+    /// Byte không mô hình hoá được kiểu này?
+    pub fn chua_biet(&self) -> Option<&'static str> {
+        match self {
+            T::ChuaBiet(ly_do) => Some(ly_do),
+            T::Vec(x) | T::Tham(x) => x.chua_biet(),
+            _ => None,
         }
     }
 
@@ -68,7 +163,9 @@ impl T {
     pub fn chac_chan_lech(&self, khac: &T) -> bool {
         use T::*;
         match (self, khac) {
-            (Mo, _) | (_, Mo) => false,
+            // `Mo` và `ChuaBiet` không bao giờ sinh lỗi LỆCH KIỂU. `ChuaBiet` được
+            // xử lý riêng ở từng điểm kiểm bằng `ChuaHoTro`.
+            (Mo, _) | (_, Mo) | (ChuaBiet(_), _) | (_, ChuaBiet(_)) => false,
             // Tham chiếu và giá trị: rustc phân biệt, nhưng ta chỉ bắt khi
             // kiểu bên trong cũng lệch — tránh báo oan chỗ auto-deref.
             (Tham(a), Tham(b)) => a.chac_chan_lech(b),
@@ -77,13 +174,16 @@ impl T {
             // cũng lệch — tránh báo oan.
             (Tham(a), b) => a.chac_chan_lech(b),
             (a, Tham(b)) => a.chac_chan_lech(b),
-            (SoNguyen, SoNguyen) | (SoThuc, SoThuc) | (Bool, Bool)
-            | (KyTu, KyTu) | (Chuoi, Chuoi) | (Rong, Rong) => false,
+            (SoNguyen(a), SoNguyen(b)) => a.lech(*b),
+            (SoThuc(a), SoThuc(b)) => a.lech(*b),
+            (Bool, Bool) | (KyTu, KyTu) | (Chuoi, Chuoi) | (Rong, Rong) => false,
             (Vec(a), Vec(b)) => a.chac_chan_lech(b),
             (Struct(a), Struct(b)) | (Enum(a), Enum(b)) => a != b,
-            // Số nguyên và số thực: rustc KHÔNG tự ép, nhưng literal chưa gắn
-            // kiểu thì linh hoạt. Không báo, tránh oan.
-            (SoNguyen, SoThuc) | (SoThuc, SoNguyen) => false,
+            // Số nguyên và số thực KHÔNG dùng thay nhau được — đây đúng là bài
+            // học "Rust không ép kiểu số ngầm". Ngoại lệ duy nhất: literal chưa
+            // ghim, vì `let x: f64 = 5;` thì `5` vẫn có thể là `5.0`... KHÔNG:
+            // Rust cũng từ chối ca đó (E0308). Nên không có ngoại lệ nào cả.
+            (SoNguyen(_), SoThuc(_)) | (SoThuc(_), SoNguyen(_)) => true,
             _ => true,
         }
     }
@@ -94,9 +194,11 @@ fn tu_kieu_ast(k: &Kieu) -> T {
         Kieu::DuongDan { doan, tham_so, .. } => {
             let ten = doan.last().map(String::as_str).unwrap_or("");
             match ten {
-                "i8" | "i16" | "i32" | "i64" | "i128" | "isize" | "u8" | "u16" | "u32"
-                | "u64" | "u128" | "usize" => T::SoNguyen,
-                "f32" | "f64" => T::SoThuc,
+                _ if KieuNguyen::tu_ten(ten).is_some() => {
+                    T::SoNguyen(KieuNguyen::tu_ten(ten).unwrap())
+                }
+                "f32" => T::SoThuc(KieuThuc::F32),
+                "f64" => T::SoThuc(KieuThuc::F64),
                 "bool" => T::Bool,
                 "char" => T::KyTu,
                 "String" | "str" => T::Chuoi,
@@ -215,8 +317,8 @@ impl<'a> BoKiemKieu<'a> {
     fn kieu_cua(&mut self, bt: &BieuThuc) -> T {
         match bt {
             BieuThuc::HangSo { gia_tri, .. } => match gia_tri {
-                HangSo::SoNguyen(_) => T::SoNguyen,
-                HangSo::SoThuc(_) => T::SoThuc,
+                HangSo::SoNguyen(_) => T::SoNguyen(KieuNguyen::ChuaGhim),
+                HangSo::SoThuc(_) => T::SoThuc(KieuThuc::ChuaGhim),
                 HangSo::DungSai(_) => T::Bool,
                 HangSo::KyTu(_) => T::KyTu,
                 HangSo::Chuoi(_) => T::Chuoi,
@@ -239,13 +341,27 @@ impl<'a> BoKiemKieu<'a> {
                     }
                 }
             }
-            BieuThuc::HaiNgoi { toan_tu, trai, phai, .. } => {
+            BieuThuc::HaiNgoi { toan_tu, trai, phai, span } => {
                 use ToanTuHai::*;
+                let a = self.kieu_cua(trai);
+                let b = self.kieu_cua(phai);
                 match toan_tu {
-                    Bang | KhacBang | NhoHon | LonHon | NhoBang | LonBang | Va | Hoac => T::Bool,
+                    Va | Hoac => T::Bool,
+                    Bang | KhacBang | NhoHon | LonHon | NhoBang | LonBang => {
+                        // Rust có `impl Mul<i64> for &i64` nhưng KHÔNG có
+                        // `PartialOrd<i64> for &i64`. Nên số học tự bỏ tham chiếu
+                        // được, còn so sánh thì không — `v.iter().filter(|x| x > 4)`
+                        // là E0308 thật, và người mới vấp chỗ này rất nhiều.
+                        let lech_tc = matches!(a, T::Tham(_)) != matches!(b, T::Tham(_))
+                            && !matches!(a, T::Mo | T::ChuaBiet(_))
+                            && !matches!(b, T::Mo | T::ChuaBiet(_));
+                        if lech_tc {
+                            self.bao_so_sanh_tham_chieu(*span, &a, &b);
+                        }
+                        T::Bool
+                    }
                     _ => {
-                        let a = self.kieu_cua(trai);
-                        let b = self.kieu_cua(phai);
+                        let (a, b) = (bo_tham_chieu(&a), bo_tham_chieu(&b));
                         if a == T::Mo { b } else { a }
                     }
                 }
@@ -295,7 +411,9 @@ impl<'a> BoKiemKieu<'a> {
                         let ck_span = ck.span;
                         for (i, a) in doi_so.iter().enumerate() {
                             let thuc = self.kieu_cua(a);
-                            if let Some(m) = mong.get(i) {
+                            if let Some(ly_do) = thuc.chua_biet() {
+                                self.bao_chua_biet(a.span(), ly_do);
+                            } else if let Some(m) = mong.get(i) {
                                 // Với ĐỐI SỐ hàm, `&T` và `T` là hai kiểu khác
                                 // nhau — auto-deref chỉ áp dụng cho receiver của
                                 // phương thức, không áp dụng ở đây.
@@ -318,8 +436,7 @@ impl<'a> BoKiemKieu<'a> {
             }
             BieuThuc::GoiPhuongThuc { doi_tuong, ten, doi_so, .. } => {
                 let chu = self.kieu_cua(doi_tuong);
-                for a in doi_so { self.kieu_cua(a); }
-                kieu_tra_ve_phuong_thuc(&chu, ten)
+                self.kieu_phuong_thuc(&chu, ten, doi_so)
             }
             BieuThuc::TruyCapTruong { doi_tuong, ten, .. } => {
                 let chu = self.kieu_cua(doi_tuong);
@@ -417,9 +534,27 @@ impl<'a> BoKiemKieu<'a> {
         self.vao();
         for cl in &k.cau_lenh {
             match cl {
-                CauLenh::Let { mau, kieu, gia_tri, .. } => {
+                CauLenh::Let { mau, kieu, gia_tri, span } => {
                     let t_gt = gia_tri.as_ref().map(|e| self.kieu_cua(e)).unwrap_or(T::Mo);
-                    let t = kieu.as_ref().map(|k| self.chuan_hoa(tu_kieu_ast(k))).unwrap_or(t_gt);
+                    // Chú thích kiểu KHÔNG được ghi đè im lặng kiểu suy ra.
+                    //
+                    // Bản trước làm đúng thế, và đó là lỗ hổng gốc: kiểu sai được
+                    // ghi vào bảng biến rồi lan ra mọi suy luận sau. `tyck` không
+                    // chỉ bỏ sót — nó TIN một điều sai rồi dùng điều sai đó để
+                    // xác nhận tiếp.
+                    let t = match kieu {
+                        Some(k) => {
+                            let khai = self.chuan_hoa(tu_kieu_ast(k));
+                            let sp = gia_tri.as_ref().map(|e| e.span()).unwrap_or(*span);
+                            if let Some(ly_do) = t_gt.chua_biet().or_else(|| khai.chua_biet()) {
+                                self.bao_chua_biet(sp, ly_do);
+                            } else if lech_trong_let(&khai, &t_gt) {
+                                self.bao_let_lech(sp, k.span(), &khai, &t_gt);
+                            }
+                            khai
+                        }
+                        None => t_gt,
+                    };
                     let mut ten = Vec::new();
                     mau.ten_rang_buoc(&mut ten);
                     for (n, _, _) in ten { self.dat(&n, t.clone()); }
@@ -504,6 +639,113 @@ impl<'a> BoKiemKieu<'a> {
         kieu_nhanh
     }
 
+    /// Kiểu trả về của một lời gọi phương thức, có tính tới closure truyền vào.
+    ///
+    /// Không suy được kiểu qua `map`/`filter` thì mọi chuỗi iterator — thứ người
+    /// học FP dùng liên tục — đều rơi vào `ChuaHoTro`, và công cụ thành vô dụng.
+    /// Đây là chỗ đáng bỏ công mô hình hoá cho tử tế.
+    fn kieu_phuong_thuc(&mut self, chu: &T, ten: &str, doi_so: &[BieuThuc]) -> T {
+        let phan_tu = match chu {
+            T::Vec(x) => (**x).clone(),
+            _ => T::Mo,
+        };
+
+        match ten {
+            // `iter()` mượn từng phần tử: item là `&T`, KHÔNG phải `T`.
+            // Chi tiết này quan trọng: `v.iter().filter(|x| x > 4)` là E0308 thật,
+            // vì `&i64` không so sánh trực tiếp được với số nguyên.
+            "iter" => {
+                for a in doi_so { self.kieu_cua(a); }
+                T::Vec(Box::new(T::Tham(Box::new(phan_tu))))
+            }
+            "into_iter" => {
+                for a in doi_so { self.kieu_cua(a); }
+                chu.clone()
+            }
+            "map" => {
+                let ra = self.kieu_than_be_quan(doi_so.first(), &phan_tu);
+                T::Vec(Box::new(ra))
+            }
+            "filter" => {
+                // Closure của `filter` nhận thêm một tầng tham chiếu nữa.
+                self.kieu_than_be_quan(doi_so.first(), &T::Tham(Box::new(phan_tu.clone())));
+                T::Vec(Box::new(phan_tu))
+            }
+            "collect" => chu.clone(),
+            "sum" | "fold" => {
+                for a in doi_so { self.kieu_cua(a); }
+                bo_tham_chieu(&phan_tu)
+            }
+            "rev" => {
+                for a in doi_so { self.kieu_cua(a); }
+                chu.clone()
+            }
+            _ => {
+                for a in doi_so { self.kieu_cua(a); }
+                kieu_tra_ve_phuong_thuc(chu, ten)
+            }
+        }
+    }
+
+    /// Kiểu thân closure, với tham số đầu tiên gán kiểu `kieu_tham`.
+    fn kieu_than_be_quan(&mut self, bt: Option<&BieuThuc>, kieu_tham: &T) -> T {
+        let Some(BieuThuc::BeQuan { tham_so, than, .. }) = bt else {
+            if let Some(e) = bt { self.kieu_cua(e); }
+            return T::Mo;
+        };
+        self.vao();
+        if let Some((m, _)) = tham_so.first() {
+            let mut ten = Vec::new();
+            m.ten_rang_buoc(&mut ten);
+            for (n, _, _) in ten { self.dat(&n, kieu_tham.clone()); }
+        }
+        let ra = self.kieu_cua(than);
+        self.ra();
+        ra
+    }
+
+    fn bao_let_lech(&mut self, span_gt: Span, span_kieu: Span, khai: &T, thuc: &T) {
+        self.diags.push(
+            Diagnostic::loi(
+                "BR0303",
+                format!("khai báo kiểu {} nhưng giá trị là {}", khai.hien_thi(), thuc.hien_thi()),
+            )
+            .nhan(Label::chinh(span_gt, format!("giá trị này là {}", thuc.hien_thi())))
+            .nhan(Label::phu(span_kieu, format!("nhưng ở đây ghi {}", khai.hien_thi())))
+            .vi_sao("Rust KHÔNG tự chuyển đổi kiểu ngầm. Khác Python và JavaScript, `7 / 2` giữa hai số nguyên cho ra số nguyên `3`, và gán nó vào `f64` là lỗi chứ không âm thầm thành `3.0`. Chính luật này chặn cả một lớp lỗi làm tròn khó tìm.")
+            .sua("sửa chú thích kiểu cho khớp giá trị")
+            .sua("hoặc ép kiểu tường minh, ví dụ `a as f64 / b as f64`")
+            .khai_niem("kiểu dữ liệu"),
+        );
+    }
+
+    fn bao_so_sanh_tham_chieu(&mut self, span: Span, a: &T, b: &T) {
+        let (tc, gt) = if matches!(a, T::Tham(_)) { (a, b) } else { (b, a) };
+        self.diags.push(
+            Diagnostic::loi("BR0304", format!("không so sánh trực tiếp {} với {}", tc.hien_thi(), gt.hien_thi()))
+                .tai(span, "phép so sánh ở đây")
+                .vi_sao("Rust cho phép `&i64 * 2` (có sẵn phép nhân cho tham chiếu) nhưng KHÔNG cho `&i64 > 2`. Đây là chỗ `v.iter()` hay làm người mới vấp: `iter()` mượn từng phần tử nên bạn nhận được `&T`, không phải `T`.")
+                .sua("thêm dấu `*` để lấy giá trị ra: `*x > 4`")
+                .sua("hoặc dùng `into_iter()` nếu bạn muốn lấy hẳn phần tử")
+                .khai_niem("tham chiếu"),
+        );
+    }
+
+    /// Byte không mô hình hoá được chỗ này — nói thẳng thay vì im lặng.
+    fn bao_chua_biet(&mut self, span: Span, ly_do: &'static str) {
+        self.diags.push(
+            Diagnostic::chua_ho_tro(
+                "BR0310",
+                "tyck-chua-mo-hinh-hoa",
+                "Byte chưa kiểm được kiểu ở chỗ này",
+            )
+            .tai(span, ly_do)
+            .vi_sao("Bộ kiểm kiểu của Byte cố tình hẹp, để mọi thông báo lỗi đều dễ hiểu. Gặp cấu trúc nằm ngoài phạm vi, Byte nói thẳng là chưa kiểm được — thay vì im lặng cho qua rồi để bạn tin nhầm là code đúng.")
+            .sua("Mở bản Desktop và bấm “Đối chiếu với cargo” để có câu trả lời chính xác")
+            .khai_niem("kiểu dữ liệu"),
+        );
+    }
+
     #[allow(clippy::too_many_arguments)]
     fn bao_lech_kieu(
         &mut self, span_dt: Span, span_ham: Span, ten_ham: &str,
@@ -519,21 +761,55 @@ impl<'a> BoKiemKieu<'a> {
     }
 }
 
-/// Kiểu trả về của các phương thức dựng sẵn. `Mo` khi chưa biết.
+/// Bỏ mọi tầng tham chiếu.
+fn bo_tham_chieu(t: &T) -> T {
+    match t {
+        T::Tham(x) => bo_tham_chieu(x),
+        khac => khac.clone(),
+    }
+}
+
+/// So kiểu trong ngữ cảnh `let` — nghiêm ngặt hơn `chac_chan_lech`.
+///
+/// `chac_chan_lech` có một nhánh nới lỏng `(a, Tham(b)) => a.chac_chan_lech(b)`
+/// để tránh báo oan chỗ auto-deref. Nhưng auto-deref **không áp dụng** cho chú
+/// thích kiểu của `let`: `let s: String = &t;` là E0308 thật.
+fn lech_trong_let(khai: &T, thuc: &T) -> bool {
+    let mot_ben_tham_chieu = matches!(khai, T::Tham(_)) != matches!(thuc, T::Tham(_));
+    let khong_mo = !matches!(khai, T::Mo | T::ChuaBiet(_))
+        && !matches!(thuc, T::Mo | T::ChuaBiet(_));
+    (mot_ben_tham_chieu && khong_mo) || khai.chac_chan_lech(thuc)
+}
+
+/// Kiểu trả về của các phương thức dựng sẵn.
+///
+/// Phương thức không có trong bảng trả `ChuaBiet` chứ KHÔNG trả `Mo`: trả `Mo`
+/// nghĩa là "kiểu này hợp lệ, chỉ chưa cần biết", và giá trị đó sau đó đi qua
+/// mọi phép kiểm mà không bị chặn. Đó chính là cách `v.first().unwrap()` vô hiệu
+/// hoá được luật phân biệt `&T` với `T` — luật phòng thủ tốt nhất của module này.
 fn kieu_tra_ve_phuong_thuc(chu: &T, ten: &str) -> T {
+    use KieuNguyen::Usize;
     match ten {
-        "len" | "count" => T::SoNguyen,
-        "is_empty" | "contains" | "starts_with" | "is_some" | "is_none" | "is_ok" | "is_err" => T::Bool,
-        "to_string" | "to_uppercase" | "to_lowercase" | "trim" | "push_str" => T::Chuoi,
-        "sqrt" | "round" => T::SoThuc,
+        // `len()` trả `usize`, KHÔNG phải "một số nguyên nào đó". Dùng nó như
+        // `i64` là lỗi E0308 mà người mới gặp rất sớm.
+        "len" | "count" => T::SoNguyen(Usize),
+        "is_empty" | "contains" | "starts_with" | "is_some" | "is_none" | "is_ok"
+        | "is_err" => T::Bool,
+        "to_string" | "to_uppercase" | "to_lowercase" | "trim" => T::Chuoi,
+        "push_str" | "push" | "sort" | "reverse" => T::Rong,
+        "sqrt" | "round" => T::SoThuc(KieuThuc::F64),
         "clone" => chu.clone(),
-        "abs" | "pow" | "min" | "max" | "sum" => match chu {
+        "abs" | "min" | "max" => chu.clone(),
+        "pow" => chu.clone(),
+        "sum" => match chu {
             T::Vec(t) => (**t).clone(),
             khac => khac.clone(),
         },
         "chars" => T::Vec(Box::new(T::KyTu)),
         "split" => T::Vec(Box::new(T::Chuoi)),
-        _ => T::Mo,
+        // `first`/`last`/`get` trả `Option<&T>`; `unwrap` trên đó cho `&T`.
+        // Chưa mô hình hoá được `Option` nên phải nói thẳng là chưa biết.
+        _ => T::ChuaBiet("phương thức chưa có trong bảng kiểu"),
     }
 }
 
@@ -577,7 +853,10 @@ pub fn kiem_tra(ct: &ChuongTrinh, diags: &mut Diagnostics) {
             // Kiểu của biểu thức cuối phải khớp kiểu trả về khai báo.
             if let Some(kb) = &h.kieu_tra_ve {
                 let mong = bk.chuan_hoa(tu_kieu_ast(kb));
-                if mong.chac_chan_lech(&t_than) {
+                if let Some(ly_do) = t_than.chua_biet() {
+                    let sp = h.than.gia_tri_cuoi.as_ref().map(|e| e.span()).unwrap_or(h.than.span);
+                    bk.bao_chua_biet(sp, ly_do);
+                } else if mong.chac_chan_lech(&t_than) {
                     let span_than = h.than.gia_tri_cuoi.as_ref().map(|e| e.span()).unwrap_or(h.than.span);
                     bk.diags.push(
                         Diagnostic::loi("BR0302", format!("`{}` khai báo trả về {} nhưng thân hàm cho ra {}",
