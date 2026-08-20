@@ -239,6 +239,10 @@ pub struct BoKiemKieu<'a> {
     /// tên struct -> (tên trường -> kiểu)
     truong_struct: HashMap<String, HashMap<String, T>>,
     bien: Vec<HashMap<String, T>>,
+    /// Kiểu trả về khai báo của hàm đang duyệt, cùng span của chú thích ấy.
+    /// `return` ở giữa thân hàm phải đối chiếu với nó — biểu thức cuối thân
+    /// hàm đã được kiểm ở `kiem_tra`, nhưng `return` sớm thì chưa từng.
+    tra_ve_ham: Option<(T, Span)>,
     diags: &'a mut Diagnostics,
 }
 
@@ -250,6 +254,7 @@ impl<'a> BoKiemKieu<'a> {
             payload: HashMap::new(),
             thuoc_enum: HashMap::new(),
             struct_co: Vec::new(),
+            tra_ve_ham: None,
             truong_struct: HashMap::new(),
             bien: vec![HashMap::new()],
             diags,
@@ -447,13 +452,20 @@ impl<'a> BoKiemKieu<'a> {
             BieuThuc::Mang { phan_tu, .. } => T::Vec(Box::new(
                 phan_tu.first().map(|e| self.kieu_cua(e)).unwrap_or(T::Mo),
             )),
-            BieuThuc::Macro { ten, doi_so, .. } => match ten.as_str() {
-                "format" => T::Chuoi,
-                "vec" => T::Vec(Box::new(
-                    doi_so.first().map(|e| self.kieu_cua(e)).unwrap_or(T::Mo),
-                )),
-                _ => T::Rong,
-            },
+            BieuThuc::Macro { ten, doi_so, .. } => {
+                // Đối số macro là biểu thức Rust bình thường và rustc kiểm chúng
+                // y như mọi biểu thức khác. Bản trước rơi vào `_ => T::Rong` mà
+                // không thăm đối số nào — nên `println!("{}", cong(1))` chỉ bị
+                // bắt lúc CHẠY, và nếu nó nằm trong nhánh không bao giờ chạy tới
+                // thì không ai bắt. Vì `println!` có mặt gần như mọi dòng mã của
+                // người mới, đây là vùng mù lớn nhất của bộ kiểm tĩnh.
+                let kieu_dau: Vec<T> = doi_so.iter().map(|e| self.kieu_cua(e)).collect();
+                match ten.as_str() {
+                    "format" => T::Chuoi,
+                    "vec" => T::Vec(Box::new(kieu_dau.first().cloned().unwrap_or(T::Mo))),
+                    _ => T::Rong,
+                }
+            }
             BieuThuc::KhoiTaoStruct { duong_dan, truong, span, .. } => {
                 let ten = duong_dan.last().cloned().unwrap_or_default();
                 for (_, e) in truong {
@@ -520,10 +532,39 @@ impl<'a> BoKiemKieu<'a> {
                         if k == "String" { for a in doi_so { self.kieu_cua(a); } return T::Chuoi; }
                         if k == "Vec" { return T::Vec(Box::new(T::Mo)); }
                     }
+                    // Tên hàm hoàn toàn lạ. Nó có thể nằm trong một nhánh
+                    // không bao giờ chạy tới, nhưng rustc vẫn từ chối: phân giải
+                    // tên xảy ra lúc biên dịch, không phụ thuộc luồng chạy. Đây
+                    // chính là vùng mù mà một bộ kiểm động không bao giờ thấy.
+                    if doan.len() == 1
+                        && !self.ham.contains_key(&cuoi)
+                        && !self.thuoc_enum.contains_key(&cuoi)
+                        && !TEN_DUNG_SAN.contains(&cuoi.as_str())
+                        && self.tra(&cuoi) == T::Mo
+                    {
+                        for a in doi_so { self.kieu_cua(a); }
+                        self.bao_ham_khong_ton_tai(ham.span(), &cuoi);
+                        return T::ChuaBiet("gọi hàm chưa khai báo");
+                    }
                     if let Some(ck) = self.ham.get(&cuoi) {
-                        let mong: Vec<T> = ck.tham_so.clone();
-                        let tra = ck.tra_ve.clone();
+                        // Chuẩn hoá Ở ĐÂY chứ không ở `nap`: lúc `nap` chạy,
+                        // bảng enum chưa đầy, nên một hàm khai báo TRƯỚC enum
+                        // sẽ giữ nguyên `T::Struct("Mau")` trong khi lời gọi
+                        // cho ra `T::Enum("Mau")`. Hai kiểu ấy in ra giống hệt
+                        // nhau nên lỗi hiện thành "đây là Mau, nhưng cần Mau".
+                        let mong: Vec<T> =
+                            ck.tham_so.clone().into_iter().map(|k| self.chuan_hoa(k)).collect();
+                        let tra = self.chuan_hoa(ck.tra_ve.clone());
                         let ck_span = ck.span;
+                        // Số đối số phải khớp — kiểm TRƯỚC vòng đối chiếu kiểu.
+                        // Vòng ấy dùng `mong.get(i)` nên đối số thừa rơi vào
+                        // `None` và bị bỏ qua im lặng, còn đối số thiếu thì
+                        // chẳng có gì để lặp qua.
+                        if doi_so.len() != mong.len() {
+                            for a in doi_so { self.kieu_cua(a); }
+                            self.bao_sai_so_doi_so(*span, ck_span, &cuoi, mong.len(), doi_so.len());
+                            return T::ChuaBiet("gọi hàm sai số đối số");
+                        }
                         for (i, a) in doi_so.iter().enumerate() {
                             let thuc = self.kieu_cua(a);
                             if let Some(ly_do) = thuc.chua_biet() {
@@ -583,6 +624,23 @@ impl<'a> BoKiemKieu<'a> {
                     None => T::Mo,
                 }
             }
+            BieuThuc::ChiSo { doi_tuong, chi_so, .. } => {
+                let t_dt = self.kieu_cua(doi_tuong);
+                let t_cs = bo_tham_chieu(&self.kieu_cua(chi_so));
+                if let T::SoNguyen(k) = t_cs {
+                    if k != KieuNguyen::Usize && k != KieuNguyen::ChuaGhim {
+                        self.bao_chi_so_khong_usize(chi_so.span(), k);
+                    }
+                }
+                // `v[0]` có kiểu phần tử của `v`. Trả `T::Mo` ở đây làm câm
+                // mọi kiểm tra phía sau: `chac_chan_lech` coi `Mo` là tương
+                // thích với tất cả, nên một `Vec<bool>` truyền vào hàm nhận
+                // `i64` đi lọt.
+                match bo_tham_chieu(&t_dt) {
+                    T::Vec(x) => (*x).clone(),
+                    _ => T::Mo,
+                }
+            }
             BieuThuc::Khoi(k) => self.khoi(k),
             BieuThuc::Neu { dieu_kien, than, nguoc_lai, .. } => {
                 self.kieu_cua(dieu_kien);
@@ -590,6 +648,14 @@ impl<'a> BoKiemKieu<'a> {
                 match nguoc_lai {
                     Some(nl) => {
                         let b = self.kieu_cua(nl);
+                        // Hai nhánh của một `if` dùng làm giá trị phải cùng kiểu.
+                        // Bản trước lấy `a` rồi vứt `b` — nên nhánh `else` sai
+                        // kiểu, hay nhánh `else` kết bằng dấu chấm phẩy (thành
+                        // `()`), đều lọt sạch.
+                        if a.chac_chan_lech(&b) {
+                            self.bao_nhanh_lech(bt.span(), "if", &a, &b, nl.span());
+                            return T::ChuaBiet("hai nhánh if lệch kiểu");
+                        }
                         if a == T::Mo { b } else { a }
                     }
                     None => T::Rong,
@@ -642,16 +708,18 @@ impl<'a> BoKiemKieu<'a> {
                 self.kieu_cua(than);
                 self.ra();
             }
-            BieuThuc::TraVe { gia_tri, .. } | BieuThuc::Thoat { gia_tri, .. } => {
+            BieuThuc::Thoat { gia_tri, .. } => {
                 if let Some(e) = gia_tri { self.kieu_cua(e); }
             }
-            BieuThuc::ChiSo { doi_tuong, chi_so, .. } => {
-                self.kieu_cua(doi_tuong);
-                let t_cs = bo_tham_chieu(&self.kieu_cua(chi_so));
-                // Chỉ số phải là `usize`, không phải "một số nguyên nào đó".
-                if let T::SoNguyen(k) = t_cs {
-                    if k != KieuNguyen::Usize && k != KieuNguyen::ChuaGhim {
-                        self.bao_chi_so_khong_usize(chi_so.span(), k);
+            BieuThuc::TraVe { gia_tri, span } => {
+                let thuc = match gia_tri {
+                    Some(e) => self.kieu_cua(e),
+                    None => T::Rong,
+                };
+                let sp = gia_tri.as_ref().map(|e| e.span()).unwrap_or(*span);
+                if let Some((mong, sp_kb)) = self.tra_ve_ham.clone() {
+                    if mong.chac_chan_lech(&thuc) {
+                        self.bao_tra_ve_som_lech(sp, sp_kb, &mong, &thuc);
                     }
                 }
             }
@@ -739,7 +807,15 @@ impl<'a> BoKiemKieu<'a> {
             if let Some(dk) = &n.dieu_kien { self.kieu_cua(dk); }
             let t = self.kieu_cua(&n.than);
             self.ra();
-            if kieu_nhanh == T::Mo { kieu_nhanh = t; }
+            // Mọi nhánh `match` phải cho ra cùng một kiểu. Bản trước chỉ giữ
+            // kiểu của nhánh đầu tiên khác `Mo` rồi bỏ qua phần còn lại —
+            // nên `match x { 0 => 0, _ => false }` đi lọt.
+            if kieu_nhanh != T::Mo && kieu_nhanh.chac_chan_lech(&t) {
+                self.bao_nhanh_lech(*span, "match", &kieu_nhanh, &t, n.than.span());
+                kieu_nhanh = T::ChuaBiet("các nhánh match lệch kiểu");
+            } else if kieu_nhanh == T::Mo {
+                kieu_nhanh = t;
+            }
         }
 
         // Vét cạn — phủ không gian giá trị.
@@ -804,6 +880,12 @@ impl<'a> BoKiemKieu<'a> {
             }
             _ => {
                 for a in doi_so { self.kieu_cua(a); }
+                if let Some(n) = so_doi_so_phuong_thuc(ten) {
+                    if n != doi_so.len() {
+                        self.bao_sai_so_doi_so_phuong_thuc(ten, n, doi_so.len(), doi_so);
+                        return T::ChuaBiet("phương thức sai số đối số");
+                    }
+                }
                 kieu_tra_ve_phuong_thuc(chu, ten)
             }
         }
@@ -897,6 +979,73 @@ impl<'a> BoKiemKieu<'a> {
             .sua(format!("truyền đúng {can} giá trị"))
             .sua(format!("hoặc sửa khai báo `{bien_the}` cho khớp"))
             .khai_niem("enum"),
+        );
+    }
+
+    fn bao_nhanh_lech(&mut self, span: Span, dang: &str, a: &T, b: &T, span_b: Span) {
+        let ten_dang = if dang == "if" { "hai nhánh của `if`" } else { "các nhánh của `match`" };
+        self.diags.push(
+            Diagnostic::loi(
+                "BR0330",
+                format!("{ten_dang} cho ra hai kiểu khác nhau: {} và {}", a.hien_thi(), b.hien_thi()),
+            )
+            .nhan(Label::chinh(span_b, format!("nhánh này cho ra {}", b.hien_thi())))
+            .nhan(Label::phu(span, format!("nhánh trước cho ra {}", a.hien_thi())))
+            .vi_sao("Trong Rust `if` và `match` là BIỂU THỨC — chúng có giá trị, và giá trị đó phải có đúng một kiểu dù chạy vào nhánh nào. Nhờ vậy bạn viết được `let x = if ... {} else {}` mà không sợ `x` lúc là số lúc là chữ. Một dấu chấm phẩy thừa ở cuối nhánh cũng đủ đổi kiểu nhánh đó thành `()`.")
+            .sua("cho hai nhánh trả về cùng một kiểu")
+            .sua("hoặc kiểm tra xem có dấu `;` thừa ở cuối một nhánh không")
+            .khai_niem(if dang == "if" { "if" } else { "match" }),
+        );
+    }
+
+    fn bao_tra_ve_som_lech(&mut self, span: Span, span_kb: Span, mong: &T, thuc: &T) {
+        self.diags.push(
+            Diagnostic::loi(
+                "BR0331",
+                format!("`return` trả {} nhưng hàm khai báo trả {}", thuc.hien_thi(), mong.hien_thi()),
+            )
+            .nhan(Label::chinh(span, format!("giá trị này là {}", thuc.hien_thi())))
+            .nhan(Label::phu(span_kb, format!("chữ ký hàm ghi {}", mong.hien_thi())))
+            .vi_sao("Mọi lối ra của hàm đều phải tôn trọng cùng một chữ ký — cả `return` giữa chừng lẫn giá trị cuối thân hàm. Người gọi chỉ nhìn thấy chữ ký, nên nếu một lối ra trả kiểu khác thì lời hứa ấy gãy.")
+            .sua("sửa giá trị của `return` cho khớp kiểu trả về")
+            .sua("hoặc sửa kiểu trả về trong chữ ký hàm")
+            .khai_niem("hàm"),
+        );
+    }
+
+    fn bao_sai_so_doi_so(&mut self, span: Span, ck_span: Span, ten: &str, can: usize, co: usize) {
+        let (dong_tu, lam) = if co < can { ("thiếu", "thêm") } else { ("thừa", "bớt") };
+        self.diags.push(
+            Diagnostic::loi("BR0332", format!("`{ten}` nhận {can} đối số nhưng được gọi với {co}"))
+                .nhan(Label::chinh(span, format!("{dong_tu} đối số ở đây")))
+                .nhan(Label::phu(ck_span, format!("`{ten}` khai báo {can} tham số")))
+                .vi_sao("Rust không có tham số tuỳ chọn và không có giá trị mặc định cho tham số. Số đối số phải khớp chính xác — kể cả khi lời gọi nằm trong một nhánh không bao giờ chạy tới, vì việc kiểm này xảy ra lúc biên dịch chứ không lúc chạy.")
+                .sua(format!("{lam} đối số cho đủ {can}"))
+                .khai_niem("hàm"),
+        );
+    }
+
+    fn bao_ham_khong_ton_tai(&mut self, span: Span, ten: &str) {
+        let mut d = Diagnostic::loi("BR0333", format!("không tìm thấy hàm tên `{ten}`"))
+            .tai(span, "chưa có `fn` nào mang tên này")
+            .vi_sao("Rust phân giải mọi cái tên lúc biên dịch. Kể cả khi lời gọi nằm trong nhánh `if` không bao giờ đúng, tên vẫn phải tồn tại — đây đúng là chỗ mà một bộ kiểm chạy-rồi-mới-biết không bao giờ nhìn thấy.");
+        if let Some(g) = Self::gan_nhat(ten, self.ham.keys()) {
+            d = d.sua(format!("có phải bạn muốn gọi `{g}` không?"));
+        }
+        self.diags.push(d.sua(format!("hoặc viết `fn {ten}(...)` trước khi gọi")).khai_niem("hàm"));
+    }
+
+    fn bao_sai_so_doi_so_phuong_thuc(&mut self, ten: &str, can: usize, co: usize, doi_so: &[BieuThuc]) {
+        let span = doi_so.first().map(|a| a.span()).unwrap_or_default();
+        self.diags.push(
+            Diagnostic::loi(
+                "BR0334",
+                format!("`.{ten}()` nhận {can} đối số nhưng được gọi với {co}"),
+            )
+            .tai(span, format!("ở đây truyền {co}"))
+            .vi_sao(format!("`{ten}` là phương thức dựng sẵn, số tham số của nó cố định. Giá trị đứng trước dấu chấm là `self` — nó KHÔNG được tính là một đối số."))
+            .sua(format!("truyền đúng {can} đối số"))
+            .khai_niem("phương thức"),
         );
     }
 
@@ -1146,7 +1295,12 @@ pub fn kiem_tra(ct: &ChuongTrinh, diags: &mut Diagnostics) {
                 ts.mau.ten_rang_buoc(&mut ten);
                 for (n, _, _) in ten { bk.dat(&n, t.clone()); }
             }
+            bk.tra_ve_ham = h
+                .kieu_tra_ve
+                .as_ref()
+                .map(|kb| (bk.chuan_hoa(tu_kieu_ast(kb)), kb.span()));
             let t_than = bk.khoi(&h.than);
+            bk.tra_ve_ham = None;
             bk.ra();
 
             // Kiểu của biểu thức cuối phải khớp kiểu trả về khai báo.
@@ -1187,4 +1341,36 @@ fn khoang_cach(a: &str, b: &str) -> usize {
         std::mem::swap(&mut truoc, &mut nay);
     }
     truoc[b.len()]
+}
+
+/// Những cái tên gọi-được nhưng không phải `fn` do người học viết: macro dựng
+/// sẵn và hàm dựng của `Option`/`Result`. Thiếu bảng này thì mọi `println!`
+/// đều bị báo là hàm không tồn tại.
+const TEN_DUNG_SAN: &[&str] = &[
+    "println", "print", "eprintln", "eprint", "format", "vec", "panic", "assert",
+    "assert_eq", "assert_ne", "write", "writeln", "dbg", "todo", "unimplemented",
+    "Some", "None", "Ok", "Err", "String", "Vec", "Box", "drop",
+];
+
+/// Số đối số của một phương thức dựng sẵn — KHÔNG tính `self`.
+///
+/// Chỉ liệt kê những phương thức có đúng một arity. `min`/`max` cố tình vắng
+/// mặt: `a.min(b)` trên số nhận 1, còn `iter.min()` nhận 0, và ở tầng này ta
+/// chưa phân biệt được hai trường hợp — đoán bừa thì báo oan, mà báo oan còn
+/// tệ hơn bỏ lọt (ADR-002 §3).
+fn so_doi_so_phuong_thuc(ten: &str) -> Option<usize> {
+    Some(match ten {
+        "len" | "is_empty" | "pop" | "clear" | "clone" | "trim" | "to_string"
+        | "to_uppercase" | "to_lowercase" | "chars" | "bytes" | "as_str" | "as_bytes"
+        | "to_owned" | "first" | "last" | "sort" | "reverse" | "count" | "abs"
+        | "sqrt" | "floor" | "ceil" | "round" | "signum" | "unwrap" | "is_some"
+        | "is_none" | "is_ok" | "is_err" | "enumerate" | "parse" | "next" => 0,
+        "push" | "push_str" | "contains" | "remove" | "get" | "starts_with"
+        | "ends_with" | "split" | "join" | "repeat" | "truncate" | "extend"
+        | "unwrap_or" | "expect" | "take" | "skip" | "zip" | "pow"
+        | "saturating_sub" | "saturating_add" | "checked_add" | "checked_sub"
+        | "wrapping_add" | "wrapping_sub" | "position" | "any" | "all" | "find" => 1,
+        "insert" | "replace" | "splitn" => 2,
+        _ => return None,
+    })
 }
