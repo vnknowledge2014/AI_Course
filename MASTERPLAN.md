@@ -540,7 +540,7 @@ export type ValidationTier =
   | 'compile'    // tsc --noEmit / byte-rust typecheck / mypy
   | 'run'        // chạy được, không throw
   | 'tests'      // assertion trong test fence pass
-  | 'output'     // stdout khớp (exact|trim|regex|json-deep)
+  | 'output'     // stdout khớp (exact|trim|contains|regex|json-deep)
   | 'trace'      // invariant/property trên TraceEvent[] của CHÍNH học viên
   | 'property'   // ∀-property + shrinking, seed đổi mỗi lần nộp
   | 'complexity' // hồi quy log-log trên step counter
@@ -579,7 +579,12 @@ export type ValidationRule =
   | { tier: 'tests'; id: string; testCode?: PolyCode; timeoutMs: number;
       requiresHost?: HostReq; onFail?: string }
   | { tier: 'output'; id: string; expected: string;
-      match: 'exact' | 'trim' | 'regex' | 'json-deep';
+      // `contains` — output chứa chuỗi này ở đâu đó. Thêm 2026-08-21: 6 bài
+      // đã viết đều dùng `expect:` để nêu MỘT DÒNG đáng chú ý trong output
+      // nhiều dòng, và union cũ không có giá trị nào mang nghĩa đó. Ép chúng
+      // sang `regex` thì che mất ý định, lại vỡ khi văn bản tiếng Việt có dấu
+      // ngoặc hay dấu chấm.
+      match: 'exact' | 'trim' | 'contains' | 'regex' | 'json-deep';
       /** R-B: expected do CI sinh bằng rustc/CPython THẬT, lưu như DỮ LIỆU. */
       generatedBy?: { toolchain: string; version: string; at: string };
       onFail?: string }

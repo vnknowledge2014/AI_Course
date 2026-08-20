@@ -1,0 +1,146 @@
+/**
+ * Chạy THẬT lời giải của mọi bài học, qua chính engine mà người học sẽ dùng.
+ *
+ * Trình biên dịch kiểm CẤU TRÚC bài (có đủ solution/test/hints không).
+ * `kiem_bai_hoc.py` kiểm SƯ PHẠM (mọi đáp án sai có `::why` không).
+ * Không cái nào kiểm được điều quan trọng nhất: **mã trong bài có chạy được
+ * không, và khối test có thật sự đạt không**.
+ *
+ * Thiếu cổng này thì một bài dạy code sai vẫn xanh hết mọi cửa. Chuyện đó đã
+ * xảy ra một lần trong dự án này — một test tự viết dạy Rust không hợp lệ mà
+ * `rustc` từ chối — nên đây không phải phòng xa lý thuyết.
+ *
+ *     node tools/kiem_ma_bai_hoc.mjs [thư-mục-json]
+ *
+ * Mặc định đọc `dist/content`. Chạy `content-compiler build` trước.
+ */
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
+
+const THU_MUC = process.argv[2] ?? 'dist/content';
+const HET_HAN_MS = 10_000;
+
+// `pyodide` là phụ thuộc của `packages/exec-python`, không của thư mục gốc —
+// nên phải phân giải qua đó thay vì import trần.
+const require = createRequire(new URL('../packages/exec-python/package.json', import.meta.url));
+const { loadPyodide } = await import(pathToFileURL(require.resolve('pyodide/pyodide.mjs')).href);
+const py = await loadPyodide();
+
+/** Chạy một đoạn Python, trả về {ok, xuat, loi}. */
+function chay(ma) {
+  const dong = [];
+  const gom = { batched: (s) => dong.push(s) };
+  py.setStdout(gom);
+  py.setStderr(gom);
+  try {
+    py.runPython(ma);
+    return { ok: true, xuat: dong.join('\n'), loi: null };
+  } catch (e) {
+    return { ok: false, xuat: dong.join('\n'), loi: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+/** Đối chiếu output theo đúng kiểu `match` mà luật chấm khai báo. */
+function khop(thuc, luat) {
+  const mong = String(luat.expected ?? '');
+  switch (luat.match ?? 'contains') {
+    case 'exact':
+      return thuc === mong;
+    case 'trim':
+      return thuc.trim() === mong.trim();
+    case 'regex':
+      return new RegExp(mong).test(thuc);
+    case 'json-deep':
+      try {
+        return JSON.stringify(JSON.parse(thuc)) === JSON.stringify(JSON.parse(mong));
+      } catch {
+        return false;
+      }
+    default:
+      // `contains` — mặc định. Xem chú thích ở `chuan_hoa_rule` trong
+      // content-compiler: `expect:` nêu một dòng, không nêu cả output.
+      return thuc.includes(mong.trim());
+  }
+}
+
+const tep = readdirSync(THU_MUC).filter((f) => f.endsWith('.json') && f !== 'index.json');
+const hong = [];
+let da_chay = 0;
+
+for (const f of tep) {
+  const bai = JSON.parse(readFileSync(join(THU_MUC, f), 'utf-8'));
+  for (const b of bai.steps) {
+    const c = b.code;
+    if (!c || c.lang !== 'python') continue;
+
+    // 1. Lời giải tham chiếu phải chạy được.
+    if (c.solution) {
+      da_chay++;
+      const r = chay(c.solution);
+      if (!r.ok) {
+        hong.push({ bai: bai.id, buoc: b.id, loai: 'lời giải không chạy được', chi_tiet: r.loi });
+        continue;
+      }
+      // 2. Khối test phải ĐẠT khi chạy trên lời giải. Nếu không thì hoặc test
+      //    sai, hoặc lời giải sai — cách nào cũng khiến người học không bao
+      //    giờ qua được bài.
+      if (c.test) {
+        const rt = chay(`${c.solution}\n${c.test}`);
+        if (!rt.ok) {
+          hong.push({ bai: bai.id, buoc: b.id, loai: 'test TRƯỢT trên chính lời giải', chi_tiet: rt.loi });
+        }
+      }
+    }
+
+    // 3. Lời giải phải cho ra ĐÚNG output mà bài đã hứa.
+    //
+    // 31/40 bài Realm 0 chấm bằng tier `output` chứ không bằng assert. Bỏ qua
+    // tier này nghĩa là bỏ qua cách chấm chính của học liệu.
+    const luat_out = (b.validation?.rules ?? []).find((r) => r.tier === 'output');
+    if (c.solution && luat_out) {
+      const r = chay(c.solution);
+      if (r.ok && !khop(r.xuat, luat_out)) {
+        hong.push({
+          bai: bai.id,
+          buoc: b.id,
+          loai: 'lời giải KHÔNG ra output mà bài đã hứa',
+          chi_tiet: `hứa ${JSON.stringify(luat_out.expected)}, thật ra ${JSON.stringify(r.xuat)}`,
+        });
+      }
+    }
+
+    // 4. Mã `starter` KHÔNG được vô tình đã đạt sẵn — nếu đạt thì bài không
+    //    yêu cầu người học làm gì cả.
+    if (c.starter && c.solution && !c.starter.includes('___')) {
+      const rs = chay(c.starter);
+      const dat_san = luat_out
+        ? rs.ok && khop(rs.xuat, luat_out)
+        : c.test
+          ? chay(`${c.starter}\n${c.test}`).ok
+          : false;
+      if (dat_san) {
+        hong.push({
+          bai: bai.id,
+          buoc: b.id,
+          loai: 'mã khởi đầu đã ĐẠT sẵn',
+          chi_tiet: 'người học không phải làm gì mà bài vẫn xanh',
+        });
+      }
+    }
+  }
+}
+
+console.log(`Đã chạy ${da_chay} lời giải trong ${tep.length} bài.`);
+if (hong.length === 0) {
+  console.log('✅ Mọi lời giải chạy được và mọi khối test đều đạt.');
+  process.exit(0);
+}
+console.log(`❌ ${hong.length} vấn đề:\n`);
+for (const h of hong) {
+  console.log(`  ✗ ${h.bai} · bước ${h.buoc}`);
+  console.log(`     ${h.loai}`);
+  if (h.chi_tiet) console.log(`     ${String(h.chi_tiet).split('\n').slice(-3).join(' | ').slice(0, 240)}`);
+}
+process.exit(1);

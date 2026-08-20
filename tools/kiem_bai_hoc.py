@@ -9,8 +9,13 @@ học đối xử với người mới ra sao. Đó là việc của file này.
 Ranh giới giữa hai bên: compiler từ chối bài KHÔNG DÙNG ĐƯỢC; script này từ
 chối bài dùng được nhưng DẠY DỞ. Cả hai đều chạy trong CI.
 
-    python3 tools/kiem_bai_hoc.py            # kiểm toàn bộ content/
-    python3 tools/kiem_bai_hoc.py --json     # xuất máy đọc
+    python3 tools/kiem_bai_hoc.py                     # kiểm toàn bộ content/
+    python3 tools/kiem_bai_hoc.py --json              # xuất máy đọc
+    python3 tools/kiem_bai_hoc.py a.lesson.md b.md    # chỉ kiểm các file này
+
+Truyền đường dẫn cụ thể khi nhiều người viết song song: chạy trên toàn
+`content/` lúc đó sẽ đỏ vì bài của NGƯỜI KHÁC còn dở, và người viết không có
+cách nào biết mình đã xong hay chưa.
 
 Cú pháp thang hai chấm (MASTERPLAN §6):
     ::::step      bước
@@ -56,7 +61,10 @@ def tach_buoc(t: str) -> list[tuple[str, str]]:
 
 def kiem(f: pathlib.Path) -> list[str]:
     t = f.read_text(encoding="utf-8")
-    ten = f.relative_to(NOI_DUNG)
+    try:
+        ten: object = f.relative_to(NOI_DUNG)
+    except ValueError:
+        ten = f
     loi: list[str] = []
 
     def bao(m: str) -> None:
@@ -128,9 +136,18 @@ def kiem(f: pathlib.Path) -> list[str]:
 def main() -> int:
     ap = argparse.ArgumentParser(description="Kiểm hiến chương sư phạm cho .lesson.md")
     ap.add_argument("--json", action="store_true", help="xuất JSON thay vì chữ")
+    ap.add_argument("tep", nargs="*", help="chỉ kiểm các file này (mặc định: toàn bộ content/)")
     ns = ap.parse_args()
 
-    bai = cac_bai()
+    if ns.tep:
+        bai = [pathlib.Path(t).resolve() for t in ns.tep]
+        thieu = [t for t in bai if not t.is_file()]
+        if thieu:
+            for t in thieu:
+                print(f"không tìm thấy: {t}", file=sys.stderr)
+            return 2
+    else:
+        bai = cac_bai()
     if not bai:
         print("Không tìm thấy file .lesson.md nào trong content/", file=sys.stderr)
         return 1

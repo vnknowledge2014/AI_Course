@@ -435,16 +435,59 @@ function doc_validate(d: Directive | undefined): unknown {
   if (!d) return { rules: [], stopOnFirstBlocking: true, advisoryAffectsBadge: 'none' };
   const rules: Record<string, unknown>[] = [];
   let cur: Record<string, unknown> | null = null;
+  const chot = () => {
+    if (cur) rules.push(chuan_hoa_rule(cur, rules.length));
+    cur = null;
+  };
   for (const l of d.than.split('\n')) {
     const m = /^\s*-\s*tier:\s*(\S+)\s*$/.exec(l);
     if (m) {
-      if (cur) rules.push(cur);
+      chot();
       cur = { tier: m[1] };
       continue;
     }
     const kv = /^\s*([a-zA-Z]\w*):\s*(.*)$/.exec(l);
     if (kv && cur) cur[kv[1]!] = kv[2];
   }
-  if (cur) rules.push(cur);
+  chot();
   return { rules, stopOnFirstBlocking: true, advisoryAffectsBadge: 'none' };
+}
+
+/**
+ * Đưa một luật chấm về đúng hình dạng schema v2 đã đóng băng.
+ *
+ * Bản trước nhét thẳng chuỗi thô vào mọi trường, nên `timeoutMs` ra `"4000"`
+ * (chuỗi) trong khi schema khai `number`, và `expect` thì schema không hề có —
+ * schema khai `expected` kèm `match`. Ứng dụng chấm bài đọc CHÍNH file JSON
+ * này, nên mỗi chỗ lệch là một luật chấm im lặng không chạy.
+ */
+function chuan_hoa_rule(r: Record<string, unknown>, i: number): Record<string, unknown> {
+  const ra: Record<string, unknown> = { ...r };
+  ra['id'] ??= `${String(r['tier'])}-${i + 1}`;
+
+  for (const k of ['timeoutMs', 'runs', 'maxSteps']) {
+    const v = ra[k];
+    if (typeof v === 'string' && v.trim() !== '' && Number.isFinite(Number(v))) {
+      ra[k] = Number(v);
+    }
+  }
+
+  if (r['tier'] === 'output') {
+    // `expect:` là cách tác giả viết trong `.lesson.md`; `expected` + `match`
+    // là cách schema gọi nó. Đổi tên ở đây thay vì bắt tác giả gõ dài hơn.
+    if (ra['expect'] !== undefined && ra['expected'] === undefined) {
+      ra['expected'] = ra['expect'];
+    }
+    delete ra['expect'];
+    // Mặc định `contains`, không phải `trim`.
+    //
+    // `expect:` trong `.lesson.md` là cách tác giả nêu MỘT DÒNG đáng chú ý
+    // trong output — không phải toàn bộ output. Mặc định thành so-khớp-hết
+    // sẽ đánh trượt lời giải đúng của 6 bài đã viết, và tệ hơn: đánh trượt
+    // người học ở đúng những bài mà chương trình in nhiều dòng.
+    //
+    // Bài nào cần so khớp toàn bộ thì ghi `match: trim` tường minh.
+    ra['match'] ??= 'contains';
+  }
+  return ra;
 }
