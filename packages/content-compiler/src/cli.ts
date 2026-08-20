@@ -9,7 +9,7 @@
  * hỏng LẶNG LẼ. Tác giả nội dung không bao giờ nên phải tự đếm dấu hai chấm.
  */
 
-import { readdir, readFile, mkdir, writeFile } from 'node:fs/promises';
+import { readdir, readFile, mkdir, writeFile, rm } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { bien_dich, LoiBienDich } from './lesson.js';
 import { LoiDirective } from './directive.js';
@@ -130,6 +130,14 @@ async function tim_lesson(goc: string): Promise<string[]> {
 
 async function build(goc: string, dich: string): Promise<number> {
   const tep = await tim_lesson(goc);
+
+  // Dọn sạch thư mục đích trước khi ghi.
+  //
+  // Không dọn thì một bài bị xoá khỏi nguồn vẫn để lại file JSON của nó nằm
+  // mãi ở đây, và ứng dụng vẫn nạp bài đó lên như thường — không có dấu hiệu
+  // nào cho thấy nó đã chết. Đúng cùng một chế độ hỏng với khung `TODO —` lọt
+  // cổng kiểm: thứ không còn tồn tại vẫn trông y như đang sống.
+  await rm(dich, { recursive: true, force: true });
   let loi = 0;
   const tat_ca = [];
   for (const t of tep) {

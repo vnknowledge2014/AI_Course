@@ -67,8 +67,25 @@ export function doc_richtext(md: string): RichNode[] {
         const cur = dong[i] ?? '';
         const m = ul ? /^\s*[-*+]\s+(.*)$/.exec(cur) : /^\s*\d+[.)]\s+(.*)$/.exec(cur);
         if (!m) break;
-        items.push([{ t: 'p', c: doc_inline(m[1]!) }]);
         i++;
+
+        // Dòng TIẾP NỐI của cùng một mục: thụt lề, không rỗng, và bản thân nó
+        // không mở một mục mới.
+        //
+        // Không gộp thì mỗi mục dài quá một dòng nguồn sẽ bị cắt đôi: phần
+        // đuôi rơi ra ngoài thành `<p>` mồ côi, và mục kế tiếp mở hẳn một
+        // `<ul>` mới. Người viết bài không thấy được điều đó — họ viết
+        // Markdown đúng chuẩn, chỉ có bộ đọc là sai — nên lỗi này âm thầm
+        // làm hỏng 21/40 bài trước khi bị bắt.
+        let van = m[1]!;
+        while (i < dong.length) {
+          const ke = dong[i] ?? '';
+          const la_muc_moi = /^\s*(?:[-*+]|\d+[.)])\s+/.test(ke);
+          if (ke.trim() === '' || la_muc_moi || !/^\s/.test(ke)) break;
+          van += ' ' + ke.trim();
+          i++;
+        }
+        items.push([{ t: 'p', c: doc_inline(van) }]);
       }
       ra.push({ t: ul ? 'ul' : 'ol', items });
       continue;

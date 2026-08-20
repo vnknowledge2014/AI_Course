@@ -1,0 +1,66 @@
+/* Bảng màu và nền chung.
+ *
+ * Sáng là mặc định, tối theo thiết lập hệ thống. Cả hai bảng đều được định
+ * nghĩa ĐẦY ĐỦ ở `:root` trước, rồi bản tối chỉ ghi đè — để không bao giờ có
+ * một biến màu chỉ tồn tại bên trong media query.
+ */
+:root {
+  --nen: #fdfcfa;
+  --nen-o: #f4f2ee;
+  --nen-ma: #f0eee9;
+  --nen-dung: #eaf6ee;
+  --nen-luu-y: #fdf3e7;
+  --vien: #e0dcd4;
+  --chu-nhat: #2b2926;
+  --chu-dam: #14120f;
+  --chu-mo: #756f66;
+  --nhan: #b2542a;
+  --dung: #2f7d4f;
+  --luu-y: #c2801f;
+  --byte-than: #f4d9c4;
+  --byte-vien: #b2542a;
+  --font-ma: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --nen: #17161a;
+    --nen-o: #201f24;
+    --nen-ma: #232228;
+    --nen-dung: #172a1f;
+    --nen-luu-y: #2b2317;
+    --vien: #34323a;
+    --chu-nhat: #e6e3dd;
+    --chu-dam: #faf8f4;
+    --chu-mo: #9b958c;
+    --nhan: #e08b5c;
+    --dung: #6cc48d;
+    --luu-y: #e0ad5c;
+    --byte-than: #3a2f2a;
+    --byte-vien: #e08b5c;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--nen);
+  color: var(--chu-nhat);
+  font-family: ui-sans-serif, system-ui, 'Inter', 'Segoe UI', sans-serif;
+  font-size: 17px;
+  line-height: 1.7;
+  -webkit-text-size-adjust: 100%;
+  /* iPad/iPhone: tránh nội dung chui xuống dưới thanh home. */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--nhan);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

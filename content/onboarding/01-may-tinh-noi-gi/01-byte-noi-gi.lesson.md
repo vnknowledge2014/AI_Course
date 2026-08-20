@@ -78,7 +78,7 @@ Gần đúng ở chỗ bạn nhận ra `2 + 3` là một phép cộng. Nhưng �
 dấu nháy kép** — nên với máy, đó chỉ là ba ký tự `2`, `+`, `3` xếp cạnh nhau,
 y như `"mèo"` là ba chữ cái. Máy đọc nguyên văn, không tính.
 
-Thử bỏ dấu nháy đi ở bài sau, bạn sẽ thấy nó đổi khác ngay.
+Cuối module này bạn sẽ thử bỏ dấu nháy đi, và thấy nó đổi khác ngay.
 ::
 :::
 
@@ -144,7 +144,7 @@ Một câu hỏi trước khi đi tiếp:
 
 Nếu bạn viết `print(Xin chào)` — **không có** dấu nháy — bạn nghĩ máy sẽ làm gì?
 
-Đừng trả lời vội. Bài sau bạn sẽ thử, và câu trả lời sẽ giải thích luôn vì sao
+Đừng trả lời vội. Cuối module này bạn sẽ thử, và câu trả lời sẽ giải thích luôn vì sao
 dấu nháy tồn tại.
 ::::
 

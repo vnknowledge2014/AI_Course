@@ -8,6 +8,7 @@
  */
 
 import type {
+  ByteBeat,
   ContentTier,
   LangId,
   Lesson,
@@ -69,6 +70,72 @@ function tach_khoi_ma(than: string): { van_xuoi: string; ma: KhoiMa[] } {
   return { van_xuoi: con_lai.join('\n'), ma };
 }
 
+/** Tâm trạng hợp lệ của Byte.
+ *
+ *  Không có `sad` và không có `disappointed`, và đó là quyết định chứ không
+ *  phải thiếu sót: sai là dữ liệu, không phải thất bại. Bảng này từ chối luôn
+ *  ở tầng biên dịch để không ai vô tình viết được một Byte thất vọng.
+ */
+const TAM_TRANG_HOP_LE = ['idle', 'thinking', 'happy', 'blocked', 'dizzy', 'curious'] as const;
+const DANG_HOP_LE = ['idle', 'lean-in', 'point-editor', 'point-stage', 'jump'] as const;
+
+function lam_byte_beat(d: Directive, tep: string): ByteBeat {
+  const a = d.thuoc_tinh ?? {};
+  // Thuộc tính viết dạng cờ trần (`{commitOnce}`) mang giá trị `true`, không
+  // phải chuỗi. Ở đây `true` là viết sai, xử lý như chuỗi rỗng để rơi vào
+  // đúng nhánh báo lỗi bên dưới thay vì làm sập trình biên dịch.
+  const chu = (k: string): string | undefined => {
+    const v = a[k];
+    return typeof v === 'string' ? v : v === undefined ? undefined : '';
+  };
+  const mood = chu('mood') ?? 'idle';
+  if (!(TAM_TRANG_HOP_LE as readonly string[]).includes(mood)) {
+    throw new LoiBienDich(
+      `tâm trạng \`${mood}\` không hợp lệ cho Byte`,
+      tep,
+      d.dong,
+      `Chọn một trong: ${TAM_TRANG_HOP_LE.join(', ')}. Byte cố tình không có ` +
+        'trạng thái buồn hay thất vọng — người mới học đã đủ thấy mình kém, ' +
+        'nhân vật hướng dẫn tỏ ra thất vọng sẽ biến sai lầm thành nỗi xấu hổ.',
+    );
+  }
+  const pose = chu('pose');
+  if (pose !== undefined && !(DANG_HOP_LE as readonly string[]).includes(pose)) {
+    throw new LoiBienDich(`dáng \`${pose}\` không hợp lệ`, tep, d.dong,
+      `Chọn một trong: ${DANG_HOP_LE.join(', ')}.`);
+  }
+
+  const line = than_richtext(d);
+  if (line.length === 0) {
+    throw new LoiBienDich('khối `::::byte` không có lời thoại', tep, d.dong,
+      'Viết một câu của Byte, tối đa 90 ký tự, không dùng thuật ngữ chưa dạy.');
+  }
+
+  const beat: ByteBeat = {
+    trigger: doc_trigger(chu('trigger'), tep, d.dong),
+    mood: mood as ByteBeat['mood'],
+    line,
+    // `maxPerPage: 1` là bất biến của schema, không phải mặc định thay đổi
+    // được: hai câu Byte trên cùng một màn hình thì câu thứ hai chỉ là nhiễu.
+    maxPerPage: 1,
+    cooldownMs: Number(chu('cooldownMs') ?? 8000),
+  };
+  if (pose) beat.pose = pose as ByteBeat['pose'];
+  return beat;
+}
+
+function doc_trigger(v: string | undefined, tep: string, dong: number): ByteBeat['trigger'] {
+  switch (v ?? 'enter') {
+    case 'enter': return { on: 'enter' };
+    case 'success': return { on: 'success' };
+    case 'idle': return { on: 'idle', afterMs: 90_000 };
+    case 'fail-same-error': return { on: 'fail-same-error', nth: 2 };
+    default:
+      throw new LoiBienDich(`trigger \`${v}\` không hợp lệ`, tep, dong,
+        'Dùng: enter, success, idle, fail-same-error.');
+  }
+}
+
 function than_richtext(d: Directive): RichNode[] {
   return doc_richtext(tach_khoi_ma(d.than).van_xuoi);
 }
@@ -123,9 +190,36 @@ export function bien_dich(tep: string, nguon: string): Lesson {
   const goc = phan_tich_directive(than, dong_than);
   const steps: Step[] = [];
 
+  // Lời thoại của Byte đứng TRƯỚC bước mà nó dẫn vào, nên phải giữ lại rồi
+  // gắn xuống bước kế tiếp. Bản trước trả `null` rồi thôi — nghĩa là mọi câu
+  // Byte nói mà tác giả viết ra đều bị vứt lặng lẽ, và nhân vật trung tâm của
+  // cả sản phẩm không bao giờ mở miệng.
+  let cho_gan: ByteBeat[] = [];
+
   for (const d of goc) {
+    if (d.ten === 'byte') {
+      cho_gan.push(lam_byte_beat(d, tep));
+      continue;
+    }
     const b = lam_step(d, tep);
-    if (b) steps.push(b);
+    if (!b) continue;
+    if (cho_gan.length > 0) {
+      (b as { byte?: ByteBeat[] }).byte = cho_gan;
+      cho_gan = [];
+    }
+    steps.push(b);
+  }
+
+  // Một `::::byte` ở cuối bài không có bước nào để bám vào. Im lặng bỏ nó đi
+  // chính là lỗi vừa vá ở trên, nên lần này nói ra.
+  if (cho_gan.length > 0) {
+    throw new LoiBienDich(
+      'khối `::::byte` cuối bài không có bước nào đứng sau để gắn vào',
+      tep,
+      dong_than,
+      'Byte nói để dẫn người học VÀO một bước. Đặt nó ngay trước bước ấy, ' +
+        'hoặc bỏ đi nếu bài đã kết thúc.',
+    );
   }
 
   if (steps.length === 0) {
@@ -174,8 +268,9 @@ function lam_step(d: Directive, tep: string): Step | null {
       return { ...chung, id: `explain-${d.dong}`, kind: 'explain', body: doc_richtext(d.than) } as Step;
 
     case 'byte':
-      // Byte beat không phải một Step; nó gắn vào step kế tiếp ở tầng biên dịch
-      // sau. Ở đây bỏ qua để giữ cấu trúc đơn giản.
+      // Byte beat không phải một Step — nó được nối vào `byte[]` của step kế
+      // tiếp, ở vòng lặp trong `bien_dich`. Trả `null` ở đây là đúng; chỗ xử
+      // lý thật nằm ngoài hàm này.
       return null;
 
     case 'explain':
