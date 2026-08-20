@@ -51,7 +51,7 @@
   {:else if buoc.kind === 'reflect'}
     <div class="ngam">
       <Byte tam_trang="nghi-ngoi" co={52} />
-      <div><RichText noi_dung={(buoc as { prompt: never }).prompt} /></div>
+      <div><RichText noi_dung={buoc.prompt} /></div>
     </div>
 
   {:else}
