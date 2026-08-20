@@ -115,6 +115,13 @@ pub enum T {
     Chuoi,
     Rong,
     Vec(Box<T>),
+    /// Bộ lặp sinh ra giá trị kiểu `T` — kết quả của `.iter()`, `.map()`…
+    ///
+    /// Tách khỏi `Vec` là bắt buộc, không phải tinh chỉnh: `v.sum()` là lỗi
+    /// còn `v.iter().sum()` thì đúng, và nếu cả hai cùng mang kiểu `Vec<i64>`
+    /// thì không có cách nào phân biệt. Đây cũng đúng là chỗ người mới vấp
+    /// nhiều nhất khi chuyển từ Python sang.
+    Lap(Box<T>),
     Tuple(Vec<T>),
     Struct(String),
     Enum(String),
@@ -142,6 +149,7 @@ impl T {
             T::Chuoi => "String".into(),
             T::Rong => "()".into(),
             T::Vec(t) => format!("Vec<{}>", t.hien_thi()),
+            T::Lap(t) => format!("bộ lặp sinh {}", t.hien_thi()),
             T::Tuple(cac) => format!("({})", cac.iter().map(|x| x.hien_thi()).collect::<Vec<_>>().join(", ")),
             T::Struct(n) | T::Enum(n) => n.clone(),
             T::Tham(t) => format!("&{}", t.hien_thi()),
@@ -154,7 +162,7 @@ impl T {
     pub fn chua_biet(&self) -> Option<&'static str> {
         match self {
             T::ChuaBiet(ly_do) => Some(ly_do),
-            T::Vec(x) | T::Tham(x) => x.chua_biet(),
+            T::Vec(x) | T::Lap(x) | T::Tham(x) => x.chua_biet(),
             _ => None,
         }
     }
@@ -179,7 +187,9 @@ impl T {
             (SoNguyen(a), SoNguyen(b)) => a.lech(*b),
             (SoThuc(a), SoThuc(b)) => a.lech(*b),
             (Bool, Bool) | (KyTu, KyTu) | (Chuoi, Chuoi) | (Rong, Rong) => false,
-            (Vec(a), Vec(b)) => a.chac_chan_lech(b),
+            (Vec(a), Vec(b)) | (Lap(a), Lap(b)) => a.chac_chan_lech(b),
+            // Một `Vec` và một bộ lặp không dùng thay nhau được.
+            (Vec(_), Lap(_)) | (Lap(_), Vec(_)) => true,
             (Struct(a), Struct(b)) | (Enum(a), Enum(b)) => a != b,
             // Số nguyên và số thực KHÔNG dùng thay nhau được — đây đúng là bài
             // học "Rust không ép kiểu số ngầm". Ngoại lệ duy nhất: literal chưa
@@ -236,6 +246,9 @@ pub struct BoKiemKieu<'a> {
     /// tên biến thể -> tên enum
     thuoc_enum: HashMap<String, String>,
     struct_co: Vec<String>,
+    /// Tên mọi phương thức người học tự viết trong khối `impl`. Bộ kiểm không
+    /// được phán "phương thức này không tồn tại" với những tên nằm ở đây.
+    phuong_thuc_tu_viet: std::collections::HashSet<String>,
     /// tên struct -> (tên trường -> kiểu)
     truong_struct: HashMap<String, HashMap<String, T>>,
     bien: Vec<HashMap<String, T>>,
@@ -254,6 +267,7 @@ impl<'a> BoKiemKieu<'a> {
             payload: HashMap::new(),
             thuoc_enum: HashMap::new(),
             struct_co: Vec::new(),
+            phuong_thuc_tu_viet: std::collections::HashSet::new(),
             tra_ve_ham: None,
             truong_struct: HashMap::new(),
             bien: vec![HashMap::new()],
@@ -273,6 +287,11 @@ impl<'a> BoKiemKieu<'a> {
                             span: h.span,
                         },
                     );
+                }
+                Muc::Impl(i) => {
+                    for h in &i.ham {
+                        self.phuong_thuc_tu_viet.insert(h.ten.clone());
+                    }
                 }
                 Muc::Enum(e) => {
                     self.payload.insert(
@@ -342,6 +361,7 @@ impl<'a> BoKiemKieu<'a> {
         match t {
             T::Struct(n) if self.enum_bien_the.contains_key(&n) => T::Enum(n),
             T::Vec(x) => T::Vec(Box::new(self.chuan_hoa(*x))),
+            T::Lap(x) => T::Lap(Box::new(self.chuan_hoa(*x))),
             T::Tham(x) => T::Tham(Box::new(self.chuan_hoa(*x))),
             khac => khac,
         }
@@ -843,51 +863,113 @@ impl<'a> BoKiemKieu<'a> {
     /// học FP dùng liên tục — đều rơi vào `ChuaHoTro`, và công cụ thành vô dụng.
     /// Đây là chỗ đáng bỏ công mô hình hoá cho tử tế.
     fn kieu_phuong_thuc(&mut self, chu: &T, ten: &str, doi_so: &[BieuThuc]) -> T {
-        let phan_tu = match chu {
-            T::Vec(x) => (**x).clone(),
-            _ => T::Mo,
-        };
+        let goc = bo_tham_chieu(chu);
 
-        match ten {
-            // `iter()` mượn từng phần tử: item là `&T`, KHÔNG phải `T`.
-            // Chi tiết này quan trọng: `v.iter().filter(|x| x > 4)` là E0308 thật,
-            // vì `&i64` không so sánh trực tiếp được với số nguyên.
-            "iter" => {
+        // ── Bộ lặp: `.iter()` mượn từng phần tử nên item là `&T`, không phải
+        // `T`. Chi tiết này quan trọng thật: `v.iter().filter(|x| x > 4)` là
+        // E0308, vì `&i64` không so sánh trực tiếp với số nguyên được.
+        match (&goc, ten) {
+            (T::Vec(x), "iter") => {
                 for a in doi_so { self.kieu_cua(a); }
-                T::Vec(Box::new(T::Tham(Box::new(phan_tu))))
+                return T::Lap(Box::new(T::Tham(x.clone())));
             }
-            "into_iter" => {
+            (T::Vec(x), "into_iter") => {
                 for a in doi_so { self.kieu_cua(a); }
-                chu.clone()
+                return T::Lap(x.clone());
             }
-            "map" => {
-                let ra = self.kieu_than_be_quan(doi_so.first(), &phan_tu);
-                T::Vec(Box::new(ra))
+            (T::Chuoi, "chars") => {
+                for a in doi_so { self.kieu_cua(a); }
+                return T::Lap(Box::new(T::KyTu));
             }
-            "filter" => {
+            (T::Lap(x), "map") => {
+                let ra = self.kieu_than_be_quan(doi_so.first(), x);
+                return T::Lap(Box::new(ra));
+            }
+            (T::Lap(x), "filter") => {
                 // Closure của `filter` nhận thêm một tầng tham chiếu nữa.
-                self.kieu_than_be_quan(doi_so.first(), &T::Tham(Box::new(phan_tu.clone())));
-                T::Vec(Box::new(phan_tu))
+                self.kieu_than_be_quan(doi_so.first(), &T::Tham(x.clone()));
+                return T::Lap(x.clone());
             }
-            "collect" => chu.clone(),
-            "sum" | "fold" => {
+            (T::Lap(_), "rev" | "take" | "skip" | "peekable") => {
                 for a in doi_so { self.kieu_cua(a); }
-                bo_tham_chieu(&phan_tu)
+                return goc.clone();
             }
-            "rev" => {
+            (T::Lap(x), "enumerate") => {
                 for a in doi_so { self.kieu_cua(a); }
-                chu.clone()
+                return T::Lap(Box::new(T::Tuple(vec![
+                    T::SoNguyen(KieuNguyen::Usize),
+                    (**x).clone(),
+                ])));
             }
-            _ => {
+            (T::Lap(x), "collect") => {
                 for a in doi_so { self.kieu_cua(a); }
-                if let Some(n) = so_doi_so_phuong_thuc(ten) {
-                    if n != doi_so.len() {
-                        self.bao_sai_so_doi_so_phuong_thuc(ten, n, doi_so.len(), doi_so);
-                        return T::ChuaBiet("phương thức sai số đối số");
-                    }
-                }
-                kieu_tra_ve_phuong_thuc(chu, ten)
+                return T::Vec(Box::new(bo_tham_chieu(x)));
             }
+            (T::Lap(x), "sum" | "fold" | "product") => {
+                for a in doi_so { self.kieu_cua(a); }
+                return bo_tham_chieu(x);
+            }
+            (T::Lap(_), "count") => {
+                for a in doi_so { self.kieu_cua(a); }
+                return T::SoNguyen(KieuNguyen::Usize);
+            }
+            (T::Lap(_), "any" | "all") => {
+                for a in doi_so { self.kieu_cua(a); }
+                return T::Bool;
+            }
+            _ => {}
+        }
+
+        for a in doi_so { self.kieu_cua(a); }
+
+        // ── Gọi phương thức của bộ lặp thẳng trên `Vec` ────────────────────
+        // Đây là chỗ vấp kinh điển khi chuyển từ Python sang: `sum(ds)` bên
+        // Python thành `ds.iter().sum()` bên Rust, không phải `ds.sum()`.
+        if matches!(goc, T::Vec(_)) && CHI_TREN_BO_LAP.contains(&ten) {
+            self.bao_thieu_iter(doi_so, chu, ten);
+            return T::ChuaBiet("phương thức của bộ lặp gọi thẳng trên Vec");
+        }
+
+        // ── Phương thức không tồn tại trên bộ thu này ──────────────────────
+        if let Some(nhom) = nhom_bo_thu(&goc) {
+            let co = phuong_thuc_cua(nhom).contains(&ten);
+            let tu_viet = self.phuong_thuc_tu_viet.contains(ten);
+            if !co && !tu_viet {
+                self.bao_khong_co_phuong_thuc(doi_so, &goc, ten, nhom);
+                return T::ChuaBiet("phương thức không tồn tại");
+            }
+        }
+
+        if let Some(n) = so_doi_so_phuong_thuc(ten) {
+            if n != doi_so.len() {
+                self.bao_sai_so_doi_so_phuong_thuc(ten, n, doi_so.len(), doi_so);
+                return T::ChuaBiet("phương thức sai số đối số");
+            }
+        }
+
+        self.kiem_doi_so_phuong_thuc(&goc, ten, doi_so);
+        kieu_tra_ve_phuong_thuc(&goc, ten)
+    }
+
+    /// Đối chiếu kiểu đối số cho những phương thức có chữ ký chắc chắn.
+    fn kiem_doi_so_phuong_thuc(&mut self, chu: &T, ten: &str, doi_so: &[BieuThuc]) {
+        let Some(a0) = doi_so.first() else { return };
+        let thuc = self.kieu_cua(a0);
+        let mong = match (chu, ten) {
+            (T::Vec(x), "push") => (**x).clone(),
+            (T::Vec(x), "contains") => T::Tham(x.clone()),
+            (T::Chuoi, "push_str") => T::Tham(Box::new(T::Chuoi)),
+            (T::Chuoi, "push") => T::KyTu,
+            _ => return,
+        };
+        if thuc.chua_biet().is_some() || mong.chua_biet().is_some() {
+            return;
+        }
+        // `contains` cần `&T`: `so.contains(2)` là E0308, phải viết `&2`. Đây
+        // là lỗi người mới gặp rất sớm và thông báo gốc của rustc khó hiểu.
+        let lech_tham_chieu = matches!(&mong, T::Tham(_)) && !matches!(&thuc, T::Tham(_));
+        if lech_tham_chieu || mong.chac_chan_lech(&thuc) {
+            self.bao_doi_so_phuong_thuc_lech(a0.span(), ten, &mong, &thuc, lech_tham_chieu);
         }
     }
 
@@ -1047,6 +1129,60 @@ impl<'a> BoKiemKieu<'a> {
             .sua(format!("truyền đúng {can} đối số"))
             .khai_niem("phương thức"),
         );
+    }
+
+    fn bao_thieu_iter(&mut self, doi_so: &[BieuThuc], chu: &T, ten: &str) {
+        let span = doi_so.first().map(|a| a.span()).unwrap_or_default();
+        self.diags.push(
+            Diagnostic::loi(
+                "BR0335",
+                format!("`.{ten}()` là phương thức của BỘ LẶP, không phải của `{}`", chu.hien_thi()),
+            )
+            .tai(span, format!("`{}` chưa phải bộ lặp", chu.hien_thi()))
+            .vi_sao("Rust tách rời chỗ CHỨA dữ liệu và cách ĐI QUA dữ liệu. Một `Vec` chỉ biết giữ giá trị; muốn cộng dồn, lọc hay biến đổi thì phải xin nó một bộ lặp trước. Nghe rườm rà, nhưng chính nhờ tách đôi như vậy mà cùng một chuỗi `.map().filter().sum()` chạy được trên `Vec`, trên `HashMap`, trên dòng đọc từ file — và không đoạn nào tạo ra danh sách trung gian.")
+            .sua(format!("thêm `.iter()` vào trước: `.iter().{ten}()`"))
+            .sua("hoặc `.into_iter()` nếu bạn muốn chuyển hẳn quyền sở hữu vào bộ lặp")
+            .khai_niem("bộ lặp"),
+        );
+    }
+
+    fn bao_khong_co_phuong_thuc(&mut self, doi_so: &[BieuThuc], chu: &T, ten: &str, nhom: NhomBoThu) {
+        let span = doi_so.first().map(|a| a.span()).unwrap_or_default();
+        let ds = phuong_thuc_cua(nhom);
+        let mut d = Diagnostic::loi(
+            "BR0336",
+            format!("`{}` không có phương thức `{ten}`", chu.hien_thi()),
+        )
+        .tai(span, "không tìm thấy phương thức này")
+        .vi_sao("Mỗi kiểu chỉ có đúng những phương thức đã được định nghĩa cho nó. Không có kế thừa ngầm, không có phương thức mọc thêm lúc chạy — nên gõ sai tên bị bắt ngay lúc biên dịch.");
+        let ds_owned: Vec<String> = ds.iter().map(|s| (*s).to_string()).collect();
+        if let Some(g) = Self::gan_nhat(ten, ds_owned.iter()) {
+            d = d.sua(format!("có phải bạn muốn gọi `.{g}()` không?"));
+        }
+        self.diags.push(d.khai_niem("phương thức"));
+    }
+
+    fn bao_doi_so_phuong_thuc_lech(
+        &mut self,
+        span: Span,
+        ten: &str,
+        mong: &T,
+        thuc: &T,
+        thieu_dau_muon: bool,
+    ) {
+        let mut d = Diagnostic::loi(
+            "BR0337",
+            format!("`.{ten}()` cần {} nhưng nhận {}", mong.hien_thi(), thuc.hien_thi()),
+        )
+        .tai(span, format!("giá trị này là {}", thuc.hien_thi()));
+        d = if thieu_dau_muon {
+            d.vi_sao(format!("`{ten}` chỉ MƯỢN giá trị để xem, không lấy quyền sở hữu — nên nó nhận một tham chiếu. Dấu `&` là cách bạn nói “cho xem thôi, không đưa hẳn”."))
+                .sua("thêm dấu `&` trước đối số")
+        } else {
+            d.vi_sao("Rust không tự chuyển đổi kiểu ngầm. Một phương thức khai báo nhận kiểu nào thì chỉ nhận đúng kiểu đó.")
+                .sua(format!("đưa vào một giá trị {}", mong.hien_thi()))
+        };
+        self.diags.push(d.khai_niem("phương thức"));
     }
 
     fn bao_khong_co_struct(&mut self, span: Span, ten: &str) {
@@ -1373,4 +1509,66 @@ fn so_doi_so_phuong_thuc(ten: &str) -> Option<usize> {
         "insert" | "replace" | "splitn" => 2,
         _ => return None,
     })
+}
+
+/// Những phương thức chỉ tồn tại trên bộ lặp, không tồn tại trên `Vec`.
+///
+/// `len` cố tình vắng mặt: `Vec` có `len()`, bộ lặp thì không — nhầm chiều.
+const CHI_TREN_BO_LAP: &[&str] = &[
+    "map", "filter", "fold", "collect", "sum", "product", "rev", "enumerate",
+    "zip", "take", "skip", "any", "all", "find", "position", "flat_map",
+    "filter_map", "peekable", "chain", "step_by", "take_while", "skip_while",
+    "for_each", "max_by_key", "min_by_key", "partition", "next",
+];
+
+#[derive(Clone, Copy, PartialEq)]
+enum NhomBoThu {
+    Chuoi,
+    Vec,
+    So,
+    BoLap,
+}
+
+/// Nhóm bộ thu, hoặc `None` khi chưa biết chắc.
+///
+/// Trả `None` cho struct, enum và `Mo` là cố ý: ở đó người học có thể tự viết
+/// `impl`, nên phán "không có phương thức này" sẽ báo oan.
+fn nhom_bo_thu(t: &T) -> Option<NhomBoThu> {
+    match t {
+        T::Chuoi => Some(NhomBoThu::Chuoi),
+        T::Vec(_) => Some(NhomBoThu::Vec),
+        T::Lap(_) => Some(NhomBoThu::BoLap),
+        T::SoNguyen(_) | T::SoThuc(_) => Some(NhomBoThu::So),
+        _ => None,
+    }
+}
+
+fn phuong_thuc_cua(nhom: NhomBoThu) -> &'static [&'static str] {
+    match nhom {
+        NhomBoThu::Chuoi => &[
+            "len", "is_empty", "push", "push_str", "chars", "bytes", "split",
+            "splitn", "split_whitespace", "lines", "trim", "trim_start", "trim_end",
+            "to_string", "to_owned", "to_uppercase", "to_lowercase", "contains",
+            "starts_with", "ends_with", "replace", "parse", "as_str", "as_bytes",
+            "repeat", "find", "char_indices", "clone", "insert", "remove", "clear",
+            "capacity", "into", "eq", "cmp", "get",
+        ],
+        NhomBoThu::Vec => &[
+            "len", "is_empty", "push", "pop", "insert", "remove", "clear",
+            "contains", "iter", "into_iter", "iter_mut", "first", "last", "get",
+            "sort", "sort_by", "sort_by_key", "reverse", "truncate", "extend",
+            "join", "concat", "to_vec", "clone", "dedup", "retain", "swap",
+            "split_off", "append", "capacity", "as_slice", "windows", "chunks",
+            "binary_search", "into", "get_mut", "resize", "fill",
+        ],
+        NhomBoThu::So => &[
+            "abs", "pow", "powi", "powf", "sqrt", "floor", "ceil", "round",
+            "trunc", "signum", "min", "max", "clamp", "to_string", "clone",
+            "checked_add", "checked_sub", "checked_mul", "checked_div",
+            "saturating_add", "saturating_sub", "saturating_mul",
+            "wrapping_add", "wrapping_sub", "wrapping_mul", "rem_euclid",
+            "count_ones", "leading_zeros", "is_nan", "is_finite", "into", "cmp",
+        ],
+        NhomBoThu::BoLap => CHI_TREN_BO_LAP,
+    }
 }
