@@ -81,8 +81,29 @@ function bat_buoc<T>(v: T | undefined, thong_diep: string, tep: string, dong: nu
 }
 
 /** Biên dịch một tệp `.lesson.md`. */
+/** Dấu hiệu khung bài học do `content new` sinh ra và chưa ai điền vào.
+ *
+ *  Dùng đúng chuỗi `TODO —` (kèm gạch ngang dài) mà `cli.ts` phát ra, không
+ *  phải chữ `TODO` trơn — để một bài học nói VỀ việc ghi chú TODO vẫn viết
+ *  được bình thường. */
+const KHUNG_CHUA_DIEN = /TODO\s+—/;
+
 export function bien_dich(tep: string, nguon: string): Lesson {
   const { frontmatter: fm, than, dong_than } = tach(nguon);
+
+  // Một khung rỗng biên dịch được là chế độ hỏng tệ nhất của cả đường ống:
+  // nó khiến "40 bài đã xong" và "40 khung chưa ai viết" trông giống hệt nhau
+  // trong CI. Chặn ở đây, trước mọi kiểm tra khác.
+  const dong_todo = nguon.split('\n').findIndex((d) => KHUNG_CHUA_DIEN.test(d));
+  if (dong_todo >= 0) {
+    throw new LoiBienDich(
+      'bài học còn chỗ `TODO —` chưa điền',
+      tep,
+      dong_todo + 1,
+      'Đây là khung do `content new` sinh ra. Hoặc viết xong nội dung, hoặc xoá ' +
+        'file đi — một khung rỗng lọt qua cổng kiểm sẽ bị đếm nhầm là bài đã viết.',
+    );
+  }
   const lay = <T extends GiaTriYaml>(k: string): T | undefined => fm[k] as T | undefined;
 
   const id = bat_buoc(lay<string>('id'), 'frontmatter thiếu `id`', tep, 1);

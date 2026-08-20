@@ -15,8 +15,16 @@ import { bien_dich, LoiBienDich } from './lesson.js';
 import { LoiDirective } from './directive.js';
 import { LoiFrontmatter } from './frontmatter.js';
 
+/** Bỏ tiền tố số thứ tự khỏi tên thư mục/file: `02-ra-lenh-cho-byte` →
+ *  `ra-lenh-cho-byte`.
+ *
+ *  Số thứ tự thuộc về ĐƯỜNG DẪN, không thuộc về danh tính bài học. Chèn nó
+ *  vào `id` nghĩa là mỗi lần chèn thêm một bài vào giữa mạch thì mọi bài sau
+ *  đó đổi id — và mọi tiến độ người học đã lưu theo id ấy mất trắng. */
+const bo_so = (s: string) => s.replace(/^\d+-/, '');
+
 const KHUNG = (track: string, moduleId: string, slug: string) => `---
-id: ${track}.${moduleId}.${slug}
+id: ${track}.${bo_so(moduleId)}.${bo_so(slug)}
 title: TODO — tiêu đề ngắn, nói rõ người học sẽ LÀM được gì
 summary: TODO — một câu
 locale: vi
