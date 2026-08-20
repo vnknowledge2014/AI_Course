@@ -27,8 +27,18 @@ export class BoThucThiTypeScript implements BoThucThi {
   private cong: CongWorker | null = null;
   private idTiepTheo = 1;
 
-  /** @param taoWorker Tạo worker mới. Gọi lại mỗi khi worker cũ bị giết. */
-  constructor(private readonly taoWorker: () => CongWorker) {}
+  /**
+   * @param taoWorker Tạo worker mới. Gọi lại mỗi khi worker cũ bị giết.
+   * @param kiemKieuTruoc Kiểm kiểu TĨNH trước khi chạy. Tiêm từ ngoài vào vì
+   *   trình biên dịch `typescript` nặng ~7 MB — nơi nào không dạy TypeScript
+   *   thì không phải tải nó. Bỏ trống nghĩa là KHÔNG kiểm kiểu, và đó là một
+   *   chế độ nguy hiểm: mã bóc kiểu rồi chạy sẽ báo ĐẠT cho `let n: number =
+   *   "ba"`. Chỉ bỏ trống khi bài học cố tình chỉ chấm hành vi lúc chạy.
+   */
+  constructor(
+    private readonly taoWorker: () => CongWorker,
+    private readonly kiemKieuTruoc?: (ma: string) => { chanDoan: ChanDoan[]; js: string | null },
+  ) {}
 
   async sanSang(): Promise<void> {
     this.bacDamBaoCong();
@@ -43,6 +53,28 @@ export class BoThucThiTypeScript implements BoThucThi {
 
   async chay(ma: string, tuyChon: TuyChonChay = {}): Promise<KetQuaChay> {
     const hetHan = tuyChon.hetHanMs ?? HET_HAN_MAC_DINH_MS;
+
+    // Kiểm TĨNH trước, chạy sau — cùng luật với `byte-rust`.
+    //
+    // Mã đã biết chắc là sai thì không được chạy. Chạy nó rồi báo "đạt" vì nó
+    // tình cờ không nổ chính là chế độ hỏng mà cả đường ống này được dựng để
+    // tránh: với TypeScript nó còn tệ hơn Rust, vì toàn bộ lý do người ta học
+    // TypeScript là hệ thống kiểu.
+    if (this.kiemKieuTruoc) {
+      const t0k = performance.now();
+      const nguon = tuyChon.maKiemTra ? `${ma}\n${tuyChon.maKiemTra}` : ma;
+      const { chanDoan, js } = this.kiemKieuTruoc(nguon);
+      if (js === null) {
+        return {
+          ok: false,
+          xuat: '',
+          chanDoan,
+          thoiGianMs: performance.now() - t0k,
+          biNgat: false,
+        };
+      }
+    }
+
     const cong = this.bacDamBaoCong();
     const id = this.idTiepTheo++;
     const t0 = performance.now();
@@ -153,3 +185,5 @@ export function chanDoanTuLoiJs(loi: string): ChanDoan {
 
 export { chayTrongWorker } from './worker-body.js';
 export type { BoChuyenDoi } from './worker-body.js';
+
+export { kiemKieu, tuyChon, doiChanDoan, TEN_TEP, type DocLib } from './kiem-kieu.js';
