@@ -4,18 +4,26 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "pnpm run chuan-bi && vite",
     "build": "svelte-check --tsconfig ./tsconfig.json && vite build",
     "preview": "vite preview",
     "typecheck": "svelte-check --tsconfig ./tsconfig.json",
-    "noi-dung": "node ../../packages/content-compiler/dist/cli.js build ../../content public/noi-dung"
+    "noi-dung": "node ../../packages/content-compiler/dist/cli.js build ../../content public/noi-dung",
+    "pyodide": "node -e \"const p=require('node:path').dirname(require.resolve('pyodide/package.json')),f=require('node:fs');f.mkdirSync('public/pyodide',{recursive:true});for(const n of ['pyodide.asm.js','pyodide.asm.wasm','pyodide.mjs','python_stdlib.zip','pyodide-lock.json'])f.copyFileSync(p+'/'+n,'public/pyodide/'+n)\"",
+    "chuan-bi": "pnpm run noi-dung && pnpm run pyodide",
+    "tauri": "tauri"
   },
   "dependencies": {
     "@byte/content-schema": "workspace:*",
-    "@byte/ui": "workspace:*"
+    "@byte/ui": "workspace:*",
+    "@tauri-apps/api": "^2.11.1",
+    "pyodide": "^0.29.4",
+    "@byte/exec-core": "workspace:*",
+    "@byte/exec-python": "workspace:*"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
+    "@tauri-apps/cli": "^2.11.4",
     "svelte": "^5.42.2",
     "svelte-check": "^4.3.2",
     "typescript": "^5.9.0",

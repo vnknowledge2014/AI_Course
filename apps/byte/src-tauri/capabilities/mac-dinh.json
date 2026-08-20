@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "mac-dinh",
+  "description": "Quyền tối thiểu. Ứng dụng học liệu không cần đọc file của người dùng, không cần mạng, không cần shell — mỗi quyền thêm vào là một cách nữa để nội dung bài học (do người khác viết) làm hại máy đang chạy nó.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

@@ -208,3 +208,5 @@ export function chanDoanTuTraceback(traceback: string): ChanDoan {
     vanBan: traceback,
   };
 }
+
+export { chayTrongWorkerPython, gan, type Pyodide } from './worker-body.js';

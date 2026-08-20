@@ -3,6 +3,7 @@
   import Byte from './Byte.svelte';
   import GoiY from './GoiY.svelte';
   import DuDoan from './DuDoan.svelte';
+  import BaiCode from './BaiCode.svelte';
   import type { Step, CodeSlot, ByteMood } from '@byte/content-schema';
 
   let { buoc, xong }: { buoc: Step; xong: () => void } = $props();
@@ -47,6 +48,9 @@
 
   {#if buoc.kind === 'predict'}
     <DuDoan buoc={buoc as never} {xong} />
+
+  {:else if buoc.kind === 'code'}
+    <BaiCode buoc={buoc as never} {xong} />
 
   {:else if buoc.kind === 'reflect'}
     <div class="ngam">

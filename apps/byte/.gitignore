@@ -1,1 +1,10 @@
+# Sinh ra từ content/ bằng `pnpm run noi-dung`.
 public/noi-dung/
+
+# Runtime Pyodide (12 MB) sao từ node_modules bằng `pnpm run pyodide`.
+# Không commit: nó là bản phát hành của bên thứ ba, phiên bản đã ghim trong
+# package.json rồi.
+public/pyodide/
+
+# Tauri sinh ra
+src-tauri/gen/
