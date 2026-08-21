@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { muc_luc, bai_hoc, type MucLuc } from './lib/noi_dung';
+  import { muc_luc, bai_hoc, thu_tu, type MucLuc } from './lib/noi_dung';
+  import { dung_ban_do, bai_ke_tiep, so_ky_nang } from './lib/cay_ky_nang';
+  import BanDo from './thanh_phan/BanDo.svelte';
   import { doc, danh_dau_buoc, danh_dau_xong } from './lib/tien_do';
   import Buoc from './thanh_phan/Buoc.svelte';
   import Byte from './thanh_phan/Byte.svelte';
@@ -11,11 +13,22 @@
   let tien_do = $state(doc());
   let loi = $state<string | null>(null);
 
+  let realm = $state<ReturnType<typeof thu_tu>>([]);
+
   $effect(() => {
     muc_luc()
-      .then((m) => (ds = m))
+      .then((m) => {
+        ds = m;
+        realm = thu_tu();
+      })
       .catch((e: Error) => (loi = e.message));
   });
+
+  // Bản đồ tính lại mỗi khi tiến độ đổi — mở khoá là hàm của tiến độ, không
+  // phải một trạng thái riêng phải nhớ đồng bộ.
+  const ban_do = $derived(ds.length ? dung_ban_do(ds, realm, tien_do) : []);
+  const ke_tiep = $derived(bai_ke_tiep(ban_do));
+  const ky_nang = $derived(so_ky_nang(ds, tien_do));
 
   async function mo(id: string) {
     try {
@@ -84,38 +97,13 @@
     </article>
 
   {:else}
-    <header class="dau-trang">
-      <Byte tam_trang="vui" co={84} loi_thoai="Chào bạn. Mình là Byte. Bắt đầu từ bài đầu tiên nhé — chậm mà chắc." />
-    </header>
-    {#each Object.entries(nhom) as [ten_module, bai_trong_module] (ten_module)}
-      <section class="module">
-        <h2>{ten_module.replace(/-/g, ' ')}</h2>
-        <ol>
-          {#each bai_trong_module as l (l.id)}
-            <li>
-              <button class="the" onclick={() => mo(l.id)}>
-                <span class="so">{l.order}</span>
-                <span class="noi">
-                  <strong>{l.title}</strong>
-                  <span class="tom">{l.summary}</span>
-                </span>
-                <span class="phut">{l.estimatedMinutes}′</span>
-                {#if tien_do.da_xong.includes(l.id)}<span class="xong" aria-label="đã xong">✓</span>{/if}
-              </button>
-            </li>
-          {/each}
-        </ol>
-      </section>
-    {/each}
+    <BanDo {ban_do} so_ky_nang={ky_nang} {ke_tiep} mo={(id) => mo(id)} />
   {/if}
 </main>
 
 <style>
   main { max-width: 44rem; margin: 0 auto; padding: 2.5rem 1.25rem 6rem; }
   h1 { font-size: 1.85rem; line-height: 1.25; margin: 0.6rem 0 0.4rem; }
-  h2 { font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase;
-       color: var(--chu-mo); margin: 2.4rem 0 0.8rem; font-weight: 600; }
-  .dau-trang { margin-bottom: 2rem; }
   .tom-tat { color: var(--chu-mo); margin: 0 0 1.2rem; line-height: 1.6; }
   .dem { font-size: 0.85rem; color: var(--chu-mo); margin: 0.5rem 0 0; }
   .thanh { height: 4px; background: var(--vien); border-radius: 999px; overflow: hidden; }
@@ -125,18 +113,6 @@
   /* Bước đã qua mờ đi nhưng KHÔNG bị ẩn: người học phải cuộn ngược lại đọc
      được, vì mạch của bài nằm ở chỗ bước sau trả lời bước trước. */
   .o-buoc.mo-nhat { opacity: 0.62; }
-  ol { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; }
-  .the {
-    width: 100%; display: flex; align-items: center; gap: 0.9rem; text-align: left;
-    background: var(--nen-o); border: 1.5px solid var(--vien); border-radius: 12px;
-    padding: 0.85rem 1rem; font: inherit; color: inherit; cursor: pointer;
-  }
-  .the:hover { border-color: var(--nhan); }
-  .so { width: 1.9rem; text-align: center; color: var(--chu-mo); font-variant-numeric: tabular-nums; }
-  .noi { flex: 1; display: flex; flex-direction: column; gap: 0.15rem; }
-  .tom { font-size: 0.86rem; color: var(--chu-mo); line-height: 1.5; }
-  .phut { font-size: 0.82rem; color: var(--chu-mo); font-variant-numeric: tabular-nums; }
-  .xong { color: var(--dung); font-weight: 700; }
   footer { padding-top: 1.8rem; display: flex; flex-direction: column; gap: 1rem; align-items: flex-start; }
   .tiep {
     background: var(--nhan); color: var(--nen); border: none; border-radius: 999px;

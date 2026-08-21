@@ -10,6 +10,7 @@
  */
 
 import { readdir, readFile, mkdir, writeFile, rm } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { bien_dich, LoiBienDich } from './lesson.js';
 import { LoiDirective } from './directive.js';
@@ -114,6 +115,40 @@ TODO
 ::::
 `;
 
+/** Thứ tự học, đọc từ `content/curriculum/thu-tu.yaml`.
+ *
+ *  Đưa vào `index.json` để ứng dụng khỏi phải hiểu YAML. Tên thư mục KHÔNG
+ *  quyết định được thứ tự — `nen-tang` (Realm 1) xếp trước `onboarding`
+ *  (Realm 0) theo bảng chữ cái — nên thứ tự phải đi kèm nội dung, không suy
+ *  ra được ở phía người đọc.
+ *
+ *  Đọc bằng tay thay vì kéo thêm một gói YAML: file này cố tình giữ hình dạng
+ *  hai tầng đơn giản, và `tools/kiem_do_thi.py` cũng đọc nó y như vậy.
+ */
+async function doc_thu_tu(goc: string): Promise<{ id: string; ten: string; track: string[] }[]> {
+  const tep = join(goc, 'curriculum', 'thu-tu.yaml');
+  if (!existsSync(tep)) return [];
+  const ra: { id: string; ten: string; track: string[] }[] = [];
+  let hien: { id: string; ten: string; track: string[] } | null = null;
+  let trong_track = false;
+  for (const dong of (await readFile(tep, 'utf-8')).split('\n')) {
+    const s = dong.trim();
+    if (!s || s.startsWith('#')) continue;
+    const m_id = /^- id:\s*(\S+)/.exec(s);
+    if (m_id) {
+      hien = { id: m_id[1]!, ten: '', track: [] };
+      ra.push(hien);
+      trong_track = false;
+      continue;
+    }
+    const m_ten = /^ten:\s*"?([^"]*)"?/.exec(s);
+    if (m_ten && hien) { hien.ten = m_ten[1]!.trim(); continue; }
+    if (s === 'track:') { trong_track = true; continue; }
+    if (trong_track && hien && s.startsWith('- ')) hien.track.push(s.slice(2).trim());
+  }
+  return ra;
+}
+
 async function tim_lesson(goc: string): Promise<string[]> {
   const ra: string[] = [];
   async function di(d: string): Promise<void> {
@@ -164,6 +199,7 @@ async function build(goc: string, dich: string): Promise<number> {
     JSON.stringify(
       {
         generated: null,
+        thuTu: await doc_thu_tu(goc),
         lessons: tat_ca.map((l) => ({
           id: l.id,
           track: l.track,

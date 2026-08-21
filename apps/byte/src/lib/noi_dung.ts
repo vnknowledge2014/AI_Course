@@ -14,18 +14,30 @@ export interface MucLuc {
   title: string;
   summary: string;
   estimatedMinutes: number;
+  tier?: string;
+  teaches?: string[];
+  requires?: string[];
+}
+
+/** Thứ tự realm/track, do trình biên dịch chép từ `content/curriculum/thu-tu.yaml`. */
+export interface Realm {
+  id: string;
+  ten: string;
+  track: string[];
 }
 
 const GOC = `${import.meta.env.BASE_URL}noi-dung`;
 
 let cache_muc_luc: MucLuc[] | null = null;
+let cache_thu_tu: Realm[] = [];
 const cache_bai = new Map<string, Lesson>();
 
 export async function muc_luc(): Promise<MucLuc[]> {
   if (cache_muc_luc) return cache_muc_luc;
   const r = await fetch(`${GOC}/index.json`);
   if (!r.ok) throw new Error(`không nạp được mục lục (HTTP ${r.status})`);
-  const d = (await r.json()) as { lessons: MucLuc[] };
+  const d = (await r.json()) as { lessons: MucLuc[]; thuTu?: Realm[] };
+  cache_thu_tu = d.thuTu ?? [];
   // Sắp theo module rồi theo `order` — thứ tự này là MẠCH học, không phải thứ
   // tự chữ cái. Đảo nó lên là phá vỡ chuỗi câu hỏi bỏ ngỏ nối giữa các bài.
   cache_muc_luc = [...d.lessons].sort(
@@ -42,4 +54,9 @@ export async function bai_hoc(id: string): Promise<Lesson> {
   const l = (await r.json()) as Lesson;
   cache_bai.set(id, l);
   return l;
+}
+
+/** Thứ tự realm. Gọi sau `muc_luc()` — nó được nạp cùng một lượt. */
+export function thu_tu(): Realm[] {
+  return cache_thu_tu;
 }

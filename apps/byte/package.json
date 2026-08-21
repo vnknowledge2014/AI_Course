@@ -11,7 +11,8 @@
     "noi-dung": "node ../../packages/content-compiler/dist/cli.js build ../../content public/noi-dung",
     "pyodide": "node -e \"const p=require('node:path').dirname(require.resolve('pyodide/package.json')),f=require('node:fs');f.mkdirSync('public/pyodide',{recursive:true});for(const n of ['pyodide.asm.js','pyodide.asm.wasm','pyodide.mjs','python_stdlib.zip','pyodide-lock.json'])f.copyFileSync(p+'/'+n,'public/pyodide/'+n)\"",
     "chuan-bi": "pnpm run noi-dung && pnpm run pyodide",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "test": "tsc src/lib/cay_ky_nang.ts src/lib/tien_do.ts --outDir dist-test --module esnext --target es2022 --moduleResolution bundler --skipLibCheck --types vite/client && node --test test/*.test.mjs"
   },
   "dependencies": {
     "@byte/content-schema": "workspace:*",

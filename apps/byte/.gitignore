@@ -8,3 +8,4 @@ public/pyodide/
 
 # Tauri sinh ra
 src-tauri/gen/
+dist-test/
