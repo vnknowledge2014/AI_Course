@@ -154,47 +154,66 @@ dòng đầu tiên. Gặp nó, hãy nhìn ngay cuối dòng `if`.
 ::::
 
 ::::code{#dat-mien-phi}
-Quán phở có khuyến mãi: khách trên 65 tuổi được tặng một chén trà.
+Quán phở có khuyến mãi: khách **trên 65 tuổi** được tặng một chén trà.
 
-Đoạn dưới đã có sẵn tuổi khách. Hãy viết điều kiện để dòng chữ tặng trà chỉ hiện
-ra khi khách **trên 65 tuổi**.
+Sáng nay có hai khách. Bác Tư 70 tuổi, anh Nam 40 tuổi. Đoạn dưới xét từng
+người một — và cả hai lần đều hỏi **cùng một câu hỏi**. Hãy viết câu hỏi đó vào
+cả hai chỗ trống.
+
+Viết đúng thì màn hình chỉ hiện ra **một** trong hai dòng chữ.
 
 ```python title=starter
 tuoi_khach = 70
 if ___:
-    print("Tặng bác một chén trà")
+    print("Bác Tư được tặng một chén trà")
+
+tuoi_khach = 40
+if ___:
+    print("Anh Nam được tặng một chén trà")
 ```
 
 ```python title=solution
 tuoi_khach = 70
 if tuoi_khach > 65:
-    print("Tặng bác một chén trà")
+    print("Bác Tư được tặng một chén trà")
+
+tuoi_khach = 40
+if tuoi_khach > 65:
+    print("Anh Nam được tặng một chén trà")
 ```
 
 ```python title=test
-# Chấm bằng OUTPUT: với tuổi 70, dòng chữ tặng trà phải hiện ra.
+# Chấm bằng OUTPUT, và chấm trên CẢ HAI khách.
+#
+# Cùng một điều kiện chạy hai lần với hai con số khác nhau, nên màn hình phải
+# hiện ra đúng một dòng — của bác Tư, không có của anh Nam.
+#
+# Điền một thứ luôn đúng thì cả hai dòng cùng hiện. Điền một thứ luôn sai thì
+# không dòng nào hiện. Cả hai đều trượt, nên chỉ có điều kiện thật mới qua.
 pass
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống nằm giữa `if` và dấu hai chấm. Chỗ đó cần một câu hỏi có–không, giống hệt loại câu hỏi bài trước.
+  body: Hai chỗ trống nằm giữa `if` và dấu hai chấm, và cả hai điền giống hệt nhau. Chỗ đó cần một câu hỏi có–không, cùng loại với câu hỏi bài trước.
 - kind: strategy
-  body: Câu hỏi là "tuổi của khách có lớn hơn 65 không". Bên trái dấu so sánh là cái tên đang giữ tuổi khách, bên phải là con số 65.
+  body: Câu hỏi là "tuổi của khách có lớn hơn 65 không". Bên trái dấu so sánh là cái tên đang giữ tuổi khách, bên phải là con số 65. Cái tên đó giữ 70 ở lần đầu và 40 ở lần sau, nhưng câu hỏi thì không đổi.
 - kind: one-line
-  body: "Viết `tuoi_khach > 65` vào chỗ trống, giữ nguyên dấu hai chấm ở cuối dòng."
+  body: "Viết `tuoi_khach > 65` vào cả hai chỗ trống, giữ nguyên dấu hai chấm ở cuối mỗi dòng `if`."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: Tặng bác một chén trà
+  match: trim
+  expect: Bác Tư được tặng một chén trà
 :::
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Máy vừa tự quyết định lần đầu tiên. Bạn không bảo nó in, bạn bảo nó khi nào in.
+Cùng một câu hỏi, hai khách, hai kết quả. Máy vừa tự quyết định lần đầu tiên —
+bạn không bảo nó in, bạn bảo nó *khi nào* in.
 ::::
 
 ::::reflect{#nghi-lai}

@@ -125,7 +125,14 @@ pub enum T {
     Tuple(Vec<T>),
     Struct(String),
     Enum(String),
-    Tham(Box<T>),
+    /// Tham chiếu, kèm cờ khả biến: `&T` là `false`, `&mut T` là `true`.
+    ///
+    /// AST đã mang sẵn cờ này ở cả `Muon` lẫn `Kieu::ThamChieu`; bản trước
+    /// vứt nó đi ngay lúc dựng `T`, nên `&x` và `&mut x` trở thành cùng một
+    /// kiểu. Mà đó chính là chỗ phân biệt của cả một họ lỗi: truyền `&x` vào
+    /// tham số `&mut`, ghi qua tham chiếu chỉ đọc, mượn `&mut` từ binding
+    /// không `mut`.
+    Tham(Box<T>, bool),
     /// Chưa suy ra được, nhưng hợp lệ. Không bao giờ sinh lỗi.
     Mo,
     /// **Bộ kiểm không mô hình hoá được chỗ này.**
@@ -152,7 +159,7 @@ impl T {
             T::Lap(t) => format!("bộ lặp sinh {}", t.hien_thi()),
             T::Tuple(cac) => format!("({})", cac.iter().map(|x| x.hien_thi()).collect::<Vec<_>>().join(", ")),
             T::Struct(n) | T::Enum(n) => n.clone(),
-            T::Tham(t) => format!("&{}", t.hien_thi()),
+            T::Tham(t, m) => format!("&{}{}", if *m { "mut " } else { "" }, t.hien_thi()),
             T::Mo => "?".into(),
             T::ChuaBiet(_) => "?".into(),
         }
@@ -162,7 +169,8 @@ impl T {
     pub fn chua_biet(&self) -> Option<&'static str> {
         match self {
             T::ChuaBiet(ly_do) => Some(ly_do),
-            T::Vec(x) | T::Lap(x) | T::Tham(x) => x.chua_biet(),
+            T::Vec(x) | T::Lap(x) => x.chua_biet(),
+            T::Tham(x, _) => x.chua_biet(),
             _ => None,
         }
     }
@@ -178,12 +186,22 @@ impl T {
             (Mo, _) | (_, Mo) | (ChuaBiet(_), _) | (_, ChuaBiet(_)) => false,
             // Tham chiếu và giá trị: rustc phân biệt, nhưng ta chỉ bắt khi
             // kiểu bên trong cũng lệch — tránh báo oan chỗ auto-deref.
-            (Tham(a), Tham(b)) => a.chac_chan_lech(b),
+            // `&T` và `&mut T` là hai kiểu khác nhau. Rust cho phép ép ngầm
+            // `&mut T` thành `&T` (mượn yếu đi thì luôn an toàn), nhưng KHÔNG
+            // cho chiều ngược lại.
+            // `self` là kiểu MONG ĐỢI, `khac` là kiểu THỰC TẾ.
+            //
+            // Ép ngầm `&mut T` → `&T` là hợp lệ (mượn yếu đi thì luôn an
+            // toàn), nhưng chiều ngược lại thì không: chỗ cần quyền ghi mà
+            // nhận về một tham chiếu chỉ đọc là lỗi.
+            (Tham(a, mong_mut), Tham(b, thuc_mut)) => {
+                (*mong_mut && !*thuc_mut) || a.chac_chan_lech(b)
+            }
             // Một bên là tham chiếu, bên kia không: rustc phân biệt, nhưng
             // auto-deref khiến nhiều chỗ vẫn hợp lệ. Chỉ báo khi kiểu BÊN TRONG
             // cũng lệch — tránh báo oan.
-            (Tham(a), b) => a.chac_chan_lech(b),
-            (a, Tham(b)) => a.chac_chan_lech(b),
+            (Tham(a, _), b) => a.chac_chan_lech(b),
+            (a, Tham(b, _)) => a.chac_chan_lech(b),
             (SoNguyen(a), SoNguyen(b)) => a.lech(*b),
             (SoThuc(a), SoThuc(b)) => a.lech(*b),
             (Bool, Bool) | (KyTu, KyTu) | (Chuoi, Chuoi) | (Rong, Rong) => false,
@@ -224,7 +242,9 @@ fn tu_kieu_ast(k: &Kieu) -> T {
                 _ => T::Mo,
             }
         }
-        Kieu::ThamChieu { ben_trong, .. } => T::Tham(Box::new(tu_kieu_ast(ben_trong))),
+        Kieu::ThamChieu { co_the_sua, ben_trong, .. } => {
+            T::Tham(Box::new(tu_kieu_ast(ben_trong)), *co_the_sua)
+        }
         Kieu::Tuple { phan_tu, .. } if phan_tu.is_empty() => T::Rong,
         Kieu::Tuple { phan_tu, .. } => T::Tuple(phan_tu.iter().map(tu_kieu_ast).collect()),
         _ => T::Mo,
@@ -369,7 +389,7 @@ impl<'a> BoKiemKieu<'a> {
             T::Struct(n) if self.enum_bien_the.contains_key(&n) => T::Enum(n),
             T::Vec(x) => T::Vec(Box::new(self.chuan_hoa(*x))),
             T::Lap(x) => T::Lap(Box::new(self.chuan_hoa(*x))),
-            T::Tham(x) => T::Tham(Box::new(self.chuan_hoa(*x))),
+            T::Tham(x, m) => T::Tham(Box::new(self.chuan_hoa(*x)), m),
             khac => khac,
         }
     }
@@ -473,7 +493,7 @@ impl<'a> BoKiemKieu<'a> {
                         // `PartialOrd<i64> for &i64`. Nên số học tự bỏ tham chiếu
                         // được, còn so sánh thì không — `v.iter().filter(|x| x > 4)`
                         // là E0308 thật, và người mới vấp chỗ này rất nhiều.
-                        let lech_tc = matches!(a, T::Tham(_)) != matches!(b, T::Tham(_))
+                        let lech_tc = matches!(a, T::Tham(..)) != matches!(b, T::Tham(..))
                             && !matches!(a, T::Mo | T::ChuaBiet(_))
                             && !matches!(b, T::Mo | T::ChuaBiet(_));
                         if lech_tc {
@@ -502,9 +522,18 @@ impl<'a> BoKiemKieu<'a> {
                 ToanTuMot::Phu => T::Bool,
                 ToanTuMot::Am => self.kieu_cua(toan_hang),
             },
-            BieuThuc::Muon { gia_tri, .. } => T::Tham(Box::new(self.kieu_cua(gia_tri))),
+            BieuThuc::Muon { co_the_sua, gia_tri, .. } => {
+                T::Tham(Box::new(self.kieu_cua(gia_tri)), *co_the_sua)
+            }
             BieuThuc::GiaiTham { gia_tri, .. } => match self.kieu_cua(gia_tri) {
-                T::Tham(t) => *t,
+                T::Tham(t, _) => *t,
+                // `*x` khi `x` không phải tham chiếu. Bản trước rơi vào
+                // `khac => khac`, nghĩa là nuốt trọn mọi phép giải tham chiếu
+                // sai và trả lại chính kiểu cũ như thể không có gì xảy ra.
+                khac if khac.chua_biet().is_none() && khac != T::Mo => {
+                    self.bao_giai_tham_sai(bt.span(), &khac);
+                    T::ChuaBiet("giải tham chiếu trên giá trị không phải tham chiếu")
+                }
                 khac => khac,
             },
             BieuThuc::Mang { phan_tu, .. } => T::Vec(Box::new(
@@ -633,7 +662,7 @@ impl<'a> BoKiemKieu<'a> {
                                 // phương thức, không áp dụng ở đây.
                                 let lech_tham_chieu = matches!(
                                     (m, &thuc),
-                                    (T::Tham(_), t) | (t, T::Tham(_)) if !matches!(t, T::Tham(_) | T::Mo)
+                                    (T::Tham(..), t) | (t, T::Tham(..)) if !matches!(t, T::Tham(..) | T::Mo)
                                 );
                                 if lech_tham_chieu || m.chac_chan_lech(&thuc) {
                                     self.bao_lech_kieu(
@@ -656,7 +685,7 @@ impl<'a> BoKiemKieu<'a> {
                 let chu = self.kieu_cua(doi_tuong);
                 let ten_struct = match &chu {
                     T::Struct(n) => Some(n.clone()),
-                    T::Tham(b) => match &**b {
+                    T::Tham(b, _) => match &**b {
                         T::Struct(n) => Some(n.clone()),
                         _ => None,
                     },
@@ -909,7 +938,7 @@ impl<'a> BoKiemKieu<'a> {
         match (&goc, ten) {
             (T::Vec(x), "iter") => {
                 for a in doi_so { self.kieu_cua(a); }
-                return T::Lap(Box::new(T::Tham(x.clone())));
+                return T::Lap(Box::new(T::Tham(x.clone(), false)));
             }
             (T::Vec(x), "into_iter") => {
                 for a in doi_so { self.kieu_cua(a); }
@@ -925,7 +954,7 @@ impl<'a> BoKiemKieu<'a> {
             }
             (T::Lap(x), "filter") => {
                 // Closure của `filter` nhận thêm một tầng tham chiếu nữa.
-                self.kieu_than_be_quan(doi_so.first(), &T::Tham(x.clone()));
+                self.kieu_than_be_quan(doi_so.first(), &T::Tham(x.clone(), false));
                 return T::Lap(x.clone());
             }
             (T::Lap(_), "rev" | "take" | "skip" | "peekable") => {
@@ -995,8 +1024,8 @@ impl<'a> BoKiemKieu<'a> {
         let thuc = self.kieu_cua(a0);
         let mong = match (chu, ten) {
             (T::Vec(x), "push") => (**x).clone(),
-            (T::Vec(x), "contains") => T::Tham(x.clone()),
-            (T::Chuoi, "push_str") => T::Tham(Box::new(T::Chuoi)),
+            (T::Vec(x), "contains") => T::Tham(x.clone(), false),
+            (T::Chuoi, "push_str") => T::Tham(Box::new(T::Chuoi), false),
             (T::Chuoi, "push") => T::KyTu,
             _ => return,
         };
@@ -1005,7 +1034,7 @@ impl<'a> BoKiemKieu<'a> {
         }
         // `contains` cần `&T`: `so.contains(2)` là E0308, phải viết `&2`. Đây
         // là lỗi người mới gặp rất sớm và thông báo gốc của rustc khó hiểu.
-        let lech_tham_chieu = matches!(&mong, T::Tham(_)) && !matches!(&thuc, T::Tham(_));
+        let lech_tham_chieu = matches!(&mong, T::Tham(..)) && !matches!(&thuc, T::Tham(..));
         if lech_tham_chieu || mong.chac_chan_lech(&thuc) {
             self.bao_doi_so_phuong_thuc_lech(a0.span(), ten, &mong, &thuc, lech_tham_chieu);
         }
@@ -1037,7 +1066,7 @@ impl<'a> BoKiemKieu<'a> {
             // Số, chuỗi, ký tự: miền vô hạn — chỉ `_` hoặc một binding mới phủ nổi.
             T::SoNguyen(_) | T::SoThuc(_) | T::KyTu | T::Chuoi => KhongGian::VoHan,
             T::Tuple(cac) => KhongGian::Tich(cac.iter().map(|x| self.khong_gian(x)).collect()),
-            T::Tham(x) => self.khong_gian(x),
+            T::Tham(x, _) => self.khong_gian(x),
             _ => KhongGian::KhongBiet,
         }
     }
@@ -1223,6 +1252,17 @@ impl<'a> BoKiemKieu<'a> {
         self.diags.push(d.khai_niem("phương thức"));
     }
 
+    fn bao_giai_tham_sai(&mut self, span: Span, t: &T) {
+        self.diags.push(
+            Diagnostic::loi("BR0341", format!("không giải tham chiếu được {} ", t.hien_thi()))
+                .tai(span, format!("`{}` không phải tham chiếu", t.hien_thi()))
+                .vi_sao("Dấu `*` nghĩa là \u{201c}đi theo tham chiếu này tới giá trị nó trỏ vào\u{201d}. Đặt nó trước một giá trị thường thì không có gì để đi theo cả — khác với C, ở Rust dấu `*` không phải một phép toán dùng được trên mọi thứ.")
+                .sua("bỏ dấu `*` đi")
+                .sua("hoặc mượn trước rồi mới giải: `*(&x)`")
+                .khai_niem("tham chiếu"),
+        );
+    }
+
     fn bao_ten_khong_co(&mut self, span: Span, ten: &str) {
         // Gợi ý từ MỌI tên đang thấy được, kể cả tên ở phạm vi đã đóng — vì
         // trường hợp hay gặp nhất chính là gõ đúng tên nhưng dùng sai chỗ.
@@ -1361,7 +1401,7 @@ impl<'a> BoKiemKieu<'a> {
     }
 
     fn bao_so_sanh_tham_chieu(&mut self, span: Span, a: &T, b: &T) {
-        let (tc, gt) = if matches!(a, T::Tham(_)) { (a, b) } else { (b, a) };
+        let (tc, gt) = if matches!(a, T::Tham(..)) { (a, b) } else { (b, a) };
         self.diags.push(
             Diagnostic::loi("BR0304", format!("không so sánh trực tiếp {} với {}", tc.hien_thi(), gt.hien_thi()))
                 .tai(span, "phép so sánh ở đây")
@@ -1405,7 +1445,7 @@ impl<'a> BoKiemKieu<'a> {
 /// Bỏ mọi tầng tham chiếu.
 fn bo_tham_chieu(t: &T) -> T {
     match t {
-        T::Tham(x) => bo_tham_chieu(x),
+        T::Tham(x, _) => bo_tham_chieu(x),
         khac => khac.clone(),
     }
 }
@@ -1416,7 +1456,7 @@ fn bo_tham_chieu(t: &T) -> T {
 /// để tránh báo oan chỗ auto-deref. Nhưng auto-deref **không áp dụng** cho chú
 /// thích kiểu của `let`: `let s: String = &t;` là E0308 thật.
 fn lech_trong_let(khai: &T, thuc: &T) -> bool {
-    let mot_ben_tham_chieu = matches!(khai, T::Tham(_)) != matches!(thuc, T::Tham(_));
+    let mot_ben_tham_chieu = matches!(khai, T::Tham(..)) != matches!(thuc, T::Tham(..));
     let khong_mo = !matches!(khai, T::Mo | T::ChuaBiet(_))
         && !matches!(thuc, T::Mo | T::ChuaBiet(_));
     (mot_ben_tham_chieu && khong_mo) || khai.chac_chan_lech(thuc)
@@ -1477,7 +1517,9 @@ pub fn kiem_tra(ct: &ChuongTrinh, diags: &mut Diagnostics) {
                 // `self` mang kiểu của khối `impl`, không phải `Self` trừu tượng.
                 let t = if matches!(&ts.mau, Mau::Ten { ten, .. } if ten == "self") {
                     match (&kieu_self, &ts.kieu) {
-                        (Some(k), Kieu::ThamChieu { .. }) => T::Tham(Box::new(k.clone())),
+                        (Some(k), Kieu::ThamChieu { co_the_sua, .. }) => {
+                            T::Tham(Box::new(k.clone()), *co_the_sua)
+                        }
                         (Some(k), _) => k.clone(),
                         (None, _) => T::Mo,
                     }

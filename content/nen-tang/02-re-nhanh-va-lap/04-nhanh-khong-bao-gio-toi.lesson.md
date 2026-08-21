@@ -177,14 +177,32 @@ Luật để không bao giờ tự tay tạo ra một nhánh chết:
 ::::
 
 ::::code{#xep-lai-hang-ro}
-Sổ chi tiêu của Byte: hôm nay tiêu 250 nghìn. Byte muốn xếp loại ngày này thành
-một trong ba mức, và mức đúng phải là `Ngày tiêu rất nhiều`.
+Sổ chi tiêu của Byte có hai ngày cần xếp loại: ngày 250 nghìn phải ra `Ngày
+tiêu rất nhiều`, ngày 150 nghìn phải ra `Ngày tiêu nhiều`.
 
-Chuỗi ba nhánh đã viết sẵn, ba câu chữ cũng đã đúng chỗ. Chỉ còn hai con số
-`100000` và `200000` chưa biết đặt vào đâu. Điền vào hai chỗ trống.
+Một ngày thôi thì chưa đủ để biết bạn xếp đúng thứ tự hay chưa. Ngày 250 nghìn
+vượt **cả hai** ngưỡng, nên xếp kiểu nào nó cũng rơi vào nhánh trên cùng và
+nhánh trên cùng lúc nào cũng in ra câu "rất nhiều". Phải có thêm một ngày nằm
+**giữa** hai ngưỡng thì thứ tự mới lộ ra.
+
+Nên bài này chép cùng một chuỗi ba nhánh hai lần, chạy trên hai ngày khác nhau.
+Dòng `tien = 150000` ở giữa gán lại cái tên cũ: từ đó trở xuống, `tien` là ngày
+thứ hai.
+
+Ba câu chữ đã đúng chỗ, hai chuỗi xếp giống hệt nhau. Chỉ còn hai con số
+`100000` và `200000` chưa biết đặt vào đâu. Điền vào bốn chỗ trống.
 
 ```python title=starter
 tien = 250000
+
+if tien > ___:
+    print("Ngày tiêu rất nhiều")
+elif tien > ___:
+    print("Ngày tiêu nhiều")
+else:
+    print("Ngày tiêu ít")
+
+tien = 150000
 
 if tien > ___:
     print("Ngày tiêu rất nhiều")
@@ -203,34 +221,48 @@ elif tien > 100000:
     print("Ngày tiêu nhiều")
 else:
     print("Ngày tiêu ít")
+
+tien = 150000
+
+if tien > 200000:
+    print("Ngày tiêu rất nhiều")
+elif tien > 100000:
+    print("Ngày tiêu nhiều")
+else:
+    print("Ngày tiêu ít")
 ```
 
 ```python title=test
-# Chấm bằng OUTPUT: với 250000, chuỗi phải chọn đúng nhánh "rất nhiều".
-# Đặt hai ngưỡng ngược lại thì chương trình vẫn chạy, chỉ là in ra câu khác —
-# đúng cái bẫy mà bài này nói tới.
+# Chấm bằng OUTPUT, và chấm trên TRỌN VẸN hai dòng chứ không phải một dòng.
+#
+# Một dòng thì không phân biệt được đúng với sai: ngày 250 nghìn vượt cả hai
+# ngưỡng, nên đặt `100000` lên trên cũng vẫn in ra "Ngày tiêu rất nhiều". Chỉ
+# ngày 150 nghìn mới tách được hai cách xếp — đặt sai thứ tự thì dòng thứ hai
+# cũng thành "rất nhiều", và hai dòng giống nhau là trượt.
 pass
 ```
 
 :::hints
 - kind: attention
-  body: Hai chỗ trống nhận hai con số `100000` và `200000`. Không phải chọn con số nào, mà chọn con số nào **lên trên**.
+  body: Bốn chỗ trống nhận đúng hai con số `100000` và `200000`, và hai chuỗi phải xếp giống hệt nhau. Việc cần quyết chỉ là con số nào **lên trên**.
 - kind: strategy
-  body: Nhánh đứng trên phải là nhánh khó thoả hơn. Trong hai ngưỡng này, ngưỡng nào có ít ngày vượt qua hơn thì ngưỡng đó lên trước.
+  body: Nhánh đứng trên phải là nhánh khó thoả hơn. Trong hai ngưỡng này, ngưỡng nào có ít ngày vượt qua hơn thì ngưỡng đó lên trước. Xếp xong, thử nhẩm ngày 150 nghìn xem nó rơi vào nhánh nào.
 - kind: one-line
-  body: "Viết `200000` vào chỗ trống thứ nhất và `100000` vào chỗ trống thứ hai."
+  body: "Trong cả hai chuỗi: viết `200000` vào chỗ trống thứ nhất và `100000` vào chỗ trống thứ hai."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: Ngày tiêu rất nhiều
+  match: regex
+  expect: ^Ngày tiêu rất nhiều\nNgày tiêu nhiều\s*$
 :::
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Vẫn ba dòng ấy. Đổi chỗ hai con số là chương trình nói khác hẳn.
+Cùng một chuỗi, hai ngày, hai câu trả lời khác nhau. Đổi chỗ hai con số là dòng
+thứ hai đổi luôn.
 ::::
 
 ::::reflect{#nghi-lai}

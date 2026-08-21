@@ -178,31 +178,67 @@ Ba điều dùng được ngay từ hôm nay:
 ::::
 
 ::::code{#noi-dung-y-ban}
-Sáng nay Byte đủ tiền, nhưng dậy muộn nên không kịp giờ.
+Byte ghi lại ba buổi sáng đầu tuần:
 
-Hãy viết điều kiện sao cho câu nhắc chỉ hiện ra vào những sáng **không phải là
-vừa đủ tiền vừa kịp giờ**.
+- **Thứ hai** — đủ tiền, nhưng dậy muộn nên không kịp giờ.
+- **Thứ ba** — vừa đủ tiền, vừa kịp giờ.
+- **Thứ tư** — kịp giờ, nhưng ví đã hết tiền.
+
+Câu nhắc chỉ được hiện ra vào những sáng **không phải là vừa đủ tiền vừa kịp
+giờ**. Cùng một điều kiện ấy xét cho cả ba buổi sáng, nên **ba chỗ trống điền
+giống hệt nhau**.
+
+Viết đúng thì màn hình hiện ra **hai** trong ba dòng chữ.
 
 ```python title=starter
 du_tien = True
 kip_gio = False
-
 if ___:
-    print("Sáng nay nhịn phở")
+    print("Sáng thứ hai nhịn phở")
+
+du_tien = True
+kip_gio = True
+if ___:
+    print("Sáng thứ ba nhịn phở")
+
+du_tien = False
+kip_gio = True
+if ___:
+    print("Sáng thứ tư nhịn phở")
 ```
 
 ```python title=solution
 du_tien = True
 kip_gio = False
-
 if not (du_tien and kip_gio):
-    print("Sáng nay nhịn phở")
+    print("Sáng thứ hai nhịn phở")
+
+du_tien = True
+kip_gio = True
+if not (du_tien and kip_gio):
+    print("Sáng thứ ba nhịn phở")
+
+du_tien = False
+kip_gio = True
+if not (du_tien and kip_gio):
+    print("Sáng thứ tư nhịn phở")
 ```
 
 ```python title=test
-# Chấm bằng OUTPUT: sáng nay thiếu giờ, nên câu nhắc phải hiện ra.
-# Viết `not du_tien and kip_gio` thì màn hình trống trơn — đúng cái bẫy
-# mà bài này nói tới.
+# Chấm bằng TRỌN VẸN output, và chấm trên CẢ BA buổi sáng.
+#
+# Một buổi sáng thôi thì không đủ để phân biệt đúng với sai: điều kiện nào
+# cũng chỉ cho ra `True` hoặc `False`, nên người gõ bừa có đúng hai lựa chọn
+# và luôn trúng một cái. Ba buổi sáng thì không còn chỗ cho may rủi.
+#
+# - Điền một thứ luôn đúng: cả ba dòng cùng hiện.
+# - Điền một thứ luôn sai: không dòng nào hiện.
+# - Điền `not kip_gio`: chỉ mình thứ hai lên tiếng, thứ tư mất tăm.
+# - Điền `not du_tien and kip_gio` — đúng cái bẫy bài này dựng lên: thứ hai
+#   im lặng dù đó là sáng phải nhịn thật, còn thứ tư thì lên tiếng. Chạy thử
+#   một buổi sáng thấy khớp là tin nhầm ngay.
+#
+# Chỉ điều kiện thật mới cho ra thứ hai và thứ tư, và bỏ qua thứ ba.
 pass
 ```
 
@@ -210,21 +246,23 @@ pass
 - kind: attention
   body: Ý bạn có hai phần: một cụm "vừa… vừa…" gồm hai điều kiện, và chữ "không phải" trùm lên cả cụm ấy. Trong dòng code, cái gì đánh dấu ranh giới của cả cụm?
 - kind: strategy
-  body: Viết cụm "vừa đủ tiền vừa kịp giờ" ra trước bằng `and`, khoanh nó lại, rồi đặt `not` ở ngoài cùng. Đặt `not` sát vào một cái tên là nó chỉ lật đúng cái tên đó.
+  body: Viết cụm "vừa đủ tiền vừa kịp giờ" ra trước bằng `and`, khoanh nó lại, rồi đặt `not` ở ngoài cùng. Đặt `not` sát vào một cái tên là nó chỉ lật đúng cái tên đó. Ba buổi sáng chỉ khác nhau ở hai con số `True`/`False` phía trên, còn câu hỏi thì không đổi — nên ba chỗ trống điền y hệt nhau.
 - kind: one-line
-  body: "Viết `not (du_tien and kip_gio)` vào chỗ trống, giữ nguyên dấu hai chấm cuối dòng."
+  body: "Viết `not (du_tien and kip_gio)` vào cả ba chỗ trống, giữ nguyên dấu hai chấm ở cuối mỗi dòng `if`."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: Sáng nay nhịn phở
+  match: regex
+  expect: ^Sáng thứ hai nhịn phở\nSáng thứ tư nhịn phở$
 :::
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Cặp ngoặc đó không phải để cho đẹp. Nó là chỗ bạn chỉ ranh giới cho mình.
+Ba buổi sáng, một điều kiện, và nó đúng ở cả ba. Cặp ngoặc đó không phải để
+cho đẹp — nó là chỗ bạn chỉ ranh giới cho mình.
 ::::
 
 ::::reflect{#nghi-lai}

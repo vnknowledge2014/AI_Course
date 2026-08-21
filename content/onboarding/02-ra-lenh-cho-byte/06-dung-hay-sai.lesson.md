@@ -163,50 +163,86 @@ số, nó cho ra một câu trả lời.**
 ::::
 
 ::::code{#khach-du-tien}
-Khách đưa 50000 đồng, tô phở giá 45000. Hãy khiến máy in ra câu trả lời cho câu
-hỏi: *tiền khách đưa có đủ trả tô phở không?*
+Tô phở giá 45000. Ba người khách lần lượt bước vào và đưa ba số tiền khác nhau.
+Hãy khiến máy trả lời cho **cả ba** cùng một câu hỏi: *tiền khách đưa có đủ trả
+tô phở không?*
+
+Người thứ ba đưa vừa đúng 45000. Ở quán phở, đưa vừa đủ thì vẫn là đủ — câu trả
+lời cho người đó phải là `True`.
+
+Ba chỗ trống điền **giống hệt nhau** — vẫn là một câu hỏi đó. Thứ thay đổi nằm ở
+dòng ngay phía trên: cái tên `tien_khach_dua` được dán lại lên một số khác.
 
 ```python title=starter
-tien_khach_dua = 50000
 gia_pho = 45000
+
+tien_khach_dua = 50000
+print(___)
+
+tien_khach_dua = 30000
+print(___)
+
+tien_khach_dua = 45000
 print(___)
 ```
 
 ```python title=solution
-tien_khach_dua = 50000
 gia_pho = 45000
+
+tien_khach_dua = 50000
+print(tien_khach_dua >= gia_pho)
+
+tien_khach_dua = 30000
+print(tien_khach_dua >= gia_pho)
+
+tien_khach_dua = 45000
 print(tien_khach_dua >= gia_pho)
 ```
 
 ```python title=test
-# Bài này chấm bằng OUTPUT: câu trả lời máy in ra phải là True.
+# Chấm bằng OUTPUT, và cố tình chấm trên BA tình huống chứ không một.
+#
+# Với một tình huống, câu trả lời đúng chỉ có thể là `True` hoặc `False` — nên
+# người gõ bừa một trong hai từ đó vào chỗ trống cũng xanh mà không hiểu gì.
+# Mỗi tình huống thêm vào lại loại đi một cách qua bài nhờ ăn may:
+#
+#   50000 → True   : loại `False`, `0`
+#   30000 → False  : loại `True`, `1`, và mọi hằng số (ba dòng sẽ giống hệt nhau)
+#   45000 → True   : loại `>` — chỗ duy nhất `>` và `>=` khác nhau là khi bằng
+#
+# Dòng cuối mới là dòng dạy được điều bài này muốn dạy. Thiếu nó thì `>` và
+# `>=` không phân biệt được, mà `>` là đáp án SAI: đưa vừa đủ tiền vẫn là đủ.
+#
+# `match: regex` là kiểu chấm duy nhất viết ra được ràng buộc theo THỨ TỰ dòng;
+# `contains` chỉ nhìn thấy một mẩu nên `<` viết ngược vẫn lọt.
 pass
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống cần một **câu hỏi**, không phải một con số. Câu hỏi đó so hai cái tên có sẵn với nhau.
+  body: Chỗ trống cần một **câu hỏi**, không phải một con số và cũng không phải chữ `True` gõ thẳng vào. Câu hỏi đó so hai cái tên có sẵn với nhau — và nó giống nhau ở cả ba chỗ trống.
 - kind: strategy
-  body: "Đủ tiền" nghĩa là tiền khách đưa lớn hơn giá, hoặc vừa đúng bằng giá. Trong bảng dấu ở trên, dấu nào gộp được cả hai trường hợp đó?
+  body: "Đủ tiền" nghĩa là tiền khách đưa lớn hơn giá, hoặc vừa đúng bằng giá. Người khách thứ ba rơi đúng vào vế thứ hai, nên dấu bạn chọn phải gộp được cả hai — trong bảng dấu ở trên, dấu nào làm được? Nhớ rằng vế bên trái là chủ ngữ của câu hỏi, nên bên trái phải là tiền khách đưa.
 - kind: one-line
-  body: "Viết `tien_khach_dua >= gia_pho` vào chỗ trống."
+  body: "Viết `tien_khach_dua >= gia_pho` vào **cả ba** chỗ trống. Máy sẽ in `True`, `False`, rồi `True`."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: True
+  match: regex
+  expect: ^True\nFalse\nTrue$
 :::
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Máy vừa trả lời bạn một câu có–không. Từ đây nó bắt đầu tự quyết định được.
+Cùng một câu hỏi, ba tình huống, ba câu trả lời. Từ đây máy bắt đầu tự quyết định được.
 ::::
 
 ::::reflect{#nghi-lai}
-Bạn đã có `True` trong tay. Nhưng để ý mà xem: máy mới chỉ **nói ra** câu trả
-lời, chứ chưa **làm gì khác đi** vì câu trả lời đó.
+Bạn đã có `True` và `False` trong tay. Nhưng để ý mà xem: máy mới chỉ **nói ra**
+câu trả lời, chứ chưa **làm gì khác đi** vì câu trả lời đó.
 
 Khách đủ tiền thì in "Mời vào", không đủ thì đừng in. Làm sao bảo máy: *chỉ chạy
 dòng này khi câu trả lời là `True`*?

@@ -220,8 +220,15 @@ giống nhau vì cùng là số, nhưng một bên cộng thêm, một bên thay
 ::::code{#giu-lai-ngay-ky-luc}
 Ghép từng mảnh trước, ghép cả bản báo cáo sau. Mảnh đầu tiên là cặp kỷ lục.
 
-Đoạn dưới đi qua sổ năm ngày và phải giữ lại **ngày tiêu nhiều nhất**. Hai dòng
-trong thân `if` đã viết sẵn; điều kiện thì còn trống.
+Byte đưa **hai** cuốn sổ, mỗi cuốn năm ngày, và hỏi cùng một câu cho cả hai:
+**ngày nào tiêu nhiều nhất**. Nên đoạn dưới có hai khối giống hệt nhau — cùng ba
+cái tên sinh ra từ `0`, cùng một vòng duyệt, cùng hai dòng trong thân `if`. Chỗ
+trống cũng chỉ có một kiểu, lặp lại hai lần: điền đúng cùng một điều kiện vào cả
+hai chỗ.
+
+Hai cuốn sổ cố ý khác nhau một điểm. Sổ A lập kỷ lục vào **ngày cuối**; sổ B lập
+kỷ lục ngay **ngày 2** rồi bốn ngày sau không ngày nào phá nổi. Vì vậy một điều
+kiện chỉ tình cờ đúng ở sổ A sẽ lộ ra ngay ở dòng in thứ hai.
 
 ```python title=starter
 so_chi_tieu = [85000, 240000, 120000, 95000, 310000]
@@ -236,7 +243,21 @@ for tien in so_chi_tieu:
         tien_ky_luc = tien
         ngay_ky_luc = ngay
 
-print(f"Ngày {ngay_ky_luc} tiêu nhiều nhất: {tien_ky_luc} đồng")
+print(f"Sổ A — ngày {ngay_ky_luc} tiêu nhiều nhất: {tien_ky_luc} đồng")
+
+so_chi_tieu = [70000, 330000, 150000, 90000, 120000]
+
+ngay = 0
+tien_ky_luc = 0
+ngay_ky_luc = 0
+
+for tien in so_chi_tieu:
+    ngay += 1
+    if ___:
+        tien_ky_luc = tien
+        ngay_ky_luc = ngay
+
+print(f"Sổ B — ngày {ngay_ky_luc} tiêu nhiều nhất: {tien_ky_luc} đồng")
 ```
 
 ```python title=solution
@@ -252,23 +273,40 @@ for tien in so_chi_tieu:
         tien_ky_luc = tien
         ngay_ky_luc = ngay
 
-print(f"Ngày {ngay_ky_luc} tiêu nhiều nhất: {tien_ky_luc} đồng")
+print(f"Sổ A — ngày {ngay_ky_luc} tiêu nhiều nhất: {tien_ky_luc} đồng")
+
+so_chi_tieu = [70000, 330000, 150000, 90000, 120000]
+
+ngay = 0
+tien_ky_luc = 0
+ngay_ky_luc = 0
+
+for tien in so_chi_tieu:
+    ngay += 1
+    if tien > tien_ky_luc:
+        tien_ky_luc = tien
+        ngay_ky_luc = ngay
+
+print(f"Sổ B — ngày {ngay_ky_luc} tiêu nhiều nhất: {tien_ky_luc} đồng")
 ```
 
 ```python title=test
-# Kỷ lục phải là 310000 của ngày 5 — con số lớn nhất, và đứng cuối sổ nên
-# nó chỉ về đích nếu vòng lặp thật sự so sánh ở từng lượt.
-assert tien_ky_luc == 310000
-assert ngay_ky_luc == 5
+# Chấm trên cả hai cuốn sổ, vì một cuốn thì chưa phân biệt được gì: kỷ lục
+# của sổ A đứng cuối sổ, nên "cứ lượt nào cũng ghi" cũng ra đúng con số ấy.
+# Sổ B là cuốn nói thật — kỷ lục của nó rơi vào ngày 2, và ba cái tên sau khi
+# chạy hết đoạn đang giữ kết quả của chính cuốn này.
+assert ngay == 5
+assert tien_ky_luc == 330000
+assert ngay_ky_luc == 2
 ```
 
 :::hints
 - kind: attention
-  body: Hai dòng trong thân `if` đều nói về lượt này — tiền của lượt này, ngày của lượt này. Chúng chỉ nên chạy ở những lượt đáng thay kỷ lục.
+  body: Hai khối dưới là một khối được chép lại: cùng ba cái tên sinh ra từ `0`, cùng hai dòng trong thân `if`. Hai dòng ấy đều nói về lượt này — tiền của lượt này, ngày của lượt này — nên chúng chỉ được chạy ở những lượt đáng thay kỷ lục.
 - kind: strategy
-  body: Câu hỏi mỗi lượt là "tiền hôm nay có nhiều hơn con số đang giữ kỷ lục không". Bên trái dấu so sánh là cái tên giữ tiền của lượt này, bên phải là cái tên giữ kỷ lục.
+  body: Câu hỏi mỗi lượt là "tiền hôm nay có nhiều hơn con số đang giữ kỷ lục không". Bên trái dấu so sánh là cái tên giữ tiền của lượt này, bên phải là cái tên giữ kỷ lục. Hai chỗ trống hỏi đúng một câu ấy, nên điền giống hệt nhau.
 - kind: one-line
-  body: "Viết `tien > tien_ky_luc` vào chỗ trống, giữ nguyên dấu hai chấm cuối dòng."
+  body: "Viết `tien > tien_ky_luc` vào **cả hai** chỗ trống, giữ nguyên dấu hai chấm cuối dòng."
 :::
 
 :::validate
@@ -277,7 +315,9 @@ assert ngay_ky_luc == 5
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Ngày 5 tiêu nhiều nhất: 310000 đồng
+  expect: Sổ A — ngày 5 tiêu nhiều nhất: 310000 đồng
+- tier: output
+  expect: Sổ B — ngày 2 tiêu nhiều nhất: 330000 đồng
 :::
 ::::
 

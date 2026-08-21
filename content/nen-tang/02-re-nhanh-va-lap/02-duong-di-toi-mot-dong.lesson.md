@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 12
 teaches: [ctrl.condition-path]
-requires: [ctrl.if-nested, logic.and, ctrl.block-indent]
+requires: [ctrl.if-nested, logic.and, ctrl.block-indent, core.function-def, core.function-call, core.function-parameter]
 concepts: [ctrl.re-nhanh, logic.phep-logic]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -207,38 +207,61 @@ if tuoi_khach > 65:
         print("Tặng bác một chén trà.")
 ```
 
-Thân của tầng ngoài không có việc gì khác, nên đoạn này làm phẳng được. Hãy
-viết điều kiện gộp vào chỗ trống, để dòng `print` chỉ chạy khi **cả hai** điều
-cùng đúng.
+Thân của tầng ngoài không có việc gì khác, nên đoạn này làm phẳng được.
+
+Nhưng một câu điều kiện chỉ được coi là viết đúng khi nó xử đúng **mọi** người
+khách bước vào quán, chứ không riêng một bác. Thử với đúng một bác thì câu
+`True` trần trụi cũng qua — mà `True` thì mời trà cho cả quán.
+
+Nên Byte đặt tên cho việc mời trà, đúng cách Realm 0 đã dạy, rồi gọi nó ba lần
+với ba người khách:
+
+- bác Tư, 70 tuổi, khách quen — phải mời;
+- bác Năm, 70 tuổi, mới ghé lần đầu — không mời;
+- anh Sáu, 40 tuổi, khách quen — không mời.
+
+Viết điều kiện gộp vào chỗ trống sao cho **cả ba** lần gọi đều xử đúng. Bài chấm
+bằng trọn vẹn màn hình, nên câu trả lời đúng in ra đúng một dòng — dòng của bác
+Tư.
 
 ```python title=starter
-tuoi_khach = 70
-la_khach_quen = True
+def moi_tra(tuoi_khach, la_khach_quen):
+    if ___:
+        print("Tặng bác một chén trà.")
 
-if ___:
-    print("Tặng bác một chén trà.")
+moi_tra(70, True)
+moi_tra(70, False)
+moi_tra(40, True)
 ```
 
 ```python title=solution
-tuoi_khach = 70
-la_khach_quen = True
+def moi_tra(tuoi_khach, la_khach_quen):
+    if tuoi_khach > 65 and la_khach_quen:
+        print("Tặng bác một chén trà.")
 
-if tuoi_khach > 65 and la_khach_quen:
-    print("Tặng bác một chén trà.")
+moi_tra(70, True)
+moi_tra(70, False)
+moi_tra(40, True)
 ```
 
 ```python title=test
-# Chấm bằng OUTPUT: khách 70 tuổi và là khách quen, nên câu tặng trà phải hiện
-# ra. Người học chưa biết viết assert nên khối này chỉ khẳng định chương trình
-# chạy được tới dòng cuối.
+# Chấm bằng TRỌN VẸN output của ba lần gọi (`match: trim`), không phải một dòng
+# lẻ. Ba người khách được chọn để mỗi câu trả lời hụt đều lộ ra:
+#   `True`                → in ba dòng;
+#   `False`               → không in dòng nào;
+#   `tuoi_khach > 65`     → in dòng của bác Tư VÀ bác Năm;
+#   `la_khach_quen`       → in dòng của bác Tư VÀ anh Sáu;
+#   `... or ...`          → in cả ba dòng.
+# Chỉ `and` cho ra đúng một dòng. Người học chưa viết assert nên khối này
+# không thêm gì; nó ở đây để nói rõ vì sao ba lần gọi là ba, không phải một.
 pass
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống nằm giữa `if` và dấu hai chấm — chỗ đó chỉ chứa được **một** câu trả lời đúng/sai. Mà bạn đang có hai câu hỏi cần hỏi cùng lúc.
+  body: Chỗ trống nằm giữa `if` và dấu hai chấm — chỗ đó chỉ chứa được **một** câu trả lời đúng/sai. Mà bạn đang có hai câu hỏi cần hỏi cùng lúc. Hai cái tên trong ngoặc đơn của `def` chính là hai thứ mỗi lần gọi đưa vào.
 - kind: strategy
-  body: Realm 0 đã cho bạn một từ nối buộc hai câu hỏi có–không thành một, và cụm ấy chỉ cho `True` khi cả hai vế cùng đúng. Vế trái là câu hỏi về tuổi; vế phải là cái tên đang giữ sẵn một giá trị đúng/sai, không cần so sánh gì thêm.
+  body: Realm 0 đã cho bạn một từ nối buộc hai câu hỏi có–không thành một, và cụm ấy chỉ cho `True` khi cả hai vế cùng đúng. Vế trái là câu hỏi về tuổi; vế phải là cái tên đang giữ sẵn một giá trị đúng/sai, không cần so sánh gì thêm. Thử áp câu bạn định viết lên lần lượt ba người khách trước khi bấm chạy.
 - kind: one-line
   body: "Viết `tuoi_khach > 65 and la_khach_quen` vào chỗ trống, giữ nguyên dấu hai chấm."
 :::
@@ -248,6 +271,7 @@ pass
   timeoutMs: 4000
 - tier: output
   expect: Tặng bác một chén trà.
+  match: trim
 :::
 ::::
 

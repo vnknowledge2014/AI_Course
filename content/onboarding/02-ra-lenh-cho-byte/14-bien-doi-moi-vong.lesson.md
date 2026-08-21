@@ -156,32 +156,49 @@ Vài chuyện gọn cần biết về biến lặp:
 ::::
 
 ::::code{#bang-nhac-bep}
-Bà chủ muốn một bảng nhắc bếp: **năm** dòng, mỗi dòng ghi số thứ tự của một tô.
+Bà chủ muốn một bảng nhắc bếp cho hai bàn. Bàn 1 gọi **năm** tô, bàn 2 gọi
+**ba** tô. Mỗi dòng ghi số thứ tự của một tô.
 
 Máy phải in ra đúng thế này:
 
 ```text title=readonly
-Tô số 0
-Tô số 1
-Tô số 2
-Tô số 3
-Tô số 4
+Bàn 1 - tô số 0
+Bàn 1 - tô số 1
+Bàn 1 - tô số 2
+Bàn 1 - tô số 3
+Bàn 1 - tô số 4
+Bàn 2 - tô số 0
+Bàn 2 - tô số 1
+Bàn 2 - tô số 2
 ```
 
-Vòng lặp đã dựng sẵn. Hãy điền thứ đổi theo từng lượt vào giữa cặp ngoặc nhọn.
+Hai vòng lặp đã dựng sẵn, và hai chỗ trống điền **cùng một thứ**. Hãy điền thứ
+đổi theo từng lượt vào giữa cặp ngoặc nhọn.
+
+Hai vòng dùng chung một cái tên. Vòng sau chạy độc lập với vòng trước: máy dán
+lại cái tên ấy từ 0 một lần nữa.
 
 ```python title=starter
 for so in range(5):
-    print(f"Tô số {___}")
+    print(f"Bàn 1 - tô số {___}")
+
+for so in range(3):
+    print(f"Bàn 2 - tô số {___}")
 ```
 
 ```python title=solution
 for so in range(5):
-    print(f"Tô số {so}")
+    print(f"Bàn 1 - tô số {so}")
+
+for so in range(3):
+    print(f"Bàn 2 - tô số {so}")
 ```
 
 ```python title=test
-# Chấm bằng OUTPUT: năm dòng, số thứ tự chạy từ 0 tới 4.
+# Chấm bằng OUTPUT, và chấm trọn cả tám dòng — không chỉ một dòng.
+#
+# Hai vòng có số lượt khác nhau, nên chỉ cái tên mới điền đúng được cả hai chỗ:
+# nhét một con số cứng vào thì tám dòng hoá giống nhau và bài trượt ngay.
 pass
 ```
 
@@ -189,21 +206,22 @@ pass
 - kind: attention
   body: Chỗ trống nằm giữa cặp ngoặc nhọn trong câu chữ. Đó là chỗ máy **không** đọc nguyên văn mà đi tìm một cái tên.
 - kind: strategy
-  body: Thứ cần thay vào là thứ đổi theo từng lượt. Trong đoạn này chỉ có đúng một cái tên như vậy, và nó đứng ngay sau chữ `for`.
+  body: Thứ cần thay vào là thứ đổi theo từng lượt. Một con số cứng thì đứng im, mà bàn 1 cần năm số khác nhau còn bàn 2 cần ba. Trong đoạn này chỉ có đúng một cái tên đổi theo lượt, và nó đứng ngay sau chữ `for`.
 - kind: one-line
-  body: "Viết `so` vào giữa cặp ngoặc nhọn, thành `{so}`."
+  body: "Viết `so` vào giữa cặp ngoặc nhọn ở **cả hai** chỗ trống, thành `{so}`."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: Tô số 0
+  match: regex
+  expect: ^Bàn 1 - tô số 0\nBàn 1 - tô số 1\nBàn 1 - tô số 2\nBàn 1 - tô số 3\nBàn 1 - tô số 4\nBàn 2 - tô số 0\nBàn 2 - tô số 1\nBàn 2 - tô số 2$
 :::
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Một câu print, năm dòng khác nhau. Phần khác nhau đó do cái tên gánh hết.
+Hai câu print, tám dòng khác nhau. Phần khác nhau đó do cái tên gánh hết.
 ::::
 
 ::::reflect{#nghi-lai}

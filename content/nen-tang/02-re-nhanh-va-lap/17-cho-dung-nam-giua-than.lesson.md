@@ -187,51 +187,83 @@ suông.
 Ô chấm điểm không có ai ngồi trước bàn phím, nên Byte đóng vai khách: mấy câu
 khách gõ được ghi sẵn trong một danh sách, mỗi lượt lấy ra một câu.
 
-Đoạn dưới chỉ còn thiếu điều kiện của vòng lặp. Nhớ rằng bạn đang viết cho **mọi
-khách**, không riêng khách hôm nay — nên đừng viết số lượt vào đó, vì bạn không
-biết trước khách sẽ bấm Enter suông mấy lần.
+Một vòng lặp chỉ được coi là viết đúng khi nó xử đúng **mọi** khách, chứ không
+riêng khách sáng nay. Nên Byte đặt tên cho việc hỏi, đúng cách Realm 0 đã dạy,
+rồi gọi nó với ba người khách:
+
+- khách sáng bấm Enter suông hai lần rồi mới gõ `45000`;
+- khách trưa gõ `120000` ngay lần đầu, không bấm suông lần nào;
+- khách tối bấm Enter suông **bốn** lần rồi mới gõ `80000`.
+
+Đoạn dưới thiếu hai chỗ, và hai chỗ ấy **không** điền giống nhau. Chúng đúng là
+cặp câu hỏi ngược chiều vừa nói ở trên: chỗ ở đầu vòng giữ cho vòng **ở lại**,
+chỗ trong `if` quyết định lúc nào **đi ra**.
+
+Vì bạn không biết trước khách sẽ bấm Enter suông mấy lần, đừng viết số lượt vào
+chỗ trống ở đầu vòng.
 
 ```python title=starter
-# Byte gõ hộ bàn phím: hai lần bấm Enter suông, lần thứ ba mới gõ số.
-khach_go = ["", "", "45000"]
-lan = 0
+# Byte gõ hộ bàn phím: mỗi phần tử là một lần khách bấm phím rồi Enter.
+def hoi_toi_khi_co_so(khach_go):
+    lan = 0
+    while ___:
+        tra_loi = khach_go[lan]
+        lan = lan + 1
+        if ___:
+            break
+    return tra_loi
 
-while ___:
-    tra_loi = khach_go[lan]
-    lan = lan + 1
-    if tra_loi != "":
-        break
+khach_sang = ["", "", "45000"]
+khach_trua = ["120000"]
+khach_toi = ["", "", "", "", "80000"]
 
-print(f"Khách gõ {tra_loi} đồng")
+print(f"Khách sáng gõ {hoi_toi_khi_co_so(khach_sang)} đồng")
+print(f"Khách trưa gõ {hoi_toi_khi_co_so(khach_trua)} đồng")
+print(f"Khách tối gõ {hoi_toi_khi_co_so(khach_toi)} đồng")
 ```
 
 ```python title=solution
-# Byte gõ hộ bàn phím: hai lần bấm Enter suông, lần thứ ba mới gõ số.
-khach_go = ["", "", "45000"]
-lan = 0
+# Byte gõ hộ bàn phím: mỗi phần tử là một lần khách bấm phím rồi Enter.
+def hoi_toi_khi_co_so(khach_go):
+    lan = 0
+    while True:
+        tra_loi = khach_go[lan]
+        lan = lan + 1
+        if tra_loi != "":
+            break
+    return tra_loi
 
-while True:
-    tra_loi = khach_go[lan]
-    lan = lan + 1
-    if tra_loi != "":
-        break
+khach_sang = ["", "", "45000"]
+khach_trua = ["120000"]
+khach_toi = ["", "", "", "", "80000"]
 
-print(f"Khách gõ {tra_loi} đồng")
+print(f"Khách sáng gõ {hoi_toi_khi_co_so(khach_sang)} đồng")
+print(f"Khách trưa gõ {hoi_toi_khi_co_so(khach_trua)} đồng")
+print(f"Khách tối gõ {hoi_toi_khi_co_so(khach_toi)} đồng")
 ```
 
 ```python title=test
-# Vòng phải chạy đủ ba lượt: bỏ qua hai câu rỗng, giữ lại câu thứ ba.
-assert lan == 3
-assert tra_loi == "45000"
+# Chấm trên BA khách, không phải một.
+#
+# Chấm bằng đúng một khách thì không phân biệt được đúng với gặp may: khách
+# sáng bấm Enter suông hai lần, nên `while lan < 3:` cũng qua — mà câu ấy sai,
+# nó đoán trước số lượt. Ba khách đây được chọn để mỗi câu trả lời hụt đều lộ:
+#   `while lan < 3:`      → khách tối bấm suông bốn lần, vòng thoát ở đầu lượt
+#                           khi chưa có số, hàm trả về chuỗi rỗng;
+#   `if True:` ở chỗ hai  → thoát ngay lượt đầu, khách sáng ra chuỗi rỗng;
+#   `while False:`        → thân không chạy lượt nào, `tra_loi` chưa hề có.
+assert hoi_toi_khi_co_so(["", "", "45000"]) == "45000"
+assert hoi_toi_khi_co_so(["120000"]) == "120000"
+assert hoi_toi_khi_co_so(["", "", "", "", "80000"]) == "80000"
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống nằm giữa `while` và dấu hai chấm. Cả việc dừng đã được dòng `break` phía dưới lo trọn rồi — vậy chỗ này còn cần nói điều gì?
+  body: Hai chỗ trống nằm ở hai chỗ khác nhau và không điền giống nhau. Chỗ thứ nhất ở giữa `while` và dấu hai chấm; chỗ thứ hai ở giữa `if` và dấu hai chấm, ngay trên dòng `break`.
 - kind: strategy
-  body: Bạn cần một điều kiện không bao giờ sai, để máy không tự thoát ra ở đầu lượt. Điều kiện ấy không phải một câu so sánh, mà là một giá trị đúng-sai viết thẳng ra — loại giá trị bạn đã gặp từ bài "Đúng hay sai".
+  body: Chỗ ở đầu vòng cần một điều kiện không bao giờ sai, để máy không tự thoát ra ở đầu lượt — nó không phải một câu so sánh, mà là một giá trị đúng-sai viết thẳng ra, loại bạn đã gặp từ bài "Đúng hay sai". Câu hỏi thật nằm ở chỗ thứ hai, và nó hỏi ngược lại: khách vừa gõ đã có gì chưa, tức `tra_loi` có khác chuỗi rỗng không.
 - kind: one-line
-  body: "Viết `True` vào chỗ trống — chữ T viết hoa, không dấu nháy."
+  body: Viết `True` vào chỗ trống sau `while` — chữ T viết hoa, không dấu nháy — và viết `tra_loi != ""` vào chỗ trống sau `if`.
 :::
 
 :::validate
@@ -240,7 +272,7 @@ assert tra_loi == "45000"
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Khách gõ 45000 đồng
+  expect: Khách tối gõ 80000 đồng
 :::
 ::::
 

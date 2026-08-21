@@ -50,11 +50,18 @@ function chay(ma) {
   };
   py.setStdout(gom);
   py.setStderr(gom);
+  // Pyodide in nguyên vết stack ra `console.error` khi cú ném từ `batched`
+  // đi ngược qua tầng WASM của nó. Cú ném ấy là CỐ Ý (xem TRAN_DONG), nên
+  // tắt tiếng trong đúng khoảng này thay vì để nó lấp mất báo cáo thật.
+  const loi_goc = console.error;
+  console.error = () => {};
   try {
     py.runPython(ma);
     return { ok: true, xuat: dong.join('\n'), loi: null };
   } catch (e) {
     return { ok: false, xuat: dong.join('\n'), loi: e instanceof Error ? e.message : String(e) };
+  } finally {
+    console.error = loi_goc;
   }
 }
 

@@ -214,11 +214,13 @@ khi vòng đã đi xong. Câu hỏi nó đặt ra không phải "tiền có quá
 ::::
 
 ::::code{#doc-lai-o-tra-loi}
-Tuần này Byte tiêu dè, không ngày nào quá 200. Đoạn dưới đã tìm xong; việc còn
-lại là đọc ô trả lời và nói cho đúng.
+Dưới đây là **hai** tuần chi tiêu, mỗi tuần một khối. Hai khối giống nhau từng
+chữ một, chỉ khác đúng dãy số trong `chi_tieu`: tuần này Byte tiêu dè cả bảy
+ngày; tuần trước cũng dè sáu ngày, tới ngày thứ bảy thì đãi bạn một bữa.
 
-Hãy điền điều kiện để máy in ra dòng chữ dành cho trường hợp **không tìm thấy
-ngày nào**.
+Cùng một chỗ trống, điền hai lần y hệt nhau. Điền đúng thì hai khối tự khắc nói
+ra hai chuyện khác nhau — vì cái quyết định câu trả lời là dấu gạch còn hay mất,
+chứ không phải câu bạn gõ.
 
 ```python title=starter
 chi_tieu = [120, 90, 150, 80, 110, 70, 130]
@@ -232,9 +234,24 @@ for tien in chi_tieu:
         break
 
 if ___:
-    print("Cả tuần không ngày nào tiêu quá 200")
+    print("Tuần này: cả tuần không ngày nào tiêu quá 200")
 else:
-    print(f"Ngày đầu tiên vượt ngưỡng: ngày {ngay_vuot}")
+    print(f"Tuần này: ngày đầu tiên vượt ngưỡng là ngày {ngay_vuot}")
+
+chi_tieu = [120, 90, 150, 80, 110, 70, 240]
+ngay = 0
+ngay_vuot = -1
+
+for tien in chi_tieu:
+    ngay += 1
+    if tien > 200:
+        ngay_vuot = ngay
+        break
+
+if ___:
+    print("Tuần trước: cả tuần không ngày nào tiêu quá 200")
+else:
+    print(f"Tuần trước: ngày đầu tiên vượt ngưỡng là ngày {ngay_vuot}")
 ```
 
 ```python title=solution
@@ -249,38 +266,63 @@ for tien in chi_tieu:
         break
 
 if ngay_vuot == -1:
-    print("Cả tuần không ngày nào tiêu quá 200")
+    print("Tuần này: cả tuần không ngày nào tiêu quá 200")
 else:
-    print(f"Ngày đầu tiên vượt ngưỡng: ngày {ngay_vuot}")
+    print(f"Tuần này: ngày đầu tiên vượt ngưỡng là ngày {ngay_vuot}")
+
+chi_tieu = [120, 90, 150, 80, 110, 70, 240]
+ngay = 0
+ngay_vuot = -1
+
+for tien in chi_tieu:
+    ngay += 1
+    if tien > 200:
+        ngay_vuot = ngay
+        break
+
+if ngay_vuot == -1:
+    print("Tuần trước: cả tuần không ngày nào tiêu quá 200")
+else:
+    print(f"Tuần trước: ngày đầu tiên vượt ngưỡng là ngày {ngay_vuot}")
 ```
 
 ```python title=test
-# Chấm bằng OUTPUT: điều kiện người học viết phải dẫn máy vào đúng nhánh
-# "không tìm thấy". Khối này chỉ khẳng định vòng lặp đã chạy trọn bảy lượt mà
-# không lần nào gặp `break`.
+# Chấm bằng TRỌN VẸN hai dòng output, không phải một dòng.
+#
+# Một khối thì chỉ có hai kết cục, nên gõ bừa `True` vào chỗ trống là trúng một
+# nửa số lần. Hai khối với hai dãy số khác nhau thì mọi câu gõ bừa đều cho hai
+# dòng cùng kiểu — `True` cho hai dòng "cả tuần không ngày nào", `0` cho hai
+# dòng "ngày đầu tiên vượt ngưỡng", trong đó tuần tiêu dè hoá ra "ngày -1".
+# Chỉ câu hỏi đúng về dấu gạch mới tách được hai tuần ra.
+#
+# Hai tuần cùng chạy trọn bảy lượt, nên `ngay` bằng 7 ở cả hai — chính vì thế
+# `ngay` không phân biệt được tìm thấy với không tìm thấy, chỉ `ngay_vuot` mới
+# làm được. Khối này khẳng định vòng lặp thứ hai đã gặp `break` ở ngày 7.
 assert ngay == 7
-assert ngay_vuot == -1
+assert ngay_vuot == 7
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống nằm giữa `if` và dấu hai chấm, ở khối sát lề trái ngay sau vòng lặp. Nhìn lại dòng thứ ba của chương trình — con số đặt vào `ngay_vuot` trước vòng là con số nào?
+  body: Hai chỗ trống nằm ở cùng một vị trí trong hai khối: giữa `if` và dấu hai chấm, ở khối sát lề trái ngay sau vòng lặp. Nhìn lại dòng thứ ba của mỗi khối — con số đặt vào `ngay_vuot` trước vòng là con số nào?
 - kind: strategy
-  body: Câu hỏi cần hỏi là "dấu gạch còn nguyên không", tức là "`ngay_vuot` có còn đúng bằng cái giá trị canh đặt trước vòng không". So sánh bằng nhau viết bằng hai dấu bằng liền nhau.
+  body: Câu hỏi cần hỏi là "dấu gạch còn nguyên không", tức là "`ngay_vuot` có còn đúng bằng cái giá trị canh đặt trước vòng không". So sánh bằng nhau viết bằng hai dấu bằng liền nhau. Cùng một câu hỏi ấy điền vào cả hai chỗ — hai tuần khác nhau là do dãy số khác nhau, không phải do bạn gõ khác đi.
 - kind: one-line
-  body: "Viết `ngay_vuot == -1` vào chỗ trống, giữ nguyên dấu hai chấm ở cuối dòng."
+  body: "Viết `ngay_vuot == -1` vào cả hai chỗ trống, giữ nguyên dấu hai chấm ở cuối mỗi dòng."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: Cả tuần không ngày nào tiêu quá 200
+  match: regex
+  expect: ^Tuần này: cả tuần không ngày nào tiêu quá 200\nTuần trước: ngày đầu tiên vượt ngưỡng là ngày 7\s*$
 :::
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Ô trả lời còn nguyên dấu gạch. Giờ mình nói được cả chuyện không tìm thấy gì.
+Một tuần còn nguyên dấu gạch, một tuần bị gạch đi. Cùng một câu hỏi, hai câu
+trả lời — giờ mình nói được cả chuyện không tìm thấy gì.
 ::::
 
 ::::reflect{#nghi-lai}
