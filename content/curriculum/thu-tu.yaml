@@ -27,3 +27,13 @@ realm:
       - ham-vien-gach
       - list-dict-set-tuple
       - chuong-trinh-that
+
+  # Realm 2 đi SONG SONG với Realm 1, không nối tiếp — người học vào được khi
+  # chưa biết vòng lặp hay hàm. Xếp nó sau ở đây chỉ để cổng đồ thị có một thứ
+  # tự tuyến tính mà kiểm; nó KHÔNG có nghĩa là phải học hết Realm 1 trước.
+  - id: toan
+    ten: "Realm 2 — Toán & Toán rời rạc"
+    track:
+      - cam-nhan-so
+      - dai-so-va-ham-so
+      - logic-va-chung-minh

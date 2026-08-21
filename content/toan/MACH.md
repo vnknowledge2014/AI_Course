@@ -1,0 +1,562 @@
+# Mạch Realm 2 — Toán & Toán rời rạc
+
+> Tài liệu thiết kế. Nó quyết định **thứ tự** các bài của Realm 2 và, quan
+> trọng hơn, **vì sao** thứ tự đó là thứ tự đúng. Sửa thứ tự thì sửa ở đây
+> trước, sửa file bài học sau.
+
+Realm này đi **song song** với Realm 1, không nối tiếp. Người học có thể vào
+đây khi chưa biết vòng lặp hay hàm — nên không bài nào được giả định điều đó.
+Python chỉ dùng để KIỂM một ý tưởng, không phải chủ đề.
+
+## Phong cách: New Math kết hợp Common Core
+
+Ba điều phân biệt nó với cách dạy toán quen thuộc:
+
+1. **Cấu trúc trước quy trình.** Dạy phép nhân là gì trước khi dạy cách nhân.
+   Người học thuộc quy trình mà không hiểu cấu trúc sẽ đứng hình ngay lần đầu
+   bài toán đổi hình dạng.
+2. **Nhiều biểu diễn cho cùng một ý.** Thanh số, mô hình vùng, sơ đồ dải —
+   mỗi cái làm lộ ra một mặt khác nhau. Người chỉ có một biểu diễn thì chỉ
+   giải được những bài trông giống biểu diễn đó.
+3. **Luôn hỏi "vì sao đúng", không chỉ "làm thế nào".** Đây là chỗ nối thẳng
+   sang T2.3 (Logic & chứng minh) và sang mọi thứ ở Realm 3.
+
+## Luật của mạch
+
+Ba ràng buộc giống hệt các realm khác:
+
+1. **Mỗi bài đúng một khái niệm mới.**
+2. **Mỗi bài kết bằng một câu hỏi bỏ ngỏ, và bài kế tiếp trả lời nó.**
+3. **Công cụ mới chỉ xuất hiện sau khi bài trước đã tạo ra sự bất tiện mà nó
+   giải quyết.**
+
+## T2.1 — Cảm nhận số (Realm 2 · Toán & Toán rời rạc · Python dùng để KIỂM · 44 bài)
+
+## T2.1 — Cảm nhận số (Realm 2 · Toán & Toán rời rạc · Python chỉ dùng để KIỂM · 44 bài)
+
+> Hiện vật chạy suốt track: **vườn của Byte** — nắm hạt (đếm được, không bẻ nhỏ được) và luống đất đo bằng sải dây (đo được, bẻ nhỏ được). Mặt đất là mốc 0; rễ ở dưới, mầm ở trên. Mọi sự bất tiện tích luỹ trên đúng một cái vườn ấy.
+
+| # | slug | Tiêu đề | Khái niệm mới (đúng một) | `reflect` cuối bài | Dựa trên |
+|---|---|---|---|---|---|
+| 1 | `mot-so-luon-la-may-cai-gi` | Mấy — nhưng mấy *cái gì* | Một con số không đứng một mình: nó luôn là câu trả lời cho "mấy **cái** gì". Bỏ cái đơn vị đi thì con số chưa nói được điều gì | Byte đếm đống hạt ra 12. An đếm lại, không nhìn Byte, cũng ra 12. Cái gì bảo đảm chuyện đó — sao không thể ra 11 hay 13? | R0.9 `so-khong-can-nhay` |
+| 2 | `dem-la-ghep-doi-mot-mot` | Đếm là ghép đôi | Đếm = ghép **mỗi vật với đúng một** tên số theo dãy 1, 2, 3…; vì là ghép một–một nên đếm theo thứ tự nào cũng ra cùng một kết quả | Đếm hạt thì ai cũng ra 12. Nhưng đo luống đất, Byte bảo "dài 4", An bảo "dài 12" — và không ai đo sai cả. Chuyện gì đã khác? | 1 |
+| 3 | `do-la-dem-cai-thuoc` | Đo là đếm cái thước | Số đo = đếm xem **cái thước đã chọn** đặt lặp lại mấy lần; đổi thước thì con số đổi, còn lượng đất thì không đổi tí nào | Vậy đếm hạt cũng là đo, với thước là "một hạt"? Nếu hai chuyện là một, thử bẻ đôi cái thước xem: nửa sải dây vẫn là dây, còn nửa hạt là gì? | 2, 1 |
+| 4 | `thuoc-be-nho-duoc-hay-khong` | Thước bẻ được và thước không bẻ được | Chỗ khác nhau **thật** giữa số đếm và số đo nằm ở đơn vị: đơn vị rời bẻ nhỏ là mất nghĩa, đơn vị đo bẻ nhỏ vẫn còn nghĩa — nên giữa hai số đo luôn còn chỗ trống | "Giữa 3 và 4 vẫn còn chỗ" — nghe thì gật đầu, nhưng *chỗ* ấy ở đâu? Phải vẽ ra bức tranh nào mới chỉ tay vào nó được? | 3 |
+| 5 | `thanh-so-moi-so-mot-cho` | Thanh số: mỗi số một chỗ | **Thanh số** — mọi số nằm trên một đường thẳng, hai vạch liền nhau cách nhau đúng một đơn vị; số là một **chỗ**, không phải một đống | Trên thanh số, muốn chỉ ra 137 hạt thì phải đếm qua 137 vạch. Có cách nào nói "137" mà không phải đếm 137 lần không? | 4, 2 |
+| 6 | `gom-muoi-thanh-mot-bo` | Gom mười thành một bó | **Đóng gói** — gom 10 vật rời thành một bó rồi đi đếm bó; bó là một đơn vị mới, to gấp mười đơn vị cũ | Byte có 13 bó và 7 hạt lẻ. Viết ra giấy thế nào cho gọn — chẳng lẽ vẽ 13 cái bó? Mà viết "13" với "7" cạnh nhau thì ai biết đâu là bó, đâu là hạt? | 5, 2 |
+| 7 | `cho-dung-noi-gia-tri` | Chỗ đứng nói giá trị | **Giá trị theo vị trí** — cùng chữ số 3, đứng cột khác thì mang lượng khác (3 hạt / 3 bó / 3 bó-của-bó); vị trí làm thay việc phải viết tên đơn vị ra | Byte có 3 bó-của-bó, không bó lẻ nào, và 7 hạt. Cột giữa chẳng có gì để viết. Bỏ trống rồi viết "37" à? | 6 |
+| 8 | `so-khong-giu-cho` | Số 0 giữ chỗ | `0` không mang nghĩa "không có gì", nó mang nghĩa "**cột này rỗng**" — nhờ nó mà 307 khác hẳn 37 | Cột nào cũng phải đủ **mười** mới được lên bó. Vì sao lại là mười? Ai chọn con số đó, và chọn số khác có được không? | 7 |
+| 9 | `vi-sao-lai-la-muoi` | Vì sao lại là mười | **Cơ số là một lựa chọn**, không phải bản chất của số: bó theo 5 thì vẫn đúng chừng ấy hạt nhưng dãy chữ số khác hẳn; 10 đến từ mười ngón tay | Bó theo 10 hay theo 5 thì đống hạt vẫn nguyên chừng ấy. Nhưng Byte vừa hái thêm một đống nữa và đổ chung vào. "Đổ chung" — trong toán gọi là gì, và nó làm gì với mấy cái bó? | 8, 6, R0.5 `bit-va-byte` |
+| 10 | `cong-la-gop-hai-dong` | Cộng là gộp hai đống | **Cộng = gộp** hai lượng thành một lượng; và vì chỉ là đổ chung vào nhau nên gộp đống nào trước cũng ra một kết quả | 3 hạt gộp với 2 bó ra "5" — 5 **cái gì**? Câu hỏi này có trả lời được không? | 9, 1 |
+| 11 | `chi-gop-duoc-thu-cung-don-vi` | Chỉ gộp được thứ cùng đơn vị | Phép cộng chỉ có nghĩa khi hai lượng **cùng một đơn vị** — đó mới là lý do người ta viết thẳng cột, chứ không phải cho đẹp mắt | 7 hạt cộng 5 hạt là 12 hạt. Nhưng cột hạt lẻ chỉ chứa nổi tới 9. Cái thứ mười đi đâu? | 10, 7 |
+| 12 | `nho-mot-la-dong-bo-lai` | "Nhớ 1" chính là đóng bó | "Nhớ 1" không phải mẹo tính nhẩm: nó là **đóng gói lại** — đủ mười cái lẻ thì thành một bó, và cái bó ấy sang đứng ở cột bên trái | Tới giờ cộng vẫn là chuyện của hai *đống*. Trên thanh số ở bài 5 — nơi một số là một *chỗ* chứ không phải một đống — thì "cộng 3" trông ra sao? | 11, 6 |
+| 13 | `cong-la-buoc-sang-phai` | Cộng là bước sang phải | Trên thanh số, cộng = **dịch sang phải** đúng bấy nhiêu đơn vị; một phép cộng, hai bức tranh (gộp đống / dời chỗ) và chúng luôn khớp nhau | Dịch sang phải là cộng. Vậy dịch sang **trái** là phép gì, và nó trả lời câu hỏi nào của Byte? | 12, 5 |
+| 14 | `bot-di-la-lui-lai` | Bớt đi là lùi lại | **Trừ = bớt đi** = dịch sang trái trên thanh số | "12 bớt 5" và "từ 5 tới 12 còn cách bao xa" nghe như hai câu hỏi chẳng dính gì nhau, thế mà cùng ra 7. Vì sao? | 13 |
+| 15 | `tru-la-khoang-cach` | Trừ là khoảng cách | `a − b` = **khoảng cách từ b tới a** trên thanh số — cũng đúng là "phải cộng thêm bao nhiêu vào b thì tới a" | Từ 5 tới 12 là 7 bước sang phải. Từ 12 tới 5 cũng 7 bước, nhưng ngược chiều. Viết `5 − 12` thì bạn phải lùi qua bên trái số 0. Bên trái số 0 có gì? | 14, 13 |
+| 16 | `ben-trai-so-khong` | Bên trái số 0 | **Số âm** — thanh số chạy tiếp về bên trái 0; 0 là một **mốc do người chọn** (mặt đất của vườn), không phải điểm cuối của thế giới | −5 và 5 cách 0 bằng nhau, chỉ khác phía. Vậy giữa −5 và −2, cái nào lớn hơn? "5 lớn hơn 2" có kéo theo "−5 lớn hơn −2" không? | 15, 5 |
+| 17 | `lon-hon-la-dung-ben-phai` | Lớn hơn nghĩa là đứng bên phải | **So sánh = vị trí trên thanh số**: `a > b` khi a đứng bên phải b — nên −2 > −5, dù rễ sâu 5 phân thì "sâu hơn" rễ 2 phân | `5 − 12` giờ đã có câu trả lời: −7. Nhưng nếu phép trừ nào cũng lùi được, thì trừ có còn là một phép riêng nữa không, hay nó là phép cộng đội lốt? | 16, 13, R0.24 `dung-hay-sai` |
+| 18 | `tru-la-cong-so-doi` | Trừ là cộng với số đối | Mỗi số có một **số đối** (cùng khoảng cách tới 0, khác phía), và `a − b = a + (−b)` — phép trừ tan vào phép cộng, không cần luật riêng | Cộng thì gộp từng ít một. "Mỗi luống 8 cây, có 5 luống" — cộng 8 năm lần thì xong. Nhưng 50 luống thì cộng 50 lần? | 17, 16 |
+| 19 | `may-lan-mot-lo` | Mấy lần một lô | **Nhân = mấy lần một lượng**; hai con số đứng hai vai khác nhau — một cái nói *lô to bao nhiêu*, cái kia nói *lấy mấy lô* | 5 luống mỗi luống 8 cây, và 8 luống mỗi luống 5 cây — hai cái vườn trông khác hẳn nhau. Số cây có khác nhau không? | 18, 10 |
+| 20 | `mang-chu-nhat-xoay-mot-goc` | Mảng chữ nhật xoay một góc | Xếp cây thành **mảng chữ nhật** hàng × cột: xoay 90° là đổi vai hai con số mà không thêm bớt cây nào → `a × b = b × a` | Mảng 7 hàng × 13 cột. Đếm từng cây thì 91 lần. Cắt cái mảng ấy thành mấy miếng dễ đếm hơn được không? | 19, 5 |
+| 21 | `cat-mang-thanh-mieng` | Cắt mảng thành miếng | **Mô hình vùng và tính chất phân phối**: cắt 13 cột thành 10 + 3 thì `7×13 = 7×10 + 7×3`; cắt kiểu nào cũng ra đúng chừng ấy cây | Bạn vừa nhân 7 với 13 mà không cộng 13 lần — và cái cột "10" trong phép cắt đúng là cái bó ở bài 6. Nhưng "nhân" còn một nghĩa nữa: "luống này dài **gấp 3** luống kia". Ở đó thì đâu là hàng, đâu là cột? | 20, 6, 7 |
+| 22 | `nhan-la-keo-gian-thanh-so` | Nhân là kéo giãn thanh số | **Nhân như co giãn**: nhân 3 = kéo cả thanh số ra xa mốc 0 ba lần = **đo lại đúng lượng ấy bằng cái thước nhỏ đi ba lần** (bài 3 quay lại) | Kéo giãn 3 lần thì mọi chỗ ra xa hơn; nhân 1 thì không đổi gì. Vậy nhân với −1 làm gì với thanh số? | 21, 3, 5 |
+| 23 | `nhan-am-la-lat-thanh-so` | Nhân số âm là lật thanh số | Nhân với −1 = **lật** thanh số quanh 0; lật hai lần thì mọi chỗ về đúng chỗ cũ — nên `(−1)×(−1) = 1` là hệ quả nhìn thấy được, không phải luật học thuộc | Kéo giãn ba lần là `×3`. Kéo giãn ba lần liên tiếp thì viết `3 × 3 × 3`. Kéo mười lần thì phải viết mười con 10 cạnh nhau — mỏi tay chưa? | 22, 16, 18 |
+| 24 | `viet-gon-phep-nhan-lap-lai` | Viết gọn phép nhân lặp | **Luỹ thừa** — `10⁵` nghĩa là 10 nhân với chính nó, **năm thừa số**; số mũ đếm *số lần thừa số xuất hiện*, chứ không phải kết quả | 10¹ = 10, 10² = 100, 10³ = 1000. Nhìn quen chưa? Đó đúng là mấy cái cột ở bài 7. Thế cột hạt lẻ — cột "một" — là 10 mũ mấy? | 23, 19 |
+| 25 | `bang-vi-tri-la-day-luy-thua` | Bảng vị trí là dãy luỹ thừa | Mỗi bước sang **trái** trong bảng vị trí là nhân 10, nên các cột chính là 10⁰, 10¹, 10², …; và `10⁰ = 1` không phải quy ước tuỳ tiện mà là hệ quả của việc đi ngược lại đúng một bước | Đi ngược thêm một bước nữa thì số mũ tụt xuống dưới 0, và mỗi bước ngược là **chia** cho 10. Nhưng khoan — suốt 24 bài Byte chưa chia lần nào. Chia là gì? | 24, 7, 9 |
+| 26 | `chia-deu-cho-may-phan` | Chia đều cho mấy phần | **Chia đều** — biết *số phần*, đi tìm *cỡ mỗi phần*: 12 hạt cho 3 luống thì mỗi luống mấy hạt | "12 hạt chia cho 3 luống" và "12 mét dây cắt thành từng đoạn 3 mét" đều viết `12 : 3`. Nhưng con số 3 đứng ở hai vai khác nhau. Khác chỗ nào? | 25, 19 |
+| 27 | `chia-la-do-xem-lot-may-lan` | Chia là đo xem lọt mấy lần | **Chia như đo** — biết *cỡ mỗi phần*, đi tìm *số phần*: "3 mét lọt vào 12 mét mấy lần"; đây đúng là câu hỏi *đo* của bài 3, chỉ viết bằng dấu chia | Hỏi "3 lọt vào 12 mấy lần" thì trả lời được. Hỏi "**0** lọt vào 12 mấy lần" thì trả lời sao? | 26, 3 |
+| 28 | `vi-sao-khong-chia-cho-khong` | Vì sao không chia được cho 0 | `12 : 0` không có kết quả vì **câu hỏi hỏng**, không phải vì máy cấm: đặt đoạn 0 mét bao nhiêu lần cũng không lấp nổi 12 mét — và không có số nào nhân với 0 ra 12 | Còn 13 mét cắt thành đoạn 3 mét thì được 4 đoạn và **thừa 1 mét**. Chỗ thừa ấy — gọi nó bằng một con số được không? | 27 |
+| 29 | `phan-con-thua` | Phần còn thừa | **Số dư** — phần còn lại vì *chưa đủ thêm một lần nữa*; nên dư luôn nhỏ hơn cái thước đang đo | 1 mét thừa ấy, tính theo "đoạn 3 mét" thì là bao nhiêu đoạn? Chưa được một đoạn, nhưng cũng không phải không có gì. Trên thanh số nó đứng ở đâu? | 28, 27 |
+| 30 | `be-nho-cai-thuoc` | Bẻ nhỏ cái thước | Khi thước không vừa thì **bẻ đơn vị thành b phần bằng nhau**; một phần trong đó là một **đơn vị mới**, và tên của nó là `1/b` | Vậy `1/4` là một cái thước mới, nhỏ đi bốn lần. Thế `3/4` là gì: ba cái bánh mỗi cái chia tư, hay ba lần cái thước mới ấy? | 29, 4, 3 |
+| 31 | `phan-so-la-may-lan-don-vi-moi` | Phân số là mấy lần đơn vị mới | `a/b` = **a bản sao của đơn vị `1/b`** — mẫu nói *thước cỡ nào*, tử nói *lấy mấy cái*; nhờ thế phân số là một **chỗ** trên thanh số, một con số đàng hoàng chứ không phải "một phần của cái bánh" | 3/4 nằm giữa 0 và 1. Thế 7/4 thì sao — lấy 7 cái thước cỡ 1/4, có chỗ nào cho nó không, hay phân số bị nhốt trong khoảng 0–1? | 30, 5, 19 |
+| 32 | `phan-so-khong-bi-nhot-duoi-mot` | Phân số không bị nhốt dưới 1 | Không có gì cấm tử lớn hơn mẫu: `7/4 = 4/4 + 3/4 = 1 và 3/4` — mẫu **không phải cái bánh**, mẫu chỉ là cỡ thước | Đặt 1/2 và 2/4 lên thanh số thì chúng rơi trúng cùng một chỗ. Hai cách viết, một con số — chuyện gì đang xảy ra? | 31, 10 |
+| 33 | `doi-thuoc-khong-doi-luong` | Đổi thước, không đổi lượng | **Phân số tương đương** — nhân cả tử lẫn mẫu với cùng một số là *đo lại đúng lượng ấy bằng thước nhỏ hơn bấy nhiêu lần*; chia cả hai xuống là đo bằng thước to hơn (rút gọn). Đây là bài 3 nói lại bằng phân số | Cùng một lượng viết được vô số cách. Vậy làm sao biết 2/3 với 3/4 bên nào lớn hơn, khi hai bên đang đo bằng hai cái thước khác nhau? | 32, 3, 21 |
+| 34 | `muon-so-sanh-thi-cung-thuoc` | Muốn so sánh thì phải cùng thước | So sánh phân số = **quy về cùng một thước** (mẫu chung) rồi đếm xem bên nào nhiều đơn vị hơn — chứ không so tử với tử, mẫu với mẫu | Cùng thước thì so được. Vậy cộng thì sao — `1/2 + 1/3` bằng bao nhiêu, và vì sao **không** phải `2/5`? | 33, 17 |
+| 35 | `cong-phan-so-van-la-luat-cu` | Cộng phân số vẫn là luật cũ | Cộng phân số chỉ làm được khi **cùng mẫu**, vì đó vẫn đúng là luật bài 11: chỉ gộp được thứ cùng đơn vị. Cộng tử, giữ nguyên mẫu — vì mẫu là *tên đơn vị*, không phải một lượng đem cộng | Mỗi lần cộng lại phải đi tìm mẫu chung thì mệt. Có loại phân số nào mà mẫu **luôn sẵn giống nhau**, khỏi quy đồng lần nào không? | 34, 11, 12 |
+| 36 | `bang-vi-tri-keo-sang-phai` | Bảng vị trí kéo sang phải | **Số thập phân là phân số cơ số 10**: kéo bảng giá trị vị trí sang bên phải dấu phẩy thì các cột là 1/10, 1/100 = 10⁻¹, 10⁻² — nên `0,25` chính là `25/100`, mẫu do vị trí lo, khỏi phải viết ra | `1/4` viết được thành `0,25`. Còn `1/3` — bẻ thước ra ba phần — viết thành thập phân thì ra số nào? | 35, 25, 7 |
+| 37 | `phan-so-nao-thanh-thap-phan-duoc` | Phân số nào viết được thành thập phân | Chỉ phân số **quy đồng được về mẫu 10ⁿ** mới có thập phân dừng lại được; `1/3 = 0,333…` không bao giờ dừng, vì bẻ 10 thành 3 phần bằng nhau thì lần nào cũng dư | Mẫu 10, 100, 1000 tiện vì lúc nào cũng thẳng cột. Nhưng khi cần so vườn 40 cây với vườn 250 cây, người ta lại chỉ dùng **đúng một** mẫu duy nhất. Mẫu nào, và vì sao lại là nó? | 36, 33, 29 |
+| 38 | `mot-cai-thuoc-cho-tat-ca` | Một cái thước cho tất cả | **Phần trăm** — chốt cứng mẫu ở 100 (`1% = 1/100`) để mọi lượng, dù to nhỏ khác nhau, đều so được với nhau bằng một con số duy nhất | 30% vườn nhà Byte và 30% vườn nhà An — cùng 30%, mà số cây khác hẳn. Vậy con số 30 ấy còn thiếu điều gì mới đủ nghĩa? | 37, 34, 33 |
+| 39 | `phan-tram-cua-cai-gi` | Phần trăm *của* cái gì | Mỗi phần trăm gắn chặt với một **cái toàn thể** = 100%; đổi cái toàn thể thì cùng một con số phần trăm mang lượng khác — nên "tăng 50% rồi giảm 50%" **không** quay về chỗ cũ | Phần trăm luôn so một phần với **cái toàn thể chứa nó**. Còn khi so số cây với số luống — hai thứ chẳng cái nào nằm trong cái nào — thì so kiểu gì? | 38, 22 |
+| 40 | `ti-so-so-hai-thu-khac-loai` | Tỉ số: so hai thứ không cùng loại | **Tỉ số** `a : b` = "cứ a cái này thì có b cái kia" — không đòi cái nào phải chứa cái nào, và **không đổi khi cả hai cùng nhân lên** (đúng luật bài 33, chỉ khác chỗ dùng) | 90 hạt trên 6 luống, và 75 hạt trên 5 luống — hai tỉ số viết ra trông chẳng giống nhau. Làm sao biết vườn nào gieo dày hơn? | 39, 33, 27 |
+| 41 | `quy-ve-mot-don-vi` | Quy về một đơn vị | **Tỉ lệ** — chia để tạo ra một **đơn vị ghép**: "mấy hạt **trên một** luống"; quy cả hai vườn về cùng một đơn vị ghép thì so sánh được ngay | Bạn vừa viết `90 : 6` và đọc là "15 hạt trên một luống". Cũng dấu ấy, bài 27 đọc là "6 lọt vào 90 mấy lần", bài 26 đọc là "chia 90 cho 6 phần". Một ký hiệu, ba cách đọc — vậy ký hiệu toán rốt cuộc ghi lại **cái gì**? | 40, 27, 3 |
+| 42 | `vi-sao-nhan-truoc-cong` | Vì sao nhân trước cộng | **Thứ tự phép toán không phải quy ước tuỳ tiện**: `3 + 4 × 5` là cách viết lại câu "3 cây lẻ, và 4 luống mỗi luống 5 cây" — phép nhân **gói** một lượng thành một khối rồi mới đem gộp, nên nó phải xong trước; tính từ trái sang thì cái gói biến mất | Nhưng nếu ý bạn đúng là "gộp 3 với 4 trước, rồi mới nhân 5"? Cái ý ấy có thật và đếm được ngoài vườn — chỉ là ký hiệu chưa nói ra nổi. | 41, 19, 10, 24 |
+| 43 | `ngoac-va-nhung-cai-ngoac-an` | Dấu ngoặc và những cái ngoặc ẩn | `( )` là chỗ bạn **nói thẳng cấu trúc** thay vì để thứ tự mặc định nói hộ — và bạn đã dùng ngoặc từ lâu mà không biết: gạch phân số và số mũ đều **là ngoặc sẵn** | Giờ Byte đọc được mọi biểu thức trong track. Vườn có 6 luống, mỗi luống 15 hạt, 20% chết, phần sống chia vào các ô rộng 3/4 mét — một câu hỏi duy nhất mà phải dùng lại gần như mọi bài đã học. Viết ra được không? | 42, 24, 31 |
+| 44 | `boss-vuon-cua-byte` | BOSS: Vườn của Byte | *(không khái niệm mới — bài tổng hợp)* một bài toán vườn đi qua đủ mạch: đơn vị & thước → giá trị vị trí → cộng/trừ có số âm → mảng & co giãn → chia đều/chia đo & dư → phân số tương đương → thập phân → phần trăm → tỉ lệ → thứ tự phép toán; mỗi bước chốt bằng một dòng Python so hai vế | Mọi con số trong bài đều là số cụ thể. Nhưng sang năm Byte trồng **n** luống, mỗi luống **h** hạt — chưa biết n và h bằng bao nhiêu mà vẫn muốn viết sẵn công thức. Đặt tên cho một con số **chưa biết** thì viết thế nào? *(dẫn sang T2.2 — Đại số & hàm số)* | 1–43 |
+
+**Vì sao thứ tự này đúng**
+
+**Vì sao thứ tự này là thứ tự đúng**
+
+**0. Một trục duy nhất: ĐƠN VỊ.** Cả 44 bài chỉ có một trục — *một con số là mấy lần một cái thước đã chọn*. Bài 1–5 dựng cái trục ấy; bài 6–9 cho thấy chữ số viết ra chỉ là cách ghi lại việc **đóng gói đơn vị**; bài 10–18 là các phép toán đọc theo trục ("chỉ gộp được thứ cùng đơn vị"); bài 19–25 là chỗ đơn vị **đổi cỡ** (nhân = đo bằng thước nhỏ hơn, luỹ thừa = đổi cỡ nhiều lần); bài 26–37 là chỗ đơn vị **bẻ nhỏ** (chia → dư → phân số → thập phân); bài 38–41 là chỗ đơn vị được **chốt cứng** (phần trăm) hoặc **ghép lại** (tỉ lệ); bài 42–43 là chỗ ký hiệu phải nói ra cái cấu trúc ấy. Nhờ một trục duy nhất, mọi khái niệm sau đều là câu cũ nói lại chỗ mới, chứ không phải chương mới trong sách. Và mọi bài chạy trên đúng **một hiện vật** — vườn của Byte — nên sự bất tiện *tích luỹ trên một vật*, không tan đi mỗi bài một ví dụ.
+
+**1. Vì sao "số đếm vs số đo" phải là bốn bài đầu chứ không phải một câu định nghĩa.** Đây là nơi mọi khó khăn về sau được gieo mầm. Người học phải tự tay chạm vào chuyện "cùng một luống, hai người ra hai con số, không ai sai" (bài 2→3) thì mới chấp nhận được rằng **mẫu số là cỡ thước** (bài 31) chứ không phải cái bánh, và rằng `1/2 = 2/4` là đổi thước chứ không phải mẹo nhân chéo (bài 33). Đặt "phân số là gì" ở giữa track mà không có bốn bài này ở đầu thì lại rơi vào đúng cái bẫy sách giáo khoa hay mắc: dạy phân số như "phần của một cái bánh", rồi tới `7/4` là gãy.
+
+**2. Vì sao thanh số ở bài 5, sớm hơn hầu hết chương trình.** Vì thanh số là công cụ trả lời câu hỏi bài 4 để hở ("giữa 3 và 4 còn chỗ — chỗ ở đâu?"), và vì sáu chỗ về sau đều sống nhờ nó: cộng là dịch phải (13), trừ là khoảng cách (15), số âm là bên trái 0 (16), so sánh là bên phải (17), nhân là kéo giãn (22), phân số là một **chỗ** chứ không phải một miếng (31). Dạy thanh số muộn thì sáu bài kia phải mỗi bài tự dựng lấy một bức tranh riêng — và người học không bao giờ thấy chúng là **cùng một** bức tranh.
+
+**3. Vì sao "vì sao lại là mười" nằm ngay sau số 0 giữ chỗ (bài 8→9), không nằm cuối.** Bài 6–8 vừa bắt người học sống trong luật "đủ mười thì lên bó" ba bài liền; đó đúng là lúc câu hỏi "sao lại mười?" tự bật ra. Trả lời nó bằng cách **bó theo 5** cho thấy 10 là một lựa chọn của loài có mười ngón tay — và người học nhận ra bảng giá trị vị trí là một *bộ máy*, không phải một sự thật. Đặt bài này ở cuối track thì nó thành chuyện vui bên lề; đặt ở đây thì nó là bản lề cho bài 25 (cột = luỹ thừa của 10), bài 36 (thập phân = phân số mẫu 10ⁿ), bài 38 (phần trăm = chốt mẫu ở 100), và mở sẵn cửa sang R3.T1 (bit/byte).
+
+**4. Vì sao số âm đứng ở bài 16–18, trước cả phép nhân — ngược với thông lệ.** Luật thứ ba của mạch quyết định chỗ này: sự bất tiện xuất hiện ở bài 15 chứ không ở đâu khác. Ngay khi trừ được đọc là **khoảng cách có hướng**, `5 − 12` đòi một chỗ đứng bên trái số 0 — không thể hoãn câu hỏi đó lại mười lăm bài để chờ "đến lượt số âm". Và đẩy số âm lên sớm trả lãi ngay ba lần: (a) bài 18 làm phép trừ **biến mất** như một phép riêng, `a − b = a + (−b)`, nên về sau không có luật trừ nào phải học thêm; (b) bài 22–23 giải thích được `(−1)×(−1) = 1` bằng *lật thanh số hai lần*, tức là bằng một bức tranh nhìn thấy được, thay vì bằng bảng dấu học thuộc — đây là bài trả lời "vì sao đúng" đắt giá nhất track; (c) bài 25 có sẵn số mũ âm để bài 36 kéo bảng vị trí sang phải.
+
+**5. Vì sao luỹ thừa chen vào giữa nhân và chia (24–25), chứ không xếp cuối cùng.** Luỹ thừa sinh ra từ đúng một sự mỏi tay có thật: bài 23 vừa bắt viết `10 × 10 × 10 × 10 × 10`. Nhưng lý do quan trọng hơn là bài 25 **quay lại giải thích cái người học đã dùng suốt 18 bài**: các cột trong bảng giá trị vị trí chính là 10⁰, 10¹, 10² — một khoảnh khắc "à ra thế" chỉ xảy ra được khi bảng vị trí đã cũ và luỹ thừa còn mới. Và chính bài 25 **sinh ra nhu cầu chia**: đi ngược một bước trong bảng là chia cho 10, mà tới lúc đó Byte chưa chia lần nào. Nếu để luỹ thừa ở cuối track thì cả hai lợi ích này mất sạch, và phép chia phải tự mở màn không lý do.
+
+**6. Vì sao chia có hai bài riêng (26, 27) và vì sao bài 27 mới là bài đắt.** "Chia đều" là nghĩa ai cũng có sẵn; "chia như đo" — *cái này lọt vào cái kia mấy lần* — là nghĩa gần như không ai được dạy, mà lại là nghĩa duy nhất giải thích nổi ba chuyện về sau: vì sao không chia được cho 0 (28), vì sao có số dư (29), và vì sao chia phân số về sau lại là "lọt mấy lần". Tách hai nghĩa thành hai bài là cách duy nhất để người học biết mình đang vấp nghĩa nào. Bài 28 (chia cho 0) là mắt xích ngắn nhất trong mạch nhưng vẫn là mắt xích: `reflect` của 27 hỏi thẳng nó, và `reflect` của nó giao lại con số dư cho bài 29.
+
+**7. Vì sao phân số nhận sáu bài, và vì sao đúng thứ tự đó.** Sáu bài này là trọng tâm của track, và chúng xếp theo đúng chuỗi hiểu lầm mà người học thật sự mắc: dư → phải bẻ thước (30) → `a/b` là *a lần cái thước `1/b`* chứ không phải "một miếng bánh" (31) → nên `7/4` có chỗ đàng hoàng (32) → nên hai cách viết cùng một chỗ là chuyện đổi thước (33) → nên so sánh phải quy về cùng thước (34) → nên cộng cũng thế, và đó vẫn là luật bài 11 (35). Bài 35 là chỗ trục đơn vị đóng vòng: người học không học một luật cộng phân số mới, họ chỉ **áp lại** cái luật đã có từ bài 11. Bỏ bài 30 thì 31 mất chỗ dựa; bỏ 32 thì hiểu lầm "phân số luôn bé hơn 1" sống sót và giết bài 37 (`1/3 = 0,333…`); bỏ 33 thì 34–35 tụt xuống thành hai mẹo quy đồng.
+
+**8. Vì sao thập phân → phần trăm → tỉ số, chứ không phải tỉ số trước.** Ba khối này là ba câu trả lời khác nhau cho cùng một sự bất tiện do bài 34–35 gây ra: *đi tìm mẫu chung mệt quá*. Thập phân chốt mẫu ở 10ⁿ để cộng luôn thẳng cột (36); phần trăm chốt mẫu ở 100 để **so** được giữa hai cái toàn thể khác nhau (38); tỉ số bỏ hẳn ý "cái toàn thể" đi khi hai đại lượng không cái nào chứa cái nào (40). Đặt tỉ số trước phần trăm — như phần lớn giáo trình — thì phần trăm chỉ còn là "tỉ số phần trăm", một cái tên; đặt sau, phần trăm được sinh ra từ nhu cầu *có một cái thước chung* rồi mới lộ ra giới hạn của chính nó ở bài 39 ("của cái gì?"), và cái giới hạn đó chính là cửa mở cho tỉ số.
+
+**9. Vì sao thứ tự phép toán là bài áp chót, và vì sao nó nói được "vì sao".** Thứ tự phép toán là bài về **ký hiệu**, nên chỉ dạy được khi đã có đủ thứ để viết ra: `+ − × ÷`, luỹ thừa, gạch phân số. Quan trọng hơn, chỉ tới đây câu trả lời "vì sao" mới thật: nhân được ưu tiên **không phải vì có người quy định thế**, mà vì nhân là phép **đóng gói một lượng thành một khối** (bài 19 và 21 đã dựng sẵn hình ảnh đó) — và một khối thì phải gói xong mới đem gộp. Bài 43 đóng lại bằng một quan sát mà người học tự kiểm được: gạch phân số và số mũ hoá ra là ngoặc đã có sẵn từ bài 31 và bài 24. `reflect` của bài 41 ("một ký hiệu, ba cách đọc — ký hiệu ghi lại cái gì?") là bản lề mở đúng vào đây.
+
+**10. Kiểm tính không thừa — bỏ một bài thì mạch đứt ở đâu.** Bỏ 4 thì 5 không có lý do tồn tại và toàn bộ khối phân số mất nền. Bỏ 8 thì 36 gãy (`0,25` và `0,205` lẫn nhau). Bỏ 11 thì 12, 35 và mọi chuyện "thẳng cột" thành mẹo. Bỏ 15 thì 16 không có ai gọi tới, và số âm quay về chỗ "đến lượt nó trong sách". Bỏ 21 thì 22 không có chỗ bám và bài 42 mất hình ảnh "gói". Bỏ 25 thì 26 mở màn không lý do và 36 mất số mũ âm. Bỏ 32 thì 37 gãy. Bỏ 39 thì 40 không có sự bất tiện nào để chữa. Ở chiều ngược lại, không bài nào dạy lại thứ bài trước đã dạy: thanh số (5), luật cùng đơn vị (11), đổi thước (3) được **dùng lại** bảy tám lần nhưng không được giới thiệu lại lần nào — mỗi lần dùng lại đều được gọi tên kèm số bài, để người học thấy mình đang xài đồ cũ.
+
+**11. Ranh giới với track lân cận và với Realm 1.** Track này không dùng vòng lặp, không dùng hàm, không dùng `list` — Python xuất hiện đúng ở vai **trọng tài**: người học phát biểu một khẳng định về số rồi bắt máy trả `True`/`False` (chỗ này chỉ cần `print`, phép toán và `==`, tức đúng những gì R0 bài 9/14/24 đã có). Nhờ vậy người học đi song song với Realm 1 vẫn theo được, và người đã học R1 cũng không thấy thừa. Chữ thay số, biểu thức, phương trình để nguyên cho T2.2 — và đó đúng là câu hỏi bỏ ngỏ của bài 44. Ước/bội/số nguyên tố, làm tròn, căn bậc hai, ký hiệu khoa học để cho T2.2/T2.5. Cơ số 2 chỉ được **chạm** ở bài 9 rồi bàn giao cho R3.T1.
+
+### Phản biện độc lập
+
+## Verdict
+
+Mạch này chắc hơn hẳn mức trung bình: trục "đơn vị" giữ được suốt 44 bài, khối 13–18 (trừ → khoảng cách → số âm → cộng số đối) và khối 26–35 (hai nghĩa của chia → dư → phân số) là hai đoạn hay nhất, gần như không có chỗ bắt bẻ. Tôi tìm được **3 vấn đề nặng, 4 vấn đề vừa**. Không có bài nào thừa theo nghĩa lặp nội dung.
+
+---
+
+## NẶNG
+
+### 1. Thiếu hẳn một mắt xích: "lấy a/b của một lượng" — mà bài 38, 39, 41, 43, 44 đều xài (tiêu chí 3 + 4)
+
+Rà lại 30 → 41: bài 31 dạy `a/b` = a bản sao của thước `1/b` — tức là a/b **của một đơn vị**. Không bài nào dạy `a/b` **của một lượng khác** (3/4 của luống 12 mét). Nhưng:
+
+- Bài 38 muốn có nghĩa thì phải tính được "30% của 40 cây" — đó đúng là lấy 30/100 của một lượng.
+- Bài 39 nói "tăng 50% rồi giảm 50% không về chỗ cũ" — phải tính 50% của một lượng **hai lần**, và bài 39 đứng *trước* bài 41 (nơi mới có kỹ thuật quy về một đơn vị).
+- Reflect bài 43 yêu cầu "20% chết" và "chia vào các ô rộng **3/4 mét**" — cái sau là chia cho một phân số, chưa hề được dạy.
+
+Đây không phải chuyện tiểu tiết: nó là phép tính duy nhất mà cả khối 38–44 đứng lên trên, và nó đang vô hình.
+
+**Sửa (chính):** chèn một bài giữa 32 và 33 — *"Lấy mấy phần của một lượng"*: `3/4 của 12 mét = chia 12 cho 4 (bài 26), rồi lấy 3 lần (bài 19)`. Reflect bài 32 đổi thành câu tạo nhu cầu: *"7/4 có chỗ đàng hoàng rồi. Nhưng vườn dài 12 mét, 'lấy 3/4 vườn' là mấy mét — 3/4 lúc này đo cái gì?"*. Reflect bài mới giữ nguyên câu hiện có của 32 ("1/2 và 2/4 rơi trúng cùng một chỗ…") để nối sang 33. Bài 38 khi đó tính `p%` bằng đúng bài này: *1% là thước cỡ 1/100 **của vườn ấy**, 30% là 30 lần cái thước đó* — không phải mẹo mới.
+
+**Nếu 44 là trần cứng:** gộp bài 28 vào bài 27 (xem mục 7 bên dưới) để lấy chỗ. Đừng cắt bài 32 hay 33.
+
+### 2. Bài 25 hứa "số mũ âm" rồi 11 bài sau mới trả, và nó mượn phép chia trước khi phép chia tồn tại (tiêu chí 3)
+
+Reflect bài 25 hỏi **hai** thứ: (a) "số mũ tụt xuống dưới 0", (b) "chia là gì". Bài 26 chỉ trả lời (b). Cái (a) bị bỏ lửng tới tận bài 36, nơi nó xuất hiện như một dòng phụ (`10⁻¹, 10⁻²`) trong bài mà khái niệm chính là thập phân — tức bài 36 đang lén mang hai khái niệm chỉ vì bài 25 nợ.
+
+Thêm nữa, cột "khái niệm mới" của 25 nói `10⁰ = 1` là "hệ quả của việc đi ngược lại đúng một bước", mà đi ngược một bước = chia cho 10 — bài 25 dùng phép chia để chứng minh, rồi reflect mới thú nhận là chưa ai học chia.
+
+**Sửa:** (i) Trong bài 25, biện minh `10⁰ = 1` bằng **mở bó**, không bằng chia: "sang trái là gom mười bó thành một bó to; sang phải là *mở* một bó ra thành mười cái nhỏ" — đó là luật bài 6 chạy ngược, người học đã có. (ii) Cắt vế "số mũ tụt xuống dưới 0" khỏi reflect 25, chỉ giữ: *"Mở bó mãi thì tới cột 'một' là hết. Mà mở một bó ra chia đều cho mười — 'chia' là gì?"* (iii) Để bài 36 được **giới thiệu** `10⁻¹` như đồ mới nó kiếm được, chứ không phải trả nợ cũ.
+
+### 3. Bài 22 nhét hai bức tranh, và bức thứ hai chưa có ai cần (tiêu chí 1 + 4)
+
+Cột khái niệm của 22 nói hai chuyện khác nhau về mặt hình ảnh: (a) **kéo giãn thanh số quanh mốc 0**, (b) **đo lại đúng lượng ấy bằng cái thước nhỏ đi ba lần**. Chúng tương đương về số, nhưng là hai mô hình tinh thần và người học phải nuốt cả hai trong một bài.
+
+Kiểm nhu cầu: reflect bài 21 hỏi "gấp 3 thì đâu là hàng, đâu là cột?" — chỉ (a) trả lời câu đó. Còn (b) mãi tới **bài 33** mới được dùng ("nhân cả tử lẫn mẫu là đo lại bằng thước nhỏ hơn"). Tức là (b) được dạy sớm 11 bài trước chỗ nó có việc.
+
+**Sửa:** bài 22 giữ đúng một khái niệm — *nhân là kéo giãn thanh số*. Chuyển vế "đo lại bằng thước nhỏ đi b lần" xuống bài 33, nơi nó chính là nội dung của bài; ở 33 gọi tên nó là "bài 3 nói lại", không phải "bài 22 nói lại". Bài 22 vẫn có thể nhắc bài 3 bằng một câu, miễn không tính là khái niệm mới.
+
+---
+
+## VỪA
+
+### 4. Bài 9 → 10 là bản lề yếu nhất mạch (tiêu chí 4)
+
+Reflect 9 không sinh ra sự bất tiện nào; nó dựng một sự kiện mới ("Byte vừa hái thêm một đống nữa"). Theo đúng luật thiết kế của chính bạn, phép cộng đang vào vì "tới lượt nó".
+
+**Sửa:** cho reflect 9 khai thác thứ bài 6–9 vừa dựng: *"Byte có 4 bó 3 hạt, An mang tới 2 bó 5 hạt, đổ chung. Đếm lại từ 1 thì phí công đóng bó mấy bài liền — có cách nào dùng lại hai con số đã đếm mà không đếm lại không?"* Lúc đó bài 10 không phải là "gộp", nó là *cách tránh đếm lại từ đầu* — một nhu cầu thật, và nó dựng sẵn cả bài 11 (bó gộp bó, hạt gộp hạt).
+
+### 5. Bài 41 → 42 nhắm trượt một bài, và bài 21 đã dùng lén quy tắc ưu tiên (tiêu chí 3 + 4)
+
+Reflect 41 hỏi "ký hiệu toán rốt cuộc ghi lại **cái gì**" — đó là câu hỏi của bài **43** (ngoặc = nói thẳng cấu trúc), không phải của 42. Bài 42 cần một sự bất tiện cụ thể: *cùng một dòng chữ, hai người ra hai kết quả*. Sự bất tiện ấy thực ra đã có từ **bài 21**, chỗ bạn viết `7×13 = 7×10 + 7×3` — dòng đó chỉ đúng nếu nhân làm trước, và không bài nào nói vì sao.
+
+**Sửa:** (i) Bài 21 viết `(7×10) + (7×3)` có ngoặc, kèm một câu "vì sao bỏ được ngoặc thì bài 42 trả lời". (ii) Reflect 41 đổi thành: *"Byte viết cả vườn thành một dòng: `3 + 4 × 5`. An đọc từ trái sang, ra 35. Byte ra 23. Cùng một dòng, hai kết quả — ai đúng?"* (iii) Câu "một ký hiệu, ba cách đọc — ký hiệu ghi lại cái gì" chuyển thành reflect của 42, thay cho câu hiện tại, hoặc đứng cạnh nó.
+
+### 6. Bài 37 hỏi "vì sao lại là 100", bài 38 không trả lời (tiêu chí 3)
+
+Cột khái niệm của 38 chỉ nói "chốt cứng mẫu ở 100", không nói **vì sao 100** mà không phải 10 hay 1000. Reflect 37 hỏi thẳng câu đó.
+
+**Sửa:** bài 38 phải trả bằng đồ đã có: 10 thì quá thô (`1/10` không tách nổi 40 cây với 250 cây), 1000 thì mỗi lần đều ra số lẻ dài; 100 = `10²` (bài 24) là bó-của-bó (bài 7) — mức bẻ nhỏ đầu tiên đủ mịn mà vẫn viết được bằng số nguyên. Nếu không trả câu này, bài 38 tụt xuống thành một định nghĩa và bài 9 mất một chỗ trả lãi.
+
+### 7. Bài 23 và bài 28 là hai cái lá — không bài nào sau đó dùng lại (tiêu chí 2)
+
+Áp đúng phép thử của bạn: bỏ 23, viết lại reflect 22 thành "kéo giãn ba lần liên tiếp thì viết thế nào" là nối thẳng sang 24; trong toàn track không có chỗ nào cần `(−1)×(−1)=1`. Bỏ 28 cũng vậy — nội dung của nó không được bài nào gọi lại, nó chỉ chuyền số dư sang 29 bằng reflect.
+
+Tôi **không** đề nghị cắt bài 23: nó bịt cái lỗ do 16 + 19 tạo ra (người học có số âm, có phép nhân, mà không có luật ghép hai thứ đó), và đó là câu "vì sao đúng" đắt nhất track. Nhưng phải cho nó một chỗ dùng lại, nếu không nó vẫn là lá.
+
+**Sửa:** (a) Bài 44 (BOSS) thêm một bước dưới mặt đất: rễ ở độ sâu −2 phân, mỗi lần xới nông lên 3 phân, làm 4 lần → dùng cả 16, 18 và 23. (b) Bài 28: hoặc giữ nguyên và cho Python làm chỗ trả lãi (`12/0` báo lỗi — bài này giải thích máy **không** cấm, câu hỏi mới hỏng), hoặc — nếu cần một chỗ cho bài mới ở mục 1 — gộp 28 vào 27 làm nửa sau của chính câu hỏi bài 27 ("3 lọt vào 12 mấy lần" → "0 lọt vào 12 mấy lần"), vì `12 : 0` đúng là ca suy biến của bài 27 chứ không phải khái niệm mới.
+
+---
+
+## NHẸ (một dòng mỗi cái)
+
+- **Bài 6 → 7:** không bài nào sở hữu bước *đóng bó lần hai*. Reflect 6 cho "13 bó", nhưng để viết ra "137" phải gom 10 bó thành bó-của-bó trước — bài 6 không dạy, bài 7 coi như đã có. Thêm một câu vào khái niệm bài 6: "đủ mười **bó** thì lại gom thành một bó to hơn — cùng một luật, lặp lại".
+- **Bài 21:** cột khái niệm có chữ "và" thật ("mô hình vùng **và** tính chất phân phối"). Đây là một ý hai tên, không phải hai ý — nhưng nên đặt tên một cái: khái niệm là *cắt mảng thì phép nhân tách theo*, còn "tính chất phân phối" chỉ là từ vựng đặt cuối bài.
+- **Bài 16:** vế "0 là một mốc do người chọn" không được bài nào sau đó dùng tới (track không có nhiệt độ, không có đổi gốc toạ độ). Hạ nó xuống thành câu kể trong truyện (Byte chọn mặt đất làm mốc), đừng để nó ngang hàng với "số âm".
+- **Bài 35:** đây là bài duy nhất ngoài 44 không có khái niệm thật sự mới — và bạn tự nói vậy ("chỉ áp lại luật bài 11"). Nên ghi thẳng vào cột như bài 44: *"không khái niệm mới — bài đóng vòng"*. Giữ bài, chỉ đừng giả vờ nó mới.
+- **Bài 8 vs bài 28:** bài 8 nói "`0` **không** mang nghĩa 'không có gì'", bài 28 lại bắt người học hình dung "đoạn dây **0 mét**" — tức đúng nghĩa "không có gì". Sửa bài 8 thành "trong một dãy chữ số, `0` còn thêm một việc nữa: giữ chỗ cho cột rỗng".
+- **Reflect bài 23:** trượt số — "kéo giãn ba lần liên tiếp thì viết `3 × 3 × 3`. Kéo mười lần thì phải viết mười con **10**". Phải là mười con 3, hoặc đổi cả ví dụ sang 10 ngay từ đầu (nên chọn cách sau, vì bài 24 lấy ví dụ `10⁵` và bài 25 cần đúng cột 10).
+- **Bài 42, cẩn thận nói quá:** "nhân trước cộng" *có* phần là quy ước (người ta chọn nó vì nó ghi gọn được cấu trúc hay gặp nhất), không phải một sự thật bị ép buộc. Track này bán "vì sao đúng" nên chỗ này nếu overclaim sẽ tự bắn vào chân khi có người hỏi "sao không quy ước ngược lại?". Viết an toàn hơn: *"quy ước này được chọn, và chọn thế là vì nó ghi lại đúng cái cấu trúc gói-rồi-gộp ở bài 19 và 21 mà không cần ngoặc"*.
+
+---
+
+## Nói thẳng chỗ tốt
+
+Bốn quyết định sau tôi thử phá không được, và chúng là lý do mạch này hơn giáo trình chuẩn: **số âm ở 16–18 trước phép nhân** (sự bất tiện sinh ở 15, hoãn là mất); **tách chia đều / chia đo thành 26 và 27** (đây là bài 27 gánh cả 28, 29 và mọi chuyện phân số về sau); **luỹ thừa chen vào 24–25 để quay lại giải thích bảng vị trí đã dùng 18 bài** (đúng là chỉ chạy được ở vị trí này); và **thập phân → phần trăm → tỉ số** chứ không phải tỉ số trước (bài 39 sinh ra bài 40 bằng một giới hạn thật, không bằng mục lục). Chuỗi 30 → 31 → 32 → 33 cũng đúng chuỗi hiểu lầm ngoài đời, không cần động.
+
+---
+
+## T2.2 — Đại số & hàm số (Realm 2 · Toán & Toán rời rạc · Python chỉ để KIỂM · 36 bài)
+
+## T2.2 — Đại số & hàm số (Realm 2 · 36 bài · hiện vật xuyên suốt: **xe bánh mì của Byte**)
+
+| # | slug | Tiêu đề | Khái niệm mới (đúng một) | `reflect` cuối bài | Dựa trên |
+|---|---|---|---|---|---|
+| 1 | `cho-trong-nhan-nhieu-so` | Ô trống trên bảng giá | Một **ô trống** trong câu tính nhận được **nhiều** giá trị khác nhau — mỗi lần điền một số, ra một kết quả; nó không phải "một số bị giấu" | Byte viết "▢ ổ bánh mì và ▢ chai nước". Hai ô này có buộc phải điền cùng một số không — và làm sao viết cho người khác biết ô nào là ô nào? | T2.1 · nhân, thứ tự phép tính |
+| 2 | `chu-cai-la-ten-cua-o-trong` | Chữ cái chỉ là cái tên dán lên ô trống | Một **chữ cái là tên của một ô trống**: mọi chỗ mang cùng một chữ là cùng một ô (phải điền cùng số); chữ khác nhau là ô khác nhau | Bạn từng viết `n = 5` trong Python — cái tên ấy đang giữ đúng một số. Còn `n` ở đây chưa giữ số nào. Vậy `15000 × n` đã là một con số chưa? | 1, R0.11 `dat-ten-cho-gia-tri` |
+| 3 | `cau-tinh-chua-ra-so` | Câu tính chưa ra số | **Biểu thức** — một câu tính còn ô trống thì chưa phải một con số; nó là một *cách tính đang chờ* | Đang chờ thì chờ cái gì? Nếu Byte đưa cho nó số 20, chuyện gì xảy ra với `15000 × n`? | 2 |
+| 4 | `dien-vao-thi-ra-so` | Điền vào thì mới ra số | **Thay giá trị** — điền một số vào **mọi** chỗ có chữ đó, biểu thức thu lại thành đúng một con số | Điền 1 ra một số, điền 2 ra số khác. Nếu điền lần lượt cả bảy ngày trong tuần rồi ghi lại — bạn được thứ gì? | 3, T2.1 · thứ tự phép tính |
+| 5 | `bang-cua-moi-lan-dien` | Bảng của mọi lần điền | **Bảng giá trị** — một biểu thức không sinh ra một số mà sinh ra cả một bảng: mỗi lần điền là một dòng, hai cột (điền gì / ra gì) | Hai người viết hai câu tính trông chẳng giống nhau: `15000 × n + 30000` và `15000 × (n + 2)`. Hai bảng của chúng giống hay khác? | 4, R0.31 `lam-lai-nhieu-lan` |
+| 6 | `hai-cau-tinh-mot-bang` | Hai câu tính, một bảng | **Biểu thức tương đương** — bằng nhau ở **mọi** giá trị điền vào, khác hẳn "tình cờ bằng nhau ở một vài số" | Hai câu ấy khác nhau đúng một dấu ngoặc. Bảng chỉ thử được vài chục số, mà "mọi số" thì thử không hết. Có luật nào cho phép tháo dấu ngoặc mà chắc chắn đúng với mọi số? | 5, T2.1 · giao hoán & kết hợp |
+| 7 | `mo-dau-ngoac` | Mở dấu ngoặc | **Phân phối** — `a × (b + c) = a × b + a × c`, đúng với mọi số vì đó chỉ là hai cách đếm cùng một khay bánh | Mở ra được thì gấp lại được không? `15000n + 30000` có quay về dạng có ngoặc không, và lấy gì làm "cái chung"? | 6, T2.1 · diện tích hình chữ nhật |
+| 8 | `rut-cai-chung-ra-ngoai` | Rút cái chung ra ngoài | **Nhân tử chung** — đọc ngược luật phân phối: phần chung của các cụm được rút ra trước ngoặc | `3n + 5n` — hai cụm này chung nhau cái gì? Rút nó ra thì trong ngoặc còn lại gì? | 7 |
+| 9 | `gop-cai-cung-loai` | Chỉ gộp được thứ cùng loại | **Hạng tử đồng dạng** — `3n + 5n = 8n` chính là rút `n` ra ngoài; còn `8n + 6` thì dừng: nó vẫn là một biểu thức đúng, chỉ là **không gộp thêm được** | Rút gọn cách mấy thì câu tính vẫn còn ô trống, vẫn chưa ra số. Suốt chín bài chưa ai hỏi "n bằng bao nhiêu". Đến lúc nào câu hỏi đó mới có nghĩa? | 8, R0.16 `khi-hai-kieu-khong-hop` |
+| 10 | `dau-bang-la-mot-cau-hoi` | Dấu `=` đặt ra một câu hỏi | **Phương trình** — hai biểu thức nối bằng `=` không phải một phép tính mà một **lời khẳng định**: mỗi lần điền vào, nó hoá ra đúng hoặc sai | Điền 20 vào thì câu ấy đúng. Còn số nào khác cũng làm nó đúng nữa không? Có bao nhiêu số như thế? | 9, 3, R0.24 `dung-hay-sai` |
+| 11 | `nhung-so-lam-cau-do-dung` | Những số làm câu đó đúng | **Nghiệm & tập nghiệm** — đáp án của một phương trình là *tập hợp* mọi giá trị điền vào làm nó đúng | Quét từ 1 tới 100 thì tìm ra. Nhưng nếu nghiệm là 2,5 hoặc là số có bảy chữ số thì quét tới bao giờ? Có cách nào không phải thử từng số? | 10 |
+| 12 | `cai-can-hai-dia` | Cái cân hai đĩa | Một phương trình đọc được như một **cái cân đang thăng bằng**: hai đĩa nặng bằng nhau, ô trống là gói hàng chưa biết nặng bao nhiêu | Cân đang thăng bằng và bạn muốn nó vẫn thăng bằng. Vậy được phép động vào hai cái đĩa theo kiểu nào? | 11 |
+| 13 | `lam-gi-cung-lam-ca-hai-dia` | Làm gì cũng phải làm cả hai đĩa | **Phép biến đổi giữ nguyên nghiệm (cộng/trừ)** — bớt hoặc thêm cùng một lượng ở hai vế cho một phương trình **mới** nhưng **cùng tập nghiệm** | Cộng trừ thì rõ rồi. Còn chia đôi cả hai đĩa — cân có còn thăng bằng? Nhân cả hai đĩa lên gấp ba thì sao? | 12 |
+| 14 | `nhan-chia-ca-hai-dia` | Nhân, chia cả hai đĩa | Nhân/chia hai vế cho cùng một số **khác 0** cũng giữ nguyên tập nghiệm — và nhân với 0 thì hỏng, vì mọi phương trình đều thành `0 = 0` | Bạn có hai loại phép giữ nghiệm. Dùng chúng theo **thứ tự nào** để cuối cùng ô trống còn đứng một mình trên một đĩa? | 13, T2.1 · chia và số 0 |
+| 15 | `tach-o-trong-ra-mot-minh` | Tách ô trống ra đứng một mình | **Giải phương trình bậc nhất** — gỡ lần lượt những gì đứng cạnh chữ (gỡ cộng trừ trước, gỡ nhân chia sau) cho tới dạng `n = một số` | Chuỗi biến đổi dài bốn năm bước. Lỡ sai một bước, bạn ra một con số khác — mà nó trông vẫn y hệt một đáp án đúng. Làm sao biết? | 14, 13 |
+| 16 | `thu-lai-o-cau-goc` | Thử lại ở câu gốc | **Kiểm nghiệm** — thay giá trị tìm được vào phương trình **ban đầu** (không phải vào dòng vừa viết); đúng thì hai vế ra cùng một số | Mọi phương trình tới giờ đều có chữ ở đúng một vế. Nếu tiền vốn cũng phụ thuộc số ổ — chữ xuất hiện ở **cả hai** đĩa — thì gỡ từ đâu? | 15, 4 |
+| 17 | `chu-o-ca-hai-dia` | Chữ đứng ở cả hai đĩa | Bớt đi cùng **một cụm có chữ** ở hai vế (cụm ấy cũng là một lượng) để dồn hết chữ về một bên | Có lần dồn xong bạn sẽ thấy chữ biến mất sạch, chỉ còn `0 = 5`. Chẳng còn ô trống nào để điền nữa. Phương trình ấy nghiệm bằng bao nhiêu? | 16, 13, 9 |
+| 18 | `khi-khong-so-nao-dung` | Khi không số nào làm nó đúng | **Vô nghiệm** — `0 = 5` nghĩa là mọi cách điền đều sai, tập nghiệm rỗng. (Chỗ này "chữ là số bí ẩn cần tìm" sụp hẳn: không có số nào để tìm) | Có câu không số nào làm đúng. Vậy có câu nào ngược lại — điền số nào vào cũng đúng — không? | 17, 11 |
+| 19 | `khi-so-nao-cung-dung` | Khi số nào cũng đúng | **Đồng nhất thức** — biến đổi ra `0 = 0` nghĩa là mọi số đều là nghiệm, vì hai vế vốn là hai **biểu thức tương đương** đội lốt phương trình | Ba loại câu trả lời: một số, không số nào, mọi số. Nhưng câu hỏi thật của quán là "bán bao nhiêu ổ thì **đủ bù** tiền vốn" — đủ bù nghĩa là bằng **hoặc hơn**. Dấu `=` nói được chuyện "hơn" không? | 18, 6 |
+| 20 | `hon-kem-thay-cho-bang` | Hơn kém thay cho bằng | **Bất phương trình** — thay `=` bằng `>` hoặc `≥`; tập nghiệm không còn là một điểm mà là cả một **khoảng**, tô được lên trục số (mút đặc / mút rỗng) | Giải nó có dùng lại được đúng các phép của cái cân không? Thử nhân hai vế với `−1`, rồi kiểm lại bằng một con số cụ thể xem. | 19, 11, T2.1 · trục số |
+| 21 | `khi-dau-phai-quay-nguoc` | Khi dấu phải quay ngược | Nhân/chia hai vế của bất phương trình cho một số **âm** thì phải **đảo chiều** dấu — còn cộng/trừ thì không (đây cũng là chỗ hình ảnh cái cân hết dùng được) | Nghiệm giờ là cả một khoảng, và bạn đang tô nó lên một đường chỉ có **một hàng số**. Nhưng bảng ở bài 5 có tận **hai cột**. Một dòng của bảng ấy ghi lên đâu? | 20, 14, T2.1 · số âm |
+| 22 | `mot-diem-can-hai-so` | Một điểm cần hai con số | **Hệ toạ độ** — hai trục vuông góc, một **cặp có thứ tự** `(x; y)` chỉ đúng một điểm; đổi thứ tự là điểm khác hẳn | Bảng ở bài 5 có bảy dòng, vậy là bảy điểm. Bảy điểm ấy nằm bừa bãi hay xếp thành hình gì? | 21, 5, T2.1 · trục số |
+| 23 | `cham-ca-bang-len-mat-phang` | Chấm cả bảng lên mặt phẳng | **Đồ thị** — hình của một biểu thức: mỗi dòng bảng thành một điểm; bảy điểm của `15000n` nằm **thẳng hàng** | Nhìn hình là đọc ra được số tiền cho từng số ổ. Nhưng nếu có một số ổ mà hình cho tới **hai** mức tiền khác nhau thì cái bảng ấy còn dùng được không? | 22, 5 |
+| 24 | `may-mot-vao-mot-ra` | Cái máy: một đầu vào, đúng một đầu ra | **Hàm số** — quy tắc mà mỗi đầu vào cho ra **đúng một** đầu ra (phát hiện bằng cách phân loại máy nào được, máy nào không, rồi mới đặt tên) | Quán có mấy cái máy: máy tính tiền thu, máy tính tiền lãi, máy đổi ra số ly nước đá. Gọi cái nào cũng là "cái máy" thì loạn. Đặt tên cho một cái máy kiểu gì? | 23, 4 |
+| 25 | `dat-ten-cho-cai-may` | Đặt tên cho cái máy | **Ký hiệu hàm** `f(n)` — `f` là tên cái máy, `f(20)` là thứ nó nhả ra khi bỏ 20 vào; đọc là "ép của hai mươi" | `f(n) = 15000n` vẽ ra một đường **thẳng**. Vì sao lại thẳng — chứ không cong, không gãy khúc? | 24, R0.37–39 `def/return` |
+| 26 | `moi-buoc-them-dung-mot-luong` | Mỗi bước thêm đúng một lượng | **Độ dốc là tốc độ đổi** — đầu vào thêm 1 thì đầu ra đổi một lượng **cố định**; chính sự cố định đó làm đồ thị thẳng, và lượng đổi âm thì đường đi xuống | Hai xe cùng bán 15 nghìn một ổ, nhưng một xe phải trả 100 nghìn tiền thuê chỗ. Hai đường có **cùng độ dốc** — vậy chúng khác nhau ở chỗ nào trên hình? | 25, 23, 5 |
+| 27 | `cho-bat-dau-cua-duong-thang` | Chỗ bắt đầu của đường thẳng | `y = ax + b` — `b` là giá trị lúc đầu vào bằng 0, cũng là chỗ đường cắt trục dọc; **hai con số `a` và `b` tả trọn một đường thẳng** | `a` và `b` đủ cho **mọi** đường thẳng. Nhưng diện tích mảnh sân hình vuông cạnh `n` mét thì sao — bảng của nó có tăng đều một lượng cố định không? | 26, 22 |
+| 28 | `khi-tang-khong-deu` | Khi mỗi bước tăng một kiểu | **Hàm bậc hai** — `n × n`: mỗi bước tăng một lượng **khác nhau** (phải lấy chênh lệch của chênh lệch mới thấy cái cố định), nên đồ thị **cong** | Tăng giá thì lãi mỗi ổ cao hơn nhưng bán được ít ổ hơn — đường cong này có một chỗ cao nhất. Chỗ ấy nằm đâu, và trên hình có gì giúp nhận ra nó? | 27, 7, T2.1 · luỹ thừa |
+| 29 | `dinh-va-hai-ben-doi-xung` | Đỉnh, và hai bên đối xứng | **Đỉnh của parabol** — chỗ cao nhất (hoặc thấp nhất); hai bên đối xứng nhau, nên **hai đầu vào khác nhau cho cùng một đầu ra** — vẫn là hàm, vì luật chỉ cấm chiều ngược lại | Đường thẳng thì thêm đều, parabol thêm không đều nhưng vẫn là **thêm**. Còn nếu mỗi giờ men trong thúng bột không thêm mà **nhân đôi** thì bảng trông thế nào? | 28, 24 |
+| 30 | `moi-buoc-nhan-voi-cung-mot-so` | Mỗi bước nhân với cùng một số | **Hàm mũ** — bước đi cố định là một phép **nhân** (`2ⁿ`) chứ không phải phép cộng: tăng trưởng nhân | Bảy giờ men mới có 128 phần, trong khi một đường thẳng dốc 1000 đơn vị mỗi giờ vẫn đang bỏ xa nó. Sau 20 giờ thì ai hơn ai? | 29, 26, T2.1 · luỹ thừa |
+| 31 | `nhan-deu-vuot-moi-cong-deu` | Nhân đều rồi sẽ vượt mọi cộng đều | Một hàm mũ (cơ số > 1) **cuối cùng luôn vượt** mọi hàm bậc nhất, dù đường thẳng ấy dốc tới đâu — dốc chỉ làm chậm ngày bị vượt | Máy nào bạn cũng đang bỏ số vào để lấy kết quả ra. Nhưng câu hỏi ở quán thường ngược lại: "muốn thu 300 nghìn thì phải bán mấy ổ". Có bỏ **kết quả** vào để đòi lại **đầu vào** không? | 30, 26 |
+| 32 | `chay-nguoc-cai-may` | Chạy ngược cái máy | **Hàm ngược** — cái máy đảo chiều: đưa đầu ra, trả lại đúng đầu vào đã tạo ra nó; và giải một phương trình bậc nhất chính là chạy ngược cái máy ấy tại **một** điểm | Máy tính tiền chạy ngược được. Nhưng máy tính diện tích sân hình vuông ở bài 28 — đưa 9 mét vuông vào máy ngược, nó phải trả về 3 hay −3? | 31, 15, 25 |
+| 33 | `khi-khong-chay-nguoc-duoc` | Khi không chạy ngược được | Máy chỉ chạy ngược được khi **hai đầu vào khác nhau không bao giờ cho cùng một đầu ra**; chỗ đối xứng của parabol là chỗ hỏng, và cách chữa là **cắt bớt đầu vào cho phép** (chỉ nhận cạnh ≥ 0) | Giờ bạn có cả tủ máy: máy xuôi, máy ngược, máy thẳng, máy cong. Muốn tính tiền lãi thì phải tính tiền thu trước rồi mới trừ vốn — hai việc, hai máy. Nối chúng thành một máy được không? | 32, 29, 24 |
+| 34 | `noi-hai-may-lien-nhau` | Nối hai máy nối đuôi nhau | **Hợp hai hàm** — đầu ra của máy này cắm thẳng vào đầu vào máy kia; `g(f(n))` là một cái máy **mới**, dùng được mà không cần mở ra xem bên trong | Nối `f` rồi `g` thì được. Nối `g` rồi `f` cũng được. Hai cách nối cho ra cùng một cái máy chứ? | 33, 25, 4 |
+| 35 | `doi-thu-tu-doi-ket-qua` | Đổi thứ tự nối, đổi luôn kết quả | Hợp hàm **không đổi chỗ được**: `f(g(n))` nói chung khác `g(f(n))` — thứ tự nối là một phần của cái máy; riêng cặp xuôi–ngược nối lại thì trả về chính đầu vào | Cả track chỉ có một ý: chữ là một ô trống, và một cái máy là một quy tắc điền ô ấy. Ghép hết lại, có tả trọn một buổi bán hàng bằng vài cái máy không? | 34, 32, 6 |
+| 36 | `boss-xe-banh-mi-cua-byte` | BOSS: Xe bánh mì của Byte | *(không khái niệm mới — bài tổng hợp)* một buổi bán hàng dựng bằng: biểu thức → phương trình → bất phương trình → đồ thị → bậc nhất/bậc hai/mũ → máy ngược → hợp máy | Bạn vừa nối hai máy thành một máy mới mà không cần biết bên trong chúng có gì — ở Realm 4, chính phép nối đó là cách người ta viết cả một chương trình. Nhưng trước đã: bài 19 bảo "mọi số đều là nghiệm". Bạn tin nó vì đã thử vài số, hay vì **chứng minh** được? *(dẫn sang T2.3 — Logic & chứng minh)* | 1–35 |
+
+**Vì sao thứ tự này đúng**
+
+**Vì sao thứ tự này là thứ tự đúng**
+
+**0. Một trục duy nhất, một hiện vật duy nhất.** Cả 36 bài chỉ có một trục: *ô trống*. Bài 1–9 dạy điền ô và biến đổi hình dạng câu tính khi ô vẫn còn đó; bài 10–21 hỏi ngược lại "điền gì thì câu này đúng"; bài 22–27 vẽ **mọi** cách điền lên một mặt phẳng; bài 28–35 phân loại các kiểu quy tắc điền. Và mọi bài chạy trên cùng một hiện vật — xe bánh mì của Byte (giá một ổ, tiền thuê chỗ, men nở trong thúng bột) — nên sự bất tiện **tích luỹ trên một vật**, không tan đi mỗi bài một ví dụ khác. Python xuất hiện đúng 8 lần và luôn ở vai **kiểm**, không bao giờ ở vai dạy: bài 5 (in bảng), 6 (so hai bảng trên cả trăm giá trị), 11 (quét tìm nghiệm), 16 (`assert` thay số vào câu gốc), 25 (`def f(n)` là chính cái máy vừa đặt tên), 31 (tìm `n` đầu tiên mà `2**n > 1000*n`), 34 (`lai(thu(n))`), 36.
+
+**1. Vì sao suốt chín bài đầu không có một dấu `=` nào.** Đây là chỗ sửa nỗi sợ đại số, và nó phải sửa bằng *cấu trúc mạch*, không bằng một câu dặn dò. Nếu bài đầu tiên có chữ đã kèm dấu `=` thì người học lập tức học được rằng "chữ là con số bị giấu, việc của tôi là tìm ra nó" — sau đó mọi lời đính chính đều vô hiệu. Nên bài 1 cho ô trống **nhiều** giá trị trước khi có bất kỳ chữ cái nào (concrete trước, ký hiệu sau — quy tắc CRA), bài 5 biến "nhiều giá trị" thành một **bảng** nhìn thấy được, và mãi bài 10 dấu `=` mới xuất hiện — lúc đó nó không thể bị đọc thành "hãy tìm số bí ẩn", vì người học đã có sẵn hình ảnh cả một bảng để đối chiếu. Bài 9 kết bằng đúng câu chốt hạ: *suốt chín bài chưa ai hỏi "n bằng bao nhiêu"* — câu hỏi đó được để dành, và vì được để dành nên khi tới nó có nghĩa.
+
+**2. Vì sao phân phối và nhân tử nằm ở 7–9, trước phương trình chứ không sau.** Bài 6 tạo ra một sự bất lực rất cụ thể: bảng thử được một trăm số, mà "mọi số" thì không thử hết. Phân phối đến đúng chỗ đó — nó là **luật đầu tiên đổi được hình dạng một biểu thức mà không cần thử**. Đặt nó sau phương trình (như phần lớn sách) thì nó chỉ còn là một mẹo biến đổi trong lúc giải, và người học học thuộc chứ không hiểu. Ba bài 7 → 8 → 9 là **một luật đọc theo ba chiều**: mở ra, gấp lại, và gấp lại trên hai cụm cùng chữ (`3n + 5n = 8n` chính là rút `n` ra ngoài) — nhờ vậy "gộp hạng tử đồng dạng" không phải quy tắc thứ tư phải nhớ mà là hệ quả của luật thứ nhất. Bài 9 cũng là chỗ duy nhất trong track mượn lại `TypeError` của Realm 0, và mượn có rào: máy Python **dừng lại**, còn `8n + 6` thì hoàn toàn hợp lệ, chỉ là hết gộp được.
+
+**3. Vì sao cái cân xuất hiện ở bài 12, và vì sao nó phải chết ở bài 21.** Cái cân là mô hình concrete, nên theo CRA nó phải đứng **trước** thao tác biến đổi (13–14) chứ không đi kèm. Nhưng nó chỉ được đứng ở đó vì bài 11 vừa chứng minh cách "quét từng số" là ngõ cụt — không có bài 11 thì cân chỉ là một hình vẽ trang trí. Quan trọng hơn: cái cân là mô hình **có hạn**, và mạch này dùng chính chỗ hạn của nó làm bài học. Đĩa cân không hình dung nổi việc nhân hai vế với `−1`; đó đúng là bài 21, nơi người học buộc phải bỏ cân, quay về trục số và kiểm bằng một con số cụ thể. Một mô hình bị bỏ đúng lúc dạy được nhiều hơn một mô hình được giả vờ là đúng mãi.
+
+**4. Vì sao 18–19 là đỉnh của track, và vì sao chúng phải nằm ở đúng đó.** "Vô nghiệm" và "mọi số đều là nghiệm" là **bằng chứng thực nghiệm** cho luận điểm mở đầu: nếu chữ thật sự là một con số bị giấu thì hai chuyện này không thể xảy ra — không thể có "số bị giấu mà không có số nào", càng không thể có "số bị giấu mà là mọi số". Chúng chỉ đứng được ở vị trí 18–19 vì cần đủ ba thứ có trước: tập nghiệm (11) để nói ra "rỗng" và "tất cả", chuỗi biến đổi giữ nghiệm (13–15) để chữ có đường mà biến mất, và chữ ở hai vế (17) để nó biến mất *một cách tự nhiên* chứ không phải do người soạn bài dựng sẵn. Bài 19 còn khép lại một vòng dài: `0 = 0` xảy ra vì hai vế vốn là hai biểu thức tương đương của bài 6 — mười ba bài sau, khái niệm cũ quay lại đội một cái lốt khác.
+
+**5. Vì sao hệ toạ độ không phải một chương mới mà là con của bài 5.** Bài 21 kết thúc với một tập nghiệm tô trên trục số — một hàng số, một chiều. Bảng ở bài 5 thì có hai cột. Toạ độ vào bằng đúng chỗ hở đó: *một dòng của bảng ghi lên đâu?* Nhờ vậy bài 22 không phải "mở bài về mặt phẳng toạ độ" mà là câu trả lời cho một sự bất tiện có thật, và bài 23 chỉ việc chấm lại **bảng cũ của xe bánh mì**, không phải một dữ liệu mới. Người học nhìn thấy bảng, biểu thức và đồ thị là **ba khuôn mặt của một thứ** — đúng quy tắc "tối thiểu hai biểu diễn liên kết động" — thay vì ba chương rời.
+
+**6. Vì sao "hàm số" mãi bài 24 mới có tên, sau đồ thị — ngược với sách giáo khoa.** Sách thường định nghĩa hàm trước rồi vẽ đồ thị minh hoạ. Ở đây làm ngược, vì quy tắc "định nghĩa được **phát hiện** chứ không được phát": bài 23 kết bằng một phản ví dụ (một đầu vào cho hai mức tiền), người học phân loại máy nào dùng được / máy nào không, **rồi** hệ thống mới đặt tên "hàm số". Ký hiệu `f(n)` lại lùi thêm một bài nữa (25), vì ký hiệu luôn đi cuối và vì nó phải sinh ra từ một sự bất tiện thật: quán có ba cái máy, gọi cái nào cũng là "cái máy" thì loạn. Bài 25 cũng là chỗ Python trả ơn: `def f(n): return 15000*n` không phải kiến thức mới với người vừa xong Realm 0 — nó là bằng chứng rằng ký hiệu toán học mới học chính là thứ họ đã gõ từ lâu.
+
+**7. Vì sao bậc hai đứng trước hàm mũ, và cả hai đứng trước hàm ngược.** Ba họ hàm được xếp theo **cách một bước đi thay đổi**: thêm một lượng cố định (26) → thêm một lượng đổi dần (28) → nhân với một số cố định (30). Đó là một trục duy nhất, tăng dần, nên bài 30 không phải chủ đề mới mà là bước thứ ba của cùng câu hỏi. Còn hàm ngược **bắt buộc** phải nằm sau bậc hai: chỗ hỏng của máy ngược (hai đầu vào cho cùng một đầu ra) chính là tính đối xứng của parabol đã dựng ở bài 29 — nếu dạy hàm ngược ngay sau hàm bậc nhất thì "một–một" là một điều kiện không ai vi phạm, tức là một điều kiện vô nghĩa. Bài 32 còn thu hồi một món nợ cũ: **giải phương trình bậc nhất ở bài 15 chính là chạy máy ngược tại một điểm** — người học nhận ra mình đã làm việc đó suốt mà chưa có tên gọi.
+
+**8. Vì sao hợp hàm đứng cuối, và kiểm tính không thừa.** Hợp hàm (34–35) là cây cầu sang Realm 4, nên nó phải đứng ở chỗ người học đã có **nhiều máy đủ khác nhau** để nối — nối hai đường thẳng thì chẳng thấy gì, nối máy-tiền-thu với máy-trừ-vốn rồi đổi thứ tự thì thấy ngay. Bài 35 (`f∘g ≠ g∘f`) gieo đúng hạt giống mà T4.2 cần và đồng thời khép cặp xuôi–ngược của 32. Kiểm tính không thừa: bỏ 5 thì 22–23 không có bảng nào để chấm; bỏ 6 thì 19 tụt xuống thành một mẹo; bỏ 11 thì cái cân ở 12 không giải quyết nỗi bất tiện nào; bỏ 17 thì 18–19 phải dựng cảnh giả; bỏ 26 thì 27–28 không có "đều/không đều" để so; bỏ 29 thì 33 mất chỗ hỏng để chỉ vào; bỏ 24 thì 32–35 nói về "cái máy" mà chưa ai định nghĩa máy. Ở chiều ngược lại, không bài nào dạy lại thứ T2.1 đã dạy: trục số, số âm, thứ tự phép tính, giao hoán/kết hợp, luỹ thừa được **dùng lại liên tục** nhưng không được giới thiệu lại lần nào; và chứng minh (vì sao một luật đúng với mọi số) được cố ý để hở — chính chỗ hở đó là câu bỏ ngỏ của bài 36, bàn giao sang T2.3.
+
+### Phản biện độc lập
+
+## Kết luận trước
+
+Mạch này chắc hơn phần lớn mạch tôi từng đọc: 34/35 mối nối `reflect(N) → khái niệm(N+1)` khớp thật, không có bài nào chỉ nằm đó "vì đến lượt nó". Bốn lập luận trụ (không có dấu `=` trong 9 bài đầu; phân phối trước phương trình; cân chết ở 21; toạ độ là con của bài 5) đều đứng vững khi thử phá. Vấn đề thật có, nhưng ít và cục bộ. Dưới đây là những chỗ tôi giữ lại được sau khi thử bác bỏ.
+
+---
+
+## 1. Bài lén nhét hai khái niệm
+
+**Bài 29 — nặng nhất, và chữ "và" nằm ngay trên tiêu đề.**
+Cột khái niệm chứa ba mệnh đề: (a) đỉnh là chỗ cao/thấp nhất, (b) hai bên đối xứng, (c) hai đầu vào cho cùng một đầu ra vẫn là hàm. (c) là gọi lại luật bài 24 — không tính. Nhưng (a) và (b) đang được đặt ngang hàng, thành hai sự thật phải nhớ.
+**Sửa:** đảo quan hệ, đừng tách bài. Khái niệm duy nhất là **đối xứng**: parabol có một cái gương. Đỉnh không phải phát hiện thứ hai, nó là **tên của điểm duy nhất nằm trên trục gương** — thứ rơi ra từ (b) chứ không đứng cạnh (b). Viết lại cột khái niệm thành: *"Parabol có một trục gương: hai đầu vào khác nhau, cách đều trục ấy, cho cùng một đầu ra. Điểm duy nhất không có bạn đối xứng chính là đỉnh."* Lúc đó (a) là hệ quả, (c) là kiểm lại luật cũ, bài còn đúng một ý.
+
+**Bài 35 — mệnh đề thứ hai là kiến thức bài 32 bị dạy lại.**
+"Hợp hàm không đổi chỗ được" + "riêng cặp xuôi–ngược nối lại thì trả về chính đầu vào". Vế sau **đã nằm trong định nghĩa bài 32** ("đưa đầu ra, trả lại đúng đầu vào đã tạo ra nó") — nó không phải khái niệm mới ở đây.
+**Sửa:** đánh dấu nó là **gọi lại**, không phải dạy: *"thử `f` rồi `g⁻¹`… và thử đúng cặp xuôi–ngược của bài 32 — đây là cặp duy nhất bạn đã biết trước là đổi thứ tự cũng như nhau."* Một câu, dán nhãn callback, hết.
+
+**Bài 33 — "cắt bớt đầu vào cho phép" là một khái niệm chưa ai giới thiệu.**
+Đó là *miền xác định*. Cả track không có bài nào nói "một cái máy còn có tập đầu vào nó chịu nhận". Nó đang được nhét vào mệnh đề phụ của bài 33 dưới dạng cách chữa.
+**Sửa:** đừng thêm bài. Biến nó thành **sự thật của hiện vật, không phải luật toán**: cái sân vốn không có cạnh âm — cái *máy* `n × n` nhận mọi số, cái *sân* thì không. Cách chữa không phải "ta cắt miền" mà "ta nhớ ra máy này đang dùng cho sân, mà sân thì chưa bao giờ nhận số âm". (Điều kiện để làm được: xem mục 4.)
+
+**Bài 20 — ô nặng nhất track, nhưng chưa vi phạm.**
+Ba thứ trong một ô: đổi `=` thành `>`/`≥`; tập nghiệm là một khoảng; tô trục số với mút đặc/rỗng. Tôi cho là **một** khái niệm vì mút đặc/rỗng chính là `>` với `≥` vẽ ra — đúng luật "hai biểu diễn liên kết". Nhưng nếu thân bài phải dạy thêm ký hiệu khoảng `(3; +∞)` thì nó thành hai bài đội một mũ.
+**Sửa:** cấm ký hiệu khoảng trong bài 20 — không chỗ nào từ 21 đến 36 cần tới nó. Giữ đúng hình tô.
+
+Các ô còn lại dùng "và" mà tôi **không** tính là vi phạm: bài 14 (nhân 0 là *ranh giới* của cùng một luật), bài 26 (dốc âm là *một ca* của cùng một luật), bài 32 (giải phương trình = chạy ngược tại một điểm là *thu nợ*, không phải dạy mới).
+
+---
+
+## 2. Bài thừa
+
+Tôi thử bỏ từng bài. **Không bài nào thừa hẳn.** Hai bài đáng lo, vì lý do khác nhau:
+
+**Bài 3 — thừa theo đúng bài kiểm của chính bạn, và chỉ thoát nhờ một việc mà cột khái niệm chưa nói ra.**
+Thử: reflect(2) hỏi *"vậy `15000 × n` đã là một con số chưa?"* → khái niệm(4) *"điền vào thì mới ra số"* trả lời trọn vẹn: chưa, và đây là lúc nó thành số. Mạch nối thẳng, bài 3 rơi ra không để lại lỗ. Lý do bài 3 vẫn phải sống nằm ở bài 6–9: ở đó người học **đổi hình dạng một biểu thức mà không hề điền số nào** — muốn làm thế thì biểu thức phải là một *vật* cầm được, so được, chứ không phải một phép tính dở dang. Nhưng cột khái niệm bài 3 hiện chỉ phát biểu phần **phủ định** ("chưa phải một con số"), mà phần phủ định thì bài 4 nuốt trọn.
+**Sửa:** viết lại cột khái niệm bài 3 thành mệnh đề khẳng định: *"Biểu thức là một **vật**: nó có hình dạng, đọc được, chép lại được, so với vật khác được — dù chưa ra số."* Lúc đó nợ của bài 3 được trả ở 6–9 chứ không ở 4, và bài kiểm bỏ-thử không còn nuốt nó.
+
+**Bài 31 — bài duy nhất trong track không trả gì về sau.**
+Không có bài nào từ 32 đến 36 dùng "mũ vượt tuyến tính". Đáng chú ý: đoạn "kiểm tính không thừa" của bạn biện hộ cho 5, 6, 11, 17, 24, 26, 29 — nhưng **không** nhắc 31 lần nào. Nó không rơi ra chỉ vì reflect(30) được viết riêng để cần tới nó; đổi reflect(30) một câu là 31 bốc hơi mà không bài nào phía sau kêu.
+Nó vẫn đáng giữ (đỉnh trí tuệ của cụm ba họ hàm, và là hạt giống độ phức tạp cho Realm 4). Nhưng phải **trả nợ**, hai chỗ:
+- **Sửa reflect(31):** hiện nó bẻ lái sang máy tính tiền — câu hỏi ngược không mọc ra từ nội dung bài 31 chút nào, nó gá vào. Cho câu hỏi ngược mọc từ chính men: *"Muốn men đủ 1000 phần thì phải chờ mấy giờ?"* Đó **đúng là** chạy ngược cái máy mũ, nó sinh ra từ bài 31, và nó rơi thẳng vào bài 32 (bài 32 rồi trả lời trên máy bậc nhất vì máy ấy gỡ được).
+- **Sửa reflect(36) hoặc câu bắc cầu Realm 4:** cho bài 31 một chỗ được gọi tên lại (chương trình chạy `2ⁿ` bước). Không thì nó mãi là một bài đẹp không ai cần.
+
+**Bài 12 — sống, nhưng bằng lý do yếu.** Bỏ 12 thì bài 13 mất từ vựng ("hai đĩa"), nên bài kiểm giữ nó lại. Đó là *sự cần thiết về từ vựng*, không phải về nhận thức — loại yếu nhất. Điều kiện để nó không tụt xuống thành hình minh hoạ: thân bài 12 phải bắt người học **phân loại thao tác nào giữ được thăng bằng, thao tác nào làm lệch**, và dự đoán trước khi bài 13 phát luật. Nếu bài 12 chỉ vẽ cái cân rồi nói "phương trình giống thế này", nó nên bị gộp vào 13.
+
+**Cặp 8–9 là cặp sát nhau nhất còn lại.** Chúng tách được vì 8 rút *một con số* ra, còn 9 rút *chính chữ* ra và thêm ranh giới "hết gộp được". Muốn giữ khoảng cách đó: bài 8 chỉ được dùng nhân tử chung là số (`15000n + 30000`), tuyệt đối không đụng `3n + 5n` — nếu bài 8 lỡ làm ví dụ ấy thì bài 9 mất hết phần mới.
+
+---
+
+## 3. Đứt mạch
+
+Ba mươi bốn mối nối khớp. Hai chỗ hở:
+
+**11 → 12 (mối nối yếu nhất track).** reflect(11) hỏi *"có cách nào không phải thử từng số?"* Bài 12 **không** trả lời câu đó — nó đổi cách nhìn. Câu trả lời thật mãi 13–15 mới tới. Người học rời bài 12 vẫn chưa có cách nào ngoài quét.
+**Sửa:** đổi reflect(11) để nó hỏi đúng thứ bài 12 đưa được, chứ đừng hứa thứ bài 12 không có. Ví dụ: *"Không thử từng số thì phải động thẳng vào chính câu ấy. Nhưng câu ấy là một lời khẳng định đang đúng — động vào mà nó hoá sai thì hỏng. Có vật gì ngoài đời cũng 'đang đúng' theo kiểu đó, và động vào nó người ta phải giữ gìn cái gì?"* Bài 12 trả lời trọn (cái cân), reflect(12) rồi mới hỏi "được phép động kiểu nào" → 13. Mạch kín, không phải hứa nợ.
+
+**31 → 32 (bẻ lái, không phải nối tiếp).** Đã nói ở mục 2: reflect(31) hiện không mọc từ bài 31. Sửa bằng câu hỏi "mấy giờ thì men đủ 1000 phần".
+
+Không còn chỗ nào khác. Đặc biệt các mối tôi ngờ nhất đều kín thật: 9→10 (câu hỏi *"n bằng bao nhiêu"* được để dành 9 bài rồi mới có nghĩa — đây là mối nối tốt nhất trong track), 19→20 ("đủ bù nghĩa là bằng hoặc hơn"), 21→22 ("một dòng của bảng hai cột ghi lên đâu"), 23→24 (phản ví dụ đẻ ra định nghĩa).
+
+---
+
+## 4. Khái niệm đến trước nhu cầu
+
+**Bài 27 — `y = ax + b` là ký hiệu duy nhất trong track đến theo lịch sách giáo khoa.**
+Bất tiện thật ở bài 27 là "hai xe cùng dốc, khác nhau ở đâu trên hình" — và nó được gỡ trọn vẹn bằng `f(n) = 15000n + 100000`, tức là ký hiệu track đã sở hữu từ bài 25. Chẳng có sự bất tiện nào đòi phải đổi `f`/`n` thành `y`/`x`. Nguy hiểm cụ thể: người học đang cầm ba cách viết cho cùng một thứ (`15000n`, `f(n) = 15000n`, `y = 15000x`) mà không bài nào hoà giải chúng.
+**Sửa:** phát biểu khái niệm bài 27 nguyên trong `f(n) = an + b` — *"`b` là thứ máy nhả ra khi bỏ 0 vào, cũng là chỗ đường cắt trục dọc; hai con số `a`, `b` tả trọn một đường"*. Đẩy `y = ax + b` xuống một dòng phụ ("sách hay viết thế này, `y` chính là cột kết quả bạn đã chấm lên trục dọc từ bài 23"), hoặc dời hẳn sang bài 36. Đừng để nó chiếm chỗ của khái niệm thật.
+
+**Bài 29 — "đối xứng" đến trước khi hiện vật cho phép nhìn thấy nó, và bài 32–33 lãnh hậu quả.**
+Bài 28 dựng bậc hai trên **mảnh sân cạnh `n` mét**. Sân thì không có cạnh âm — nên trên chính hiện vật ấy, parabol chỉ có nửa bên phải: **không có đối xứng nào để thấy**, không có "hai đầu vào cho cùng một đầu ra" nào để phát hiện. Bài 29 buộc phải phát đối xứng như một sự thật về một bức hình chưa ai cần. Hậu quả dây chuyền: reflect(32) hỏi *"đưa 9 m² vào máy ngược, trả 3 hay −3?"* — trong khung mảnh sân, −3 chưa bao giờ là ứng viên, câu hỏi rỗng; và cách chữa của bài 33 ("chỉ nhận cạnh ≥ 0") không chữa gì cả, vì chưa có gì hỏng.
+
+**Sửa — một gói ba bài, không thêm bài nào:**
+- **28:** tách rõ **cái máy** khỏi **cái sân**. Máy `f(n) = n × n` nhận *mọi* số (T2.1 đã có số âm); mảnh sân chỉ là một lần dùng máy ấy. Chỉ cần một câu, nhưng nó làm −3 thành ứng viên sống ở bài 32 và làm "cạnh ≥ 0" thành một cái cắt thật ở bài 33.
+- **29:** dạy đối xứng trên **đường lãi theo giá**, không trên mảnh sân. Đặt ô trống là *"tăng giá bao nhiêu nghìn so với giá đang bán"* — số âm nghĩa là hạ giá, hoàn toàn có nghĩa trong xe bánh mì. Lúc đó "hai mức giá khác nhau cho **cùng một** khoản lãi" là một quan sát có thật, gây sốc, và đỉnh là chỗ lãi cao nhất — đúng thứ reflect(28) đã hứa. (Hiện reflect(28) hứa một đường cong **có chỗ cao nhất**, tức parabol quay xuống, mà bài 28 chỉ dựng `n × n` quay lên — cái gói này vá luôn chỗ hụt đó.)
+- **33:** mảnh sân quay lại đúng lúc, làm cách chữa: máy nhận mọi số thì hỏng, cái sân vốn không nhận số âm thì chạy ngược được.
+
+Ngoài hai chỗ này, tôi không tìm thấy khái niệm nào đến sớm. Cân (12) đợi 11 mới vào, toạ độ (22) đợi 21, hàm (24) đợi phản ví dụ 23, ký hiệu `f` (25) đợi "ba cái máy gọi tên loạn", kiểm nghiệm (16) đợi chuỗi năm bước — tất cả đều đúng thứ tự bất tiện-trước-tên-sau.
+
+---
+
+## Ngoài bốn tiêu chí — bốn cái sẽ cắn khi viết thân bài
+
+- **`0 = 0` ở bài 14 nói ngược với `0 = 0` ở bài 19.** Bài 14 dạy: nhân hai vế với 0 thì *hỏng*, mọi phương trình thành `0 = 0`. Bài 19 dạy: ra `0 = 0` nghĩa là *mọi số đều là nghiệm*. Cả hai đều đúng, nhưng người học sẽ va nhau. Bài 19 phải gọi lại bài 14 một câu: *"bạn đọc `0 = 0` là 'mọi số' chỉ vì mọi bước bạn vừa đi đều là phép giữ nghiệm — lỡ nhân hai vế với 0 thì `0 = 0` chẳng nói gì hết."*
+- **reflect(11) dùng nghiệm `2,5`** trong ngữ cảnh số ổ bánh mì — 2,5 ổ là vô nghĩa, và người học tinh ý sẽ mất tin vào hiện vật. Đổi sang đại lượng chia lẻ được (kg bột, lít nước) hoặc bỏ hẳn, giữ mỗi lý do "nghiệm có bảy chữ số".
+- **Bài 24 cần một phản ví dụ sống trong xe bánh mì**, không phải giả định. reflect(23) đang hỏi "nếu có" — nếu bài 24 không chỉ ra được một cái máy thật của quán vi phạm luật (ví dụ "số ổ đã bán → lúc mấy giờ" — cùng một con số ứng với hai thời điểm trong ngày), thì phần "phân loại máy nào được, máy nào không" tụt xuống thành bài tập phiếu, và định nghĩa lại thành *được phát* chứ không *được phát hiện*.
+- **Không bài nào dạy việc dịch câu hỏi của quán thành câu tính.** Track dùng kỹ năng này ở mọi bài và BOSS 36 đòi nó ở mức cao nhất ("dựng cả một buổi bán hàng"), nhưng nó chưa từng được gọi tên hay luyện riêng. Không cần thêm bài — nhưng nên có ít nhất hai reflect (gợi ý: bài 10 và bài 19) hỏi thẳng *"câu hỏi này của quán viết thành câu tính nào?"* thay vì đưa sẵn phương trình.
+
+---
+
+## T2.3 — Logic & chứng minh (Realm 2 · Toán & Toán rời rạc · Python CHỈ để KIỂM · 32 bài)
+
+## Mạch T2.3 — Logic & chứng minh
+
+Người học vào track đã xong R0 + R1 (biết `True/False`, `and/or/not`, `if/elif/else`, `while`, biến cộng dồn, biến cờ, `break`, `list`, `def/return`, đọc traceback) và xong T2.1 (chẵn/lẻ, chia hết, số nguyên tố, phân số tối giản) + T2.2 (biến, biểu thức, công thức theo `n`, hàm số).
+
+**Hiện vật xuyên suốt:** CLB cờ vua lớp 6A — 6 thành viên (Nam, Lan, Minh, Hoa, Tú, Khanh), một bảng nội quy, một sổ quỹ. Bài 21 là chỗ hiện vật **cố ý gãy**: 6 người thì kiểm hết được, số tự nhiên thì không — và chính cú gãy đó là cửa vào nửa chứng minh. Bài 30–32 quay về đúng vòng `while` cộng dồn của T1.2.
+
+**Python trong track này không bao giờ là lời giải.** Nó dựng bảng chân lý (`itertools.product`), kiểm một câu trên 6 thành viên (`all` / `any`), đi săn phản ví dụ, và cuối cùng viết bất biến thành `assert` trong thân vòng. Bài 21 dạy thẳng: máy nói "chưa thấy sai", không bao giờ nói "đúng".
+
+| # | slug | Tiêu đề | Khái niệm mới (đúng một) | `reflect` cuối bài | Dựa trên |
+|---|---|---|---|---|---|
+| 1 | `cau-nao-phan-xu-duoc` | Câu nào phân xử được | **Mệnh đề** — câu mà chuyện nó đúng hay sai là chuyện phân xử được (khác câu hỏi, câu sai khiến, câu nêu ý thích) | "Sân trường rộng" — Nam bảo đúng, Lan bảo sai, và không ai nói dối cả. Còn "CLB có 6 thành viên" thì đếm một cái là xong. Hai câu ấy khác nhau ở chỗ nào? | R0.24 `dung-hay-sai` |
+| 2 | `dung-sai-do-su-viec` | Đúng hay sai do sự việc, không do người nói | **Giá trị chân lý** — mỗi mệnh đề mang đúng một trong hai giá trị; "chưa biết" là chuyện của người đang xét, không phải giá trị thứ ba | "Nam đã nộp quỹ" là đúng. Vậy câu "Nam chưa nộp quỹ" mang giá trị gì? Có bao giờ hai câu ấy cùng đúng không? Cùng sai? | 1, R0.24 |
+| 3 | `noi-nguoc-lai-mot-cau` | Nói ngược lại một câu | **Phủ định** — dựng từ một mệnh đề một mệnh đề mới luôn mang giá trị ngược lại; trong hai câu ấy luôn có đúng một câu đúng | Ghép hai câu bằng chữ "và": "Nam ngã **và** Nam khóc" nghe khác "Nam khóc **và** Nam ngã". Logic có nghe ra chỗ khác nhau đó không? | 2, T1.2.5 `noi-nguoc-lai` |
+| 4 | `va-chi-nhin-hai-gia-tri` | Phép "và" chỉ nhìn hai giá trị | **Hội (và)** — giá trị của câu ghép chỉ do giá trị Đ/S của hai vế quyết định, không do nội dung, thứ tự hay quan hệ nhân quả giữa chúng | Ở quán, "gọi trà **hoặc** cà phê" nghĩa là chọn một. Nếu bạn bê về cả hai cốc, câu ấy còn đúng không? | 3, R0.29 `hai-dieu-kien-cung-dung` |
+| 5 | `hoac-gom-ca-hai` | "Hoặc" gồm cả hai | **Tuyển (hoặc)** — đúng khi **ít nhất một** vế đúng, kể cả khi cả hai cùng đúng | Bạn vừa xét bốn kiểu điền Đ/S cho hai vế. Lấy gì bảo đảm bốn kiểu ấy là đủ, không sót? Ba vế thì bao nhiêu kiểu? | 4, R0.30 `chi-can-mot-ve-dung` |
+| 6 | `xet-du-moi-truong-hop` | Xét đủ mọi trường hợp | **Bảng chân lý** — liệt kê có hệ thống mọi tổ hợp giá trị của các vế (n vế → 2ⁿ dòng), mỗi tổ hợp đúng một lần, không sót không lặp | Dựng bảng cho câu "P hoặc không P": cột kết quả toàn Đ, dù P là câu gì đi nữa. Bạn dựng nhầm, hay câu ấy có gì lạ? | 5, T1.2.6 `ai-duoc-tinh-truoc` |
+| 7 | `cot-ket-qua-khong-doi` | Khi cột kết quả không đổi | **Hằng đúng và hằng sai** — có những câu ghép đúng ở mọi dòng, và những câu sai ở mọi dòng ("P và không P"); giá trị của chúng không phụ thuộc sự việc nào cả | "Không phải là không P" — dựng bảng thì cột của nó trùng khít cột của "P". Hai câu viết khác chữ mà cùng một bảng thì có thay nhau được ở mọi chỗ không? | 6, 3 |
+| 8 | `cung-bang-thi-thay-duoc-nhau` | Cùng một bảng thì thay được cho nhau | **Tương đương logic** — hai câu có bảng chân lý trùng khít thì thay thế nhau ở bất kỳ chỗ nào mà không đổi giá trị của câu bao ngoài | "Không phải cả Nam và Lan đều nộp quỹ" — nhiều người đọc thành "cả hai đều chưa nộp". Dựng hai bảng xem chúng có trùng nhau không. Nếu không, thì câu nào mới đúng là phủ định? | 7, 6 |
+| 9 | `phu-dinh-di-vao-trong` | Phủ định đi vào trong thì "và" hoá "hoặc" | **Luật De Morgan** — đẩy phủ định vào trong ngoặc thì "và" đổi thành "hoặc" và ngược lại | Bảng nội quy CLB có dòng: "Nếu là thành viên thì phải đeo thẻ." Dòng này cũng ghép hai vế — nhưng không phải "và", cũng không phải "hoặc". **Khi nào** thì dòng nội quy ấy bị coi là sai? | 8, 4, 5 |
+| 10 | `neu-thi-la-mot-luat` | "Nếu... thì" là một lời hứa | **Kéo theo (P → Q)** — câu ghép chỉ **sai ở đúng một dòng**: vế trước đúng mà vế sau sai; luật chỉ bị phá bởi một thành viên không đeo thẻ | Bảng còn hai dòng chưa ai bàn tới: hai dòng "vế trước sai". Một người **không** phải thành viên, không đeo thẻ — nội quy có bị phá không? | 9, 2 |
+| 11 | `khi-ve-truoc-khong-xay-ra` | Khi vế trước không xảy ra | **Chân lý rỗng — sai kéo theo bất kỳ** — vế trước sai thì cả câu đúng, bất kể vế sau, vì không ai vi phạm được; "P → Q đúng" **không** có nghĩa "Q đúng" | Nội quy đúng, và bạn thấy một người đang đeo thẻ. Kết luận "người đó là thành viên" — chắc chưa? | 10 |
+| 12 | `doi-cho-hai-ve` | Đổi chỗ hai vế | **Mệnh đề đảo (Q → P)** — đổi chỗ hai vế cho ra một câu **khác**, giá trị có thể khác hẳn câu gốc | Thử cách khác: giữ nguyên thứ tự nhưng phủ định cả hai vế — "không phải thành viên thì không phải đeo thẻ". Câu này có phải câu gốc không? Bảng của nó giống bảng của ai? | 11, 10 |
+| 13 | `phu-dinh-ca-hai-ve` | Phủ định cả hai vế | **Mệnh đề phản (¬P → ¬Q)** — cũng là một câu khác câu gốc, và bảng của nó **trùng khít bảng mệnh đề đảo** | Đổi chỗ thì hỏng. Phủ định thì hỏng. Làm **cả hai** cùng lúc thì sao — hai cái hỏng có bù nhau không? | 12, 8, 3 |
+| 14 | `vua-doi-cho-vua-phu-dinh` | Vừa đổi chỗ vừa phủ định | **Phản đảo (¬Q → ¬P) tương đương câu gốc** — bảng trùng khít câu gốc, nên ở mọi chỗ hai câu ấy thay được cho nhau | Câu gốc và phản đảo luôn đi cùng nhau; câu gốc và đảo thì không. Nhưng nếu **cả gốc lẫn đảo** cùng đúng thì sao? Thư viện trường viết: "được mượn sách **khi và chỉ khi** có thẻ." Ba chữ "và chỉ khi" thêm vào điều gì? | 13, 12, 8 |
+| 15 | `khi-va-chi-khi` | Khi và chỉ khi | **Tương đương hai chiều (P ↔ Q)** — khẳng định cả P → Q lẫn Q → P cùng lúc; đây là dạng của mọi **định nghĩa**, nên định nghĩa dùng được theo cả hai hướng | Mọi câu từ đầu track tới giờ đều nói về **một** người có tên. Nhưng nội quy viết "mọi thành viên đều đeo thẻ" — không nêu tên ai. Riêng câu "bạn ấy đeo thẻ" thì đúng hay sai? | 14, 12, 10 |
+| 16 | `cau-con-cho-trong` | Câu còn một chỗ trống | **Câu mở (vị từ)** — câu có chỗ trống thì **chưa** mang giá trị chân lý; điền một thành viên vào mới thành mệnh đề (trong Python: một hàm nhận tên, trả `True`/`False`) | Điền lần lượt 6 cái tên thì được 6 mệnh đề, 6 giá trị Đ/S. Câu "mọi thành viên đều đeo thẻ" thu 6 giá trị ấy về thành **một** giá trị bằng cách nào? | 15, 1, T2.2 (hàm số) |
+| 17 | `voi-moi-la-va-keo-dai` | "Với mọi" là chữ "và" kéo dài | **Lượng từ với mọi (∀)** — biến câu mở thành mệnh đề; đúng khi **tất cả** mệnh đề con đều đúng, tức là chữ "và" nối 6 lần | Nếu "với mọi" chỉ là "và" kéo dài, thì "hoặc" kéo dài đọc thành câu tiếng Việt gì? | 16, 4 |
+| 18 | `ton-tai-la-hoac-keo-dai` | "Tồn tại" là chữ "hoặc" kéo dài | **Lượng từ tồn tại (∃)** — đúng khi **ít nhất một** mệnh đề con đúng | Muốn khẳng định "tồn tại", chỉ cần chỉ ra một người là xong. Muốn khẳng định "với mọi", phải xét cả 6. Vậy muốn **bác bỏ** "với mọi" thì cần mấy người? | 17, 5 |
+| 19 | `mot-nguoi-la-du-de-bac-bo` | Một người là đủ để bác bỏ | **Phản ví dụ** — một trường hợp làm câu mở sai là đủ, và là **cách duy nhất**, để bác bỏ một câu "với mọi" (hệ quả ngã ra ngay: tổ nào không có ai thì không có phản ví dụ nào — `all([])` là `True`) | "Không phải mọi thành viên đều đeo thẻ" và "tồn tại một thành viên không đeo thẻ" — hai câu ấy là một hay là hai? Còn phủ định của "tồn tại" thì đọc ra sao? | 18, 17, 3 |
+| 20 | `phu-dinh-cau-co-luong-tu` | Phủ định một câu có lượng từ | **Phủ định lượng từ** — ¬∀ thành ∃¬, ¬∃ thành ∀¬: chính là De Morgan kéo dài | 6 thành viên thì máy kiểm hết trong một nháy. Nhưng "với mọi số tự nhiên n, n² + n + 41 là số nguyên tố" — máy thử 39 số đầu, không sai lần nào. Đã kết luận được chưa? | 19, 9, 17, 18 |
+| 21 | `kiem-nghin-lan-van-chua-du` | Kiểm nghìn lần vẫn chưa đủ | **Kiểm hữu hạn không phải chứng minh** — máy chỉ nói được về những trường hợp nó đã xét; câu trên đúng 40 lần rồi **sai ở n = 40** | Máy chỉ nói được về những số nó đã thử. Muốn nói một câu đúng cho **mọi** số chẵn mà không thử số nào, bạn phải làm việc với chữ "chẵn" chứ không với từng con số. Vậy "chẵn" viết ra thành cái gì mà tính toán được? | 20, 19, T2.1 (số nguyên tố) |
+| 22 | `mo-dinh-nghia-ra` | Mở định nghĩa ra | **Dùng định nghĩa** — thay chữ bằng dạng tính được: "n chẵn" nghĩa là "có số nguyên k để n = 2k"; vì định nghĩa là câu hai chiều nên dùng được cả chiều mở ra lẫn chiều gói lại | Có dạng n = 2k rồi. Lấy **hai số chẵn bất kỳ** cộng lại — nhưng "bất kỳ" thì viết ra là số nào? | 21, 15, T2.1, T2.2 |
+| 23 | `xet-mot-so-bat-ky` | Xét một số bất kỳ | **Chứng minh trực tiếp** — đặt tên cho một đối tượng bất kỳ thoả giả thiết, chỉ dùng giả thiết + định nghĩa + điều đã chứng minh, đi tới kết luận; vì không dùng gì riêng của nó nên lập luận đúng cho mọi trường hợp | Thử câu "nếu n² chẵn thì n chẵn". Mở định nghĩa ra được n² = 2k, rồi tắc — từ đó không nặn ra được n = 2m. Tắc thì bỏ à? | 22, 10 |
+| 24 | `chung-minh-cau-phan-dao-thay` | Chứng minh câu phản đảo thay cho câu gốc | **Chứng minh bằng phản đảo** — vì phản đảo tương đương câu gốc (bài 14), chứng minh "n lẻ thì n² lẻ" là đã chứng minh xong câu gốc | Phản đảo chỉ dùng được cho câu có dạng "nếu... thì". Còn "√2 không viết được thành phân số" — làm gì có vế trước để mà đảo. Bắt đầu từ đâu? | 23, 14, 3 |
+| 25 | `gia-su-dieu-nguoc-lai` | Giả sử điều ngược lại | **Chứng minh phản chứng** — giả sử phủ định của điều cần chứng minh, suy ra một câu **hằng sai** ("P và không P"), nên điều giả sử ấy sai | Phản chứng đưa bạn tới **một** câu, xong là hết. Nhưng "1 + 2 + ... + n = n(n+1)/2 với mọi n" không phải một câu — nó là vô hạn câu, mỗi n một câu. Mà câu thứ k+1 chỉ hơn câu thứ k đúng **một số hạng**. Tận dụng được chỗ "chỉ hơn một chút" đó không? | 24, 7, 3, T2.1 (phân số tối giản) |
+| 26 | `hai-viec-du-de-do-ca-hang` | Hai việc là đủ để đổ cả hàng | **Nguyên lý quy nạp** — chứng minh vô hạn mệnh đề bằng đúng hai việc: câu đầu tiên đúng, và **từ** câu thứ k đúng **suy ra** câu thứ k+1 đúng (hàng domino, bậc thang) | Việc thứ hai bảo "giả sử bậc k đúng" — tức là giả sử chính cái mình đang muốn chứng minh? Nghe như đi vòng tròn. | 25, 10, T2.2 (công thức theo n) |
+| 27 | `duoc-phep-muon-bac-truoc` | Được phép mượn bậc ngay trước | **Giả thiết quy nạp** — trong bước quy nạp, "P(k) đúng" là **giả thiết của một câu kéo theo**, không phải điều đã có sẵn; không vòng tròn vì bậc đầu chẳng mượn ai, mỗi bậc sau chỉ mượn bậc đã đổ | Bước quy nạp của câu "n = n + 1" cũng đúng: nếu k = k+1 thì cộng 1 hai vế được k+1 = k+2. Vậy mọi số đều bằng số liền sau nó? | 26, 10, 11 |
+| 28 | `khong-co-bac-dau-thi-khong-do` | Không có bậc đầu thì không đổ | **Cơ sở quy nạp là bắt buộc** — bước quy nạp chỉ **chuyển tiếp**, nó không khởi động được gì; thiếu cơ sở thì cả dây chuyền không bao giờ bắt đầu | Có cơ sở, có bước. Nhưng câu "mọi số ≥ 2 đều viết được thành tích các số nguyên tố": để tách 12 = 3 × 4 bạn cần biết **4** tách được, chứ chẳng cần biết gì về 11. Bước quy nạp chỉ cho mượn bậc liền trước — thế thì tắc? | 27, 26 |
+| 29 | `muon-tat-ca-cac-bac-duoi` | Mượn tất cả các bậc dưới | **Quy nạp mạnh** — bước quy nạp được phép giả sử **mọi** mệnh đề từ cơ sở tới k, không chỉ riêng bậc k | Quy nạp chạy theo "bậc thứ n". Vòng `while` cũng chạy theo lượt: lượt 1, lượt 2, lượt 3... Trong vòng cộng dồn sổ quỹ CLB, sau **mỗi** lượt có câu nào cứ đúng đi đúng lại không? | 28, 27, T2.1 (số nguyên tố) |
+| 30 | `dieu-dung-lai-sau-moi-luot` | Điều đúng lại sau mỗi lượt | **Bất biến vòng lặp** — một câu đúng trước lượt đầu, và hễ đúng trước một lượt thì đúng sau lượt đó; chứng minh nó **chính là quy nạp theo số lượt** (cơ sở = trước vòng, bước = một lượt thân vòng) — viết thành `assert` trong thân vòng để máy KIỂM | Bất biến đúng suốt vòng. Nhưng nếu vòng cứ chạy mãi thì nó cứ đúng mãi mà bạn chẳng bao giờ có kết quả trong tay. Ở T1.2 bạn đã gặp vòng không chịu dừng. Lấy gì bảo đảm vòng này dừng? | 29, 26, T1.2.9 `xem-lai-dieu-kien-luc-nao`, T1.2.12 `cong-don-qua-tung-luot` |
+| 31 | `vi-sao-vong-chac-chan-dung` | Vì sao vòng chắc chắn dừng | **Thước đo dừng** — chỉ ra một đại lượng nguyên không âm giảm ít nhất 1 mỗi lượt; số tự nhiên không giảm mãi được (chính là quy nạp nhìn ngược), nên vòng phải dừng — đây là bằng chứng cho "bước tiến" mà T1.2 mới chỉ dặn | Vòng dừng rồi, và bất biến vẫn đúng. Ghép hai điều đó lại đã đủ để nói `tong` bằng đúng tổng quỹ 6 tháng chưa — hay còn thiếu một mẩu tin nữa, mẩu mà **chỉ lúc thoát** mới có? | 30, 26, T1.2.10 `vong-lap-khong-chiu-dung` |
+| 32 | `boss-bang-chung-cho-mot-vong-lap` | BOSS: Bằng chứng cho một vòng lặp | *(không khái niệm mới — bài tổng hợp)* mẩu tin còn thiếu là: **lúc thoát, điều kiện lặp sai**; ghép bất biến + điều kiện lặp sai + thước đo dừng thành một bằng chứng trọn vẹn cho vòng cộng quỹ, rồi dùng Python `assert` chỉ để kiểm lại | Bằng chứng bạn vừa viết bằng tiếng Việt, máy không đọc được — nên vẫn phải chạy test mới yên tâm. Có cách nào nói cho máy nghe **một phần** bằng chứng, để nó bắt lỗi trước cả khi chạy? *(dẫn sang R3 — bit, byte & kiểu dữ liệu, và xa hơn là kiểm chứng chương trình)* | 22–31, T1.2.12, T1.2.23 `la-co-nho-mot-su-that` |
+
+**Vì sao thứ tự này đúng**
+
+## Vì sao thứ tự này là thứ tự đúng
+
+**0. Một trục duy nhất: "câu này đúng hay sai, và làm sao bạn biết".** Nửa đầu (1–20) mài một câu cho tới khi nó nói được mọi thứ và bị phủ định đúng cách. Nửa sau (21–32) hỏi lấy gì bảo đảm nó đúng. Bài 21 là bản lề của cả track: nó không dạy công cụ nào, nó **phá vỡ** công cụ mà 20 bài trước vừa dựng lên (máy kiểm hết 6 thành viên trong một nháy — rồi gặp miền vô hạn thì chịu). Mọi phương pháp chứng minh sau đó xuất hiện như thứ đi gỡ đúng chỗ tắc vừa lộ ra, không phải như mục lục của một cuốn sách logic.
+
+**1. Vì sao `and`/`or`/`not` được dựng lại chứ không dạy lại.** Người học đã gõ `and`, `or`, `not` suốt T1.2 — dạy lại là xúc phạm. Cái mới ở bài 4–5 không phải toán tử mà là một sự thật họ chưa từng bị hỏi: **giá trị câu ghép chỉ do giá trị hai vế quyết định** — nên "Nam ngã và Nam khóc" bằng "Nam khóc và Nam ngã", điều mà tiếng Việt không chịu. Đó là lần đầu logic tách khỏi ngôn ngữ đời thường, và nó phải xảy ra trước bảng chân lý, vì bảng chân lý chỉ có nghĩa khi bạn đã chấp nhận rằng nội dung hai vế không còn quan trọng nữa. Bài 5 (hoặc bao gồm cả hai) đặt ngay sau vì đó là chỗ tiếng Việt cãi lại lần thứ hai, và cãi mạnh hơn.
+
+**2. Vì sao bảng chân lý ở bài 6 chứ không phải bài 1.** Bảng chân lý là công cụ **trả lời một câu hỏi** — "lấy gì bảo đảm tôi xét đủ?" — và câu hỏi ấy chỉ có sau khi bài 5 bắt người học tự liệt kê bốn trường hợp bằng tay và thấy mình không chắc. Mở track bằng bảng chân lý thì nó là một cái bảng phải chép. Mở nó ở bài 6 thì nó là sự nhẹ nhõm. Ngay sau đó, bài 7 (hằng đúng / hằng sai) không phải phần lý thuyết thêm: nó là thứ người học **tự vấp phải** khi dựng bảng cho "P hoặc không P" và thấy cột kết quả toàn Đ — đúng luật New Math số 3, định nghĩa được phát hiện chứ không được phát. Và nó là món nợ trả ở bài 25: phản chứng không nói nổi nếu chưa có chữ "hằng sai".
+
+**3. Vì sao kéo theo phải đứng sau De Morgan, và chân lý rỗng phải đứng riêng một bài.** "Sai suy ra bất kỳ" là chỗ người học rụng nhiều nhất trong mọi giáo trình logic, vì nó bị dạy như một quy ước phải nuốt. Ở đây nó không phải quy ước: bài 10 định nghĩa kéo theo qua **nội quy CLB bị phá lúc nào**, và câu trả lời "chỉ bị phá bởi một thành viên không đeo thẻ" là điều bất kỳ đứa trẻ nào cũng gật đầu. Hai dòng "vế trước sai" khi đó không còn là quy ước — chúng là hệ quả không thể chối: người ngoài CLB thì không phá được nội quy của CLB. Tách bài 11 ra riêng vì nó mang **hai** hệ quả trái ngược trực giác cần thời gian riêng: câu đúng mà chẳng nói gì về vế sau, và câu đúng mà chẳng cần ai kiểm. Gộp nó vào bài 10 là bảo đảm cả hai đều trượt.
+
+**4. Vì sao đảo — phản — phản đảo là ba bài chứ không phải một.** Sách thường gói ba câu họ hàng vào một trang bảng đối chiếu, và người học thuộc bảng mà vẫn nhầm suốt đời. Ba bài ở đây có ba nội dung khác nhau hẳn: bài 12 phát hiện **đổi chỗ thì hỏng**, bài 13 phát hiện **phủ định cũng hỏng, và hỏng y hệt kiểu vừa rồi** (bảng của phản trùng bảng của đảo — một cú bất ngờ thật sự, không phải một dòng trong bảng), bài 14 phát hiện **hai cái hỏng bù nhau**. Mỗi bài là một lần dựng bảng và một lần bị bất ngờ. Và bài 14 không phải điểm dừng: nó là công cụ được rút ra dùng ở bài 24, cách đó mười bài — đúng kiểu công cụ được cất đi rồi lấy ra đúng lúc tắc.
+
+**5. Vì sao lượng từ được dựng thành "và kéo dài" / "hoặc kéo dài".** Trên một CLB 6 người (luật New Math số 4: 5–7 phần tử, đồ vật thật), ∀ và ∃ **thật sự là** chuỗi và/hoặc dài — nên bài 17–18 không giới thiệu gì mới về bản chất, chúng chỉ đặt tên cho thứ người học đã có. Cái giá phải trả là bài 16 (câu mở) bắt buộc phải đứng trước: chưa có chỗ trống thì chưa có gì để lượng hoá. Cái được trả lại là bài 20: phủ định lượng từ không phải luật mới phải học thuộc, nó là De Morgan bài 9 kéo dài — và người học **đoán ra được** trước khi được nói. Đây cũng là lý do bài 19 (phản ví dụ) chen vào giữa 18 và 20: nó tạo ra sự bất đối xứng sắc nhất của track (bác bỏ "mọi" tốn một người, bác bỏ "tồn tại" tốn cả sáu), và chính sự bất đối xứng ấy là thứ bài 20 tổng quát hoá thành luật.
+
+**6. Vì sao chứng minh trực tiếp phải chờ tới bài 23.** Không ai chứng minh được điều gì về "số chẵn" chừng nào "chẵn" còn là một chữ. Bài 22 (mở định nghĩa) là bậc thang bị thiếu trong hầu hết giáo trình: nó biến chữ thành n = 2k, và nó chỉ hợp lệ vì bài 15 đã cho biết định nghĩa là câu **hai chiều** nên đi được cả hai lượt. Thứ tự ba phương pháp cũng có lý do: trực tiếp (23) → phản đảo (24) → phản chứng (25), theo đúng thứ tự **độ tắc** mà người học vừa gặp. Phản đảo sinh ra từ một bế tắc cụ thể ở cuối bài 23 ("n² = 2k rồi tắc"), không sinh ra vì tới lượt. Phản chứng đứng cuối vì nó là thứ duy nhất dùng được cho câu **không có** dạng "nếu... thì" — và bài 24 phải để hở đúng chỗ đó trước.
+
+**7. Vì sao quy nạp tách làm bốn bài, và tách theo đúng bốn kiểu hiểu sai.** 26 dựng nguyên lý; 27 gỡ nghi ngờ "vòng tròn" — nghi ngờ này **luôn** xuất hiện và nếu không gỡ thì người học làm bài đúng mà không tin bài mình làm; 28 cho thấy bước đúng mà thiếu cơ sở thì kết luận sai bét (n = n+1), tức là cơ sở không phải thủ tục hành chính; 29 mở ra quy nạp mạnh **chỉ khi** bài 28 vừa dựng một bài toán mà bậc liền trước vô dụng (12 cần 4, không cần 11). Nếu dạy quy nạp mạnh ngay sau quy nạp thường, nó chỉ là "phiên bản mạnh hơn, cứ dùng cái này cho chắc" — và người học mất hẳn cảm giác vì sao có hai thứ.
+
+**8. Vì sao track kết bằng vòng lặp, và kết bằng đúng vòng lặp của T1.2.** Bất biến vòng lặp (30) **không phải khái niệm mới** theo nghĩa toán học — nó là quy nạp với "bậc n" đổi tên thành "sau lượt n". Đặt nó ngay sau quy nạp mạnh là để người học nhận ra điều đó chứ không phải học thêm một thứ. Ba bài cuối trả ba món nợ của T1.2, đúng theo thứ tự T1.2 đã vay: bài 30 trả cho `tong = tong + tien` (T1.2.12 chỉ dặn "biến tích luỹ phải sinh trước vòng" mà không nói tại sao đúng), bài 31 trả cho "mỗi `while` cần một bước tiến" (T1.2.10 dặn suông — giờ mới có bằng chứng: thước đo giảm trên số tự nhiên), bài 32 trả cho toàn bộ BOSS sổ chi tiêu (chạy 30 test xanh, nhưng xanh không phải đúng — chính là bài 21 nói lại lần cuối, ở nơi nó cắn đau nhất).
+
+**9. Python xuất hiện ở đâu và không được xuất hiện ở đâu.** Python dựng bảng chân lý (6–9), kiểm câu trên 6 thành viên bằng `all`/`any` (17–19), săn phản ví dụ (20–21), và viết bất biến thành `assert` (30–32). Nó **không bao giờ** được phép là câu trả lời: bài 21 tồn tại chính để đóng cánh cửa đó lại, và mọi bài sau 21 đều dùng Python theo đúng một vai — kiểm lại thứ đã chứng minh, hoặc bác bỏ thứ chưa chứng minh. Đây cũng là chỗ hai luật CRA được tôn trọng: chữ tiếng Việt trước (Task 1–3), rồi `and`/`or`/`not` của Python làm bậc **biểu diễn** trung gian mà người học đã quen, ký hiệu ¬ ∧ ∨ → ↔ ∀ ∃ mới xuất hiện cuối cùng, kèm cách đọc.
+
+**10. Kiểm tính không thừa — bỏ một bài thì mạch đứt ở đâu.** Bỏ 7 thì 25 không có chữ "hằng sai" để dẫn tới. Bỏ 8 thì 13, 14, 20, 24 mất tiêu chuẩn "trùng bảng thì thay được" và biến thành bốn mẹo rời. Bỏ 11 thì 19 (miền rỗng) và 32 (vòng chạy 0 lượt vẫn đúng) mất gốc. Bỏ 15 thì 22 không có quyền mở định nghĩa theo chiều ngược. Bỏ 16 thì 17 lượng hoá trên hư không. Bỏ 21 thì cả nửa sau của track không có lý do tồn tại. Bỏ 27 thì người học làm quy nạp mà không tin. Bỏ 28 thì 29 không có bế tắc để gỡ. Bỏ 31 thì bài 32 nói về kết quả của một vòng chưa chắc đã có kết quả. Ở chiều ngược lại, không bài nào dạy lại thứ R0/R1 đã dạy: `True/False`, `and/or/not`, `while`, biến cộng dồn, biến cờ được **dùng lại liên tục** mà không được giới thiệu lại lần nào.
+
+**11. Ranh giới với các track lân cận.** Tập hợp, quan hệ, ánh xạ, lực lượng để nguyên cho T2.4 — nên mọi "với mọi" ở đây chạy trên một danh sách 6 tên hoặc trên số tự nhiên, không bài nào cần ký hiệu ∈ hay {x | ...}. Đếm số dòng bảng chân lý dừng ở "gấp đôi mỗi lần thêm một vế", phần 2ⁿ và tổ hợp để cho T2.5. Bảng chân lý cho mạch điện, biểu thức chuẩn tắc, thoả được (SAT) không đụng tới — chúng thuộc R3. Curry–Howard, chứng minh là chương trình, kiểu phụ thuộc đã được MASTERPLAN đẩy lên đỉnh T2.6, nên bài 32 chỉ **trỏ** sang chứ không mở ra. Cả track đúng một bài không mang khái niệm mới (bài 32), giữ đúng tỉ lệ của R0 và T1.2.
+
+### Phản biện độc lập
+
+Đã đối chiếu với `content/onboarding/MACH.md` (R0), `content/nen-tang/MACH.md` (T1.2), và `MASTERPLAN.md` §8.4. Mọi tham chiếu R0/T1.2 trong bảng đều **đúng số, đúng slug** (R0.24/29/30, T1.2.5/6/9/10/12/23 — kiểm từng dòng). Fact toán ở bài 21 cũng đúng: n²+n+41 nguyên tố với n = 0…39, hỏng đúng ở n = 40 (= 41²).
+
+Chuỗi bản lề 1→32 **liền, không đứt**: tôi kiểm từng cặp N→N+1, cả 31 cặp đều có bài sau trả lời đúng câu hỏi bài trước để hở. Đó là chỗ mạch này mạnh nhất và tôi không bịa ra vấn đề ở đó.
+
+Nhưng có 8 lỗi thật. Xếp theo mức nghiêm trọng.
+
+---
+
+## A. LỖI NẶNG
+
+### A1. Không có bài nào dạy MODUS PONENS — mà bài 23–32 chạy bằng nó
+Track có **15 bài** về ngữ nghĩa của `→` (10, 11, 12, 13, 14, 15) nhưng **không một bài nào** dạy cách *dùng* một câu kéo theo: có `P → Q` đúng **và** có `P` đúng thì rút ra `Q`. Bài 11 chỉ dạy mặt phủ định của nó ("`P → Q` đúng **không** có nghĩa `Q` đúng") — tức là dạy cái anti-rule mà chưa bao giờ dạy cái rule.
+
+Chỗ nó cắn:
+- Bài 23 "chỉ dùng giả thiết + định nghĩa + điều đã chứng minh, **đi tới kết luận**" — động cơ của "đi tới" chính là tách rời.
+- Bài 27 lập luận "không vòng tròn vì bậc đầu chẳng mượn ai, mỗi bậc sau chỉ mượn bậc đã đổ". Lập luận này **chỉ đọc được** nếu người học đã biết: có `P(1)` đúng, có `P(1) → P(2)` đúng, nên `P(2)` đúng. Nếu chưa biết, bài 27 — bài quan trọng nhất khối quy nạp — trở thành lời trấn an chứ không phải lời giải thích.
+- Bài 30 (bất biến) là modus ponens lặp lại theo lượt.
+
+**Sửa (không tốn thêm bài):** đổi trục bài 11 từ *"khi vế trước không xảy ra"* thành *"một luật cho bạn cái gì, và không cho bạn cái gì"*. Nội quy "thành viên thì đeo thẻ" + "Nam là thành viên" ⟹ **Nam đeo thẻ** (đây là cách *duy nhất* một luật sinh ra kết luận). Cũng nội quy đó + "Nam không phải thành viên" ⟹ **luật im lặng, và im lặng thì không ai phá được** — chân lý rỗng rơi ra như hệ quả, không còn là quy ước phải nuốt. Cũng nội quy đó + "Nam đeo thẻ" ⟹ **luật vẫn im lặng** → dẫn thẳng sang bài 12.
+
+Cách này còn chữa luôn chỗ chính người thiết kế tự thú trong lập luận §3: *"Tách bài 11 ra riêng vì nó mang **hai** hệ quả trái ngược trực giác"* — hai hệ quả trong một bài đúng là dấu hiệu tiêu chí 1. Gộp lại dưới một trục "luật chỉ nói khi vế trước khớp" thì thành **một** khái niệm, và khái niệm đó là thứ đang thiếu.
+
+*(Phương án dự phòng nếu muốn giữ nguyên bài 11: gộp 12+13 thành một bài "hai cách làm hỏng, cùng một kiểu hỏng" để lấy một slot cho modus ponens. Tôi không khuyến nghị — lập luận §4 bảo vệ việc tách 12/13/14 khá vững.)*
+
+### A2. Bài 5 dạy lại nguyên văn R0.30 — và bài 3 dạy lại T1.2.5
+Lập luận §10 khẳng định *"không bài nào dạy lại thứ R0/R1 đã dạy"*. Sai ở hai chỗ, kiểm được bằng chữ:
+
+- **R0.30 `chi-can-mot-ve-dung`**: "`or` cho `True` khi **ít nhất một** vế đúng."
+- **Bài 5**, cột khái niệm: "Tuyển (hoặc) — đúng khi **ít nhất một** vế đúng, kể cả khi cả hai cùng đúng."
+
+Nửa đầu là R0.30 chép lại. Cái mới **chỉ là** nửa sau — "hoặc" tiếng Việt loại trừ, `or` của logic bao gồm. **Sửa:** viết lại cột khái niệm bài 5 thành đúng cái đó: *"'Hoặc' của logic bao gồm cả hai — khác 'hoặc' tiếng Việt vốn ngầm hiểu là chọn một"*. Bỏ mệnh đề "ít nhất một vế đúng" khỏi cột khái niệm, đẩy nó xuống phần ôn.
+
+Tương tự:
+- **T1.2.5 `noi-nguoc-lai`**: "`not` lật `True` thành `False` và ngược lại."
+- **Bài 3 `noi-nguoc-lai-mot-cau`**: "Phủ định — dựng từ một mệnh đề một mệnh đề mới luôn **mang giá trị ngược lại**."
+
+Slug gần trùng, câu khái niệm gần trùng. Cái mới ở bài 3 là vế sau: **trong hai câu luôn có đúng một câu đúng** (và phủ định áp lên *câu tiếng Việt*, không chỉ lên biến boolean — chỗ người học thật sự trượt là phủ định câu có "và", có "mọi", chứ không phải `not True`). **Sửa:** đổi slug + tiêu đề bài 3 để nêu cái mới (ví dụ `luon-co-dung-mot-cau-dung`), và cột khái niệm dẫn bằng luật bài trung, không dẫn bằng "lật giá trị".
+
+### A3. Bài 16 (câu mở) đến MUỘN 7 bài — bài 9–15 đã lượng hoá lén
+Bài 15 kết bằng: *"Mọi câu từ đầu track tới giờ đều nói về **một** người có tên."* Câu này **sai với chính track**. Bài 9 dựng nội quy "Nếu **là thành viên** thì phải đeo thẻ" — không tên ai. Bài 10–14 xử lý nó như một mệnh đề `P → Q` suốt năm bài, trong khi `P` = "là thành viên" và `Q` = "đeo thẻ" đều là **câu mở**. Bài 11 còn nói thẳng "một người **không** phải thành viên" — tức là đang thế trị vào một chỗ trống chưa được thừa nhận là có.
+
+Đây không phải lỗi thứ tự (bài 16 đứng đúng chỗ nó cần cho bài 17), mà là lỗi **nợ ngầm**: năm bài liên tiếp mượn trước một khái niệm chưa tới lượt.
+
+**Sửa:** buộc bài 10–14 dùng **từng thành viên có tên**, mỗi lần một người: "Nếu **Nam** là thành viên thì **Nam** phải đeo thẻ", "Nếu **Khanh** là thành viên thì…". Dòng trên bảng nội quy được giới thiệu như **cách viết tắt sáu câu**, và nói thẳng: "chỗ trống trên tấm bảng ấy, ta để tới bài 16". Làm vậy thì câu mở ở bài 16 không phải một khái niệm rơi từ trên xuống — nó là **món nợ được gọi tên**, và bài 15 nói thật.
+
+### A4. Bài 2 — tiêu đề nêu một thứ, cột khái niệm nêu thứ khác
+Đúng dấu hiệu tiêu chí 1:
+- Tiêu đề: "Đúng hay sai **do sự việc, không do người nói**" → tính khách quan.
+- Khái niệm: "Giá trị chân lý — mỗi mệnh đề mang **đúng một trong hai** giá trị; 'chưa biết' không phải giá trị thứ ba" → tính lưỡng trị.
+
+Hai thứ khác nhau. Tính khách quan là thứ trả lời reflect của bài 1 ("Sân trường rộng"). Tính lưỡng trị là thứ bài 3 (đúng một câu đúng) và bài 25 (phản chứng: không có cửa thứ ba) cần.
+
+Thêm nữa, bài 1 đã tự trả lời reflect của mình: cột khái niệm bài 1 loại sẵn "câu nêu ý thích", mà "Sân trường rộng" chính là loại đó.
+
+**Sửa:** dời tính khách quan lên bài 1 — khái niệm bài 1 thành *"Mệnh đề — câu mà việc nó đúng hay sai là chuyện của **sự việc**, không phải chuyện của người nói"*, và cột khái niệm bài 1 chỉ loại **câu hỏi + câu sai khiến** (loại được bằng ngữ pháp), để "Sân trường rộng" là bài tập thật bên trong bài 1. Reflect bài 1 đổi thành cửa vào lưỡng trị: *"Mệnh đề nào cũng đúng hoặc sai. Vậy 'Ngày mai Khanh đến CLB' — chưa ai biết. 'Chưa biết' có phải giá trị thứ ba không?"* Bài 2 khi đó mang **đúng một** khái niệm.
+
+---
+
+## B. LỖI VỪA
+
+### B1. Bài 7 — cột khái niệm có chữ "và", và reflect không luyện mặt nào trong hai mặt
+"**Hằng đúng và hằng sai**". Tôi chấp nhận đây vẫn là *một* khái niệm nếu đọc theo tiêu đề (`cot-ket-qua-khong-doi` — cột hằng, hai vị). Nhưng reflect của bài 7 lại là **phủ định kép** ("Không phải là không P"), mà cột của phủ định kép **không hằng** — nó biến thiên theo P. Tức là bài 7 kết bằng một ví dụ phản lại chính tiêu đề của nó.
+
+Hậu quả thật: **"hằng sai" không được luyện lần nào**, mà bài 25 (phản chứng) sống bằng đúng chữ đó — lập luận §2 cũng nói thế ("phản chứng không nói nổi nếu chưa có chữ hằng sai").
+
+**Sửa reflect bài 7:** *"'P và không P' — cột toàn S, dù P là câu gì. Còn 'không phải là không P' thì cột lại **trùng khít cột của P** — không toàn Đ, cũng không toàn S. Hai câu viết khác chữ mà cùng một cột thì có thay nhau được không?"* Giữ nguyên cầu nối sang bài 8, mà hằng sai được sờ tận tay.
+
+### B2. Bài 19 là bài THỪA theo đúng phép thử của chính tài liệu
+Bỏ bài 19 ra: reflect bài 18 hỏi *"muốn **bác bỏ** 'với mọi' thì cần mấy người?"* — bài 20 (`¬∀` thành `∃¬`) trả lời câu đó **trực tiếp và tổng quát hơn**. Mạch nối liền. Đó chính là định nghĩa "thừa" ở luật 2.
+
+Lập luận §5 bào chữa rằng bài 19 "tạo ra sự bất đối xứng sắc nhất". Không đúng — sự bất đối xứng **đã được phát biểu trọn vẹn trong reflect bài 18** ("khẳng định 'tồn tại' chỉ cần một người, khẳng định 'với mọi' phải xét cả 6"). Bài 19 không tạo ra nó, nó chỉ nhắc lại.
+
+Tôi **không** đề nghị xoá bài 19 — tên gọi "phản ví dụ" là tài sản mà bài 21 và cả nghề toán sống nhờ. Đề nghị **làm cho nó cần thiết**:
+
+1. **Sửa reflect bài 18** thành câu hỏi về *giá* của cả bốn việc, không chỉ hai: *"Khẳng định 'tồn tại' tốn một người, khẳng định 'với mọi' tốn cả sáu. Vậy còn **bác bỏ**: bác bỏ 'với mọi' tốn mấy người, bác bỏ 'tồn tại' tốn mấy?"* Bài 19 khi đó trả lời một câu mà bài 20 không trả lời (bài 20 nói *vì sao* có quy luật đó, bài 19 nói *giá* là bao nhiêu).
+2. **Lôi `all([]) == True` ra khỏi ngoặc đơn.** Hiện nó đang nằm trong dấu ngoặc ở cột khái niệm bài 19, mà lập luận §10 lại tuyên bố bài 32 dựa vào nó ("vòng chạy 0 lượt vẫn đúng"). Một sự thật chịu lực mà bị nhét trong ngoặc thì chắc chắn rơi. Cho nó một `predict` riêng trong bài 19: *"Tổ trực nhật tuần này chưa xếp ai. 'Mọi người trong tổ đều đeo thẻ' — đúng hay sai?"* Đây cũng là lần thứ hai chân lý rỗng của bài 11 hiện ra, và người học **tự nhận ra** là cùng một chuyện.
+
+### B3. Bài 29 (quy nạp mạnh) là ngõ cụt — 30, 31, 32 không dùng nó lần nào
+Reflect bài 29 tự bỏ rơi nội dung bài 29: nó bắc cầu sang bất biến vòng lặp bằng *quy nạp thường* ("quy nạp chạy theo bậc thứ n, vòng `while` cũng chạy theo lượt"). Bất biến chỉ cần bậc liền trước. Nên sau khi trả xong món nợ 12 = 3×4 của bài 28, quy nạp mạnh **không được dùng lại lần nào trong track**.
+
+Có chỗ nó dùng được, và đang bị bỏ lỡ: **bài 31**. Cột khái niệm bài 31 viết "số tự nhiên không giảm mãi được (chính là quy nạp nhìn ngược)" — nhưng không nói *quy nạp nào*. Lập luận "không có dãy số tự nhiên giảm vô hạn" chính là **nguyên lý sắp thứ tự tốt**, và cách trình bày tự nhiên của nó là **phản ví dụ nhỏ nhất**: giả sử vòng không dừng, lấy lượt **đầu tiên** hỏng — muốn nói được "đầu tiên" thì phải nói về **mọi** lượt trước nó, tức đúng thứ bài 29 vừa cấp phép.
+
+**Sửa:** dựng bài 31 theo lối phản ví dụ nhỏ nhất và ghi thẳng vào cột "Dựa trên": `30, 29, 26, 25`. Bài 29 hết ngõ cụt, và bài 25 (phản chứng) được dùng lại lần thứ hai ở chỗ nó thật sự đắt giá.
+
+### B4. Bài 8 và bài 15 là hai loại "tương đương" mà track không bao giờ phân biệt
+Bài 8: *tương đương logic* — hai câu **trùng bảng** thì thay được cho nhau. Bài 15: *tương đương hai chiều* `P ↔ Q` — một **phép nối**, cho ra một cột.
+
+Đây là cặp bị nhầm nhiều nhất trong mọi giáo trình logic nhập môn, và ở đây chúng bị đặt cách nhau bảy bài, cùng gọi là "tương đương", **không một dòng nào nối**. Người học sẽ đọc bài 15 như bài 8 dạy lại — đúng thứ mà lập luận §10 tự hào là đã tránh.
+
+Cái tệ hơn: chỗ nối lại đang có sẵn và miễn phí. Bài 7 vừa cho "hằng đúng", bài 8 cho "trùng bảng". Ghép hai cái đó ra đúng một câu: **hai câu tương đương ⟺ cột của `P ↔ Q` toàn Đ**.
+
+**Sửa:** thêm một `predict` bắt buộc vào bài 15 — dựng bảng cho `P ↔ Q` với `P` = câu gốc, `Q` = phản đảo (bài 14), thấy cột toàn Đ; rồi với `Q` = mệnh đề đảo (bài 12), thấy cột không toàn Đ. Một cú là ba bài 7, 8, 14 cùng được trả tiền, và bài 24 ("phản đảo tương đương nên thay được") có chân đứng thay vì một lời hứa.
+
+---
+
+## C. VẶT — sửa một dòng là xong
+
+| # | Vấn đề | Sửa |
+|---|---|---|
+| Bài 6 | `itertools.product` xuất hiện **trước** sự bất tiện mà nó gỡ — vi phạm luật 3 của chính tài liệu. Ba vế = 8 dòng chép tay mới là chỗ đau. | Bài 6 dựng bảng bằng `for` lồng `for` (dùng lại T1.2.21 — đang vắng mặt trong cả cột "Dựa trên"). Để dành `product` cho bài 9, khi công thức có ngoặc và 3 biến. |
+| Bài 6 | Cột khái niệm viết "n vế → **2ⁿ** dòng", trong khi §11 tự tuyên bố "đếm số dòng dừng ở *gấp đôi mỗi lần thêm một vế*, phần 2ⁿ để cho T2.5". Tự mâu thuẫn. | Bỏ ký hiệu `2ⁿ` khỏi cột khái niệm bài 6. |
+| Bài 9 | Cột "Dựa trên" thiếu **T1.2.7 `dau-ngoac-noi-ro-y`** — De Morgan là bài đầu tiên có `¬(P ∧ Q)`, tức là bài đầu tiên ngoặc mang nghĩa. | Thêm vào cột. |
+| Bài 10 | Slug `neu-thi-la-mot-**luat**`, tiêu đề "…là một **lời hứa**". Hai ẩn dụ khác nhau, mà bài 11 sống bằng đúng ẩn dụ đó (lời hứa chỉ *bội* khi đã có nghĩa vụ). | Chọn "lời hứa", sửa slug. |
+| Bài 20 | Reflect nói "máy thử **39 số đầu**", bài 21 nói "**đúng 40 lần** rồi sai ở n = 40". Số tự nhiên gồm 0, nên n = 0…39 là **40** số. | Bài 20 sửa thành "thử tới n = 39" hoặc "40 số đầu". |
+| Bài 21 | Chỉ nói máy **không** làm được gì. Đọc trần thì thành "máy vô dụng" — mà 30–32 lại dựng cả bằng chứng quanh `assert`. | Thêm nửa còn lại vào cột khái niệm: máy vẫn **kết luận dứt điểm** được hai việc — tìm ra phản ví dụ (bác bỏ ∀) và tìm ra nhân chứng (chứng minh ∃). Nó chỉ không nói được chữ "đúng" cho ∀ trên miền vô hạn. |
+| Bài 23→24 | Cầu nối yếu hơn §6 tuyên bố: "n² = 2k rồi tắc" cũng gỡ được bằng **phản chứng** (bài 25), nên bài 24 chưa phải câu trả lời duy nhất. | Reflect bài 23 chỉ thẳng vào *hình dạng* của chỗ tắc: *"Từ n² = 2k không nặn ra n = 2m. Thử lật câu hỏi: nếu n **không** chẵn thì n² ra sao? Câu lật ấy có phải câu gốc không — bảng để kiểm bạn đã dựng ở bài 14."* |
+| Bài 27 | Cột khái niệm đã chứa sẵn đáp án bài 28: "không vòng tròn **vì bậc đầu chẳng mượn ai**". Bài 28 khi đó chỉ minh hoạ lại điều bài 27 đã kết luận. | Bỏ vế đó khỏi bài 27. Bài 27 chỉ trả lời nghi ngờ vòng tròn bằng **tư cách logic của giả thiết**: bạn không khẳng định `P(k)`, bạn khẳng định `P(k) → P(k+1)` — một câu kéo theo, và bài 10–11 đã dạy câu kéo theo đúng được mà vế trước chẳng cần đúng. (Sau khi sửa A1, chỗ này khớp hoàn hảo.) Chuyện "còn phải có bậc đầu" để nguyên cho bài 28. |
+
+---
+
+## D. Những chỗ tôi đã thử phá mà không phá được
+
+- **Bỏ từng bài một:** ngoài bài 19 (mục B2), 30 bài còn lại đều đứt mạch khi bỏ. Tôi kiểm từng bài chứ không kiểm mẫu. Riêng bài 13 (mệnh đề phản) là bài ít được dùng lại nhất về sau — nhưng nó **không** thừa theo phép thử: reflect bài 12 hỏi thẳng về mệnh đề phản, bài 14 không trả lời câu đó.
+- **Bài 24 nằm gọn trong bài 25:** chứng minh √2 vô tỉ dùng lại đúng kết quả "n² chẵn ⟹ n chẵn" của bài 24. Công cụ được cất đi rồi lấy ra đúng lúc cần — đây là chỗ đẹp nhất của cả track, đừng động vào.
+- **Bài 21 làm bản lề:** đúng. Nó là bài duy nhất trong 32 bài **phá** công cụ thay vì dựng công cụ, và mọi phương pháp chứng minh sau đó có lý do tồn tại nhờ nó.
+- **Ranh giới track:** không bài nào cần `∈`, `{x | …}`, tổ hợp, hay SAT. Giữ đúng biên với T2.4/T2.5/R3.
+- **Tỉ lệ bài không khái niệm mới:** đúng 1/32 (bài BOSS), khớp R0 và T1.2.
+
+---
+
+## Tóm tắt việc phải làm
+
+**Bắt buộc (mạch hỏng nếu không sửa):** A1 (dựng lại bài 11 quanh modus ponens) · A2 (viết lại cột khái niệm bài 3 và bài 5 để hết dạy lại R0.30 / T1.2.5) · A3 (bài 10–14 dùng thành viên có tên; nêu rõ món nợ câu mở) · A4 (dời tính khách quan lên bài 1, bài 2 chỉ còn lưỡng trị).
+
+**Nên sửa:** B1 (reflect bài 7 phải luyện hằng sai) · B2 (reflect bài 18 hỏi giá cả bốn chiều; đưa `all([])` ra khỏi ngoặc) · B3 (bài 31 dựng theo phản ví dụ nhỏ nhất, dùng lại bài 29 và 25) · B4 (bài 15 phải nối `↔` với "trùng bảng" của bài 8).
+
+**Vặt:** 8 mục ở bảng C.
+
+Sau các sửa trên, số bài vẫn là **32** — không thêm, không bớt.

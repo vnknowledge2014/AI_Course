@@ -19,9 +19,149 @@ Người học vào Realm 1 đã xong Realm 0: biết `print`, `input`, `if/elif
    giải quyết.** Không giới thiệu `dict` vì "đến lượt dict trong sách", mà vì
    người học vừa phải dùng hai list song song và suýt lệch chỉ số.
 
-> **Còn thiếu: T1.1 — Giá trị, biến & kiểu (30 bài).** Agent thiết kế mạch cho
-> track này chết giữa chừng vì lỗi kết nối API, không phải vì bế tắc thiết kế.
-> Cần chạy lại riêng track đó.
+## T1.1 — Giá trị, biến & kiểu (Realm 1 · Nền tảng lập trình · Python · 30 bài)
+
+| # | slug | Tiêu đề | Khái niệm mới (đúng một) | `reflect` cuối bài | Dựa trên |
+|---|---|---|---|---|---|
+| 1 | `so-nguyen-va-so-thuc` | Con số có cái đuôi `.0` | `int` và `float` là **hai kiểu số khác nhau**; chỉ cần một `float` lẫn vào là cả biểu thức ra `float` — nên `90000 / 2` cho `45000.0` chứ không phải `45000` | Hoá đơn in ra `45000.0đ` — cái đuôi `.0` không ai viết trên giấy cả. Muốn kéo nó về `int` thì bảo máy thế nào? Và nếu con số là `45000.7`, nó thành `45001` hay `45000`? | R0.14 `moi-gia-tri-co-mot-kieu`, R0.15 `so-le-va-so-nguyen` |
+| 2 | `cat-phan-le-khong-phai-lam-tron` | `int()` cắt, không làm tròn | `int()` đặt lên một **số thực** thì **cắt phăng** phần lẻ, không làm tròn: `int(45000.7)` ra `45000` | Cắt thì quán mất `0.7` đồng mỗi hoá đơn. Một nghìn hoá đơn là mất bảy trăm đồng — âm thầm, không báo lỗi. Muốn làm tròn cho công bằng thì gọi ai? | 1, R0.21 `doi-chu-thanh-so` |
+| 3 | `lam-tron-cho-cong-bang` | Làm tròn cho công bằng | `round(x)` đưa về **số nguyên gần nhất** — khác hẳn cắt: `round(45000.7)` ra `45001` | Chia `100000đ` cho 3 người: `round(100000 / 3)` ra `33333`. Nhưng `round` chỉ trả về **một** con số. Câu hỏi thật của bạn có hai vế: mỗi người trả bao nhiêu, và **còn thừa mấy đồng**. Có phép chia nào chỉ lấy phần nguyên không? | 2 |
+| 4 | `chia-lay-phan-nguyen` | Phép chia không có phần lẻ | `//` — chia lấy **phần nguyên**, và kết quả là `int` thật (không đuôi `.0`) | `100000 // 3` ra `33333`. Ba người đưa `33333`, tổng `99999`. Muốn biết thiếu mấy đồng, bạn phải tự nhân rồi tự trừ: `100000 - 33333 * 3`. Có phép nào đưa thẳng phần thừa ra không? | 3, R0.15 |
+| 5 | `phan-con-thua` | Phần còn thừa | `%` — chia lấy **dư**: `100000 % 3` ra `1`, đúng số đồng lẻ không chia được | `//` và `%` cho ra `int` sạch sẽ, vì bạn đang đếm bằng **đồng**. Nếu sổ ghi bằng **nghìn** — `0.1` nghìn cộng `0.2` nghìn — máy có cho ra đúng `0.3` không? | 4 |
+| 6 | `so-thuc-chi-la-so-xap-xi` | Số thực chỉ là số gần đúng | Số thực máy lưu là **xấp xỉ**, không phải chính xác: `0.1 + 0.2` ra `0.30000000000000004`, y như `1/3` không viết hết được bằng thập phân | Nghĩa là `0.1 + 0.2 == 0.3` cho `False`. Câu hỏi "khách trả đủ tiền chưa" mà viết bằng `==` trên số thực thì có ngày sai. Vậy tiền thì phải lưu bằng kiểu gì? | 5, R0.24 `dung-hay-sai` |
+| 7 | `dem-bang-don-vi-nho-nhat` | Đếm thì dùng số nguyên | Luật chọn kiểu: **`float` để ĐO** (cân nặng, nhiệt độ), **`int` để ĐẾM** — tiền là đếm, nên giữ bằng **đồng** dưới dạng `int`, chỉ đổi sang nghìn/triệu lúc **in ra** | Đã chọn được kiểu cho mọi con số trong đầu bạn. Nhưng con số **đầu tiên** của chương trình đến từ `input()`, và nó là chữ. Khách gõ `25.5` (nghìn), bạn viết `int("25.5")` — máy nói gì? | 6, 1 |
+| 8 | `doi-chu-co-phan-le-thanh-so` | Chữ có phần lẻ thì đổi bằng gì | `float()` — đổi một chuỗi **có dấu chấm** thành số thực; `int()` từ chuỗi khắt khe hơn `int()` từ số: `int(25.5)` chạy, `int("25.5")` thì `ValueError` | Chữ thành số thì có `int` và `float`. Nhưng ô "ghi chú" khách để trống, và bạn viết `if ghi_chu:` — không so sánh với gì cả. `ghi_chu` là một chuỗi, đâu phải `True`/`False`. Máy lấy đâu ra câu trả lời đúng/sai? | 7, R0.20 `input-luon-tra-ve-chu`, R0.22 `khi-doi-kieu-that-bai` |
+| 9 | `moi-gia-tri-deu-co-mot-su-that` | Mọi giá trị đều có một "sự thật" | `bool(x)` — mọi giá trị quy được về `True`/`False`: `0`, `0.0`, `""` là `False`, còn lại là `True`; nhờ vậy `if ghi_chu:` viết được | Tiện thật. Nhưng khoản chi **0 đồng** (gửi xe miễn phí) cũng rơi vào nhánh `False`, y hệt ô **chưa nhập gì cả**. Hai chuyện đó khác nhau một trời một vực. Máy có sẵn giá trị nào mang nghĩa "chưa có gì" không? | 8, R0.24 |
+| 10 | `chua-co-gi-khac-bang-khong` | "Chưa có gì" không phải số 0 | `None` — giá trị dành riêng cho **chưa có gì**; khác `0` (đã biết, bằng không) và khác `""` (đã nhập, nhập rỗng) | Nhưng `bool(None)` cũng là `False`, nên `if ghi_chu:` vẫn gộp `None` chung với `""`. Muốn hỏi thẳng "cái này có đang trống không" thì hỏi bằng gì? | 9 |
+| 11 | `hoi-thang-co-phai-none-khong` | Hỏi thẳng: có phải `None` không | `x is None` — câu hỏi riêng cho `None`, và là chỗ **duy nhất** phân biệt được "chưa có" với "có mà rỗng" | `ghi_chu = None` vẫn là một dòng gán hẳn hoi: cái tên **có mặt**, chỉ nội dung là rỗng. Còn nếu bạn quên hẳn dòng đó rồi `print(ghi_chu)` — máy có tự coi nó là `None` không? | 10 |
+| 12 | `ten-chua-tung-duoc-gan` | Cái tên chưa từng được gán | Một cái tên chỉ **có mặt từ dòng gán trở xuống**; dùng trước dòng đó là `NameError` — máy không có "None ngầm" cho tên bạn quên khai | Tên có mặt kể từ lúc bạn gán. Vậy `print` — cái tên bạn gõ từ bài đầu Realm 0 — **ai** gán nó? Và nếu bạn viết `print = 5` thì sao? | 11, R0.08 `chu-va-ten`, R0.11 `dat-ten-cho-gia-tri` |
+| 13 | `de-len-ten-co-san` | Đè lên cái tên máy đã có | Những cái tên có sẵn (`print`, `sum`, `list`, `str`, `type`) **không được bảo vệ**: `sum = 0` chạy êm, rồi `sum(...)` mới nổ `TypeError: 'int' object is not callable` — cách xa chỗ gây lỗi | Máy để bạn đè lên `sum` mà không kêu một tiếng. Vậy nó **có** từ chối cái tên nào không? | 12, R0.16 `khi-hai-kieu-khong-hop` |
+| 14 | `cai-ten-may-tu-choi` | Cái tên máy từ chối thẳng | Luật cứng của một cái tên: chỉ chữ/số/`_`, không mở đầu bằng số, và **không được là từ khoá** (`if`, `for`, `class`, `return`…) — sai là `SyntaxError`, máy không chạy dòng nào | Máy chỉ cấm mấy chục từ khoá. Ngoài ra `t`, `x1`, `dulieu`, `tien_ca_phe` — nó nhận tuốt, như nhau. Vậy ai là người còn lại quyết định tên nào tốt? | 13, R0.18 `loi-truoc-khi-chay` |
+| 15 | `ten-noi-ra-noi-dung` | Cái tên phải nói ra nội dung | Quy ước mềm: `snake_case`, và tên nói **nội dung** chứ không nói kiểu hay thứ tự (`x`, `so1`, `data`, `str_ten` là tên tệ; `tien_ca_phe`, `so_nguoi_chia` là tên tốt) — máy đọc được hết, người mới là người đọc không nổi | Mọi giá trị **có tên** giờ đã có tên tốt. Nhưng trong công thức `tong * 0.1` thì `0.1` chẳng có tên nào cả. Ba tháng sau bạn mở lại: nó là thuế, là chiết khấu, hay là phí ship? | 14 |
+| 16 | `con-so-khong-ai-dat-ten` | Con số trần nằm giữa công thức | **Hằng** — giá trị không đổi suốt chương trình, đặt tên VIẾT_HOA và khai một chỗ ở đầu file (`THUE_SUAT = 0.1`); Python không khoá được, đây là giao ước giữa người với người | Đầu file giờ ba dòng: `THUE_SUAT`, `PHI_SHIP`, `NGUONG_CANH_BAO` — ba dòng cho ba hằng đứng cạnh nhau. Gộp lại một dòng có được không? | 15 |
+| 17 | `nhieu-ten-tren-mot-dong` | Nhiều tên trên một dòng | `a, b, c = 1, 2, 3` — gán nhiều tên trong một dòng; **số tên bên trái phải bằng đúng số giá trị bên phải**, lệch là `ValueError` | Có một việc dòng gán nhiều làm được mà hai dòng riêng **không** làm nổi: đổi chỗ hai cái tên. Thử `a = b` rồi `b = a` xem — cả hai cùng thành một giá trị. Vì sao? | 16, R0.12 `doi-gia-tri-cua-ten` |
+| 18 | `ve-phai-tinh-xong-truoc` | Vế phải tính xong hết rồi mới gán | Máy tính **trọn vế phải** trước, xong mới dán tên — nên `a, b = b, a` đổi chỗ đúng, còn hai dòng riêng thì dòng đầu đã đè mất `a` | Con số và cái tên bạn đã cầm chắc. Còn **tên khoản**: khách gõ `"Cà Phê"`, sổ ghi `"cà phê"`, `==` cho `False`. Máy so hai chuỗi bằng cách nào mà chặt đến thế? | 17 |
+| 19 | `chuoi-la-mot-day-ky-tu` | Chuỗi là một dãy ký tự | Chuỗi là một **dãy ký tự có thứ tự**, và `==` so **từng ký tự một theo đúng thứ tự** — nên hoa/thường khác nhau, thừa một dấu cách cũng khác | Nếu chuỗi là một dãy thì nó có **số lượng** ký tự xác định. Cột "tên khoản" trên sổ rộng đúng 12 chỗ — `"cà phê sữa đá"` có vừa không? Đếm bằng mắt à? | 18, R0.10 `noi-hai-cau-chu`, R0.33 `mot-cho-chua-nhieu-gia-tri` |
+| 20 | `chuoi-dai-bao-nhieu` | Chuỗi dài bao nhiêu | `len(chuoi)` — trả về **số ký tự** của chuỗi | 13 ký tự, cột chỉ có 12 chỗ. Phải cắt bớt. Nhưng trước hết: muốn nhìn riêng **một** ký tự — ký tự đầu chẳng hạn — thì gọi nó là ký tự số mấy? | 19 |
+| 21 | `tra-tung-ky-tu-mot` | Tra từng ký tự một | `chuoi[0]` — chỉ số trên chuỗi, đếm từ `0` y hệt list ở Realm 0; xin quá cuối dãy thì `IndexError` | Tra được từng ký tự rồi. Vậy **sửa** thì sao — `ten[0] = "C"` để viết hoa chữ đầu? | 20, R0.34 `dem-tu-khong` |
+| 22 | `chuoi-sua-khong-duoc` | Chuỗi sửa không được | Chuỗi **bất biến**: `ten[0] = "C"` cho `TypeError: 'str' object does not support item assignment` — muốn đổi thì phải **dựng một chuỗi mới** rồi gán lại cái tên | Dựng chuỗi mới thì được. Nhưng dựng 12 ký tự đầu bằng `ten[0] + ten[1] + ... + ten[11]` là mười hai lần cộng, và đổi cột thành 15 chỗ thì viết lại từ đầu. Xin thẳng một **khúc** được không? | 21, R0.12 |
+| 23 | `cat-mot-khuc-chuoi` | Cắt một khúc chuỗi | Lát cắt `ten[0:12]` — **đầu lấy, cuối chừa**, và kết quả luôn là một chuỗi **mới** | Tên đã vừa cột. Nhưng `"Cà Phê"[0:12]` vẫn khác `"cà phê"` — cắt không làm hai chuỗi giống nhau. Đưa cả hai về cùng một dạng, có sẵn công cụ nào không? | 22, 20 |
+| 24 | `phuong-thuc-di-lien-gia-tri` | Cái hàm đi liền với giá trị | **Phương thức** — hàm gắn liền một giá trị, gọi bằng `gia_tri.ten()`: `ten.lower()` đưa mọi chữ về thường và **trả về chuỗi mới**, chuỗi cũ không suy suyển (đúng luật bài 22) | Hai bên cùng chữ thường rồi mà `" cà phê ".lower() == "cà phê"` vẫn cho `False`. Chúng khác nhau ở một chỗ mắt không nhìn thấy. Chỗ nào? | 23, 22 |
+| 25 | `khoang-trang-vo-hinh` | Khoảng trắng ở hai đầu | `.strip()` — cắt khoảng trắng **hai đầu** chuỗi, phần giữa không đụng tới; `input()` là nơi khoảng trắng thừa hay dính vào nhất | Tên khoản đã sạch. Còn con số: cột "tiền" rộng 10 chỗ, `25000` chiếm mấy chỗ? Gõ `len(25000)` xem máy nói gì. | 24, R0.20 |
+| 26 | `muon-cat-so-phai-doi-thanh-chu` | Muốn đếm con số, phải đổi nó thành chữ | `str()` — đổi bất kỳ giá trị nào thành chuỗi; `len`, chỉ số và lát cắt **chỉ chạy trên chuỗi**, nên `len(25000)` là `TypeError` còn `len(str(25000))` cho `5` | `str(45000.0)` cho `"45000.0"` — cái đuôi `.0` của bài 1 quay lại, lần này nằm trong chữ nên `int()` cũng không cứu được. Trong f-string có chỗ nào bảo máy in con số **theo đúng ý bạn** không? | 25, 20, 1 |
+| 27 | `dinh-dang-sau-dau-hai-cham` | Phần nằm sau dấu hai chấm | Dấu `:` bên trong `{}` của f-string mở ra **phần định dạng**: `f"{tien:.2f}"` in đúng hai chữ số sau dấu phẩy, không cần `round` cũng không cần `str` | `45000.00` đúng rồi, nhưng mắt phải tự đếm hàng nghìn mới đọc được. Có ký hiệu nào bảo máy chèn dấu ngăn nghìn không? | 26, R0.23 `chen-gia-tri-vao-cau` |
+| 28 | `dau-ngan-hang-nghin` | Dấu ngăn hàng nghìn | `f"{tien:,}"` — dấu phẩy trong phần định dạng bảo máy **ngăn nhóm ba chữ số**; ghép được với `.2f` thành `{tien:,.2f}` | Con số đã dễ đọc. Nhưng in ba dòng sổ liền nhau thì cột tiền so le, vì tên khoản dài ngắn khác nhau. Bắt mỗi cột rộng cố định được không? | 27 |
+| 29 | `moi-cot-mot-be-rong` | Mỗi cột một bề rộng | `f"{ten:<12}"` / `f"{tien:>10}"` — con số trong phần định dạng là **bề rộng**, `<` và `>` là **dạt về bên nào**; ngắn thì máy chèn khoảng trắng cho đủ | Bạn đã có đủ: đọc từ bàn phím, đổi kiểu, tính, đặt tên, chuẩn hoá chuỗi, định dạng. Ghép thành một dòng sổ hoàn chỉnh được chưa? | 28, 23 |
+| 30 | `boss-mot-dong-so-chi-tieu` | BOSS: Một dòng sổ hoàn chỉnh | *(không khái niệm mới — bài tổng hợp)* `input` → `.strip().lower()` → `float`/`int` → hằng `THUE_SUAT` → `//` và `%` chia đều cho nhóm → `None` cho ghi chú trống → in một dòng `f"{ten:<12}{tien:>10,}đ"` thẳng cột | Một dòng thì đẹp. Nhưng sổ cần **xếp loại**: dưới 50k là lặt vặt, 50k–500k là thường, trên 500k là khoản lớn — và riêng khoản trên 500k mà lại là tiền ăn thì phải cảnh báo. Điều kiện nằm trong điều kiện. Viết thế nào? *(dẫn sang T1.2 — Rẽ nhánh & lặp)* | 1–29 |
+
+**Vì sao thứ tự này đúng**
+
+**Vì sao thứ tự này là thứ tự đúng**
+
+**0. Một trục duy nhất, một hiện vật duy nhất.** Trục của track không phải "các kiểu dữ liệu trong Python" (đó là mục lục) mà là: *cái nhãn dán trên một giá trị quyết định máy làm gì với nó — kể cả những việc bạn không ngờ, và kể cả khi máy không báo lỗi nào.* Realm 0 đã dạy `type()` và `TypeError`, nên T1.1 không được phép mở màn bằng "hôm nay ta học sâu hơn về kiểu". Nó mở màn bằng một vết xước cụ thể mà người học vừa tự tay tạo ra ở Realm 0: chia đôi hoá đơn rồi in ra `45000.0đ`. Và cả 30 bài chạy trên **đúng một hiện vật — một dòng trong sổ chi tiêu** (`cà phê ...... 25.000đ`): mọi bất tiện tích luỹ trên cùng một vật, nên bài 29 mới có chỗ để trả hết. Hiện vật này chọn có chủ ý để nối thẳng vào BOSS của cả Realm 1 (Sổ chi tiêu của Byte) và vào 30 ngày chi tiêu của T1.2.
+
+**1. Vì sao khối số (1–7) đi trước tất cả, và vì sao nó kết bằng một bài LUẬT chứ không phải một cú pháp.** Bốn công cụ số (`int()` cắt, `round`, `//`, `%`) không được xếp theo "sách dạy số học", mà theo một chuỗi hỏng dần của **cùng một bài toán chia tiền**: đuôi `.0` xấu (1) → cắt thì mất tiền (2) → làm tròn thì công bằng nhưng chỉ cho ra một số, không nói được phần thừa (3) → `//` cho phần mỗi người (4) → `%` cho phần thừa (5). Tới bài 5 người học đang có một cảm giác sai lầm dễ chịu: "số nguyên thì luôn đúng". Bài 6 (`0.1 + 0.2`) đập vỡ nó — và đập đúng lúc, vì chỉ sau khi đã đếm bằng đồng suốt năm bài thì người học mới thấy *vì sao* việc chọn đơn vị lại là một quyết định. Bài 7 vì thế không phải lời khuyên rơi từ trên trời ("dùng int cho tiền nhé") mà là kết luận duy nhất còn lại sau khi bài 6 vừa chứng minh `==` trên số thực không dùng được. Đây là bài THIẾT KẾ duy nhất của nửa đầu track, và nó được phép xuất hiện vì bài trước đã trả giá.
+
+**2. Vì sao `bool()` (9) đứng chen giữa ép kiểu và `None`, chứ không nằm cạnh `True/False`.** Đặt truthiness ngay sau `dung-hay-sai` của Realm 0 thì nó là một bảng luật phải học thuộc. Đặt ở đây thì nó là **cái bẫy sinh ra `None`**: bài 9 vừa cho người học một cách viết gọn đầy quyến rũ (`if ghi_chu:`), bài 10 lập tức phơi ra rằng cách viết ấy gộp "khoản 0 đồng" với "chưa nhập gì" vào cùng một nhánh. Không có bài 9 thì bài 10 (`None`) chỉ là một từ khoá mới phải nhớ; có bài 9 thì `None` là câu trả lời cho một sự nhập nhằng người học vừa tự tạo ra. Và bài 11 (`is None`) không phải bài về toán tử `is` — nó là bài đóng nốt cái bẫy: đây là chỗ **duy nhất** phân biệt được "chưa có" với "có mà rỗng". Ba bài 9→10→11 phải đi liền, đúng thứ tự đó; bỏ bất kỳ bài nào thì hai bài còn lại mất chân đứng.
+
+**3. Vì sao khối tên (12–16) sinh ra từ `None` chứ không mở đầu track.** Hầu hết sách đặt "quy tắc đặt tên biến" ở chương 2, nơi nó là một trang nội quy không ai đọc. Ở đây nó được `None` kéo vào: bài 11 vừa dạy `ghi_chu = None` là một dòng gán **thật**, nên câu hỏi tự nhiên kế tiếp là "thế không viết dòng nào thì sao" → `NameError` (12). Từ đó mỗi bài trả lời đúng cái bài trước để hở, và độ nghiêm khắc của máy giảm dần một cách có thể quan sát được: tên chưa gán thì máy **báo** (12) → tên có sẵn bị đè thì máy **im lặng** rồi nổ ở chỗ khác (13) → tên là từ khoá thì máy **từ chối trước cả khi chạy** (14) → tên xấu thì máy **không quan tâm**, chỉ người đọc khổ (15). Bài 15 vì thế không phải văn phong ép buộc mà là chỗ cuối cùng của một cái thang mà người học vừa tự trèo xuống. Bài 16 (hằng) là hệ quả trực tiếp của 15: nếu tên phải nói ra nội dung, thì `0.1` nằm trần giữa công thức là một giá trị **không có tên** — lỗ hổng do chính luật của bài 15 chỉ ra.
+
+**4. Vì sao gán nhiều (17) và swap (18) tách làm hai bài, và vì sao chúng nằm cuối khối tên.** Chúng đến sau hằng vì đó là chỗ đầu tiên có ba dòng `=` đứng liền nhau đòi gộp — một bất tiện có thật, không phải một cú pháp đến lượt. Và chúng phải tách đôi vì hai khái niệm khác hẳn nhau: bài 17 là *hình dạng* (nhiều tên, nhiều giá trị, phải khớp số lượng), bài 18 là *thứ tự máy làm việc* (vế phải tính trọn rồi mới gán). Bài 18 mới là bài đắt: nó giải thích vì sao `a = b` rồi `b = a` hỏng, và cái hiểu ấy về sau còn dùng lại ở mọi phép gán phức tạp. Gộp hai bài thì người học đổi chỗ được nhưng không biết vì sao đổi được — đúng thứ mạch này cấm.
+
+**5. Vì sao khối chuỗi (19–26) không mở bằng "chuỗi có các phương thức sau đây".** Nó mở bằng một phép so sánh cho `False` mà lẽ ra phải `True` (`"Cà Phê" == "cà phê"`), và câu trả lời cho nó — *chuỗi là một dãy ký tự, `==` so từng ký tự một* — chính là khái niệm nền của cả khối. Từ nền đó, mọi công cụ mọc ra theo đúng thứ tự nhu cầu của **một cột rộng 12 chỗ**: đếm ký tự (20) → nhìn một ký tự (21) → thử sửa một ký tự và bị từ chối (22) → nên phải dựng chuỗi mới, mà dựng bằng 12 phép cộng thì vô lý (23 — lát cắt). Bài 22 (bất biến) không phải một sự thật cần thuộc: nó là **lý do tồn tại** của bài 23 và của mọi phương thức chuỗi phía sau (`.lower()` trả về chuỗi mới chứ không sửa tại chỗ), và nó gài sẵn phép đối lập cho T1.4 khi list hoá ra sửa được. Bài 24 giới thiệu **phương thức** như một khái niệm (`gia_tri.ten()`) chứ không giới thiệu `.lower()` như một mẹo — nhờ vậy `.strip()` ở bài 25, và mọi `.split()`, `.append()` về sau, không cần dạy lại cú pháp dấu chấm lần nào nữa.
+
+**6. Vì sao `str()` (26) nằm cuối khối chuỗi chứ không nằm cạnh `int()`/`float()`.** Xếp `int()` – `float()` – `str()` thành bộ ba ép kiểu là cách sắp theo mục lục, và nó làm `str()` mất động cơ: người học đã có f-string từ Realm 0 nên chẳng cần `str()` để nối chuỗi. `str()` chỉ **thật sự cần** ở đúng một chỗ: khi bạn muốn dùng `len`, chỉ số hoặc lát cắt lên một con số — và chỗ đó chỉ tồn tại sau khi bài 20–23 đã dạy ba công cụ ấy. Bài 26 vì thế vừa là câu trả lời cho `len(25000)`, vừa là bản lề: `str(45000.0)` lôi cái đuôi `.0` của bài 1 quay lại, lần này nằm trong chữ nên `int()` không cứu nổi — và đó là cửa duy nhất mở sang định dạng f-string.
+
+**7. Vì sao ba bài f-string (27–29) là ba bài chứ không phải một, và vì sao chúng ở cuối.** Chúng là phần **trả nợ** của cả track: `.2f` trả cho bài 1 và 6 (đuôi `.0`, số thực xấu), `,` trả cho bài 7 (đếm bằng đồng thì con số dài, phải ngăn nhóm mới đọc được), `<12`/`>10` trả cho bài 19–23 (cột rộng 12 chỗ — thứ đã ép người học học `len` và lát cắt). Đặt chúng sớm thì chúng là ba ký hiệu phải nhớ; đặt ở đây thì mỗi ký hiệu xoá đúng một vết xước người học đã sống chung suốt hai mươi bài. Tách ba là bắt buộc vì chúng là ba **mệnh lệnh khác nhau** gửi cho máy (in mấy chữ số lẻ / có ngăn nhóm không / rộng bao nhiêu và dạt về đâu), và người học phải sai riêng từng cái mới sửa riêng được từng cái.
+
+**8. Kiểm tính không thừa (bỏ một bài thì mạch đứt ở đâu).** Bỏ 2 thì 3 không có gì để đối lập — `round` thành phép làm tròn hiển nhiên, không ai thấy nó khác `int()`. Bỏ 6 thì 7 thành lời khuyên suông. Bỏ 9 thì 10–11 mất động cơ, `None` thành từ khoá phải thuộc. Bỏ 13 thì 14 không có thang để so (nghiêm khắc dần). Bỏ 17 thì 18 không có cú pháp để mà chạy. Bỏ 22 thì 23 (lát cắt) mất lý do, và T1.4 mất phép đối lập "list thì sửa được". Bỏ 26 thì 27 không có đường vào. Ở chiều ngược lại, không bài nào dạy lại thứ Realm 0 đã dạy: `type()`, `int()` trên chuỗi, `ValueError`, `TypeError`, f-string cơ bản, chỉ số đếm từ 0, `if`/so sánh — tất cả được **dùng lại liên tục** nhưng không được giới thiệu lại lần nào. Cả track có đúng **một** bài không mang khái niệm mới (bài 30 — BOSS), đúng tỉ lệ của Realm 0, T1.2 và T1.3.
+
+**9. Hai đầu neo.** Đầu vào nối thẳng vào cái người học vừa gõ xong ở BOSS Realm 0 (một chương trình hỏi–đáp có `input`, `int()` và f-string) — bài 1 chỉ hỏi một câu về đúng dòng chia tiền họ vừa viết. Đầu ra nối vào T1.2 bài 1 `dieu-kien-trong-dieu-kien`: `reflect` của bài 30 dựng sẵn một bài toán xếp loại có **hai tầng điều kiện** (ngưỡng tiền, rồi trong ngưỡng lớn lại xét loại khoản chi) — đúng thứ T1.2 bài 1 mở màn, và đúng lý do vì sao "Dựa trên" của bài đó đã ghi sẵn `T1.1`.
+
+### Phản biện độc lập
+
+## Kết luận
+
+Mạch này mạnh thật ở ba khối: 5→6→7, 9→10→11, và 12→15. Nhưng nó **chưa sạch**. Có 4 chỗ phải sửa trước khi viết bài (nếu không, bài viết ra sẽ mang lỗi vào code chạy thật), 5 chỗ nên sửa, và 4 khẳng định sai/không chạy được. Lập luận của người thiết kế overclaim ở hai điểm: "đúng một hiện vật" (thực ra hai) và "không bài nào dạy lại Realm 0" (bài 1, 21, 24 có dạy lại).
+
+Đã đối chiếu toàn bộ tham chiếu `R0.xx` với `/Volumes/SEAGATE/Personal_Projects/AI_Course/content/onboarding/MACH.md`: **tất cả tồn tại đúng slug, đúng nội dung**. Chỗ để trống của T1.1 nằm ở `/Volumes/SEAGATE/Personal_Projects/AI_Course/content/nen-tang/MACH.md` dòng 22–24.
+
+---
+
+## 1. Bài lén nhét hai khái niệm
+
+**Bài 7 — nặng.** Slug nói "đếm bằng đơn vị nhỏ nhất", tiêu đề nói "đếm thì dùng số nguyên", cột khái niệm nói luật ĐO/ĐẾM. Ba tên cho ba thứ. Có hai khái niệm thật và chúng độc lập: (a) luật chọn **kiểu** theo đo-hay-đếm; (b) chọn **đơn vị** để luật đó dùng được với tiền (giữ bằng đồng). Người học có thể tin (a) mà vẫn đếm bằng nghìn với `25.5` — tức (b) chưa được dạy. Vế thứ ba, "chỉ đổi sang nghìn/triệu lúc in ra", là một lời hứa chưa có công cụ (27–29 mới trả).
+**Sửa:** khái niệm duy nhất = (b), đúng như slug. (a) rút thành một câu lý do trong thân bài, bỏ cân nặng/nhiệt độ (nằm ngoài hiện vật). Vế in ra chuyển hẳn vào `reflect`.
+
+**Bài 29 — nặng.** "Con số là bề rộng" và "`<`/`>` là dạt về bên nào" là hai mệnh lệnh sai riêng được — đúng theo tiêu chuẩn mà chính tác giả dùng để tách 17/18 và tách 27/28/29.
+**Sửa:** tách đôi. 29a = bề rộng; 29b = căn lề, và **29b có động cơ thật**: mặc định căn lề phụ thuộc kiểu (chuỗi dạt trái, số dạt phải), nên ngày bạn in `"—"` vào cột tiền cho khoản chưa rõ (chính `None` của bài 10), cả cột lật sang trái mà không ai báo. Slot lấy từ bài 21 (xem mục 2).
+
+**Bài 24 — vừa.** Ba mệnh đề trong một ô: phương thức là gì + `.lower()` + trả về chuỗi mới. Nặng hơn: **cú pháp dấu chấm không mới** — R0.36 đã cho người học gõ `danh_sach.append(...)`.
+**Sửa:** khái niệm duy nhất = "phương thức chuỗi **trả về** giá trị mới chứ không sửa tại chỗ — không gán lại là mất trắng" (`ten.lower()` đứng một mình không làm gì cả). Đây mới là phần chưa ai dạy, và nó là tiền trả trực tiếp cho bài 22. Nhân tiện, phép đối lập "list sửa được" có **ngay bây giờ** nhờ R0.36, không phải để dành T1.4.
+
+**Bài 1 — vừa.** "`int` và `float` là hai kiểu số khác nhau" là R0.14+R0.15 nguyên văn; "`90000 / 2` cho `45000.0`" chính là câu R0.14 hỏi và R0.15 trả lời. Phần thật sự mới chỉ là **luật lây**: một `float` lẫn vào là cả biểu thức thành `float`.
+**Sửa:** cột khái niệm chỉ giữ luật lây, và ví dụ phải là phép **không phải chia** (`45000 + 0.5`, `tong * 1.0`) — vì chia thì R0.15 đã dạy. Đuôi `.0` từ `/` được **dùng lại** làm hiện trường, ghi "Dựa trên R0.15", không giới thiệu lại.
+
+---
+
+## 2. Bài thừa
+
+**Bài 21 — thừa theo đúng phép thử của chính mạch.** `reflect` của bài 20 hỏi "ký tự đầu gọi là ký tự số mấy?" — người học trả lời được bằng R0.34 (`dem-tu-khong`) mà không cần bài 21. Một `reflect` mà người học tự trả lời xong không phải bản lề. Bài 21 không mang khái niệm mới, nó chuyển một khái niệm cũ sang kiểu mới.
+**Sửa (khuyến nghị):** gộp 21 vào 22 — "đọc `ten[0]` thì được, gán `ten[0] = "C"` thì máy từ chối" là **một** khái niệm (bất biến), và cú pháp chỉ số là phương tiện. `IndexError` để làm ghi chú bên lề, đối lập luôn với lát cắt bài 23 (`ten[0:12]` trên chuỗi 6 ký tự **không** nổ). Slot dôi ra dùng cho việc tách bài 29.
+**Sửa (nếu muốn giữ 21):** đổi khái niệm của nó thành thứ R0 chưa có — chỉ số âm `ten[-1]` (lấy ký tự cuối mà không cần `len`), có nhu cầu thật trong hiện vật (kiểm dòng sổ có kết bằng `đ` không).
+
+Đã thử bỏ từng bài còn lại: **3, 12, 17, 26 đều không thừa.** Bỏ 3 thì 2 không có đối trọng và 4 mất bậc thang. Bỏ 12 thì 13 không có mức "máy báo" để so (khái niệm mới của 12 là **thứ tự dòng**, không phải `NameError` — R0.08 đã có `NameError`; phải viết cột khái niệm sao cho phần mới là phần thời điểm). Bỏ 17 thì 18 không có cú pháp. Bỏ 26 thì 27 không có cửa vào.
+
+---
+
+## 3. Chỗ đứt mạch
+
+**3→4 — nặng.** `reflect` của bài 3 nói "câu hỏi thật có hai vế: mỗi người trả bao nhiêu, và còn thừa mấy đồng" rồi hỏi "có phép chia nào chỉ lấy phần nguyên không?". Vế sau không nối từ vế trước: người học vừa được chỉ vào **phần thừa**, họ sẽ hỏi tới `%` (bài 5) chứ không hỏi `//`. Bài 3 đang giới thiệu nhầm bài kế tiếp.
+**Sửa:** cho `round` phạm một lỗi mà chỉ `//` sửa được — làm tròn **lên**: chia `100000` cho 6, `round(16666.666)` ra `16667`, sáu người đưa `100002`, tức bạn thu **thừa** tiền của hoá đơn. Kết luận bắt buộc: chia tiền thì phải luôn làm tròn **xuống**. Đó chính là `//`. Bài 4 giữ nguyên `reflect` (tổng `99999`, thiếu 1 đồng) → bài 5.
+
+**8→9 — nặng.** Đây là chỗ nối yếu nhất nửa đầu track: `reflect` bài 8 mở bằng "Chữ thành số thì có `int` và `float`. **Nhưng** ô ghi chú..." — chữ "nhưng" là dấu hiệu chuyển đề tài, không phải bản lề. Không có gì trong bài 8 sinh ra nhu cầu `bool()`.
+**Sửa:** nhu cầu có sẵn ngay trong bài 8, không phải bịa: khách bấm Enter suông, `float("")` nổ `ValueError`. Nghĩa là bạn phải hỏi "có nhập gì không" **trước khi** đổi kiểu — và câu hỏi đó viết bằng `if o_tien:`, một chuỗi đặt trần trong `if`. Đúng cái bẫy mà 9→10→11 cần, lại nối thẳng vào R0.22.
+
+**Bài 8 còn hở một chỗ.** Bài 7 vừa ra luật "tiền giữ bằng `int` đồng"; bài 8 kết thúc bằng một `float`. Nếu bài 8 không đóng vòng bằng `int(float("25.5") * 1000)` thì luật bài 7 gãy đúng một bài sau khi ban hành.
+
+**16 / 26 / 27 — nặng, cùng một sợi.** Sau bài 7, tiền là `int`; `//` và `%` giữ nó là `int`. Vậy **`45000.0` ở bài 26 từ đâu ra?** Hiện không có nguồn hợp pháp — trừ một nguồn lậu mà mạch chưa thừa nhận: `THUE_SUAT = 0.1` ở bài 16 biến `tong * THUE_SUAT` thành `float`, im lặng phá luật bài 7 chín bài sau khi lập.
+**Sửa hai chỗ:** (a) bài 16 phải nói thẳng hằng của mình là `float` và nó kéo tiền ra khỏi `int` — cách giữ là `tong * 10 // 100`; (b) bài 27 lấy động cơ từ một `float` **đúng luật ĐO của bài 7**: trung bình mỗi ngày tiêu bao nhiêu = `tong / so_ngay` → `45333.333333333336` (chào bài 6) → `.2f`. Vừa hợp luật, vừa nối thẳng vào "30 ngày chi tiêu" của T1.2.
+
+**12→13 — nhẹ.** Câu "`print` — **ai** gán nó?" không được bài 13 trả lời; 13 chỉ nói tên có sẵn thì đè được.
+**Sửa:** 13 mở bằng một câu trả lời thẳng ("máy gán sẵn một nhóm tên trước khi chạy dòng đầu của bạn") rồi mới tới chuyện đè.
+
+**Ví dụ của bài 13 chọn sai tên.** Người học chưa bao giờ dùng `sum()` — R0 không dạy `sum`. Đè một cái tên họ chưa từng gọi thì cú nổ `TypeError` không đau. `len` và `str` thì chưa tới (bài 20, 26).
+**Sửa:** đè cái họ đang dùng hằng ngày từ R0.21: `int = 0`, rồi vài dòng sau `int(input(...))` nổ.
+
+**Bài 30 — nhẹ.** `.strip().lower()` là hai lời gọi nối chuỗi, cú pháp này chưa xuất hiện ở 24 hay 25, mà 30 là bài "không khái niệm mới".
+**Sửa:** cho bài 25 đóng bằng phép nối hai lời gọi, hoặc BOSS viết hai dòng.
+
+---
+
+## 4. Khái niệm đến trước nhu cầu
+
+**Bài 17 — nặng, động cơ giả.** "Ba hằng đứng cạnh nhau, gộp lại một dòng có được không?" — nhưng gộp ba hằng vào một dòng là việc mà chính tinh thần bài 15/16 khuyên **không** nên làm. Bạn đang mở một công cụ bằng cách hỏi "làm chuyện xấu này được không?", rồi bài học phải tự đính chính.
+**Sửa:** nhu cầu thật nằm sẵn trong hiện vật — một dòng sổ có ba ô, và mỗi vòng ghi mới phải dựng lại cả ba: `ten, tien, ghi_chu = "", 0, None`. Dùng lại `None` của bài 10, đúng hình dạng "nhiều tên – nhiều giá trị – phải khớp số lượng", và không dạy một thói quen phải gỡ sau. Bài 18 giữ nguyên.
+
+**Hiện vật không phải một — vừa.** Bài 1–5 chạy trên "chia hoá đơn cho nhóm"; bài 19–29 chạy trên "một dòng sổ chi tiêu". Một dòng sổ không có nhóm nào để chia, nên `//` và `%` thành khách — và chỗ lộ ra là BOSS bài 30, phải nhét "`//` và `%` chia đều cho nhóm" vào một bài toán in một dòng.
+**Sửa:** khai ngay ở bài 1 rằng dòng sổ có loại khoản "đi ăn chung, chia n người", và cột `ghi_chu` giữ số người. Lúc đó `//` và `%` là ruột của hiện vật, và BOSS không phải nhét gì.
+
+---
+
+## Bốn khẳng định sẽ chết khi chạy thật
+
+- **Bài 26 sai:** "`len`, chỉ số và lát cắt **chỉ chạy trên chuỗi**". Chúng chạy trên list — R0.33/R0.34 đã dạy, và chính bài 21 viết "y hệt list ở Realm 0". Câu đúng: chúng **không chạy trên số**.
+- **Bài 3 sai một nửa:** `round` của Python làm tròn nửa về số **chẵn** — `round(0.5)` ra `0`, `round(2.5)` ra `2`, `round(45000.5)` ra `45000`. Bài đang bán chữ "công bằng" và "gần nhất"; người học thử đúng ca `.5` là bài đổ. Hoặc nói thẳng luật hoà, hoặc tránh sạch mọi ví dụ `.5`.
+- **Bài 28 lệch với hiện vật:** `f"{tien:,}"` cho `25,000`, trong khi hiện vật của track in `25.000đ`. Chọn một: đổi hiện vật sang dấu phẩy ngay từ bài 1, hoặc bài 28 phải nói ra khoảng cách này (đổi sang dấu chấm cần thêm một phương thức — có sẵn từ bài 24).
+- **Bài 20 chập chờn:** `len("cà phê sữa đá")` bằng 13 chỉ đúng với chuỗi NFC; gõ tổ hợp hoặc copy từ macOS (NFD) cho 17. Track dạy `len` bằng tiếng Việt có dấu thì bộ chấm phải chốt NFC, nếu không ca kiểm tra sẽ lúc đúng lúc sai.
+
+---
+
+## Chỗ tốt, đừng động vào
+
+5→6→7 (đếm bằng đồng suốt năm bài rồi mới đập vỡ `float` — đúng lúc); 9→10→11 (bẫy → `None` → `is None`, ba bài dính liền, bỏ bài nào cũng hỏng hai bài kia); 12→15 (thang nghiêm khắc giảm dần, người học **quan sát được**, không phải nghe kể); 22 làm lý do tồn tại cho 23 và cho mọi phương thức chuỗi; 26 làm bản lề duy nhất sang định dạng; `reflect` bài 30 khớp chính xác với `dieu-kien-trong-dieu-kien` của T1.2 (hai tầng điều kiện, đúng thứ T1.2 bài 1 mở màn).
+
+---
 
 ## T1.2 — Rẽ nhánh & lặp (Realm 1 · Nền tảng lập trình · Python · 28 bài)
 
