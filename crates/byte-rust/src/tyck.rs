@@ -922,6 +922,9 @@ impl<'a> BoKiemKieu<'a> {
             match cl {
                 CauLenh::Let { mau, kieu, gia_tri, span } => {
                     let t_gt = gia_tri.as_ref().map(|e| self.kieu_cua(e)).unwrap_or(T::Mo);
+                    if let Some(e) = gia_tri.as_ref() {
+                        self.kiem_move_ra_khoi_muon(e);
+                    }
                     // Chú thích kiểu KHÔNG được ghi đè im lặng kiểu suy ra.
                     //
                     // Bản trước làm đúng thế, và đó là lỗ hổng gốc: kiểu sai được
@@ -1646,6 +1649,55 @@ impl<'a> BoKiemKieu<'a> {
         );
     }
 
+    /// Biểu thức này có đang MOVE một giá trị ra khỏi chỗ chỉ được mượn không?
+    ///
+    /// Gọi ở những vị trí mà giá trị chắc chắn bị chuyển đi: khởi tạo `let`,
+    /// biểu thức cuối thân hàm, `return`, và đối số lời gọi. Ở những chỗ khác
+    /// (nhận của phương thức, vế trong `&`) thì cùng cú pháp ấy lại hợp lệ, nên
+    /// không kiểm — thà bỏ lọt còn hơn từ chối oan.
+    fn kiem_move_ra_khoi_muon(&mut self, e: &BieuThuc) {
+        let (span, dang) = match e {
+            BieuThuc::GiaiTham { gia_tri, span } => {
+                match bo_tham_chieu(&self.kieu_cua_nhe(gia_tri)) {
+                    t if !la_chac_chan_copy(&t) && matches!(self.kieu_cua_nhe(gia_tri), T::Tham(..)) => {
+                        (*span, "tham chiếu")
+                    }
+                    _ => return,
+                }
+            }
+            BieuThuc::ChiSo { doi_tuong, span, .. } => {
+                match bo_tham_chieu(&self.kieu_cua_nhe(doi_tuong)) {
+                    T::Vec(x) if !la_chac_chan_copy(&x) => (*span, "phần tử của Vec"),
+                    _ => return,
+                }
+            }
+            _ => return,
+        };
+        self.bao_move_ra_khoi_muon(span, dang);
+    }
+
+    /// Suy kiểu mà KHÔNG phát chẩn đoán.
+    ///
+    /// `kiem_move_ra_khoi_muon` chạy sau khi biểu thức đã được suy kiểu một
+    /// lần rồi; gọi lại `kieu_cua` sẽ nhân đôi mọi lỗi bên trong nó.
+    fn kieu_cua_nhe(&mut self, e: &BieuThuc) -> T {
+        let n = self.diags.so_luong();
+        let t = self.kieu_cua(e);
+        self.diags.cat_bot(n);
+        t
+    }
+
+    fn bao_move_ra_khoi_muon(&mut self, span: Span, dang: &str) {
+        self.diags.push(
+            Diagnostic::loi("BR0354", format!("không chuyển được giá trị ra khỏi {dang}"))
+                .tai(span, "chỗ này chỉ cho MƯỢN, không cho lấy đi")
+                .vi_sao("Mượn nghĩa là xem nhờ: chủ sở hữu vẫn còn đó và vẫn phải còn nguyên vẹn khi bạn trả lại. Lấy hẳn giá trị ra sẽ để lại một cái lỗ ở chỗ cũ — mà chủ sở hữu không hề biết. Đây đúng là điều Rust ngăn được còn hầu hết ngôn ngữ khác thì không.")
+                .sua("dùng `.clone()` nếu bạn cần một bản riêng")
+                .sua("hoặc trả về một tham chiếu thay vì giá trị")
+                .khai_niem("quyền sở hữu"),
+        );
+    }
+
     fn bao_ep_kieu_khong_duoc(&mut self, span: Span, nguon: &T, dich: &T) {
         self.diags.push(
             Diagnostic::loi(
@@ -1954,6 +2006,9 @@ pub fn kiem_tra(ct: &ChuongTrinh, diags: &mut Diagnostics) {
                 .kieu_tra_ve
                 .as_ref()
                 .map(|kb| (bk.chuan_hoa(tu_kieu_ast(kb)), kb.span()));
+            if let Some(e) = h.than.gia_tri_cuoi.as_ref() {
+                bk.kiem_move_ra_khoi_muon(e);
+            }
             let t_than = bk.khoi(&h.than);
             bk.tra_ve_ham = None;
             bk.ra();
@@ -2090,4 +2145,14 @@ fn phuong_thuc_cua(nhom: NhomBoThu) -> &'static [&'static str] {
         ],
         NhomBoThu::BoLap => CHI_TREN_BO_LAP,
     }
+}
+
+/// Kiểu này CHẮC CHẮN là `Copy`?
+///
+/// Cố tình bảo thủ ở cả hai đầu. `String` và `Vec` chắc chắn không Copy —
+/// hai kiểu ấy đủ để bắt lớp lỗi hay gặp. Struct và enum thì trả `true`
+/// (coi như Copy, tức không báo gì) vì người học có thể viết
+/// `#[derive(Clone, Copy)]`, và từ chối oan tệ hơn bỏ lọt nhiều.
+fn la_chac_chan_copy(t: &T) -> bool {
+    !matches!(t, T::Chuoi | T::Vec(_) | T::Lap(_))
 }

@@ -226,6 +226,18 @@ impl Diagnostics {
         self.items.push(d);
     }
 
+    /// Số chẩn đoán đã ghi. Dùng cùng `cat_bot` để suy kiểu thử mà không để
+    /// lại dấu vết — cần khi một pha phải hỏi kiểu của biểu thức đã suy rồi,
+    /// mà gọi lại sẽ nhân đôi mọi lỗi bên trong nó.
+    pub fn so_luong(&self) -> usize {
+        self.items.len()
+    }
+
+    /// Bỏ mọi chẩn đoán ghi sau mốc `n`.
+    pub fn cat_bot(&mut self, n: usize) {
+        self.items.truncate(n);
+    }
+
     pub fn co_loi(&self) -> bool {
         self.items.iter().any(|d| d.severity == Severity::Loi)
     }
