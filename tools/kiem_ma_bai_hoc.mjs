@@ -28,10 +28,26 @@ const require = createRequire(new URL('../packages/exec-python/package.json', im
 const { loadPyodide } = await import(pathToFileURL(require.resolve('pyodide/pyodide.mjs')).href);
 const py = await loadPyodide();
 
+/** Trần số dòng in ra cho MỘT lần chạy.
+ *
+ *  Cần thật, không phải phòng xa: luật #5 điền `1` vào chỗ trống, và
+ *  `while 1:` là vòng lặp vô hạn in ra vô tận. Không có trần này thì bộ dò
+ *  nuốt sạch bộ nhớ rồi chết trước khi kịp báo cáo gì.
+ *
+ *  Ném từ trong `batched` là cách duy nhất dừng được vòng lặp: `runPython`
+ *  không nhận timeout, nên phải để chính Python nổ ra ngoài.
+ */
+const TRAN_DONG = 5000;
+
 /** Chạy một đoạn Python, trả về {ok, xuat, loi}. */
 function chay(ma) {
   const dong = [];
-  const gom = { batched: (s) => dong.push(s) };
+  const gom = {
+    batched: (s) => {
+      if (dong.length >= TRAN_DONG) throw new Error('VUOT_TRAN_DONG');
+      dong.push(s);
+    },
+  };
   py.setStdout(gom);
   py.setStderr(gom);
   try {
@@ -107,6 +123,51 @@ for (const f of tep) {
           buoc: b.id,
           loai: 'lời giải KHÔNG ra output mà bài đã hứa',
           chi_tiet: `hứa ${JSON.stringify(luat_out.expected)}, thật ra ${JSON.stringify(r.xuat)}`,
+        });
+      }
+    }
+
+    // 5. Chỗ trống `___` không được điền bừa mà vẫn qua.
+    //
+    // Một bài dạy dấu ngoặc, chấm bằng đúng MỘT bộ dữ liệu, thì `if True:`
+    // cũng cho ra đúng câu mà bài mong đợi — người học gõ bừa vẫn xanh, và
+    // cái bẫy mà bài dựng lên cả trang để nói tới thì không bao giờ sập.
+    //
+    // Chỉ báo khi câu điền bừa THẬT SỰ qua được; điền bừa mà chương trình nổ
+    // thì không sao, đó là hành vi đúng.
+    if (b.kind === 'code' && c.starter?.includes('___') && (luat_out || c.test)) {
+      for (const bua of ['True', '1', '0']) {
+        const thu = c.starter.replaceAll('___', bua);
+        const r = chay(c.test ? `${thu}\n${c.test}` : thu);
+        const qua = r.ok && (luat_out ? khop(r.xuat, luat_out) : true);
+        if (qua) {
+          hong.push({
+            bai: bai.id,
+            buoc: b.id,
+            loai: 'điền bừa vẫn QUA bài',
+            chi_tiet: `thay \`___\` bằng \`${bua}\` là đạt — cách chấm không phân biệt được đúng với sai`,
+          });
+          break;
+        }
+      }
+    }
+
+    // 4. Cách chấm phải PHÂN BIỆT được đúng với sai.
+    //
+    // Một bước `code` mà khối test chỉ có `pass` và không có tier `output`
+    // thì không có cách nào trượt: người học gõ gì cũng xanh. Bài vẫn qua
+    // trình biên dịch (có đủ solution/test/hints) và qua cổng sư phạm (có đủ
+    // ::why, đủ ba nấc gợi ý) — nhưng nó không dạy được gì, vì không có phản
+    // hồi nào phụ thuộc vào thứ người học viết ra.
+    if (b.kind === 'code' && c.solution) {
+      const co_assert = c.test ? /\bassert\b|\braise\b/.test(c.test) : false;
+      const co_output = luat_out && String(luat_out.expected ?? '').trim() !== '';
+      if (!co_assert && !co_output) {
+        hong.push({
+          bai: bai.id,
+          buoc: b.id,
+          loai: 'không có cách nào TRƯỢT bài này',
+          chi_tiet: 'khối test không có assert, và không có tier output — gõ gì cũng xanh',
         });
       }
     }
