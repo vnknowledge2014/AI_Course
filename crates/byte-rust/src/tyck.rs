@@ -432,7 +432,13 @@ impl<'a> BoKiemKieu<'a> {
                 HangSo::SoThuc(_) => T::SoThuc(KieuThuc::ChuaGhim),
                 HangSo::DungSai(_) => T::Bool,
                 HangSo::KyTu(_) => T::KyTu,
-                HangSo::Chuoi(_) => T::Chuoi,
+                // Chuỗi trong nháy kép là `&str`, KHÔNG phải `String`.
+                //
+                // Gộp hai kiểu này lại là chỗ người học Rust vấp sớm nhất và
+                // đau nhất: `String + String` cần dấu `&` ở vế phải, còn
+                // `&str + &str` thì hoàn toàn không cộng được. Nếu bộ kiểm coi
+                // cả hai là một thì không bài học nào dạy được sự khác nhau ấy.
+                HangSo::Chuoi(_) => T::Tham(Box::new(T::Chuoi), false),
             },
             BieuThuc::DuongDan { doan, .. } => {
                 if doan.len() == 1 {
@@ -486,6 +492,27 @@ impl<'a> BoKiemKieu<'a> {
                 use ToanTuHai::*;
                 let a = self.kieu_cua(trai);
                 let b = self.kieu_cua(phai);
+                // Cộng chuỗi có hai luật khác nhau và HAI MÃ LỖI khác nhau.
+                if matches!(toan_tu, Cong) {
+                    let (ka, kb) = (bo_tham_chieu(&a), bo_tham_chieu(&b));
+                    if ka == T::Chuoi && kb == T::Chuoi {
+                        let a_la_tham = matches!(a, T::Tham(..));
+                        let b_la_tham = matches!(b, T::Tham(..));
+                        if a_la_tham {
+                            // `&str + bất cứ gì`: `&str` không có `impl Add`.
+                            self.bao_str_khong_cong_duoc(*span);
+                            return T::ChuaBiet("&str không cộng được");
+                        }
+                        if !b_la_tham {
+                            // `String + String`: có `impl Add<&str> for String`
+                            // nhưng không có `Add<String>`.
+                            self.bao_thieu_muon_khi_cong_chuoi(phai.span());
+                            return T::ChuaBiet("cộng String thiếu dấu &");
+                        }
+                        return T::Chuoi;
+                    }
+                }
+
                 match toan_tu {
                     Va | Hoac => T::Bool,
                     Bang | KhacBang | NhoHon | LonHon | NhoBang | LonBang => {
@@ -493,7 +520,14 @@ impl<'a> BoKiemKieu<'a> {
                         // `PartialOrd<i64> for &i64`. Nên số học tự bỏ tham chiếu
                         // được, còn so sánh thì không — `v.iter().filter(|x| x > 4)`
                         // là E0308 thật, và người mới vấp chỗ này rất nhiều.
-                        let lech_tc = matches!(a, T::Tham(..)) != matches!(b, T::Tham(..))
+                        // Ngoại lệ: `String` so sánh được với `&str` — std có
+                        // `impl PartialEq<&str> for String`. Không chừa chỗ này
+                        // thì `ten == "Byte"` bị từ chối oan, mà đó là dòng
+                        // xuất hiện trong gần như mọi bài học có chuỗi.
+                        let ca_hai_la_chuoi =
+                            bo_tham_chieu(&a) == T::Chuoi && bo_tham_chieu(&b) == T::Chuoi;
+                        let lech_tc = !ca_hai_la_chuoi
+                            && matches!(a, T::Tham(..)) != matches!(b, T::Tham(..))
                             && !matches!(a, T::Mo | T::ChuaBiet(_))
                             && !matches!(b, T::Mo | T::ChuaBiet(_));
                         if lech_tc {
@@ -768,6 +802,14 @@ impl<'a> BoKiemKieu<'a> {
     fn duyet_con(&mut self, bt: &BieuThuc) {
         match bt {
             BieuThuc::Gan { dich, gia_tri, .. } => {
+                // `const` không phải một ô nhớ — nó được thay thẳng vào chỗ
+                // dùng lúc biên dịch, nên không có gì để gán vào cả.
+                if let BieuThuc::DuongDan { doan, span } = &**dich {
+                    if doan.len() == 1 && self.hang.contains_key(&doan[0]) {
+                        let ten = doan[0].clone();
+                        self.bao_gan_vao_hang(*span, &ten);
+                    }
+                }
                 self.kieu_cua(dich);
                 self.kieu_cua(gia_tri);
             }
@@ -1260,6 +1302,38 @@ impl<'a> BoKiemKieu<'a> {
                 .sua("bỏ dấu `*` đi")
                 .sua("hoặc mượn trước rồi mới giải: `*(&x)`")
                 .khai_niem("tham chiếu"),
+        );
+    }
+
+    fn bao_str_khong_cong_duoc(&mut self, span: Span) {
+        self.diags.push(
+            Diagnostic::loi("BR0342", "không cộng được hai chuỗi hằng `&str`")
+                .tai(span, "`&str` không có phép cộng")
+                .vi_sao("`&str` chỉ là một CỬA SỔ nhìn vào chuỗi ký tự nằm sẵn đâu đó — nó không sở hữu vùng nhớ nào, nên không có chỗ để chứa kết quả nối. `String` thì sở hữu vùng nhớ của mình, nên nó nối được.")
+                .sua("đổi vế trái thành `String`: `String::from(\"...\") + \"...\"`")
+                .sua("hoặc dùng `format!(\"{}{}\", a, b)`")
+                .khai_niem("chuỗi"),
+        );
+    }
+
+    fn bao_thieu_muon_khi_cong_chuoi(&mut self, span: Span) {
+        self.diags.push(
+            Diagnostic::loi("BR0343", "cộng hai `String` thì vế phải cần dấu `&`")
+                .tai(span, "thiếu dấu `&` ở đây")
+                .vi_sao("Phép cộng của `String` NUỐT vế trái (lấy luôn quyền sở hữu để nối thêm vào) nhưng chỉ MƯỢN vế phải. Nhờ vậy nó không phải cấp phát vùng nhớ mới — nhưng cũng vì vậy vế phải phải là một tham chiếu.")
+                .sua("thêm `&` trước vế phải")
+                .sua("hoặc dùng `format!(\"{}{}\", a, b)` nếu bạn còn cần cả hai chuỗi về sau")
+                .khai_niem("chuỗi"),
+        );
+    }
+
+    fn bao_gan_vao_hang(&mut self, span: Span, ten: &str) {
+        self.diags.push(
+            Diagnostic::loi("BR0344", format!("`{ten}` là hằng, không gán lại được"))
+                .tai(span, "vế trái phải là một biến")
+                .vi_sao(format!("`const` không phải một ô nhớ. Trình biên dịch thay giá trị của `{ten}` thẳng vào mọi chỗ dùng nó, nên lúc chạy không còn cái tên ấy ở đâu để mà gán vào."))
+                .sua(format!("đổi `const {ten}` thành `let mut {ten}` nếu bạn cần giá trị thay đổi được"))
+                .khai_niem("hằng"),
         );
     }
 
