@@ -4,7 +4,7 @@ title: Viết gọn phép cộng dồn
 summary: Cộng thêm vào một cái tên có lối viết ngắn — vẫn là đọc–sửa–ghi, chỉ gõ tên một lần.
 locale: vi
 track: nen-tang
-module: 02-re-nhanh-va-lap
+module: re-nhanh-va-lap
 order: 13
 tier: A
 languages: [python]
@@ -32,16 +32,16 @@ Một dòng mà cái tên phải gõ hai lần. Mình có lối viết ngắn ch
 ::::
 
 ::::explain{#mot-cai-ten-go-hai-lan}
-Bài trước bạn cộng dồn được cả sổ chi tiêu: `tong = 0` sinh ra trước vòng, rồi
-mỗi lượt trong thân vòng chạy dòng này:
+Cộng dồn cả sổ chi tiêu thì bạn viết thế này: một cái tên `tong = 0` sinh ra
+trước vòng, rồi mỗi lượt trong thân vòng chạy đúng dòng này:
 
 ```python
 tong = tong + tien
 ```
 
-Dòng ấy làm ba việc, theo đúng thứ tự bạn đã mổ ra ở bài 11: **đọc** giá trị cũ
-của `tong`, **cộng** thêm `tien`, rồi **dán lại** cái tên `tong` lên kết quả
-mới. Đọc – sửa – ghi.
+Dòng ấy làm ba việc, theo đúng thứ tự này: **đọc** giá trị cũ của `tong`,
+**cộng** thêm `tien`, rồi **dán lại** cái tên `tong` lên kết quả mới. Đọc – sửa
+– ghi.
 
 Ba việc đó đều cần. Chỗ phiền nằm ở chữ `tong`: nó phải gõ hai lần trên cùng một
 dòng, và hai lần ấy buộc phải giống hệt nhau. Gõ nhầm thành `tong = tng + tien`
@@ -101,8 +101,8 @@ Cả tuần tiêu 750000 đồng
 
 Ba chỗ đáng nhìn kỹ:
 
-- `tong = 0` nằm **ngoài** vòng, sát lề trái. Đây là lý do của bài trước: khai
-  nó trong thân thì mỗi lượt lại xoá sạch lượt trước.
+- `tong = 0` nằm **ngoài** vòng, sát lề trái. Khai nó trong thân vòng thì mỗi
+  lượt lại dán `tong` về 0, xoá sạch những gì lượt trước cộng được.
 - `tong += tien` nằm **trong** thân vòng, thụt vào bốn dấu cách. Nó chạy sáu
   lần, mỗi lần với một con số khác — vì `tien` đổi giá trị mỗi vòng.
 - `print` lại nằm ngoài vòng. Bạn muốn một dòng tổng kết, không phải sáu dòng
@@ -142,8 +142,8 @@ Máy đi tìm và không thấy, nên nó dừng trước cả khi cộng.
 :::opt
 0 — máy hiểu một cái tên đang cộng dồn thì bắt đầu từ 0
 ::why
-Gần đúng ở chỗ 0 chính là con số hợp lý để bắt đầu, và bạn đã tự chọn đúng nó ở
-bài trước khi viết `tong = 0`.
+Gần đúng ở chỗ 0 chính là con số hợp lý để bắt đầu — đoạn ví dụ phía trên cũng
+mở sổ bằng đúng `tong = 0`.
 
 Chỗ lệch là ở chỗ ai chọn. Máy không tự bổ sung thứ bạn quên nói — nguyên tắc
 này theo bạn từ những bài đầu tiên của Realm 0. Nếu nó tự cho `tong` bằng 0, thì

@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 12
 teaches: [ctrl.else-binding]
-requires: [ctrl.else, ctrl.if-nested, ctrl.block-indent, logic.and]
+requires: [ctrl.else, ctrl.if-nested, ctrl.condition-path, ctrl.block-indent, logic.and]
 concepts: [ctrl.re-nhanh, core.khoi-lenh]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -107,8 +107,10 @@ Bác quen mà thiếu tiền, ghi sổ nợ nhé.
 
 Xếp bốn dòng lệnh theo cột lề, sẽ thấy ngay từng cặp:
 
-- Cột 0: `if la_khach_quen:` — câu hỏi ngoài. Không có dòng nào khác ở cột 0
-  sau nó, nên câu hỏi ngoài **không có** `else`.
+- Cột 0: `if la_khach_quen:` — câu hỏi ngoài. Ngay sau thân của nó không có
+  dòng `else:` nào ở cột 0, nên câu hỏi ngoài **không có** `else`. (Một dòng
+  cột 0 khác — chẳng hạn một `print` như câu "Đã ghi vào sổ." ở hai bài trước —
+  thì chỉ là việc làm tiếp theo, không phải nhánh của nó.)
 - Cột 4: `if tien >= 45000:` và `else:`. Hai dòng này ngang hàng nhau, nên
   chúng là hai lối của cùng một ngã ba — ngã ba về tiền.
 - Cột 8: hai dòng `print`, mỗi dòng nằm trong một lối.
@@ -191,9 +193,9 @@ hỏi tiền sai và không có `else` để rẽ sang.
 :::opt
 Máy báo lỗi vì `else` nằm cách `if` của nó tận hai dòng
 ::why
-Gần đúng ở chỗ bạn cảnh giác với `SyntaxError` khi thấy `else` không nằm sát
-ngay dưới cái `if` mà mắt bạn ghép cặp cho nó — thói quen này đã cứu bạn nhiều
-lần ở Realm 0.
+Gần đúng ở chỗ bạn đọc ra rằng dòng `else` này đứng cách xa cái `if` mà mắt bạn
+ghép cặp cho nó — giữa chúng còn chen mấy dòng thụt vào. Khoảng cách ấy có
+thật.
 
 Chỗ lệch: máy không ghép cặp bằng khoảng cách dòng, nó ghép bằng **cột lề**.
 Tính theo cột lề thì `else` ở cột 0 nối thẳng với `if la_khach_quen:` ở cột 0,
@@ -282,18 +284,28 @@ Cột lề nói cho mình biết `else` ấy là của ai. Bạn vừa nói đú
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-`else` gom mọi trường hợp còn lại của **một** `if` — bạn vừa thấy chuyện gì xảy
-ra khi chọn nhầm cái `if` ấy.
+Cả bài này là đi tìm **chủ** của một dòng `else`: nó gom phần còn lại của `if`
+nào. Cột lề luôn chỉ ra được đúng một cái tên.
 
-Còn `elif` thì hơi khác. Một chuỗi `if` – `elif` – `elif` – `else` không phải
-là mấy câu hỏi rời nhau: máy hỏi từ trên xuống và **dừng lại ở nhánh đúng đầu
-tiên**, những nhánh phía dưới thì không hỏi tới nữa.
+Realm 0 thì đã cho bạn luật của chuỗi nhánh: `if` – `elif` – `elif` hỏi từ trên
+xuống và dừng ở nhánh đúng **đầu tiên**.
 
-Bây giờ tưởng tượng sổ chi tiêu xếp mức tiêu: nhánh đầu bắt "tiêu quá 100
-nghìn", nhánh sau định bắt "tiêu quá 500 nghìn". Một ngày tiêu 600 nghìn thì
-thoả cả hai câu — nhưng máy dừng ở nhánh nào?
+Hôm nay bạn hỏi một dòng `else`: *nó thuộc về `if` nào?* Bây giờ mang đúng câu
+hỏi ấy sang một chuỗi `elif`, nhưng hỏi từ phía ngược lại: **những ngày nào
+thuộc về dòng này?** Sổ chi tiêu xếp mức tiêu, nhánh "quá 100 nghìn" đứng trước
+nhánh "quá 500 nghìn":
 
-Và nếu nó dừng ở nhánh đầu, thì nhánh sau bao giờ mới tới lượt?
+```python
+if tien > 100000:
+    print("Ngày tiêu nhiều")
+elif tien > 500000:
+    print("Ngày tiêu rất nhiều")
+```
+
+Lấy giấy bút và tìm giúp mình **một** số tiền in ra được câu "Ngày tiêu rất
+nhiều". Thử 600 nghìn. Thử một triệu. Thử số nào bạn thích.
+
+Nếu tìm mãi không ra số nào, thì dòng `elif` ấy nằm trong file để làm gì?
 
 Bài sau trả lời.
 ::::

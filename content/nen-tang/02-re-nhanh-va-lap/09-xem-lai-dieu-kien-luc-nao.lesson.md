@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 12
 teaches: [ctrl.while-check-timing]
-requires: [ctrl.while, ctrl.if, core.reassign]
+requires: [ctrl.while, ctrl.if, core.reassign, core.fstring]
 concepts: [ctrl.lap, core.dung-sai]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -31,7 +31,7 @@ provenance:
 Mình không vừa làm vừa liếc điều kiện. Mình nhìn nó đúng một chỗ.
 ::::
 
-::::explain{#ba-chu-nhin-noi-luc-nao}
+::::explain{#nhin-vao-noi-luc-nao}
 Bài trước để lại hai cách hiểu về cùng một vòng lặp, và cả hai đều nghe lọt tai:
 
 - máy canh chừng điều kiện suốt lượt, hễ thấy sai là dừng ngay giữa thân;
@@ -155,8 +155,9 @@ cũng không ngăn được dòng nằm sau nó.
 :::opt
 Máy báo lỗi, vì một vòng lặp không chạy lượt nào là chuyện không ổn
 ::why
-Gần đúng ở chỗ bạn cảnh giác, và nhiều lỗi thật sự bắt đầu bằng đúng cái cảm
-giác "chỗ này có gì đó không ổn".
+Gần đúng ở chỗ bạn đang áp một suy luận hợp lý: đã gọi là vòng **lặp** thì phải
+lặp, nên một vòng không chạy lượt nào nghe như một câu lệnh vô nghĩa — mà thứ
+vô nghĩa thì máy hay bắt lỗi.
 
 Chỗ lệch: 0 lượt là một kết quả hợp lệ, đàng hoàng, y như `False` là câu trả
 lời đàng hoàng cho một `if`. Nghĩ về nghĩa ngoài đời mà xem: ví không đủ tiền
@@ -221,8 +222,8 @@ print("Về nhà")
 ```
 
 ```python title=test
-# Sau lượt cuối, ví còn 10 nghìn — không đủ một tô nữa nên vòng dừng.
-# Dòng báo cáo vẫn phải in ra ở lượt cuối, dù lúc đó điều kiện đã sai.
+# Dòng bạn điền chỉ được BÁO số tiền, không được sửa nó: sau lượt cuối ví
+# phải còn đúng 10 nghìn — không đủ một tô nữa nên vòng dừng ở đó.
 assert tien_con == 10000
 ```
 
@@ -230,7 +231,7 @@ assert tien_con == 10000
 - kind: attention
   body: Dòng cần điền nằm trong thân vòng, ngay sau dòng trừ tiền. Ở chỗ đó `tien_con` đã mang con số mới của lượt này rồi.
 - kind: strategy
-  body: Câu cần in có kèm một con số đang nằm trong một cái tên, nên dùng đúng lối in kèm giá trị bạn đã quen. Ở lượt cuối con số ấy là 10000 — điều kiện lúc đó đã sai, nhưng thân vẫn chạy nốt dòng này.
+  body: Câu cần in có kèm một con số đang nằm trong một cái tên, nên dùng đúng lối in kèm giá trị bạn đã quen. Một trăm nghìn mua được hai tô, nên đúng một dòng ấy phải in ra hai con số khác nhau — 55000 sau tô đầu, rồi 10000 sau tô thứ hai. Ở lượt cuối điều kiện đã sai, nhưng thân vẫn chạy nốt dòng này.
 - kind: one-line
   body: 'Viết `print(f"Còn {tien_con} đồng")` vào chỗ trống, thụt vào bốn dấu cách cho thẳng hàng với dòng ngay trên nó.'
 :::
@@ -240,6 +241,8 @@ assert tien_con == 10000
   timeoutMs: 4000
 - tier: tests
   timeoutMs: 4000
+- tier: output
+  expect: Còn 55000 đồng
 - tier: output
   expect: Còn 10000 đồng
 :::
@@ -266,7 +269,7 @@ thứ nằm trong điều kiện. Chẳng hạn `to_con_lai = 3`, còn thân ch�
 
 Đầu lượt sau, máy đọc lại điều kiện. Nó đọc được gì? Rồi sau đó thì sao?
 
-Bài sau trả lời, và có kèm chỗ để bấm Dừng.
+Bài sau trả lời.
 ::::
 
 ::::checkpoint{mastery=0.8}

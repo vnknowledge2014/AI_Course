@@ -10,7 +10,7 @@ tier: A
 languages: [python]
 defaultLanguage: python
 level: intro
-estimatedMinutes: 12
+estimatedMinutes: 13
 teaches: [ctrl.condition-path]
 requires: [ctrl.if-nested, logic.and, ctrl.block-indent, core.function-def, core.function-call, core.function-parameter]
 concepts: [ctrl.re-nhanh, logic.phep-logic]
@@ -67,6 +67,12 @@ if la_ngay_trong_tuan:
             print("Ngày đi chợ trong tuần mà tiêu quá tay.")
 ```
 
+Hai dòng `if` đầu không có dấu so sánh nào, và đó không phải chỗ viết thiếu:
+`la_ngay_trong_tuan` với `co_di_cho` đang giữ sẵn `True` từ hai dòng trên cùng,
+nên chúng **đã là** câu trả lời có–không rồi, không cần so sánh gì thêm. Realm 0
+đã chỉ chuyện này lúc dạy `and`. Chỉ dòng thứ ba mới phải hỏi một câu so sánh,
+vì `tien_hom_nay` giữ một con số chứ không giữ đúng/sai.
+
 Máy in ra:
 
 ```text
@@ -88,12 +94,16 @@ ba, và cột 0 là hết đường — không còn gì bao ngoài nữa.
 Ba lần dò cho ra ba câu hỏi. Ghép lại thành một câu tiếng Việt: dòng `print` ấy
 chạy khi **hôm nay là ngày trong tuần, và có đi chợ, và tiêu quá 200 nghìn**.
 
+Việc vừa làm có tên: đi ngược từ một dòng lên tới lề trái để thu đủ mọi lớp cửa
+bao ngoài nó, ấy là dò **đường đi tới một dòng**. Nó là việc bạn làm mỗi lần mở
+code người lạ, và cả bài hôm nay xoay quanh đúng nó.
+
 Chữ **và** lặp lại hai lần trong câu vừa rồi không phải chuyện tình cờ.
 ::::
 
 ::::predict{#mot-cua-dong-giua-duong commitOnce}
-Đổi hai chỗ: hôm nay không đi chợ, nhưng tiêu tới 300 nghìn. Và tầng ngoài cùng
-có thêm một dòng `print` của riêng nó.
+Đổi hai chỗ và thêm hai dòng: hôm nay không đi chợ, nhưng tiêu tới 300 nghìn;
+thêm một `print` trong thân tầng ngoài, và một `print` nữa sát lề trái.
 
 **Trước khi bấm chạy**, bạn đoán màn hình hiện ra những dòng nào?
 
@@ -106,7 +116,7 @@ if la_ngay_trong_tuan:
     print("Đang xem một ngày trong tuần.")
     if co_di_cho:
         if tien_hom_nay > 200000:
-            print("Đi chợ tốn quá tay.")
+            print("Ngày đi chợ trong tuần mà tiêu quá tay.")
 print("Đã ghi vào sổ.")
 ```
 
@@ -187,90 +197,103 @@ là **làm phẳng** — tiếng Anh là *flatten*, từ để bạn tra cứu. 
 thụt lề xuống còn một, và câu điều kiện đọc lên đúng như câu tiếng Việt bạn vừa
 nói ra miệng.
 
-Nhưng có một điều kiện để làm được phép này, và nó chính là chỗ đoạn trong bước
-đoán vừa rồi khác với đoạn ở đây: **thân của tầng ngoài không được có việc gì
-khác** ngoài đúng cái `if` tầng trong.
+Nhưng phép này chỉ làm được khi có đủ **hai** điều kiện. Điều kiện thứ nhất
+chính là chỗ đoạn trong bước đoán vừa rồi khác với đoạn ở đây: **thân của tầng
+ngoài không được có việc gì khác** ngoài đúng cái `if` tầng trong.
 
 Đoạn trong bước đoán có `print("Đang xem một ngày trong tuần.")` nằm ở cột 4.
 Dòng ấy chạy với mọi ngày trong tuần, đi chợ hay không. Gộp cả ba điều kiện lại
 thành một `and` là dòng ấy mất chỗ đứng — nó sẽ bị kéo vào sâu và chỉ còn chạy
 trong những ngày đi chợ tốn kém.
+
+Còn điều kiện thứ hai thì hôm nay chưa có đoạn nào cho bạn thấy, vì nó chỉ lộ ra
+khi khối lồng có thêm đúng một chữ. Bài sau chỉ thẳng vào chữ ấy. Từ giờ tới đó,
+hãy nhớ rằng luật bạn vừa cầm còn thiếu một nửa.
 ::::
 
 ::::code{#viet-lai-cho-phang}
-Quán phở tặng trà cho khách quen trên 65 tuổi. Byte viết đoạn này bằng hai tầng
-lồng:
+Byte nhận một file của quán phở đầu ngõ. Trong file có đúng đoạn này, và không
+ai kèm theo lời giải thích nào:
 
 ```python
-if tuoi_khach > 65:
-    if la_khach_quen:
-        print("Tặng bác một chén trà.")
+if troi_lanh:
+    if tuoi_khach > 65:
+        if la_khach_quen:
+            print("Tặng bác một chén trà nóng.")
 ```
 
-Thân của tầng ngoài không có việc gì khác, nên đoạn này làm phẳng được.
+Chủ quán muốn gộp ba tầng `if` ấy xuống còn một. Thân của mỗi tầng ngoài không
+có việc gì khác, nên đoạn này làm phẳng được — nhưng muốn gộp thì phải biết gộp
+những gì, mà điều đó chỉ có một cách tìm ra: đứng ở dòng `print` rồi dò ngược
+lên. Cột 12 lên cột 8, cột 8 lên cột 4, cột 4 lên cột 0. Ba lớp cửa dò được là
+ba vế của câu điều kiện mới.
 
-Nhưng một câu điều kiện chỉ được coi là viết đúng khi nó xử đúng **mọi** người
-khách bước vào quán, chứ không riêng một bác. Thử với đúng một bác thì câu
-`True` trần trụi cũng qua — mà `True` thì mời trà cho cả quán.
+Một câu điều kiện chỉ được coi là viết đúng khi nó xử đúng **mọi** người khách
+bước vào quán, chứ không riêng một bác. Thử với đúng một bác thì câu `True` trần
+trụi cũng qua — mà `True` thì mời trà cho cả quán.
 
-Nên Byte đặt tên cho việc mời trà, đúng cách Realm 0 đã dạy, rồi gọi nó ba lần
-với ba người khách:
+Nên Byte đặt tên cho việc mời trà, đúng cách Realm 0 đã dạy, rồi gọi nó bốn
+lần, mỗi lần một cảnh khác:
 
-- bác Tư, 70 tuổi, khách quen — phải mời;
-- bác Năm, 70 tuổi, mới ghé lần đầu — không mời;
-- anh Sáu, 40 tuổi, khách quen — không mời.
+- hôm lạnh, bác Tư 70 tuổi, khách quen — phải mời;
+- hôm lạnh, bác Năm 70 tuổi, mới ghé lần đầu — không mời;
+- hôm lạnh, anh Sáu 40 tuổi, khách quen — không mời;
+- hôm nắng, bác Tư 70 tuổi, khách quen — không mời.
 
-Viết điều kiện gộp vào chỗ trống sao cho **cả ba** lần gọi đều xử đúng. Bài chấm
-bằng trọn vẹn màn hình, nên câu trả lời đúng in ra đúng một dòng — dòng của bác
-Tư.
+Viết điều kiện gộp vào chỗ trống sao cho **cả bốn** lần gọi đều xử đúng. Bài
+chấm bằng trọn vẹn màn hình, nên câu trả lời đúng in ra đúng một dòng — dòng của
+bác Tư hôm trời lạnh.
 
 ```python title=starter
-def moi_tra(tuoi_khach, la_khach_quen):
+def moi_tra(troi_lanh, tuoi_khach, la_khach_quen):
     if ___:
-        print("Tặng bác một chén trà.")
+        print("Tặng bác một chén trà nóng.")
 
-moi_tra(70, True)
-moi_tra(70, False)
-moi_tra(40, True)
+moi_tra(True, 70, True)
+moi_tra(True, 70, False)
+moi_tra(True, 40, True)
+moi_tra(False, 70, True)
 ```
 
 ```python title=solution
-def moi_tra(tuoi_khach, la_khach_quen):
-    if tuoi_khach > 65 and la_khach_quen:
-        print("Tặng bác một chén trà.")
+def moi_tra(troi_lanh, tuoi_khach, la_khach_quen):
+    if troi_lanh and tuoi_khach > 65 and la_khach_quen:
+        print("Tặng bác một chén trà nóng.")
 
-moi_tra(70, True)
-moi_tra(70, False)
-moi_tra(40, True)
+moi_tra(True, 70, True)
+moi_tra(True, 70, False)
+moi_tra(True, 40, True)
+moi_tra(False, 70, True)
 ```
 
 ```python title=test
-# Chấm bằng TRỌN VẸN output của ba lần gọi (`match: trim`), không phải một dòng
-# lẻ. Ba người khách được chọn để mỗi câu trả lời hụt đều lộ ra:
-#   `True`                → in ba dòng;
-#   `False`               → không in dòng nào;
-#   `tuoi_khach > 65`     → in dòng của bác Tư VÀ bác Năm;
-#   `la_khach_quen`       → in dòng của bác Tư VÀ anh Sáu;
-#   `... or ...`          → in cả ba dòng.
-# Chỉ `and` cho ra đúng một dòng. Người học chưa viết assert nên khối này
-# không thêm gì; nó ở đây để nói rõ vì sao ba lần gọi là ba, không phải một.
+# Chấm bằng TRỌN VẸN output của bốn lần gọi (`match: trim`), không phải một
+# dòng lẻ. Bốn cảnh được chọn để mọi câu trả lời hụt một vế đều lộ ra:
+#   `True`                          → in bốn dòng;
+#   `False`                         → không in dòng nào;
+#   dò thiếu, chỉ lấy một lớp cửa   → in ba dòng;
+#   dò thiếu, chỉ lấy hai lớp cửa   → in hai dòng;
+#   nối bằng `or` thay vì `and`     → in ba hoặc bốn dòng.
+# Chỉ đủ ba vế nối bằng `and` mới cho ra đúng một dòng — nghĩa là chỉ người dò
+# hết đường đi tới dòng `print` mới qua được. Người học chưa viết assert nên
+# khối này không thêm gì; nó ở đây để nói rõ vì sao bốn lần gọi là bốn.
 pass
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống nằm giữa `if` và dấu hai chấm — chỗ đó chỉ chứa được **một** câu trả lời đúng/sai. Mà bạn đang có hai câu hỏi cần hỏi cùng lúc. Hai cái tên trong ngoặc đơn của `def` chính là hai thứ mỗi lần gọi đưa vào.
+  body: Chỗ trống nằm giữa `if` và dấu hai chấm — chỗ đó chỉ chứa được **một** câu trả lời đúng/sai. Đừng vội điền. Quay lên đoạn trong file của quán, đặt ngón tay vào dòng `print`, rồi đi ngược lên chép ra từng dòng có lề nhỏ hơn. Ba cái tên trong ngoặc đơn của `def` là ba thứ mỗi lần gọi đưa vào.
 - kind: strategy
-  body: Realm 0 đã cho bạn một từ nối buộc hai câu hỏi có–không thành một, và cụm ấy chỉ cho `True` khi cả hai vế cùng đúng. Vế trái là câu hỏi về tuổi; vế phải là cái tên đang giữ sẵn một giá trị đúng/sai, không cần so sánh gì thêm. Thử áp câu bạn định viết lên lần lượt ba người khách trước khi bấm chạy.
+  body: Ba lần dò cho ba câu hỏi, mà cả ba phải cùng đúng thì bác mới có trà. Realm 0 đã cho bạn từ nối buộc hai câu hỏi có–không thành một, và bài này vừa nói thêm rằng dùng nó hai lần liền nhau thì nối được ba vế. Hai trong ba vế là cái tên đang giữ sẵn giá trị đúng/sai, không cần so sánh gì thêm; vế còn lại là câu hỏi về tuổi. Thử áp câu bạn định viết lên lần lượt bốn cảnh trước khi bấm chạy.
 - kind: one-line
-  body: "Viết `tuoi_khach > 65 and la_khach_quen` vào chỗ trống, giữ nguyên dấu hai chấm."
+  body: "Viết `troi_lanh and tuoi_khach > 65 and la_khach_quen` vào chỗ trống, giữ nguyên dấu hai chấm."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: Tặng bác một chén trà.
+  expect: Tặng bác một chén trà nóng.
   match: trim
 :::
 ::::
@@ -282,11 +305,12 @@ Ba cửa hay một cửa đòi ba thứ — với mình là một. Với mắt b
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-Nếu khối lồng nào cũng viết lại được bằng `and`, và viết bằng `and` thì bớt
-được mấy tầng thụt lề, thì còn cần lồng làm gì nữa?
+Điều kiện thứ hai lúc nãy còn để ngỏ. Chữ làm nó lộ ra là `else` — và bạn tự
+thấy được nó làm gì, không cần đợi bài sau nói hộ.
 
-Thử lấy giấy bút làm một phép đổi. Đoạn dưới đây có hai tầng, và tầng trong có
-thêm một `else`:
+Thử lấy giấy bút làm một phép đổi. Đoạn dưới đây **thoả** điều kiện thứ nhất:
+thân tầng ngoài không có việc gì khác ngoài đúng cái `if` tầng trong. Chỉ khác
+một chỗ — tầng trong có thêm một `else`:
 
 ```python
 if la_khach_quen:

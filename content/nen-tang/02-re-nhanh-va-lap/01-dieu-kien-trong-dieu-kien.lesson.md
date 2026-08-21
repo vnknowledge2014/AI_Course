@@ -106,8 +106,9 @@ qua luôn cả cái câu hỏi 500 nghìn — y như người không vào đư�
 ::::
 
 ::::predict{#ngay-tieu-it commitOnce}
-Đổi một con số thôi: hôm nay Byte chỉ tiêu 150 nghìn. Để ý là điều kiện của
-tầng trong đã đổi thành `> 100000`, và `150000 > 100000` là một câu **đúng**.
+Đổi hai chỗ so với đoạn vừa rồi: số tiền còn 150 nghìn, và ngưỡng của tầng
+trong hạ xuống 100 nghìn — nên `150000 > 100000` là một câu **đúng**. Ngoài hai
+chỗ ấy, mọi dòng còn lại giữ nguyên từng chữ.
 
 **Trước khi bấm chạy**, bạn đoán màn hình hiện ra những dòng nào?
 
@@ -117,7 +118,7 @@ tien_hom_nay = 150000
 if tien_hom_nay > 200000:
     print("Hôm nay tiêu hơi nhiều.")
     if tien_hom_nay > 100000:
-        print("Ghi chú lại ngày này.")
+        print("Ngày này phải ghi chú lại.")
 print("Đã ghi vào sổ.")
 ```
 
@@ -126,7 +127,7 @@ Chỉ một dòng: Đã ghi vào sổ.
 :::
 
 :::opt
-Hai dòng: Ghi chú lại ngày này, rồi Đã ghi vào sổ.
+Hai dòng: Ngày này phải ghi chú lại, rồi Đã ghi vào sổ.
 ::why
 Gần đúng ở chỗ bạn kiểm điều kiện tầng trong rất chính xác: `150000 > 100000`
 cho `True` thật. Nếu dòng `if` ấy đứng một mình sát lề trái thì bạn đã đoán
@@ -157,8 +158,9 @@ trường hợp — hôm nay tiêu nhiều hay tiêu ít thì sổ vẫn đượ
 :::opt
 Máy báo lỗi vì một `if` không được đặt bên trong một `if` khác
 ::why
-Gần đúng ở chỗ bạn đang cảnh giác với lỗi khi thấy một cách viết lạ mắt — thói
-quen này giúp bạn rất nhiều ở Realm 0 với `SyntaxError`.
+Gần đúng ở chỗ bạn nhận ra dòng `if` thứ hai đang đứng ở một chỗ chưa từng
+thấy: mọi `if` bạn gặp ở Realm 0 đều viết sát lề trái, còn dòng này lùi vào bốn
+dấu cách — nó nằm trong thân của một `if` khác.
 
 Chỗ lệch: Python không giới hạn chuyện này. Thân của một `if` chứa được mọi
 loại dòng lệnh, kể cả một `if` khác, và trong `if` khác ấy lại chứa được một
@@ -203,49 +205,84 @@ Hai ý nghĩa khác hẳn nhau, và thứ phân biệt chúng chỉ là bốn d�
 ::::
 
 ::::code{#them-mot-tang}
-Sổ chi tiêu hôm nay ghi 600 nghìn. Byte muốn: **trong số những ngày đã tiêu quá
-200 nghìn**, ngày nào quá 500 nghìn thì in ra một câu ghi chú riêng.
+Sổ chi tiêu ghi hai ngày cuối tuần: thứ Bảy 520 nghìn, chủ nhật 480 nghìn. Byte
+muốn: **trong số những ngày đã tiêu quá 200 nghìn**, ngày nào quá 500 nghìn thì
+in thêm một câu ghi chú riêng. Thứ Bảy vượt cả hai mốc; chủ nhật vượt mốc 200
+nghìn nhưng chưa chạm mốc 500 nghìn.
 
-Dòng `print` đã nằm sẵn ở cột 8. Hãy viết dòng còn thiếu ở cột 4 để câu hỏi thứ
-hai nằm đúng bên trong thân của câu hỏi thứ nhất.
+Một câu điều kiện chỉ được coi là viết đúng khi nó xử đúng **cả hai** ngày, chứ
+không riêng ngày tiêu nhiều. Thử với đúng một ngày thì `if True:` cũng qua — mà
+`True` thì ngày nào cũng thành kỷ lục.
+
+Hai chỗ trống nằm sẵn ở cột 4, mỗi khối một chỗ. Viết vào đó câu hỏi thứ hai,
+sao cho nó nằm đúng trong thân của câu hỏi thứ nhất. Bài chấm bằng trọn vẹn màn
+hình, nên câu trả lời đúng in ra đúng ba dòng — chủ nhật không được có dòng kỷ
+lục.
 
 ```python title=starter
-tien_hom_nay = 600000
+tien_thu_bay = 520000
+tien_chu_nhat = 480000
 
-if tien_hom_nay > 200000:
+if tien_thu_bay > 200000:
+    print("Thứ Bảy tiêu hơi nhiều.")
     ___
-        print("Ngày kỷ lục, ghi chú lại.")
+        print("Thứ Bảy là ngày kỷ lục.")
+
+if tien_chu_nhat > 200000:
+    print("Chủ nhật tiêu hơi nhiều.")
+    ___
+        print("Chủ nhật là ngày kỷ lục.")
 ```
 
 ```python title=solution
-tien_hom_nay = 600000
+tien_thu_bay = 520000
+tien_chu_nhat = 480000
 
-if tien_hom_nay > 200000:
-    if tien_hom_nay > 500000:
-        print("Ngày kỷ lục, ghi chú lại.")
+if tien_thu_bay > 200000:
+    print("Thứ Bảy tiêu hơi nhiều.")
+    if tien_thu_bay > 500000:
+        print("Thứ Bảy là ngày kỷ lục.")
+
+if tien_chu_nhat > 200000:
+    print("Chủ nhật tiêu hơi nhiều.")
+    if tien_chu_nhat > 500000:
+        print("Chủ nhật là ngày kỷ lục.")
 ```
 
 ```python title=test
-# Chấm bằng OUTPUT: với 600000, cả hai tầng điều kiện đều đúng nên câu ghi chú
-# phải hiện ra. Người học chưa biết viết assert nên khối này chỉ khẳng định
-# chương trình chạy được tới dòng cuối.
+# Chấm bằng TRỌN VẸN màn hình theo đúng thứ tự dòng (`match: regex`), trên HAI
+# ngày chứ không phải một. Chấm bằng một ngày tiêu nhiều thì không phân biệt
+# được đúng với gặp may: với 520000 thì `if True:`, `if tien_thu_bay > 0:` hay
+# `if tien_thu_bay > 200000:` đều cho ra y hệt đáp án đúng.
+#
+# Hai ngày ở đây được chọn để mỗi câu trả lời hụt đều lộ ra:
+#   `True` / `> 0` / `> 200000`  → chủ nhật in thừa dòng "ngày kỷ lục";
+#   `> 600000` / `if False:`     → thứ Bảy thiếu dòng "ngày kỷ lục";
+#   ngưỡng lệch, ví dụ `> 300000`→ chủ nhật in thừa dòng "ngày kỷ lục";
+#   chép nguyên dòng của thứ Bảy xuống chỗ trống thứ hai
+#                                → chủ nhật lại in thừa dòng "ngày kỷ lục".
+# 520000 và 480000 kẹp mốc 500000 từ hai phía, nên chỉ ngưỡng nằm giữa hai số
+# ấy mới qua được — cổng chấm đúng con số mà gợi ý đã dặn.
+# Người học chưa biết viết assert nên khối này không thêm gì; nó ở đây để nói
+# rõ vì sao hai ngày là hai, không phải một.
 pass
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống nằm ở cột 4 — lùi vào bốn dấu cách so với `if` phía trên. Đó là chỗ dành cho một dòng nằm **trong thân** của `if` đầu tiên.
+  body: Cả hai chỗ trống đều nằm ở cột 4 — lùi vào bốn dấu cách so với `if` ngay phía trên nó. Đó là chỗ dành cho một dòng nằm **trong thân** của `if` đầu tiên, chứ không phải một ngã ba mới sát lề trái.
 - kind: strategy
-  body: Dòng bạn cần viết là một câu hỏi có–không nữa, hỏi xem số tiền có quá 500000 không. Nó có đủ ba phần như mọi câu hỏi kiểu này: từ khoá mở đầu, điều kiện, và dấu hai chấm cuối dòng.
+  body: Mỗi chỗ trống cần một câu hỏi có–không nữa, hỏi xem số tiền của ngày ấy có quá 500000 không. Nó có đủ ba phần như mọi câu hỏi kiểu này: từ khoá mở đầu, điều kiện, và dấu hai chấm cuối dòng. Để ý hai khối hỏi về hai cái tên khác nhau — chép nguyên dòng của thứ Bảy xuống dưới thì chủ nhật cũng bị chấm là ngày kỷ lục.
 - kind: one-line
-  body: "Thay `___` bằng `if tien_hom_nay > 500000:`, giữ nguyên bốn dấu cách phía trước."
+  body: "Thay `___` thứ nhất bằng `if tien_thu_bay > 500000:` và `___` thứ hai bằng `if tien_chu_nhat > 500000:`, giữ nguyên bốn dấu cách phía trước mỗi dòng."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: Ngày kỷ lục, ghi chú lại.
+  match: regex
+  expect: ^Thứ Bảy tiêu hơi nhiều\.\nThứ Bảy là ngày kỷ lục\.\nChủ nhật tiêu hơi nhiều\.\s*$
 :::
 ::::
 

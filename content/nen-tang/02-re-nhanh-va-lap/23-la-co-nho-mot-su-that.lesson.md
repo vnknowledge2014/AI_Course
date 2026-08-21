@@ -10,9 +10,9 @@ tier: A
 languages: [python]
 defaultLanguage: python
 level: intro
-estimatedMinutes: 13
+estimatedMinutes: 14
 teaches: [core.flag-variable]
-requires: [core.boolean, ctrl.break-scope, ctrl.for-each, core.reassign]
+requires: [core.boolean, ctrl.break-scope, ctrl.nested-loop, ctrl.for-each, ctrl.for-range, core.reassign, ctrl.block-indent, core.list-index, core.fstring]
 concepts: [core.bien, core.dung-sai, ctrl.lap]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -135,6 +135,13 @@ vừa chạy xong — dù xong tự nhiên hay bị cắt — giờ xem lá cờ
 trong thân vòng tuần, `break` của nó nói về vòng tuần. Đúng luật bài trước, chưa
 có ngoại lệ nào.
 
+Đoạn này có **hai** dòng `break`, nên câu hỏi bật ra ngay: cái bên trong còn để
+làm gì? Thử bỏ nó đi mà xem — đoạn code vẫn in ra đúng hai dòng ấy. Khác nhau ở
+phần không nhìn thấy: không có nó, vòng ngày dò nốt ngày 5, 6, 7 của tuần 1 dù
+câu trả lời đã có từ ngày 4. `break` bên trong là để **thôi ngay khi đã đủ
+biết** — đúng việc bài "Dừng ngay khi đã đủ biết" đã dạy. `break` bên ngoài là
+để **báo tin ra tầng trên**. Hai dòng cùng một từ khoá, làm hai việc khác nhau.
+
 Lá cờ chính là thứ nối hai vòng lại: vòng trong kéo cờ lên, vòng ngoài nhìn cờ.
 ::::
 
@@ -163,9 +170,9 @@ False
 :::opt
 True
 ::why
-Gần đúng ở chỗ bạn đọc đúng ý định của người viết, và đúng cả chuyện xảy ra ở
-lượt thứ hai: `240 > 200` là đúng, nên `da_vuot` được kéo lên `True` thật. Nếu
-in ra ngay lúc đó, bạn đã thắng.
+Bạn đọc trúng ý định của người viết, và trúng cả chuyện xảy ra ở lượt thứ hai:
+`240 > 200` là đúng, nên `da_vuot` được kéo lên `True` thật. Nếu `print` chạy
+ngay lúc đó, bạn đã thắng.
 
 Chỗ lệch nằm ở hai lượt tiếp theo. Vòng lặp không dừng lại sau lượt hai — nó
 chạy tiếp với 95 rồi 110. Cả hai đều không quá 200, nên máy vào nhánh `else` và
@@ -173,17 +180,17 @@ chạy `da_vuot = False`, dán đè lên lá cờ vừa kéo lên. Lúc `print` 
 lại trong `da_vuot` là câu trả lời của **ngày cuối cùng**, không phải của cả
 tuần.
 
-Đây là lý do một biến cờ chỉ được kéo **lên**, không bao giờ có dòng hạ xuống
-trong thân vòng.
+Với câu hỏi *có ngày nào… không*, đây chính là lý do lá cờ chỉ được kéo **lên**:
+thân vòng không có chỗ cho một dòng hạ nó xuống.
 ::
 :::
 
 :::opt
 Máy in bốn dòng: False, True, False, False — mỗi lượt một dòng
 ::why
-Gần đúng ở chỗ bạn theo dõi rất sát giá trị của `da_vuot` qua từng lượt, và bốn
-giá trị bạn liệt kê đúng từng cái một. Đó là cách đọc code mà người viết chương
-trình giỏi vẫn làm trong đầu.
+Bốn giá trị bạn liệt kê đúng từng cái một: `da_vuot` thật sự lần lượt mang
+`False`, `True`, `False`, `False` qua bốn lượt. Dò được như vậy là đang đọc code
+đúng cái cách người viết chương trình vẫn đọc trong đầu.
 
 Chỗ lệch nằm ở chỗ đứng của `print`. Nó viết sát lề trái, ngoài thân vòng, nên
 nó không thuộc về lượt nào cả — nó chạy đúng một lần, sau khi vòng lặp đã xong
@@ -192,15 +199,16 @@ hẳn. Muốn thấy bốn dòng thì `print` phải lùi vào trong thân vòng
 :::
 
 :::opt
-240
+Máy báo lỗi, vì `da_vuot` bị gán tới bốn lần trong một vòng lặp
 ::why
-Gần đúng ở chỗ bạn nhớ rằng đâu đó trong đoạn này có con số làm nên chuyện, và
-240 đúng là con số ấy.
+Bạn đếm đúng một chuyện có thật: cùng một cái tên bị dán lại bốn lần, mỗi lượt
+một lần. Đoạn code này quả thật ghi đè liên tục lên `da_vuot`.
 
-Chỗ lệch nằm ở thứ `da_vuot` được giao giữ. Không có dòng nào viết
-`da_vuot = tien` cả; hai dòng gán vào nó chỉ đưa `True` hoặc `False`. Một biến
-cờ cố tình chỉ giữ có–không, không giữ con số — và đó vừa là sức mạnh vừa là
-giới hạn của nó.
+Chỗ lệch nằm ở việc Python coi chuyện ghi đè ấy là bình thường. Một cái tên
+không phải cái ô chỉ điền được một lần — nó là mảnh giấy dán, gỡ ra dán sang giá
+trị khác bao nhiêu lần cũng được, đúng như `tong` ở bài cộng dồn đã bị dán lại
+sau mỗi lượt. Máy không kêu một tiếng nào; nó lặng lẽ nhận lần dán cuối cùng —
+và đó mới là chỗ cái bẫy này nằm.
 ::
 :::
 ::::
@@ -208,74 +216,108 @@ giới hạn của nó.
 ::::explain{#la-co-chi-keo-len}
 Rút ra ba điều từ cái bẫy vừa rồi:
 
-- **Cờ chỉ đi một chiều.** Đặt `False` một lần trước vòng, rồi trong vòng chỉ có
-  dòng gán `True`. Thân vòng không bao giờ chứa dòng hạ cờ xuống. Nhánh `else`
-  ở bài trên trông rất hợp lý — mỗi lượt trả lời cho ngày của lượt đó — nhưng
-  câu hỏi bạn đang hỏi là câu hỏi về **cả tuần**, không phải về một ngày.
+- **Với câu hỏi *có ngày nào… không*, cờ chỉ đi một chiều.** Đặt `False` một lần
+  trước vòng, rồi trong vòng chỉ có dòng kéo lên `True`. Hạ cờ trong thân vòng
+  là dán đè lên chuyện đã xảy ra. Nhánh `else` ở bài trên trông rất hợp lý — mỗi
+  lượt trả lời cho ngày của lượt đó — nhưng câu hỏi bạn đang hỏi là câu hỏi về
+  **cả tuần**, không phải về một ngày.
 - **Cờ phải sinh ra trước vòng.** Viết `da_vuot = False` trong thân vòng thì mỗi
-  lượt lại hạ cờ một lần, y hệt cái bẫy trên. Còn không viết nó ở đâu cả thì
-  dòng `if da_vuot:` sau vòng gặp `NameError` — cái tên chưa từng tồn tại.
+  lượt lại hạ cờ một lần, y hệt cái bẫy trên. Còn bỏ hẳn dòng ấy đi thì bài vẫn
+  chạy — nhưng chỉ khi may mắn có ít nhất một ngày vượt ngưỡng, vì lúc đó dòng
+  `da_vuot = True` kịp tạo ra cái tên. Đưa vào một tuần tiêu dè, thân `if` không
+  chạy lần nào, cái tên chưa từng tồn tại, và `if da_vuot:` sau vòng gặp
+  `NameError`.
 - **Đặt tên cho lá cờ nghe ra một câu có–không.** `da_vuot`, `co_khach_moi`,
   `da_ghi_so` — đọc lên là thành một câu trả lời được bằng có hoặc không. Tên
   kiểu `kiem_tra` hay `trang_thai` thì lúc đọc `if kiem_tra:` bạn không biết
   đang hỏi gì.
 
-Một chuyện nữa đáng nhớ, vì nó là lý do lá cờ tồn tại: `da_vuot` được sinh ra
-sát lề trái, nên nó không thuộc về vòng lặp nào. Vòng lặp kết thúc thì các cái
-tên sát lề trái vẫn còn nguyên. Vòng trong chạm được vào nó, vòng ngoài chạm
-được vào nó, và mọi dòng nằm sau cả hai vòng cũng vậy.
+Nói cho hết một chuyện mà người mới hay hiểu ngược. Ở Python, một cái tên đã
+được tạo ra thì còn đó tới hết chương trình — vòng lặp không nhốt cái tên nào
+lại, tên sinh trong thân vòng sống y như tên sinh ngoài vòng. Vậy nên lý do
+`da_vuot = False` phải nằm trước vòng không phải là chuyện thụt lề, mà đúng là
+chuyện vừa nói ở gạch đầu dòng thứ hai: để dù thân `if` không lần nào chạy, dòng
+đọc cờ sau vòng vẫn có thứ để đọc.
+
+Đã sinh ra rồi thì `da_vuot` chạm được từ mọi phía: vòng trong ghi vào nó, vòng
+ngoài đọc nó, và mọi dòng nằm sau cả hai vòng cũng đọc được.
 ::::
 
-::::code{#keo-co-len-khi-gap}
-Byte dò sổ chi tiêu tuần này để trả lời một câu duy nhất: **có ngày nào tiêu quá
-200 nghìn không?**
+::::code{#bao-tin-ra-vong-tuan}
+Sổ chi tiêu tháng trước của Byte, 28 ngày xếp thành 4 tuần. Tháng này tiêu dè
+hơn: mãi tới **ngày 17** mới có ngày đầu tiên quá 200 nghìn. Byte muốn dò tới đó
+là dừng hẳn, không mở nốt tuần 4.
 
-Lá cờ đã được sinh ra trước vòng, và khối `if/else` sau vòng đã sẵn sàng đọc nó.
-Còn thiếu đúng dòng kéo cờ lên khi gặp ngày vượt ngưỡng.
+Trong vòng ngày, lá cờ đã được kéo lên và `break` đã cắt vòng ngày. Còn thiếu
+đúng chỗ **báo tin ra vòng tuần** — không có nó, vòng tuần cứ mở tiếp tuần sau
+như chưa có chuyện gì.
+
+Chỗ trống là **hai dòng**: một dòng đọc lá cờ, và dưới nó một dòng cắt vòng
+tuần.
 
 ```python title=starter
-chi_tieu = [80, 120, 260, 60, 110, 130, 70]
+chi_tieu = [80, 120, 95, 140, 60, 110, 180,
+            70, 90, 100, 85, 140, 75, 190,
+            60, 95, 260, 120, 100, 70, 130,
+            90, 110, 100, 230, 150, 95, 220]
 da_vuot = False
 
-for tien in chi_tieu:
-    if tien > 200:
-        ___
-        break
+for tuan in range(1, 5):
+    print(f"Đang dò tuần {tuan}")
+    for ngay_trong_tuan in range(1, 8):
+        ngay = (tuan - 1) * 7 + ngay_trong_tuan
+        if chi_tieu[ngay - 1] > 200:
+            da_vuot = True
+            break
+    ___
 
 if da_vuot:
-    print("Tuần này có ngày tiêu quá 200 nghìn")
+    print("Tháng này có ngày tiêu quá 200 nghìn")
 else:
-    print("Cả tuần không ngày nào quá 200 nghìn")
+    print("Cả tháng không ngày nào quá 200 nghìn")
 ```
 
 ```python title=solution
-chi_tieu = [80, 120, 260, 60, 110, 130, 70]
+chi_tieu = [80, 120, 95, 140, 60, 110, 180,
+            70, 90, 100, 85, 140, 75, 190,
+            60, 95, 260, 120, 100, 70, 130,
+            90, 110, 100, 230, 150, 95, 220]
 da_vuot = False
 
-for tien in chi_tieu:
-    if tien > 200:
-        da_vuot = True
+for tuan in range(1, 5):
+    print(f"Đang dò tuần {tuan}")
+    for ngay_trong_tuan in range(1, 8):
+        ngay = (tuan - 1) * 7 + ngay_trong_tuan
+        if chi_tieu[ngay - 1] > 200:
+            da_vuot = True
+            break
+    if da_vuot:
         break
 
 if da_vuot:
-    print("Tuần này có ngày tiêu quá 200 nghìn")
+    print("Tháng này có ngày tiêu quá 200 nghìn")
 else:
-    print("Cả tuần không ngày nào quá 200 nghìn")
+    print("Cả tháng không ngày nào quá 200 nghìn")
 ```
 
 ```python title=test
-# Ngày thứ ba tiêu 260 nghìn, nên sau vòng lá cờ phải đang được kéo lên.
-# Thiếu dòng kéo cờ thì `da_vuot` vẫn là False và máy nói ngược lại sự thật.
+# Tuần 1 và tuần 2 không ngày nào quá 200; ngày 17 (tuần 3) là ngày đầu tiên.
+# Đặt đúng tầng thì vòng tuần dừng ngay sau tuần 3, nên cái tên `tuan` — vẫn
+# còn đó sau khi vòng lặp xong — đang giữ số 3.
+# Quên hẳn hai dòng ấy, hoặc thụt chúng vào thân vòng ngày, thì vòng tuần chạy
+# trọn bốn lượt và `tuan` là 4. Viết `break` trần không kèm dòng đọc cờ thì nó
+# cắt ngay từ tuần 1, lúc `da_vuot` còn chưa được kéo lên.
 assert da_vuot
+assert tuan == 3
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống nằm trong nhánh đúng của `if`, ngay trên dòng `break`. Tới được dòng đó nghĩa là máy vừa gặp một ngày quá 200 — và bạn cần ghi lại sự thật ấy vào một chỗ mà dòng `if da_vuot:` bên dưới đọc được.
+  body: Chỗ trống nằm sát dưới vòng ngày, thụt vào bốn dấu cách — tức là trong thân vòng tuần. Máy chạy tới đó khi vòng ngày vừa xong một tuần, dù xong tự nhiên hay bị `break` cắt. Lúc ấy thứ duy nhất cho bạn biết tuần vừa rồi có chuyện hay không là lá cờ.
 - kind: strategy
-  body: Cái tên cần ghi vào đã có sẵn ở dòng thứ hai của chương trình, đang giữ `False`. Việc của bạn là dán lại cái tên ấy lên giá trị ngược lại — giá trị nghĩa là "đúng, đã thấy".
+  body: Dòng trên hỏi lá cờ, dòng dưới làm việc khi cờ đang treo. Nhớ luật bài trước — lệnh cắt ngang luôn nói về vòng gần nhất bao quanh nó — nên muốn nó cắt vòng tuần thì cả hai dòng phải nằm trong thân vòng tuần, chứ không phải trong thân vòng ngày.
 - kind: one-line
-  body: "Viết `da_vuot = True` vào chỗ trống, thụt vào đúng bằng dòng `break` ngay dưới nó."
+  body: "Viết `if da_vuot:` vào chỗ trống, rồi xuống dòng viết `break` thụt vào tám dấu cách."
 :::
 
 :::validate
@@ -284,25 +326,25 @@ assert da_vuot
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Tuần này có ngày tiêu quá 200 nghìn
+  expect: Tháng này có ngày tiêu quá 200 nghìn
 :::
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Cờ đã kéo lên từ ngày thứ ba. Vòng lặp xong lâu rồi mà nó vẫn treo đó.
+Cờ kéo lên ở tuần 3, vòng tuần nhìn thấy và dừng luôn. Tuần 4 mình chưa mở tới.
 ::::
 
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-Bà chủ đọc dòng chữ máy in ra — *"Tuần này có ngày tiêu quá 200 nghìn"* — rồi
+Bà chủ đọc dòng chữ máy in ra — *"Tháng này có ngày tiêu quá 200 nghìn"* — rồi
 hỏi lại ngay câu mà ai cũng sẽ hỏi:
 
 > Ngày nào?
 
 Lá cờ chịu. Nó chỉ có hai giá trị, và cả hai đều không phải một con số ngày.
-Lúc máy chạy tới ngày thứ ba, nó **đã cầm** con số 3 trong tay — rồi nó vứt đi,
-chỉ giữ lại một chữ `True`.
+Lúc máy dừng lại, `ngay` trong tay nó đang là 17 — rồi nó vứt con số ấy đi, chỉ
+giữ lại một chữ `True`.
 
 Chỗ để ghi thì vẫn là chỗ ấy: một cái tên sinh ra trước vòng, được chạm trong
 vòng, đọc lại sau vòng. Chỉ có thứ ghi vào là phải đổi.

@@ -10,9 +10,9 @@ tier: A
 languages: [python]
 defaultLanguage: python
 level: intro
-estimatedMinutes: 12
+estimatedMinutes: 14
 teaches: [core.result-variable]
-requires: [core.flag-variable, ctrl.for-each, ctrl.break, core.reassign]
+requires: [core.flag-variable, ctrl.for-each, ctrl.break, core.reassign, core.augmented-assign]
 concepts: [core.bien, ctrl.tim-kiem, ctrl.lap]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -56,10 +56,32 @@ tên đó có tên gọi riêng: **biến kết quả** — nó giữ kết qu�
 chứ không chỉ giữ tin là đã tìm thấy.
 
 Còn một chi tiết nhỏ phải chuẩn bị trước. Khi bạn duyệt sổ bằng
-`for tien in chi_tieu:`, cái tên `tien` giữ **số tiền**, không ai nói cho bạn
-biết đó là ngày thứ mấy. Muốn biết ngày thì phải tự đếm lượt — đúng cái đếm bạn
-đã dựng ở bài đếm những lượt đáng kể: `ngay = 0` trước vòng, `ngay += 1` ở đầu
-mỗi lượt.
+`for tien in chi_tieu:`, cái tên `tien` giữ **số tiền** của lượt này, và chỉ thế
+thôi. Không ai nói cho bạn biết đó là ngày thứ mấy.
+
+Muốn có con số ngày trong tay thì tự đếm lấy, bằng đúng phép cộng dồn viết gọn
+của bài *Viết gọn phép cộng dồn*: một cái tên đặt bằng 0 trước vòng, rồi `+= 1`
+ở đầu mỗi lượt.
+
+```python title=readonly
+chi_tieu = [80, 120, 95]
+ngay = 0
+
+for tien in chi_tieu:
+    ngay += 1
+    print(f"Ngày {ngay} tiêu {tien} nghìn")
+```
+
+```text title=readonly
+Ngày 1 tiêu 80 nghìn
+Ngày 2 tiêu 120 nghìn
+Ngày 3 tiêu 95 nghìn
+```
+
+Vòng lặp đưa `tien` vào tay bạn; `ngay` là thứ bạn tự dựng lấy. Hai dòng ấy
+không phải phần mới của hôm nay — chúng chỉ là `+= 1` đặt vào chỗ nhỏ nhất mà nó
+dùng được. Có chúng rồi thì lúc `if` chạy đúng, trong tay bạn có sẵn **cả** số
+tiền lẫn số ngày, và bạn được chọn ghi cái nào.
 ::::
 
 ::::example{#ghi-so-thay-vi-ghi-true}
@@ -108,9 +130,9 @@ Ngày đầu tiên vượt ngưỡng: ngày 4
 
 - `da_vuot = True` → `ngay_tim_duoc = ngay`.
 
-Hai dòng còn lại chỉ là bộ đếm lượt: `ngay = 0` trước vòng và `ngay += 1` ở
-đầu thân. Chúng không phải phần mới của bài — chúng có mặt để lúc `if` chạy
-đúng, trong tay bạn đang có sẵn con số ngày để ghi.
+Hai dòng còn lại là bộ đếm bạn vừa dựng ở trên: `ngay = 0` trước vòng và
+`ngay += 1` ở đầu thân. Chúng có mặt để lúc `if` chạy đúng, trong tay bạn đang
+có sẵn con số ngày để ghi.
 
 Và `break` vẫn ở nguyên chỗ cũ, vẫn làm đúng việc cũ: câu hỏi là **ngày đầu
 tiên**, nên gặp một ngày là đủ biết, không cần dò nốt.
@@ -119,6 +141,7 @@ Nếu câu hỏi đổi thành "ngày đầu tiên vượt ngưỡng ấy tiêu 
 một hình dạng, chỉ đổi thứ ghi vào:
 
 ```python title=readonly
+chi_tieu = [80, 120, 95, 240, 60, 110, 210]
 tien_tim_duoc = 0
 
 for tien in chi_tieu:
@@ -132,6 +155,9 @@ print(f"Tiêu {tien_tim_duoc} nghìn")
 ```text title=readonly
 Tiêu 240 nghìn
 ```
+
+Để ý là bộ đếm biến mất khỏi đoạn này. Lần này không cần tới nó — thứ phải ghi
+là `tien`, mà `tien` thì vòng lặp đã đưa sẵn vào tay bạn mỗi lượt.
 
 Ghi `ngay` thì bạn giữ được **vị trí**; ghi `tien` thì bạn giữ được **giá trị**.
 Cái tên trung thành với đúng thứ bạn ghi vào nó, không tự đoán thêm.
@@ -177,8 +203,9 @@ cuối là ngày 7.
 :::opt
 240
 ::why
-Gần đúng ở chỗ bạn nhớ rằng đâu đó trong đoạn này có một con số làm nên chuyện,
-và 240 đúng là số tiền của ngày vượt ngưỡng đầu tiên.
+Bạn đọc dòng ghi theo đúng nghĩa của nó — *giữ lại thứ vừa làm nên chuyện* — và
+ở ngày 2 thì thứ làm nên chuyện quả thật là số tiền 240. Suy luận ấy chính là
+luận điểm của bài, chỉ đang gắn nhầm vào một dòng khác.
 
 Chỗ lệch nằm ở vế phải của dòng ghi. Dòng đó viết `ngay_tim_duoc = ngay`, nên
 thứ được ghi vào là số **thứ tự ngày**, không phải số tiền. Muốn giữ số tiền thì
@@ -189,9 +216,8 @@ vế phải phải là `tien` — như đoạn `tien_tim_duoc` ở trên.
 :::opt
 0
 ::why
-Gần đúng ở chỗ bạn nhìn ra `ngay_tim_duoc` được đặt bằng 0 trước vòng, và bạn
-đang cẩn thận với chuyện cái tên nào còn giữ gì sau khi vòng lặp kết thúc — đó
-là câu hỏi rất đáng hỏi.
+Gần đúng ở chỗ bạn nhìn ra `ngay_tim_duoc` được đặt bằng 0 trước vòng, rồi hỏi
+tiếp một câu rất đáng hỏi: vòng lặp chạy xong thì cái tên ấy còn giữ được gì.
 
 Chỗ lệch: thân vòng lặp không phải một căn phòng riêng có cửa đóng. Dòng
 `ngay_tim_duoc = ngay` dán lại đúng cái tên đã sinh ra ở trên, chứ không tạo ra
@@ -213,67 +239,86 @@ Cả hai đều có lúc dùng. "Ngày đầu tiên tiêu quá 200" cần `break
 tiêu quá 200" thì bỏ `break` đi là xong. Một từ khoá quyết định câu trả lời, nên
 trước khi viết, hãy đọc lại câu hỏi xem nó hỏi đầu hay cuối.
 
-Ba điều nữa gói lại cho gọn:
+Hai điều nữa gói lại cho gọn:
 
 - **Biến kết quả nói được nhiều hơn lá cờ.** Nó vừa cho biết chuyện đã xảy ra,
   vừa cho biết xảy ra ở đâu. Lá cờ vẫn có chỗ của nó — khi bạn thật sự chỉ cần
   có–không thì `True/False` đọc lên rõ nghĩa hơn một con số.
-- **Bạn đã gặp hình dạng này ở bài giữ lại kỷ lục.** Ở đó cái tên cũng sinh ra
-  trước vòng và bị ghi đè trong vòng, chỉ khác luật ghi: kỷ lục thì *so sánh rồi
-  mới thay* và phải quét hết; tìm kiếm thì *gặp là ghi rồi dừng*.
 - **Đặt tên theo thứ nó giữ.** `ngay_tim_duoc`, `tien_cao_nhat`, `ban_dat_truoc`
   — đọc lên là biết trong đó có gì. Tên kiểu `ket_qua` hay `x` thì mười dòng sau
   bạn phải dò ngược lên mới nhớ ra nó đang giữ ngày hay giữ tiền.
 ::::
 
 ::::code{#ghi-lai-ngay-tim-duoc}
-Vẫn cuốn sổ tuần của bài trước — ngày thứ ba tiêu 260 nghìn. Lần này bà chủ
-không hỏi *có hay không* nữa, bà hỏi thẳng: **ngày nào?**
+Bà chủ đưa ra **hai** cuốn sổ — tuần này và tuần trước — rồi hỏi cùng một câu
+cho cả hai. Không phải *có hay không* nữa, mà là: **ngày nào?**
 
-Bộ đếm ngày đã dựng sẵn, `break` đã nằm đúng chỗ. Còn thiếu đúng dòng ghi lại
-ngày vừa tìm được.
+Bộ đếm đã dựng sẵn ở cả hai đoạn, `break` đã nằm đúng chỗ. Còn thiếu đúng dòng
+ghi lại ngày vừa tìm được — một dòng cho mỗi cuốn sổ.
 
 ```python title=starter
-chi_tieu = [80, 120, 260, 60, 110, 130, 70]
-ngay = 0
-ngay_tim_duoc = 0
+tuan_nay = [80, 120, 260, 60, 110, 130, 70]
+tuan_truoc = [95, 70, 110, 130, 240, 90, 60]
 
-for tien in chi_tieu:
+ngay = 0
+ngay_tuan_nay = 0
+for tien in tuan_nay:
     ngay += 1
     if tien > 200:
         ___
         break
 
-print(f"Ngày đầu tiên vượt ngưỡng: ngày {ngay_tim_duoc}")
+ngay = 0
+ngay_tuan_truoc = 0
+for tien in tuan_truoc:
+    ngay += 1
+    if tien > 200:
+        ___
+        break
+
+print(f"Tuần này: ngày {ngay_tuan_nay}")
+print(f"Tuần trước: ngày {ngay_tuan_truoc}")
 ```
 
 ```python title=solution
-chi_tieu = [80, 120, 260, 60, 110, 130, 70]
-ngay = 0
-ngay_tim_duoc = 0
+tuan_nay = [80, 120, 260, 60, 110, 130, 70]
+tuan_truoc = [95, 70, 110, 130, 240, 90, 60]
 
-for tien in chi_tieu:
+ngay = 0
+ngay_tuan_nay = 0
+for tien in tuan_nay:
     ngay += 1
     if tien > 200:
-        ngay_tim_duoc = ngay
+        ngay_tuan_nay = ngay
         break
 
-print(f"Ngày đầu tiên vượt ngưỡng: ngày {ngay_tim_duoc}")
+ngay = 0
+ngay_tuan_truoc = 0
+for tien in tuan_truoc:
+    ngay += 1
+    if tien > 200:
+        ngay_tuan_truoc = ngay
+        break
+
+print(f"Tuần này: ngày {ngay_tuan_nay}")
+print(f"Tuần trước: ngày {ngay_tuan_truoc}")
 ```
 
 ```python title=test
-# Ngày thứ ba tiêu 260 nghìn, nên sau vòng biến kết quả phải giữ số 3.
-# Ghi nhầm `tien` vào thì nó giữ 260; quên hẳn dòng ghi thì nó vẫn là 0.
-assert ngay_tim_duoc == 3
+# Tuần này vượt ngưỡng ở ngày 3, tuần trước ở ngày 5 — hai con số khác nhau.
+# Chép thẳng một con số vào chỗ trống thì đúng được một cuốn sổ và sai cuốn kia.
+# Ghi nhầm `tien` thì nó giữ 260 và 240; quên hẳn dòng ghi thì cả hai vẫn là 0.
+assert ngay_tuan_nay == 3
+assert ngay_tuan_truoc == 5
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống nằm trong nhánh đúng của `if`, ngay trên `break`. Tới được dòng đó nghĩa là ngày đang xét vượt ngưỡng — và ngay lúc ấy, cái tên nào đang giữ số thứ tự của ngày này?
+  body: Hai chỗ trống nằm trong nhánh đúng của `if`, ngay trên `break`. Tới được dòng đó nghĩa là ngày đang xét vượt ngưỡng — và ngay lúc ấy, cái tên nào đang giữ số thứ tự của ngày này?
 - kind: strategy
-  body: Bạn cần dán cái tên `ngay_tim_duoc` lên giá trị mà bộ đếm đang giữ. Vế trái là cái tên sinh ra ở dòng thứ ba; vế phải là cái tên vừa được cộng thêm 1 ở đầu lượt.
+  body: Mỗi chỗ trống dán một cái tên kết quả lên giá trị mà bộ đếm đang giữ. Vế trái là cái tên sinh ra ngay phía trên vòng ấy; vế phải là cái tên vừa được cộng thêm 1 ở đầu lượt. Hai vòng dùng hai tên kết quả khác nhau, nhưng chung một bộ đếm.
 - kind: one-line
-  body: "Viết `ngay_tim_duoc = ngay` vào chỗ trống, thụt vào đúng bằng dòng `break` ngay dưới nó."
+  body: Chỗ trống thứ nhất viết `ngay_tuan_nay = ngay`, chỗ thứ hai viết `ngay_tuan_truoc = ngay` — cả hai thụt vào đúng bằng dòng `break` ngay dưới nó.
 :::
 
 :::validate
@@ -282,35 +327,39 @@ assert ngay_tim_duoc == 3
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Ngày đầu tiên vượt ngưỡng: ngày 3
+  expect: Tuần này: ngày 3
 :::
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Ngày 3. Mình không gật đầu suông nữa — mình chỉ được đúng chỗ trong sổ.
+Ngày 3 và ngày 5. Hai chỗ trống bạn điền vào có cùng một hình dạng, mà hai cuốn
+sổ ra hai câu trả lời khác nhau — vì bạn ghi cái tên đang cầm con số, chứ không
+chép con số.
 ::::
 
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-Nhìn lại dòng bạn viết **trước** vòng lặp: `ngay_tim_duoc = 0`. Byte đặt số 0 vào
-đó mà chưa nói vì sao, và bạn cũng chưa cần dùng tới nó — vì cả ba cuốn sổ hôm
-nay đều có ít nhất một ngày vượt ngưỡng, nên dòng ghi luôn được chạy.
+Nhìn lại hai dòng bạn viết **trước** mỗi vòng lặp: `ngay_tuan_nay = 0` và
+`ngay_tuan_truoc = 0`. Byte đặt số 0 vào đó mà chưa nói vì sao, và bạn cũng chưa
+cần dùng tới nó — vì mọi cuốn sổ hôm nay đều có ít nhất một ngày vượt ngưỡng,
+nên dòng ghi luôn được chạy.
 
-Bây giờ đưa máy một tuần tiêu dè: `[80, 120, 95, 60, 110, 130, 70]`. Không ngày
-nào quá 200. Thân `if` không lần nào chạy, không ai ghi gì vào `ngay_tim_duoc`
-cả, và nó vẫn giữ nguyên thứ bạn đặt lúc đầu.
+Bây giờ đưa máy cuốn sổ thứ ba, một tuần tiêu dè:
+`[80, 120, 95, 60, 110, 130, 70]`. Không ngày nào quá 200. Thân `if` không lần
+nào chạy, không ai ghi gì vào biến kết quả cả, và nó vẫn giữ nguyên thứ bạn đặt
+lúc đầu.
 
 Máy in ra:
 
 ```text title=readonly
-Ngày đầu tiên vượt ngưỡng: ngày 0
+Tuần trước nữa: ngày 0
 ```
 
 Bà chủ đọc dòng đó và đi tìm ngày 0 trong cuốn lịch. Không có ngày 0 trong tháng
 nào cả.
 
-Vậy trước vòng, `ngay_tim_duoc` nên được đặt bằng gì — và sau vòng, làm sao bạn
+Vậy trước vòng, biến kết quả nên được đặt bằng gì — và sau vòng, làm sao bạn
 biết được rằng con số trong đó là một ngày thật, chứ không phải cái bạn đặt sẵn
 từ đầu?
 

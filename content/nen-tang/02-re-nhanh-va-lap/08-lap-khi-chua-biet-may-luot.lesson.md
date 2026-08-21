@@ -10,9 +10,9 @@ tier: A
 languages: [python]
 defaultLanguage: python
 level: intro
-estimatedMinutes: 13
+estimatedMinutes: 14
 teaches: [ctrl.while]
-requires: [ctrl.if, ctrl.for-range, core.reassign]
+requires: [ctrl.if, ctrl.for-range, ctrl.for-each, ctrl.comparison, core.reassign, core.input, core.input-returns-str, core.fstring, err.name-error]
 concepts: [ctrl.lap, ctrl.re-nhanh]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -108,7 +108,31 @@ Và đây là câu trả lời cho bài trước: con số lượt **không nằ
 code cả. Nó là hệ quả của việc nồi có bao nhiêu tô. Với `while`, bạn thôi không
 đếm lượt nữa — bạn nói ra điều kiện để còn được lặp tiếp.
 
-Đúng chuyện hỏi lại khách hôm trước, viết bằng `while`:
+Còn một chuyện nữa: chuyện hỏi lại khách hôm trước. Trước khi viết nó, phải biết
+máy nhận về **cái gì** khi khách bấm Enter mà chưa gõ chữ nào.
+
+Realm 0 ví `input` như người phụ quán đứng nghe khách rồi ghi lên tờ giấy: khách
+nói *"hai lăm"*, tờ giấy có hai nét mực. Khách bấm Enter suông là khách chẳng
+nói gì — người phụ quán vẫn đưa lại tờ giấy, chỉ là tờ giấy **không có nét mực
+nào**. Python viết tờ giấy trắng ấy là `""`: hai dấu nháy dính nhau, ở giữa
+trống không.
+
+Không cần tin, hỏi thẳng máy:
+
+```python title=readonly
+tra_loi = input("Số tiền hôm nay: ")
+print(tra_loi == "")
+```
+
+Người ngồi trước máy bấm Enter luôn, không gõ gì:
+
+```text
+Số tiền hôm nay: 
+True
+```
+
+Vậy là bạn có sẵn một câu đúng-sai nói được ý *"khách chưa gõ gì"* — đúng loại
+câu mà `while` cần:
 
 ```python title=readonly
 tra_loi = input("Số tiền hôm nay: ")
@@ -118,6 +142,29 @@ while tra_loi == "":
 
 print(f"Đã ghi: {tra_loi}")
 ```
+
+Đi lại đúng đường máy đi, với một khách bấm Enter suông hai lần rồi mới gõ
+`50000`:
+
+- Dòng `input` **đầu tiên** chạy trước khi vào vòng. Khách bấm Enter suông, nên
+  `tra_loi` giữ `""`.
+- **Đầu lượt 1** — `"" == ""` cho `True`. Vào thân: máy hỏi lại, khách lại bấm
+  Enter suông, `tra_loi` vẫn `""`. Hết thân, quay lại dòng `while`.
+- **Đầu lượt 2** — vẫn `True`. Máy hỏi lại, lần này khách gõ `50000`, `tra_loi`
+  giữ `"50000"`. Hết thân, quay lại.
+- **Đầu lượt 3** — `"50000" == ""` cho `False`. Máy không vào thân nữa, nó nhảy
+  xuống và in `Đã ghi: 50000`.
+
+Hai chỗ dễ vấp trong đoạn này:
+
+- **Sao phải hỏi một lần trước khi vào vòng?** Vì dòng `while` cần có sẵn một câu
+  trả lời để mà xem. Chưa hỏi lần nào thì `tra_loi` chưa tồn tại, mà cái chưa
+  tồn tại thì máy không xem được — nó dừng ngay tại dòng `while` và báo
+  `NameError`.
+- **Sao dòng `input` xuất hiện hai lần?** Vì hai dòng ấy làm hai việc khác nhau:
+  dòng ngoài hỏi lần đầu, dòng trong hỏi **lại**. Ở nồi nước dùng, con số mới của
+  mỗi lượt đến từ một phép tính (`to_con_lai - 1`); ở đây nó đến từ người đang
+  ngồi gõ.
 
 Khách bấm Enter suông mấy lần thì máy hỏi lại đúng mấy lần. Không dòng nào
 trong đoạn code có con số ấy, và cũng không cần.
@@ -197,21 +244,20 @@ Không lối nào cao cấp hơn lối nào. Chọn lối nào là trả lời m
 lại từng lượt?*
 
 > Cẩn thận: `while` là câu lệnh đầu tiên có thể khiến chương trình chạy mãi
-> không dừng. Để ý trong cả ba đoạn code hôm nay, thân vòng luôn có một dòng
+> không dừng. Để ý trong cả ba vòng lặp hôm nay, thân vòng luôn có một dòng
 > làm thứ nằm trong điều kiện đổi đi — nồi vơi một tô, ví bớt một tô phở, câu
-> trả lời được hỏi lại. Dòng đó quan trọng tới mức có hẳn một bài riêng cho nó,
-> ở ngay phía trước.
+> trả lời được hỏi lại. Dòng đó quan trọng tới mức có hẳn một bài riêng cho nó.
 ::::
 
 ::::code{#mua-cho-toi-khi-het-tien}
-Byte cầm 250 nghìn tiền chợ. Mỗi món ở chợ hết 60 nghìn, và Byte mua chừng nào
+Byte cầm 240 nghìn tiền chợ. Mỗi món ở chợ hết 60 nghìn, và Byte mua chừng nào
 còn đủ tiền cho một món nữa.
 
 Số món mua được thì bạn đừng đếm hộ máy — hãy viết điều kiện để nó tự dừng đúng
 lúc. Điền vào chỗ trống.
 
 ```python title=starter
-tien_cho = 250000
+tien_cho = 240000
 
 while ___:
     print("Mua thêm một món")
@@ -221,7 +267,7 @@ print(f"Còn lại {tien_cho} đồng, không mua nữa")
 ```
 
 ```python title=solution
-tien_cho = 250000
+tien_cho = 240000
 
 while tien_cho >= 60000:
     print("Mua thêm một món")
@@ -231,8 +277,10 @@ print(f"Còn lại {tien_cho} đồng, không mua nữa")
 ```
 
 ```python title=test
-# Vòng phải dừng đúng lúc số tiền còn lại không đủ cho một món nữa.
-assert tien_cho == 10000
+# Ranh giới nằm ở đúng lượt thứ tư: lúc ấy trong túi còn vừa vặn 60 nghìn, và
+# vừa vặn 60 nghìn thì vẫn mua được — nên tiêu hết sạch, còn lại 0 đồng.
+# Điều kiện bỏ sót điểm bằng sẽ dừng sớm một lượt và để lại 60 nghìn.
+assert tien_cho == 0
 ```
 
 :::hints
@@ -250,7 +298,7 @@ assert tien_cho == 10000
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Còn lại 10000 đồng, không mua nữa
+  expect: Còn lại 0 đồng, không mua nữa
 :::
 ::::
 
@@ -267,8 +315,12 @@ dấu hai chấm, cùng thân thụt vào. Khác đúng chỗ nó quay lại.
 Vậy nó xem lại điều kiện vào lúc nào?
 
 Nhìn thân vòng lúc nãy: nó có hai dòng, và dòng dưới trừ đi 60 nghìn. Ở lượt
-cuối, ngay sau dòng trừ ấy, `tien_cho` tụt xuống 10000 — điều kiện
-`tien_cho >= 60000` lúc đó đã sai rồi, mà thân thì vẫn còn dở.
+cuối, ngay sau dòng trừ ấy, `tien_cho` tụt xuống 0 — điều kiện
+`tien_cho >= 60000` lúc đó đã sai rồi. Thân vòng ấy vừa vặn hết ngay tại đó, nên
+bạn không nhìn thấy được chuyện gì xảy ra tiếp theo.
+
+Giờ thêm một dòng nữa vào **sau** dòng trừ, chẳng hạn một câu báo lại số tiền
+còn trong túi. Ở lượt cuối, dòng ấy có được chạy không?
 
 Hai cách hiểu đều nghe lọt tai:
 

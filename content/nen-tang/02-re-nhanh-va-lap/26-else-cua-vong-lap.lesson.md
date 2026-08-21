@@ -200,58 +200,89 @@ Nhánh "không tìm thấy" nằm ngay tại chỗ, dính liền với vòng l�
 ::::
 
 ::::code{#chuyen-tau-cuoi-ngay}
-Ga tàu có năm chuyến trong ngày, khởi hành lúc 5, 7, 9, 11 và 13 giờ. Bạn ra ga
-lúc 14 giờ và muốn biết chuyến gần nhất còn đi được.
+Ga tàu có năm chuyến trong ngày, khởi hành lúc 5, 7, 9, 11 và 13 giờ. Bạn ra ga,
+nhìn đồng hồ, rồi muốn biết chuyến gần nhất còn đi được là chuyến nào.
 
-Đoạn dưới đã đi qua từng chuyến và đã có `break`. Chỉ thiếu đúng một từ khoá cho
-nhánh **đi hết mà không gặp chuyến nào**.
+Đoạn dưới là **hai** lần ra ga, mỗi lần một khối. Hai khối giống nhau từng chữ
+một, chỉ khác đúng con số trong `gio_muon`: lần đầu bạn tới lúc 8 giờ và còn kịp
+chuyến; lần sau tới lúc 14 giờ, muộn hơn cả chuyến cuối cùng.
+
+Cả hai khối đã đi qua từng chuyến và đã có `break`. Cùng một chỗ trống, điền hai
+lần y hệt nhau. Điền đúng thì hai khối tự khắc nói ra hai chuyện khác nhau — vì
+cái quyết định câu trả lời là vòng lặp có gặp `break` hay không, chứ không phải
+câu bạn gõ.
 
 ```python title=starter
 gio_tau = [5, 7, 9, 11, 13]
-gio_muon = 14
 
+gio_muon = 8
 for gio in gio_tau:
     if gio >= gio_muon:
-        print(f"Chuyến gần nhất: {gio} giờ")
+        print(f"Ra ga lúc {gio_muon} giờ: đi được chuyến {gio} giờ")
         break
 ___:
-    print("Hôm nay hết tàu rồi")
+    print(f"Ra ga lúc {gio_muon} giờ: hôm nay hết tàu rồi")
+
+gio_muon = 14
+for gio in gio_tau:
+    if gio >= gio_muon:
+        print(f"Ra ga lúc {gio_muon} giờ: đi được chuyến {gio} giờ")
+        break
+___:
+    print(f"Ra ga lúc {gio_muon} giờ: hôm nay hết tàu rồi")
 ```
 
 ```python title=solution
 gio_tau = [5, 7, 9, 11, 13]
-gio_muon = 14
 
+gio_muon = 8
 for gio in gio_tau:
     if gio >= gio_muon:
-        print(f"Chuyến gần nhất: {gio} giờ")
+        print(f"Ra ga lúc {gio_muon} giờ: đi được chuyến {gio} giờ")
         break
 else:
-    print("Hôm nay hết tàu rồi")
+    print(f"Ra ga lúc {gio_muon} giờ: hôm nay hết tàu rồi")
+
+gio_muon = 14
+for gio in gio_tau:
+    if gio >= gio_muon:
+        print(f"Ra ga lúc {gio_muon} giờ: đi được chuyến {gio} giờ")
+        break
+else:
+    print(f"Ra ga lúc {gio_muon} giờ: hôm nay hết tàu rồi")
 ```
 
 ```python title=test
-# Chấm bằng OUTPUT. Khối này khẳng định vòng lặp đã đi trọn cả năm chuyến —
-# cái tên trong vòng còn giữ giá trị của lượt cuối cùng, nghĩa là không lượt
-# nào gặp `break`.
+# Chấm bằng TRỌN VẸN hai dòng output, không phải một dòng.
+#
+# Một khối thì không phân biệt được gì: gõ `if True` vào chỗ trống cũng in ra
+# đúng câu mà khối ấy mong đợi. Hai khối thì `if True` lộ ngay — khối đầu in ra
+# cả hai câu cùng lúc, vừa "đi được chuyến 9 giờ" vừa "hôm nay hết tàu rồi",
+# thành ba dòng trên màn hình thay vì hai.
+#
+# Khối này khẳng định thêm rằng vòng thứ hai đã đi trọn năm chuyến: cái tên
+# `gio` còn giữ giờ của chuyến cuối cùng, nghĩa là không lượt nào gặp `break`.
 assert gio == 13
 assert gio_muon == 14
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống nằm ở đầu dòng, sát lề trái — thẳng hàng với chữ `for` phía trên, chứ không thẳng hàng với `if`. Mức thụt lề đó cho biết từ khoá này thuộc về ai.
+  body: Hai chỗ trống nằm ở cùng một vị trí trong hai khối: đầu dòng, sát lề trái — thẳng hàng với chữ `for` phía trên, chứ không thẳng hàng với `if`. Mức thụt lề đó cho biết từ khoá này thuộc về ai.
 - kind: strategy
-  body: Nhánh cần viết là nhánh chạy khi vòng đi hết lượt mà không lần nào gặp `break`. Python dùng lại đúng một từ khoá bạn đã biết cho việc này, chỉ đổi chỗ đặt nó.
+  body: Nhánh cần viết là nhánh chỉ chạy khi vòng đi hết lượt mà không lần nào gặp `break`. Python dùng lại đúng một từ khoá bạn đã biết cho việc này, chỉ đổi chỗ đặt nó. Cùng từ khoá ấy điền vào cả hai chỗ — hai lần ra ga khác nhau là do con số `gio_muon` khác nhau, không phải do bạn gõ khác đi.
 - kind: one-line
-  body: "Viết `else` vào chỗ trống, giữ nguyên dấu hai chấm ở cuối dòng."
+  body: "Viết `else` vào **cả hai** chỗ trống, giữ nguyên dấu hai chấm ở cuối dòng."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: output
-  expect: Hôm nay hết tàu rồi
+  match: regex
+  expect: ^Ra ga lúc 8 giờ: đi được chuyến 9 giờ\nRa ga lúc 14 giờ: hôm nay hết tàu rồi\s*$
 :::
 ::::
 

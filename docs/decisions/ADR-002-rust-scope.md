@@ -83,3 +83,43 @@ thật, rồi đòi `byte-rust` **hoặc** phát đúng mã lỗi **hoặc** tr�
 - `crates/byte-rust` chuyển từ `packages/` sang `crates/` theo bố cục monorepo.
 - Mọi thông báo hiện đang nói "chưa hỗ trợ" ở dạng lỗi thường (ví dụ `BR0542`
   macro) phải đổi sang kết cục `ChuaHoTro`.
+
+---
+
+## Phụ lục — Trạng thái đo được, 2026-08-21
+
+Cổng đối chiếu `rustc` (`crates/byte-rust-conformance`, chạy `--am`):
+
+| | |
+|---|---|
+| Mutant cơ học | **0/58 nhận oan** |
+| Corpus âm thủ công | **3/100 nhận oan** (khởi điểm 61/100) |
+| Từ chối oan | **0** — không mã Rust hợp lệ nào bị chặn |
+| Test workspace | 113 xanh |
+
+Ba ca còn lọt, và vì sao chúng còn lọt:
+
+| Ca | rustc | Vì sao AST không đủ |
+|---|---|---|
+| `hai_muon_mut_qua_hai_cau_lenh` | E0499 | Phải biết hai tham chiếu có CÙNG SỐNG ở một thời điểm không |
+| `doc_bien_khi_dang_bi_muon_mut` | E0502 | Như trên — vùng sống của một mượn, không phải vị trí cú pháp của nó |
+| `tham_chieu_song_lau_hon_thu_no_tro_toi` | E0597 | Cần so sánh vòng đời hai vùng nhớ |
+
+Cả ba đều quy về **vùng sống**, và vùng sống được định nghĩa trên đồ thị luồng
+điều khiển chứ không trên cây cú pháp. Đây đúng là kết luận §2 đã đưa ra trước
+khi viết một dòng mã nào — nó không đổi.
+
+Những gì §2 nói là "không làm được trên AST" hoá ra có ba lớp khác nhau, và
+phân biệt được ba lớp ấy mới là phần đáng học:
+
+1. **Không cần luồng, chỉ cần nhìn đúng chỗ.** `cong(&mut x, &mut x)` — hai
+   mượn trong cùng một lời gọi thì chắc chắn sống cùng lúc. Trả `&<biến cục
+   bộ>` — chỉ cần biết cái tên sinh ra ở đâu. Cả hai đã vá (BR0355, BR0356).
+2. **Không cần luồng, chỉ cần bảng chữ ký.** `fn an(self)` nuốt bộ nhận, còn
+   `fn an(&self)` thì không — chữ ký nằm ngay trong khối `impl` của chính
+   chương trình đó. Đã vá.
+3. **Thật sự cần luồng.** Ba ca ở bảng trên.
+
+Bài học cho những đợt sau: khi một luật "cần phân tích luồng", hãy hỏi lại
+xem nó có thật sự cần không, hay chỉ cần một thông tin đang nằm sẵn đâu đó mà
+chưa ai nối vào.

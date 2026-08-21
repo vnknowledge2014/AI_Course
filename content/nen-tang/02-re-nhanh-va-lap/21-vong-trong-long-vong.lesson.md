@@ -159,10 +159,11 @@ lùi vào trong thân vòng `ban`, nên nó chạy lại trọn vẹn cho mỗi 
 ::::explain{#bon-dieu-de-vap}
 Bốn chuyện đáng cất vào túi:
 
-- **Thụt lề là thứ duy nhất nói ai nằm trong ai.** Trong ví dụ lịch trên, kéo
-  dòng `for ngay` ra sát lề bằng `for tuan` thì hai vòng thành hai vòng nối
-  đuôi: máy in hai dòng tuần trước, xong hẳn, rồi mới in ba dòng ngày — năm dòng
-  thay vì tám. Cũng đoạn code ấy, chỉ đổi bốn dấu cách, kết quả khác hẳn.
+- **Thụt lề là thứ duy nhất nói ai nằm trong ai.** Trong ví dụ 2 tuần × 3 ngày
+  ở trên, kéo dòng `for ngay` ra sát lề bằng `for tuan` thì hai vòng thành hai
+  vòng nối đuôi: máy in hai dòng tuần trước, xong hẳn, rồi mới in ba dòng ngày
+  — năm dòng thay vì tám. Cũng đoạn code ấy, chỉ đổi bốn dấu cách, kết quả khác
+  hẳn.
 - **Hai vòng cần hai cái tên khác nhau.** Đặt cả hai là `ngay` thì máy không
   báo lỗi, nhưng vòng trong dán đè lên cái tên đó mỗi lượt — và sau khi vòng
   trong chạy xong, cái tên không còn giữ giá trị của vòng ngoài nữa.
@@ -172,57 +173,95 @@ Bốn chuyện đáng cất vào túi:
   triệu lượt thân vòng, và lúc đó bạn sẽ thấy máy chậm hẳn đi.
 ::::
 
-::::code{#in-to-lich-thang}
-Bà chủ dán tờ lịch tháng lên tường bếp: **4 tuần, mỗi tuần 7 ngày**.
-
-Máy phải in ra 28 dòng, mở đầu và kết thúc thế này:
+::::repair{#in-to-lich-thang}
+Bà chủ dán tờ lịch tháng lên tường bếp: **4 tuần, mỗi tuần 7 ngày**. Byte gõ
+đoạn dưới. Đủ hai vòng lặp, đủ hai dòng `print`, không thiếu một chữ nào — mà
+màn hình ra thế này:
 
 ```text title=readonly
-Tuần 1 - ngày 1
-Tuần 1 - ngày 2
-...
-Tuần 4 - ngày 6
-Tuần 4 - ngày 7
+Tuần 1
+Tuần 2
+Tuần 3
+Tuần 4
+    ngày 1
+    ngày 2
+    ngày 3
+    ngày 4
+    ngày 5
+    ngày 6
+    ngày 7
 ```
 
-Vòng ngoài đã dựng sẵn. Hãy viết vòng trong vào chỗ trống.
+Mười một dòng: bốn cái tên tuần dồn hết lên đầu, rồi bảy ô ngày trơ trọi ở
+cuối. Đúng cái cảnh 4 **cộng** 7 mà gạch đầu dòng thứ nhất vừa nói tới, trong
+khi tờ lịch cần 4 **nhân** 7.
+
+Tờ lịch thật in ra 32 dòng — mỗi tên tuần kèm ngay bảy ô ngày của tuần đó:
+
+```text title=readonly
+Tuần 1
+    ngày 1
+    ngày 2
+...
+Tuần 4
+    ngày 6
+    ngày 7
+```
+
+Sửa đoạn code cho ra đúng tờ lịch ấy. Không thêm dòng nào, không xoá dòng nào,
+không đổi một con số nào.
 
 ```python title=starter
 for tuan in range(1, 5):
-    ___
-        print(f"Tuần {tuan} - ngày {ngay}")
+    print(f"Tuần {tuan}")
+for ngay in range(1, 8):
+    print(f"    ngày {ngay}")
 ```
 
 ```python title=solution
 for tuan in range(1, 5):
+    print(f"Tuần {tuan}")
     for ngay in range(1, 8):
-        print(f"Tuần {tuan} - ngày {ngay}")
+        print(f"    ngày {ngay}")
 ```
 
 ```python title=test
-# Chấm bằng OUTPUT: 28 dòng, dòng cuối cùng là tuần 4 ngày 7.
+# Chấm bằng OUTPUT, và luật chấm phải phân biệt được ba cảnh khác nhau:
+#
+#   hai vòng nối đuôi (code khởi đầu)  → 11 dòng, bốn tuần dồn lên đầu;
+#   chỉ lùi dòng `for ngay` vào 4      → IndentationError, không ra dòng nào;
+#   chỉ lùi dòng `print` ngày vào 8    → máy vẫn chạy trơn tru và vẫn ra đúng
+#                                        11 dòng ấy: lùi sâu thêm một mức
+#                                        trong cùng một thân không đổi được
+#                                        chuyện ai lồng trong ai.
+#
+# Chỉ khi CẢ HAI dòng lùi đúng mức thì mới ra 32 dòng đúng thứ tự. Regex dưới
+# ghim hai dòng đầu, hai dòng cuối, và ghim luôn SỐ DÒNG ở giữa — `contains`
+# nhìn một mẩu nên bản nối đuôi vẫn có `ngày 7` và vẫn lọt.
 pass
 ```
 
 :::hints
 - kind: attention
-  body: Dòng `print` dùng hai cái tên: `tuan` và `ngay`. Một cái đã có chủ ở dòng đầu; cái còn lại chưa ai sinh ra, và chỗ trống chính là nơi sinh ra nó.
+  body: Đặt hai dòng `for` cạnh nhau rồi nhìn vào **đầu dòng**: cả hai đang bắt đầu ở cùng một chỗ, sát lề trái. Gạch đầu dòng thứ nhất ở mục trên vừa nói cái gì xảy ra với hai vòng cùng sát lề?
 - kind: strategy
-  body: Chỗ trống cần đúng một dòng mở vòng lặp, viết y như dòng đầu nhưng cho ngày: một cái tên, rồi một `range` chạy từ ngày 1 tới hết ngày 7. Nhớ dấu hai chấm cuối dòng, vì dòng `print` bên dưới đang lùi vào để làm thân cho nó.
+  body: Vòng ngày phải trở thành *phần việc mỗi lượt* của vòng tuần — nghĩa là nó nằm trong thân vòng tuần, đứng cùng mức với dòng `print` tên tuần. Rồi tới lượt dòng `print` ngày: nó là thân của vòng ngày, nên nó phải lùi thêm một mức nữa so với vòng ngày. Hai dòng cùng phải dịch, mỗi dòng một mức.
 - kind: one-line
-  body: "Viết `for ngay in range(1, 8):` vào chỗ trống, giữ nguyên bốn dấu cách đầu dòng."
+  body: "Thêm bốn dấu cách vào đầu dòng `for ngay in range(1, 8):` để nó đứng ở cột 4, rồi thêm bốn dấu cách vào đầu dòng `print` ngày để nó đứng ở cột 8."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: Tuần 4 - ngày 7
+  match: regex
+  expect: ^Tuần 1\n    ngày 1\n(?:.+\n){28}    ngày 6\n    ngày 7$
 :::
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Hai dòng `for` mà ra hai mươi tám dòng chữ. Kim giờ với kim phút đấy.
+Hai dòng lùi vào bốn dấu cách, mười một dòng thành ba mươi hai. Kim giờ với kim
+phút đấy.
 ::::
 
 ::::reflect{#nghi-lai}
@@ -234,10 +273,11 @@ nhờ bạn tìm ngày đầu tiên vượt 500 nghìn, và tìm thấy thì th�
 Bạn đặt `break` vào đúng chỗ đã học ở bài dừng ngay khi đủ biết: trong thân,
 ngay sau khi in ra ngày tìm được.
 
-Chạy lên, nó dừng thật — ngày sau đó trong tuần ấy không hiện ra nữa. Nhưng
-`Tuần 3`, `Tuần 4` vẫn cứ in ra đều đặn, và các ngày của chúng cũng vậy.
+Chạy lên, nó dừng thật — những ngày sau đó trong tuần ấy không hiện ra nữa.
+Nhưng `Tuần 3`, `Tuần 4` vẫn cứ in ra đều đặn, và mỗi tuần ấy lại tìm ra ngày
+vượt ngưỡng của riêng nó.
 
-Vậy `break` vừa thoát khỏi cái gì?
+Vậy `break` vừa thoát khỏi cái gì? Bài sau trả lời.
 ::::
 
 ::::checkpoint{mastery=0.8}

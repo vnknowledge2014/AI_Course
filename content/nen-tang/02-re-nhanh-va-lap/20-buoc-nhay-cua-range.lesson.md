@@ -1,7 +1,7 @@
 ---
 id: nen-tang.re-nhanh-va-lap.buoc-nhay-cua-range
 title: Bước nhảy của range
-summary: Con số thứ ba trong ngoặc là khoảng cách giữa hai giá trị liền nhau — nhờ nó vòng lặp đi thưa được, và đi lùi được.
+summary: Con số thứ ba trong ngoặc là khoảng cách máy cộng thêm sau mỗi lượt — đặt nó là 7 thì vòng đi thưa, đặt nó là số âm thì vòng đi lùi.
 locale: vi
 track: nen-tang
 module: re-nhanh-va-lap
@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 12
 teaches: [ctrl.range-step]
-requires: [ctrl.range-start, ctrl.for-range, ctrl.continue]
+requires: [ctrl.range-start, ctrl.for-range, ctrl.continue, ctrl.for-each, core.list]
 concepts: [ctrl.lap, core.pham-vi]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -38,13 +38,14 @@ Câu hỏi bỏ ngỏ của bài trước: sổ chi tiêu ghi cả tháng, và b
 
 Hai con số trong `range` cắt được một **đoạn liền nhau** — ngày 8 tới ngày 14
 thì gọn gàng. Năm ngày thứ Hai kia nằm rải ra cả tháng, không liền nhau, nên
-không có đoạn nào để cắt. Với những gì đang có trong tay, bạn phải viết thế
-này:
+không có đoạn nào để cắt.
+
+Nhưng bạn không phải đi hết hai mươi chín ngày rồi `continue` hai mươi tư lần
+đâu. Nước đi gọn nhất bạn đang có là bỏ `range` sang một bên, viết thẳng năm
+con số thành một danh sách:
 
 ```python title=readonly
-for ngay in range(1, 30):
-    if ngay != 1 and ngay != 8 and ngay != 15 and ngay != 22 and ngay != 29:
-        continue
+for ngay in [1, 8, 15, 22, 29]:
     print(f"Thứ Hai ngày {ngay}")
 ```
 
@@ -56,16 +57,23 @@ Thứ Hai ngày 22
 Thứ Hai ngày 29
 ```
 
-Ra đúng năm dòng. Nhưng nhìn dòng `if`: năm con số chép tay vào một điều kiện
-dài. Tháng sau thứ Hai rơi vào ngày khác, bạn phải sửa cả năm chỗ — và tháng
-nào cũng phải sửa lại.
+Năm dòng đúng ý bà chủ, ngắn hơn hẳn `continue`, và chạy được thật. Đây là nước
+đi đúng, không phải nước đi tạm.
 
-Trong khi năm con số ấy có một luật rất gọn, gọn hơn cả câu điều kiện kia:
-**cách nhau đúng bảy**. Từ 1 bước bảy tới 8, bước bảy nữa tới 15, cứ thế.
+Chỗ vướng nằm ở chỗ khác: năm con số ấy do **bạn** chép tay. Tháng sau thứ Hai
+rơi vào ngày khác, bạn chép lại năm con số khác. Bà chủ hỏi cả năm thì bạn chép
+năm mươi hai con số. Và có những câu mà chép tay thì hết buổi: nồi nước dùng
+ninh bốn tiếng, hớt bọt mười lăm phút một lần — mười sáu con số; số nhà chẵn
+của cả dãy phố — năm mươi con số.
 
-Nghĩ tới chuyến xe buýt quen. Nó không đỗ trước mọi số nhà — nó đỗ cách bảy
-căn một lần. Muốn nói trọn chuyến xe ấy, bạn cần ba điều: lên ở đâu, xuống
-trước số nhà nào, và **mỗi lần đỗ cách nhau mấy căn**.
+Danh sách chép tay còn giấu mất một điều. Năm con số kia không phải năm con số
+bất kỳ: chúng có một luật, và luật ấy ngắn hơn cả năm con số — **cách nhau đúng
+bảy**. Từ 1 bước bảy tới 8, bước bảy nữa tới 15, cứ thế. Chép tay thì mỗi tháng
+chép lại; viết ra được cái luật thì viết một lần dùng cho mọi tháng.
+
+Nghĩ tới chuyến xe buýt quen. Nó không đỗ trước mọi số nhà — nó đỗ cách bảy căn
+một lần. Muốn nói trọn chuyến xe ấy, bạn cần ba điều: lên ở đâu, xuống trước số
+nhà nào, và **mỗi lần đỗ cách nhau mấy căn**.
 
 `range` có đúng ba chỗ cho ba điều đó.
 ::::
@@ -86,18 +94,23 @@ Thứ Hai ngày 22
 Thứ Hai ngày 29
 ```
 
-Năm dòng y hệt, không còn `if`, không còn `continue`. Đọc ba con số theo thứ tự:
+Y hệt năm dòng của danh sách chép tay. Nhưng để ý: trong ngoặc không có con số
+nào là ngày thứ Hai cả. Ba con số ấy là **cái luật**, không phải kết quả của
+luật. Đọc chúng theo thứ tự:
 
 - `1` — điểm khởi hành, đúng vai trò nó nhận ở bài trước. Con số này **có** vào
   vòng.
 - `30` — chỗ dừng, cũng đúng vai trò cũ. Con số này **không bao giờ** vào vòng.
-- `7` — chỗ mới của bài hôm nay: **bước nhảy**. Đó là khoảng cách từ một giá
-  trị tới giá trị kế tiếp.
+- `7` — chỗ mới của bài hôm nay: **bước nhảy**. Đó là con số máy cộng thêm vào
+  sau mỗi lượt, tức khoảng cách từ một giá trị tới giá trị kế tiếp.
 
 Máy đi thế này: đặt `ngay` ở 1, chạy thân vòng; cộng 7 thành 8, 8 vẫn chưa tới
 chỗ dừng nên chạy thân tiếp; 15, rồi 22, rồi 29. Cộng 7 lần nữa thành 36 — 36
 đã qua chỗ dừng, vòng kết thúc. Số 36 không được in ra, mà số 30 cũng chưa bao
 giờ xuất hiện.
+
+Tháng sau thứ Hai rơi vào ngày 5? Sửa đúng một con số: `range(5, 30, 7)`. Cái
+luật vẫn là cái luật.
 
 Và `range(1, 30)` với `range(1, 30, 7)` khác nhau đúng một chỗ ấy. Không viết
 con số thứ ba thì bước nhảy là **1** — nghĩa là `range(1, 30)` và
@@ -146,36 +159,28 @@ số bị bỏ qua.
 Ba dòng: 2, 3, 4
 ::why
 Gần đúng ở chỗ bạn đang tìm chỗ đứng cho vai trò "số lượt" — vai trò mà con số
-duy nhất trong `range(3)` vẫn giữ. Ba con số thì đúng là vòng này chạy ba lượt,
-nên bạn không đếm sai lượt nào.
+duy nhất trong `range(3)` vẫn giữ. Vòng này quả thật chạy ba lượt, nên con số
+ba của bạn không phải từ trên trời rơi xuống.
 
-Chỗ lệch: khi `range` nhận ba số thì không con số nào là số lượt cả. Hai số đầu
-là hai mốc trên trục số, số thứ ba là khoảng cách mỗi bước. Số lượt không ai
-viết ra — nó là hệ quả của ba con số kia.
+Chỗ lệch: ba lượt ấy đến từ chỗ khác. Nó là hệ quả của cả 2, cả 11 lẫn cả 3 gộp
+lại — không con số nào trong ngoặc khai ra nó. Hai số đầu là hai mốc trên trục
+số, số thứ ba là khoảng cách mỗi bước, còn số lượt thì không ai viết ra. Thử đổi
+11 thành 12 mà xem: vẫn ba con số trong ngoặc, nhưng `range(2, 12, 3)` chạy bốn
+lượt — 2, 5, 8, 11.
 ::
 :::
 ::::
 
-::::explain{#di-lui-va-di-hut}
-Ba chuyện đáng cất vào túi về bước nhảy:
+::::explain{#buoc-am-thi-di-lui}
+Đọc lại đúng một câu vừa nói ở trên: bước nhảy là **con số máy cộng thêm sau
+mỗi lượt**. Trong câu ấy không có chữ nào bắt con số đó phải dương.
 
-- **Bước âm thì đi lùi.** `range(5, 0, -1)` cho ra 5, 4, 3, 2, 1. Đi lùi thì
-  chỗ dừng nằm **dưới** điểm khởi hành, và luật "chỗ dừng không bao giờ tới
-  lượt" vẫn giữ nguyên: muốn số cuối cùng là 1 thì phải viết chỗ dừng là 0.
-- **Đi sai hướng thì vòng chạy 0 lượt.** `range(1, 10, -1)` bảo máy khởi hành ở
-  1 rồi lùi dần, trong khi chỗ dừng lại nằm phía trên. Máy không kêu một tiếng
-  nào, thân vòng chỉ đơn giản không chạy lần nào — đúng cảnh im lặng bạn đã gặp
-  với `range(15, 8)`.
-- **Bước 0 thì máy dừng và nói.** `range(1, 10, 0)` cho `ValueError` kèm dòng
-  `range() arg 3 must not be zero`. Cũng phải thôi: bước 0 nghĩa là đứng yên
-  mãi ở một chỗ, và đó là vòng lặp vô hạn — thứ máy giữ bạn khỏi rơi vào.
-::::
+Cộng thêm `-1` mỗi lượt thì giá trị đi xuống. Vòng lặp đi lùi:
 
-::::code{#dem-nguoc-khai-truong}
-Quán phở mở thêm chi nhánh. Trước lúc bà chủ bấm chuông khai trương, cả nhà đếm
-ngược **năm giây**.
-
-Máy phải in ra đúng năm dòng này:
+```python title=readonly
+for giay in range(5, 0, -1):
+    print(f"Còn {giay} giây")
+```
 
 ```text title=readonly
 Còn 5 giây
@@ -185,37 +190,81 @@ Còn 2 giây
 Còn 1 giây
 ```
 
+Đi lại từng bước như lúc nãy: đặt `giay` ở 5, chạy thân vòng; cộng −1 thành 4,
+chạy thân; rồi 3, rồi 2, rồi 1. Cộng −1 lần nữa thành 0 — mà 0 chính là chỗ
+dừng, nên vòng kết thúc ở đó.
+
+Chỗ này đáng dừng lại một nhịp, vì nó là chỗ trượt chân quen nhất của bước âm.
+Muốn con số **cuối cùng in ra** là 1 thì chỗ dừng phải viết là **0**, chứ không
+phải 1. Viết `range(5, 1, -1)` thì máy dừng ngay khi chạm 1, và dòng
+`Còn 1 giây` không bao giờ hiện ra.
+
+Vẫn đúng cái luật cũ thôi — chỗ dừng không bao giờ vào vòng. Chỉ có điều hướng
+đi đổi nên chỗ dừng đổi bên: đi tới thì nó nằm **trên** con số cuối cùng một
+bậc, đi lùi thì nó nằm **dưới** con số cuối cùng một bậc.
+
+Hai chuyện nữa đáng cất vào túi:
+
+- **Đi sai hướng thì vòng chạy 0 lượt.** `range(1, 10, -1)` bảo máy khởi hành ở
+  1 rồi lùi dần, trong khi chỗ dừng lại nằm phía trên. Máy không kêu một tiếng
+  nào, thân vòng chỉ đơn giản không chạy lần nào — đúng cảnh im lặng bạn đã gặp
+  với `range(15, 8)` ở bài trước.
+- **Bước 0 thì máy dừng và nói.** `range(1, 10, 0)` cho `ValueError` kèm dòng
+  `range() arg 3 must not be zero`. Cũng phải thôi: bước 0 nghĩa là đứng yên
+  mãi ở một chỗ, và đó là vòng lặp không bao giờ hết — thứ máy giữ bạn khỏi rơi
+  vào.
+::::
+
+::::code{#hot-bot-noi-nuoc-dung}
+Nồi nước dùng của quán ninh đúng **2 tiếng**, tức 120 phút. Nước vừa sôi thì bà
+chủ hớt bọt lần đầu — **phút 30** — rồi cứ **20 phút** hớt một lần, tới lúc tắt
+bếp ở phút 120 thì thôi.
+
+Máy phải in ra đúng năm dòng này:
+
+```text title=readonly
+Hớt bọt: phút 30
+Hớt bọt: phút 50
+Hớt bọt: phút 70
+Hớt bọt: phút 90
+Hớt bọt: phút 110
+```
+
 Điền ba con số vào ba chỗ trống.
 
 ```python title=starter
-for giay in range(___, ___, ___):
-    print(f"Còn {giay} giây")
+for phut in range(___, ___, ___):
+    print(f"Hớt bọt: phút {phut}")
 ```
 
 ```python title=solution
-for giay in range(5, 0, -1):
-    print(f"Còn {giay} giây")
+for phut in range(30, 120, 20):
+    print(f"Hớt bọt: phút {phut}")
 ```
 
 ```python title=test
-# Chấm bằng OUTPUT: năm dòng, con số đi lùi từ 5 xuống 1.
+# Chấm bằng TRỌN VẸN màn hình theo đúng thứ tự dòng (`match: regex` ở dưới),
+# không phải bằng một dòng lẻ. Lệch con số nào trong ba con số cũng lộ ra:
+# lệch điểm khởi hành thì dòng đầu sai, lệch bước nhảy thì các dòng giữa sai,
+# lệch chỗ dừng thì số dòng sai.
 pass
 ```
 
 :::hints
 - kind: attention
-  body: Con số đầu tiên in ra là 5, con số cuối cùng in ra là 1 — dãy này đi xuống chứ không đi lên. Chỗ trống thứ ba là chỗ nói hướng đi.
+  body: Ba chỗ trống, ba vai. Nhìn cột số trong màn hình cần in: con số đầu tiên là 30, con số cuối cùng là 110, và từ một dòng sang dòng ngay sau nó, con số nhích lên đúng bao nhiêu?
 - kind: strategy
-  body: Chỗ trống thứ nhất là điểm khởi hành, viết thẳng số đầu tiên. Chỗ trống thứ ba là bước nhảy, và mỗi lượt con số giảm đúng một đơn vị. Chỗ trống thứ hai là chỗ dừng — máy dừng NGAY TRƯỚC nó, nên với hướng đi xuống, nó phải nhỏ hơn 1 một đơn vị.
+  body: Chỗ trống thứ nhất là điểm khởi hành — viết thẳng con số của dòng đầu tiên. Chỗ trống thứ ba là bước nhảy — chính là khoảng cách giữa hai dòng liền nhau. Chỗ trống thứ hai là chỗ dừng, và chỗ dừng thì không bao giờ vào vòng: đề bài đã cho sẵn con số ấy, chính là mốc tắt bếp.
 - kind: one-line
-  body: "Viết `range(5, 0, -1)`, giữ nguyên dấu hai chấm cuối dòng."
+  body: "Viết `range(30, 120, 20)`, giữ nguyên dấu hai chấm cuối dòng."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: Còn 1 giây
+  match: regex
+  expect: ^Hớt bọt: phút 30\nHớt bọt: phút 50\nHớt bọt: phút 70\nHớt bọt: phút 90\nHớt bọt: phút 110$
 :::
 ::::
 
@@ -227,7 +276,7 @@ Một dòng nói trọn cả chuyến đi: lên ở đâu, xuống chỗ nào, m
 Một câu hỏi trước khi đi tiếp.
 
 Bước nhảy giúp bạn đi thưa trên **một** hàng số: hàng ngày trong tháng, hàng
-giây đếm ngược, hàng phút hớt bọt nồi nước dùng.
+phút hớt bọt nồi nước dùng, hàng giây đếm ngược.
 
 Nhưng tờ lịch dán trên tường quán không phải một hàng. Nó là **4 tuần × 7
 ngày**: bốn dòng, mỗi dòng bảy ô.
@@ -236,7 +285,7 @@ Bạn viết được vòng lặp chạy qua bốn tuần — `range(1, 5)`, d�
 nó in ra tên một tuần. Nhưng bên trong tuần ấy còn bảy ô ngày phải in nữa, và
 mỗi ô lại là một lượt riêng.
 
-Ai đứng ra in bảy ô đó?
+Ai đứng ra in bảy ô đó? Bài sau trả lời.
 ::::
 
 ::::checkpoint{mastery=0.8}
