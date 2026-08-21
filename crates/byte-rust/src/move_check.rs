@@ -86,16 +86,19 @@ struct BoKiem<'a> {
     diags: &'a mut Diagnostics,
     /// Đã báo cho biến nào rồi, để không lặp lại cùng một chẩn đoán.
     da_bao: Vec<String>,
+    /// Phương thức tự viết nhận `self` theo giá trị — gọi là nuốt bộ nhận.
+    nuot_self: std::collections::HashSet<String>,
 }
 
 impl<'a> BoKiem<'a> {
-    fn moi(diags: &'a mut Diagnostics) -> Self {
+    fn moi(diags: &'a mut Diagnostics, nuot_self: std::collections::HashSet<String>) -> Self {
         Self {
             trang_thai: vec![HashMap::new()],
             do_sau_nhanh: 0,
             moc_vong_lap: Vec::new(),
             diags,
             da_bao: Vec::new(),
+            nuot_self,
         }
     }
 
@@ -314,9 +317,14 @@ impl<'a> BoKiem<'a> {
             }
             BieuThuc::GoiPhuongThuc { doi_tuong, ten, doi_so, .. } => {
                 self.bieu_thuc(doi_tuong);
-                // `.clone()`/`.len()`… mượn `self`, không lấy hẳn. Ta không phân
-                // biệt được nên coi là mượn — hướng an toàn, tránh báo lỗi oan.
-                let _ = ten;
+                // Phương thức nhận `self` THEO GIÁ TRỊ thì nuốt luôn bộ nhận.
+                //
+                // Với những tên còn lại (`.clone()`, `.len()`, mọi phương thức
+                // dựng sẵn) ta không phân biệt được nên vẫn coi là mượn —
+                // hướng an toàn, tránh báo lỗi oan.
+                if self.nuot_self.contains(ten) {
+                    self.ghi_move(doi_tuong);
+                }
                 for a in doi_so {
                     self.bieu_thuc(a);
                     self.ghi_move(a);
@@ -516,7 +524,29 @@ impl<'a> BoKiem<'a> {
 }
 
 /// Kiểm tra toàn bộ chương trình.
+/// Tên những phương thức người học tự viết mà nhận `self` THEO GIÁ TRỊ.
+///
+/// Gọi một phương thức như thế là chuyển hẳn quyền sở hữu của bộ nhận vào nó
+/// — dùng lại bộ nhận sau đó là E0382. Không có bảng này thì `move_check` coi
+/// mọi lời gọi phương thức đều chỉ mượn, và cả lớp lỗi ấy đi lọt.
+fn nap_phuong_thuc_nuot(ct: &ChuongTrinh) -> std::collections::HashSet<String> {
+    let mut ra = std::collections::HashSet::new();
+    for m in &ct.muc {
+        let Muc::Impl(i) = m else { continue };
+        for h in &i.ham {
+            let Some(ts) = h.tham_so.first() else { continue };
+            let la_self = matches!(&ts.mau, Mau::Ten { ten, .. } if ten == "self");
+            // `self` trần thì nuốt; `&self` và `&mut self` thì chỉ mượn.
+            if la_self && !matches!(&ts.kieu, Kieu::ThamChieu { .. }) {
+                ra.insert(h.ten.clone());
+            }
+        }
+    }
+    ra
+}
+
 pub fn kiem_tra(ct: &ChuongTrinh, diags: &mut Diagnostics) {
+    let nuot = nap_phuong_thuc_nuot(ct);
     for m in &ct.muc {
         let ham = match m {
             Muc::Ham(h) => vec![h],
@@ -524,7 +554,7 @@ pub fn kiem_tra(ct: &ChuongTrinh, diags: &mut Diagnostics) {
             _ => continue,
         };
         for h in ham {
-            let mut bk = BoKiem::moi(diags);
+            let mut bk = BoKiem::moi(diags, nuot.clone());
             bk.vao();
             for ts in &h.tham_so {
                 let mut ten = Vec::new();
