@@ -246,6 +246,9 @@ pub struct BoKiemKieu<'a> {
     /// tên biến thể -> tên enum
     thuoc_enum: HashMap<String, String>,
     struct_co: Vec<String>,
+    /// `const TEN: Kieu = ...` ở cấp cao nhất. Không nạp bảng này thì mọi lần
+    /// dùng một hằng đều trông như dùng tên chưa khai báo.
+    hang: HashMap<String, T>,
     /// Tên mọi phương thức người học tự viết trong khối `impl`. Bộ kiểm không
     /// được phán "phương thức này không tồn tại" với những tên nằm ở đây.
     phuong_thuc_tu_viet: std::collections::HashSet<String>,
@@ -267,6 +270,7 @@ impl<'a> BoKiemKieu<'a> {
             payload: HashMap::new(),
             thuoc_enum: HashMap::new(),
             struct_co: Vec::new(),
+            hang: HashMap::new(),
             phuong_thuc_tu_viet: std::collections::HashSet::new(),
             tra_ve_ham: None,
             truong_struct: HashMap::new(),
@@ -287,6 +291,9 @@ impl<'a> BoKiemKieu<'a> {
                             span: h.span,
                         },
                     );
+                }
+                Muc::Const { ten, kieu, .. } => {
+                    self.hang.insert(ten.clone(), tu_kieu_ast(kieu));
                 }
                 Muc::Impl(i) => {
                     for h in &i.ham {
@@ -373,7 +380,27 @@ impl<'a> BoKiemKieu<'a> {
         self.bien.last_mut().unwrap().insert(ten.to_string(), t);
     }
     fn tra(&self, ten: &str) -> T {
-        self.bien.iter().rev().find_map(|p| p.get(ten).cloned()).unwrap_or(T::Mo)
+        self.bien
+            .iter()
+            .rev()
+            .find_map(|p| p.get(ten).cloned())
+            .or_else(|| self.hang.get(ten).cloned())
+            .unwrap_or(T::Mo)
+    }
+
+    /// Cái tên này có tồn tại ở đâu đó không?
+    ///
+    /// Tách khỏi `tra` vì `tra` trả `T::Mo` cho cả hai trường hợp "có tên
+    /// nhưng chưa suy được kiểu" và "không có tên nào cả" — mà hai chuyện đó
+    /// khác hẳn nhau: cái đầu là im lặng đúng, cái sau là lỗi.
+    fn co_ten(&self, ten: &str) -> bool {
+        self.bien.iter().any(|p| p.contains_key(ten))
+            || self.hang.contains_key(ten)
+            || self.ham.contains_key(ten)
+            || self.thuoc_enum.contains_key(ten)
+            || self.struct_co.iter().any(|s| s == ten)
+            || TEN_DUNG_SAN.contains(&ten)
+            || ten == "self"
     }
 
     // ── Suy kiểu ────────────────────────────────────────────────────────────
@@ -395,6 +422,17 @@ impl<'a> BoKiemKieu<'a> {
                     }
                     if let Some(e) = self.thuoc_enum.get(&doan[0]) {
                         return T::Enum(e.clone());
+                    }
+                    // Không tìm thấy cái tên này ở bất kỳ phạm vi nào đang mở.
+                    //
+                    // Đây là chỗ bắt được cả một họ lỗi mà bộ kiểm động không
+                    // bao giờ thấy: dùng biến khai báo trong một khối `{}` đã
+                    // đóng, dùng biến khai báo trong nhánh `if` không chạy, và
+                    // dùng trước khi khai báo. Cả ba đều là lỗi PHÂN GIẢI TÊN,
+                    // xảy ra lúc biên dịch, không phụ thuộc luồng chạy.
+                    if !self.co_ten(&doan[0]) {
+                        self.bao_ten_khong_co(bt.span(), &doan[0]);
+                        return T::ChuaBiet("tên chưa khai báo");
                     }
                     T::Mo
                 } else {
@@ -1183,6 +1221,25 @@ impl<'a> BoKiemKieu<'a> {
                 .sua(format!("đưa vào một giá trị {}", mong.hien_thi()))
         };
         self.diags.push(d.khai_niem("phương thức"));
+    }
+
+    fn bao_ten_khong_co(&mut self, span: Span, ten: &str) {
+        // Gợi ý từ MỌI tên đang thấy được, kể cả tên ở phạm vi đã đóng — vì
+        // trường hợp hay gặp nhất chính là gõ đúng tên nhưng dùng sai chỗ.
+        let mut co: Vec<String> = self.bien.iter().flat_map(|p| p.keys().cloned()).collect();
+        co.extend(self.hang.keys().cloned());
+        co.extend(self.ham.keys().cloned());
+        let mut d = Diagnostic::loi("BR0340", format!("không tìm thấy tên `{ten}`"))
+            .tai(span, "chưa có gì mang tên này ở đây")
+            .vi_sao("Một cái tên chỉ sống trong khối `{}` khai báo ra nó. Ra khỏi dấu ngoặc là nó biến mất — kể cả khi dòng đó nằm ngay bên dưới. Rust kiểm điều này lúc biên dịch, nên một biến khai báo trong nhánh `if` không bao giờ chạy tới vẫn bị bắt.")
+            .khai_niem("phạm vi");
+        if let Some(g) = Self::gan_nhat(ten, co.iter()) {
+            d = d.sua(format!("có phải bạn muốn dùng `{g}` không?"));
+        }
+        self.diags.push(
+            d.sua("hoặc khai báo nó bằng `let` trước khi dùng")
+                .sua("nếu nó đang nằm trong một khối `{}`, khai báo ở ngoài khối ấy"),
+        );
     }
 
     fn bao_khong_co_struct(&mut self, span: Span, ten: &str) {

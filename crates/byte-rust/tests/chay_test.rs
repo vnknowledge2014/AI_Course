@@ -219,9 +219,22 @@ fn unwrap_tren_none() {
     assert_eq!(loi(&ct("let a: Option<i64> = None;\nlet b = a.unwrap();")), "BR0551");
 }
 
+/// Tên chưa khai báo phải bị bắt ở pha TĨNH (BR0340), không phải lúc chạy.
+///
+/// Trước đây ca này rơi xuống trình thông dịch và ra BR0501 — nghĩa là nó chỉ
+/// bị bắt khi luồng chạy tới đúng dòng ấy. Đặt cùng lời gọi vào một nhánh
+/// `if` không bao giờ đúng thì nó biến mất hoàn toàn, đúng vùng mù mà ADR-002
+/// §2 nói tới. Phân giải tên xảy ra lúc biên dịch, nên nó phải được bắt ở đó.
 #[test]
 fn bien_chua_khai_bao() {
-    assert_eq!(loi(&ct("println!(\"{}\", chua_co);")), "BR0501");
+    assert_eq!(loi(&ct("println!(\"{}\", chua_co);")), "BR0340");
+}
+
+/// Và đây là lý do phải bắt tĩnh: nhánh này không bao giờ chạy tới.
+#[test]
+fn bien_chua_khai_bao_trong_nhanh_chet() {
+    let ma = "let n = 0;\nif n > 0 {\n    println!(\"{}\", chua_co);\n}";
+    assert_eq!(loi(&ct(ma)), "BR0340");
 }
 
 #[test]
