@@ -12,6 +12,7 @@
  */
 
 import type { PhanHoiChay, YeuCauChay } from '@byte/exec-core';
+import { chayTrenLuoi, type CauHinhLuoi } from './the-gioi.js';
 
 /** Bề mặt Pyodide mà worker này dùng tới — khai báo hẹp để không kéo cả kiểu của gói vào. */
 export interface Pyodide {
@@ -35,6 +36,20 @@ export function chayTrongWorkerPython(yeuCau: YeuCauChay, py: Pyodide): PhanHoiC
   py.setStderr(gom);
 
   try {
+    // Bài có sân khấu: chạy trong thế giới lưới và trả kèm chuỗi sự kiện.
+    if (yeuCau.luoi) {
+      const kq = chayTrenLuoi(py, yeuCau.ma, yeuCau.luoi as CauHinhLuoi);
+      return {
+        loai: 'xong',
+        id: yeuCau.id,
+        ok: kq.thang,
+        xuat: dong.join('\n'),
+        loi: kq.thang ? null : kq.vi_sao,
+        suKien: kq.su_kien,
+        thang: kq.thang,
+        viSao: kq.vi_sao,
+      };
+    }
     // Mã kiểm tra nối SAU mã người học, cùng một không gian tên — đó là điều
     // làm `assert tinh_tien(3) == 9` kiểm được đúng hàm họ vừa viết.
     const nguon = yeuCau.maKiemTra ? `${yeuCau.ma}\n${yeuCau.maKiemTra}` : yeuCau.ma;

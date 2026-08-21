@@ -72,7 +72,7 @@ export class BoThucThiPython implements BoThucThi {
         }
       });
 
-      cong.gui({ loai: 'chay', id, ma, maKiemTra: tuyChon.maKiemTra });
+      cong.gui({ loai: 'chay', id, ma, maKiemTra: tuyChon.maKiemTra, luoi: tuyChon.luoi });
     });
 
     const thoiGianMs = performance.now() - t0;
@@ -82,6 +82,36 @@ export class BoThucThiPython implements BoThucThi {
     }
     if (phanHoi.loai !== 'xong') {
       return { ok: false, xuat: '', chanDoan: [], thoiGianMs, biNgat: false };
+    }
+    // Bài có sân khấu: lỗi đã được thế giới viết sẵn bằng tiếng Việt ("Byte
+    // đâm vào tường"), nên KHÔNG đưa nó qua bộ dịch traceback — bộ ấy sinh ra
+    // để dịch thông báo của CPython, và cho nó một câu tiếng Việt sẽ ra một
+    // chẩn đoán vô nghĩa.
+    if (phanHoi.suKien) {
+      return {
+        ok: phanHoi.ok,
+        xuat: phanHoi.xuat,
+        chanDoan: phanHoi.viSao
+          ? [
+              {
+                ma: 'EX0600',
+                muc: 'loi' as const,
+                thongDiep: phanHoi.viSao,
+                dong: 1,
+                cot: 1,
+                doDai: 1,
+                viSao: null,
+                cachSua: [],
+                khaiNiem: 'thế giới',
+                vanBan: phanHoi.viSao,
+              },
+            ]
+          : [],
+        thoiGianMs,
+        biNgat: false,
+        suKien: phanHoi.suKien,
+        thang: phanHoi.thang ?? false,
+      };
     }
     return {
       ok: phanHoi.ok,
@@ -212,3 +242,5 @@ export function chanDoanTuTraceback(traceback: string): ChanDoan {
 export { chayTrongWorkerPython, gan, type Pyodide } from './worker-body.js';
 
 export { kiemAst, type TruyVanAst, type KetQuaAst } from './kiem-ast.js';
+
+export { chayTrenLuoi, type SuKien, type CauHinhLuoi, type KetQuaLuoi } from './the-gioi.js';

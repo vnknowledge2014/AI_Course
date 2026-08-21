@@ -54,6 +54,11 @@ export interface KetQuaChay {
   thoiGianMs: number;
   /** Bị dừng vì vượt ngân sách thời gian/bước. */
   biNgat: boolean;
+  /** Chuỗi sự kiện của sân khấu. Chỉ có khi bài có thế giới. */
+  suKien?: unknown[];
+  /** Thắng trong thế giới — khác `ok` ở chỗ nó nói về LUẬT CHƠI, không phải
+   *  về việc chương trình có nổ hay không. */
+  thang?: boolean;
 }
 
 export interface TuyChonChay {
@@ -64,6 +69,8 @@ export interface TuyChonChay {
   hetHanMs?: number;
   /** Chạy thêm đoạn kiểm tra sau mã của người học (dùng cho chấm bài). */
   maKiemTra?: string;
+  /** Cấu hình thế giới, nếu bài có sân khấu. */
+  luoi?: unknown;
 }
 
 /**

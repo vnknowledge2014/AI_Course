@@ -3,15 +3,28 @@
   import GoiY from './GoiY.svelte';
   import Byte from './Byte.svelte';
   import { chay_python } from '../lib/chay_ma';
+  import SanKhau from './SanKhau.svelte';
   import type { CodeStep, KetQuaChay } from './kieu';
 
-  let { buoc, xong }: { buoc: CodeStep; xong: () => void } = $props();
+  let {
+    buoc,
+    xong,
+    san_choi = false,
+  }: { buoc: CodeStep; xong: () => void; san_choi?: boolean } = $props();
 
   const khe = $derived(buoc.code as unknown as Record<string, string | undefined>);
   let ma = $state('');
   let ket_qua = $state<KetQuaChay | null>(null);
   let dang_chay = $state(false);
   let so_lan_sai = $state(0);
+
+  /** Cấu hình sân khấu, nếu bước này có thế giới. */
+  const luoi = $derived(
+    (buoc as { liveView?: { world?: { family?: string; params?: unknown } } }).liveView?.world
+      ?.family === 'grid-bot'
+      ? ((buoc as { liveView: { world: { params: unknown } } }).liveView.world.params as never)
+      : null,
+  );
 
   // Chỉ nạp mã khởi đầu MỘT lần cho mỗi bước. Không có bảo vệ này thì mỗi lần
   // Svelte tính lại `khe`, bài sẽ xoá sạch thứ người học đang gõ dở.
@@ -31,21 +44,32 @@
     try {
       // Mã kiểm tra chạy CÙNG không gian tên, ngay sau mã người học — đó là
       // điều làm `assert tinh_tien(3) == 9` kiểm được đúng hàm họ vừa viết.
-      ket_qua = await chay_python(ma, khe['test']);
-      if (!ket_qua.ok) so_lan_sai += 1;
+      ket_qua = await chay_python(ma, san_choi ? undefined : khe['test'], luoi ?? undefined);
+      if (!ket_qua.ok && !san_choi) so_lan_sai += 1;
     } finally {
       dang_chay = false;
     }
   }
 
-  const dat = $derived(ket_qua?.ok === true);
+  // Sân chơi không có đáp án đúng, nên nút đi tiếp mở ngay từ đầu: bắt người
+  // học "thắng" một sân chơi là biến nó thành bài tập, mà bài tập thì đã có ở
+  // bước trước rồi.
+  const dat = $derived(san_choi || ket_qua?.ok === true);
 </script>
 
 <div class="bai-code">
   <RichText noi_dung={buoc.body} />
 
+  {#if luoi}
+    <SanKhau
+      {luoi}
+      su_kien={(ket_qua?.suKien ?? []) as never}
+      thang={ket_qua?.thang ?? false}
+    />
+  {/if}
+
   <label class="soan">
-    <span class="nhan">Mã của bạn</span>
+    <span class="nhan">{san_choi ? 'Sân chơi — đổi gì cũng được' : 'Mã của bạn'}</span>
     <textarea
       bind:value={ma}
       spellcheck="false"
@@ -58,7 +82,7 @@
     <button class="chay" onclick={chay} disabled={dang_chay}>
       {dang_chay ? 'Đang chạy…' : 'Chạy thử'}
     </button>
-    {#if dat}<button class="tiep" onclick={xong}>Đi tiếp</button>{/if}
+    {#if dat}<button class="tiep" onclick={xong}>{san_choi ? 'Xong, đi tiếp' : 'Đi tiếp'}</button>{/if}
   </div>
 
   {#if ket_qua}
@@ -76,13 +100,13 @@
         </div>
       {/each}
 
-      {#if dat}
+      {#if dat && !san_choi}
         <Byte tam_trang="reo-len" co={48} loi_thoai="Chạy đúng rồi." />
       {/if}
     </div>
   {/if}
 
-  {#if buoc.hints && (so_lan_sai > 0 || ket_qua)}
+  {#if !san_choi && buoc.hints && (so_lan_sai > 0 || ket_qua)}
     <GoiY thang={buoc.hints} />
   {/if}
 </div>

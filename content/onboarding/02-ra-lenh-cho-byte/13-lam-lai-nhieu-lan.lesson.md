@@ -197,6 +197,24 @@ pass
 Hai dòng code, sáu lượt việc. Đổi con số trong ngoặc là đổi luôn số lượt.
 ::::
 
+::::sandbox{#cho-byte-di}
+Byte đang đứng ở góc trái. Viên đá cuối hàng cách nó **sáu ô**.
+
+Đây là sân chơi — không có đáp án đúng, không ai chấm. Đổi con số, đổi lệnh,
+chạy lại bao nhiêu lần cũng được. Thử cả những thứ bạn nghĩ là sẽ hỏng: đi
+bảy ô xem sao, hay bỏ hẳn vòng lặp đi.
+
+```python title=starter
+for lan in range(6):
+    di_toi()
+```
+
+:::world{grid-bot}
+{ "rong": 7, "cao": 1, "bat_dau": { "x": 0, "y": 0 }, "huong": 0,
+  "vien": [ { "x": 6, "y": 0 } ] }
+:::
+::::
+
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 

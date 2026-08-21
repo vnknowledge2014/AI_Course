@@ -378,6 +378,7 @@ function lam_step(d: Directive, tep: string): Step | null {
         },
         hints: doc_thang_goi_y(hints),
         validation: doc_validate(d.con.find((c) => c.ten === 'validate')),
+        ...doc_the_gioi(d.con.find((c) => c.ten === 'world')),
       } as unknown as Step;
     }
 
@@ -389,6 +390,24 @@ function lam_step(d: Directive, tep: string): Step | null {
 
     case 'reflect':
       return { ...chung, body: than_richtext(d) } as unknown as Step;
+
+    case 'sandbox': {
+      // Sân chơi: KHÔNG chấm, không có lời giải đúng.
+      //
+      // Đây là chỗ người học nghịch cho tới khi hiểu, và nó tồn tại vì một lý
+      // do sư phạm cụ thể: mọi bước khác đều có một đáp án đang chờ, nên chúng
+      // dạy được cách LÀM ĐÚNG nhưng không dạy được cách THỬ. Không có chỗ để
+      // thử thì người học không bao giờ tự đặt câu hỏi "nếu đổi chỗ này thì
+      // sao" — mà đó mới là cách người ta thật sự học lập trình.
+      const { ma } = tach_khoi_ma(d.than);
+      const dau = ma[0];
+      return {
+        ...chung,
+        body: than_richtext(d),
+        code: dau ? { language: dau.lang, starter: dau.src, solution: dau.src, suggestions: [] } : undefined,
+        ...doc_the_gioi(d.con.find((c) => c.ten === 'world')),
+      } as unknown as Step;
+    }
 
     default:
       throw new LoiBienDich(
@@ -429,6 +448,48 @@ function doc_thang_goi_y(d: Directive): unknown {
   }
   xa();
   return { rungs };
+}
+
+/**
+ * Đọc khối `:::world` — cấu hình sân khấu của một bước.
+ *
+ *  ```
+ *  :::world{grid-bot}
+ *  { "rong": 5, "cao": 3, "bat_dau": {"x":0,"y":0}, "vien": [{"x":4,"y":0}] }
+ *  :::
+ *  ```
+ *
+ *  Thân là JSON thuần, không phải YAML. Cấu hình lưới có cấu trúc lồng thật
+ *  (danh sách toạ độ), mà bộ đọc `key: value` phẳng ở đây không diễn tả nổi —
+ *  và thêm một bộ đọc YAML thứ hai chỉ để phục vụ một khối là cái giá đắt hơn
+ *  việc bắt tác giả gõ dấu ngoặc.
+ */
+function doc_the_gioi(d: Directive | undefined): Record<string, unknown> {
+  if (!d) return {};
+  const family = Object.keys(d.thuoc_tinh ?? {})[0] ?? 'grid-bot';
+  const than = d.than.trim();
+  if (than === '') return {};
+  let params: unknown;
+  try {
+    params = JSON.parse(than);
+  } catch (e) {
+    throw new LoiBienDich(
+      `khối \`:::world\` không phải JSON hợp lệ: ${(e as Error).message}`,
+      '',
+      d.dong,
+      'Thân của `:::world` là JSON thuần. Kiểm dấu phẩy thừa và dấu nháy đơn.',
+    );
+  }
+  return {
+    liveView: {
+      world: { family, params, seed: 0 },
+      renderer: 'svg',
+      linkedViews: 1,
+      minViewport: { w: 360, h: 420 },
+      onSuccess: 'pulse',
+      onFailure: 'freeze-at-step',
+    },
+  };
 }
 
 function doc_validate(d: Directive | undefined): unknown {

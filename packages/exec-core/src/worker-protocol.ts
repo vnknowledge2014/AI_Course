@@ -16,6 +16,9 @@ export interface YeuCauChay {
   id: number;
   ma: string;
   maKiemTra?: string;
+  /** Cấu hình thế giới, nếu bài học có sân khấu. Worker chạy mã người học
+   *  bên trong thế giới ấy và trả về chuỗi sự kiện thay vì chỉ trả output. */
+  luoi?: unknown;
 }
 
 export interface PhanHoiChay {
@@ -25,6 +28,12 @@ export interface PhanHoiChay {
   xuat: string;
   /** Thông báo lỗi thô của runtime, host sẽ chuyển thành chẩn đoán. */
   loi: string | null;
+  /** Chuỗi sự kiện để sân khấu phát lại. Chỉ có khi yêu cầu mang `luoi`. */
+  suKien?: unknown[];
+  /** Kết cục trong thế giới: nhặt hết viên và không đâm tường. */
+  thang?: boolean;
+  /** Lý do thua, viết sẵn bằng tiếng Việt. */
+  viSao?: string | null;
 }
 
 export interface PhanHoiSanSang {

@@ -49,8 +49,10 @@
   {#if buoc.kind === 'predict'}
     <DuDoan buoc={buoc as never} {xong} />
 
-  {:else if buoc.kind === 'code'}
-    <BaiCode buoc={buoc as never} {xong} />
+  {:else if buoc.kind === 'code' || buoc.kind === 'sandbox'}
+    <!-- Sân chơi dùng chung thành phần với bài tập: cùng ô soạn, cùng nút
+         chạy, cùng sân khấu. Khác đúng một điều — nó không chấm. -->
+    <BaiCode buoc={buoc as never} {xong} san_choi={buoc.kind === 'sandbox'} />
 
   {:else if buoc.kind === 'reflect'}
     <div class="ngam">

@@ -26,8 +26,16 @@ export function bo_thuc_thi(): BoThucThiPython {
   return may;
 }
 
-export async function chay_python(ma: string, ma_kiem_tra?: string): Promise<KetQuaChay> {
+export async function chay_python(
+  ma: string,
+  ma_kiem_tra?: string,
+  luoi?: unknown,
+): Promise<KetQuaChay> {
   const m = bo_thuc_thi();
   await m.sanSang();
+  // Bài có sân khấu chấm bằng LUẬT CHƠI (nhặt hết viên, không đâm tường), nên
+  // nó không chạy khối `test` — hai cách chấm chồng lên nhau chỉ làm người học
+  // trượt vì một lý do mà màn hình không hề nói tới.
+  if (luoi) return m.chay(ma, { luoi });
   return ma_kiem_tra ? m.chay(ma, { maKiemTra: ma_kiem_tra }) : m.chay(ma);
 }
