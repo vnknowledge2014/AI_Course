@@ -51,6 +51,35 @@ pub enum KieuNguyen {
 }
 
 impl KieuNguyen {
+    /// Kiểu này không dấu?
+    ///
+    /// `ChuaGhim` trả `false`: một literal chưa ghim còn có thể trở thành kiểu
+    /// có dấu, nên phán nó không dấu là đoán bừa.
+    /// Khoảng giá trị hợp lệ, `None` cho `ChuaGhim` và các bề rộng phụ thuộc
+    /// nền tảng mà ta cố ý không phán (`isize`/`usize` đã chốt 64-bit ở
+    /// ADR-002 nên vẫn trả khoảng).
+    pub fn khoang(self) -> Option<(i128, i128)> {
+        use KieuNguyen::*;
+        Some(match self {
+            I8 => (i8::MIN as i128, i8::MAX as i128),
+            I16 => (i16::MIN as i128, i16::MAX as i128),
+            I32 => (i32::MIN as i128, i32::MAX as i128),
+            I64 | Isize => (i64::MIN as i128, i64::MAX as i128),
+            I128 => return None,
+            U8 => (0, u8::MAX as i128),
+            U16 => (0, u16::MAX as i128),
+            U32 => (0, u32::MAX as i128),
+            U64 | Usize => (0, u64::MAX as i128),
+            U128 => return None,
+            ChuaGhim => return None,
+        })
+    }
+
+    pub fn khong_dau(self) -> bool {
+        use KieuNguyen::*;
+        matches!(self, U8 | U16 | U32 | U64 | U128 | Usize)
+    }
+
     pub fn ten(self) -> &'static str {
         use KieuNguyen::*;
         match self {
@@ -787,8 +816,19 @@ impl<'a> BoKiemKieu<'a> {
             BieuThuc::Tuple { phan_tu, .. } => {
                 T::Tuple(phan_tu.iter().map(|e| self.kieu_cua(e)).collect())
             }
-            BieuThuc::Ep { kieu, gia_tri, .. } => {
-                self.kieu_cua(gia_tri);
+            BieuThuc::Ep { kieu, gia_tri, span } => {
+                let nguon = self.kieu_cua(gia_tri);
+                // `as` chỉ đổi được giữa các kiểu NGUYÊN THUỶ. Nó là phép
+                // diễn giải lại bit, không phải phép phân tích cú pháp —
+                // `"42" as i64` không có nghĩa gì cả.
+                let nguyen_thuy = matches!(
+                    bo_tham_chieu(&nguon),
+                    T::SoNguyen(_) | T::SoThuc(_) | T::Bool | T::KyTu | T::Mo | T::ChuaBiet(_)
+                );
+                if !nguyen_thuy {
+                    self.bao_ep_kieu_khong_duoc(*span, &nguon, &tu_kieu_ast(kieu));
+                    return T::ChuaBiet("ép kiểu từ kiểu không nguyên thuỷ");
+                }
                 tu_kieu_ast(kieu)
             }
             khac => {
@@ -886,6 +926,8 @@ impl<'a> BoKiemKieu<'a> {
                                 self.bao_chua_biet(sp, ly_do);
                             } else if lech_trong_let(&khai, &t_gt) {
                                 self.bao_let_lech(sp, k.span(), &khai, &t_gt);
+                            } else if let Some(e) = gia_tri.as_ref() {
+                                self.kiem_hang_vua_kieu(&khai, e);
                             }
                             khai
                         }
@@ -1053,6 +1095,33 @@ impl<'a> BoKiemKieu<'a> {
             if n != doi_so.len() {
                 self.bao_sai_so_doi_so_phuong_thuc(ten, n, doi_so.len(), doi_so);
                 return T::ChuaBiet("phương thức sai số đối số");
+            }
+        }
+
+        // `abs()` chỉ có trên kiểu CÓ DẤU. Số không dấu không bao giờ âm nên
+        // std không định nghĩa phép này cho chúng — gọi nó là dấu hiệu người
+        // học đang tưởng `u32` cũng chứa được số âm.
+        if ten == "abs" {
+            if let T::SoNguyen(k) = goc {
+                if k.khong_dau() {
+                    self.bao_abs_tren_khong_dau(doi_so, k);
+                    return T::ChuaBiet("abs trên kiểu không dấu");
+                }
+            }
+        }
+
+        // `pow()` nhận `u32` cho SỐ MŨ, bất kể cơ số là kiểu gì. Đây là chỗ
+        // rất dễ vấp: `co_so.pow(mu)` với `mu: i64` là lỗi, dù cả hai đều là
+        // số nguyên.
+        if ten == "pow" && matches!(goc, T::SoNguyen(_)) {
+            if let Some(a0) = doi_so.first() {
+                let t_mu = self.kieu_cua(a0);
+                if let T::SoNguyen(k) = bo_tham_chieu(&t_mu) {
+                    if k != KieuNguyen::U32 && k != KieuNguyen::ChuaGhim {
+                        self.bao_pow_sai_kieu_mu(a0.span(), k);
+                        return T::ChuaBiet("số mũ của pow không phải u32");
+                    }
+                }
             }
         }
 
@@ -1334,6 +1403,103 @@ impl<'a> BoKiemKieu<'a> {
                 .vi_sao(format!("`const` không phải một ô nhớ. Trình biên dịch thay giá trị của `{ten}` thẳng vào mọi chỗ dùng nó, nên lúc chạy không còn cái tên ấy ở đâu để mà gán vào."))
                 .sua(format!("đổi `const {ten}` thành `let mut {ten}` nếu bạn cần giá trị thay đổi được"))
                 .khai_niem("hằng"),
+        );
+    }
+
+    /// Hằng số viết ra có nằm vừa trong kiểu đã khai báo không?
+    ///
+    /// `let x: u8 = 300;` biên dịch được ở bản trước vì `300` mang kiểu
+    /// `ChuaGhim` — "literal chưa ghim thì hợp với mọi bề rộng". Đúng, nhưng
+    /// chỉ với những literal NẰM VỪA. rustc bắt chỗ này bằng lint
+    /// `overflowing_literals`, và nó bắt lúc biên dịch chứ không để tràn âm
+    /// thầm lúc chạy như C.
+    fn kiem_hang_vua_kieu(&mut self, khai: &T, e: &BieuThuc) {
+        let (am, hang) = match e {
+            BieuThuc::HangSo { gia_tri: HangSo::SoNguyen(v), .. } => (false, *v),
+            BieuThuc::MotNgoi { toan_tu: ToanTuMot::Am, toan_hang, .. } => {
+                match &**toan_hang {
+                    BieuThuc::HangSo { gia_tri: HangSo::SoNguyen(v), .. } => (true, *v),
+                    _ => return,
+                }
+            }
+            _ => return,
+        };
+        let T::SoNguyen(k) = khai else { return };
+        if *k == KieuNguyen::ChuaGhim {
+            return;
+        }
+
+        // Số âm gán vào kiểu không dấu: rustc báo E0600 (`-` không áp dụng
+        // được cho kiểu không dấu) chứ không phải lỗi tràn — và thông báo ấy
+        // đúng hơn, vì vấn đề nằm ở dấu trừ chứ không ở con số.
+        if am && k.khong_dau() {
+            self.bao_am_tren_khong_dau(e.span(), *k);
+            return;
+        }
+
+        if let Some((thap, cao)) = k.khoang() {
+            let v = if am { -(hang as i128) } else { hang as i128 };
+            if v < thap || v > cao {
+                self.bao_hang_tran_kieu(e.span(), *k, v, thap, cao);
+            }
+        }
+    }
+
+    fn bao_am_tren_khong_dau(&mut self, span: Span, k: KieuNguyen) {
+        self.diags.push(
+            Diagnostic::loi("BR0348", format!("`{}` không nhận giá trị âm", k.ten()))
+                .tai(span, format!("dấu `-` không dùng được với `{}`", k.ten()))
+                .vi_sao(format!("`{}` là kiểu KHÔNG DẤU — mọi bit của nó đều dùng để đếm, không có bit nào dành cho dấu. Nên `-5` ở đây không phải là số nhỏ; nó không phải là một giá trị hợp lệ nào cả.", k.ten()))
+                .sua(format!("đổi kiểu thành `i{}` nếu giá trị có thể âm", k.ten().trim_start_matches('u')))
+                .khai_niem("kiểu số"),
+        );
+    }
+
+    fn bao_hang_tran_kieu(&mut self, span: Span, k: KieuNguyen, v: i128, thap: i128, cao: i128) {
+        self.diags.push(
+            Diagnostic::loi("BR0349", format!("`{v}` không nằm vừa trong `{}`", k.ten()))
+                .tai(span, format!("`{}` chứa được từ {thap} tới {cao}", k.ten()))
+                .vi_sao(format!("Số nguyên trong Rust có bề rộng cố định, và bề rộng ấy là một phần của kiểu. Khác C, con số vượt khoảng không bị cắt bớt âm thầm — nó bị từ chối ngay lúc biên dịch, nên không có chuyện chương trình chạy ra một giá trị mà bạn chưa bao giờ viết ra."))
+                .sua(format!("chọn kiểu rộng hơn, ví dụ `i64`, nếu bạn cần tới {v}"))
+                .sua(format!("hoặc sửa giá trị cho nằm trong khoảng của `{}`", k.ten()))
+                .khai_niem("kiểu số"),
+        );
+    }
+
+    fn bao_ep_kieu_khong_duoc(&mut self, span: Span, nguon: &T, dich: &T) {
+        self.diags.push(
+            Diagnostic::loi(
+                "BR0345",
+                format!("không ép {} sang {} bằng `as` được", nguon.hien_thi(), dich.hien_thi()),
+            )
+            .tai(span, format!("`as` không nhận {}", nguon.hien_thi()))
+            .vi_sao("`as` là phép DIỄN GIẢI LẠI cùng những bit đó dưới một kiểu khác, nên nó chỉ dùng được giữa các kiểu nguyên thuỷ. Đọc một chuỗi thành số là việc khác hẳn: phải phân tích từng ký tự, và có thể thất bại — nên nó phải trả về một kết quả có thể là lỗi.")
+            .sua("dùng `.parse::<i64>()` nếu bạn muốn đọc chuỗi thành số")
+            .sua("hoặc `.unwrap()` sau `parse` nếu chắc chắn chuỗi hợp lệ")
+            .khai_niem("ép kiểu"),
+        );
+    }
+
+    fn bao_abs_tren_khong_dau(&mut self, doi_so: &[BieuThuc], k: KieuNguyen) {
+        let span = doi_so.first().map(|a| a.span()).unwrap_or_default();
+        self.diags.push(
+            Diagnostic::loi("BR0346", format!("`{}` không có phương thức `abs`", k.ten()))
+                .tai(span, "kiểu không dấu thì không cần lấy trị tuyệt đối")
+                .vi_sao(format!("`{}` là kiểu KHÔNG DẤU — nó không bao giờ chứa số âm, nên trị tuyệt đối của nó luôn là chính nó. std không định nghĩa `abs` cho những kiểu ấy, và điều đó có ích: nó bắt được lúc biên dịch cái giả định rằng biến này có thể âm.", k.ten()))
+                .sua(format!("nếu giá trị này CÓ THỂ âm, khai báo nó là `i{}` thay vì `{}`", k.ten().trim_start_matches('u'), k.ten()))
+                .sua("nếu không, bỏ `.abs()` đi")
+                .khai_niem("kiểu số"),
+        );
+    }
+
+    fn bao_pow_sai_kieu_mu(&mut self, span: Span, k: KieuNguyen) {
+        self.diags.push(
+            Diagnostic::loi("BR0347", format!("số mũ của `pow` phải là `u32`, không phải `{}`", k.ten()))
+                .tai(span, format!("giá trị này là `{}`", k.ten()))
+                .vi_sao("Số mũ luôn là `u32` bất kể cơ số thuộc kiểu nào — một số mũ âm sẽ cho ra phân số, mà phép luỹ thừa trên số nguyên thì không trả về phân số được. Ghim `u32` là cách kiểu dữ liệu nói ra điều đó thay vì để chương trình vỡ lúc chạy.")
+                .sua("ép số mũ: `.pow(mu as u32)`")
+                .sua("hoặc khai báo số mũ là `u32` ngay từ đầu")
+                .khai_niem("kiểu số"),
         );
     }
 
