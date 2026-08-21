@@ -669,6 +669,10 @@ impl<'a> BoKiemKieu<'a> {
                 T::Struct(ten)
             }
             BieuThuc::GoiHam { ham, doi_so, span } => {
+                // Hai `&mut` cùng một gốc trong CÙNG MỘT lời gọi: cả hai chắc
+                // chắn sống cùng lúc, nên không cần phân tích vùng sống mới
+                // biết là xung đột.
+                self.kiem_hai_muon_mut(doi_so, *span);
                 if let BieuThuc::DuongDan { doan, .. } = &**ham {
                     let cuoi = doan.last().cloned().unwrap_or_default();
                     if let Some(e) = self.thuoc_enum.get(&cuoi).cloned() {
@@ -1698,6 +1702,42 @@ impl<'a> BoKiemKieu<'a> {
         );
     }
 
+    /// Hai đối số cùng mượn `&mut` một gốc trong một lời gọi.
+    fn kiem_hai_muon_mut(&mut self, doi_so: &[BieuThuc], span: Span) {
+        let mut da_thay: Vec<String> = Vec::new();
+        for a in doi_so {
+            let BieuThuc::Muon { co_the_sua: true, gia_tri, .. } = a else { continue };
+            let BieuThuc::DuongDan { doan, .. } = &**gia_tri else { continue };
+            let goc = doan.join("::");
+            if da_thay.contains(&goc) {
+                self.bao_hai_muon_mut(span, &goc);
+                return;
+            }
+            da_thay.push(goc);
+        }
+    }
+
+    fn bao_hai_muon_mut(&mut self, span: Span, ten: &str) {
+        self.diags.push(
+            Diagnostic::loi("BR0355", format!("mượn `{ten}` dạng `&mut` hai lần cùng lúc"))
+                .tai(span, "hai lần mượn khả biến cùng sống trong một lời gọi")
+                .vi_sao(format!("Rust cho phép NHIỀU người cùng xem, hoặc ĐÚNG MỘT người được sửa — không bao giờ cả hai. Nếu hai chỗ cùng sửa được `{ten}` một lúc thì không ai đoán nổi kết quả cuối là của bên nào, và đó chính là lớp lỗi mà Rust xoá bỏ hoàn toàn."))
+                .sua("truyền giá trị thay vì tham chiếu, hoặc tách thành hai lời gọi")
+                .khai_niem("mượn"),
+        );
+    }
+
+    fn bao_tra_ve_tham_chieu_cuc_bo(&mut self, span: Span, ten: &str) {
+        self.diags.push(
+            Diagnostic::loi("BR0356", format!("trả về tham chiếu tới `{ten}`, mà `{ten}` chết khi hàm kết thúc"))
+                .tai(span, "tham chiếu này sẽ trỏ vào chỗ không còn gì")
+                .vi_sao(format!("`{ten}` sinh ra bên trong hàm, nên nó biến mất ngay khi hàm trả về. Người gọi mà cầm tham chiếu ấy thì đang cầm địa chỉ của một chỗ đã dọn — trong C đây là lỗi kinh điển và im lặng; Rust bắt nó lúc biên dịch."))
+                .sua("trả về giá trị thay vì tham chiếu")
+                .sua(format!("hoặc để người gọi tạo `{ten}` rồi truyền tham chiếu vào"))
+                .khai_niem("vòng đời"),
+        );
+    }
+
     fn bao_ep_kieu_khong_duoc(&mut self, span: Span, nguon: &T, dich: &T) {
         self.diags.push(
             Diagnostic::loi(
@@ -2008,6 +2048,19 @@ pub fn kiem_tra(ct: &ChuongTrinh, diags: &mut Diagnostics) {
                 .map(|kb| (bk.chuan_hoa(tu_kieu_ast(kb)), kb.span()));
             if let Some(e) = h.than.gia_tri_cuoi.as_ref() {
                 bk.kiem_move_ra_khoi_muon(e);
+                // Trả tham chiếu tới một biến khai báo NGAY TRONG hàm: biến ấy
+                // chết khi hàm kết thúc, nên tham chiếu trả về trỏ vào chỗ
+                // không còn gì. Luật này không cần phân tích luồng — chỉ cần
+                // biết cái tên ấy sinh ra ở đâu.
+                if matches!(&h.kieu_tra_ve, Some(Kieu::ThamChieu { .. })) {
+                    if let BieuThuc::Muon { gia_tri, span, .. } = e {
+                        if let BieuThuc::DuongDan { doan, .. } = &**gia_tri {
+                            if doan.len() == 1 && ten_cuc_bo(&h.than).contains(&doan[0]) {
+                                bk.bao_tra_ve_tham_chieu_cuc_bo(*span, &doan[0]);
+                            }
+                        }
+                    }
+                }
             }
             let t_than = bk.khoi(&h.than);
             bk.tra_ve_ham = None;
@@ -2155,4 +2208,18 @@ fn phuong_thuc_cua(nhom: NhomBoThu) -> &'static [&'static str] {
 /// `#[derive(Clone, Copy)]`, và từ chối oan tệ hơn bỏ lọt nhiều.
 fn la_chac_chan_copy(t: &T) -> bool {
     !matches!(t, T::Chuoi | T::Vec(_) | T::Lap(_))
+}
+
+/// Mọi tên do `let` khai báo ngay trong thân một khối (không đệ quy xuống
+/// khối con — biến của khối con không sống tới chỗ trả về được).
+fn ten_cuc_bo(k: &Khoi) -> Vec<String> {
+    let mut ra = Vec::new();
+    for cl in &k.cau_lenh {
+        if let CauLenh::Let { mau, .. } = cl {
+            let mut ten = Vec::new();
+            mau.ten_rang_buoc(&mut ten);
+            ra.extend(ten.into_iter().map(|(n, _, _)| n));
+        }
+    }
+    ra
 }
