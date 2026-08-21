@@ -38,12 +38,19 @@ KHUON_RO = [
 ]
 
 # Gán một chuỗi dài vào một cái tên nghe như credential.
+#
+# Tiền tố `(?:[a-z0-9]+[_-])?` là chỗ bản đầu tiên hụt, và hụt đúng ca đã sinh
+# ra script này: `\b` không khớp sau dấu gạch dưới, nên `ollama_api_key`,
+# `openai_api_key`, `anthropic_api_key` — dạng tên phổ biến nhất — đều lọt hết.
+# Cổng bỏ sót thứ nó được viết ra để bắt là cổng tệ hơn không có cổng, vì nó
+# còn phát ra một tờ giấy chứng nhận sạch.
 GAN = re.compile(
     r"""(?ix)
-    \b(
+    (?<![a-z0-9])(?:[a-z0-9]+[_-])?
+    (
         api[_-]?key | apikey | access[_-]?token | auth[_-]?token |
         secret[_-]?key | client[_-]?secret | private[_-]?key |
-        [a-z_]*_pass(?:word)? | passwd
+        password | passwd | pass
     )\b
     \s* [:=] \s*
     ['"]? ([A-Za-z0-9._\-/+]{16,}) ['"]?
@@ -58,7 +65,14 @@ VO_HAI = re.compile(
      | fake | sample | test[_-]?only | redacted | none | null | true | false
      # Đọc từ biến môi trường là cách ĐÚNG, không phải rò rỉ. Cổng kêu ở đây
      # sẽ dạy người ta bỏ qua nó, mà một cổng bị bỏ qua thì không còn là cổng.
-     | process\.env | os\.environ | std::env | System\.getenv | ENV\[
+     | (?:process\.)?env[.\[] | os\.environ | std::env | System\.getenv
+     | config\. | getenv | secrets\. | vault
+     # Biểu thức mã, không phải hằng: `self.api_key`, `builder.get_key()`.
+     # Một credential thật không bao giờ có dấu chấm nối hai định danh hay
+     # dấu ngoặc gọi hàm.
+     | [a-z_]+\.[a-z_] | [A-Za-z_]+\(
+     # Khoá ví dụ in trong tài liệu chính thức của AWS.
+     | AKIAIOSFODNN7EXAMPLE
      )
     """
 )
@@ -79,7 +93,13 @@ def do_hon_loan(s: str) -> float:
 
 
 # Thư mục không bao giờ đáng quét: phụ thuộc bên thứ ba và sản phẩm build.
-BO_QUA_THU_MUC = {"node_modules", "target", "dist", ".git", "venv", ".venv", "vendor"}
+BO_QUA_THU_MUC = {
+    "node_modules", "target", "dist", ".git", "venv", ".venv", "vendor",
+    # Bản sao kho bên thứ ba để tra cứu — không phải mã của dự án này, và mã
+    # mẫu trong đó đầy khoá giả. Quét chúng chỉ tạo ra tiếng ồn che mất tín
+    # hiệu thật.
+    "repos", "references", "_raw_data",
+}
 
 
 def cac_tep(tat_ca: bool) -> list[pathlib.Path]:
@@ -99,7 +119,15 @@ def cac_tep(tat_ca: bool) -> list[pathlib.Path]:
         import os
 
         for goc_hien, thu_muc, ten_tep in os.walk(GOC):
-            thu_muc[:] = [d for d in thu_muc if d not in BO_QUA_THU_MUC]
+            # Khớp cả hậu tố: `.rig_raw_data` và `.pageindex_raw_data` là bản
+            # sao thô để tra cứu, và khớp-chính-xác bỏ sót chúng vì tên có tiền
+            # tố riêng.
+            thu_muc[:] = [
+                d
+                for d in thu_muc
+                if d not in BO_QUA_THU_MUC
+                and not any(d.endswith(x) for x in ("_raw_data",))
+            ]
             for n in ten_tep:
                 tep.append(pathlib.Path(goc_hien) / n)
 
@@ -114,6 +142,10 @@ def cac_tep(tat_ca: bool) -> list[pathlib.Path]:
 
 
 def quet(t: pathlib.Path) -> list[tuple[int, str, str]]:
+    # Chính file này chứa khuôn nhận dạng, nên nó luôn tự khớp. Bỏ qua nó là
+    # đúng chứ không phải né: khuôn dạng không phải bí mật.
+    if t.resolve() == pathlib.Path(__file__).resolve():
+        return []
     try:
         noi_dung = t.read_text(encoding="utf-8")
     except (UnicodeDecodeError, OSError):
