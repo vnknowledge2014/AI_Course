@@ -402,6 +402,16 @@ impl<'a> BoKiemKieu<'a> {
         }
         // Option/Result dựng sẵn
         self.enum_bien_the.insert("Option".into(), vec!["Some".into(), "None".into()]);
+        // Payload của `Option` phải được nạp, không chỉ danh sách biến thể.
+        //
+        // Thiếu nó thì bộ vét cạn coi `Some(1)` là phủ TRỌN nhánh `Some` —
+        // và `match o { Some(1) => .., None => .. }` đi lọt, dù mọi giá trị
+        // `Some(x)` với `x != 1` đều không nhánh nào bắt. Tên kiểu để trống
+        // vì ta chưa theo dõi tham số kiểu; `kg_enum` chỉ cần biết có MẤY chỗ.
+        self.payload.insert(
+            "Option".into(),
+            vec![("Some".into(), vec![String::new()]), ("None".into(), Vec::new())],
+        );
         self.enum_bien_the.insert("Result".into(), vec!["Ok".into(), "Err".into()]);
         self.payload.insert("Option".into(), vec![("Some".into(), vec!["_".into()]), ("None".into(), vec![])]);
         self.payload.insert("Result".into(), vec![("Ok".into(), vec!["_".into()]), ("Err".into(), vec!["_".into()])]);

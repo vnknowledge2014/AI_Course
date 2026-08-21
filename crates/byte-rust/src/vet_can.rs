@@ -106,6 +106,20 @@ pub fn thieu(kg: &KhongGian, mau: &[&Mau]) -> Option<String> {
                             // Có nhánh không nêu rõ thành phần ⇒ coi như bao quát.
                             continue;
                         }
+                        // Miền của phần dữ liệu chưa mô hình hoá được, nhưng
+                        // một mẫu HẰNG SỐ thì chắc chắn không phủ nổi nó.
+                        //
+                        // Không có luật này thì `match o { Some(1) => .., None
+                        // => .. }` đi lọt: bộ vét cạn thấy nhánh `Some` có mẫu
+                        // nên coi là xong, dù mọi `Some(x)` với `x != 1` đều
+                        // không nhánh nào bắt. Wildcard và binding vẫn phủ như
+                        // cũ — chỉ hằng số mới bị coi là không đủ.
+                        if matches!(kg_con, KhongGian::KhongBiet)
+                            && mau_con.iter().all(|m| matches!(m, Mau::HangSo { .. }))
+                            && !mau_con.is_empty()
+                        {
+                            return Some(format!("{ten}(_)"));
+                        }
                         if let Some(w) = thieu(kg_con, &mau_con) {
                             return Some(format!("{ten}({w})"));
                         }
