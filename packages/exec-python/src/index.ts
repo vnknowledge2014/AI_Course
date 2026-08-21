@@ -210,3 +210,5 @@ export function chanDoanTuTraceback(traceback: string): ChanDoan {
 }
 
 export { chayTrongWorkerPython, gan, type Pyodide } from './worker-body.js';
+
+export { kiemAst, type TruyVanAst, type KetQuaAst } from './kiem-ast.js';

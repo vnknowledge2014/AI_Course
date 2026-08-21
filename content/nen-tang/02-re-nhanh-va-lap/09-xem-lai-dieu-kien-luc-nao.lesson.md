@@ -245,6 +245,17 @@ assert tien_con == 10000
   expect: Còn 55000 đồng
 - tier: output
   expect: Còn 10000 đồng
+- tier: static
+  onFail: dòng bạn điền phải BÁO con số đang có trong ví, không in ra một chuỗi cố định
+  requireAst:
+  # `min: 2` vì khung đã có sẵn MỘT lệnh print ("Về nhà") — dòng bạn điền phải
+  # là cái thứ hai. Hỏi `uses-name: tien_con` không được: khung đã nhắc tên ấy
+  # hai lần ở dòng `while` và dòng trừ tiền, nên luật thoả bất kể điền gì.
+  - kind: uses-call, target: print, min: 2
+  - kind: uses-name, target: tien_con, min: 3
+  forbidAst:
+  - kind: has-literal, target: 10000
+  - kind: has-literal, target: 55000
 :::
 ::::
 

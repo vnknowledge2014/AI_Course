@@ -24,6 +24,7 @@ const HET_HAN_MS = 10_000;
 
 // `pyodide` là phụ thuộc của `packages/exec-python`, không của thư mục gốc —
 // nên phải phân giải qua đó thay vì import trần.
+const { kiemAst } = await import(new URL('../packages/exec-python/dist/kiem-ast.js', import.meta.url).href);
 const require = createRequire(new URL('../packages/exec-python/package.json', import.meta.url));
 const { loadPyodide } = await import(pathToFileURL(require.resolve('pyodide/pyodide.mjs')).href);
 const py = await loadPyodide();
@@ -155,6 +156,43 @@ for (const f of tep) {
             chi_tiet: `thay \`___\` bằng \`${bua}\` là đạt — cách chấm không phân biệt được đúng với sai`,
           });
           break;
+        }
+      }
+    }
+
+    // 3b. Luật `tier: static` phải ĐẠT trên lời giải và TRƯỢT trên mã khởi đầu.
+    //
+    // Một luật static đạt trên cả hai thì nó không kiểm gì cả; trượt trên lời
+    // giải thì bài không thể qua được. Kiểm cả hai chiều là cách duy nhất biết
+    // luật ấy có thật sự phân biệt hay không.
+    const luat_static = (b.validation?.rules ?? []).filter((r) => r.tier === 'static');
+    for (const r of luat_static) {
+      const yeu = r.requireAst ?? [];
+      const cam = r.forbidAst ?? [];
+      if (c.solution) {
+        const kq = kiemAst(py, c.solution, yeu, cam);
+        if (!kq.dat) {
+          hong.push({
+            bai: bai.id,
+            buoc: b.id,
+            loai: `luật static \`${r.id}\` TRƯỢT trên chính lời giải`,
+            chi_tiet: kq.loi_cu_phap
+              ? `lời giải không parse được: ${kq.loi_cu_phap}`
+              : `thiếu ${JSON.stringify(kq.thieu)} · cấm mà vẫn có ${JSON.stringify(kq.cam)}`,
+          });
+        }
+      }
+      if (c.starter && c.starter.includes('___')) {
+        // Điền bừa vào chỗ trống rồi kiểm: luật static phải chặn được.
+        const bua = c.starter.replaceAll('___', 'True');
+        const kq = kiemAst(py, bua, yeu, cam);
+        if (kq.dat) {
+          hong.push({
+            bai: bai.id,
+            buoc: b.id,
+            loai: `luật static \`${r.id}\` cho qua cả đáp án điền bừa`,
+            chi_tiet: 'thay `___` bằng `True` vẫn thoả — luật không phân biệt được gì',
+          });
         }
       }
     }

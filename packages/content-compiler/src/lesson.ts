@@ -439,18 +439,63 @@ function doc_validate(d: Directive | undefined): unknown {
     if (cur) rules.push(chuan_hoa_rule(cur, rules.length));
     cur = null;
   };
+  // Khoá đang gom các mục con dạng danh sách, ví dụ `requireAst:` theo sau là
+  // các dòng `- kind: ... target: ...`.
+  let khoa_ds: string | null = null;
+
   for (const l of d.than.split('\n')) {
     const m = /^\s*-\s*tier:\s*(\S+)\s*$/.exec(l);
     if (m) {
       chot();
       cur = { tier: m[1] };
+      khoa_ds = null;
       continue;
     }
+
+    // Mục của một danh sách: `  - kind: uses-call, target: round`
+    const muc = /^\s*-\s+(\S.*)$/.exec(l);
+    if (muc && cur && khoa_ds) {
+      (cur[khoa_ds] as Record<string, unknown>[]).push(doc_muc(muc[1]!));
+      continue;
+    }
+
     const kv = /^\s*([a-zA-Z]\w*):\s*(.*)$/.exec(l);
-    if (kv && cur) cur[kv[1]!] = kv[2];
+    if (!kv || !cur) continue;
+    const [, khoa, gia_tri] = kv as unknown as [string, string, string];
+
+    // `requireAst:` không có giá trị trên cùng dòng ⇒ mở một danh sách.
+    //
+    // Bản trước gán thẳng chuỗi rỗng vào `requireAst`, nên mọi luật `static`
+    // biên dịch ra một mảng KHÔNG tồn tại và im lặng không chạy. Đó là lý do
+    // hai agent viết bài từ chối dùng `tier: static` — họ đúng.
+    if (gia_tri.trim() === '') {
+      khoa_ds = khoa;
+      cur[khoa] = [];
+      continue;
+    }
+    khoa_ds = null;
+    cur[khoa] = gia_tri;
   }
   chot();
   return { rules, stopOnFirstBlocking: true, advisoryAffectsBadge: 'none' };
+}
+
+/**
+ * Đọc một mục danh sách viết trên MỘT dòng: `kind: uses-call, target: round`.
+ *
+ * Cố tình chỉ nhận dạng một dòng. Cho phép mục trải nhiều dòng nghĩa là phải
+ * theo dõi mức thụt lề, mà ta đã có một bộ đọc thang hai chấm riêng cho việc
+ * đó — thêm một luật thụt lề thứ hai ở đây là chỗ để lẫn lộn sinh ra.
+ */
+function doc_muc(s: string): Record<string, unknown> {
+  const ra: Record<string, unknown> = {};
+  for (const phan of s.split(',')) {
+    const kv = /^\s*([a-zA-Z]\w*):\s*(.*)$/.exec(phan);
+    if (!kv) continue;
+    const v = kv[2]!.trim();
+    ra[kv[1]!] = /^-?\d+$/.test(v) ? Number(v) : v;
+  }
+  return ra;
 }
 
 /**
@@ -470,6 +515,18 @@ function chuan_hoa_rule(r: Record<string, unknown>, i: number): Record<string, u
     if (typeof v === 'string' && v.trim() !== '' && Number.isFinite(Number(v))) {
       ra[k] = Number(v);
     }
+  }
+
+  if (r['tier'] === 'static') {
+    // `lang` mặc định theo ngôn ngữ của bài; tác giả không phải lặp lại nó ở
+    // mỗi dòng truy vấn.
+    for (const k of ['requireAst', 'forbidAst']) {
+      const ds = ra[k];
+      if (Array.isArray(ds)) {
+        ra[k] = ds.map((q) => ({ lang: 'python', ...(q as object) }));
+      }
+    }
+    ra['onFail'] ??= 'lời giải chưa dùng đúng cách mà bài đang dạy';
   }
 
   if (r['tier'] === 'output') {

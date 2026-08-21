@@ -557,9 +557,28 @@ export type AstQuery =
   | { lang: 'typescript'; kind: TsAstKind; target?: string; min?: number };
 
 export type PyAstKind =
+  // ── Hình dạng bậc cao, cho Realm 4 (FP) ────────────────────────────
   | 'match-stmt' | 'comprehension' | 'lambda' | 'recursion'
   | 'frozen-dataclass' | 'no-mutation' | 'pure-fn' | 'no-global'
-  | 'uses-generator' | 'no-import';
+  | 'uses-generator' | 'no-import'
+  // ── Sáu primitive tổng quát, thêm 2026-08-21 ───────────────────────
+  //
+  // Bảng cũ chỉ có hình dạng bậc cao nên không bài nào của Realm 0–2 viết
+  // nổi một luật `static`, và tác giả buộc phải chấm mọi thứ bằng `output`.
+  // Chấm bằng output không phân biệt được "đáp án đúng" với "đáp án tình cờ
+  // ra đúng số" — `if True:` cũng in ra câu mà bài mong đợi.
+  //
+  // Sáu kind dưới đây là primitive, không phải hình dạng: mỗi cái phủ cả
+  // một họ bài học thay vì một bài.
+  | 'uses-call'       // `target` = tên hàm được gọi, ví dụ `round`
+  | 'uses-operator'   // `target` = ký hiệu, ví dụ `//`, `%`, `not`, `and`
+  | 'uses-fstring'    // có f-string trong bài
+  | 'uses-name'       // `target` = tên được tham chiếu
+  | 'has-literal'     // `target` = hằng viết nguyên văn; dùng trong `forbidAst`
+                      // để chặn đáp án chép cứng con số
+  | 'nesting';        // `target` = `ngoài/trong`, ví dụ `not/and` — đúng thứ
+                      // một cặp ngoặc thay đổi, và không diễn tả được bằng
+                      // năm kind trên
 export type RsAstKind =
   | 'match-expr' | 'enum-def' | 'impl-trait' | 'no-unwrap'
   | 'no-clone-in-loop' | 'uses-iterator-chain' | 'trait-bound' | 'no-mut-binding';

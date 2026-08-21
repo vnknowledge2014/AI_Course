@@ -1,0 +1,202 @@
+/**
+ * Đánh giá luật chấm `tier: static` cho Python.
+ *
+ * Chấm bằng `output` không phân biệt được "đáp án đúng" với "đáp án tình cờ
+ * ra đúng số": bài dạy dấu ngoặc, starter là `if ___:`, và `if True:` cũng in
+ * ra câu mà bài mong đợi. Tầng `static` hỏi thẳng vào HÌNH DẠNG của mã người
+ * học viết, nên nó bắt được đúng chỗ mà output bỏ qua.
+ *
+ * Dùng module `ast` của chính CPython chứ không tự viết bộ phân tích. Tự viết
+ * nghĩa là có một bộ phân tích Python thứ hai trong dự án, và hai bộ phân tích
+ * thì sớm muộn cũng lệch nhau — mà lệch ở đây nghĩa là chấm sai.
+ *
+ * MASTERPLAN §5 nói rõ: AST query, KHÔNG regex trên mã nguồn. Regex trên mã
+ * không phân biệt nổi `not (a and b)` với chuỗi `"not (a and b)"` trong một
+ * comment.
+ */
+
+import type { Pyodide } from './worker-body.js';
+
+/** Một truy vấn AST, đúng hình dạng `AstQuery` của schema v2. */
+export interface TruyVanAst {
+  lang: string;
+  kind: string;
+  target?: string;
+  min?: number;
+}
+
+export interface KetQuaAst {
+  /** Mọi truy vấn `requireAst` đều thoả và không truy vấn `forbidAst` nào thoả. */
+  dat: boolean;
+  /** Truy vấn không thoả, để nói cho người học biết còn thiếu gì. */
+  thieu: TruyVanAst[];
+  /** Truy vấn bị cấm mà vẫn xuất hiện. */
+  cam: TruyVanAst[];
+  /** Mã không phân tích được — khác hẳn "phân tích được nhưng sai hình dạng". */
+  loi_cu_phap: string | null;
+}
+
+/**
+ * Đoạn Python đếm số lần mỗi hình dạng xuất hiện.
+ *
+ * Chạy trong Pyodide nên nó là CPython thật; `ast.parse` ở đây là đúng cùng
+ * hàm mà `python3` dùng.
+ */
+const DEM = `
+import ast, json
+
+def _dem(nguon, cac_truy_van):
+    cay = ast.parse(nguon)
+    ra = []
+    for tv in cac_truy_van:
+        kind = tv.get("kind")
+        tg = tv.get("target")
+        n = 0
+        for nut in ast.walk(cay):
+            if kind == "uses-call":
+                if isinstance(nut, ast.Call):
+                    ten = getattr(nut.func, "id", None) or getattr(nut.func, "attr", None)
+                    if tg is None or ten == tg:
+                        n += 1
+            elif kind == "uses-operator":
+                n += _khop_toan_tu(nut, tg)
+            elif kind == "uses-fstring":
+                if isinstance(nut, ast.JoinedStr):
+                    n += 1
+            elif kind == "uses-name":
+                # Chỉ đếm chỗ ĐỌC tên, không đếm chỗ gán nó.
+                #
+                # \`tien = 0\` là đặt tên, không phải dùng tên. Luật \`uses-name\`
+                # tồn tại để hỏi "lời giải có THAM CHIẾU tới biến này không",
+                # mà một dòng gán thì chưa tham chiếu gì cả — đếm nó vào sẽ cho
+                # qua đúng những đáp án mà luật này sinh ra để chặn.
+                if (isinstance(nut, ast.Name) and isinstance(nut.ctx, ast.Load)
+                        and (tg is None or nut.id == tg)):
+                    n += 1
+            elif kind == "has-literal":
+                if isinstance(nut, ast.Constant):
+                    # So bằng CHUỖI HOÁ để tác giả viết target là văn bản thuần:
+                    # target "10000" khớp cả 10000 lẫn "10000" — người viết bài
+                    # không phải nhớ kiểu, và trong ngữ cảnh "chặn đáp án chép
+                    # cứng" thì cả hai đều là chép cứng.
+                    if tg is None or str(nut.value) == tg:
+                        n += 1
+            elif kind == "nesting":
+                n += _khop_long(nut, tg)
+            elif kind == "comprehension":
+                if isinstance(nut, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
+                    n += 1
+            elif kind == "lambda":
+                if isinstance(nut, ast.Lambda):
+                    n += 1
+            elif kind == "match-stmt":
+                if isinstance(nut, getattr(ast, "Match", ())):
+                    n += 1
+            elif kind == "no-import":
+                if isinstance(nut, (ast.Import, ast.ImportFrom)):
+                    n += 1
+        ra.append(n)
+    return ra
+
+_TOAN_TU = {
+    "+": ast.Add, "-": ast.Sub, "*": ast.Mult, "/": ast.Div,
+    "//": ast.FloorDiv, "%": ast.Mod, "**": ast.Pow,
+    "==": ast.Eq, "!=": ast.NotEq, "<": ast.Lt, "<=": ast.LtE,
+    ">": ast.Gt, ">=": ast.GtE,
+}
+
+def _khop_toan_tu(nut, tg):
+    if tg == "and":
+        return 1 if isinstance(nut, ast.BoolOp) and isinstance(nut.op, ast.And) else 0
+    if tg == "or":
+        return 1 if isinstance(nut, ast.BoolOp) and isinstance(nut.op, ast.Or) else 0
+    if tg == "not":
+        return 1 if isinstance(nut, ast.UnaryOp) and isinstance(nut.op, ast.Not) else 0
+    lop = _TOAN_TU.get(tg)
+    if lop is None:
+        return 0
+    if isinstance(nut, ast.BinOp) and isinstance(nut.op, lop):
+        return 1
+    if isinstance(nut, ast.Compare) and any(isinstance(o, lop) for o in nut.ops):
+        return 1
+    if isinstance(nut, ast.AugAssign) and isinstance(nut.op, lop):
+        return 1
+    return 0
+
+def _loai(nut, ten):
+    if ten in ("and", "or"):
+        lop = ast.And if ten == "and" else ast.Or
+        return isinstance(nut, ast.BoolOp) and isinstance(nut.op, lop)
+    if ten == "not":
+        return isinstance(nut, ast.UnaryOp) and isinstance(nut.op, ast.Not)
+    if ten == "call":
+        return isinstance(nut, ast.Call)
+    if ten == "if":
+        return isinstance(nut, (ast.If, ast.IfExp))
+    if ten == "for":
+        return isinstance(nut, (ast.For, ast.AsyncFor))
+    if ten == "while":
+        return isinstance(nut, ast.While)
+    return False
+
+def _khop_long(nut, tg):
+    """\`ngoài/trong\` — nút ngoài chứa TRỰC TIẾP một nút trong.
+
+    Trực tiếp, không phải bắc cầu: \`not (a and b)\` khớp \`not/and\`, còn
+    \`not a and b\` thì không — đúng chỗ mà một cặp ngoặc thay đổi.
+    """
+    if not tg or "/" not in tg:
+        return 0
+    ngoai, trong = tg.split("/", 1)
+    if not _loai(nut, ngoai):
+        return 0
+    for con in ast.iter_child_nodes(nut):
+        if _loai(con, trong):
+            return 1
+    return 0
+`;
+
+/** Những kind mang nghĩa PHỦ ĐỊNH: xuất hiện là hỏng, dù nằm ở `requireAst`. */
+const KIND_PHU_DINH = new Set(['no-import', 'no-mutation', 'no-global']);
+
+export function kiemAst(
+  py: Pyodide,
+  ma: string,
+  yeu_cau: TruyVanAst[] = [],
+  cam: TruyVanAst[] = [],
+): KetQuaAst {
+  py.runPython(DEM);
+  const dem = (cac: TruyVanAst[]): number[] => {
+    if (cac.length === 0) return [];
+    py.globals.set('_nguon', ma);
+    py.globals.set('_tv', JSON.stringify(cac));
+    py.runPython('_kq = json.dumps(_dem(_nguon, json.loads(_tv)))');
+    return JSON.parse(String(py.globals.get('_kq'))) as number[];
+  };
+
+  try {
+    const n_yeu = dem(yeu_cau);
+    const n_cam = dem(cam);
+    const thieu = yeu_cau.filter((q, i) => {
+      const n = n_yeu[i] ?? 0;
+      // `no-*` đảo chiều: có mặt là hỏng.
+      return KIND_PHU_DINH.has(q.kind) ? n > 0 : n < (q.min ?? 1);
+    });
+    const vi_pham = cam.filter((_, i) => (n_cam[i] ?? 0) > 0);
+    return {
+      dat: thieu.length === 0 && vi_pham.length === 0,
+      thieu,
+      cam: vi_pham,
+      loi_cu_phap: null,
+    };
+  } catch (e) {
+    // Mã không phân tích được thì KHÔNG kết luận là sai hình dạng — đó là lỗi
+    // cú pháp, và tầng `run` sẽ báo nó bằng thông báo dễ hiểu hơn nhiều.
+    return {
+      dat: false,
+      thieu: [],
+      cam: [],
+      loi_cu_phap: e instanceof Error ? e.message : String(e),
+    };
+  }
+}
