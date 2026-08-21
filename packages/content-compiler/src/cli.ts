@@ -29,7 +29,7 @@ title: TODO — tiêu đề ngắn, nói rõ người học sẽ LÀM được g
 summary: TODO — một câu
 locale: vi
 track: ${track}
-module: ${moduleId}
+module: ${bo_so(moduleId)}
 order: 1
 tier: A
 languages: [python]

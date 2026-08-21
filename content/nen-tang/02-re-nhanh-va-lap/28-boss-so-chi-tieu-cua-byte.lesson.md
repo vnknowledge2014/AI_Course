@@ -13,7 +13,7 @@ level: intro
 estimatedMinutes: 15
 teaches: []
 practices: [core.accumulator, core.compound-assign, core.counter-if, core.max-tracker, core.sentinel, ctrl.nested-if, ctrl.for-each, core.fstring]
-requires: [core.accumulator, core.compound-assign, core.max-tracker, core.sentinel, ctrl.nested-if, ctrl.for-each]
+requires: [core.accumulator, core.augmented-assign, core.max-tracker, ctrl.sentinel-value, ctrl.if-nested, ctrl.for-each]
 concepts: [ctrl.lap, ctrl.re-nhanh, core.bien]
 gradingMatrix:
   web-chrome: [static, run, tests, output]

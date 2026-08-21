@@ -1,0 +1,29 @@
+# Thứ tự học — nguồn sự thật duy nhất về "bài nào đứng trước bài nào".
+#
+# Tên thư mục KHÔNG quyết định thứ tự. `nen-tang` đứng sau `onboarding` dù
+# xếp trước theo bảng chữ cái, và không có quy ước đặt tên nào sửa được điều
+# đó mà không làm hỏng thứ khác. Nên thứ tự phải được ghi ra tường minh.
+#
+# `tools/kiem_do_thi.py` đọc file này để kiểm: mọi skill một bài YÊU CẦU đều
+# phải được một bài ĐỨNG TRƯỚC nó DẠY. Thiếu thứ tự thật thì phép kiểm ấy
+# vô nghĩa.
+
+realm:
+  - id: onboarding
+    ten: "Realm 0 — Bãi đáp của Byte"
+    # Dùng `module` trong frontmatter (slug KHÔNG mang số thứ tự), không dùng
+    # tên thư mục. Số thứ tự thuộc về đường dẫn; danh tính module thì không —
+    # cùng lý do `id` bài học không mang số (xem content-compiler/src/cli.ts).
+    track:
+      - may-tinh-noi-gi
+      - ra-lenh-cho-byte
+
+  - id: nen-tang
+    ten: "Realm 1 — Nền tảng lập trình"
+    track:
+      # T1.1 chưa viết; giữ chỗ để thứ tự không đổi khi nó xuất hiện.
+      - gia-tri-bien-kieu
+      - re-nhanh-va-lap
+      - ham-vien-gach
+      - list-dict-set-tuple
+      - chuong-trinh-that

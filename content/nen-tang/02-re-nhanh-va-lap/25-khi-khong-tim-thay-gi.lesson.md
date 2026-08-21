@@ -4,7 +4,7 @@ title: Khi chẳng tìm thấy gì
 summary: Đặt sẵn một giá trị mang nghĩa "chưa có" trước vòng, rồi kiểm nó sau vòng để biết mình có tìm được gì không.
 locale: vi
 track: nen-tang
-module: 02-re-nhanh-va-lap
+module: re-nhanh-va-lap
 order: 25
 tier: A
 languages: [python]

@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 9
 teaches: [core.boolean, ctrl.comparison]
-requires: [core.variable, core.type]
+requires: [core.variable, core.type-of-value]
 concepts: [core.dung-sai, core.so-sanh]
 gradingMatrix:
   web-chrome: [static, run, tests, output]

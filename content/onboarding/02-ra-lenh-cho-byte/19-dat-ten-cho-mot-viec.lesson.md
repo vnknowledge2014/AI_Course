@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 11
 teaches: [core.function-def, core.function-call]
-requires: [core.variable, core.indentation]
+requires: [core.variable, ctrl.block-indent]
 concepts: [core.ham]
 gradingMatrix:
   web-chrome: [static, run, tests, output]

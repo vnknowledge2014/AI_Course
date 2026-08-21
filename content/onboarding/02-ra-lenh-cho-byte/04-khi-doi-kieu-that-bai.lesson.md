@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 10
 teaches: [core.value-error]
-requires: [core.int-cast, core.type-error]
+requires: [core.int-cast, err.type-error]
 concepts: [core.kieu-gia-tri, core.loi]
 gradingMatrix:
   web-chrome: [static, run, tests, output]

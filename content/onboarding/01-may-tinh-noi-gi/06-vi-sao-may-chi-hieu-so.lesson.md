@@ -12,7 +12,7 @@ defaultLanguage: text
 level: intro
 estimatedMinutes: 10
 teaches: [core.bang-ma, core.ky-tu-la-so]
-requires: [core.bit-byte]
+requires: [core.byte]
 concepts: [core.bang-ma]
 gradingMatrix:
   web-chrome: []

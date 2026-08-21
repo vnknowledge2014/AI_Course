@@ -4,7 +4,7 @@ title: Một lượt, nhiều câu trả lời
 summary: Nhiều cái tên cùng ghi chép trên một lượt duyệt — và tổng đi cùng số đếm thì có luôn trung bình.
 locale: vi
 track: nen-tang
-module: 02-re-nhanh-va-lap
+module: re-nhanh-va-lap
 order: 27
 tier: A
 languages: [python]

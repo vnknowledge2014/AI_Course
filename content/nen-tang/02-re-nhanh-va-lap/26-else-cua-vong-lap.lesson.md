@@ -4,7 +4,7 @@ title: 'Nhánh else của vòng lặp'
 summary: Vòng lặp có nhánh else riêng, và nó chỉ chạy khi vòng đi hết lượt mà chưa lần nào gặp break.
 locale: vi
 track: nen-tang
-module: 02-re-nhanh-va-lap
+module: re-nhanh-va-lap
 order: 26
 tier: A
 languages: [python]

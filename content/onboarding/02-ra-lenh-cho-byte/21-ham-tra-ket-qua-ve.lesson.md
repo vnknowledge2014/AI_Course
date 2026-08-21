@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 13
 teaches: [core.function-return]
-requires: [core.function-parameter, core.type-error]
+requires: [core.function-parameter, err.type-error]
 concepts: [core.tra-ve]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
