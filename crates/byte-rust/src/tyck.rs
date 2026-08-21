@@ -971,6 +971,14 @@ impl<'a> BoKiemKieu<'a> {
                 }
                 _ => {}
             }
+            // Mẫu phải KHỚP ĐƯỢC với kiểu của giá trị đang match.
+            //
+            // Bản trước không đối chiếu gì cả: `match n { Mau::Do => ... }` với
+            // `n: i64` vẫn qua, `Diem { x, z }` với struct không có `z` vẫn
+            // qua, `Goi::Mot(x, y)` với biến thể một tham số vẫn qua. Ba lỗi
+            // ấy đều nằm ở PHÍA MẪU, mà phía mẫu chưa từng được kiểm.
+            self.kiem_mau(&n.mau, &t_gt);
+
             self.vao();
             let mut ten = Vec::new();
             n.mau.ten_rang_buoc(&mut ten);
@@ -1463,6 +1471,168 @@ impl<'a> BoKiemKieu<'a> {
                 .sua(format!("chọn kiểu rộng hơn, ví dụ `i64`, nếu bạn cần tới {v}"))
                 .sua(format!("hoặc sửa giá trị cho nằm trong khoảng của `{}`", k.ten()))
                 .khai_niem("kiểu số"),
+        );
+    }
+
+    /// Đối chiếu một mẫu với kiểu của giá trị đang được khớp.
+    fn kiem_mau(&mut self, mau: &Mau, gt: &T) {
+        let goc = bo_tham_chieu(gt);
+        match mau {
+            // `_` và tên trần khớp mọi thứ; không có gì để kiểm.
+            Mau::BoQua { .. } | Mau::Ten { .. } => {}
+
+            Mau::Hoac { nhanh, .. } => {
+                for m in nhanh {
+                    self.kiem_mau(m, gt);
+                }
+            }
+
+            Mau::Tuple { phan_tu, .. } => {
+                if let T::Tuple(kieu) = &goc {
+                    for (m, k) in phan_tu.iter().zip(kieu.iter()) {
+                        self.kiem_mau(m, k);
+                    }
+                }
+            }
+
+            Mau::HangSo { gia_tri, span } => {
+                let k = match gia_tri {
+                    HangSo::SoNguyen(_) => T::SoNguyen(KieuNguyen::ChuaGhim),
+                    HangSo::SoThuc(_) => T::SoThuc(KieuThuc::ChuaGhim),
+                    HangSo::DungSai(_) => T::Bool,
+                    HangSo::KyTu(_) => T::KyTu,
+                    HangSo::Chuoi(_) => T::Tham(Box::new(T::Chuoi), false),
+                };
+                if goc.chac_chan_lech(&k) {
+                    self.bao_mau_lech_kieu(*span, &goc, &k);
+                }
+            }
+
+            Mau::Dai { tu, .. } => self.kiem_mau(tu, gt),
+
+            Mau::BienThe { duong_dan, truong, span } => {
+                let cuoi = duong_dan.last().cloned().unwrap_or_default();
+
+                // Mẫu struct: `Diem { x, y }`
+                if let Some(bang) = self.truong_struct.get(&cuoi).cloned() {
+                    // Khớp một struct với giá trị thuộc kiểu khác hẳn.
+                    if !matches!(&goc, T::Struct(n) if *n == cuoi)
+                        && goc.chua_biet().is_none()
+                        && goc != T::Mo
+                    {
+                        self.bao_mau_lech_kieu(*span, &goc, &T::Struct(cuoi.clone()));
+                        return;
+                    }
+                    if let MauTruong::TheoTen { truong: cac, dau_ba_cham } = truong {
+                        for (ten, con) in cac {
+                            match bang.get(ten) {
+                                None => self.bao_mau_truong_la(con.span(), &cuoi, ten, &bang),
+                                Some(k) => {
+                                    let k = self.chuan_hoa(k.clone());
+                                    self.kiem_mau(con, &k);
+                                }
+                            }
+                        }
+                        // Thiếu trường mà không có `..`: rustc từ chối, và luật
+                        // đó có ích — thêm một trường vào struct sẽ báo lỗi ở
+                        // mọi chỗ khớp mẫu chưa cập nhật, thay vì âm thầm bỏ qua.
+                        if !dau_ba_cham {
+                            let mut khoa: Vec<&String> = bang.keys().collect();
+                            khoa.sort();
+                            let thieu: Vec<String> = khoa
+                                .into_iter()
+                                .filter(|k| !cac.iter().any(|(t, _)| t == *k))
+                                .cloned()
+                                .collect();
+                            if !thieu.is_empty() {
+                                self.bao_mau_thieu_truong(*span, &cuoi, &thieu);
+                            }
+                        }
+                    }
+                    return;
+                }
+
+                // Mẫu biến thể enum: `Goi::Mot(x)`
+                if let Some(en) = self.thuoc_enum.get(&cuoi).cloned() {
+                    if !matches!(&goc, T::Enum(n) if *n == en)
+                        && goc.chua_biet().is_none()
+                        && goc != T::Mo
+                    {
+                        self.bao_mau_lech_kieu(*span, &goc, &T::Enum(en.clone()));
+                        return;
+                    }
+                    if let Some(can) = self.so_payload(&en, &cuoi) {
+                        let co = match truong {
+                            MauTruong::Khong => 0,
+                            MauTruong::TheoViTri(ps) => ps.len(),
+                            MauTruong::TheoTen { truong, .. } => truong.len(),
+                        };
+                        if can != co {
+                            self.bao_mau_sai_arity(*span, &en, &cuoi, can, co);
+                        }
+                    }
+                    return;
+                }
+
+                // Tên lạ ở vị trí mẫu: `Mau::Tim` khi enum không có biến thể ấy.
+                if duong_dan.len() >= 2 {
+                    let truoc = duong_dan[duong_dan.len() - 2].clone();
+                    if self.enum_bien_the.contains_key(&truoc) {
+                        self.bao_khong_co_bien_the(*span, &truoc, &cuoi);
+                    }
+                }
+            }
+        }
+    }
+
+    fn bao_mau_lech_kieu(&mut self, span: Span, gt: &T, mau: &T) {
+        self.diags.push(
+            Diagnostic::loi(
+                "BR0350",
+                format!("mẫu này khớp {} nhưng giá trị là {}", mau.hien_thi(), gt.hien_thi()),
+            )
+            .tai(span, format!("không khớp được với {}", gt.hien_thi()))
+            .vi_sao("Một nhánh `match` không bao giờ khớp thì là mã chết — và mã chết trong `match` nguy hiểm hơn ở chỗ khác, vì nó làm bạn tưởng đã xử lý một trường hợp mà thật ra chưa.")
+            .sua("kiểm lại kiểu của giá trị đang match")
+            .khai_niem("match"),
+        );
+    }
+
+    fn bao_mau_truong_la(&mut self, span: Span, ten: &str, truong: &str, bang: &HashMap<String, T>) {
+        let mut co: Vec<&String> = bang.keys().collect();
+        co.sort();
+        let ds = co.iter().map(|s| format!("`{s}`")).collect::<Vec<_>>().join(", ");
+        let mut d = Diagnostic::loi("BR0351", format!("`{ten}` không có trường `{truong}`"))
+            .tai(span, "mẫu nhắc tới một trường không tồn tại")
+            .vi_sao("Khớp mẫu tháo struct ra theo đúng hình dạng đã khai báo. Một cái tên không có trong khai báo thì không có gì để tháo ra cả.");
+        if let Some(g) = Self::gan_nhat(truong, bang.keys()) {
+            d = d.sua(format!("có phải bạn muốn viết `{g}` không?"));
+        }
+        self.diags.push(d.sua(format!("`{ten}` có các trường: {ds}")).khai_niem("match"));
+    }
+
+    fn bao_mau_thieu_truong(&mut self, span: Span, ten: &str, thieu: &[String]) {
+        let ds = thieu.iter().map(|s| format!("`{s}`")).collect::<Vec<_>>().join(", ");
+        self.diags.push(
+            Diagnostic::loi("BR0352", format!("mẫu thiếu trường {ds} của `{ten}`"))
+                .tai(span, "chưa nhắc tới mọi trường")
+                .vi_sao("Rust bắt liệt kê đủ mọi trường, và luật đó có ích: hôm nào bạn thêm một trường vào struct, mọi chỗ khớp mẫu chưa cập nhật sẽ báo lỗi ngay — thay vì âm thầm bỏ qua dữ liệu mới.")
+                .sua(format!("thêm {ds} vào mẫu"))
+                .sua("hoặc viết `..` để nói rõ là bạn cố ý bỏ qua phần còn lại")
+                .khai_niem("match"),
+        );
+    }
+
+    fn bao_mau_sai_arity(&mut self, span: Span, en: &str, bien_the: &str, can: usize, co: usize) {
+        self.diags.push(
+            Diagnostic::loi(
+                "BR0353",
+                format!("`{en}::{bien_the}` mang {can} giá trị nhưng mẫu tháo ra {co}"),
+            )
+            .tai(span, format!("mẫu này tháo ra {co}"))
+            .vi_sao("Số lượng dữ liệu mỗi biến thể mang theo được ghim lúc khai báo enum. Nhờ nó cố định, khớp mẫu mới tháo đúng từng phần ra mà không bao giờ trượt chỗ.")
+            .sua(format!("tháo đúng {can} giá trị"))
+            .khai_niem("match"),
         );
     }
 
