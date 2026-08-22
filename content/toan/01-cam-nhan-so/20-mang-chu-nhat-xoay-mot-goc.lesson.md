@@ -108,8 +108,9 @@ Thứ bằng nhau chỉ có đúng một: **số cây**. Dấu `×` là cái má
 máy ấy cho ra cùng một kết quả dù bạn nạp hai con số theo thứ tự nào.
 
 Cẩn thận thêm một tầng nữa: giao hoán được chứng minh bằng **cái mảng chữ
-nhật**, mà chỉ phép nhân mới có mảng. Đừng vội đem nó đi cho mượn: bài sau sẽ
-cho bạn kiểm một phép khác, và kết quả không như bạn nghĩ.
+nhật**, mà chỉ phép nhân mới có mảng. Đừng vội đem nó đi cho mượn — ngay ở
+phần dưới đây bạn sẽ đem đúng câu hỏi "đổi chỗ hai con số" ấy hỏi một phép
+khác, và kết quả không như bạn nghĩ.
 ::::
 
 ::::predict{#doan-ba-cau-hoi commitOnce}
@@ -185,39 +186,39 @@ Từ giờ, mỗi lần gặp một phép nhân khó, bạn có quyền xoay nó
 ::::
 
 ::::code{#trong-tai-hai-cau}
-Byte muốn máy chốt lại hai câu, và hai câu này cố tình cho ra **hai câu trả lời
-ngược nhau** — nên gõ cứng `True` cả hai chỗ thì câu dưới sai, gõ cứng `False`
-cả hai chỗ thì câu trên sai.
+Byte muốn máy chốt lại hai chuyện, và hai chuyện này cố tình cho ra **hai câu
+trả lời ngược nhau** — nên một chữ `True` hay `False` gõ cứng chỉ qua được
+nhiều nhất một dòng.
 
-- **Câu 1**: vườn 6 luống mỗi luống 9 cây, và vườn 9 luống mỗi luống 6 cây —
-  có cùng số cây không?
-- **Câu 2**: cũng đổi chỗ hai con số như thế, nhưng với phép trừ — "12 bớt 5"
-  và "5 bớt 12" có bằng nhau không?
-
-Mỗi chỗ trống là một câu hỏi viết bằng dấu `==`, không phải một câu trả lời
-chép sẵn.
+- **Chỗ trống 1**: Byte đếm xong mảng **6 hàng, mỗi hàng 9 cây** — 54 cây. Bây
+  giờ xoay mảng ấy đi một góc: nó thành **9 hàng**. Mỗi hàng lúc này mấy cây?
+  Điền con số ấy, **đừng nhân lại** — hãy xoay.
+- **Chỗ trống 2**: cũng đổi chỗ hai con số như thế, nhưng với phép trừ — "12
+  bớt 5" và "5 bớt 12" có bằng nhau không? Chỗ này phải là một **câu hỏi** viết
+  bằng dấu `==`, không phải câu trả lời chép sẵn.
 
 ```python title=starter
-xoay_vuon = ___
-xoay_phep_tru = ___
+thua_so = ___          # xoay mảng 6 hàng × 9 cột lại: 9 hàng, mỗi hàng mấy cây?
+xoay_phep_tru = ___    # "12 bớt 5" và "5 bớt 12" có bằng nhau không?
 
-print(xoay_vuon)
+print(9 * thua_so == 54)
 print(xoay_phep_tru)
 ```
 
 ```python title=solution
-xoay_vuon = 6 * 9 == 9 * 6
+thua_so = 6
 xoay_phep_tru = 12 - 5 == 5 - 12
 
-print(xoay_vuon)
+print(9 * thua_so == 54)
 print(xoay_phep_tru)
 ```
 
 ```python title=test
-# Hai câu cho ra hai giá trị ngược nhau, nên một chữ True hay False gõ cứng
-# chỉ qua được nhiều nhất một dòng. Bốn dòng dưới chốt lại chính nội dung bài:
-# xoay mảng thì bằng, xoay phép trừ thì không.
-assert xoay_vuon is True, "6 × 9 và 9 × 6 là cùng một mảng xoay một góc — phải bằng nhau"
+# Chỗ trống 1 chấm đúng cái việc xoay mảng: chỉ một con số duy nhất lọt qua,
+# và tìm ra nó nghĩa là đã đọc được mảng 6 × 9 theo chiều kia. Chỗ trống 2 giữ
+# vai đối chứng — xoay mảng thì bằng, xoay phép trừ thì không.
+assert thua_so == 6, "xoay mảng 6 hàng × 9 cột thành 9 hàng × 6 cột — mỗi hàng 6 cây"
+assert 9 * thua_so == 54, "9 hàng, mỗi hàng chừng ấy cây, phải về lại đúng 54 cây"
 assert xoay_phep_tru is False, "12 − 5 và 5 − 12 ngược chiều nhau — không bằng nhau"
 assert 6 * 9 == 54 and 9 * 6 == 54, "cả hai chiều đều đếm ra 54 cây"
 assert 12 - 5 == 7 and 5 - 12 == -7, "một bên 7, bên kia −7: cùng khoảng cách, khác phía"
@@ -225,21 +226,20 @@ assert 12 - 5 == 7 and 5 - 12 == -7, "một bên 7, bên kia −7: cùng khoản
 
 :::hints
 - kind: attention
-  body: Hai chỗ trống đều nằm ở vế phải một dấu `=`, và ngay dưới chúng là hai lệnh `print`. Việc của chúng là **hỏi máy một câu**, không phải ghi sẵn câu trả lời bạn đã đoán.
+  body: Chỗ trống 1 không đòi bạn nhân gì cả — mảng 6 hàng × 9 cột đã đếm xong là 54 cây rồi. Cầm tờ giấy xoay đi một phần tư vòng rồi nhìn lại: bây giờ có 9 hàng, mỗi hàng bao nhiêu cây?
 - kind: strategy
-  body: Mỗi câu hỏi gồm ba phần — vế trái, dấu so sánh bằng (hai dấu bằng viết liền nhau), vế phải. Câu 1 so `6 * 9` với phép nhân đổi chỗ của nó; câu 2 so `12 - 5` với phép trừ đổi chỗ của nó.
+  body: Xoay mảng thì hàng thành cột, cột thành hàng — không cây nào thêm vào, không cây nào rơi ra, nên số cây mỗi hàng mới chính là số hàng cũ. Còn chỗ trống 2 là một câu hỏi ba phần: vế trái, dấu so sánh bằng (hai dấu bằng viết liền nhau), vế phải — so `12 - 5` với phép trừ đổi chỗ của nó.
 - kind: one-line
-  body: "Viết `6 * 9 == 9 * 6` vào chỗ trống thứ nhất và `12 - 5 == 5 - 12` vào chỗ trống thứ hai."
+  body: "Viết `6` vào chỗ trống thứ nhất và `12 - 5 == 5 - 12` vào chỗ trống thứ hai."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: static
-  onFail: mỗi chỗ trống phải là một câu so sánh bằng (`==`) giữa hai phép tính — gõ thẳng `True` hay `False` thì bạn không hỏi máy điều gì cả
+  onFail: chỗ trống thứ hai phải là một câu so sánh bằng (`==`) giữa hai phép trừ — gõ thẳng `False` thì bạn không hỏi máy điều gì cả
   requireAst:
   - kind: uses-operator, target: ==, min: 2
-  - kind: uses-operator, target: *, min: 2
   - kind: uses-operator, target: -, min: 2
 - tier: tests
   timeoutMs: 4000

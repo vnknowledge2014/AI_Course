@@ -48,7 +48,7 @@ An không biết nó nói về cái gì:
 
 - 12 **hạt** trong túi? — vậy thì bốc gọn trong lòng bàn tay.
 - 12 **luống** đất? — vậy thì cả buổi sáng gieo chưa xong.
-- 12 **sải dây**, tức chiều dài một luống? — vậy thì nó chẳng nói gì về hạt cả.
+- 12 **bước chân**, tức chiều dài một luống? — vậy thì nó chẳng nói gì về hạt cả.
 
 Ba câu ấy nói về ba thứ khác hẳn nhau. Tấm bảng không giúp An chọn được câu nào.
 ::::
@@ -86,10 +86,10 @@ hiểu giống bên kia, chuyện hỏng ngay: người mua nghĩ *45 nghìn*, n
 
 ```python title=readonly
 so_hat_trong_tui = 12
-so_sai_day_do_mot_luong = 12
+so_buoc_chan_do_mot_luong = 12
 
 print(so_hat_trong_tui)
-print(so_sai_day_do_mot_luong)
+print(so_buoc_chan_do_mot_luong)
 ```
 
 Máy in ra:
@@ -102,7 +102,7 @@ Máy in ra:
 Hai dòng giống hệt nhau, cho hai thứ khác hẳn nhau.
 
 Để ý chỗ này: **cái đơn vị đang nằm trong tên biến, không nằm trong giá trị.**
-Chữ `hat` và chữ `sai_day` là bạn viết cho bạn đọc. Thứ máy cất giữ và thứ máy
+Chữ `hat` và chữ `buoc_chan` là bạn viết cho bạn đọc. Thứ máy cất giữ và thứ máy
 in ra chỉ có con số `12`, trần trụi, giống nhau từng nét.
 ::::
 
@@ -113,8 +113,8 @@ Giờ hỏi máy một câu có–không: hai thứ ấy có bằng nhau không?
 
 ```python
 so_hat_trong_tui = 12
-so_sai_day_do_mot_luong = 12
-print(so_hat_trong_tui == so_sai_day_do_mot_luong)
+so_buoc_chan_do_mot_luong = 12
+print(so_hat_trong_tui == so_buoc_chan_do_mot_luong)
 ```
 
 :::opt{correct}
@@ -125,11 +125,11 @@ True
 False
 ::why
 Gần đúng ở chỗ bạn đang giữ chắc đúng cái điều bài này muốn dạy: 12 hạt và 12
-sải dây là hai thứ khác nhau, và trả lời "bằng nhau" cho hai thứ ấy là một câu
+bước chân là hai thứ khác nhau, và trả lời "bằng nhau" cho hai thứ ấy là một câu
 trả lời vô nghĩa ngoài vườn.
 
 Chỗ lệch nằm ở việc máy đang nhìn thấy gì. Bạn chưa hề đưa chữ "hạt" hay chữ
-"sải dây" vào trong máy — bạn chỉ viết chúng trong **tên** của hai biến, và tên
+"bước chân" vào trong máy — bạn chỉ viết chúng trong **tên** của hai biến, và tên
 thì máy không đọc nghĩa. Hai bên dấu `==` là hai con số `12` và `12`. Với chừng
 ấy thông tin, `True` là câu trả lời đúng duy nhất máy có thể đưa ra.
 ::
@@ -145,7 +145,7 @@ ai bắt bẻ được.
 Chỗ lệch: ở Realm 0 bạn đã gặp `==` với một vai khác hẳn — nó là một **câu hỏi
 có–không**, không phải một chỗ ghi kết quả. Thứ đi ra khỏi nó luôn là `True`
 hoặc `False`, chưa bao giờ là một con số. Muốn thấy con số thì bỏ hẳn phần
-`== so_sai_day_do_mot_luong` đi.
+`== so_buoc_chan_do_mot_luong` đi.
 ::
 :::
 
@@ -167,9 +167,9 @@ tất cả những gì nó có trong tay. Đây chính là lý do đơn vị ph�
 Máy trả `True` không phải vì nó ẩu. Nó trả `True` vì nó trả lời **đúng câu bạn
 hỏi**: hai con số này có bằng nhau không. Con số thì bằng nhau thật.
 
-Câu bạn thật sự muốn hỏi lại là một câu khác: *12 hạt và 12 sải dây có phải một
-thứ không.* Câu đó có chữ "hạt" và chữ "sải dây" trong đấy — và bạn đã bỏ hai
-chữ ấy lại bên ngoài.
+Câu bạn thật sự muốn hỏi lại là một câu khác: *12 hạt và 12 bước chân có phải
+một thứ không.* Câu đó có chữ "hạt" và chữ "bước chân" trong đấy — và bạn đã bỏ
+hai chữ ấy lại bên ngoài.
 
 Rút ra một câu mang theo suốt track này:
 
@@ -257,7 +257,7 @@ Byte đổ túi hạt ra chiếu, đếm từ phía hàng rào vào, được 12
 An gom lại, đổ ra lần nữa, đếm từ phía cổng lại — không nhìn Byte, không hỏi
 Byte. An cũng được 12.
 
-Hai người, hai thứ tự hoàn toàn khác nhau, mà cùng một con số. Cái gì bảo đảm
+Hai người, hai đường đi hoàn toàn khác nhau, mà cùng một con số. Cái gì bảo đảm
 chuyện đó? Vì sao An không thể ra 11, hay 13?
 
 Nếu bạn định trả lời "vì đống hạt có 12 hạt" — thì hãy để ý, câu đó đang dùng

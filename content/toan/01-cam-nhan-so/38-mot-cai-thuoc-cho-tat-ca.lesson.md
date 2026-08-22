@@ -1,7 +1,7 @@
 ---
 id: toan.cam-nhan-so.mot-cai-thuoc-cho-tat-ca
 title: Một cái thước cho tất cả
-summary: Chốt cứng mẫu ở 100 thì mọi lượng to nhỏ khác nhau đều đọc được bằng một con số — và 100 được chọn vì 10 quá thô còn 1000 thì thừa một cột.
+summary: Chốt cứng mẫu ở 100 thì mọi lượng to nhỏ khác nhau đều đọc được bằng một con số — và 100 được chọn vì nó đủ mịn để tách những chênh lệch đời thường mà vẫn chỉ tốn hai chữ số.
 locale: vi
 track: toan
 module: cam-nhan-so
@@ -35,21 +35,23 @@ Mỗi lần so lại đi tìm một cái thước mới thì mệt. Chọn sẵn
 Câu hỏi còn treo từ bài trước: vườn Byte 40 cây mất 14, vườn An 250 cây mất 80
 — vườn nào bị nặng hơn?
 
-Bài 34 đã cho cách làm: muốn so thì phải **cùng thước**. Quy `14/40` và `80/250`
-về một mẫu chung là được. Mẫu chung nhỏ nhất của 40 và 250 là 1000:
+Bài 34 đã cho cách làm: muốn so thì phải **cùng thước**, và nó cho luôn cách
+tìm thước chung — lấy mẫu bên này nhân mẫu bên kia thì luôn ra một cỡ thước mà
+cả hai bên đều đếm chẵn được. Với `14/40` và `80/250` thì thước chung là
+`40 × 250 = 10000`:
 
 ```text
-14/40   =  350/1000
-80/250  =  320/1000
+14/40   =  3500/10000
+80/250  =  3200/10000
 ```
 
-`350` cái thước so với `320` cái thước, cùng một cỡ thước — vườn Byte nặng hơn.
-Xong, và cách này không sai một chút nào.
+`3500` cái thước so với `3200` cái thước, cùng một cỡ thước — vườn Byte nặng
+hơn. Xong, và cách này không sai một chút nào.
 
 Chỗ bất tiện lộ ra ở lần thứ hai. Chiều nay bác Tư sang khoe vườn mình: 60 cây
-mất 20. So vườn bác Tư với vườn Byte thì mẫu chung của 60 và 40 là 120 — một
-cái thước **khác hẳn** cái vừa dùng. So bác Tư với An thì mẫu chung của 60 và
-250 lại là 1500, thêm một cái thước nữa. Ba cái vườn, ba lần so, ba cái thước.
+mất 20. So vườn bác Tư với vườn Byte thì thước chung là `60 × 40 = 2400` — một
+cái thước **khác hẳn** cái vừa dùng. So bác Tư với An thì `60 × 250 = 15000`,
+thêm một cái thước nữa. Ba cái vườn, ba lần so, ba cái thước.
 
 Và không cái thước nào trong ba cái ấy dùng lại được cho lần sau. Cứ thêm một
 cái vườn là lại đi tìm mẫu chung từ đầu.
@@ -75,9 +77,10 @@ thẳng cột sẵn, khỏi quy đồng.
 
 Cả hai đều không ra **số nguyên** cái thước. Mà cái thước thì phải đếm được
 bằng số nguyên — đó là toàn bộ ý nghĩa của bài 31: tử nói *lấy mấy cái*, và
-"lấy ba cái rưỡi cái thước" thì thước đã bị bẻ thêm lần nữa rồi. Muốn đếm bằng
-số nguyên với mẫu 10 thì phải làm tròn cả hai xuống `3/10`, và lúc đó hai cái
-vườn **trông y hệt nhau**. Mẫu 10 quá thô: nó không tách nổi hai vườn ra.
+"lấy ba cái rưỡi cái thước" thì thước đã bị bẻ thêm lần nữa rồi. Đếm chẵn bằng
+thước `1/10` thì cả hai vườn đều ra "3 cái thước rồi thừa một mẩu", mà mẫu 10
+không có cột nào để ghi cái mẩu ấy. Mẫu 10 quá thô: nó không viết nổi lượng của
+vườn nào trong hai vườn, nên cũng chẳng tách được hai vườn ra.
 
 **Thử mẫu 100.**
 
@@ -90,9 +93,13 @@ vườn **trông y hệt nhau**. Mẫu 10 quá thô: nó không tách nổi hai 
 đúng cái mà mẫu 10 làm mất.
 
 **Thử mẫu 1000.** Ra `350/1000` và `320/1000` — cũng đúng, cũng tách được. Chỉ
-là cả hai con số đều kết thúc bằng một chữ số `0` không mang tin gì thêm. Cột
-thứ ba luôn rỗng, kéo theo mọi con số dài thêm một chữ số suốt đời, đổi lại
-không phân biệt được thêm cái gì.
+là với hai cái vườn này thì cột thứ ba rỗng: `350` và `320` đều thừa ra một chữ
+số `0` không mang tin gì thêm, và con số nào cũng phải dài thêm một chữ số để
+nuôi cái cột ấy.
+
+Có lượng cần tới cột thứ ba thật — `1/8` là `0,125`, tức `12,5%`, đúng cái ca
+bài 37 vừa dựng. Lúc đó người ta viết thêm phần lẻ sau dấu phẩy chứ không đổi
+mẫu: mẫu vẫn chốt ở 100.
 
 Vậy **100 là mức bẻ nhỏ đầu tiên đủ mịn mà vẫn viết được bằng số nguyên.** Nó
 cũng chính là `10²` của bài 24 — bó-của-bó của bài 7, gom mười bó thành một bó
@@ -108,68 +115,73 @@ trăm**. Ký hiệu là `%`.
 
 Đọc lại hai cái vườn bằng tên mới: vườn Byte bị sâu ăn **35%**, vườn An **32%**.
 Vườn Byte nặng hơn — dù nó chỉ mất 14 cây còn vườn An mất tới 80 cây.
-
-Một điều thành thật trước khi đi tiếp: chốt mẫu ở 100 **không** phá được cái
-giới hạn của bài 37. Vườn bác Tư mất 20 cây trên 60, tức `20/60`, rút gọn là
-`1/3`. Mà `3` thì không kéo về 100 được — bài 37 vừa chỉ ra chỗ đó bằng `999`
-với `1002`. Nên vườn bác Tư bị ăn `33,33…%`, cái đuôi vẫn không dừng, và
-người ta viết gọn là "khoảng 33%".
-
-Phần trăm không xoá được chỗ dư. Nó chỉ chọn sẵn cái thước, để khỏi phải chọn
-lại mỗi lần.
 ::::
 
 ::::predict{#doan-vuon-nao-nang commitOnce}
-Byte kể lại cho An nghe: "Vườn mình 40 cây, sâu ăn 14 cây. Vườn bạn 250 cây,
-sâu ăn 80 cây."
+Bác Tư vẫn còn ngồi đó, và vườn bác chưa được đo lần nào: **60 cây, sâu ăn 20
+cây**. Vườn An thì vừa đo xong — **250 cây, sâu ăn 80 cây**, tức `32%`.
 
-**Trước khi đọc tiếp**, bạn đoán vườn nào bị sâu ăn nặng hơn?
+**Trước khi tính ra giấy**, bạn đoán vườn nào bị sâu ăn nặng hơn?
 
 :::opt{correct}
-Vườn Byte — 35 trên 100, so với 32 trên 100 của vườn An
+Vườn bác Tư — hơn 33 trên 100, so với 32 trên 100 của vườn An
 :::
 
 :::opt
-Vườn An, vì 80 cây chết nhiều hơn hẳn 14 cây
+Vườn An, vì 80 cây chết nhiều hơn hẳn 20 cây
 ::why
 Gần đúng ở chỗ bạn so hai con số **cùng đơn vị**, đúng luật bài 11 — cả hai đều
-là "cây", và 80 cây thật sự là một tổn thất lớn hơn 14 cây. Nếu câu hỏi là
+là "cây", và 80 cây thật sự là một tổn thất lớn hơn 20 cây. Nếu câu hỏi là
 "nhà nào mất nhiều cây hơn" thì bạn trúng hoàn toàn, không bàn cãi gì.
 
 Chỗ lệch nằm ở chữ **nặng hơn**. Nặng hơn là so phần chết với **chính cái vườn
-chứa nó**: 14 trên 40 là hơn một phần ba, còn 80 trên 250 là chưa tới một phần
-ba. Hai câu hỏi khác nhau, và chúng cho hai câu trả lời ngược nhau trên cùng
-một dữ liệu — đó là lý do phải nói rõ đang hỏi câu nào.
+chứa nó**: 20 trên 60 là đúng một phần ba, còn 80 trên 250 thì chưa tới một
+phần ba — một phần ba của 250 là hơn 83 cây, mà vườn An mới mất 80. Hai câu hỏi
+khác nhau, và chúng cho hai câu trả lời ngược nhau trên cùng một dữ liệu; đó là
+lý do phải nói rõ đang hỏi câu nào.
 ::
 :::
 
 :::opt
 Không so được, vì hai cái vườn to nhỏ khác nhau
 ::why
-Gần đúng ở chỗ bạn nhớ đúng luật bài 34: `14/40` và `80/250` đang đo bằng hai
+Gần đúng ở chỗ bạn nhớ đúng luật bài 34: `20/60` và `80/250` đang đo bằng hai
 cái thước khác nhau, và so thẳng tử với tử, mẫu với mẫu thì cho ra kết quả bậy.
 Cảnh giác ấy chặn được đúng cái lỗi phổ biến nhất về phân số.
 
 Chỗ lệch: luật ấy cấm so **khi còn khác thước**, chứ không cấm **đổi về cùng
 thước** rồi so. Bài 33 cho phép đổi thoải mái — nhân cả tử lẫn mẫu thì lượng
-không suy suyển. Quy cả hai về mẫu 100 là được `35/100` và `32/100`, cùng thước,
-so được ngay.
+không suy suyển. Đo cả hai bằng cái thước `1/100` vừa chốt là được `33,33…` cái
+thước so với `32` cái, cùng thước, so được ngay.
 ::
 :::
 
 :::opt
 Bằng nhau — cả hai đều xấp xỉ một phần ba
 ::why
-Gần đúng ở chỗ bạn ước lượng nhanh và ước lượng ấy trúng: `14/40` và `80/250`
-đều quanh quẩn một phần ba, không cái nào lệch xa. Nghe qua điện thoại mà phải
+Gần đúng ở chỗ bạn ước lượng nhanh và ước lượng ấy trúng: `20/60` đúng bằng một
+phần ba, còn `80/250` chỉ kém một phần ba một chút. Nghe qua điện thoại mà phải
 trả lời ngay thì đây là câu trả lời tốt.
 
-Chỗ lệch nằm ở **độ mịn của cái thước bạn dùng để ước lượng**. Thước "một phần
-ba" — hay thước `1/10` cũng vậy — quá thô để tách `35` với `32`; nhìn qua nó
-thì hai vườn dính làm một. Đây đúng là lý do người ta chốt mẫu ở 100 chứ không
-ở 10: chỗ chênh 3 phần trăm chỉ hiện ra khi thước đủ nhỏ.
+Chỗ lệch nằm ở **độ mịn của cái thước bạn dùng để ước lượng**. Chữ *xấp xỉ* đã
+bỏ đi đúng cái chỗ chênh mà câu hỏi đang hỏi. Thước `1/10` cũng bỏ đi đúng chỗ
+ấy: đếm chẵn bằng nó thì cả hai vườn đều ra "3 cái thước rồi thừa một mẩu", và
+nhìn qua nó thì hai vườn dính làm một. Đây đúng là lý do người ta chốt mẫu ở
+100 chứ không ở 10: chỗ chênh hơn một phần trăm chỉ hiện ra khi thước đủ nhỏ.
 ::
 :::
+::::
+
+::::explain{#phan-tram-khong-xoa-duoc-cho-du}
+Vườn bác Tư nặng hơn — và con số của nó lộ ra đúng cái giới hạn bài 37 vừa
+dựng. `20/60` rút gọn (bài 33) là `1/3`. Mà `3` thì không kéo về 100 được: bài
+37 đã chỉ ra chỗ đó bằng `999` với `1002`. Nên vườn bác Tư bị ăn `33,33…%`,
+cái đuôi vẫn không dừng, và người ta viết gọn là "khoảng 33%".
+
+Chốt mẫu ở 100 **không** phá được cái giới hạn ấy. Phần trăm không xoá được chỗ
+dư — nó chỉ chọn sẵn cái thước, để khỏi phải chọn lại mỗi lần. Mà chừng ấy đã
+đủ để trả lời câu vừa rồi: `33,33…` nhiều hơn `32`, khỏi cần biết cái đuôi dài
+tới đâu.
 ::::
 
 ::::explain{#tu-so-cay-ra-phan-tram}
@@ -186,8 +198,8 @@ thành `?/100` thì cái `?` phải thoả: `?` đứng trên 100 mà bằng đ�
 trên 40 — tức là `?` bằng `14` nhân với 100 rồi chia cho 40.
 
 Một chuyện nhỏ về máy: Realm 0 đã nói phép chia `/` trong Python luôn cho ra số
-lẻ, kể cả khi chia hết. Nên máy sẽ in `35.0` chứ không in `35`. `35,0` phần trăm
-với `35` phần trăm là cùng một lượng.
+**có phần thập phân**, kể cả khi chia hết — nên máy in `35.0` chứ không in `35`.
+`35,0` phần trăm với `35` phần trăm là cùng một lượng.
 ::::
 
 ::::code{#do-hai-cai-vuon-bang-mot-thuoc}

@@ -74,9 +74,10 @@ Có. Mười ba cái bó vẫn còn nhiều, mà bó cũng là vật đếm đư
 ⟦ bó ×10 ⟧        [bó][bó][bó]    ● ● ● ● ● ● ●     (đếm 1 + 3 + 7 = 11 lần)
 ```
 
-Từ 137 lần đếm xuống 11 lần, và không lần nào phải đếm quá mười. Đây không
-phải luật mới — nó là **cùng một luật, chạy lần thứ hai**. Và nó chạy được lần
-thứ ba, thứ tư, không có chỗ dừng.
+Từ 137 lần đếm xuống 11 lần, và không lần nào phải đếm quá chín — hễ đủ mười
+là luật bắt buộc lại thành một, nên không chỗ nào (bó-của-bó, bó, hay hạt lẻ)
+còn tới mười. Đây không phải luật mới — nó là **cùng một luật, chạy lần thứ
+hai**. Và nó chạy được lần thứ ba, thứ tư, không có chỗ dừng.
 ::::
 
 ::::example{#kiem-lai-so-hat}
@@ -183,57 +184,61 @@ Nhờ lặp được như thế, đống nào to tới đâu cũng đếm đư�
 ::::
 
 ::::code{#dem-bo-thay-vi-dem-hat}
-Byte và An mỗi người một đống, cùng buộc theo luật mười.
+Byte đổ một đống hạt ra bàn và đếm được **68 hạt**. Bây giờ làm đúng cái việc
+bài này dạy: buộc mười hạt thành một bó, buộc tới khi không còn buộc được nữa.
 
 Điền hai chỗ trống:
 
-1. `bo_cua_bo` — một bó-của-bó là mấy **hạt**? (mười bó, mà mỗi bó mười hạt)
-2. `dong_cua_an` — An buộc xong được **4 bó và 5 hạt lẻ**. Đống của An là mấy
-   **hạt**?
+1. `so_bo` — buộc xong thì trên bàn có mấy **bó**?
+2. `so_hat_le` — còn lại mấy **hạt lẻ** nằm rời ngoài bó?
 
-Hai chỗ ấy đòi hai con số khác hẳn nhau, và bài chấm bằng cả hai — nên một con
-số gõ cứng vào cả hai chỗ thì trượt ít nhất một câu.
+Hai con số ấy phải ăn khớp với nhau: gộp hết bó và hạt lẻ lại thì phải quay về
+đúng 68 hạt như lúc đầu, vì buộc bó không làm mất hạt nào.
 
 ```python title=starter
-# 1) Một bó-của-bó là mấy HẠT?
-bo_cua_bo = ___
+# Byte đổ 68 hạt ra bàn, buộc mười thành một bó.
 
-# 2) An có 4 bó và 5 hạt lẻ. Đống của An là mấy HẠT?
-dong_cua_an = ___
+# 1) Buộc xong được mấy BÓ?
+so_bo = ___
 
-print(bo_cua_bo)
-print(dong_cua_an)
+# 2) Còn lại mấy HẠT LẺ?
+so_hat_le = ___
+
+print(so_bo)
+print(so_hat_le)
 ```
 
 ```python title=solution
-# 1) Một bó-của-bó là mấy HẠT?
-bo_cua_bo = 100
+# Byte đổ 68 hạt ra bàn, buộc mười thành một bó.
 
-# 2) An có 4 bó và 5 hạt lẻ. Đống của An là mấy HẠT?
-dong_cua_an = 45
+# 1) Buộc xong được mấy BÓ?
+so_bo = 6
 
-print(bo_cua_bo)
-print(dong_cua_an)
+# 2) Còn lại mấy HẠT LẺ?
+so_hat_le = 8
+
+print(so_bo)
+print(so_hat_le)
 ```
 
 ```python title=test
-# Vế phải của hai câu đầu cố ý viết bằng phép cộng chứ không bằng một con số
-# gõ sẵn: cộng từng cái mười CHÍNH LÀ việc "đếm bó" mà bài vừa dạy. Nó cũng
-# không mượn phép nhân — thứ mà track này chưa đi tới.
-assert bo_cua_bo == 10 + 10 + 10 + 10 + 10 + 10 + 10 + 10 + 10 + 10, "một bó-của-bó là MƯỜI BÓ, mà mỗi bó là mười hạt"
-assert dong_cua_an == 10 + 10 + 10 + 10 + 5, "4 bó là bốn lần mười hạt, rồi cộng thêm 5 hạt lẻ"
-# Câu cuối buộc con số vừa điền phải khớp với chính đống 137 hạt trong bài:
-# 1 bó-của-bó, 3 bó và 7 hạt lẻ phải quay về đúng chỗ cũ.
-assert bo_cua_bo + 10 + 10 + 10 + 7 == 137, "buộc bó không được làm mất hạt nào — gộp lại phải ra đúng đống ban đầu"
+# Câu đầu là câu đắt nhất của bài: nó chấm cái LUẬT, không chấm con số. Ai
+# buộc thiếu một bó rồi để 18 hạt nằm lẻ sẽ vấp ngay ở đây.
+assert 0 <= so_hat_le < 10, "còn đủ mười hạt lẻ thì phải buộc thêm một bó nữa — hạt lẻ không bao giờ tới mười"
+# Vế trái cố ý viết bằng phép cộng chứ không bằng một con số gõ sẵn: cộng từng
+# cái mười CHÍNH LÀ việc "đếm bó" mà bài vừa dạy. Nó cũng không mượn phép nhân
+# — thứ mà track này chưa đi tới.
+assert 10 + 10 + 10 + 10 + 10 + 10 + so_hat_le == 68, "sáu bó là sáu lần mười hạt; cộng nốt chỗ hạt lẻ phải quay về đúng đống 68 ban đầu"
+assert so_bo == 6, "68 hạt, cứ mười hạt một bó, thì buộc được sáu bó — bó thứ bảy thiếu hạt nên không buộc được"
 ```
 
 :::hints
 - kind: attention
-  body: Cả hai chỗ trống đều hỏi "mấy HẠT", không hỏi mấy bó. Nên trước khi viết, đổi mọi cái bó về hạt đã.
+  body: Buộc tới khi không buộc được nữa, nghĩa là đừng dừng sớm. Buộc xong mà trên bàn vẫn còn mười hạt lẻ trở lên thì chưa xong việc — mười hạt ấy còn buộc được thêm một bó.
 - kind: strategy
-  body: Một bó là mười hạt. Muốn biết mười bó là mấy hạt thì cộng mười cái mười lại — phần máy in ở trên đã làm sẵn phép cộng ấy một lần. Với đống của An thì cộng bốn cái mười, rồi nhớ cộng nốt mấy hạt lẻ còn rời.
+  body: Cứ đếm ra mười hạt thì bớt mười hạt khỏi đống rồi ghi thêm một vạch bó. Bắt đầu từ 68, bớt đi mười, rồi bớt tiếp mười nữa, cứ thế cho tới khi phần còn lại không đủ mười hạt để buộc nữa. Số lần bớt là số bó, phần còn lại là hạt lẻ.
 - kind: one-line
-  body: "Viết `100` vào chỗ trống thứ nhất và `45` vào chỗ trống thứ hai."
+  body: "Viết `6` vào chỗ trống thứ nhất và `8` vào chỗ trống thứ hai."
 :::
 
 :::validate

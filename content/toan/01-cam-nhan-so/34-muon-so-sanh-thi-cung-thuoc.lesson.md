@@ -10,9 +10,9 @@ tier: A
 languages: [python]
 defaultLanguage: python
 level: intro
-estimatedMinutes: 13
+estimatedMinutes: 14
 teaches: [math.fraction-compare]
-requires: [math.fraction, math.compare-on-number-line, math.like-units, math.thanh-so, core.arithmetic, core.variable, core.print-variable, core.boolean, ctrl.comparison]
+requires: [math.equivalent-fraction, math.fraction, math.compare-on-number-line, math.like-units, math.thanh-so, core.arithmetic, core.variable, core.print-variable, core.boolean, ctrl.comparison]
 concepts: [math.phan-so, math.mau-chung, math.thanh-so]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -174,81 +174,100 @@ bằng hai thước khác cỡ, nên đem so thì so nhầm thứ.
 ::::
 
 ::::code{#trong-tai-cho-hai-cap-luong}
-Byte đo bốn luống trong vườn và muốn máy trả lời hai câu hỏi:
+Byte đo sáu luống trong vườn và muốn máy trả lời ba câu hỏi:
 
 - **Sáng** — luống A dài `2/3` sải, luống B dài `3/4` sải. *Luống A có dài hơn
   luống B không?*
 - **Chiều** — luống C dài `5/8` sải, luống D dài `2/3` sải. *Luống D có dài
   hơn luống C không?*
+- **Tối** — luống E dài `4/7` sải, luống F dài `5/9` sải. *Luống E có dài hơn
+  luống F không?*
 
-Phần quy về cùng thước đã viết sẵn cho bạn ở bốn dòng gán. Việc của bạn là
-đặt đúng **câu hỏi** vào hai chỗ trống — và để ý: hai câu hỏi trên hỏi ngược
-chiều nhau.
+Việc chính của bạn là **quy từng lượng về thước chung**: mỗi chỗ trống ở các
+dòng gán hỏi đúng một câu — *một cái `1/…` bên này gồm mấy phần của thước
+chung?* Hai buổi đầu bài đã đặt sẵn câu hỏi so sánh cho bạn nhìn mẫu; buổi tối
+thì bạn tự viết câu hỏi ấy.
 
-Hai cặp này được chọn để cho ra hai câu trả lời **khác nhau**. Gõ cứng `False`
-vào cả hai chỗ thì buổi chiều sai; gõ cứng `True` thì buổi sáng sai. Chỉ hai
-câu hỏi viết thật mới qua được cả hai.
+Ba cặp dùng ba cỡ thước khác nhau, nên không cặp nào chép được cặp nào. Và
+chỗ trống trong `print` cuối là một **câu hỏi**, không phải một câu trả lời:
+gõ thẳng `True` vào đó thì bạn không hỏi máy điều gì cả, và bài sẽ chặn.
 
 ```python title=starter
-# Sáng — luống A dài 2/3 sải, luống B dài 3/4 sải.
-# Cùng thước 1/12 sải: mỗi 1/3 gồm 4 phần, mỗi 1/4 gồm 3 phần.
-a = 2 * 4
-b = 3 * 3
-print(___)
+# Sáng — luống A dài 2/3 sải, luống B dài 3/4 sải. Cùng thước 1/12 sải.
+# Mỗi 1/3 gồm mấy phần của thước 1/12? Mỗi 1/4 gồm mấy phần?
+a = 2 * ___
+b = 3 * ___
+print(a > b)
 
-# Chiều — luống C dài 5/8 sải, luống D dài 2/3 sải.
-# Cùng thước 1/24 sải: mỗi 1/8 gồm 3 phần, mỗi 1/3 gồm 8 phần.
-c = 5 * 3
-d = 2 * 8
+# Chiều — luống C dài 5/8 sải, luống D dài 2/3 sải. Cùng thước 1/24 sải.
+# Mỗi 1/8 gồm mấy phần của thước 1/24? Mỗi 1/3 gồm mấy phần?
+c = 5 * ___
+d = 2 * ___
+print(d > c)
+
+# Tối — luống E dài 4/7 sải, luống F dài 5/9 sải. Thước chung bạn tự chọn:
+# mẫu này nhân mẫu kia, 7 x 9 = 63, nên cả hai đếm bằng thước 1/63 sải.
+e = 4 * ___
+f = 5 * ___
 print(___)
 ```
 
 ```python title=solution
-# Sáng — luống A dài 2/3 sải, luống B dài 3/4 sải.
-# Cùng thước 1/12 sải: mỗi 1/3 gồm 4 phần, mỗi 1/4 gồm 3 phần.
+# Sáng — luống A dài 2/3 sải, luống B dài 3/4 sải. Cùng thước 1/12 sải.
+# Mỗi 1/3 gồm mấy phần của thước 1/12? Mỗi 1/4 gồm mấy phần?
 a = 2 * 4
 b = 3 * 3
 print(a > b)
 
-# Chiều — luống C dài 5/8 sải, luống D dài 2/3 sải.
-# Cùng thước 1/24 sải: mỗi 1/8 gồm 3 phần, mỗi 1/3 gồm 8 phần.
+# Chiều — luống C dài 5/8 sải, luống D dài 2/3 sải. Cùng thước 1/24 sải.
+# Mỗi 1/8 gồm mấy phần của thước 1/24? Mỗi 1/3 gồm mấy phần?
 c = 5 * 3
 d = 2 * 8
 print(d > c)
+
+# Tối — luống E dài 4/7 sải, luống F dài 5/9 sải. Thước chung bạn tự chọn:
+# mẫu này nhân mẫu kia, 7 x 9 = 63, nên cả hai đếm bằng thước 1/63 sải.
+e = 4 * 9
+f = 5 * 7
+print(e > f)
 ```
 
 ```python title=test
-# Bốn assert này chốt lại chính điều bài vừa dạy: quy về cùng thước thì mỗi
-# phân số biến thành một SỐ PHẦN, và số phần mới là thứ đem so được.
-assert a == 8, "2/3 sải đếm bằng thước 1/12 thì được 8 phần (2 x 4)"
-assert b == 9, "3/4 sải đếm bằng thước 1/12 thì được 9 phần (3 x 3)"
-assert c == 15, "5/8 sải đếm bằng thước 1/24 thì được 15 phần (5 x 3)"
-assert d == 16, "2/3 sải đếm bằng thước 1/24 thì được 16 phần (2 x 8)"
-assert a < b, "2/3 NGẮN hơn 3/4, dù 2 và 3 nhìn thì thấy tử bên nào cũng nhỏ hơn mẫu"
+# Chín assert này chốt lại chính điều bài vừa dạy: quy về cùng thước thì mỗi
+# phân số biến thành một SỐ PHẦN, và số phần mới là thứ đem so được. Sáu cái
+# đầu chấm đúng bước quy về thước chung — bước mà bài này mang tới.
+assert a == 8, "2/3 sải đếm bằng thước 1/12 thì được 8 phần: mỗi 1/3 gồm 4 phần, nên 2 x 4"
+assert b == 9, "3/4 sải đếm bằng thước 1/12 thì được 9 phần: mỗi 1/4 gồm 3 phần, nên 3 x 3"
+assert c == 15, "5/8 sải đếm bằng thước 1/24 thì được 15 phần: mỗi 1/8 gồm 3 phần, nên 5 x 3"
+assert d == 16, "2/3 sải đếm bằng thước 1/24 thì được 16 phần: mỗi 1/3 gồm 8 phần, nên 2 x 8"
+assert e == 36, "4/7 sải đếm bằng thước 1/63 thì được 36 phần: mỗi 1/7 gồm 9 phần, nên 4 x 9"
+assert f == 35, "5/9 sải đếm bằng thước 1/63 thì được 35 phần: mỗi 1/9 gồm 7 phần, nên 5 x 7"
+assert a < b, "2/3 NGẮN hơn 3/4: cùng thước 1/12 thì 8 phần ít hơn 9 phần — mẫu 3 nhỏ hơn mẫu 4 chỉ nói thước bên A to hơn, không nói lượng bên A nhiều hơn"
 assert d > c, "2/3 DÀI hơn 5/8, dù tử 2 nhỏ hơn tử 5 — đây là chỗ so tử với tử sai"
+assert e > f, "4/7 DÀI hơn 5/9: cùng thước 1/63 thì 36 phần nhiều hơn 35 phần, dù tử 4 nhỏ hơn tử 5"
 ```
 
 :::hints
 - kind: attention
-  body: Hai chỗ trống đều nằm trong `print`, ngay dưới hai dòng vừa đếm xong số phần. Đọc kỹ câu hỏi của mỗi buổi ở phần đề bài — buổi sáng hỏi A có hơn B, buổi chiều hỏi D có hơn C.
+  body: Sáu chỗ trống ở các dòng gán hỏi đúng một kiểu câu, và bài 33 đã dạy cách trả lời — cùng một lượng đo bằng cái thước nhỏ hơn mấy lần thì đếm ra nhiều phần hơn bấy nhiêu lần. Chỗ trống thứ bảy nằm trong `print` cuối; đề bài buổi tối nói rõ nó hỏi chiều nào.
 - kind: strategy
-  body: Mỗi chỗ trống là một câu hỏi có–không của Realm 0: tên bên trái, dấu lớn hơn, tên bên phải. Vì hai buổi hỏi ngược chiều nhau nên hai cái tên đổi chỗ giữa hai dòng, không chép được dòng này sang dòng kia.
+  body: Thước `1/12` nhỏ hơn thước `1/3` bốn lần và nhỏ hơn thước `1/4` ba lần, nên mỗi `1/3` gồm 4 phần còn mỗi `1/4` gồm 3 phần — đó là con số nhân vào. Làm y hệt với thước `1/24` (nhỏ hơn `1/8` ba lần, nhỏ hơn `1/3` tám lần) và thước `1/63` (nhỏ hơn `1/7` chín lần, nhỏ hơn `1/9` bảy lần). Chỗ trống cuối viết như hai dòng `print` trên, chỉ đổi hai cái tên.
 - kind: one-line
-  body: "Viết `a > b` vào chỗ trống thứ nhất và `d > c` vào chỗ trống thứ hai."
+  body: "Điền lần lượt `4`, `3` rồi `3`, `8` rồi `9`, `7` vào sáu dòng gán, và `e > f` vào chỗ trống trong `print` cuối."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: static
-  onFail: mỗi chỗ trống phải là một câu hỏi so sánh bằng dấu `>` giữa hai số phần — gõ thẳng `True` hay `False` thì không hỏi máy điều gì cả
+  onFail: chỗ trống cuối phải là một câu hỏi so sánh bằng dấu `>` giữa hai số phần — gõ thẳng `True` hay `False` thì không hỏi máy điều gì cả
   requireAst:
-  - kind: uses-operator, target: >, min: 2
+  - kind: uses-operator, target: >, min: 3
 - tier: tests
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^False\nTrue\s*$
+  expect: ^False\nTrue\nTrue\s*$
 :::
 ::::
 

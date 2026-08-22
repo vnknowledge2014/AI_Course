@@ -10,9 +10,9 @@ tier: A
 languages: [python]
 defaultLanguage: python
 level: intro
-estimatedMinutes: 12
+estimatedMinutes: 13
 teaches: [math.negative-number]
-requires: [core.arithmetic, core.number-literal, core.variable, core.print-variable, core.output]
+requires: [math.number-line-subtract, math.number-line-add, math.thanh-so, core.arithmetic, core.number-literal, core.variable, core.print-variable, core.output]
 concepts: [math.thanh-so, math.so-am, math.moc-khong]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -143,12 +143,12 @@ thứ ba là phiên bản gọn nhất: xuất phát ngay từ mặt đất mà 
 ::::
 
 ::::predict{#doan-truoc-khi-chay commitOnce}
-Byte đang đứng ở vạch 3 trên thanh số và lùi 7 bước.
+Byte đang đứng ở vạch 2 trên thanh số và lùi 6 bước.
 
 **Trước khi bấm chạy**, bạn đoán màn hình hiện ra gì?
 
 ```python
-print(3 - 7)
+print(2 - 6)
 ```
 
 :::opt{correct}
@@ -158,7 +158,7 @@ print(3 - 7)
 :::opt
 4
 ::why
-Gần đúng ở chỗ bạn đếm không sai một bước nào: từ vạch 3 lùi 7 bước thì dừng ở
+Gần đúng ở chỗ bạn đếm không sai một bước nào: từ vạch 2 lùi 6 bước thì dừng ở
 một chỗ cách vạch 0 đúng **bốn** bước. Con số 4 bạn tìm ra là thật, và nó là
 mảnh thứ nhất của cái tên.
 
@@ -172,13 +172,13 @@ cách 0 bốn bước. Bỏ dấu đi là hai chỗ khác nhau mang chung một 
 :::opt
 0
 ::why
-Gần đúng ở chỗ bạn nhận ra vạch 3 chỉ đủ cho ba bước lùi: hết bước thứ ba là
+Gần đúng ở chỗ bạn nhận ra vạch 2 chỉ đủ cho hai bước lùi: hết bước thứ hai là
 chạm 0, không còn gì để bớt nữa. Ý nghĩ ấy đúng hẳn hoi — với **hạt**. Byte có
-3 hạt thì không ai lấy đi 7 hạt được, và cái nắm hạt ấy nhiều nhất chỉ vơi tới
+2 hạt thì không ai lấy đi 6 hạt được, và cái nắm hạt ấy nhiều nhất chỉ vơi tới
 rỗng.
 
 Phạm vi của quy tắc ấy là những thứ đếm được mà không bẻ nhỏ được — đúng cái
-loại đơn vị bài 4 gọi tên. Chỗ lệch: `3 - 7` ở đây không hỏi về nắm hạt, nó hỏi
+loại đơn vị bài 4 gọi tên. Chỗ lệch: `2 - 6` ở đây không hỏi về nắm hạt, nó hỏi
 về một **chỗ** trên thanh số. Dưới mặt đất vẫn là đất, và đi xuống thêm bốn
 phân nữa là việc cái rễ làm hằng ngày. Thanh số không có bức tường ở vạch 0.
 ::
@@ -192,7 +192,7 @@ có nghĩa thì nó dừng hẳn và nói ra, chứ không đoán bừa giúp b�
 nó ném ra `TypeError` khi bạn bảo nó cộng một câu chữ với một con số.
 
 Chỗ lệch: việc này **có** nghĩa. Máy giữ số theo đúng cái thanh số vừa kéo dài
-ban nãy, nên với nó `3 - 7` là một câu hỏi bình thường và nó trả lời được ngay,
+ban nãy, nên với nó `2 - 6` là một câu hỏi bình thường và nó trả lời được ngay,
 không phải nghĩ lâu hơn `12 - 5` một chút nào.
 ::
 :::
@@ -209,12 +209,15 @@ bốn phân — không ai nhầm hai thứ đó ngoài vườn cả.
 ::::
 
 ::::code{#hai-lan-lui}
-Byte lùi hai lần trên thanh số và muốn ghi lại chỗ đến của từng lần.
+Byte lùi hai lần trên thanh số, rồi ghi lại tên một chỗ nằm sẵn bên trái vạch 0.
 
-Hai lần này được chọn để ra **hai loại kết quả khác nhau**: lần một dừng lại khi
+Hai lần lùi được chọn để ra **hai loại kết quả khác nhau**: lần một dừng lại khi
 còn bên phải vạch 0, lần hai đi qua hẳn sang bên trái. Chép cứng một con số vào
 cả hai chỗ trống thì nhiều nhất cũng chỉ qua được một dòng — mỗi chỗ trống phải
 là một phép lùi viết ra thật.
+
+Chỗ trống thứ ba thì ngược lại: không có phép nào phải làm, chỉ có một cái tên
+phải viết ra cho đủ hai mảnh.
 
 ```python title=starter
 # Thanh số của Byte: vạch 0 là mặt đất. Sang phải là phía mầm mọc lên,
@@ -226,8 +229,14 @@ sau_lan_mot = ___
 # Lần hai: đang ở vạch 3, lùi 7 bước — nhiều hơn số bước từ 3 về tới 0.
 sau_lan_hai = ___
 
+# Đầu rễ ớt nằm ở chỗ cách mặt đất 5 phân về phía dưới.
+# Ở đây không có lần lùi nào cả — chỉ viết TÊN của chỗ ấy ra,
+# cái tên gồm hai mảnh: cách 0 bao xa, và ở phía nào.
+cho_re_ot = ___
+
 print(sau_lan_mot)
 print(sau_lan_hai)
+print(cho_re_ot)
 ```
 
 ```python title=solution
@@ -240,40 +249,52 @@ sau_lan_mot = 9 - 4
 # Lần hai: đang ở vạch 3, lùi 7 bước — nhiều hơn số bước từ 3 về tới 0.
 sau_lan_hai = 3 - 7
 
+# Đầu rễ ớt nằm ở chỗ cách mặt đất 5 phân về phía dưới.
+# Ở đây không có lần lùi nào cả — chỉ viết TÊN của chỗ ấy ra,
+# cái tên gồm hai mảnh: cách 0 bao xa, và ở phía nào.
+cho_re_ot = -5
+
 print(sau_lan_mot)
 print(sau_lan_hai)
+print(cho_re_ot)
 ```
 
 ```python title=test
-# Ba câu khẳng định này chốt lại đúng điều bài vừa dạy, chứ không chỉ chấm bài:
+# Bốn câu khẳng định này chốt lại đúng điều bài vừa dạy, chứ không chỉ chấm bài:
 # nếu một ngày nào đó máy chạy bài học đổi cách hiểu dấu trừ, cổng kiểm phải đỏ
 # lên chứ không được dạy sai lặng lẽ.
 assert sau_lan_mot == 5, "từ vạch 9 lùi 4 bước thì dừng ở vạch 5"
 assert sau_lan_hai == -4, "từ vạch 3 lùi 7 bước thì đi qua 0 và dừng ở vạch -4"
-assert sau_lan_hai == 0 - 4, "-4 đúng là chỗ cách vạch 0 bốn bước về phía bên trái"
+assert sau_lan_hai < 0, "lùi quá vạch 0 thì chỗ đến nằm bên trái, nên tên nó phải mang dấu"
+assert cho_re_ot == -5, "chỗ cách vạch 0 năm bước về bên trái mang tên -5"
 ```
 
 :::hints
 - kind: attention
-  body: Đề bài cho bạn hai con số cho mỗi lần: chỗ đang đứng, và số bước lùi. Cả hai con số đó đều phải xuất hiện trong chỗ trống, không được thiếu cái nào.
+  body: Hai chỗ trống đầu, đề bài cho bạn hai con số cho mỗi lần: chỗ đang đứng, và số bước lùi. Cả hai con số đó đều phải xuất hiện trong chỗ trống, không được thiếu cái nào. Chỗ trống thứ ba không cho bạn hai con số, vì ở đó không có lần lùi nào.
 - kind: strategy
-  body: Bài 14 nói lùi lại thì viết dấu trừ. Vậy chỗ trống có dạng "chỗ đang đứng, dấu trừ, số bước lùi". Đừng tự tính nhẩm rồi chép con số kết quả vào — lần hai là chỗ dễ nhẩm sai nhất, và máy tính hộ bạn nhanh hơn.
+  body: Bài 14 nói lùi lại thì viết dấu trừ. Vậy hai chỗ trống đầu có dạng "chỗ đang đứng, dấu trừ, số bước lùi" — đừng tự tính nhẩm rồi chép con số kết quả vào, lần hai là chỗ dễ nhẩm sai nhất. Chỗ trống thứ ba thì đọc lại hai mảnh của một cái tên bên trái vạch 0: khoảng cách viết thành con số, phía viết thành dấu đặt trước nó.
 - kind: one-line
-  body: "Viết `9 - 4` vào chỗ trống thứ nhất và `3 - 7` vào chỗ trống thứ hai."
+  body: "Ba chỗ trống lần lượt là `9 - 4`, `3 - 7` và `-5`."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: static
-  onFail: mỗi chỗ trống phải là một phép lùi viết bằng dấu trừ — chép sẵn con số kết quả thì không có lần lùi nào xảy ra trên thanh số
+  onFail: hai chỗ trống đầu phải là một phép lùi viết bằng dấu trừ, đúng trên hai con số đề bài cho; chỗ trống thứ ba phải là tên của chỗ cách vạch 0 năm bước về bên trái
   requireAst:
   - kind: uses-operator, target: -, min: 2
+  - kind: has-literal, target: 9
+  - kind: has-literal, target: 4
+  - kind: has-literal, target: 3
+  - kind: has-literal, target: 7
+  - kind: has-literal, target: 5
 - tier: tests
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^5\n-4\s*$
+  expect: ^5\n-4\n-5\s*$
 :::
 ::::
 

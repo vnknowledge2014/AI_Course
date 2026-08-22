@@ -59,6 +59,12 @@ dọc thì không đụng gì tới hàng:
 - Miếng trái: 7 hàng × 10 cột.
 - Miếng phải: 7 hàng × 3 cột.
 
+Để ý thứ tự viết. Bài 19 viết cỡ lô trước — `8 × 5` là lô 8 cây, lấy 5 lượt. Từ
+bài 20, hai chiều đọc cho ra đúng một con số, nên từ đây Byte viết theo thứ tự
+nhìn vào mảng cho tiện: **số hàng trước, số cột sau**. `7 × 13` là 7 hàng, mỗi
+hàng 13 cây. Đổi được là nhờ cái mảng xoay một góc ở bài trước — không phải vì
+hai vai đã hết khác nhau.
+
 Viết ra:
 
 ```text
@@ -165,12 +171,14 @@ nhặt hai miếng ở hai góc chéo nhau rồi bỏ quên hai miếng còn l�
 156 rồi 156 rồi 106 rồi 106
 ::why
 Gần đúng ở chỗ bạn để ý hai dòng cuối cùng bắt đầu bằng `10 * 10`, nên chờ
-chúng cùng thiếu như nhau. Quan sát ấy sắc: hai dòng đó đúng là cùng một cách
-cắt — cắt cả hai cạnh.
+chúng cùng thiếu như nhau. Quan sát ấy sắc: hai dòng đó đúng là xuất phát từ
+cùng một **kiểu** cắt — cắt cả hai cạnh.
 
-Chỗ lệch nằm ở phần đuôi. Dòng ba dừng lại sau hai miếng góc. Dòng bốn viết
-tiếp `+ (10 * 3) + (2 * 10)` — đó là hai miếng bị bỏ quên, 30 cây và 20 cây.
-Cộng đủ bốn miếng thì `100 + 30 + 20 + 6 = 156`, bằng đúng cái mảng ban đầu.
+Mà cắt cả hai cạnh thì mảng vỡ thành **bốn** miếng, nên chỉ khi nhặt đủ bốn
+miếng thì mới thành một phép cắt trọn vẹn. Chỗ lệch nằm ở phần đuôi: dòng ba
+dừng lại sau hai miếng góc nên còn thiếu; dòng bốn viết tiếp
+`+ (10 * 3) + (2 * 10)` — hai miếng bị bỏ quên, 30 cây và 20 cây — nên
+`100 + 30 + 20 + 6 = 156`, bằng đúng mảng ban đầu.
 ::
 :::
 

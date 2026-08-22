@@ -10,9 +10,9 @@ tier: A
 languages: [python]
 defaultLanguage: python
 level: intro
-estimatedMinutes: 13
+estimatedMinutes: 14
 teaches: [math.fraction-add]
-requires: [math.fraction-compare, math.fraction, math.like-units, math.improper-fraction, math.subtraction-as-distance, core.arithmetic, core.variable, core.print-variable, core.boolean, ctrl.comparison]
+requires: [math.fraction-compare, math.equivalent-fraction, math.fraction, math.like-units, math.improper-fraction, math.subtraction-as-distance, core.arithmetic, core.variable, core.print-variable, core.boolean, ctrl.comparison]
 concepts: [math.phan-so, math.mau-chung, math.don-vi]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -71,22 +71,22 @@ cái `1/6`; mỗi `1/3` gồm 2 cái `1/6`.
 # Quy về thước 1/6 sải rồi mới cộng.
 sang = 1 * 3      # 1/2 sải = 3 phần của thước 1/6
 chieu = 1 * 2     # 1/3 sải = 2 phần của thước 1/6
+mau = 6           # cộng xong thì vẫn đang đếm bằng thước 1/6
 
-print(sang + chieu)
+print(sang + chieu, mau)
 ```
 
 Máy in ra:
 
 ```text
-5
+5 6
 ```
 
 Năm **phần của thước `1/6`**, tức `5/6` sải dây.
 
-Để ý một chuyện trong đoạn code trên: con số `6` không đi vào phép cộng lần
-nào. Nó không xuất hiện ở bất kỳ dấu `+` nào cả. Nó chỉ nằm trong lời chú
-thích, làm đúng một việc — nói cho bạn biết những con số 3, 2, 5 kia đang đếm
-**cái gì**.
+Để ý con số `6` trong đoạn code trên: nó không đi vào dấu `+` nào cả. Nó đi
+thẳng từ dòng trên xuống dòng kết quả, y nguyên — vì nó không phải một lượng
+đem cộng, nó là **tên của cái thước** mà cả ba con số 3, 2, 5 kia đang đếm.
 
 Đó là toàn bộ nội dung của câu "cộng tử, giữ nguyên mẫu": tử là số phần đếm
 được nên đem cộng, mẫu là tên đơn vị nên đi theo mà không đổi.
@@ -178,23 +178,27 @@ Byte đo hai luống, mỗi luống căng làm hai lần:
 - **Luống B** — sáng `3/4` sải, chiều thêm `2/3` sải. Thước chung `1/12`
   (`4 × 3`).
 
-Bốn chỗ trống hỏi cùng một câu, chỉ khác con số: **lượng này đếm bằng thước
-chung thì được mấy phần?** Máy sẽ cộng giúp bạn phần còn lại.
+Mỗi luống có ba chỗ trống. Hai chỗ đầu hỏi câu quen thuộc: **lượng này đếm
+bằng thước chung thì được mấy phần?** Chỗ thứ ba hỏi thứ máy không đoán hộ
+được: **cộng xong rồi thì số phần ấy đang đếm bằng thước nào** — tức mẫu của
+kết quả. Chỉ riêng phép cộng là máy làm giúp.
 
 Hai luống này được chọn để cho ra hai cỡ khác nhau: một luống chưa tới một
-sải, một luống vượt quá. Điền cùng một con số vào cả bốn chỗ thì không luống
+sải, một luống vượt quá. Điền cùng một con số vào cả sáu chỗ thì không luống
 nào ra đúng.
 
 ```python title=starter
 # Luống A — sáng 1/2 sải, chiều thêm 1/3 sải. Thước chung: 1/6 sải.
 a_sang = ___
 a_chieu = ___
-print(a_sang + a_chieu)
+a_mau = ___
+print(a_sang + a_chieu, a_mau)
 
 # Luống B — sáng 3/4 sải, chiều thêm 2/3 sải. Thước chung: 1/12 sải.
 b_sang = ___
 b_chieu = ___
-print(b_sang + b_chieu)
+b_mau = ___
+print(b_sang + b_chieu, b_mau)
 print(b_sang + b_chieu > 12)
 ```
 
@@ -202,33 +206,38 @@ print(b_sang + b_chieu > 12)
 # Luống A — sáng 1/2 sải, chiều thêm 1/3 sải. Thước chung: 1/6 sải.
 a_sang = 3
 a_chieu = 2
-print(a_sang + a_chieu)
+a_mau = 6
+print(a_sang + a_chieu, a_mau)
 
 # Luống B — sáng 3/4 sải, chiều thêm 2/3 sải. Thước chung: 1/12 sải.
 b_sang = 9
 b_chieu = 8
-print(b_sang + b_chieu)
+b_mau = 12
+print(b_sang + b_chieu, b_mau)
 print(b_sang + b_chieu > 12)
 ```
 
 ```python title=test
-# Sáu assert trên hai bộ dữ liệu khác nhau: một số điền chung cho cả bốn chỗ
-# trống không thể qua nổi, vì bốn chỗ ấy là bốn con số khác nhau.
+# Tám assert trên hai bộ dữ liệu khác nhau: một số điền chung cho cả sáu chỗ
+# trống không thể qua nổi, vì sáu chỗ ấy là sáu con số khác nhau. Hai assert
+# về `_mau` chấm đúng nửa sau của luật: cộng tử, GIỮ NGUYÊN mẫu.
 assert a_sang == 3, "1/2 sải đếm bằng thước 1/6 thì được 3 phần, không phải 1"
 assert a_chieu == 2, "1/3 sải đếm bằng thước 1/6 thì được 2 phần"
 assert a_sang + a_chieu == 5, "1/2 + 1/3 là 5 phần của thước 1/6, tức 5/6 sải"
+assert a_mau == 6, "đặt 3 bản sao của thước 1/6 cạnh 2 bản sao thì vẫn là thước 1/6 — mẫu không cộng vào nhau thành 12, cũng không nhân lên thành 36"
 assert b_sang == 9, "3/4 sải đếm bằng thước 1/12 thì được 9 phần (3 x 3)"
 assert b_chieu == 8, "2/3 sải đếm bằng thước 1/12 thì được 8 phần (2 x 4)"
 assert b_sang + b_chieu == 17, "3/4 + 2/3 là 17 phần của thước 1/12 — vượt quá một sải, và điều đó không sao cả"
+assert b_mau == 12, "cộng xong vẫn đang đếm bằng thước 1/12 — cái thước không tự to ra hay nhỏ đi trong lúc bạn đặt các phần cạnh nhau"
 ```
 
 :::hints
 - kind: attention
-  body: Cả bốn chỗ trống hỏi đúng một kiểu câu, đó là câu bài 33 đã dạy trả lời — đổi sang thước nhỏ hơn mấy lần thì cùng lượng ấy đếm được nhiều phần hơn bấy nhiêu lần.
+  body: Bốn chỗ trống ở dòng `_sang` và `_chieu` hỏi đúng một kiểu câu, đó là câu bài 33 đã dạy trả lời — đổi sang thước nhỏ hơn mấy lần thì cùng lượng ấy đếm được nhiều phần hơn bấy nhiêu lần. Hai chỗ `_mau` thì không phải tính gì cả: câu trả lời đã nằm sẵn trong dòng chú thích "Thước chung" ngay phía trên.
 - kind: strategy
-  body: Thước `1/6` nhỏ hơn thước `1/2` ba lần nên mỗi `1/2` gồm 3 phần; nhỏ hơn thước `1/3` hai lần nên mỗi `1/3` gồm 2 phần. Làm y hệt cho luống B với thước `1/12` — nó nhỏ hơn `1/4` ba lần và nhỏ hơn `1/3` bốn lần.
+  body: Thước `1/6` nhỏ hơn thước `1/2` ba lần nên mỗi `1/2` gồm 3 phần; nhỏ hơn thước `1/3` hai lần nên mỗi `1/3` gồm 2 phần. Làm y hệt cho luống B với thước `1/12` — nó nhỏ hơn `1/4` ba lần và nhỏ hơn `1/3` bốn lần. Còn `a_mau` và `b_mau` là tên của chính cái thước chung ấy: cộng xong không ai đổi thước, nên mẫu vẫn là con số đứng dưới gạch ngang của thước chung.
 - kind: one-line
-  body: "Điền lần lượt `3`, `2`, `9`, `8` vào bốn chỗ trống theo thứ tự từ trên xuống."
+  body: "Điền `3`, `2`, `6` cho luống A và `9`, `8`, `12` cho luống B, theo thứ tự từ trên xuống."
 :::
 
 :::validate
@@ -238,7 +247,7 @@ assert b_sang + b_chieu == 17, "3/4 + 2/3 là 17 phần của thước 1/12 — 
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^5\n17\nTrue\s*$
+  expect: ^5 6\n17 12\nTrue\s*$
 :::
 ::::
 

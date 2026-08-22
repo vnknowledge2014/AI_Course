@@ -92,6 +92,11 @@ của An nhỏ hơn, nên nó phải đặt xuống nhiều lần hơn mới ph�
 Và đó là hình dạng chung của mọi phép đo: **thước nhỏ đi thì con số lớn lên, và
 ngược lại.** Hai thứ ấy đi ngược chiều nhau, vì chúng cùng phải phủ đúng một
 lượng đất.
+
+Để ý một chuyện may ở đây: cả hai lần đo đều **vừa khít** — lần đặt thước cuối
+cùng dừng đúng ở cuối luống, không thừa mẩu nào. Đời thật ít khi tử tế thế. Nếu
+bàn chân An đặt tới lần thứ mười hai mà luống vẫn còn thừa một mẩu ngắn hơn một
+bàn chân, thì con số phải ghi là gì? Giữ câu hỏi ấy lại, vài bài nữa sẽ tới.
 ::::
 
 ::::explain{#con-so-doi-luong-dat-khong-doi}
@@ -199,7 +204,10 @@ An đo lần thứ ba. Lần này An mượn đúng sải dây của Byte và đ
 Ba con số đã có sẵn. Hai chỗ trống là hai câu hỏi có–không:
 
 1. **Giữ nguyên thước, đổi người đo** — hai con số có giống nhau không?
-2. **Cùng một người đo, đổi thước** — hai con số có giống nhau không?
+2. **Đổi sang cái thước nhỏ hơn** — con số có nhỏ đi theo không?
+
+Câu thứ hai là chỗ dễ trượt tay nhất của bài. Đừng đoán trước đáp án: cứ đọc
+thẳng câu hỏi trong chú thích, viết ra phép so sánh, rồi để máy trả lời.
 
 Hai câu này được chọn để cho ra hai câu trả lời **ngược nhau**. Gõ cứng `True`
 vào cả hai thì câu sau sai; gõ cứng `False` thì câu trước sai. Chỉ hai câu hỏi
@@ -214,7 +222,8 @@ an_do_bang_buoc_chan = 12       # An đặt bàn chân, đếm được 12 lần
 # 1) Cùng một cái thước, hai người đo — hai con số có giống nhau không?
 print(___)
 
-# 2) Đổi thước — hai con số có giống nhau không?
+# 2) Đổi sang cái thước NHỎ hơn — con số có nhỏ đi theo không?
+#    Hỏi máy: số đo bằng sải dây có lớn hơn số đo bằng bước chân không?
 print(___)
 ```
 
@@ -227,8 +236,9 @@ an_do_bang_buoc_chan = 12       # An đặt bàn chân, đếm được 12 lần
 # 1) Cùng một cái thước, hai người đo — hai con số có giống nhau không?
 print(byte_do_bang_sai_day == an_do_lai_bang_sai_day)
 
-# 2) Đổi thước — hai con số có giống nhau không?
-print(byte_do_bang_sai_day == an_do_bang_buoc_chan)
+# 2) Đổi sang cái thước NHỎ hơn — con số có nhỏ đi theo không?
+#    Hỏi máy: số đo bằng sải dây có lớn hơn số đo bằng bước chân không?
+print(byte_do_bang_sai_day > an_do_bang_buoc_chan)
 ```
 
 ```python title=test
@@ -242,22 +252,24 @@ assert an_do_bang_buoc_chan > byte_do_bang_sai_day, "bước chân nhỏ hơn s�
 
 :::hints
 - kind: attention
-  body: Hai chỗ trống đều nằm trong `print`, và dòng chú thích ngay trên mỗi chỗ nói rõ nó đang hỏi cái gì. Ba cái tên ở đầu bài đã giữ sẵn ba con số; việc của bạn là chọn đúng cặp cho mỗi câu hỏi.
+  body: Hai chỗ trống đều nằm trong `print`, và dòng chú thích ngay trên mỗi chỗ nói rõ nó đang hỏi cái gì. Ba cái tên ở đầu bài đã giữ sẵn ba con số; việc của bạn là chọn đúng cặp tên cho mỗi câu hỏi, và đúng dấu so sánh cho mỗi câu — hai câu này không hỏi cùng một kiểu.
 - kind: strategy
-  body: Câu thứ nhất nói về hai lần đo cùng bằng sải dây, nên cả hai tên trong đó đều có chữ `sai_day`. Câu thứ hai đặt một lần đo bằng sải dây cạnh một lần đo bằng bước chân. Nối hai tên bằng dấu so sánh bằng của Realm 0 — hai dấu bằng viết liền nhau.
+  body: Câu thứ nhất nói về hai lần đo cùng bằng sải dây, nên cả hai tên trong đó đều có chữ `sai_day`, nối nhau bằng dấu so sánh bằng của Realm 0 — hai dấu bằng viết liền nhau. Câu thứ hai không hỏi bằng nhau nữa mà hỏi bên nào lớn hơn, nên dấu ở giữa là dấu lớn hơn `>`: bên trái là số đo bằng sải dây, bên phải là số đo bằng bước chân.
 - kind: one-line
-  body: 'Thay `___` thứ nhất bằng `byte_do_bang_sai_day == an_do_lai_bang_sai_day`, và `___` thứ hai bằng `byte_do_bang_sai_day == an_do_bang_buoc_chan`.'
+  body: 'Thay `___` thứ nhất bằng `byte_do_bang_sai_day == an_do_lai_bang_sai_day`, và `___` thứ hai bằng `byte_do_bang_sai_day > an_do_bang_buoc_chan`.'
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: static
-  onFail: mỗi chỗ trống phải là một câu hỏi so sánh bằng (`==`) giữa hai cái tên có sẵn — gõ thẳng `True` hay `False` thì không hỏi máy điều gì cả
+  onFail: hai chỗ trống hỏi hai kiểu khác nhau — một chỗ hỏi hai con số có bằng nhau không (`==`), chỗ kia hỏi con số nào lớn hơn (`>`); gõ thẳng `True` hay `False` thì không hỏi máy điều gì cả
   requireAst:
-  # `min: 2` vì có hai câu hỏi. Khung khởi đầu chưa có dấu `==` nào, nên luật
-  # này chặn được đúng cái đáp án gõ cứng hai chữ True/False.
-  - kind: uses-operator, target: ==, min: 2
+  # Hai luật cho hai chỗ trống, mỗi chỗ một dấu so sánh khác nhau. Khung khởi
+  # đầu chưa có dấu nào trong hai dấu ấy, nên cặp luật này chặn được đúng cái
+  # đáp án gõ cứng hai chữ True/False, và chặn luôn kiểu viết `==` cho cả hai.
+  - kind: uses-operator, target: ==, min: 1
+  - kind: uses-operator, target: >, min: 1
 - tier: output
   match: regex
   expect: ^True\nFalse\s*$
@@ -265,19 +277,25 @@ assert an_do_bang_buoc_chan > byte_do_bang_sai_day, "bước chân nhỏ hơn s�
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Giữ thước thì số trùng, đổi thước thì số lệch. Luống đất thì nằm im từ đầu.
+Giữ thước thì số trùng. Đổi sang thước nhỏ hơn thì số không nhỏ đi — nó lớn lên.
 ::::
 
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-Nếu đo là đếm, thì chuyện ngược lại có đúng không — **đếm hạt cũng là đo**, với
-cái thước là *một hạt*?
+Quay lại cái mẩu thừa lúc nãy. Cứ cho là An đo hụt thật: đặt bàn chân tới lần
+thứ mười hai mà luống vẫn còn thừa một mẩu, ngắn hơn một bàn chân. An không có
+cái tên nào trong dãy để dán lên cái mẩu ấy. Cách gỡ nhìn ra ngay là **bẻ nhỏ
+cái thước** — lấy nửa bàn chân đặt nốt vào chỗ thừa.
+
+Nhưng bẻ nhỏ thước xong lại lòi ra một câu hỏi khác. Nếu đo là đếm, thì chuyện
+ngược lại có đúng không — **đếm hạt cũng là đo**, với cái thước là *một hạt*?
 
 Nghe thì khớp. Byte đặt sải dây bốn lần rồi ghi *4 sải*; Byte cũng đặt tay lên
 từng hạt mười hai lần rồi ghi *12 hạt*. Cùng một việc, chỉ khác cái thước.
 
-Nhưng thử một chuyện với hai cái thước ấy: **bẻ đôi chúng ra.**
+Vậy thì đem đúng cái phép gỡ vừa nói áp cho cả hai thước xem sao: **bẻ đôi chúng
+ra.**
 
 Nửa sải dây thì vẫn là dây, vẫn căng ra được, vẫn đặt xuống đất đo được — và
 luống đất vẫn còn nguyên chừng ấy để mà đo. Bẻ tiếp nửa nữa cũng thế.

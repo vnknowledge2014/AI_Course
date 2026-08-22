@@ -193,13 +193,24 @@ chung vào một đống.
 - **Sáng**: Byte hái 12 hạt, An mang tới 7 hạt.
 - **Chiều**: Byte hái 5 hạt, An mang tới 20 hạt.
 
-Hai chỗ trống là số đo của hai đống chung. Đừng chép sẵn con số tổng vào đó —
-hãy viết ra phép **gộp** hai cái tên đứng ngay phía trên, để câu bạn viết còn
+Hai chỗ trống đầu là số đo của hai đống chung. Đừng chép sẵn con số tổng vào đó
+— hãy viết ra phép **gộp** hai cái tên đứng ngay phía trên, để câu bạn viết còn
 đúng cả khi Byte hái được nhiều hơn.
 
 Bài chấm bằng cả hai buổi, và hai buổi cho ra hai con số khác nhau (một đống
 19 hạt, một đống 25 hạt). Điền cứng một con số vào cả hai chỗ thì nhiều nhất
 chỉ đúng được một buổi.
+
+Chỗ trống thứ ba là chỗ định luật đầu bài được đem ra kiểm. Nó hỏi lại đúng
+phép gộp của buổi chiều, nhưng bạn phải **đảo hai cái tên** so với dòng ngay
+trên. Máy sẽ đặt hai câu bạn tự viết cạnh nhau và so — nó không biết trước câu
+nào đúng, nên câu ấy chỉ xanh khi cả hai chiều đều do bạn viết ra và khớp nhau.
+
+Buổi chiều được chọn cho chỗ trống ấy là cố ý: đống của An lớn hơn đống của
+Byte. Nếu trong đầu bạn còn sót một luật kiểu "số lớn phải đứng trước" thì lúc
+gõ hai dòng ấy bạn sẽ thấy tay mình muốn xếp cả hai theo cùng một chiều — và
+đó chính là lúc dừng lại một nhịp mà tự hỏi: đảo lại thì đống chung có khác đi
+không?
 
 ```python title=starter
 # Sáng: Byte hái 12 hạt, An mang tới 7 hạt, đổ chung.
@@ -212,8 +223,12 @@ chieu_byte = 5
 chieu_an = 20
 tong_chieu = ___
 
+# Vẫn đúng phép gộp ấy của buổi chiều, chỉ đảo hai cái tên sang bên kia dấu `+`.
+tong_chieu_nguoc = ___
+
 print(tong_sang)
 print(tong_chieu)
+print(tong_chieu_nguoc)
 ```
 
 ```python title=solution
@@ -227,8 +242,12 @@ chieu_byte = 5
 chieu_an = 20
 tong_chieu = chieu_byte + chieu_an
 
+# Vẫn đúng phép gộp ấy của buổi chiều, chỉ đảo hai cái tên sang bên kia dấu `+`.
+tong_chieu_nguoc = chieu_an + chieu_byte
+
 print(tong_sang)
 print(tong_chieu)
+print(tong_chieu_nguoc)
 ```
 
 ```python title=test
@@ -237,39 +256,44 @@ print(tong_chieu)
 assert tong_sang == 19, "12 hạt đổ chung với 7 hạt thì đống chung có 19 hạt"
 assert tong_chieu == 25, "5 hạt đổ chung với 20 hạt thì đống chung có 25 hạt"
 
-# Hai câu dưới chốt lại đúng điều bài này nói, viết ra thành thứ máy kiểm
-# được: đổ đống nào trước cũng ra một đống ấy. Buổi chiều được chọn cố ý —
-# đống của An lớn hơn đống của Byte, nên nếu "số lớn phải đứng trước" là một
-# luật thật thì dòng cuối đã đỏ.
-assert tong_sang == sang_an + sang_byte, "đổi chỗ hai đống thì đống chung không đổi"
-assert tong_chieu == chieu_an + chieu_byte, "đổi chỗ hai đống thì đống chung không đổi"
+# Câu dưới chốt lại đúng điều bài này nói. Nó so hai câu mà BẠN viết ra —
+# `tong_chieu` gộp theo một chiều, `tong_chieu_nguoc` gộp theo chiều kia — chứ
+# không so một con số với chính nó. Máy vẫn không biết vì sao hai vế phải bằng
+# nhau; lý do nằm ở bức tranh dải phía trên, không nằm trong máy.
+assert tong_chieu == tong_chieu_nguoc, "đổi chỗ hai đống thì đống chung không đổi"
 ```
 
 :::hints
 - kind: attention
-  body: Nhìn hai dòng ngay phía trên mỗi chỗ trống. Ở đó đã có sẵn hai cái tên giữ số hạt của hai người, và đống chung được làm từ đúng hai đống ấy.
+  body: Nhìn hai dòng ngay phía trên mỗi chỗ trống. Ở đó đã có sẵn hai cái tên giữ số hạt của hai người, và đống chung được làm từ đúng hai đống ấy. Chỗ trống cuối dùng lại đúng hai cái tên của buổi chiều, không thêm tên nào mới.
 - kind: strategy
-  body: Gộp trong toán viết bằng dấu cộng. Đặt hai cái tên ở hai bên dấu ấy, đừng đặt con số kết quả — con số kết quả là thứ máy phải tự tính ra, không phải thứ bạn chép vào.
+  body: Gộp trong toán viết bằng dấu cộng. Đặt hai cái tên ở hai bên dấu ấy, đừng đặt con số kết quả — con số kết quả là thứ máy phải tự tính ra, không phải thứ bạn chép vào. Chỗ trống cuối viết lại đúng phép gộp buổi chiều nhưng tên nào đang đứng trước thì cho nó đứng sau.
 - kind: one-line
-  body: "Thay `___` thứ nhất bằng `sang_byte + sang_an`, và `___` thứ hai bằng `chieu_byte + chieu_an`."
+  body: "Thay `___` thứ nhất bằng `sang_byte + sang_an`, `___` thứ hai bằng `chieu_byte + chieu_an`, và `___` thứ ba bằng `chieu_an + chieu_byte`."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: static
-  onFail: mỗi chỗ trống phải GỘP hai cái tên đứng ngay trên nó bằng dấu `+` — chép sẵn con số tổng thì bài không còn kiểm được gì
+  onFail: mỗi chỗ trống phải GỘP hai cái tên đứng ngay trên nó bằng dấu `+` — chép sẵn con số tổng thì bài không còn kiểm được gì, và chỗ trống cuối phải dùng lại đúng hai cái tên của buổi chiều theo thứ tự ngược lại
   requireAst:
-  # `min: 2` vì có hai buổi, mỗi buổi một phép gộp. Khung khởi đầu chưa có dấu
-  # `+` nào, nên luật này chặn đúng cái đáp án chép cứng 19 với 25.
-  - kind: uses-operator, target: +, min: 2
+  # Ba phép gộp: hai buổi, cộng thêm một lần viết lại buổi chiều theo chiều
+  # ngược. Khung khởi đầu chưa có dấu `+` nào, nên luật này chặn đúng cái đáp
+  # án chép cứng 19 với 25.
+  - kind: uses-operator, target: +, min: 3
+  # `min: 2` cho hai cái tên buổi chiều: chúng phải xuất hiện ở CẢ HAI chiều.
+  # Thiếu luật này thì một nửa mỗi phép gộp có thể chép cứng mà vẫn qua —
+  # `tong_chieu = chieu_an + 5` cho ra đúng 25.
+  - kind: uses-name, target: sang_byte, min: 1
   - kind: uses-name, target: sang_an, min: 1
-  - kind: uses-name, target: chieu_an, min: 1
+  - kind: uses-name, target: chieu_byte, min: 2
+  - kind: uses-name, target: chieu_an, min: 2
 - tier: tests
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^19\n25\s*$
+  expect: ^19\n25\n25\s*$
 :::
 ::::
 

@@ -161,8 +161,9 @@ Ba điều đi kèm, cả ba đều là cùng một câu "lùi hoàn tác tiến
   vạch nào.
 - **Trừ hết thì về đúng mốc 0.** `12 − 12` là 0: lùi đủ 12 bước từ vạch 12 thì
   chân đặt xuống đầu luống. Bên tranh đống, đó là cái rổ sạch trơn.
-- **Lùi rồi tiến lại đúng chừng ấy thì về chỗ cũ.** `(12 − 5) + 5` là 12, đúng
-  như máy vừa in.
+- **Lùi rồi tiến, hay tiến rồi lùi — chừng ấy bước thì đều về chỗ cũ.**
+  `(12 − 5) + 5` là 12, đúng như máy vừa in; và đi vòng kia cũng thế, `(9 + 5) −
+  5` là 9. Chiều nào đi trước không quan trọng, miễn số bước hai lượt bằng nhau.
 
 Câu thứ ba đáng ghi lại, vì nó không chỉ là một mẹo thử. Nó nói rằng phép trừ và
 phép cộng **tháo được cho nhau**: cái này làm gì thì cái kia gỡ ra được. Byte sẽ
@@ -171,29 +172,30 @@ gì tới việc lùi.
 ::::
 
 ::::code{#con-lai-bao-nhieu}
-Hai chuyện xảy ra trong vườn sáng nay.
+Hai chuyện xảy ra trong vườn sáng nay — mỗi chuyện một bức tranh.
 
-- **Luống của Byte** có `12` cây. Sâu ăn mất `5` cây.
-- **Túi hạt của An** có `20` hạt. An gieo hết cả `20` hạt xuống luống.
+- **Tranh đống.** Luống của Byte có `12` cây. Sâu ăn mất `5` cây. Còn mấy cây?
+- **Tranh thanh số.** An đang ở vạch `9` trên sợi dây. An quay người, lùi đủ `9`
+  bước. Chân đặt xuống vạch nào?
 
-Điền hai chỗ trống để máy nói ra mỗi bên còn lại bao nhiêu.
+Điền hai chỗ trống để máy trả lời cả hai.
 
 Bài chấm bằng **cả hai chuyện**, và chúng được chọn để cho ra hai con số khác
-nhau: một bên còn dư, một bên về đúng mốc 0. Gõ cứng `7` vào cả hai chỗ thì túi
-của An sai; gõ cứng `0` thì luống của Byte sai. Chỉ một phép trừ viết thật mới
-qua được cả hai.
+nhau: một bên còn dư, một bên về đúng mốc 0. Gõ cứng `7` vào cả hai chỗ thì An
+sai; gõ cứng `0` thì luống của Byte sai. Chỉ một phép trừ viết thật mới qua được
+cả hai.
 
 ```python title=starter
 cay_tren_luong = 12
 cay_sau_an = 5
 cay_con_lai = ___
 
-hat_trong_tui = 20
-hat_da_gieo = 20
-hat_con_lai = ___
+vach_dang_dung_an = 9
+so_buoc_lui_an = 9
+vach_toi_an = ___
 
 print(cay_con_lai)
-print(hat_con_lai)
+print(vach_toi_an)
 ```
 
 ```python title=solution
@@ -201,40 +203,44 @@ cay_tren_luong = 12
 cay_sau_an = 5
 cay_con_lai = cay_tren_luong - cay_sau_an
 
-hat_trong_tui = 20
-hat_da_gieo = 20
-hat_con_lai = hat_trong_tui - hat_da_gieo
+vach_dang_dung_an = 9
+so_buoc_lui_an = 9
+vach_toi_an = vach_dang_dung_an - so_buoc_lui_an
 
 print(cay_con_lai)
-print(hat_con_lai)
+print(vach_toi_an)
 ```
 
 ```python title=test
 # Hai chuyện cho ra hai con số khác nhau, nên một con số gõ cứng chỉ qua được
-# nhiều nhất một câu. Câu cuối chốt lại chính "lùi rồi tiến lại thì về chỗ cũ".
+# nhiều nhất một câu. Hai câu cuối chốt lại "lùi hoàn tác tiến", theo cả hai
+# chiều — đúng hai chiều mà hộp tổng kết vừa nêu.
 assert cay_con_lai == 7, "12 cây bớt 5 cây thì còn 7 cây"
-assert hat_con_lai == 0, "gieo hết sạch thì túi về đúng mốc 0"
+assert vach_toi_an == 0, "lùi đủ 9 bước từ vạch 9 thì về đúng mốc 0 — đầu luống"
 assert cay_con_lai + cay_sau_an == cay_tren_luong, "trả 5 cây về chỗ cũ thì phải đủ lại 12 — phép cộng gỡ được phép trừ"
+assert (cay_con_lai + cay_sau_an) - cay_sau_an == cay_con_lai, "tiến rồi lùi chừng ấy bước cũng về đúng chỗ cũ"
 ```
 
 :::hints
 - kind: attention
-  body: Nhìn hai dòng ngay phía trên mỗi chỗ trống. Một dòng cho biết lúc đầu có bao nhiêu, dòng kia cho biết mất đi bao nhiêu. Chỗ trống cần cả hai.
+  body: Nhìn hai dòng ngay phía trên mỗi chỗ trống. Ở chuyện thứ nhất, một dòng cho biết lúc đầu có bao nhiêu, dòng kia cho biết mất đi bao nhiêu. Ở chuyện thứ hai, một dòng cho biết An đang đứng ở vạch nào, dòng kia cho biết An lùi mấy bước. Chỗ trống nào cũng cần cả hai dòng.
 - kind: strategy
-  body: Trên thanh số, chỗ còn lại = chỗ xuất phát lùi sang trái bấy nhiêu vạch. Viết nó bằng hai cái tên có sẵn nối bằng dấu trừ, và để ý thứ tự — cái đứng trước dấu trừ là chỗ xuất phát.
+  body: Trên thanh số, chỗ tới = chỗ đang đứng lùi sang trái bấy nhiêu vạch — và "bớt đi" của tranh đống cũng viết ra đúng hình dạng ấy. Viết mỗi chỗ trống bằng hai cái tên có sẵn nối bằng dấu trừ, và để ý thứ tự: cái đứng trước dấu trừ là chỗ xuất phát.
 - kind: one-line
-  body: "Chỗ trống thứ nhất là `cay_tren_luong - cay_sau_an`, chỗ trống thứ hai là `hat_trong_tui - hat_da_gieo`."
+  body: "Chỗ trống thứ nhất là `cay_tren_luong - cay_sau_an`, chỗ trống thứ hai là `vach_dang_dung_an - so_buoc_lui_an`."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: static
-  onFail: mỗi chỗ trống phải là một phép trừ giữa lượng ban đầu và lượng mất đi — gõ thẳng con số còn lại thì bạn đã tính hộ máy rồi
+  onFail: mỗi chỗ trống phải là một phép trừ giữa hai cái tên đứng ngay trên nó — gõ thẳng con số kết quả thì bạn đã tính hộ máy rồi
   requireAst:
   # `min: 2` vì có hai chuyện, mỗi chuyện một phép trừ. Khung khởi đầu chưa có
   # dấu `-` nào, nên luật này chặn được đúng cái đáp án chép cứng hai con số.
   - kind: uses-operator, target: -, min: 2
+- tier: tests
+  timeoutMs: 4000
 - tier: output
   match: regex
   expect: ^7\n0\s*$
@@ -242,7 +248,7 @@ assert cay_con_lai + cay_sau_an == cay_tren_luong, "trả 5 cây về chỗ cũ 
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Còn 7 cây, còn 0 hạt. Lùi tới đầu luống vẫn là lùi, mình đếm được hết.
+Còn 7 cây, và về đúng vạch 0. Lùi tới đầu luống vẫn là lùi, mình đếm được hết.
 ::::
 
 ::::reflect{#nghi-lai}

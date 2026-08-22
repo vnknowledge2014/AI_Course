@@ -10,9 +10,9 @@ tier: A
 languages: [python]
 defaultLanguage: python
 level: intro
-estimatedMinutes: 14
+estimatedMinutes: 15
 teaches: [math.carry]
-requires: [math.like-units, math.dong-goi, core.arithmetic, core.variable, core.print-variable, core.string-concat, logic.and]
+requires: [math.like-units, math.dong-goi, core.arithmetic, core.variable, core.print-variable]
 concepts: [math.dong-goi, math.thang-cot, math.gia-tri-vi-tri]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -138,15 +138,17 @@ làm mất hạt thật, còn đóng bó thì không mất gì.
 :::
 
 :::opt
-4735
+812
 ::why
-Gần đúng ở chỗ bạn nhớ đúng một việc mà dấu `+` làm được thật: đặt hai mảnh
-cạnh nhau thành một mảnh dài hơn. Realm 0 dùng nó như vậy để nối hai câu chữ,
-và ở đó nghĩ thế là chính xác.
+Gần đúng ở chỗ bạn làm đúng nửa việc khó nhất — nhận ra mười hạt lẻ ấy phải
+thành một cái bó, và bó thì thuộc cột bên trái. Nên cột bó đúng là `4 + 3 + 1 =
+8`, không sai một chút nào.
 
-Chỗ lệch nằm ở phạm vi. `+` chỉ ghép khi cả hai bên là **chữ** — có dấu nháy
-bao quanh. Ở đây `47` và `35` viết trần nên chúng là số, và với hai con số thì
-`+` gộp lượng chứ không xếp chữ cạnh nhau.
+Chỗ lệch nằm ở chỗ đóng bó là một cuộc **dời chỗ**, không phải một bản sao.
+Mười hạt đã đi sang cột bó rồi thì chúng không còn ở cột hạt lẻ nữa, nên cột
+hạt lẻ phải là `12 − 10 = 2` chứ không còn là `12`. Đọc `812` ra thì thành tám
+trăm mười hai hạt — mười hạt vừa bị đếm hai lần, một lần dưới dạng bó và một
+lần dưới dạng hạt.
 ::
 :::
 ::::
@@ -203,25 +205,58 @@ Byte ghi sổ hai buổi. Mỗi buổi hai người dồn hạt vào chung một
 - **Sáng**: Byte có 4 bó 7 hạt lẻ, An mang tới 3 bó 5 hạt lẻ.
 - **Chiều**: Byte có 5 bó 7 hạt lẻ, An mang tới 6 bó 5 hạt lẻ.
 
-Mỗi bó đúng mười hạt, nên bốn đống đã được viết sẵn thành bốn con số theo bảng
-vị trí (bài 7): 4 bó 7 hạt lẻ viết là `47`, và cứ thế. Việc của bạn là gộp hai
-đống của mỗi buổi.
+Lần này bốn đống **không** được viết sẵn thành `47` hay `35`. Mỗi đống nằm
+nguyên thành hai cột — số bó một tên, số hạt lẻ một tên — vì việc của bài này
+nằm đúng ở chỗ ranh giới giữa hai cột ấy. Gõ `47 + 35` thì máy đóng bó hộ bạn
+và bạn không chạm vào chỗ ấy một lần nào.
+
+Bạn sẽ đi lại đúng cái bảng ở phần trên, từng dòng một: gộp cột hạt lẻ, tách
+mười hạt thừa ra khỏi cột đó, cộng cái bó vừa đóng vào cột bên trái, rồi mới
+đọc các cột thành một con số.
+
+Hai chỗ đáng để ý, vì đó là chỗ bài này sống:
+
+- **`- 10` ở cột hạt lẻ.** Mười hạt ấy đã sang cột bó rồi thì chúng không còn
+  ở cột hạt lẻ nữa. Không trừ nghĩa là đếm chúng hai lần.
+- **`+ 1` ở cột bó.** Cái `1` của "nhớ 1" không phải thứ máy tự làm hộ — nó là
+  một dấu cộng bạn gõ ra, ở đúng cột bạn chọn.
 
 Hai buổi được chọn cố ý. Cột hạt lẻ của cả hai đều là `7 + 5`, nên buổi nào
-cũng phải đóng một bó. Nhưng buổi chiều còn phải đóng bó **lần thứ hai** ở cột
-bó, nên hai buổi ra hai con số khác hẳn nhau — buổi chiều dài tới ba chữ số.
-Chép cứng một kết quả vào cả hai chỗ trống thì hỏng ít nhất một buổi.
+cũng phải đóng một bó. Nhưng buổi chiều gộp cột bó ra `12`, nên nó còn phải
+đóng bó **lần thứ hai** — mười cái bó đổi lấy một bó-của-bó — và con số cuối
+dài tới ba chữ số.
 
 ```python title=starter
 # Sáng: Byte 4 bó 7 hạt lẻ, An mang tới 3 bó 5 hạt lẻ.
-sang_byte = 47
-sang_an = 35
+sang_byte_bo = 4
+sang_byte_hat = 7
+sang_an_bo = 3
+sang_an_hat = 5
+
+# Cột hạt lẻ trước: gộp hai cột hạt lẻ đã.
+sang_hat_gop = ___
+# Mười hạt trong số đó vừa đóng thành một bó và rời khỏi cột này.
+sang_hat_con = ___
+# Cột bó: gộp hai cột bó, rồi cộng thêm đúng cái bó vừa đóng.
+sang_bo_gop = ___
+# Đọc hai cột thành một con số — mỗi bó là mười hạt.
+tong_sang = ___
 
 # Chiều: Byte 5 bó 7 hạt lẻ, An mang tới 6 bó 5 hạt lẻ.
-chieu_byte = 57
-chieu_an = 65
+chieu_byte_bo = 5
+chieu_byte_hat = 7
+chieu_an_bo = 6
+chieu_an_hat = 5
 
-tong_sang = ___
+chieu_hat_gop = ___
+chieu_hat_con = ___
+chieu_bo_gop = ___
+
+# Cột bó lần này cũng tràn: mười cái bó đóng thành MỘT bó-của-bó và sang đứng
+# ở cột thứ ba. Đây là cái `1` được nhớ lần thứ hai, viết sẵn cho bạn.
+chieu_bo_cua_bo = 1
+chieu_bo_con = ___
+# Ba cột — mỗi bó-của-bó là một trăm hạt, mỗi bó là mười hạt.
 tong_chieu = ___
 
 print(tong_sang)
@@ -230,54 +265,104 @@ print(tong_chieu)
 
 ```python title=solution
 # Sáng: Byte 4 bó 7 hạt lẻ, An mang tới 3 bó 5 hạt lẻ.
-sang_byte = 47
-sang_an = 35
+sang_byte_bo = 4
+sang_byte_hat = 7
+sang_an_bo = 3
+sang_an_hat = 5
+
+# Cột hạt lẻ trước: gộp hai cột hạt lẻ đã.
+sang_hat_gop = sang_byte_hat + sang_an_hat
+# Mười hạt trong số đó vừa đóng thành một bó và rời khỏi cột này.
+sang_hat_con = sang_hat_gop - 10
+# Cột bó: gộp hai cột bó, rồi cộng thêm đúng cái bó vừa đóng.
+sang_bo_gop = sang_byte_bo + sang_an_bo + 1
+# Đọc hai cột thành một con số — mỗi bó là mười hạt.
+tong_sang = sang_bo_gop * 10 + sang_hat_con
 
 # Chiều: Byte 5 bó 7 hạt lẻ, An mang tới 6 bó 5 hạt lẻ.
-chieu_byte = 57
-chieu_an = 65
+chieu_byte_bo = 5
+chieu_byte_hat = 7
+chieu_an_bo = 6
+chieu_an_hat = 5
 
-tong_sang = sang_byte + sang_an
-tong_chieu = chieu_byte + chieu_an
+chieu_hat_gop = chieu_byte_hat + chieu_an_hat
+chieu_hat_con = chieu_hat_gop - 10
+chieu_bo_gop = chieu_byte_bo + chieu_an_bo + 1
+
+# Cột bó lần này cũng tràn: mười cái bó đóng thành MỘT bó-của-bó và sang đứng
+# ở cột thứ ba. Đây là cái `1` được nhớ lần thứ hai, viết sẵn cho bạn.
+chieu_bo_cua_bo = 1
+chieu_bo_con = chieu_bo_gop - 10
+# Ba cột — mỗi bó-của-bó là một trăm hạt, mỗi bó là mười hạt.
+tong_chieu = chieu_bo_cua_bo * 100 + chieu_bo_con * 10 + chieu_hat_con
 
 print(tong_sang)
 print(tong_chieu)
 ```
 
 ```python title=test
-assert tong_sang == 82, "47 hạt gộp 35 hạt: đóng một bó, còn 2 hạt lẻ"
-assert tong_chieu == 122, "57 hạt gộp 65 hạt: đóng bó hai lần, còn 2 hạt lẻ"
+# Buổi sáng, đi theo đúng thứ tự của bảng: gộp cột hạt lẻ, dời mười hạt sang
+# trái, rồi mới tới cột bó.
+assert sang_hat_gop == 12, "7 hạt lẻ gộp với 5 hạt lẻ thì được 12 hạt lẻ"
+assert sang_hat_con == 2, "mười hạt trong số đó vừa thành một bó và RỜI cột hạt lẻ, nên cột ấy còn 2"
+assert sang_bo_gop == 8, "4 bó gộp 3 bó rồi cộng cái bó vừa đóng: 4 + 3 + 1 = 8"
+assert tong_sang == 82, "8 bó và 2 hạt lẻ, viết theo bảng vị trí là 82"
 
-# Đọc ngược hai kết quả ra thành cột (bài 7). Đóng bó không sinh ra và không
-# làm mất hạt nào, nên tổng phải tách lại được thành đúng chừng ấy bó và hạt.
-assert tong_sang == 80 + 2, "82 là 8 bó và 2 hạt lẻ"
-assert tong_chieu == 100 + 20 + 2, "122 là 1 bó-của-bó, 2 bó và 2 hạt lẻ"
+# Buổi chiều: cùng một luật, nhưng phải chạy thêm một lần nữa ở cột bó.
+assert chieu_hat_gop == 12, "cột hạt lẻ buổi chiều cũng là 7 + 5"
+assert chieu_hat_con == 2, "lại mười hạt đi sang cột bó, cột hạt lẻ còn 2"
+assert chieu_bo_gop == 12, "5 bó gộp 6 bó rồi cộng cái bó vừa đóng: 5 + 6 + 1 = 12"
+assert chieu_bo_con == 2, "mười cái bó ấy vừa thành một bó-của-bó và RỜI cột bó, nên cột ấy còn 2"
+assert tong_chieu == 122, "1 bó-của-bó, 2 bó và 2 hạt lẻ, viết ra là 122"
 
-# Cột hạt lẻ của hai buổi giống hệt nhau (7 + 5), nên sau khi đóng bó cả hai
-# buổi đều phải còn đúng 2 hạt lẻ — dù số bó thì khác xa nhau.
-assert 80 + 2 == tong_sang and 120 + 2 == tong_chieu, "cả hai buổi đều còn đúng 2 hạt lẻ"
+# Bảo toàn. Đóng bó chỉ đổi hình dạng, không sinh ra và không làm mất hạt nào,
+# nên đếm thẳng cả đống về "một hạt" — không đi qua cột nào, đúng cách 2 của
+# bài 11 — phải rơi trúng con số bạn vừa dựng lên từ các cột.
+kiem_sang = sang_byte_bo * 10 + sang_byte_hat + sang_an_bo * 10 + sang_an_hat
+kiem_chieu = chieu_byte_bo * 10 + chieu_byte_hat + chieu_an_bo * 10 + chieu_an_hat
+assert tong_sang == kiem_sang, "gộp theo cột rồi đóng bó phải ra đúng chừng ấy hạt như khi đếm thẳng"
+assert tong_chieu == kiem_chieu, "buổi chiều cũng vậy, dù phải đóng bó tới hai lần"
 ```
 
 :::hints
 - kind: attention
-  body: Bốn cái tên phía trên chia làm hai cặp, mỗi cặp một buổi. Đọc đầu mỗi tên để biết nó thuộc buổi nào — đừng gộp một đống buổi sáng với một đống buổi chiều.
+  body: Nhìn lại cái bảng ở phần trên — bảng ấy có bao nhiêu dòng thì ở đây có bấy nhiêu chỗ trống, và đúng thứ tự đó. Đọc kỹ đuôi mỗi tên để biết nó đếm bó hay đếm hạt lẻ; cột nào chỉ được gộp với cột ấy (bài 11).
 - kind: strategy
-  body: Mỗi chỗ trống là một phép gộp của bài 10 giữa hai đống trong cùng một buổi. Đừng tự đóng bó trong đầu rồi chép con số cuối vào — chỗ đóng bó là chỗ dễ trượt nhất, cứ để máy làm rồi đối chiếu với bảng cột bạn vừa đọc.
+  body: Làm cột hạt lẻ trước rồi mới sang cột bó, vì cột bó phải chờ xem cột bên phải có đóng được bó nào không. Mười hạt đi sang cột bó thì cột hạt lẻ mất đúng mười — trừ đi. Cột bó thì được thêm đúng một — cộng vào. Dòng cuối mỗi buổi chỉ là đọc các cột thành một con số: bó nhân mười, bó-của-bó nhân một trăm, rồi cộng hết lại.
 - kind: one-line
-  body: "Thay `___` thứ nhất bằng `sang_byte + sang_an`, và `___` thứ hai bằng `chieu_byte + chieu_an`."
+  body: "Buổi sáng: `sang_hat_gop = sang_byte_hat + sang_an_hat`, `sang_hat_con = sang_hat_gop - 10`, `sang_bo_gop = sang_byte_bo + sang_an_bo + 1`, `tong_sang = sang_bo_gop * 10 + sang_hat_con`. Buổi chiều ba dòng đầu y hệt với `chieu_…`, rồi `chieu_bo_con = chieu_bo_gop - 10` và `tong_chieu = chieu_bo_cua_bo * 100 + chieu_bo_con * 10 + chieu_hat_con`."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: static
-  onFail: mỗi chỗ trống phải GỘP hai cái tên của cùng một buổi bằng dấu `+` — chép sẵn con số tổng thì chỗ đóng bó không còn được kiểm gì
+  onFail: mỗi chỗ trống phải được DỰNG từ những cái tên đứng phía trên nó — chép sẵn con số kết quả thì chỗ đóng bó, tức toàn bộ bài này, không còn được kiểm gì
   requireAst:
-  # Hai buổi thì hai phép gộp. Khung khởi đầu chưa có dấu `+` nào, nên luật này
-  # chặn đúng đáp án chép cứng 82 với 122.
-  - kind: uses-operator, target: +, min: 2
-  - kind: uses-name, target: sang_an, min: 1
-  - kind: uses-name, target: chieu_an, min: 1
+  # Ba dấu `-`: cột hạt lẻ của hai buổi, cộng thêm cột bó của buổi chiều. Đây
+  # là luật đắt nhất ở đây — nó chặn đúng lời giải bỏ qua bước dời mười hạt ra
+  # khỏi cột và điền thẳng `2` vào.
+  - kind: uses-operator, target: -, min: 3
+  # Gộp hai cột, cộng cái bó vừa đóng, rồi cộng các cột lại thành một con số.
+  - kind: uses-operator, target: +, min: 6
+  # Đọc cột thành con số: bó nhân mười, bó-của-bó nhân một trăm.
+  - kind: uses-operator, target: *, min: 2
+  # Cả tám cái tên đầu vào phải có mặt. Thiếu luật này thì một nửa mỗi phép gộp
+  # có thể chép cứng mà vẫn qua — `sang_hat_gop = sang_byte_hat + 5` ra đúng 12.
+  - kind: uses-name, target: sang_byte_bo, min: 1
+  - kind: uses-name, target: sang_byte_hat, min: 1
+  - kind: uses-name, target: sang_an_bo, min: 1
+  - kind: uses-name, target: sang_an_hat, min: 1
+  - kind: uses-name, target: chieu_byte_bo, min: 1
+  - kind: uses-name, target: chieu_byte_hat, min: 1
+  - kind: uses-name, target: chieu_an_bo, min: 1
+  - kind: uses-name, target: chieu_an_hat, min: 1
+  # Con số cuối phải được dựng TỪ CÁC CỘT, không phải tính vòng qua đường khác.
+  - kind: uses-name, target: sang_hat_con, min: 1
+  - kind: uses-name, target: sang_bo_gop, min: 1
+  - kind: uses-name, target: chieu_hat_con, min: 1
+  - kind: uses-name, target: chieu_bo_con, min: 1
+  - kind: uses-name, target: chieu_bo_cua_bo, min: 1
 - tier: tests
   timeoutMs: 4000
 - tier: output

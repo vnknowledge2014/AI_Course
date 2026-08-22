@@ -39,13 +39,16 @@ Thử đọc lại xem. Ba người cầm cùng tờ giấy ấy:
 
 - Người thứ nhất cắt thành `13` và `7`: 13 bó với 7 hạt lẻ → 130 + 7 = **137 hạt**.
 - Người thứ hai cắt thành `1` và `37`: 1 bó với 37 hạt lẻ → 10 + 37 = **47 hạt**.
-- Người thứ ba không cắt gì cả: **137 hạt lẻ**, chưa buộc bó nào.
+- Người thứ ba cắt đủ ba ô `1`|`3`|`7` nhưng đếm cột từ trái sang: 1 hạt lẻ,
+  3 bó, 7 bó-của-bó → 1 + 30 + 700 = **731 hạt**.
 
-Ba cách đọc, hai đống hạt khác hẳn nhau. Tờ giấy không hề nói nó là cách nào.
+Ba cách đọc, ba đống hạt khác hẳn nhau — 137, 47 và 731. Tờ giấy không hề nói
+nó là cách nào.
 
-Chỗ hỏng nằm ở đâu? Ở chỗ con số `13` chiếm **hai ô** mà con `7` chỉ chiếm
-**một**, nên không ai biết chỗ cắt nằm đâu. Muốn tờ giấy chỉ đọc được một cách,
-phải thoả thuận trước một luật:
+Hai người đầu hỏng cùng một chỗ: con số `13` chiếm **hai ô** mà con `7` chỉ
+chiếm **một**, nên không ai biết chỗ cắt nằm đâu. (Người thứ ba cắt đúng chỗ,
+hỏng ở chiều đếm — cuối bài quay lại chỗ ấy.) Muốn tờ giấy chỉ đọc được một
+cách, phải thoả thuận trước một luật:
 
 > Mỗi cột đúng **một** chữ số.
 
@@ -199,7 +202,8 @@ bó với 4 hạt lẻ. Vẫn đúng hai chữ số 4 và 5, mà hai đống l�
 Cách viết này đứng được là nhờ ba thoả thuận, thiếu cái nào cũng sập:
 
 1. Hàng ô có thứ tự cố định, và **đếm từ phải sang trái**: hạt lẻ, rồi bó, rồi
-   bó-của-bó, rồi bó-của-bó-của-bó.
+   bó-của-bó, rồi bó-của-bó-của-bó — đây chính là chỗ người thứ ba lúc nãy
+   trượt, và trượt tới 594 hạt.
 2. Mỗi cột đúng một chữ số — nên phải đóng bó cho tới khi không cột nào còn đủ
    mười.
 3. Mỗi cột to gấp mười cột bên phải nó. Đó là luật bài 6, đứng nguyên tại chỗ.
@@ -271,10 +275,20 @@ assert thu_hai + 9 == thu_ba, "đổi chỗ hai chữ số 4 và 5 làm đống 
 - tier: static
   onFail: mỗi ngày phải được ráp lại từ các CỘT của nó — gõ thẳng con số cuối cùng vào thì bài không nhìn thấy cái cột nào cả
   requireAst:
-  # Khung chưa có dấu cộng nào, nên luật này chặn đúng cái đáp án chép ba con
-  # số 45, 54, 137 vào ba chỗ trống. `min: 3` chứ không phải 13 vì `40 + 5`
-  # cũng là một cách ráp cột hợp lệ.
+  # Khung chưa có dấu cộng nào, nên luật này chặn cái đáp án chép cả ba con số
+  # 45, 54, 137 vào ba chỗ trống. `min: 3` chứ không phải 13 vì `40 + 5` cũng
+  # là một cách ráp cột hợp lệ.
   - kind: uses-operator, target: +, min: 3
+  forbidAst:
+  # Một mình luật trên chưa đủ: `uses-operator` đếm trên CẢ FILE, nên đáp án
+  # gõ cứng HAI ngày đầu — `thu_hai = 45`, `thu_ba = 54`, rồi ráp cột đúng cho
+  # thứ Tư — vẫn có bốn dấu cộng và vẫn lọt. Ba luật dưới đây chặn từng con số
+  # kết quả một, nên gõ cứng đúng MỘT chỗ cũng không qua. Chúng không đụng tới
+  # cách ráp cột nào cả: `40 + 5`, `50 + 4`, `100 + 30 + 7` hay bản dài
+  # `10 + 10 + 10 + 10 + 5` đều không chứa nguyên văn 45, 54 hay 137.
+  - kind: has-literal, target: 45
+  - kind: has-literal, target: 54
+  - kind: has-literal, target: 137
 - tier: tests
   timeoutMs: 4000
 - tier: output

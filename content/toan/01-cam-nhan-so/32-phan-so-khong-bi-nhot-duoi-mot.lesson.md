@@ -66,8 +66,8 @@ bằng sải, đường dưới đếm bằng miếng `1/4`.
 ├───────────┼───────────┤     đếm bằng sải: một sải, rồi một sải nữa
 ├──┼──┼──┼──┼──┼──┼──┼──┤     vẫn đường ấy, mỗi sải bẻ tư
 0  1  2  3  4  5  6  7  8     đếm bằng miếng 1/4
-                  ▲
-                  bảy miếng — tức 7/4 sải — đứng giữa 1 và 2
+                     ▲
+                     bảy miếng — tức 7/4 sải — đứng giữa 1 và 2
 ```
 
 Nhìn cái vạch số `4` ở hàng dưới: nó rơi trúng vạch `1` ở hàng trên. Bốn miếng
@@ -80,10 +80,10 @@ Có nó rồi thì bảy miếng tách ra được. Bảy miếng cùng cỡ n�
 gộp đống nào trước cũng thế (bài 10), nên gộp bốn miếng đầu lại thành một sải,
 còn dư ba miếng:
 
-`7/4 = 4/4 + 3/4 = 1 và 3/4`
+`7/4 = 4/4 + 3/4`
 
-Đọc thành tiếng: *một sải và ba phần tư sải*. Đây đúng là câu người bán vải hay
-nói — "một thước rưỡi", "hai thước tư" — và giờ bạn viết được nó bằng số.
+Nói bằng lời: bảy miếng ấy là **một sải chẵn, cộng thêm ba miếng nữa**. Không
+miếng nào biến đi đâu cả — chỉ có bốn miếng đầu vừa được gộp lại thành một sải.
 
 Hỏi máy làm trọng tài cho cả hai khẳng định:
 
@@ -101,8 +101,8 @@ True
 ::::
 
 ::::predict{#doan-mot-sai-va-ba-mieng commitOnce}
-Byte viết cùng một luống rau cải bằng hai cách: `7/4` sải, và "một sải cộng
-`3/4` sải".
+Byte viết cùng một luống rau cải bằng hai cách: `7/4` sải, và "một sải chẵn,
+cộng thêm ba miếng `1/4` nữa".
 
 **Trước khi bấm chạy**, bạn đoán màn hình hiện ra gì?
 
@@ -229,10 +229,11 @@ assert 7/4 == 4/4 + 3/4, "bảy miếng = bốn miếng + ba miếng, và bốn 
   onFail: mỗi chỗ trống phải là một câu so sánh (`>`) giữa cái luống viết bằng phân số và số 1 — gõ thẳng `True` hay `False` thì không hỏi máy điều gì cả
   requireAst:
   # Khung chưa có dấu `>` nào, nên `min: 2` chặn đúng đáp án gõ cứng hai chữ
-  # True/False. `/` min 4 buộc hai câu hỏi phải viết bằng phân số: dòng thứ ba
-  # đã sẵn có hai dấu `/`, nên mức 4 chỉ đạt khi hai chỗ trống cũng là phân số.
+  # True/False. Dòng thứ ba viết sẵn đã có ba dấu `/`, nên `/` min 5 chỉ đạt
+  # khi cả hai chỗ trống cũng viết bằng phân số — chép một số thập phân đã
+  # tính sẵn vào một chỗ trống là trượt.
   - kind: uses-operator, target: >, min: 2
-  - kind: uses-operator, target: /, min: 4
+  - kind: uses-operator, target: /, min: 5
 - tier: output
   match: regex
   expect: ^True\nFalse\nTrue\s*$

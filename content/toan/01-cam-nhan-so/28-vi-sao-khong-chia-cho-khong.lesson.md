@@ -168,16 +168,16 @@ Chữ ở đầu dòng dưới cùng ghép từ *zero* (số không), *division*
 *error* (lỗi). Dịch sát: **lỗi chia cho không**.
 
 Đây là chỗ dễ hiểu lầm nhất của cả bài, nên nói cho thẳng: **máy không cấm bạn.**
-Nó không có một danh sách những phép toán bị coi là hư hỏng. Nó dừng lại vì nó
-đi tìm câu trả lời cho "số nào nhân 0 ra 12" và tìm không ra — cũng đúng lý do
-mà bạn tìm không ra khi làm trên giấy. Bỏ hết máy tính trên đời đi thì `12 : 0`
-vẫn không có kết quả.
+Người viết ra Python có đặt sẵn một chỗ chặn ở đây thật — nhưng họ chặn vì **câu
+hỏi hỏng**, chứ không phải vì họ ngại con số 0. Nếu `12 : 0` có đáp án thì họ đã
+cho máy trả lời rồi, y như nó vẫn trả lời `12 / 0.0001` ngay dưới đây.
+Bỏ hết máy tính trên đời đi thì `12 : 0` vẫn không có kết quả.
 
 Và để thấy máy chia được cho mọi cái thước khác: `12 / 3` cho `4.0`, `12 / 1` cho
 `12.0`, `12 / 0.5` cho `24.0`, `12 / 0.0001` cho `120000.0`. Cái thước cuối mỏng
 như sợi tóc, máy vẫn trả lời gọn ghẽ. (Dấu chấm với số `0` phía sau là do phép
-`/` luôn cho ra số lẻ, R0 bài 15 đã nói.) Chỉ đúng một cái thước làm nó dừng, và
-đó là cái thước không dài tí nào.
+`/` luôn cho ra số **có phần thập phân**, kể cả khi chia hết — R0 bài 15 đã nói.)
+Chỉ đúng một cái thước làm nó dừng, và đó là cái thước không dài tí nào.
 
 Còn một kiểu hỏng nữa, hỏng ngược lại: `0 : 0` hỏi "thước 0 mét lọt vào 0 mét
 mấy lần?" — đặt 5 lần cũng được 0 mét, đặt 100 lần cũng được 0 mét, lần nào cũng
@@ -186,73 +186,84 @@ không chỉ ra được **một** con số, nên cả hai đều là câu hỏi
 ::::
 
 ::::byte{trigger=enter mood=thinking pose=point-editor}
-Bạn tự bắt mình tin nhé. Hai cái thước, hai câu trả lời khác nhau.
+Bạn tự bắt mình tin nhé. Hai phép chia, hai câu trả lời khác nhau.
 ::::
 
-::::code{#tu-tay-kiem-hai-cai-thuoc}
-Byte muốn tự tay xác nhận, bằng đúng sợi dây 12 mét trong vườn:
+::::code{#tu-tay-kiem-hai-phep-chia}
+Byte muốn tự tay xác nhận, bằng đúng cái cầu vừa dựng ở trên: **chia là câu hỏi
+ngược của nhân**. Muốn biết một phép chia có đáp án hay không thì đem thử một con
+số rồi nhân ngược lại xem có về đúng chỗ cũ không.
 
-- **Thước 3 mét**: đặt 4 lần. Máy tính ra được bao nhiêu mét, và chồng ấy có phủ
-  đúng 12 mét không?
-- **Thước 0 mét**: đặt một triệu lần. Máy tính ra được bao nhiêu mét, và chồng ấy
-  có phủ đúng 12 mét không?
+- **`12 : 3`** hỏi *"số nào nhân 3 thì ra 12?"* — thử số **4**.
+- **`12 : 0`** hỏi *"số nào nhân 0 thì ra 12?"* — thử luôn **một triệu**.
 
-Mỗi cái thước in hai dòng: dòng trên là số mét đã phủ (đã viết sẵn), dòng dưới là
-câu trả lời cho câu hỏi *"đã phủ đúng 12 mét chưa"*. Hai chỗ trống là hai câu hỏi ấy.
+Mỗi phép chia in hai dòng: dòng trên là kết quả nhân ngược (đã viết sẵn), dòng
+dưới là câu trả lời cho câu hỏi *"nhân ngược có về đúng 12 chưa"*. Hai chỗ trống
+là hai câu hỏi ấy.
 
-Bài chấm bằng **cả hai** cái thước, và hai cái này được chọn để cho ra hai câu
-trả lời ngược nhau. Gõ cứng `True` vào cả hai chỗ thì thước 0 mét sai; gõ cứng
-`False` thì thước 3 mét sai. Chỉ một câu hỏi viết thật mới qua được cả hai.
+Bài chấm bằng **cả hai** phép chia, và hai phép này cho ra hai câu trả lời ngược
+nhau. Gõ cứng `True` vào cả hai chỗ thì phép `12 : 0` sai; gõ cứng `False` thì
+phép `12 : 3` sai. Và chép thẳng con số cũng không qua: câu hỏi phải so **cái
+tên** đang giữ kết quả nhân ngược với 12.
 
 ```python title=starter
-be_ba_met = 3 * 4
-be_khong_met = 0 * 1000000
-
-print(be_ba_met)
+# 12 : 3 hỏi "số nào nhân 3 thì ra 12?" — thử số 4
+thu_bon = 4 * 3
+print(thu_bon)
 print(___)
-print(be_khong_met)
+
+# 12 : 0 hỏi "số nào nhân 0 thì ra 12?" — thử một triệu
+thu_mot_trieu = 1000000 * 0
+print(thu_mot_trieu)
 print(___)
 ```
 
 ```python title=solution
-be_ba_met = 3 * 4
-be_khong_met = 0 * 1000000
+# 12 : 3 hỏi "số nào nhân 3 thì ra 12?" — thử số 4
+thu_bon = 4 * 3
+print(thu_bon)
+print(thu_bon == 12)
 
-print(be_ba_met)
-print(be_ba_met == 12)
-print(be_khong_met)
-print(be_khong_met == 12)
+# 12 : 0 hỏi "số nào nhân 0 thì ra 12?" — thử một triệu
+thu_mot_trieu = 1000000 * 0
+print(thu_mot_trieu)
+print(thu_mot_trieu == 12)
 ```
 
 ```python title=test
-# Chốt lại chính điều bài vừa nói, trên hai cái thước khác hẳn nhau. Nếu một
+# Chốt lại chính điều bài vừa nói, trên hai phép chia khác hẳn nhau. Nếu một
 # ngày nào đó máy chạy bài học tính sai chỗ này thì cổng đỏ lên, chứ không dạy
 # sai lặng lẽ.
-assert be_ba_met == 12, "thước 3 mét đặt 4 lần thì phủ đúng 12 mét — đó là nghĩa của 12 : 3 = 4"
-assert be_khong_met == 0, "thước 0 mét đặt một triệu lần vẫn ra 0 mét, không nhích lên tí nào"
-assert be_khong_met != 12, "đây là cả nội dung bài: chồng thước 0 mét không bao giờ chạm tới 12"
-assert 0 * 7 != 12, "7 không phải đáp án của 12 : 0"
-assert 0 * 999999999 != 12, "một con số khổng lồ cũng không phải đáp án của 12 : 0"
+assert thu_bon == 12, "4 nhân 3 về đúng 12 — nên 4 là đáp án của 12 : 3"
+assert thu_mot_trieu == 0, "một triệu nhân 0 vẫn ra 0, không nhích lên tí nào"
+assert thu_mot_trieu != 12, "đây là cả nội dung bài: không con số nào nhân 0 mà về được 12"
+assert 7 * 0 != 12, "7 không phải đáp án của 12 : 0"
+assert 999999999 * 0 != 12, "một con số khổng lồ cũng không phải đáp án của 12 : 0"
 ```
 
 :::hints
 - kind: attention
-  body: Hai chỗ trống đều nằm trong `print`, ngay dưới một dòng đã in ra số mét thật. Việc của chúng không phải in lại con số ấy lần nữa, mà là hỏi máy một câu chỉ có hai câu trả lời.
+  body: Hai chỗ trống đều nằm trong `print`, ngay dưới một dòng đã in ra kết quả nhân ngược. Việc của chúng không phải in lại con số ấy lần nữa, mà là hỏi máy một câu chỉ có hai câu trả lời.
 - kind: strategy
-  body: Câu hỏi ấy gồm ba phần: cái tên đang giữ số mét đã phủ, dấu so sánh bằng của R0 bài 6 (hai dấu bằng viết liền nhau), và con số 12 — chiều dài sợi dây. Hai chỗ trống dùng hai cái tên khác nhau, nên không chép được của nhau.
+  body: Câu hỏi ấy gồm ba phần: cái tên đang giữ kết quả nhân ngược, dấu so sánh bằng của R0 bài 24 (hai dấu bằng viết liền nhau), và con số 12 — cái số bị chia. Hai chỗ trống dùng hai cái tên khác nhau, nên không chép được của nhau.
 - kind: one-line
-  body: "Thay `___` thứ nhất bằng `be_ba_met == 12` và `___` thứ hai bằng `be_khong_met == 12`."
+  body: "Thay `___` thứ nhất bằng `thu_bon == 12` và `___` thứ hai bằng `thu_mot_trieu == 12`."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: static
-  onFail: mỗi chỗ trống phải là một câu hỏi so sánh bằng (`==`) giữa số mét đã phủ và con số 12 — gõ thẳng `True` hay `False` thì không hỏi máy điều gì cả
+  onFail: mỗi chỗ trống phải là một câu hỏi so sánh bằng (`==`) giữa kết quả nhân ngược và con số 12 — và phải so cái TÊN đang giữ kết quả ấy với 12, không phải chép lại con số
   requireAst:
-  # `min: 2` vì có hai cái thước, mỗi cái một câu hỏi. Khung chưa có dấu `==`
+  # `min: 2` vì có hai phép chia, mỗi phép một câu hỏi. Khung chưa có dấu `==`
   # nào, nên luật này chặn được đúng cái đáp án gõ cứng hai chữ True/False.
   - kind: uses-operator, target: ==, min: 2
+  # Khung đã ĐỌC mỗi cái tên đúng một lần (`print(thu_bon)`), nên `min: 2` ép
+  # chỗ trống phải nhắc lại tên ấy — chặn đáp án `print(12 == 12)` chép cứng
+  # con số mà vẫn khớp output lẫn dấu `==`.
+  - kind: uses-name, target: thu_bon, min: 2
+  - kind: uses-name, target: thu_mot_trieu, min: 2
 - tier: output
   match: regex
   expect: ^12\nTrue\n0\nFalse\s*$
@@ -260,7 +271,7 @@ assert 0 * 999999999 != 12, "một con số khổng lồ cũng không phải đ�
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Thước 3 mét thì phủ kín. Thước 0 mét thì đặt cả triệu lần vẫn đứng yên.
+Bốn nhân 3 về đúng 12. Một triệu nhân 0 thì vẫn nằm nguyên ở số 0.
 ::::
 
 ::::reflect{#nghi-lai}

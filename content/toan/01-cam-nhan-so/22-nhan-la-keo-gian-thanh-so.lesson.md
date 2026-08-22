@@ -47,6 +47,12 @@ nói *phép biến đổi mạnh cỡ nào*. Nhét chúng vào một cái mảng
 giả vờ rằng 3 cũng là mấy sải dây, mà nó không phải.
 
 Nên bức tranh cho "gấp 3" nằm ở chỗ khác: **thanh số** của bài 5.
+
+Một chuyện nhỏ về chỗ đứng của hai con số, nói ra để bạn khỏi khựng. Bài 19 đọc
+`3 × 4` là "**ba lần** một lô bốn cây" — số lần đứng trước. Bài 20 đã cho phép
+đổi vai hai con số mà tích không đổi, nên từ đây ta viết hệ số kéo giãn ở
+**sau**: `4 × 3` đọc là "vạch 4, kéo giãn 3 lần". Cùng một con số 12, chỉ là
+cách đọc hợp với sợi dây thun hơn.
 ::::
 
 ::::explain{#keo-ca-thanh-so-ra-xa-moc-0}
@@ -177,11 +183,14 @@ Vườn Byte có hai luống: luống rau muống dài **4** sải dây, luống
 **7** sải dây. Byte kéo giãn thanh số **3 lần** rồi đọc lại cả vườn trên thanh
 số mới.
 
-Điền ba chỗ trống cho máy tính ra chỗ mới của từng luống.
+Điền bốn chỗ trống: chỗ mới của từng luống, khoảng cách giữa hai luống **sau
+khi kéo**, và chỗ mà **mốc 0** rơi vào sau khi kéo.
 
-Bài chấm bằng **hai luống có độ dài khác nhau**, cộng thêm hai câu về mốc 0 và
-về khoảng cách giữa hai luống. Một con số chép cứng vào ba chỗ trống chỉ đúng
-được nhiều nhất một dòng, nên phải viết ra phép kéo giãn thật.
+Bài chấm bằng bốn tình huống lệch nhau — hai luống dài khác nhau, khoảng cách
+giữa chúng, và mốc 0. Một con số chép cứng vào cả bốn chỗ trống chỉ đúng được
+nhiều nhất một dòng, nên phải viết ra phép kéo giãn thật. Cách chấm còn bắt cả
+bốn dòng đi qua chính cái tên `keo`, và đối chiếu khoảng cách bạn tính với
+`(mong_toi − rau_muong) × keo`.
 
 ```python title=starter
 rau_muong = 4
@@ -191,10 +200,12 @@ keo = 3
 rau_muong_sau_keo = ___
 mong_toi_sau_keo = ___
 khoang_giua_sau_keo = ___
+moc_0_sau_keo = ___
 
 print(rau_muong_sau_keo)
 print(mong_toi_sau_keo)
 print(khoang_giua_sau_keo)
+print(moc_0_sau_keo)
 ```
 
 ```python title=solution
@@ -205,31 +216,33 @@ keo = 3
 rau_muong_sau_keo = rau_muong * keo
 mong_toi_sau_keo = mong_toi * keo
 khoang_giua_sau_keo = mong_toi_sau_keo - rau_muong_sau_keo
+moc_0_sau_keo = 0 * keo
 
 print(rau_muong_sau_keo)
 print(mong_toi_sau_keo)
 print(khoang_giua_sau_keo)
+print(moc_0_sau_keo)
 ```
 
 ```python title=test
-# Hai luống dài khác nhau (4 và 7) nên một con số gõ cứng không qua nổi cả hai
-# dòng đầu. Hai câu cuối chốt lại đúng hai điều bài vừa nói: mốc 0 đứng yên, và
-# khoảng cách giữa hai vạch cũng giãn ra chừng ấy lần.
+# Bốn câu, bốn chỗ trống — câu nào cũng đọc thẳng thứ bạn vừa viết, nên gõ sai
+# là đỏ ngay. Hai luống dài khác nhau (4 và 7) nên một con số gõ cứng không qua
+# nổi cả hai dòng đầu. Hai câu cuối chốt lại đúng hai điều bài vừa nói: khoảng
+# cách giữa hai vạch cũng giãn ra chừng ấy lần, và mốc 0 thì đứng yên.
 assert rau_muong_sau_keo == 12, "vạch 4 kéo giãn 3 lần thì rơi vào chỗ 12"
 assert mong_toi_sau_keo == 21, "vạch 7 kéo giãn 3 lần thì rơi vào chỗ 21"
 assert khoang_giua_sau_keo == (mong_toi - rau_muong) * keo, \
     "khoảng giữa hai luống vốn là 3 khoảng; kéo giãn 3 lần thì nó thành 9, không giữ nguyên 3"
-assert 0 * keo == 0, "mốc 0 là chỗ ghim sợi dây thun — kéo kiểu gì nó cũng đứng yên"
-assert rau_muong * 1 == rau_muong, "kéo giãn 1 lần là không kéo gì cả"
+assert moc_0_sau_keo == 0, "mốc 0 là chỗ ghim sợi dây thun — kéo kiểu gì nó cũng đứng yên"
 ```
 
 :::hints
 - kind: attention
-  body: Ba cái tên đã có sẵn ở trên đầu bài — `rau_muong`, `mong_toi`, `keo`. Chỗ trống nào cũng lắp được từ những cái tên ấy, không cần gõ thêm con số mới nào.
+  body: Ba cái tên đã có sẵn ở trên đầu bài — `rau_muong`, `mong_toi`, `keo`. Ba chỗ trống đầu lắp được từ những cái tên ấy; chỗ trống cuối cần thêm đúng một con số, mà con số ấy chính là mốc 0.
 - kind: strategy
-  body: Hai dòng đầu hỏi cùng một câu cho hai cái vạch khác nhau — vạch này cách 0 mấy khoảng, nhân lên chừng ấy lần. Dòng thứ ba hỏi khoảng cách giữa hai chỗ MỚI, mà chỗ mới thì hai dòng trên vừa đặt tên xong rồi.
+  body: Hai dòng đầu hỏi cùng một câu cho hai cái vạch khác nhau — vạch này cách 0 mấy khoảng, nhân lên chừng ấy lần. Dòng thứ ba hỏi khoảng cách giữa hai chỗ MỚI, mà chỗ mới thì hai dòng trên vừa đặt tên xong rồi. Dòng thứ tư hỏi cùng câu đầu tiên nhưng cho cái vạch nằm ngay tại chỗ ghim.
 - kind: one-line
-  body: "Ba chỗ trống lần lượt là `rau_muong * keo`, `mong_toi * keo`, và `mong_toi_sau_keo - rau_muong_sau_keo`."
+  body: "Bốn chỗ trống lần lượt là `rau_muong * keo`, `mong_toi * keo`, `mong_toi_sau_keo - rau_muong_sau_keo`, và `0 * keo`."
 :::
 
 :::validate
@@ -238,18 +251,20 @@ assert rau_muong * 1 == rau_muong, "kéo giãn 1 lần là không kéo gì cả"
 - tier: static
   onFail: mỗi luống phải được kéo giãn bằng chính con số `keo`, không phải chép cứng kết quả — chép cứng thì đổi `keo` sang 5 là bài sai ngay
   requireAst:
-  # Hai phép nhân (một cho mỗi luống) và hai chỗ ĐỌC tên `keo`. Điền bừa vào
-  # chỗ trống thì không có dấu nhân nào, nên luật này phân biệt được.
-  - kind: uses-operator, target: *, min: 2
-  - kind: uses-name, target: keo, min: 2
+  # Ba phép nhân (một cho mỗi luống, một cho mốc 0) và ba chỗ ĐỌC tên `keo`.
+  # Điền bừa vào chỗ trống thì không có dấu nhân nào, nên luật này phân biệt
+  # được. `min: 3` cũng chặn luôn đáp án gõ thẳng `0` vào dòng mốc 0 — dòng ấy
+  # phải là một phép kéo giãn thật thì mới nói được điều bài đang nói.
+  - kind: uses-operator, target: *, min: 3
+  - kind: uses-name, target: keo, min: 3
 - tier: output
   match: regex
-  expect: ^12\n21\n9\s*$
+  expect: ^12\n21\n9\n0\s*$
 :::
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-12 và 21, cách nhau 9. Cái khoảng giữa hai luống cũng bị kéo theo.
+12 và 21, cách nhau 9. Khoảng giữa hai luống cũng bị kéo, còn mốc 0 thì không.
 ::::
 
 ::::reflect{#nghi-lai}

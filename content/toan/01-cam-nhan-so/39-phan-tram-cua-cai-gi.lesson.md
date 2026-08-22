@@ -70,52 +70,9 @@ Nên câu đầy đủ luôn phải có ba mảnh, thiếu một mảnh là chư
 > **30%** — của **cái vườn 40 cây** — là **12 cây**.
 ::::
 
-::::example{#cai-toan-the-doi-giua-chung}
-Chuyện thú vị xảy ra khi cái toàn thể **đổi giữa chừng**, mà người ta không để ý.
-
-Chợ đầu làng bán gạo 20.000 đồng một ký. Tháng trước tăng **50%**. Tháng này
-giảm **50%**. Về chỗ cũ chưa?
-
-Đi từng bước, và ở mỗi bước hỏi thẳng "50% của cái gì":
-
-```text
-Giá gốc:            20.000 đ        ← đây là 100% lúc tăng
-Tăng 50% của nó:    +10.000 đ
-Giá mới:            30.000 đ        ← đây là 100% lúc giảm
-Giảm 50% của nó:    −15.000 đ
-Giá cuối:           15.000 đ
-```
-
-`15.000` chứ không phải `20.000`. Rẻ hơn giá gốc một phần tư.
-
-Chỗ trượt chân nằm ở dòng thứ ba. Sau khi tăng, cái toàn thể **không còn là**
-20.000 nữa — nó là 30.000. Chữ `50%` ở lần hai bám vào một cái toàn thể khác
-cái nó bám ở lần một. Cùng một con số 50, hai lượng khác nhau: 10.000 và
-15.000.
-
-Bức tranh thứ hai cho cùng chuyện này, vẽ trên **thanh số** như bài 22 đã dựng.
-Tăng 50% là **kéo giãn** đoạn ra một lần rưỡi. Giảm 50% là **co lại** còn một
-nửa. Kéo giãn một lần rưỡi rồi co còn một nửa thì rốt cuộc đoạn dài bao nhiêu?
-
-```text
-1,5 lần rồi × một nửa  =  0,75 lần  →  còn ba phần tư đoạn ban đầu
-20.000 × 0,75 = 15.000
-```
-
-Hai bức tranh — sơ đồ dải từng bước, và thanh số co giãn — cho cùng một con số.
-Bức thứ nhất cho thấy **vì sao** hụt: cái toàn thể đã đổi. Bức thứ hai cho thấy
-**hụt bao nhiêu**: còn `3/4`, và con số `3/4` ấy không phụ thuộc vào giá gạo
-là 20.000 hay bao nhiêu đi nữa.
-
-Và đây không phải chuyện chợ búa vặt vãnh. Cùng một cái bẫy nằm trong: "giảm
-giá 50%, hôm nay giảm thêm 20%", "lương tăng 10% rồi công ty cắt 10%", "cửa
-hàng tăng giá 30% rồi treo biển sale 30%".
-::::
-
 ::::predict{#doan-gia-gao commitOnce}
-Bao gạo nhà An mua tháng trước: **20.000 đồng một ký**.
-
-Tháng sau chợ tăng giá **50%**. Tháng sau nữa chợ giảm **50%**.
+Chợ đầu làng bán gạo **20.000 đồng một ký**. Tháng trước chợ tăng giá **50%**.
+Tháng này chợ giảm **50%**.
 
 **Trước khi tính ra giấy**, bạn đoán một ký gạo bây giờ bao nhiêu?
 
@@ -166,6 +123,44 @@ toàn thể giữa chừng mà không báo.
 :::
 ::::
 
+::::example{#cai-toan-the-doi-giua-chung}
+Đáp án là `15.000` — không về chỗ cũ. Vì sao thì phải đi từng bước lại chuyện
+bao gạo ấy, và ở mỗi bước hỏi thẳng "50% của cái gì":
+
+```text
+Giá gốc:            20.000 đ        ← đây là 100% lúc tăng
+Tăng 50% của nó:    +10.000 đ
+Giá mới:            30.000 đ        ← đây là 100% lúc giảm
+Giảm 50% của nó:    −15.000 đ
+Giá cuối:           15.000 đ
+```
+
+`15.000` chứ không phải `20.000`. Rẻ hơn giá gốc một phần tư.
+
+Chỗ trượt chân nằm ở dòng thứ ba. Sau khi tăng, cái toàn thể **không còn là**
+20.000 nữa — nó là 30.000. Chữ `50%` ở lần hai bám vào một cái toàn thể khác
+cái nó bám ở lần một. Cùng một con số 50, hai lượng khác nhau: 10.000 và
+15.000.
+
+Bức tranh thứ hai cho cùng chuyện này, vẽ trên **thanh số** như bài 22 đã dựng.
+Tăng 50% là **kéo giãn** đoạn ra một lần rưỡi. Giảm 50% là **co lại** còn một
+nửa. Kéo giãn một lần rưỡi rồi co còn một nửa thì rốt cuộc đoạn dài bao nhiêu?
+
+```text
+1,5 lần rồi × một nửa  =  0,75 lần  →  còn ba phần tư đoạn ban đầu
+20.000 × 0,75 = 15.000
+```
+
+Hai bức tranh — sơ đồ dải từng bước, và thanh số co giãn — cho cùng một con số.
+Bức thứ nhất cho thấy **vì sao** hụt: cái toàn thể đã đổi. Bức thứ hai cho thấy
+**hụt bao nhiêu**: còn `3/4`, và con số `3/4` ấy không phụ thuộc vào giá gạo
+là 20.000 hay bao nhiêu đi nữa.
+
+Và đây không phải chuyện chợ búa vặt vãnh. Cùng một cái bẫy nằm trong: "giảm
+giá 50%, hôm nay giảm thêm 20%", "lương tăng 10% rồi công ty cắt 10%", "cửa
+hàng tăng giá 30% rồi treo biển sale 30%".
+::::
+
 ::::explain{#hoi-may-tren-hai-tinh-huong}
 Hai tình huống trong bài này nói cùng một điều từ hai phía:
 
@@ -189,8 +184,10 @@ sai, và nếu chỗ trống thứ hai bám nhầm vào `gia_goc` thì giá cu�
 
 ```python title=starter
 # Tình huống 1 — cùng "30%", hai cái vườn khác cỡ
-ba_muoi_byte = 40 * 30 / 100     # 30% của vườn Byte, cả vườn 40 cây
-ba_muoi_an = ___                 # 30% của vườn An, cả vườn 250 cây
+ca_vuon_byte = 40
+ca_vuon_an = 250
+ba_muoi_byte = ca_vuon_byte * 30 / 100   # 30% của CẢ VƯỜN Byte
+ba_muoi_an = ___                         # 30% của CẢ VƯỜN An
 
 # Tình huống 2 — cùng "50%", nhưng cái toàn thể đổi giữa chừng
 gia_goc = 20000
@@ -207,8 +204,10 @@ print(gia_cuoi)
 
 ```python title=solution
 # Tình huống 1 — cùng "30%", hai cái vườn khác cỡ
-ba_muoi_byte = 40 * 30 / 100     # 30% của vườn Byte, cả vườn 40 cây
-ba_muoi_an = 250 * 30 / 100      # 30% của vườn An, cả vườn 250 cây
+ca_vuon_byte = 40
+ca_vuon_an = 250
+ba_muoi_byte = ca_vuon_byte * 30 / 100   # 30% của CẢ VƯỜN Byte
+ba_muoi_an = ca_vuon_an * 30 / 100       # 30% của CẢ VƯỜN An
 
 # Tình huống 2 — cùng "50%", nhưng cái toàn thể đổi giữa chừng
 gia_goc = 20000
@@ -225,8 +224,8 @@ print(gia_cuoi)
 
 ```python title=test
 # Tình huống 1: cùng 30%, hai lượng khác hẳn nhau.
-assert ba_muoi_byte == 12, "30% của vườn 40 cây là 12 cây"
-assert ba_muoi_an == 75, "30% của vườn 250 cây là 75 cây — cùng con số 30, mà hơn sáu lần"
+assert ba_muoi_byte == 12, "30% của ca_vuon_byte, tức 40 cây, là 12 cây"
+assert ba_muoi_an == 75, "30% của ca_vuon_an, tức 250 cây, là 75 cây — cùng con số 30, mà hơn sáu lần"
 assert ba_muoi_an != ba_muoi_byte, "cùng 30% mà ra hai lượng khác nhau: đó là cả nội dung bài này"
 
 # Tình huống 2: cái toàn thể lúc giảm là giá MỚI, không phải giá gốc.
@@ -240,9 +239,9 @@ assert gia_cuoi == gia_goc * 75 / 100, "còn đúng ba phần tư giá gốc: k�
 - kind: attention
   body: Chỗ trống thứ hai nằm ngay dưới dòng đã tính ra `gia_moi`. Hỏi lại chính mình câu trong lời chú thích — lúc chợ giảm giá, cái giá đang treo trên bảng là giá nào?
 - kind: strategy
-  body: Cả hai chỗ trống dùng chung một khuôn với dòng đã viết sẵn ở trên nó — cái toàn thể, nhân với con số phần trăm, rồi chia cho 100. Việc duy nhất bạn phải quyết là điền cái toàn thể nào vào đầu khuôn ấy.
+  body: Cả hai chỗ trống dùng chung một khuôn với dòng đã viết sẵn ở trên nó — cái toàn thể, nhân với con số phần trăm, rồi chia cho 100. Việc duy nhất bạn phải quyết là điền cái toàn thể nào vào đầu khuôn ấy. Dùng tên biến chứ đừng chép con số, vì đọc lên là đọc ra ngay "30% của cái gì".
 - kind: one-line
-  body: "Viết `250 * 30 / 100` vào chỗ trống thứ nhất, và `gia_moi * 50 / 100` vào chỗ thứ hai."
+  body: "Viết `ca_vuon_an * 30 / 100` vào chỗ trống thứ nhất, và `gia_moi * 50 / 100` vào chỗ thứ hai."
 :::
 
 :::validate

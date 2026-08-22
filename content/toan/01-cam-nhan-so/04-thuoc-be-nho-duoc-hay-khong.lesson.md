@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 12
 teaches: [math.don-vi-roi-va-lien]
-requires: [math.don-vi, core.output, core.variable, core.print-variable, core.arithmetic, core.division, core.float, ctrl.comparison]
+requires: [math.don-vi, core.output, core.variable, core.print-variable, core.arithmetic, core.division, core.float, core.boolean, ctrl.comparison]
 concepts: [math.don-vi, math.so-dem, math.so-do]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -96,6 +96,11 @@ Máy in ra:
 True
 True
 ```
+
+Một chuyện chấm câu trước khi đi tiếp: trên giấy người Việt viết `3,5`, còn
+Python viết `3.5` bằng dấu chấm. Cùng một con số, hai cách chấm câu — bài này
+viết bằng dấu phẩy ở phần văn xuôi và bằng dấu chấm trong code, và hai chỗ đó
+nói cùng một điều.
 
 Lần bẻ thứ nhất lòi ra `3.5`. Lần bẻ thứ hai lòi ra `3.25`, và hai dòng `True`
 xác nhận nó nằm hẳn giữa `3` với `3.5` chứ không trùng đầu nào.
@@ -184,12 +189,15 @@ cái thước có bẻ được hay không.
 Luống rau nhà Byte đo được 3 sải. Luống nhà An đo được 4 sải. Thước là **sải
 dây** — thước bẻ được.
 
-Điền hai chỗ trống: một số đo nằm hẳn giữa hai luống ấy, rồi bẻ tiếp một lần
-nữa để lấy một số đo nằm hẳn giữa `3` và cái số bạn vừa viết.
+Điền ba chỗ trống. Hai chỗ đầu đi với **sải dây**: một số đo nằm hẳn giữa hai
+luống ấy, rồi bẻ tiếp một lần nữa để lấy một số đo nằm hẳn giữa `3` và cái số
+bạn vừa viết.
 
-Bài chấm bằng cả hai chỗ, và hai chỗ ấy đòi **hai con số khác nhau**: một con
-số gõ cứng vào cả hai chỗ thì không thể vừa nằm giữa 3 với 4, vừa nằm giữa 3
-với chính nó.
+Hai chỗ ấy đòi **hai con số khác nhau**: một con số gõ cứng vào cả hai thì
+không thể vừa nằm giữa 3 với 4, vừa nằm giữa 3 với chính nó.
+
+Chỗ thứ ba đổi thước: vẫn hai con số `3` và `4` ấy, vẫn câu hỏi "giữa chúng còn
+chỗ không", nhưng lần này đơn vị là **hạt**.
 
 ```python title=starter
 # 1) Một số đo nằm HẲN giữa 3 và 4 — không bằng đầu nào.
@@ -198,8 +206,12 @@ giua = ___
 # 2) Bẻ tiếp: một số đo nằm HẲN giữa 3 và cái số bạn vừa viết ở trên.
 giua_nua = ___
 
+# 3) Giữa 3 HẠT và 4 HẠT có đống hạt nào nằm ở giữa không? Viết True hay False.
+co_dong_hat_o_giua = ___
+
 print(giua)
 print(giua_nua)
+print(co_dong_hat_o_giua)
 ```
 
 ```python title=solution
@@ -209,26 +221,33 @@ giua = 3.5
 # 2) Bẻ tiếp: một số đo nằm HẲN giữa 3 và cái số bạn vừa viết ở trên.
 giua_nua = 3.25
 
+# 3) Giữa 3 HẠT và 4 HẠT có đống hạt nào nằm ở giữa không? Viết True hay False.
+co_dong_hat_o_giua = False
+
 print(giua)
 print(giua_nua)
+print(co_dong_hat_o_giua)
 ```
 
 ```python title=test
-# Ba câu này chốt lại đúng ba điều bài vừa nói, và chúng chấm được cả những
-# đáp án khác lời giải mẫu: ai viết 3.4 rồi 3.1 cũng qua, miễn là hai con số
-# thật sự nằm lồng trong nhau.
+# Ba câu đầu chấm phía sải dây, và chúng chấm được cả những đáp án khác lời
+# giải mẫu: ai viết 3.4 rồi 3.1 cũng qua, miễn là hai con số thật sự nằm lồng
+# trong nhau.
 assert 3 < giua < 4, "số đo thứ nhất phải nằm HẲN giữa hai luống — không bằng 3, cũng không bằng 4"
 assert 3 < giua_nua < giua, "số đo thứ hai phải nằm HẲN giữa 3 và con số bạn vừa viết ở trên"
 assert 3 < (3 + giua_nua) / 2 < giua_nua, "bẻ thêm lần nữa thì VẪN còn chỗ — thước bẻ được thì không bao giờ hết chỗ để bẻ"
+# Hai câu cuối chấm phía hạt — nửa còn lại của cặp khái niệm mà bài này dạy.
+assert co_dong_hat_o_giua == False, "hạt là đơn vị RỜI — bẻ đôi hạt thì hết là hạt, nên giữa 3 hạt và 4 hạt là hết, không còn gì"
+assert co_dong_hat_o_giua != (3 < giua_nua < giua), "cùng hai con số 3 và 4, cùng câu hỏi 'giữa chúng còn chỗ không' — sải dây trả lời có, hạt trả lời không. Cái quyết định là đơn vị, không phải con số."
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống thứ nhất nằm giữa hai con số 3 và 4; chỗ trống thứ hai nằm giữa 3 và cái số bạn vừa viết. Hai đoạn ấy dài ngắn khác nhau, nên hai câu trả lời không chép được cho nhau.
+  body: Chỗ trống thứ nhất nằm giữa hai con số 3 và 4; chỗ trống thứ hai nằm giữa 3 và cái số bạn vừa viết. Hai đoạn ấy dài ngắn khác nhau, nên hai câu trả lời không chép được cho nhau. Còn chỗ trống thứ ba thì không hỏi con số nào cả — nó hỏi có hay không, và đơn vị lúc này là hạt chứ không phải sải dây.
 - kind: strategy
-  body: Chỗ dễ tìm nhất trong một đoạn là điểm chính giữa. Ví dụ trên đầu bài đã in ra sẵn hai con số ấy khi máy tự bẻ đôi hai lần — nhìn lại hai dòng đầu của phần máy in.
+  body: Chỗ dễ tìm nhất trong một đoạn là điểm chính giữa. Ví dụ trên đầu bài đã in ra sẵn hai con số ấy khi máy tự bẻ đôi hai lần — nhìn lại hai dòng đầu của phần máy in. Còn chỗ thứ ba thì nhớ lại hình bẻ đôi một hạt ở đầu bài: hai mảnh ấy không còn là hạt nữa.
 - kind: one-line
-  body: "Viết `3.5` vào chỗ trống thứ nhất và `3.25` vào chỗ trống thứ hai."
+  body: "Viết `3.5` vào chỗ trống thứ nhất, `3.25` vào chỗ trống thứ hai, và `False` vào chỗ trống thứ ba."
 :::
 
 :::validate

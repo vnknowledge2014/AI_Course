@@ -10,9 +10,9 @@ tier: A
 languages: [python]
 defaultLanguage: python
 level: intro
-estimatedMinutes: 13
+estimatedMinutes: 14
 teaches: [math.ratio]
-requires: [core.arithmetic, core.variable, core.assignment, core.print-variable, core.number-literal]
+requires: [math.percent-whole, math.like-units, math.equivalent-fraction, math.multiplication, math.thanh-so, math.don-vi, core.arithmetic, core.variable, core.assignment, core.print-variable, core.number-literal]
 concepts: [math.ti-so, math.don-vi-ghep]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -211,17 +211,24 @@ Hai cái vườn, một câu luật. Bạn chép câu ấy ra cho cả hai giúp
 ::::code{#chep-luat-tuoi}
 Luật tưới của Byte vẫn thế: **cứ 2 gáo thì tưới được 5 gốc**.
 
-Hai nhà hàng xóm nhờ Byte tính hộ, và hai nhà có cỡ vườn khác nhau:
+Ba nhà hàng xóm nhờ Byte tính hộ, và ba nhà đếm theo hai kiểu khác nhau:
 
 - **Vườn nhà An** chạy đúng **4 lượt** múc.
 - **Vườn nhà Tú** chạy đúng **7 lượt** múc.
+- **Vườn nhà Mai** không đếm lượt. Nhà Mai chỉ nhớ tưới xong đúng **30 gốc**.
 
-Điền bốn chỗ trống sao cho mỗi vườn được chép ra từ đúng bộ đôi mẫu.
+Hai vườn đầu cho sẵn số lượt, chép thẳng là xong. Vườn nhà Mai thì con số 30
+nằm ở vế **gốc** — nên trước khi chép được gì, bạn phải đọc ra 30 gốc ấy là bộ
+đôi mẫu chép lên mấy lần. Đây đúng là chỗ hai cái tên đơn vị có việc: đọc nhầm
+30 thành số lượt thì cả hai vế cùng vọt.
 
-Bài chấm bằng **cả hai vườn cùng lúc**, và hai vườn được chọn khác số lượt
-đúng vì lý do đó: một cặp số gõ cứng vào cả bốn chỗ thì hỏng ít nhất một vườn,
-mà nhân đúng một vế thì hỏng cả hai. Chỉ có chép cả bộ đôi, ở cả hai vườn, mới
-qua được.
+Điền sáu chỗ trống, tất cả đều viết bằng bộ đôi mẫu — kể cả vế gốc của nhà Mai,
+đừng gõ thẳng con số 30 vào.
+
+Bài chấm bằng **cả ba vườn cùng lúc**, và ba vườn được chọn khác số lượt đúng
+vì lý do đó: một cặp số gõ cứng vào cả sáu chỗ thì hỏng ít nhất hai vườn, mà
+nhân đúng một vế thì hỏng cả ba. Chỉ có chép cả bộ đôi, ở cả ba vườn, mới qua
+được.
 
 ```python title=starter
 gao_mau = 2
@@ -233,8 +240,13 @@ goc_an = ___
 gao_tu = ___
 goc_tu = ___
 
+# Nhà Mai tưới xong 30 gốc. Bộ đôi mẫu phải chép lên mấy lần thì vế gốc ra 30?
+gao_mai = ___
+goc_mai = ___
+
 print(gao_an, goc_an)
 print(gao_tu, goc_tu)
+print(gao_mai, goc_mai)
 ```
 
 ```python title=solution
@@ -247,30 +259,37 @@ goc_an = goc_mau * 4
 gao_tu = gao_mau * 7
 goc_tu = goc_mau * 7
 
+gao_mai = gao_mau * 6
+goc_mai = goc_mau * 6
+
 print(gao_an, goc_an)
 print(gao_tu, goc_tu)
+print(gao_mai, goc_mai)
 ```
 
 ```python title=test
-# Hai vườn, hai số lượt khác nhau — nên không có cặp số nào điền được vào cả
-# bốn chỗ mà vẫn qua. Bốn dòng đầu chốt từng con số; hai dòng cuối chốt điều
-# bài này thật sự dạy: mỗi vườn phải là bộ đôi mẫu chép lên, ở CẢ HAI vế cùng
-# một số lần.
+# Ba vườn, ba số lượt khác nhau — nên không có cặp số nào điền được vào cả sáu
+# chỗ mà vẫn qua. Sáu dòng đầu chốt từng con số; ba dòng cuối chốt điều bài này
+# thật sự dạy: mỗi vườn phải là bộ đôi mẫu chép lên, ở CẢ HAI vế cùng một số
+# lần.
 assert gao_an == 8, "4 lượt múc, mỗi lượt 2 gáo — vế gáo của vườn An phải là 8"
 assert goc_an == 20, "4 lượt múc, mỗi lượt tưới 5 gốc — vế gốc của vườn An phải là 20"
 assert gao_tu == 14, "7 lượt múc, mỗi lượt 2 gáo — vế gáo của vườn Tú phải là 14"
 assert goc_tu == 35, "7 lượt múc, mỗi lượt tưới 5 gốc — vế gốc của vườn Tú phải là 35"
+assert goc_mai == 30, "nhà Mai tưới xong 30 gốc — vế gốc phải rơi đúng vào 30"
+assert gao_mai == 12, "30 gốc là bộ đôi mẫu chép lên 6 lần, nên vế gáo phải là 6 lần 2 gáo — 12 gáo"
 assert gao_an == gao_mau * 4 and goc_an == goc_mau * 4, "vườn An phải nhân CẢ HAI vế với 4"
 assert gao_tu == gao_mau * 7 and goc_tu == goc_mau * 7, "vườn Tú phải nhân CẢ HAI vế với 7"
+assert gao_mai * 5 == goc_mai * 2, "vế gáo và vế gốc là cùng một bộ đôi chép lên, không tự do với nhau"
 ```
 
 :::hints
 - kind: attention
-  body: Hai dòng đầu đã có sẵn bộ đôi mẫu `gao_mau` và `goc_mau`. Bốn chỗ trống không hỏi bốn con số mới — chúng hỏi bộ đôi ấy được chép lên mấy lần.
+  body: Hai dòng đầu đã có sẵn bộ đôi mẫu `gao_mau` và `goc_mau`. Sáu chỗ trống không hỏi sáu con số mới — chúng hỏi bộ đôi ấy được chép lên mấy lần. Riêng nhà Mai cho bạn con số ở vế gốc, không phải số lượt.
 - kind: strategy
-  body: Chép bộ đôi lên 4 lần nghĩa là nhân với 4 ở CẢ hai vế, một vế lấy `gao_mau`, vế kia lấy `goc_mau`. Vườn nhà Tú làm y hệt, chỉ thay 4 bằng 7 — và cũng phải thay ở cả hai vế.
+  body: Chép bộ đôi lên 4 lần nghĩa là nhân với 4 ở CẢ hai vế, một vế lấy `gao_mau`, vế kia lấy `goc_mau`. Vườn nhà Tú làm y hệt, chỉ thay 4 bằng 7. Vườn nhà Mai thì đi ngược một bước trước đã: mỗi lượt tưới 5 gốc, vậy 30 gốc là mấy lượt?
 - kind: one-line
-  body: "Viết `gao_mau * 4` rồi `goc_mau * 4` cho vườn An, `gao_mau * 7` rồi `goc_mau * 7` cho vườn Tú."
+  body: "Viết `gao_mau * 4` rồi `goc_mau * 4` cho vườn An, `gao_mau * 7` rồi `goc_mau * 7` cho vườn Tú, `gao_mau * 6` rồi `goc_mau * 6` cho vườn Mai."
 :::
 
 :::validate
@@ -279,16 +298,17 @@ assert gao_tu == gao_mau * 7 and goc_tu == goc_mau * 7, "vườn Tú phải nhâ
 - tier: static
   onFail: mỗi chỗ trống phải chép bộ đôi mẫu lên — tức là nhân `gao_mau` hoặc `goc_mau` với số lượt, chứ không gõ thẳng con số kết quả
   requireAst:
-  - kind: uses-operator, target: *, min: 4
-  - kind: uses-name, target: goc_mau, min: 2
+  - kind: uses-operator, target: *, min: 6
+  - kind: uses-name, target: gao_mau, min: 3
+  - kind: uses-name, target: goc_mau, min: 3
 - tier: output
   match: regex
-  expect: ^8 20\n14 35\s*$
+  expect: ^8 20\n14 35\n12 30\s*$
 :::
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Hai vườn khác cỡ, mà vẫn đúng một câu: cứ 2 gáo thì 5 gốc.
+Ba vườn khác cỡ, mà vẫn đúng một câu: cứ 2 gáo thì 5 gốc.
 ::::
 
 ::::reflect{#nghi-lai}
@@ -303,8 +323,8 @@ Chiều nay Byte và An mỗi người đi gieo hạt, gieo xong mới đếm:
 - Vườn An: **75 hạt** trên **5 luống**.
 
 Hai tỉ số: `90 : 6` và `75 : 5`. Nhìn vào thì chẳng giống nhau, và cũng không
-có cách nào chép cái này ra thành cái kia — nhân `75 : 5` lên 1 lần thì chưa
-tới, lên 2 lần thì quá.
+có cách nào chép **nguyên lần** cái này ra thành cái kia — nhân `75 : 5` lên 1
+lần thì chưa tới, lên 2 lần thì quá.
 
 Byte muốn biết vườn nào **gieo dày hơn**, tức là mỗi luống chịu nhiều hạt hơn.
 Vườn Byte nhiều hạt hơn thật, nhưng cũng nhiều luống hơn — nên "nhiều hạt hơn"

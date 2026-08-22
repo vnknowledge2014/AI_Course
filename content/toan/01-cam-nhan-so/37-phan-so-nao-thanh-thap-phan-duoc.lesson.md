@@ -1,7 +1,7 @@
 ---
 id: toan.cam-nhan-so.phan-so-nao-thanh-thap-phan-duoc
 title: Phân số nào viết được thành thập phân
-summary: Thập phân chỉ có mẫu 10, 100, 1000. Phân số nào kéo được mẫu về đó thì viết ra rồi dừng; `1/3` thì không, và chỗ dư cứ quay lại y hệt.
+summary: Thập phân chỉ có mẫu 10, 100, 1000 rồi xa hơn nữa. Phân số nào kéo được mẫu về một cột của bảng ấy thì viết ra rồi dừng; `1/3` thì không, và chỗ dư cứ quay lại y hệt.
 locale: vi
 track: toan
 module: cam-nhan-so
@@ -58,55 +58,9 @@ Vậy `1/4` viết được thành `0,25` là vì kéo được mẫu 4 lên đ�
 1/4  =  (1 × 25) / (4 × 25)  =  25/100  =  0,25
 ```
 
-Phép thử của cả bài này chỉ có thế: **kéo mẫu về đúng 10, 100 hay 1000 được
-thì viết được thành thập phân, và viết xong là dừng.**
-::::
-
-::::example{#keo-mau-ve-tron}
-Thử phép thử ấy trên vài cái ca đong gạo trong bếp nhà Byte.
-
-```text
-1/5   →  5 × 2   = 10     →  2/10   = 0,2       dừng
-1/4   →  4 × 25  = 100    →  25/100 = 0,25      dừng
-1/20  →  20 × 5  = 100    →  5/100  = 0,05      dừng
-1/8   →  8 × 125 = 1000   →  125/1000 = 0,125   dừng
-```
-
-Bốn lần đều trúng. Giờ tới `1/3`, và lần này không trúng lần nào:
-
-```text
-3 × 3   = 9        thiếu 1 so với 10
-3 × 4   = 12       vượt 10
-3 × 33  = 99       thiếu 1 so với 100
-3 × 34  = 102      vượt 100
-3 × 333 = 999      thiếu 1 so với 1000
-3 × 334 = 1002     vượt 1000
-```
-
-Ba lần đều cùng một hình: `1000` **lọt vào giữa** hai số nguyên liền nhau
-`999` và `1002`, không có chỗ nào cho nó đứng.
-
-Vì sao mãi mãi như thế, chứ không phải "chưa tìm ra số đủ lớn"? Nhìn lại cách
-`1000` được dựng lên, đúng bằng luật đóng bó của bài 6 và 7. Mười là **hai lần
-năm**. Trăm là mười lần mười. Nghìn là trăm lần mười. Nên `1000` chỉ được ghép
-từ hai loại bó: **bó đôi** và **bó năm**.
-
-Bẻ `1000` ra thành các phần bằng nhau thì cũng chỉ đi qua đúng hai bước ấy —
-bẻ đôi, hoặc bẻ năm. Bẻ đôi mãi ra `2, 4, 8`. Bẻ năm mãi ra `5, 25, 125`. Trộn
-hai kiểu ra `10, 20, 40, 50, 100, 200, 250, 500`. Cả danh sách:
-
-```text
-2  4  5  8  10  20  25  40  50  100  125  200  250  500  1000
-```
-
-Trong đó không có `3`. Cũng không có `6`, `7`, `9`. Chúng không phải bó đôi,
-không phải bó năm, và không ghép được từ hai thứ ấy.
-
-Còn nếu cứ chia bừa `1` cho `3` theo kiểu mở bó thì chuyện xảy ra thế này:
-mở một lon thành 10 phần, chia cho 3 được 3 phần, **dư 1**. Mở cái dư 1 ấy
-thành 10 phần nhỏ hơn, chia cho 3 được 3 phần, **dư 1**. Số dư quay về đúng
-cái nó vừa là. Cùng một tình huống lặp lại thì cho ra cùng một kết quả, mãi
-mãi — nên `1/3 = 0,333…` và cái đuôi ấy không có chỗ dừng.
+Phép thử của cả bài này chỉ có thế: **kéo mẫu về được một cột của bảng — 10,
+100, 1000, hay xa hơn nữa — thì viết được thành thập phân, và viết xong là
+dừng.**
 ::::
 
 ::::predict{#doan-ca-mot-phan-tam commitOnce}
@@ -152,91 +106,151 @@ Gần đúng ở chỗ bạn cảnh giác đúng chỗ: có những mẫu chẳn
 được, và bạn nhớ `1/3` là một trong số đó. Với mẫu 3, 6, 7 hay 9 thì cảnh giác
 ấy trúng.
 
-Chỗ lệch nằm ở việc 8 khác 3 ở đâu. `8` là **bẻ đôi ba lần** — mà `1000` thì
-bẻ đôi được. `3` không đến từ bẻ đôi, cũng không đến từ bẻ năm, nên nó nằm
-ngoài danh sách. Hai mẫu trông đều "không phải số tròn", nhưng chỉ một trong
-hai thật sự nằm ngoài.
+Chỗ lệch nằm ở việc 8 khác 3 ở đâu. Cứ thử kéo mẫu xem: `8 × 125 = 1000`,
+trúng đúng một cột của bảng, nên `1/8` viết ra rồi dừng. Còn mẫu 3 thì nhân với
+số nguyên nào cũng trượt qua cột — phần ngay sau đây sẽ chỉ ra vì sao nó trượt
+mãi mãi. Hai mẫu trông đều "không phải số tròn", nhưng chỉ một trong hai thật
+sự nằm ngoài.
 ::
 :::
 ::::
 
-::::explain{#viet-vao-may-thi-dung-dau-cham}
-Một chỗ khác nhau nhỏ giữa vở toán và màn hình, nói trước để khỏi vướng:
-trên giấy người Việt viết `0,25`, còn Python viết `0.25` bằng dấu chấm. Cùng
-một con số, hai cách chấm câu. Bài này viết bằng dấu phẩy ở phần văn xuôi và
-bằng dấu chấm trong code, và hai chỗ đó nói cùng một điều.
+::::example{#keo-mau-ve-tron}
+Thử phép thử ấy trên vài cái ca đong gạo trong bếp nhà Byte — kể cả cái ca
+vừa đoán.
 
-Việc còn lại của bài: đem cái phép thử vừa dựng ra hỏi máy. Máy không cần biết
-gì về gạo hay về thước — nó chỉ nhân hai số rồi cho bạn xem kết quả. Nhưng ba
-kết quả đặt cạnh nhau đủ để bạn thấy `1000` lọt vào giữa.
+```text
+1/5   →  5 × 2   = 10     →  2/10   = 0,2       dừng
+1/4   →  4 × 25  = 100    →  25/100 = 0,25      dừng
+1/20  →  20 × 5  = 100    →  5/100  = 0,05      dừng
+1/8   →  8 × 125 = 1000   →  125/1000 = 0,125   dừng
+```
+
+Bốn lần đều trúng. Giờ tới `1/3`, và lần này không trúng lần nào:
+
+```text
+3 × 3   = 9        thiếu 1 so với 10
+3 × 4   = 12       vượt 10
+3 × 33  = 99       thiếu 1 so với 100
+3 × 34  = 102      vượt 100
+3 × 333 = 999      thiếu 1 so với 1000
+3 × 334 = 1002     vượt 1000
+```
+
+Ba lần đều cùng một hình: `1000` **lọt vào giữa** hai bước liền nhau của bảng
+nhân 3 — `3 × 333 = 999` rồi `3 × 334 = 1002`. Nhân 3 thì nhảy từng bước 3 một,
+mà `1000` rơi vào giữa một bước, nên không có chỗ nào cho nó đứng.
+
+Vì sao mãi mãi như thế, chứ không phải "chưa tìm ra số đủ lớn"? Nhìn lại cách
+`1000` được dựng lên, đúng bằng luật đóng bó của bài 6 và 7. Mười là **hai lần
+năm**. Trăm là mười lần mười. Nghìn là trăm lần mười. Nên `1000` chỉ được ghép
+từ hai loại bó: **bó đôi** và **bó năm**.
+
+Bẻ `1000` ra thành các phần bằng nhau thì cũng chỉ đi qua đúng hai bước ấy —
+bẻ đôi, hoặc bẻ năm. Bẻ đôi mãi ra `2, 4, 8`. Bẻ năm mãi ra `5, 25, 125`. Trộn
+hai kiểu ra `10, 20, 40, 50, 100, 200, 250, 500`. Cả danh sách:
+
+```text
+2  4  5  8  10  20  25  40  50  100  125  200  250  500  1000
+```
+
+Danh sách này mới dừng ở `1000`. Bảng thì còn chạy tiếp — `10000`, `100000` —
+nên bẻ đôi bốn lần ra `16` cũng trúng: `16 × 625 = 10000`, tức
+`1/16 = 0,0625`. Thứ quyết định không phải con số `1000`, mà là mẫu có ghép
+được **chỉ từ bó đôi với bó năm** hay không.
+
+Trong đó không có `3`. Cũng không có `6`, `7`, `9`. Chúng không phải bó đôi,
+không phải bó năm, và không ghép được từ hai thứ ấy — nên bảng có chạy xa tới
+đâu, chúng vẫn nằm ngoài.
+
+Còn nếu cứ chia bừa `1` cho `3` theo kiểu mở bó thì chuyện xảy ra thế này:
+mở một lon thành 10 phần, chia cho 3 được 3 phần, **dư 1**. Mở cái dư 1 ấy
+thành 10 phần nhỏ hơn, chia cho 3 được 3 phần, **dư 1**. Số dư quay về đúng
+cái nó vừa là. Cùng một tình huống lặp lại thì cho ra cùng một kết quả, mãi
+mãi — nên `1/3 = 0,333…` và cái đuôi ấy không có chỗ dừng.
 ::::
 
 ::::code{#hoi-may-xem-co-trung-khong}
-Kéo mẫu về đúng `1000` bằng phép nhân: mẫu nhân với một **số nguyên**, xem có
-trúng đúng `1000` hay không.
+Việc còn lại của bài: đem cái phép thử vừa dựng ra hỏi máy. Máy không biết gì
+về gạo hay về thước — nó chỉ nhân hai số rồi cho bạn xem kết quả. Nhưng mấy kết
+quả đặt cạnh nhau đủ để bạn thấy mẫu nào trúng cột và mẫu nào không.
 
-Hai cái ca được chọn để cho ra hai câu trả lời **ngược nhau**: ca `1/8` trúng,
-ca `1/3` thì kẹp `1000` vào giữa. Điền cứng một con số vào cả hai chỗ trống thì
-ít nhất một dòng sai.
+Mỗi dòng là một lần chạy phép thử trên một cái ca: kéo mẫu về đúng `1000` bằng
+phép nhân với một **số nguyên**, rồi xem có trúng hay không.
+
+Ba cái ca cho ra hai loại kết quả **ngược nhau**: ca `1/8` và ca `1/40` trúng
+đúng cột, còn ca `1/3` thì chỉ kẹp được `1000` vào giữa. Điền cứng một con số
+vào cả ba chỗ trống thì ít nhất một dòng sai.
 
 ```python title=starter
-# Ca 1/8 lon — thử số 125
-tam_nhan_125 = 8 * 125
+# Ca 1/8 lon — bẻ đôi ba lần, thử số 125
+tam_nhan = 8 * 125
 
-# Ca 1/3 lon — 333 là số lớn nhất còn dưới, 334 là số nhỏ nhất đã vượt
-ba_nhan_333 = ___
-ba_nhan_334 = ___
+# Ca 1/40 lon — vừa bó đôi vừa bó năm. Nhân 40 với số nào thì trúng đúng 1000?
+bon_muoi_nhan = ___
 
-print(tam_nhan_125)
-print(ba_nhan_333)
-print(ba_nhan_334)
+# Ca 1/3 lon — không số nguyên nào trúng, chỉ kẹp được 1000 vào giữa:
+# một phép nhân dừng lại ngay dưới 1000, một phép nhân vừa vượt qua nó.
+ba_nhan_duoi = ___
+ba_nhan_tren = ___
+
+print(tam_nhan)
+print(bon_muoi_nhan)
+print(ba_nhan_duoi)
+print(ba_nhan_tren)
 ```
 
 ```python title=solution
-# Ca 1/8 lon — thử số 125
-tam_nhan_125 = 8 * 125
+# Ca 1/8 lon — bẻ đôi ba lần, thử số 125
+tam_nhan = 8 * 125
 
-# Ca 1/3 lon — 333 là số lớn nhất còn dưới, 334 là số nhỏ nhất đã vượt
-ba_nhan_333 = 3 * 333
-ba_nhan_334 = 3 * 334
+# Ca 1/40 lon — vừa bó đôi vừa bó năm. Nhân 40 với số nào thì trúng đúng 1000?
+bon_muoi_nhan = 40 * 25
 
-print(tam_nhan_125)
-print(ba_nhan_333)
-print(ba_nhan_334)
+# Ca 1/3 lon — không số nguyên nào trúng, chỉ kẹp được 1000 vào giữa:
+# một phép nhân dừng lại ngay dưới 1000, một phép nhân vừa vượt qua nó.
+ba_nhan_duoi = 3 * 333
+ba_nhan_tren = 3 * 334
+
+print(tam_nhan)
+print(bon_muoi_nhan)
+print(ba_nhan_duoi)
+print(ba_nhan_tren)
 ```
 
 ```python title=test
-# Ba assert này chốt đúng ba câu của bài, trên hai cái ca khác nhau:
-# một ca trúng cột, một ca không bao giờ trúng.
-assert tam_nhan_125 == 1000, "8 nhân 125 trúng đúng 1000 — nên 1/8 = 125/1000 = 0,125, viết xong là dừng"
-assert ba_nhan_333 == 999, "3 nhân 333 mới được 999, còn thiếu 1 nữa mới tới 1000"
-assert ba_nhan_334 == 1002, "3 nhân 334 đã vọt lên 1002 — vượt qua 1000 mất rồi"
-assert ba_nhan_333 < 1000 < ba_nhan_334, "1000 lọt vào GIỮA hai số nguyên liền nhau, nên không số nguyên nào nhân với 3 ra đúng nó"
+# Bốn phép thử trên ba cái ca. Hai ca kéo được mẫu về đúng cột 1000, một ca
+# thì không số nguyên nào trúng — đó đúng là câu mà tiêu đề bài đang hỏi.
+assert tam_nhan == 1000, "8 nhân 125 trúng đúng 1000 — nên 1/8 = 125/1000 = 0,125, viết xong là dừng"
+assert bon_muoi_nhan == 1000, "40 nhân 25 cũng trúng đúng 1000 — nên 1/40 = 25/1000 = 0,025, cũng dừng"
+assert ba_nhan_duoi == 999, "3 nhân 333 mới được 999, còn thiếu 1 nữa mới tới 1000"
+assert ba_nhan_tren == 1002, "3 nhân 334 đã vọt lên 1002 — vượt qua 1000 mất rồi"
+assert ba_nhan_duoi < 1000 < ba_nhan_tren, "999 và 1002 là hai bước liền nhau của bảng nhân 3, cách nhau đúng 3 — 1000 lọt vào giữa nên không số nguyên nào nhân với 3 ra đúng nó"
 ```
 
 :::hints
 - kind: attention
-  body: Nhìn dòng đã viết sẵn ở trên. Nó có đúng ba mảnh: mẫu của cái ca, dấu nhân, và con số đem thử. Hai dòng của bạn cũng cần đúng ba mảnh ấy, chỉ khác con số.
+  body: Nhìn dòng đã viết sẵn ở trên. Nó có đúng ba mảnh: mẫu của cái ca, dấu nhân, và con số đem thử. Ba dòng của bạn cũng cần đúng ba mảnh ấy, chỉ khác con số.
 - kind: strategy
-  body: Mẫu của ca thứ hai là 3, và hai con số đem thử đã ghi ngay trong lời chú thích — 333 rồi 334. Việc của bạn là để máy nhân hộ, chứ không phải tự nhân trong đầu rồi chép kết quả vào.
+  body: "Ca 1/40 thì hỏi ngược lại: 1000 gồm mấy lần 40? `40 * 20 = 800`, còn thiếu 200 nữa, mà 200 lại đúng bằng `40 * 5` — vậy con số cần thử là 20 cộng 5. Ca 1/3 thì bảng dò ở phần trước đã tìm sẵn hai con số: một số nhân 3 ra 999, số liền sau nó nhân 3 ra 1002."
 - kind: one-line
-  body: "Viết `3 * 333` vào chỗ trống thứ nhất và `3 * 334` vào chỗ trống thứ hai."
+  body: "Viết `40 * 25` vào chỗ trống thứ nhất, `3 * 333` vào chỗ thứ hai và `3 * 334` vào chỗ thứ ba."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: static
-  onFail: mỗi chỗ trống phải là một phép nhân thật giữa mẫu 3 và con số đem thử — chép sẵn kết quả vào thì máy không nhân hộ bạn lần nào
+  onFail: mỗi chỗ trống phải là một phép nhân thật giữa mẫu của cái ca và con số đem thử — chép sẵn kết quả vào thì máy không nhân hộ bạn lần nào
   requireAst:
-  # `min: 3` vì có ba phép thử: 8×125 đã viết sẵn, cộng hai phép của bạn.
+  # `min: 4` vì có bốn phép thử: 8×125 đã viết sẵn, cộng ba phép của bạn.
   # Khung khởi đầu chỉ có một dấu nhân, nên luật này chặn được đáp án gõ cứng.
-  - kind: uses-operator, target: *, min: 3
+  - kind: uses-operator, target: *, min: 4
 - tier: tests
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^1000\n999\n1002\s*$
+  expect: ^1000\n1000\n999\n1002\s*$
 :::
 ::::
 

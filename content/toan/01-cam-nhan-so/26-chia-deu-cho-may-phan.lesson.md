@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 12
 teaches: [math.division-partitive]
-requires: [math.multiplication, math.multiply-commutative, core.arithmetic, core.division, core.output, core.variable, ctrl.for-range, ctrl.if, ctrl.comparison]
+requires: [math.multiplication, math.multiply-commutative, core.arithmetic, core.division, core.output, core.variable, core.reassign, ctrl.for-range, ctrl.loop-variable, ctrl.if, ctrl.comparison]
 concepts: [math.chia-deu, math.thua-so-con-thieu, math.so-do-dai]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -79,14 +79,16 @@ chứa đúng 12 hạt, không thừa không thiếu:
 Xoay mảng ấy 90° — bài 20 nói xoay không thêm bớt hạt nào — thì nó thành **3
 hàng × 4 cột**: ba luống, mỗi luống bốn hạt.
 
-Nên câu "mỗi luống 4 hạt" nói cùng một điều với câu `3 × 4 = 12`. Và đó là chỗ
-phép chia thật sự nằm:
+Nên câu "mỗi luống 4 hạt" nói cùng một điều với câu `4 × 3 = 12`, đọc đúng thứ
+tự bài 19 xếp: **lô 4 hạt, lấy 3 lô**. Và đó là chỗ phép chia thật sự nằm:
 
-> `12 : 3` là đi tìm **con số còn thiếu** trong `3 × ? = 12`.
+> `12 : 3` là đi tìm **con số còn thiếu** trong `? × 3 = 12`.
 
 Bài 19 nói phép nhân có hai vai: một con số nói **lô to bao nhiêu**, con số kia
 nói **lấy mấy lô**. Chia đều là biết trước "lấy mấy lô" (3 luống) và đi tìm "lô
-to bao nhiêu" (mỗi luống mấy hạt).
+to bao nhiêu" (mỗi luống mấy hạt). Mà "lô to bao nhiêu" là con số đứng **trước**
+dấu nhân — đúng như bài 19 xếp. Nên chỗ trống `?` nằm bên trái không phải tuỳ
+tiện: nó nằm đúng cái ô bài 19 đã dành cho cỡ lô.
 
 Bức tranh thứ ba, cho ai quen nhìn dải hơn nhìn hạt — **sơ đồ dải**. Một dải
 dài 12 ô, gấp làm ba khúc bằng nhau:
@@ -94,7 +96,7 @@ dài 12 ô, gấp làm ba khúc bằng nhau:
 ```text
 ├────────────┼────────────┼────────────┤
       4            4            4
-└──────────────── 12 ────────────────┘
+└───────────────── 12 ─────────────────┘
 ```
 
 Số khúc là thứ bạn quyết định trước khi gấp; độ dài mỗi khúc là thứ phép gấp
@@ -109,7 +111,7 @@ so_hat = 12
 so_luong = 3
 
 print(so_hat / so_luong)
-print(so_luong * 4)
+print(4 * so_luong)
 ```
 
 Máy in ra:
@@ -139,8 +141,8 @@ hết; cứ thế cho tới cỡ nào gộp lại vừa khít 12.
 tong_hat = 12
 so_luong = 3
 
-for co in range(1, 13):
-    if so_luong * co == tong_hat:
+for co in range(13):
+    if co * so_luong == tong_hat:
         print(co)
 ```
 
@@ -151,7 +153,7 @@ for co in range(1, 13):
 :::opt
 3
 ::why
-Gần đúng ở chỗ bạn nhận ra 3 và 4 là một cặp đi liền nhau trong `3 × 4 = 12`,
+Gần đúng ở chỗ bạn nhận ra 3 và 4 là một cặp đi liền nhau trong `4 × 3 = 12`,
 và cặp ấy đúng — nắm được nó là nắm được cả bài.
 
 Chỗ lệch nằm ở chỗ trong hai con số ấy, con nào là thứ **đã biết** và con nào
@@ -164,14 +166,14 @@ Chia đều là đi tìm cái chưa biết, nên thứ được in ra phải là
 :::
 
 :::opt
-Mười hai dòng, từ 1 tới 12
+Mười ba dòng, từ 0 tới 12
 ::why
 Gần đúng ở chỗ bạn nhớ chính xác `for` chạy qua **mọi** giá trị trong dãy chứ
-không dừng lại giữa chừng — `co` thật sự lần lượt mang cả mười hai giá trị từ 1
-tới 12.
+không dừng lại giữa chừng, và nhớ đúng luật của Realm 0: `range(13)` đếm từ 0,
+nên `co` thật sự lần lượt mang cả mười ba giá trị từ 0 tới 12.
 
 Chỗ lệch nằm ở chỗ `print` thụt vào **bên trong** `if`. Vòng lặp ghé qua đủ
-mười hai lần, nhưng mỗi lần ghé nó lại hỏi "gộp lại có vừa khít 12 chưa"; chỉ
+mười ba lần, nhưng mỗi lần ghé nó lại hỏi "gộp lại có vừa khít 12 chưa"; chỉ
 lần nào câu trả lời là đúng thì dòng `print` mới chạy.
 ::
 :::
@@ -179,12 +181,13 @@ lần nào câu trả lời là đúng thì dòng `print` mới chạy.
 :::opt
 Không in gì cả
 ::why
-Gần đúng ở chỗ bạn theo dõi đúng mấy lần thử đầu tiên: `3 × 1 = 3` chưa tới 12,
-`3 × 2 = 6` cũng chưa. Nếu cuộc thử dừng lại ở lần trượt đầu tiên thì thật sự
-không có gì được in ra, và có những kiểu lặp làm đúng như vậy.
+Gần đúng ở chỗ bạn theo dõi đúng mấy lần thử đầu tiên: cỡ 1 thì `1 × 3 = 3`,
+chưa tới 12; cỡ 2 thì `2 × 3 = 6`, cũng chưa. Nếu cuộc thử dừng lại ở lần trượt
+đầu tiên thì thật sự không có gì được in ra, và có những kiểu lặp làm đúng như
+vậy.
 
 Chỗ lệch: `for ... in range(...)` không dừng khi trượt. Nó đi hết dãy, và trong
-dãy 1…12 có đúng một cỡ làm phép nhân khít.
+dãy 0…12 có đúng một cỡ làm phép nhân khít.
 ::
 :::
 ::::
@@ -200,6 +203,13 @@ phần. Càng nhiều phần thì mỗi phần càng nhỏ.
 nó chỉ mô tả một chuyện đang xảy ra, chứ chưa nói **vì sao**. Vì sao thì cái sơ
 đồ dải đã nói: một dải dài chừng ấy mà gấp thành nhiều khúc hơn thì mỗi khúc
 buộc phải ngắn lại.
+
+Và đây là chỗ câu ấy hỏng hẳn. Cuốc đúng **một** luống thì luống ấy nhận cả 12
+hạt — chia rồi mà không nhỏ đi tí nào, vì "gấp thành một khúc" là không gấp gì
+cả. Vậy câu "chia làm số nhỏ đi" chỉ đúng khi số phần **nhiều hơn một**; đó là
+phạm vi của nó, không phải một luật cho mọi phép chia. Tới phần phân số (bài 30
+trở đi) bạn sẽ gặp lần hỏng thứ hai, nặng hơn: khi con số đứng sau dấu chia nhỏ
+hơn 1, chia xong con số lại còn **to ra**.
 ::::
 
 ::::code{#chia-deu-hai-vuon}
@@ -208,8 +218,9 @@ Hai vườn, hai lần chia đều:
 - **Vườn của Byte**: 12 hạt, chia đều cho **3** luống.
 - **Vườn của An**: 20 hạt, chia đều cho **4** luống.
 
-Máy thử lần lượt từng cỡ, y như ở phần đoán. Hai chỗ trống là **cái tổng phải
-gộp về được** — con số nói cho máy biết lúc nào thì vừa khít.
+Máy thử lần lượt từng cỡ, y như ở phần đoán. Hai chỗ trống là **số phần** — số
+luống của mỗi vườn, thứ đã biết từ trước khi cuộc thử bắt đầu. Đề mỗi vườn cho
+hai con số; việc của bạn là nhặt ra con nào nói số luống, con nào là cả đống hạt.
 
 Bài chấm bằng cả hai vườn, và hai vườn được chọn để cho ra **hai cỡ khác nhau**
 (4 và 5): một con số gõ cứng vào cả hai chỗ trống thì nhiều nhất chỉ đúng được
@@ -218,14 +229,14 @@ một vườn.
 ```python title=starter
 # Vườn của Byte: 12 hạt, chia đều cho 3 luống.
 moi_luong_byte = 0
-for co in range(1, 13):
-    if 3 * co == ___:
+for co in range(13):
+    if co * ___ == 12:
         moi_luong_byte = co
 
 # Vườn của An: 20 hạt, chia đều cho 4 luống.
 moi_luong_an = 0
-for co in range(1, 21):
-    if 4 * co == ___:
+for co in range(21):
+    if co * ___ == 20:
         moi_luong_an = co
 
 print(moi_luong_byte)
@@ -235,14 +246,14 @@ print(moi_luong_an)
 ```python title=solution
 # Vườn của Byte: 12 hạt, chia đều cho 3 luống.
 moi_luong_byte = 0
-for co in range(1, 13):
-    if 3 * co == 12:
+for co in range(13):
+    if co * 3 == 12:
         moi_luong_byte = co
 
 # Vườn của An: 20 hạt, chia đều cho 4 luống.
 moi_luong_an = 0
-for co in range(1, 21):
-    if 4 * co == 20:
+for co in range(21):
+    if co * 4 == 20:
         moi_luong_an = co
 
 print(moi_luong_byte)
@@ -250,23 +261,24 @@ print(moi_luong_an)
 ```
 
 ```python title=test
-# Hai vườn cho hai cỡ khác nhau, nên một con số điền bừa vào cả hai chỗ trống
-# không thể qua nổi cả hai dòng đầu. Hai assert cuối khoá lại điều bài dạy:
-# cỡ tìm được phải gộp ngược về đúng cái đống ban đầu.
+# Hai vườn cho hai số luống khác nhau, nên một con số điền bừa vào cả hai chỗ
+# trống không thể qua nổi cả hai dòng đầu. Hai assert giữa khoá lại điều bài
+# dạy: cỡ tìm được phải gộp ngược về đúng cái đống ban đầu — và cỡ đứng TRƯỚC
+# dấu nhân, số luống đứng SAU, đúng thứ tự "lô to bao nhiêu × lấy mấy lô".
 assert moi_luong_byte == 4, "12 hạt vào 3 luống thì mỗi luống 4 hạt — không cỡ nào khác gộp lại vừa khít 12"
 assert moi_luong_an == 5, "20 hạt vào 4 luống thì mỗi luống 5 hạt"
-assert 3 * moi_luong_byte == 12, "gộp 3 luống về phải ra đúng đống hạt ban đầu, không thừa không thiếu"
-assert 4 * moi_luong_an == 20, "gộp 4 luống về cũng phải ra đúng đống ban đầu"
+assert moi_luong_byte * 3 == 12, "lô 4 hạt lấy 3 lô thì về đúng đống ban đầu, không thừa không thiếu"
+assert moi_luong_an * 4 == 20, "lô 5 hạt lấy 4 lô thì cũng về đúng đống ban đầu"
 assert moi_luong_byte != moi_luong_an, "hai vườn khác nhau thì cỡ mỗi luống khác nhau — nếu bằng nhau là có chỗ điền cứng"
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống nằm bên phải dấu `==`, tức là ở vế mà phép nhân phải gộp về cho khít. Bên trái đã có số luống nhân với cỡ đang thử.
+  body: Chỗ trống đứng ngay sau `co *`, nên nó là con số được đem nhân với cỡ đang thử. Cả đống hạt thì đã nằm sẵn bên phải dấu `==` rồi.
 - kind: strategy
-  body: Vòng thử dừng lại đúng lúc "số luống nhân cỡ" bằng cả đống hạt ban đầu. Mỗi vườn có một đống hạt riêng, và hai con số ấy đã ghi ngay trong dòng chú thích phía trên mỗi khối.
+  body: Con số ấy là **số phần** — số luống Byte quyết định lúc cuốc đất, thứ đã biết chứ không phải thứ đi tìm; cỡ mỗi luống mới là thứ vòng thử sinh ra. Dòng chú thích phía trên mỗi khối cho cả hai con số, bạn chọn con nói số luống.
 - kind: one-line
-  body: "Chỗ trống thứ nhất là `12`, chỗ trống thứ hai là `20`."
+  body: "Chỗ trống thứ nhất là `3`, chỗ trống thứ hai là `4`."
 :::
 
 :::validate

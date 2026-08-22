@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 13
 teaches: [math.division-quotative]
-requires: [math.division-partitive, math.multiplication, math.thanh-so, core.arithmetic, core.output, core.variable, core.reassign, core.accumulator, ctrl.for-range, ctrl.if, ctrl.comparison]
+requires: [math.division-partitive, math.thuoc-do, math.multiplication, math.multiply-commutative, math.thanh-so, core.arithmetic, core.output, core.variable, core.reassign, core.accumulator, ctrl.for-range, ctrl.if, ctrl.comparison]
 concepts: [math.chia-do, math.dat-thuoc-lap-lai, math.thua-so-con-thieu]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -48,10 +48,10 @@ Nên Byte làm động tác khác hẳn: **đặt cái thước lên và đếm*
 ```text
 cuộn dây 12 mét
 ├───────────────────────────────────────────────┤
-├───3───┤                                              đặt lần 1, còn 9
-├───3───┼───3───┤                                      đặt lần 2, còn 6
-├───3───┼───3───┼───3───┤                              đặt lần 3, còn 3
-├───3───┼───3───┼───3───┼───3───┤                      đặt lần 4, còn 0
+├─────3─────┤                                        đặt lần 1, còn 9
+├─────3─────┼─────3─────┤                            đặt lần 2, còn 6
+├─────3─────┼─────3─────┼─────3─────┤                đặt lần 3, còn 3
+├─────3─────┼─────3─────┼─────3─────┼─────3─────┤    đặt lần 4, còn 0
 ```
 
 Hết dây. Đặt được **4 lần**, nên cắt ra **4 đoạn**.
@@ -77,17 +77,22 @@ gang" — đổi thước thì con số đổi, còn luống đất thì không 
 thước. `12 : 3` chính là câu hỏi đo ấy, viết bằng ký hiệu.
 
 Còn **vì sao** 4 là con số đúng? Vì cuộc đo dừng đúng lúc không còn dây. Bốn
-đoạn, mỗi đoạn 3 mét, ghép lại thì đúng bằng cuộn ban đầu:
+đoạn, mỗi đoạn 3 mét, ghép lại thì đúng bằng cuộn ban đầu — đọc đúng thứ tự bài
+19 xếp thì đó là **lô 3 mét, lấy 4 lô**:
 
-`4 × 3 = 12`
+`3 × 4 = 12`
 
 Đặt cạnh bài trước thì thấy hai phép chia là hai câu hỏi khác nhau về cùng một
 phép nhân `? × ? = 12`:
 
 | Câu hỏi | Đã biết | Đi tìm | Phép nhân |
 |---|---|---|---|
-| 12 hạt cho 3 luống, mỗi luống mấy hạt | số phần = 3 | cỡ mỗi phần | `3 × ? = 12` |
-| 12 mét cắt đoạn 3 mét, được mấy đoạn | cỡ mỗi phần = 3 | số phần | `? × 3 = 12` |
+| 12 hạt cho 3 luống, mỗi luống mấy hạt | số phần = 3 | cỡ mỗi phần | `? × 3 = 12` |
+| 12 mét cắt đoạn 3 mét, được mấy đoạn | cỡ mỗi phần = 3 | số phần | `3 × ? = 12` |
+
+Chỗ trống `?` không nhảy lung tung: ô **trước** dấu nhân là cỡ lô, ô **sau** là
+số lô — đúng như bài 19 xếp. Nên hai hàng có `?` ở hai bên khác nhau chính vì
+hai câu hỏi đi tìm hai vai khác nhau.
 
 Bài 20 đã nói xoay mảng chữ nhật 90° thì số cây không đổi, nên hai phép nhân
 trên ra cùng một con số. Đó là lý do hai câu hỏi rất khác nhau lại viết chung
@@ -262,11 +267,12 @@ print(so_khuc_vai)
 # cả bốn chỗ trống không qua nổi cả hai dòng đầu.
 #
 # Hai assert giữa là chỗ bài này khác bài trước: ghép các đoạn lại phải về
-# đúng cuộn ban đầu, và con số nhân với THƯỚC chứ không nhân với số phần.
+# đúng cuộn ban đầu. Thước đứng TRƯỚC dấu nhân, số lần đặt được đứng SAU —
+# đúng thứ tự "lô to bao nhiêu × lấy mấy lô" mà bài 19 xếp.
 assert so_doan_day == 4, "thước 3 mét đặt được đúng 4 lần trên cuộn dây 12 mét"
 assert so_khuc_vai == 3, "thước 7 mét đặt được đúng 3 lần trên cây vải 21 mét"
-assert so_doan_day * 3 == 12, "ghép 4 đoạn, mỗi đoạn 3 mét, phải về đúng cuộn 12 mét"
-assert so_khuc_vai * 7 == 21, "ghép 3 khúc, mỗi khúc 7 mét, phải về đúng cây vải 21 mét"
+assert 3 * so_doan_day == 12, "lô 3 mét lấy 4 lô thì ghép lại về đúng cuộn 12 mét"
+assert 7 * so_khuc_vai == 21, "lô 7 mét lấy 3 lô thì ghép lại về đúng cây vải 21 mét"
 assert con_lai_day == 0, "đo xong mà vẫn còn dây thừa thì cuộc đo chưa chạy hết"
 assert con_lai_vai == 0, "cây vải cũng vừa khít, không dư mẩu nào"
 ```

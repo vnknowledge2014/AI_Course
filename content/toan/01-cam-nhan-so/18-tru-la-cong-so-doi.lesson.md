@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 14
 teaches: [math.additive-inverse]
-requires: [math.negative-number, math.compare-on-number-line, core.arithmetic, core.variable, ctrl.comparison, core.output]
+requires: [math.negative-number, math.compare-on-number-line, core.arithmetic, core.variable, core.print-variable, ctrl.comparison, core.output]
 concepts: [math.thanh-so, math.so-doi, math.mui-ten-cong]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -47,11 +47,11 @@ Bây giờ nhìn lại thanh số sau bài 16. Mỗi chỗ bên phải vạch 0 
 diện bên trái, **cách vạch 0 đúng bằng nhau**:
 
 ```text
-        ┌──── 5 bước ────┐┌──── 5 bước ────┐
+      ┌──────── 5 bước ────────┬──────── 5 bước ────────┐
    ───┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬───
       -5   -4   -3   -2   -1    0    1    2    3    4    5
-       ▲                                                 ▲
-       └──────────── một cặp song sinh ──────────────────┘
+      ▲                                                 ▲
+      └─────────────── một cặp song sinh ───────────────┘
 ```
 
 `5` và `-5` là một cặp. `2` và `-2` là một cặp. Còn `0` thì bạn song sinh của nó
@@ -189,8 +189,10 @@ không được đứng liền nhau. Gõ `10 + * 6` thì máy từ chối ngay t
 
 Chỗ lệch nằm ở vai của dấu `-` trong `(-6)`. Ở đó nó không phải một phép tính,
 nó là **một phần tên** của con số — tên của cái chỗ cách vạch 0 sáu bước về bên
-trái, đúng như bài 16 vừa đặt. Cặp ngoặc chính là cách nói cho mắt bạn, và cho
-máy, thấy rõ điều đó: bên trong ngoặc là một con số, không phải một việc.
+trái, đúng như bài 16 vừa đặt. Cặp ngoặc là cách nói cho **mắt bạn** thấy rõ
+điều đó: bên trong ngoặc là một con số, không phải một việc. Máy thì không cần
+cặp ngoặc ấy — `10 + -6` nó vẫn đọc được — nhưng người đọc thì cần, nên ta cứ
+viết.
 ::
 :::
 ::::
@@ -204,9 +206,10 @@ Số đối của số đối là chính nó. Số đối của `0` là `0`.
 **Hai:** `a − b` và `a + (−b)` không phải hai phép tính cho cùng đáp số. Chúng
 là **một phép tính viết bằng hai cách**, vì chúng dán đúng cùng một mũi tên.
 
-**Ba:** cộng một số đối vào chính nó thì về vạch 0 — `5 + (-5)` ra `0`, mũi tên
-đi 5 bước sang phải rồi 5 bước sang trái, dừng đúng chỗ xuất phát. Đó là lý do
-cặp song sinh ấy đáng có một cái tên riêng.
+**Ba:** cộng một số với số đối của nó thì về vạch 0 — `5 + (-5)` ra `0`: đứng ở
+vạch 5, dán mũi tên dài 5 chỉ sang trái, mà 5 cũng đúng là quãng từ vạch 5 về
+tới vạch 0, nên chân dừng ngay tại 0. Đó là lý do cặp song sinh ấy đáng có một
+cái tên riêng.
 ::::
 
 ::::code{#ba-cap-mot-luat}
@@ -224,6 +227,8 @@ chỗ trống thì nhiều nhất cũng chỉ qua được một cặp.
 ```python title=starter
 # Vườn của Byte đo bằng phân, mặt đất là vạch 0.
 # Luật của bài: lùi b bước cũng là tiến số đối của b bước.
+# Dấu phẩy trong `print(a, b)` cho phép in hai giá trị trên một dòng,
+# cách nhau một dấu cách.
 
 # Cặp một: từ vạch 14 lùi 6 bước.
 tru_mot = 14 - 6
@@ -245,6 +250,8 @@ print(tru_ba, cong_ba)
 ```python title=solution
 # Vườn của Byte đo bằng phân, mặt đất là vạch 0.
 # Luật của bài: lùi b bước cũng là tiến số đối của b bước.
+# Dấu phẩy trong `print(a, b)` cho phép in hai giá trị trên một dòng,
+# cách nhau một dấu cách.
 
 # Cặp một: từ vạch 14 lùi 6 bước.
 tru_mot = 14 - 6
@@ -274,7 +281,7 @@ assert cong_hai == tru_hai == -5, "4 lùi 9 bước thì đi qua vạch 0 và t�
 assert cong_ba == tru_ba == 13, "lùi -9 bước là quay mũi tên lại, thành tiến 9 bước"
 
 assert 7 + (-7) == 0, "cộng một số với số đối của nó thì về đúng vạch 0"
-assert 0 + 0 == 0, "số đối của 0 là chính 0"
+assert 7 - 0 == 7 + 0, "số đối của 0 là chính 0, nên trừ 0 và cộng 0 là cùng một mũi tên dài 0"
 assert 4 - (-9) == 4 + 9, "số đối của -9 là 9, nên hai cách viết là một"
 ```
 

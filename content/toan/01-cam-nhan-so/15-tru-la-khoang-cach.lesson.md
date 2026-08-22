@@ -90,6 +90,12 @@ Trên hình này, hỏi câu A hay câu B đều là chỉ tay vào **cùng mộ
 bên phải. Câu A gọi nó là *chỗ còn lại sau khi bớt*. Câu B gọi nó là *chỗ thiếu
 để cho đủ*. Mảnh thì chỉ có một, nên số đo của nó cũng chỉ có một.
 
+Và một chỗ rất dễ trượt chân khi nhìn hình này: **đếm mảnh, đừng đếm vạch.** Từ
+vạch 5 tới vạch 12 có tám cái vạch — 5, 6, 7, 8, 9, 10, 11, 12 — nhưng chỉ bảy
+cái khoảng nằm giữa chúng. Sải dây nằm ở khoảng chứ không nằm ở vạch, y như bài
+3 đã dặn: đo là đếm số lần đặt thước xuống. Hàng rào cũng vậy — tám cây cột thì
+chỉ kẹp được bảy đoạn rào.
+
 Hỏi máy, và hỏi luôn cả câu kiểm:
 
 ```python title=readonly
@@ -113,8 +119,11 @@ Dòng dưới là chỗ đáng nhìn: cộng phần còn thiếu vào phần đ�
 ::::
 
 ::::predict{#doan-cau-kiem commitOnce}
-Byte muốn hỏi máy thẳng một câu **có–không**: *cộng phần còn phải cuốc vào phần
-đã cuốc, có ra đúng cả luống không?*
+Byte muốn hỏi máy hai câu **có–không**, và hai câu ấy chỉ khác nhau ở chỗ cộng
+phần còn thiếu vào **mốc nào**:
+
+- *Cộng phần còn phải cuốc vào phần đã cuốc, có ra đúng cả luống không?*
+- *Cộng phần còn phải cuốc vào cả luống, có ra đúng phần đã cuốc không?*
 
 **Trước khi bấm chạy**, bạn đoán màn hình hiện ra gì?
 
@@ -125,32 +134,39 @@ con_phai_cuoc = ca_luong - da_cuoc
 
 print(con_phai_cuoc)
 print(da_cuoc + con_phai_cuoc == ca_luong)
+print(ca_luong + con_phai_cuoc == da_cuoc)
 ```
 
 :::opt{correct}
-7 rồi True
+7, True, rồi False
 :::
 
 :::opt
-8 rồi False
+8, False, rồi False
 ::why
 Gần đúng ở chỗ bạn đếm bằng đúng cách bài 2 dạy — ghép mỗi thứ với đúng một tên
 số: 5, 6, 7, 8, 9, 10, 11, 12 là tám cái tên, không thừa không thiếu cái nào.
 Phép đếm ấy không sai một chỗ.
 
-Chỗ lệch là bạn đang đếm **vạch**, còn câu hỏi đòi đếm **sải dây**. Bài 4 đã nói
-chỗ đo được nằm ở khoảng trống giữa hai vạch, không nằm trên vạch: mỗi sải dây
-là một cái khoảng, và tám cái vạch chỉ kẹp được bảy cái khoảng. Quy tắc "đếm tên
-số" đúng cho vật rời — hạt, cây, người — chứ không đúng cho khoảng cách. Cứ đếm
-cây cột hàng rào thì ra tám, mà đếm đoạn rào giữa chúng thì ra bảy.
+Chỗ lệch là bạn đang đếm **vạch**, còn câu hỏi đòi đếm **sải dây**. Bài 3 đã nói
+đo là đếm **số lần đặt thước xuống** — mà mỗi lần đặt là một cái *khoảng*, không
+phải một cái *vạch*; bài 5 cũng hỏi "hai cái khoảng có bằng nhau không" chứ
+không hỏi tên ba cái vạch. Đúng như sơ đồ dải phía trên vừa dặn: tám cái vạch
+chỉ kẹp được bảy cái khoảng. Quy tắc "đếm tên số" đúng cho vật rời — hạt, cây,
+người — chứ không đúng cho khoảng cách. Cứ đếm cây cột hàng rào thì ra tám, mà
+đếm đoạn rào giữa chúng thì ra bảy.
+
+Dòng giữa bắt được ngay chỗ lệch ấy, và đó là điều hay của câu thử lại: nếu còn
+phải cuốc 8 sải thật thì `5 + 8` phải ra `12`, mà nó ra `13`.
 ::
 :::
 
 :::opt
-7 rồi 12
+7, 12, rồi 19
 ::why
-Gần đúng ở chỗ bạn tính đúng vế trái, không lệch một đơn vị: `5 + 7` là 12, và
-việc nó ra đúng cả luống chính là điều bài này muốn bạn thấy.
+Gần đúng ở chỗ bạn tính đúng cả hai vế trái, không lệch một đơn vị: `5 + 7` là
+12 và `12 + 7` là 19. Riêng việc dòng giữa ra đúng cả luống chính là điều bài
+này muốn bạn thấy.
 
 Chỗ lệch nằm ở cái dấu. Trong vở toán, dấu `=` nói *"vế trái ra bao nhiêu"*, nên
 đọc như bạn là đọc theo thói quen đúng suốt mười mấy năm. Nhưng `==` — hai dấu
@@ -161,14 +177,17 @@ thì bỏ hẳn phần `== ca_luong` đi, như dòng cuối của ví dụ phía
 :::
 
 :::opt
-Máy báo lỗi, vì bên trái dấu `==` là một phép cộng chứ chưa phải một con số
+7, True, rồi True
 ::why
-Gần đúng ở chỗ bạn nhớ máy làm từng việc một và tự hỏi việc nào phải xong trước
-— đó là câu hỏi đúng, và nó sẽ cứu bạn ở nhiều bài về sau.
+Gần đúng ở chỗ bạn nắm đúng cái lõi của bài: **cộng phần còn thiếu vào thì phải
+ra đủ.** Câu ấy đúng, và nó chính là câu thử lại mà bạn sẽ dùng suốt track.
 
-Chỗ lệch: máy làm đúng cái thứ tự bạn đang lo. Nó tính `5 + 7` ra `12` trước,
-rồi mới đem `12` ấy so với `12` bên phải. `==` chỉ so hai **giá trị**, và tới
-lúc nó nhìn tới thì cả hai vế đều đã thành giá trị rồi. Không có gì để nổ.
+Chỗ lệch là phạm vi: phần còn thiếu ấy thiếu **của một mốc cụ thể**, không thiếu
+chung cho cả hai. Bảy sải là quãng từ vạch 5 *tới* vạch 12 — nên cộng nó vào
+vạch 5 thì tới vạch 12, còn cộng nó vào vạch 12 là đi thêm bảy sải nữa, vượt
+khỏi đầu kia của luống: `12 + 7` là 19, không phải 5. Đổi chỗ hai cái mốc là đổi
+hẳn câu hỏi. Phép cộng thì đổi chỗ hai đống vẫn ra một đống chung (bài 10),
+nhưng "từ đâu tới đâu" thì không có luật ấy — nó có chiều đi.
 ::
 :::
 ::::
@@ -176,13 +195,23 @@ lúc nó nhìn tới thì cả hai vế đều đã thành giá trị rồi. Kh�
 ::::explain{#mot-phep-hai-cach-doc}
 Gói lại thành một câu mang đi được:
 
-> `a − b` đọc được **hai cách**, và hai cách chỉ vào cùng một mảnh:
-> *"bớt `b` khỏi `a`"* và *"từ `b` tới `a` còn cách bao xa"*.
+> `a − b` là **số phải cộng thêm vào `b` để tới `a`**.
 
-Cách đọc thứ hai còn một cách nói nữa, và đây là cách hữu dụng nhất khi bí:
-**"phải cộng thêm bao nhiêu vào `b` thì tới `a`"**. Nó biến mọi phép trừ thành
-một phép cộng còn thiếu một chỗ — và cho bạn một cách thử lại không cần nhớ luật
-gì: `b + (a − b)` phải ra đúng `a`. Cộng lại không ra thì trừ hỏng.
+Đây là cách nói chắc chân nhất, vì nó không đòi bên nào phải lớn hơn bên nào —
+nó chỉ hỏi *đi từ `b` tới `a` thì đi thế nào*. Nó biến mọi phép trừ thành một
+phép cộng còn thiếu một chỗ, và cho bạn một cách thử lại không cần nhớ luật gì:
+`b + (a − b)` phải ra đúng `a`. Cộng lại không ra thì trừ hỏng.
+
+Hai cách nói quen tai hơn cùng chỉ vào **một mảnh** trên sơ đồ dải:
+
+> *"bớt `b` khỏi `a`"* — đó là bài 14; và *"từ `b` tới `a` còn cách bao xa"* —
+> **chừng nào `b` chưa vượt qua `a` trên thanh số**.
+
+Cái vế in đậm ấy là **phạm vi**, và nó không phải chữ thừa. "Còn cách bao xa" là
+hỏi một chiều dài, mà chiều dài thì luôn là một con số đếm được, không bao giờ
+ít hơn không. Khi `b` đã đứng bên phải `a` thì hỏi khoảng cách vẫn hỏi được,
+nhưng câu trả lời không còn là `a − b` nữa. Cuối bài Byte sẽ dẫm đúng vào chỗ ấy
+— và đó là chỗ bài sau bắt đầu.
 
 Cách đọc mới trả tiền ở đúng chỗ mà tranh "bớt đi" chịu thua: những câu hỏi
 **không ai bớt gì của ai**.
@@ -203,7 +232,7 @@ Hai câu hỏi "còn bao xa", ở hai chỗ chẳng liên quan gì nhau.
 
 - **Luống của Byte**: cả luống dài `12` sải, đã cuốc tới vạch `5`. Còn phải cuốc
   mấy sải?
-- **Chuyến tàu về quê**: tàu chạy lúc `9` giờ, bây giờ mới `6` giờ. Còn mấy
+- **Chuyến tàu về quê**: bây giờ mới `6` giờ, tàu chạy lúc `9` giờ. Còn mấy
   tiếng nữa?
 
 Điền hai chỗ trống. Hai dòng `print` cuối là **câu thử lại** đã viết sẵn: cộng
@@ -214,13 +243,17 @@ Bài chấm bằng **cả hai chuyện**, và chúng cho ra hai con số khác n
 `3`). Gõ cứng một con số vào cả hai chỗ thì có một chỗ sai, và câu thử lại sẽ
 nói `False` ngay tại chỗ ấy.
 
+Còn một chỗ cố ý nữa: hai chuyện xếp hai cái mốc theo **hai thứ tự khác nhau**.
+Chép máy móc "cái tên dòng trên trừ cái tên dòng dưới" thì một trong hai chuyện
+sẽ hỏng — và câu thử lại sẽ nói `False` ngay tại chuyện ấy.
+
 ```python title=starter
 ca_luong = 12
 da_cuoc = 5
 con_phai_cuoc = ___
 
-gio_tau_chay = 9
 gio_bay_gio = 6
+gio_tau_chay = 9
 con_may_tieng = ___
 
 print(con_phai_cuoc)
@@ -234,8 +267,8 @@ ca_luong = 12
 da_cuoc = 5
 con_phai_cuoc = ca_luong - da_cuoc
 
-gio_tau_chay = 9
 gio_bay_gio = 6
+gio_tau_chay = 9
 con_may_tieng = gio_tau_chay - gio_bay_gio
 
 print(con_phai_cuoc)
@@ -256,7 +289,7 @@ assert gio_bay_gio + con_may_tieng == gio_tau_chay, "6 giờ cộng phần chờ
 
 :::hints
 - kind: attention
-  body: Hai dòng ngay trên mỗi chỗ trống cho bạn hai cái mốc: một cái đích và một chỗ đang đứng. Câu hỏi là hai mốc ấy cách nhau bao xa.
+  body: "Hai dòng ngay trên mỗi chỗ trống cho bạn hai cái mốc: một cái đích và một chỗ đang đứng. Câu hỏi là hai mốc ấy cách nhau bao xa. Đọc kỹ xem ở mỗi chuyện, cái nào là đích — vì hai chuyện không xếp giống nhau."
 - kind: strategy
   body: "Khoảng cách từ mốc đang đứng tới mốc đích viết bằng một phép trừ, và thứ tự có quan trọng: cái đích đứng trước dấu trừ, chỗ đang đứng đứng sau. Thử lại bằng câu ở dòng print cuối — cộng kết quả vào chỗ đang đứng phải ra đúng cái đích."
 - kind: one-line
@@ -273,6 +306,8 @@ assert gio_bay_gio + con_may_tieng == gio_tau_chay, "6 giờ cộng phần chờ
   # dấu `-` nào (hai dòng cuối chỉ có `+` và `==`), nên luật này chặn được đúng
   # cái đáp án chép cứng hai con số.
   - kind: uses-operator, target: -, min: 2
+- tier: tests
+  timeoutMs: 4000
 - tier: output
   match: regex
   expect: ^7\n3\nTrue\nTrue\s*$
@@ -286,6 +321,9 @@ Bảy sải và ba tiếng. Chẳng ai bớt gì của ai, mà phép trừ vẫn
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
+Câu vừa gói lại ở trên có một cái ngưỡng — *chừng nào `b` chưa vượt qua `a`*.
+Bây giờ là lúc cố tình đem nó ra ngoài ngưỡng ấy xem chuyện gì xảy ra.
+
 Khoảng cách thì không phân biệt chiều. Từ vạch 5 tới vạch 12 là 7 bước sang
 phải; từ vạch 12 về vạch 5 cũng đúng 7 bước, chỉ là quay đầu lại. Sợi dây nằm
 giữa hai vạch dài 7 sải, đi kiểu nào cũng thế.
@@ -293,7 +331,12 @@ giữa hai vạch dài 7 sải, đi kiểu nào cũng thế.
 Nhưng hai phép trừ thì không đối xử với nhau như vậy. `12 − 5` bạn viết ra được
 ngay: đứng ở vạch 12, lùi 5 bước, tới vạch 7.
 
-Còn `5 − 12` thì sao? Cùng một luật của bài 14 — đứng ở vạch 5, lùi 12 bước. Đi
+Còn `5 − 12` thì sao? Đọc theo kiểu "còn cách bao xa" thì nó phải ra 7 — nhưng
+đó đúng là chỗ cách đọc ấy vừa hết hiệu lực, vì 12 đã vượt qua 5 rồi. Còn đọc
+theo câu chắc chân — *phải cộng thêm bao nhiêu vào 12 để tới 5* — thì câu hỏi
+vẫn đứng vững, chỉ là chưa con số nào bạn biết trả lời nổi nó.
+
+Cứ đi bộ thử xem. Cùng một luật của bài 14 — đứng ở vạch 5, lùi 12 bước. Đi
 được 5 bước thì chân chạm mốc 0, đầu luống. Vẫn còn 7 bước nữa phải lùi.
 
 **Bên trái số 0 có gì?** Bài sau trả lời.

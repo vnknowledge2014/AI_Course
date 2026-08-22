@@ -48,14 +48,18 @@ cho cùng một câu trả lời. Nắm 5 hạt vừa nhiều hơn nắm 2 hạt
 hơn, vừa đứng bên phải nó. Ba cách nói, một kết quả.
 
 Bài 16 vừa mở nửa bên trái ra. Ở đó hai câu hỏi tách hẳn nhau, và chúng đi
-ngược chiều: càng đi xa vạch 0 về bên trái thì càng lùi sâu về bên trái. Nên từ
-giờ, hỏi câu nào thì phải nói rõ câu ấy.
+ngược chiều: càng xa vạch 0 về bên trái thì con số càng **nhỏ**. Rễ ớt xa mặt
+đất hơn rễ húng, nhưng số của nó lại nhỏ hơn. Nên từ giờ, hỏi câu nào thì phải
+nói rõ câu ấy.
 ::::
 
 ::::explain{#mot-luat-duy-nhat}
 Luật của cả bài gói trong một câu:
 
 > `a > b` đúng khi **a đứng bên phải b** trên thanh số.
+
+Dấu `<` là chính câu hỏi ấy hỏi ngược lại: `a < b` đúng khi a đứng bên **trái**
+b. Một luật, đọc từ hai đầu.
 
 Không có luật thứ hai, và cũng không có ngoại lệ cho nửa bên trái.
 
@@ -69,8 +73,9 @@ phải, ba bước. Vậy `-2` đứng bên phải `-5`, nên **`-2 > -5`**.
 Vì sao lại chọn định nghĩa này, chứ không chọn "số nào xa vạch 0 hơn thì lớn
 hơn"? Vì hai luật trong tay bạn phải khớp với nhau.
 
-Bài 13 nói: **cộng là bước sang phải.** Cộng thêm thì phải lớn lên — không ai
-chấp nhận một phép cộng làm số nhỏ đi.
+Bài 13 nói: **cộng là bước sang phải.** Cộng thêm một số **đứng bên phải vạch
+0** thì phải lớn lên — không ai chấp nhận việc đổ thêm hạt vào mà nắm hạt lại
+vơi đi. (Cộng một số nằm bên trái vạch 0 là chuyện của bài sau.)
 
 Giả sử ta chọn "xa 0 hơn là lớn hơn". Đứng ở `-5`, cộng thêm 3, tức bước sang
 phải ba bước, tới `-2`. Nhưng `-2` gần vạch 0 hơn, nên theo cách chọn ấy nó
@@ -133,46 +138,47 @@ trả lời `False` — `-5` không đứng bên phải `-2`.
 ::::
 
 ::::predict{#doan-truoc-khi-chay commitOnce}
-Byte ghi hai con số vào sổ vườn rồi hỏi máy một câu.
+Byte đào thêm hai khóm nữa và ghi vào sổ vườn: đầu rễ gừng nằm 1 phân dưới mặt
+đất, đầu rễ sả nằm 9 phân dưới. Rồi Byte hỏi máy một câu.
 
 **Trước khi bấm chạy**, bạn đoán màn hình hiện ra gì?
 
 ```python
-re_ot = -5
-re_hung = -2
-print(re_ot > re_hung)
+re_gung = -1
+re_sa = -9
+print(re_gung > re_sa)
 ```
 
 :::opt{correct}
-False
+True
 :::
 
 :::opt
-True
+False
 ::why
 Gần đúng ở chỗ bạn dùng một quy tắc bạn tự kiểm được bằng tay hàng nghìn lần:
-số 5 lớn hơn số 2, nên cái mang số 5 thì lớn hơn cái mang số 2. Quy tắc ấy
+số 9 lớn hơn số 1, nên cái mang số 9 thì lớn hơn cái mang số 1. Quy tắc ấy
 không sai — trong phạm vi những số **đứng bên phải vạch 0**, nơi "mang con số
 to hơn" và "đứng bên phải hơn" luôn đi cùng nhau.
 
-Chỗ lệch: qua bên trái vạch 0, hai chuyện ấy tách nhau và đi ngược chiều. `-5`
-đúng là xa vạch 0 hơn `-2` thật, nhưng xa về phía **trái** — mà bên trái là
-phía nhỏ đi. Muốn từ `-5` tới `-2` thì phải bước sang phải ba bước, nên `-2`
+Chỗ lệch: qua bên trái vạch 0, hai chuyện ấy tách nhau và đi ngược chiều. `-9`
+đúng là xa vạch 0 hơn `-1` thật, nhưng xa về phía **trái** — mà bên trái là
+phía nhỏ đi. Muốn từ `-9` tới `-1` thì phải bước sang phải tám bước, nên `-1`
 mới là số đứng bên phải.
 ::
 :::
 
 :::opt
--5
+-1
 ::why
 Gần đúng ở chỗ bạn đọc dấu `>` như một câu hỏi "cái nào lớn hơn" và chờ máy chỉ
-tay vào một trong hai con số. Ý muốn ấy rất hợp lý, và đó cũng đúng là việc bạn
-đang cần biết.
+tay vào một trong hai con số — và bạn chỉ đúng chỗ, `-1` thật sự là số lớn hơn
+trong cặp này. Ý muốn ấy rất hợp lý, và đó cũng đúng là việc bạn đang cần biết.
 
 Chỗ lệch nằm ở thứ đi ra khỏi dấu `>`. Ở Realm 0, bài về `True` và `False` đã
 nói: dấu so sánh đặt ra một câu hỏi **có–không** — ở đây là "vế trái có đứng
 bên phải vế phải không?". Câu trả lời chỉ có thể là `True` hoặc `False`, chưa
-bao giờ là một con số. Muốn thấy con số thì in thẳng `re_ot` ra.
+bao giờ là một con số. Muốn thấy con số thì in thẳng `re_gung` ra.
 ::
 :::
 

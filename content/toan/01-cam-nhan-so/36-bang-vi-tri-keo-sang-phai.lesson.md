@@ -1,7 +1,7 @@
 ---
 id: toan.cam-nhan-so.bang-vi-tri-keo-sang-phai
 title: Bảng vị trí kéo sang phải
-summary: Kéo bảng giá trị vị trí sang bên phải dấu phẩy thì các cột thành 1/10, 1/100 — nên số thập phân là phân số có mẫu sẵn, khỏi phải quy đồng.
+summary: "Kéo bảng giá trị vị trí sang bên phải dấu phẩy thì các cột thành 1/10, 1/100 — nên số thập phân là phân số có mẫu sẵn cùng một họ 10, 100, 1000: quy đồng chỉ còn là thêm chữ số 0, không phải đi tìm cỡ thước."
 locale: vi
 track: toan
 module: cam-nhan-so
@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 14
 teaches: [math.decimal-place-value]
-requires: [math.fraction-add, math.fraction-compare, math.dong-goi, math.place-value-powers, math.exponent, math.unit-fraction, math.remainder, core.arithmetic, core.variable, core.print-variable, core.boolean, ctrl.comparison]
+requires: [math.fraction-add, math.fraction-compare, math.equivalent-fraction, math.dong-goi, math.place-value-powers, math.exponent, math.unit-fraction, math.remainder, core.arithmetic, core.variable, core.print-variable, core.boolean, ctrl.comparison]
 concepts: [math.thap-phan, math.gia-tri-vi-tri, math.phan-so]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -93,8 +93,11 @@ không ai phải quy đồng — chỉ cần mở bó thêm một bước ở b�
 Cùng mẫu rồi thì bài 34 trả lời ngay: 25 phần ít hơn 40 phần, nên `0,25` mét
 **ngắn hơn** `0,4` mét. Nhiều chữ số hơn không có nghĩa là dài hơn.
 
-Rút gọn `25/100` theo bài 33 — chia cả tử lẫn mẫu cho 25 — thì được `1/4`.
-Vậy `1/4` và `0,25` là cùng một chỗ trên thanh số, viết bằng hai cách.
+Đi ngược lại cũng được, và vẫn là việc bài 33 đã dạy — chỉ chạy theo chiều
+gom thay vì chiều bẻ: chia **số phần** cho 25, rồi chia luôn **số phần trong
+một đơn vị** cho 25. Tức là 25 phần của thước `1/100` gom lại vừa đúng 1 phần
+của thước `1/4`, không thừa mẩu nào. Vậy `1/4` và `0,25` là cùng một chỗ trên
+thanh số, viết bằng hai cách.
 ::::
 
 ::::predict{#doan-luong-nao-dai-hon commitOnce}
@@ -127,9 +130,16 @@ lớn hơn. `0,205` có ba chữ số sau dấu phẩy, `0,25` chỉ có hai —
 
 Chỗ lệch là phạm vi của luật ấy. Bên **trái** dấu phẩy, thêm một cột là gom
 mười thành một, tức nhân mười — nên thêm chữ số làm con số to lên. Bên
-**phải**, thêm một cột là mở một ra thành mười, tức chia mười — nên thêm chữ
-số chỉ làm con số **mịn hơn**, không làm nó to hơn. Quy về thước `1/1000` thì
-`0,25` được 250 phần, còn `0,205` được 205 phần.
+**phải**, thêm một cột là mở một ra thành mười, tức chia mười — nên chữ số
+thêm vào chỉ góp được một lượng **nhỏ hơn một phần** của cột đứng ngay trước
+nó. Nó làm con số mịn hơn, và có làm to lên chút ít — `0,25` đúng là nhỏ hơn
+`0,251` — nhưng không bao giờ bù nổi chỗ đã thua ở một cột to hơn: `0,205`
+thua `0,25` ngay tại cột `1/100`, 0 phần so với 5 phần, nên chữ số `5` nằm mãi
+ở cột `1/1000` có thêm vào cũng không gỡ lại được.
+
+Luật thật là thế này: **so số thập phân là so từ cột to nhất chạy sang phải;
+cột nào hơn trước thì hơn hẳn, bao nhiêu cột phía sau cũng không cứu được.**
+Quy về thước `1/1000` thì `0,25` được 250 phần, còn `0,205` được 205 phần.
 ::
 :::
 
@@ -140,8 +150,8 @@ Gần đúng ở chỗ bạn nhớ điều bài 8 nói về chữ số `0`: nó 
 nào cả. Cột `1/100` của `0,205` đúng là rỗng thật, chẳng có phần nào đứng ở
 đó — chỗ ấy bạn đọc chuẩn.
 
-Chỗ lệch: bỏ chữ số `0` đi thì chữ số `5` **tụt sang trái một cột**, từ cột
-`1/1000` nhảy lên cột `1/100`, tức lớn lên mười lần. Đó chính là việc mà bài 8
+Chỗ lệch: bỏ chữ số `0` đi thì chữ số `5` **dịch sang trái một cột**, từ cột
+`1/1000` sang cột `1/100`, tức lớn lên mười lần. Đó chính là việc mà bài 8
 dựng ra số `0` để ngăn: nó không mang lượng, nhưng nó **giữ chỗ**, và nhờ giữ
 chỗ mà `0,205` không lẫn thành `0,25`.
 ::
@@ -162,20 +172,10 @@ Chỗ lệch nằm ở việc Python chọn hiện ra cái gì cho bạn đọc.
 ::::
 
 ::::explain{#ten-cua-cac-cot-moi}
-Mấy cái cột mới bên phải dấu phẩy cũng có tên, và tên của chúng rơi ra từ bài
-25 mà không cần thêm luật nào.
-
-Bài 25 nói: mỗi bước sang **trái** là nhân 10, nên các cột bên trái là `10⁰`,
-`10¹`, `10²`… Đi ngược lại — mỗi bước sang **phải** là chia 10 — thì số mũ tụt
-xuống dưới 0:
-
-| cột | 100 | 10 | 1 | 1/10 | 1/100 |
-|---|---|---|---|---|---|
-| tên | `10²` | `10¹` | `10⁰` | `10⁻¹` | `10⁻²` |
-
-Dấu trừ trên số mũ đếm **số bước đi sang phải**, y như số mũ không có dấu trừ
-đếm số bước đi sang trái. `10⁻²` là cột `1/100`, và đó là lý do người ta gọi
-`0,25` là *hai chữ số thập phân*: nó dùng tới cột `10⁻²`.
+Mấy cái cột mới bên phải dấu phẩy cũng có tên riêng — dãy số mũ của bài 25
+viết tiếp xuống dưới `0` thì thành **luỹ thừa âm**. Bài này không cần tới cách
+viết ấy, ta cứ đếm bằng **số phần**; cứ biết là mấy cột mới không phải đồ vô
+danh, và để dành luỹ thừa âm cho lúc nó có việc thật.
 
 Còn một chuyện nhỏ nhưng dễ vấp khi bạn gõ vào máy. Trên giấy tiếng Việt ta
 ngăn phần nguyên với phần lẻ bằng **dấu phẩy** — `0,25`. Python ngăn bằng

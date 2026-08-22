@@ -1,7 +1,7 @@
 ---
 id: toan.cam-nhan-so.thanh-so-moi-so-mot-cho
 title: Thanh số — mỗi số một chỗ
-summary: Một mốc 0 và một khoảng làm đơn vị là đủ dựng ra thanh số, nơi con số thôi là một đống và thành một chỗ đứng.
+summary: Một mốc 0 và một khoảng làm đơn vị là đủ dựng ra thanh số — nơi con số có thêm bức tranh thứ hai: không chỉ là một đống, mà còn là một chỗ đứng chỉ tay vào được.
 locale: vi
 track: toan
 module: cam-nhan-so
@@ -68,10 +68,11 @@ còn là một đống nữa — nó là **một chỗ**, đúng một điểm, 
 sải. Cái "chỗ trống" mà bài 4 nói tới nằm gọn trong đoạn ấy:
 
 ```text
-   0    1    2    3   3,5   4    5
-   ●────┼────┼────┼────·────┼────┼───→
-                       ↑
-                  đây, chỉ được rồi
+   0    1    2    3    4    5
+   ●────┼────┼────┼────┼────┼───→
+                    ↑
+                   3,5
+            đây, chỉ được rồi
 ```
 
 Thanh số có đúng **một luật** phải giữ, và nó là luật khắt khe:
@@ -183,9 +184,14 @@ Người chỉ có bức tranh "đống" sẽ đứng hình ngay lần đầu g�
 ngay, và điều đó đúng với cả những số mà về sau bạn còn chưa gặp.
 
 Một điều nữa đáng cất đi: mốc `0` và cái khoảng đơn vị đều là do **người chọn**.
-Byte chọn đầu luống làm `0` và một sải làm đơn vị; chọn khác thì cùng một luống
-đất ra một con số khác — đúng như bài 3 đã nói. Nhưng chọn xong rồi thì phải
-giữ nguyên suốt bức tranh, nếu không thì luật khoảng cách gãy.
+Byte chọn đầu luống làm `0` và một sải làm đơn vị. Nhưng hai cái chọn ấy không
+kéo theo cùng một hậu quả. Dời mốc `0` đi chỗ khác thì mọi cái vạch đổi tên —
+nhưng cái luống vẫn dài đúng chừng ấy, vì khoảng cách giữa hai vạch không hề
+nhúc nhích. Còn đổi cái khoảng đơn vị thì đúng như bài 3 đã nói: cùng một luống
+đất ra một con số khác. Cất riêng điều đó đi, về sau còn dùng.
+
+Chọn kiểu nào cũng được, nhưng chọn xong rồi thì phải giữ nguyên suốt bức
+tranh, nếu không thì luật khoảng cách gãy.
 ::::
 
 ::::code{#dat-vach-cho-dung-cho}
@@ -200,8 +206,9 @@ và chỉ ghi được chỗ của hai cái vạch — vạch `3` bị mưa xoá
    `3` và vạch `4`.
 
 Bài chấm bằng cả hai chỗ và bằng bốn câu hỏi khác nhau, trong đó có câu đòi hai
-bên phải cách đều. Một con số gõ cứng vào cả hai chỗ trống thì trượt ngay câu
-đầu tiên.
+bên phải cách đều. Gõ cùng một con số vào cả hai chỗ thì lọt được hai câu đầu,
+nhưng trượt ở câu thứ ba: một cái chỗ không thể vừa là vạch `3`, vừa nằm HẲN
+bên phải vạch `3`.
 
 ```python title=starter
 vach_2 = 2

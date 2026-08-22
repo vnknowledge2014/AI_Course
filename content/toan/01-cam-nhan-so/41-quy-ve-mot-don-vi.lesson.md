@@ -41,8 +41,9 @@ Câu hỏi là vườn nào **gieo dày hơn** — mỗi luống chịu nhiều 
 
 Cách của bài trước không dùng được ở đây. Ở đó bạn luôn có một bộ đôi mẫu rồi
 chép nó lên: `2 : 5` chép bốn lần ra `8 : 20`. Còn `75 : 5` thì chép một lần
-chưa tới `90 : 6`, chép hai lần đã vọt qua. Không có số lượt nào biến bộ đôi
-này thành bộ đôi kia, nên không có cách nào đặt chúng cạnh nhau mà đọc.
+chưa tới `90 : 6`, chép hai lần đã vọt qua. Không có số lượt **nguyên** nào
+biến bộ đôi này thành bộ đôi kia, nên chép tới chép lui cũng không đặt được
+chúng cạnh nhau mà đọc.
 
 So thẳng từng vế cũng không xong. 90 nhiều hạt hơn 75 — đúng, nhưng vườn Byte
 cũng nhiều luống hơn. Hai vế đều lớn hơn thì chưa nói được gì về chuyện dày
@@ -135,7 +136,7 @@ và độ dày thì phải tính xong mới biết bên nào hơn.
 Gần đúng ở chỗ bạn tính ra đúng con số mà hai vế cho ra — `90 / 6` thật sự là
 `15.0`, và đó là con số quan trọng nhất trong cả bài. Bạn làm xong phần khó.
 
-Chỗ lệch là ở việc dấu `>` không chọn hộ bạn cái lớn hơn. Realm 0 bài 6 đã dạy
+Chỗ lệch là ở việc dấu `>` không chọn hộ bạn cái lớn hơn. Realm 0 bài 24 đã dạy
 nó là một **câu hỏi có–không**: thứ đi ra khỏi nó luôn là `True` hoặc `False`,
 chưa bao giờ là một con số. Muốn thấy con số thì in thẳng `day_byte`, đừng bọc
 nó trong một câu hỏi.

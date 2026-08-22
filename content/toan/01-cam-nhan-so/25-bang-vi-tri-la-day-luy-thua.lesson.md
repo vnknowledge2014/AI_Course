@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 13
 teaches: [math.place-value-powers]
-requires: [math.dong-goi, math.multiplication, core.arithmetic, core.number-literal, core.output, core.variable]
+requires: [math.exponent, math.place-value, math.dong-goi, math.multiply-as-scaling, math.multiplication, core.arithmetic, core.number-literal, core.output, core.variable]
 concepts: [math.bang-vi-tri, math.so-mu-khong, math.mo-bo]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -65,8 +65,10 @@ chục sang cột một, ta **mở** một bó ra: một bó mười hạt mở 
 rời, mỗi hạt là một cái ở cột "một". Một hạt chưa buộc vào đâu vẫn là **một
 hạt**.
 
-> `10⁰ = 1` không phải một quy ước ai đó áp xuống cho gọn. Nó là câu "chưa đóng
-> bó lần nào thì hạt vẫn là hạt", viết lại bằng ký hiệu luỹ thừa.
+> `10⁰ = 1` đúng là một quy ước — nhưng không phải quy ước chọn bừa cho gọn.
+> Nó là con số **duy nhất** đặt được vào đó mà cái luật "mỗi bước sang trái
+> nhân thêm 10" vẫn chạy tiếp qua cột cuối cùng. Đặt số khác vào thì luật gãy
+> ngay ở bước từ cột một sang cột chục.
 
 Có một bức tranh thứ hai nói cùng điều ấy, cho ai thấy thanh số dễ hình dung
 hơn cái vườn. Ở bài 22, nhân 10 là **kéo giãn thanh số ra mười lần**. Sang trái
@@ -238,6 +240,22 @@ assert gia_cot_chuc == gia_cot_mot * 10, "luật ấy đúng ở cả bước cu
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: static
+  onFail: ba chỗ trống phải điền SỐ MŨ sau `10 **`, và cột "một" phải viết ra số mũ `0` — chép cứng giá trị của cột thì cái bài này vừa dạy không xuất hiện ở đâu cả
+  requireAst:
+  # Đúng ba chỗ `10 ** ___`. Gõ thẳng 1, 10, 100 thì không còn dấu mũ nào, nên
+  # luật này phân biệt được đúng với sai.
+  - kind: uses-operator, target: **, min: 3
+  # Riêng dấu mũ thì chưa đủ: chỗ trống nằm SAU `10 **`, nên dấu mũ còn nguyên
+  # dù điền gì vào. Con số `0` mới là thứ cả bài đi tìm, nên nó phải được viết
+  # ra — lời giải thật có nó, mọi kiểu điền bừa thì không.
+  - kind: has-literal, target: 0
+  forbidAst:
+  # Lưới thứ hai, chặn đúng hai con số là KẾT QUẢ. Lời giải thật (`10 ** 2` và
+  # một tổng dựng từ ba cái tên) không chứa nguyên văn chúng, nên luật này
+  # không cản ai làm thật.
+  - kind: has-literal, target: 100
+  - kind: has-literal, target: 247
 - tier: tests
   timeoutMs: 4000
 - tier: output

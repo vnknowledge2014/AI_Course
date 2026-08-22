@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 12
 teaches: [math.multiplication]
-requires: [core.arithmetic, core.variable, core.print-variable, core.output]
+requires: [core.arithmetic, ctrl.comparison, core.boolean, core.variable, core.print-variable, core.output]
 concepts: [math.lo-va-so-lo, math.don-vi-moi]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -65,27 +65,35 @@ lô 200 gam gạo, lô 3 mét vải.
 ::::
 
 ::::explain{#hai-con-so-hai-vai}
-Bây giờ tới chỗ dễ trượt nhất của cả bài, và nó không phải chuyện tính toán.
+Bây giờ tới một chỗ đáng nhìn kỹ, và nó không phải chuyện tính toán.
 
 Trong `8 * 5`, hai con số **không cùng loại**. Chúng trả lời hai câu hỏi khác
 nhau:
 
 | con số | trả lời câu hỏi | đơn vị của nó |
 |---|---|---|
-| 8 | một lô to bao nhiêu? | cây / một luống |
+| 8 | một lô to bao nhiêu? | cây — nhưng là cây của MỘT luống |
 | 5 | lấy mấy lô? | luống |
 
-Kết quả 40 mang đơn vị **cây** — không phải luống, cũng không phải "cây trên
-một luống". Nhìn lại bài 1: một con số luôn là "mấy **cái gì**". Phép nhân là
-chỗ cái "cái gì" ấy đổi giữa chừng: hai đầu vào mang hai đơn vị khác nhau, đầu
-ra mang đơn vị thứ ba.
+Kết quả 40 mang đơn vị **cây** — không phải luống, cũng không phải "cây của một
+luống". Nhìn lại bài 1: một con số luôn là "mấy **cái gì**". Phép nhân là chỗ
+cái "cái gì" ấy đổi giữa chừng: hai đầu vào mang hai đơn vị khác nhau, và ở đây
+đầu ra mang một đơn vị thứ ba: cây.
+
+Cái đơn vị hai tầng của số 8 — "cây của một luống" — có tên riêng và có cách
+viết riêng; bài 40 sẽ lấy nó ra. Ở bài này chỉ cần nhận ra nó khác đơn vị của
+số 5, thế là đủ.
 
 Đây cũng là lý do bạn **không** cộng được 8 với 5 ở đây. Bài 11 đã chốt: chỉ
 gộp được thứ cùng đơn vị. 8 cây-mỗi-luống và 5 luống không cùng đơn vị, nên
 `8 + 5 = 13` là một phép tính chạy được nhưng con số 13 không đếm cái gì trong
 vườn cả.
 
-Nói cách khác: `+` đòi hai bên **cùng vai**, `×` đòi hai bên **khác vai**.
+Nói cách khác: `+` lúc nào cũng **đòi** hai bên cùng đơn vị — không có ngoại
+lệ. Còn `×` thì **cho phép** hai bên khác vai, và trong cách đọc "lấy mấy lần
+một lô" thì chúng khác vai thật: một cái là cỡ lô, một cái là số lô. Phép nhân
+còn những bức tranh khác — bài 22 sẽ đưa một cái, ở đó con số thứ hai không đo
+cái gì cả.
 ::::
 
 ::::example{#hoi-thang-cai-may}
@@ -172,8 +180,10 @@ năm lượt. Hai câu hỏi khác nhau nên hai kết quả khác nhau: 13 và 
 88888 rồi 40 rồi 13
 ::why
 Gần đúng ở chỗ bạn nhớ dấu `+` có hai việc: với chữ thì nó **ghép** hai mảnh
-lại thành một câu dài. Cách đọc ấy đúng, và nếu `mot_luong` giữ `"8"` có dấu
-nháy thì bạn đã trúng hoàn toàn — máy sẽ dán năm chữ số 8 thành `88888` thật.
+lại thành một câu dài. Cách đọc ấy đúng — nhưng chỉ đúng cho **dòng đầu**. Nếu
+`mot_luong` giữ `"8"` có dấu nháy thì dòng đầu thật sự dán ra `88888`; còn dòng
+hai sẽ dán tiếp thành `88888` chứ không phải 40, và dòng ba thì máy dừng hẳn —
+nó không cộng được một mảnh chữ với một con số.
 
 Chỗ lệch nằm ở dòng đầu tiên của chương trình: `mot_luong = 8`, viết không có
 dấu nháy. Nhãn của nó là số, nên dấu `+` ở đây tính chứ không ghép.
@@ -196,7 +206,8 @@ Nên `8 * 5` đọc được theo ba cách, và cả ba đều là một:
 
 - 8 cộng lại 5 lần.
 - Lấy 5 lô, mỗi lô 8.
-- Đo một lượng bằng thước cỡ 8, được 5.
+- Cái lượng mà đem đo bằng thước cỡ 8 thì đặt vừa đúng 5 lần — lượng ấy là 40.
+  (Đọc ngược cách này lại thì thành phép chia; bài 27 sẽ cầm nó lên.)
 ::::
 
 ::::code{#dong-gao-hai-buoi}

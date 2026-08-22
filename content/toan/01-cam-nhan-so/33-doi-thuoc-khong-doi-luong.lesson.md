@@ -10,7 +10,7 @@ tier: A
 languages: [python]
 defaultLanguage: python
 level: intro
-estimatedMinutes: 13
+estimatedMinutes: 14
 teaches: [math.equivalent-fraction]
 requires: [math.fraction, math.improper-fraction, math.unit-fraction, math.thuoc-do, math.thanh-so, math.multiplication, math.like-units, math.division-by-zero, core.output, core.arithmetic, core.division, core.boolean, ctrl.comparison]
 concepts: [math.don-vi-va-thuoc, math.thanh-so, math.tu-va-mau]
@@ -76,6 +76,21 @@ luống hẹ         ├───────┼───────┤        
 
 Hai hàng cuối cùng dài đúng bằng nhau. Cái vạch mới ở giữa không cắt bớt gì —
 nó chỉ chia đôi chỗ đã có.
+
+Sơ đồ dải nói được "hai đoạn dài bằng nhau". Thanh số (bài 5) nói thêm một
+điều nữa, và đó mới là điều bài này cần: hai cách viết không đứng cạnh nhau,
+chúng đứng **cùng một chỗ**.
+
+```text
+0                  1/2                  1
+├───────────────────┼───────────────────┤     bẻ đôi: hai miếng cỡ 1/2
+├─────────┼─────────┼─────────┼─────────┤     bẻ tư: bốn miếng cỡ 1/4
+0        1/4       2/4       3/4        1
+```
+
+Hai hàng vạch ấy nằm trên cùng một đường. Vạch `1/2` ở hàng trên và vạch `2/4`
+ở hàng dưới rơi trúng nhau: muốn chỉ vào `2/4`, ngón tay bạn dừng đúng chỗ nó
+đã dừng khi chỉ vào `1/2`.
 
 Làm lại một lần nữa với luống rau muống `3/4` sải của bài 31, lần này bẻ đôi
 cái thước `1/4`:
@@ -170,6 +185,24 @@ bằng cái thước to hơn.
 
 Hai phân số ở cùng một chỗ như thế gọi là **phân số tương đương**.
 
+Nhưng hai chiều không giống nhau ở một điểm, và điểm ấy phải nói ra. Chiều nhân
+lúc nào cũng đi được: cái thước nào cũng bẻ nhỏ thêm được. Chiều chia thì có
+điều kiện — muốn gộp `k` miếng nhỏ thành một miếng to, **số miếng phải chia hết
+cho `k`**, và **cỡ thước cũng phải chia hết cho `k`**. Thiếu một trong hai thì
+động tác gộp không xong, và bạn thấy ngay chỗ thừa ra.
+
+Lấy đúng ba con số của bài này ra gộp từng đôi một (`k` bằng 2):
+
+```text
+6/8   6 miếng gộp đôi được 3, thước 1/8 gộp đôi thành 1/4   →  3/4
+3/4   3 miếng gộp đôi thì thừa một miếng lẻ                 →  dừng ở 3/4
+6/4   6 miếng gộp đôi được 3, thước 1/4 gộp đôi thành 1/2   →  3/2
+```
+
+`3/2` xong rồi cũng dừng, vì lý do y hệt `3/4`: ba miếng gộp đôi thì thừa một
+miếng. Chiều nhân đi được mãi; chiều chia mỗi lúc một hết đường, và chỗ nó hết
+đường là chỗ cái thước đã to hết cỡ mà vẫn đo trọn được cái luống.
+
 Một điều kiện nhỏ nhưng phải nói: `k` không được là `0`. Bẻ một cái thước làm
 `0` phần thì không còn cái thước nào để đo — đúng chỗ bài 28 đã chỉ ra rằng câu
 hỏi ấy hỏng, chứ không phải máy cấm.
@@ -237,11 +270,12 @@ assert 3/4 != 6/4, "gấp đôi số miếng mà không bẻ nhỏ miếng nào 
 - tier: static
   onFail: mỗi chỗ trống phải là một câu hỏi so sánh bằng (`==`) giữa hai phân số — gõ thẳng `True` hay `False` thì không hỏi máy điều gì cả
   requireAst:
-  # Dòng thứ ba viết sẵn đã có một `==` và hai dấu `/`. Đòi `==` từ 3 và `/`
-  # từ 4 trở lên nghĩa là hai chỗ trống cũng phải là câu hỏi bằng viết bằng
-  # phân số — gõ True/False hay chép sẵn một số thập phân đều không đạt.
+  # Dòng thứ ba viết sẵn đã có một `==` và hai dấu `/`. Đòi `==` từ 3 nghĩa là
+  # hai chỗ trống cũng phải là câu hỏi bằng. Đòi `/` từ 6 nghĩa là mỗi chỗ
+  # trống phải có đủ HAI phân số — chép một số thập phân đã tính sẵn vào một
+  # vế (`3/4 == 0.75`) chỉ góp được 5 dấu `/`, nên trượt.
   - kind: uses-operator, target: ==, min: 3
-  - kind: uses-operator, target: /, min: 4
+  - kind: uses-operator, target: /, min: 6
 - tier: output
   match: regex
   expect: ^True\nFalse\nFalse\s*$

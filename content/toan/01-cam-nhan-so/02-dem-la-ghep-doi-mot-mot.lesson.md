@@ -1,7 +1,7 @@
 ---
 id: toan.cam-nhan-so.dem-la-ghep-doi-mot-mot
 title: Đếm là ghép đôi
-summary: Đếm là dán lên mỗi vật đúng một cái tên trong dãy một, hai, ba… Vì là ghép một–một nên đếm theo thứ tự nào cũng ra cùng một con số.
+summary: Đếm là dán lên mỗi vật đúng một cái tên trong dãy một, hai, ba… Vì là ghép một–một nên đi đường nào đếm cũng ra cùng một con số.
 locale: vi
 track: toan
 module: cam-nhan-so
@@ -63,6 +63,8 @@ Ba luật của việc đếm, viết ra cho rõ:
 1. Mỗi hạt nhận **đúng một** tên: không hạt nào bị bỏ sót, không hạt nào bị chỉ
    vào hai lần.
 2. Tên phải đọc theo **đúng thứ tự** dãy, bắt đầu từ *một*, không nhảy cóc.
+   Chú ý: cái phải giữ nguyên là thứ tự của DÃY TÊN, không phải thứ tự bạn đi
+   qua các hạt. Đúng chỗ khác nhau đó là toàn bộ bài này.
 3. Số hạt của cả đống là **cái tên cuối cùng** bạn đọc tới.
 
 Luật thứ ba mới là chỗ đáng dừng lại. Cái tên "mười hai" vốn được sinh ra để dán
@@ -92,9 +94,9 @@ Nhưng nhìn cả hàng: cả hai người đều dán hết, mỗi hạt đúng
 không lặp. Nên cả hai đều xài hết đúng chừng ấy cái tên trong dãy — và cái tên
 cuối cùng của cả hai đều là cái thứ **mười hai**.
 
-Đây là câu trả lời: **đổi thứ tự đếm chỉ làm đổi cái nhãn trên từng hạt, không
-làm đổi số nhãn đã dùng.** Con số 12 không phải may mắn; nó bị luật ghép đôi ép
-phải ra như vậy.
+Đây là câu trả lời: **đổi đường đi khi đếm — thăm vật nào trước, vật nào sau —
+chỉ làm đổi cái nhãn trên từng hạt, không làm đổi số nhãn đã dùng.** Con số 12
+không phải may mắn; nó bị luật ghép đôi ép phải ra như vậy.
 
 Đưa hai cái nhãn của cùng cái hạt cạnh hàng rào cho máy giữ:
 
@@ -166,55 +168,54 @@ Gom lại thành một câu để mang theo cả track:
 
 Và điều đó cho bạn một cách kiểm lại chính mình. Lần sau đếm ra một con số bạn
 nghi ngờ, đừng đếm lại y hệt đường cũ — hãy đếm theo một đường **khác**. Ra cùng
-số thì cả hai lần đều giữ đủ luật ghép đôi. Ra khác số thì chắc chắn có một lần
-đã phá luật: bỏ sót một vật, hoặc chỉ vào một vật hai lần.
+số thì bạn tin được hơn hẳn — hai lần đi hai đường khác nhau mà cùng phá luật y
+hệt một kiểu là chuyện hiếm. Ra khác số thì chắc chắn có một lần đã phá luật: bỏ
+sót một vật, chỉ vào một vật hai lần, hoặc đọc nhảy mất một cái tên trong dãy.
 
 Đây cũng là chỗ trả lời câu "sao không thể ra 11 hay 13" của bài trước. Ra 13
-nghĩa là có một hạt bị chỉ hai lần. Ra 11 nghĩa là có một hạt bị bỏ quên. Cả hai
-đều là phá luật, chứ không phải xui.
+nghĩa là hoặc có một hạt bị chỉ hai lần, hoặc bạn đã đọc nhảy một cái tên. Ra 11
+nghĩa là hoặc bỏ quên một hạt, hoặc đọc lặp một cái tên. Cả bốn đều là phá luật,
+chứ không phải xui.
 ::::
 
 ::::code{#hai-cach-dem-mot-ket-qua}
-Byte muốn tự tay xác nhận điều vừa học, trên đúng đống hạt của mình. Bốn con số
-Byte và An ghi lại đã có sẵn:
+Byte đem chính cái phép kiểm vừa học ra dùng, trên đúng đống hạt của mình. Đống
+hạt ấy được đếm ba lần, ba đường đi khác nhau:
 
-- Cái hạt cạnh hàng rào: Byte dán nhãn `1`, An dán nhãn `12`.
-- Cả đống: Byte đọc tới tên cuối là `12`, An cũng đọc tới `12`.
+- Byte đếm từ phía hàng rào vào, đọc tới tên cuối là `12`.
+- An đếm từ phía cổng lại, cũng tới `12`.
+- An đếm thêm lần nữa, đi một đường khác nữa — lần này tới `13`.
 
-Hai chỗ trống là hai câu hỏi có–không. Câu thứ nhất hỏi về **cái nhãn của một
-hạt**, câu thứ hai hỏi về **con số của cả đống**.
+Hai chỗ trống là hai câu hỏi có–không. Mỗi câu đặt lần đếm của Byte cạnh một lần
+đếm của An, để xem hai lần ấy có khớp nhau không.
 
-Hai câu này được chọn để cho ra hai câu trả lời **ngược nhau**: một cái đổi theo
-người đếm, một cái thì không. Gõ cứng `False` vào cả hai thì câu sau sai; gõ
-cứng `True` thì câu trước sai. Chỉ hai câu hỏi viết thật mới qua được cả hai.
+Hai câu này được chọn để cho ra hai câu trả lời **ngược nhau**: một cặp lệch, một
+cặp khớp. Gõ cứng `False` vào cả hai thì câu sau sai; gõ cứng `True` thì câu
+trước sai. Chỉ hai câu hỏi viết thật mới qua được cả hai.
 
 ```python title=starter
-# Cùng MỘT đống hạt. Byte đếm từ hàng rào vào, An đếm từ cổng lại.
-byte_goi_hat_canh_hang_rao_la = 1
-an_goi_hat_canh_hang_rao_la = 12
-
+# Cùng MỘT đống hạt, đếm ba lần, mỗi lần đi một đường khác.
 byte_dem_ca_dong_duoc = 12
 an_dem_ca_dong_duoc = 12
+an_dem_lai_lan_ba_duoc = 13   # An đếm lại lần nữa, đi một đường khác nữa
 
-# 1) Cái nhãn dán lên MỘT hạt — hai người có dán giống nhau không?
+# 1) Lần đếm thứ ba có khớp với hai lần trước không?
 print(___)
 
-# 2) Con số của CẢ ĐỐNG — hai người có ra giống nhau không?
+# 2) Còn hai lần đếm đầu — có khớp nhau không?
 print(___)
 ```
 
 ```python title=solution
-# Cùng MỘT đống hạt. Byte đếm từ hàng rào vào, An đếm từ cổng lại.
-byte_goi_hat_canh_hang_rao_la = 1
-an_goi_hat_canh_hang_rao_la = 12
-
+# Cùng MỘT đống hạt, đếm ba lần, mỗi lần đi một đường khác.
 byte_dem_ca_dong_duoc = 12
 an_dem_ca_dong_duoc = 12
+an_dem_lai_lan_ba_duoc = 13   # An đếm lại lần nữa, đi một đường khác nữa
 
-# 1) Cái nhãn dán lên MỘT hạt — hai người có dán giống nhau không?
-print(byte_goi_hat_canh_hang_rao_la == an_goi_hat_canh_hang_rao_la)
+# 1) Lần đếm thứ ba có khớp với hai lần trước không?
+print(byte_dem_ca_dong_duoc == an_dem_lai_lan_ba_duoc)
 
-# 2) Con số của CẢ ĐỐNG — hai người có ra giống nhau không?
+# 2) Còn hai lần đếm đầu — có khớp nhau không?
 print(byte_dem_ca_dong_duoc == an_dem_ca_dong_duoc)
 ```
 
@@ -222,25 +223,25 @@ print(byte_dem_ca_dong_duoc == an_dem_ca_dong_duoc)
 # Ba assert này chốt lại chính điều bài vừa dạy, trên hai tình huống ngược
 # nhau. Nếu một ngày nào đó có người sửa mấy con số ở trên cho "gọn" thì cổng
 # đỏ lên, chứ bài không lặng lẽ dạy sai.
-assert byte_goi_hat_canh_hang_rao_la != an_goi_hat_canh_hang_rao_la, "cùng một hạt, hai người đếm hai hướng thì nhãn PHẢI khác nhau — đó là nửa đầu của bài"
-assert byte_dem_ca_dong_duoc == an_dem_ca_dong_duoc, "cả đống thì hai người PHẢI ra cùng một số — đó là nửa sau của bài"
+assert byte_dem_ca_dong_duoc == an_dem_ca_dong_duoc, "hai lần đếm cùng giữ đủ luật, trên cùng một đống, thì PHẢI ra cùng một số — đó là nửa đầu của bài"
 assert byte_dem_ca_dong_duoc == 12, "cái tên cuối cùng của dãy một–mười hai là 12, không phải con số nào khác"
+assert byte_dem_ca_dong_duoc != an_dem_lai_lan_ba_duoc, "ra 13 thì chắc chắn một lần nào đó đã phá luật — chỗ này bài tập bắt bạn nhìn ra dấu hiệu đó"
 ```
 
 :::hints
 - kind: attention
-  body: Hai chỗ trống đều nằm trong `print`, và bên trên mỗi chỗ đã có sẵn một dòng chú thích nói rõ nó đang hỏi cái gì. Việc của chúng không phải in lại một con số, mà là hỏi máy một câu chỉ có hai câu trả lời.
+  body: Hai chỗ trống đều nằm trong `print`, và bên trên mỗi chỗ đã có sẵn một dòng chú thích nói rõ nó đang hỏi cái gì. Việc của chúng không phải in lại một con số, mà là hỏi máy xem hai lần đếm có ra cùng một số không.
 - kind: strategy
-  body: Mỗi câu hỏi gồm ba phần — tên bên trái, dấu so sánh bằng của Realm 0 (hai dấu bằng viết liền nhau), và tên bên phải. Câu thứ nhất so hai cái nhãn của cùng một hạt; câu thứ hai so hai con số của cả đống. Bốn cái tên đã có sẵn ở trên, dùng đúng cặp cho mỗi câu.
+  body: Mỗi câu hỏi gồm ba phần — tên bên trái, dấu so sánh bằng của Realm 0 (hai dấu bằng viết liền nhau), và tên bên phải. Cả hai câu đều lấy lần đếm của Byte làm mốc: câu thứ nhất đặt nó cạnh lần đếm thứ ba, câu thứ hai đặt nó cạnh lần đếm đầu của An.
 - kind: one-line
-  body: 'Thay `___` thứ nhất bằng `byte_goi_hat_canh_hang_rao_la == an_goi_hat_canh_hang_rao_la`, và `___` thứ hai bằng `byte_dem_ca_dong_duoc == an_dem_ca_dong_duoc`.'
+  body: 'Thay `___` thứ nhất bằng `byte_dem_ca_dong_duoc == an_dem_lai_lan_ba_duoc`, và `___` thứ hai bằng `byte_dem_ca_dong_duoc == an_dem_ca_dong_duoc`.'
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: static
-  onFail: mỗi chỗ trống phải là một câu hỏi so sánh bằng (`==`) giữa hai cái tên có sẵn — gõ thẳng `True` hay `False` thì không hỏi máy điều gì cả
+  onFail: mỗi chỗ trống phải là một câu hỏi so sánh bằng (`==`) giữa hai lần đếm — hai lần ra khác số nghĩa là đã có một lần phá luật ghép đôi, và chỉ câu hỏi viết thật mới chỉ ra chỗ lệch đó; gõ thẳng `True` hay `False` thì không hỏi máy điều gì cả
   requireAst:
   # `min: 2` vì có hai câu hỏi. Khung khởi đầu chưa có dấu `==` nào, nên luật
   # này chặn được đúng cái đáp án gõ cứng hai chữ True/False.
@@ -252,13 +253,13 @@ assert byte_dem_ca_dong_duoc == 12, "cái tên cuối cùng của dãy một–m
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Nhãn thì đổi, con số cuối thì không. Giờ mình đếm kiểu nào bạn cũng tin được.
+Hai lần khớp, một lần lệch. Chỗ lệch ấy là dấu hiệu có lần mình đã phá luật.
 ::::
 
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-Đếm hạt thì ai đếm cũng ra 12 — bạn vừa thấy vì sao.
+Đếm hạt mà giữ đủ luật thì ai đếm cũng ra 12 — bạn vừa thấy vì sao.
 
 Chiều nay Byte và An ra đo một luống đất.
 

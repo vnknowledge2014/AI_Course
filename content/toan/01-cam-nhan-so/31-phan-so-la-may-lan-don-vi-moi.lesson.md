@@ -10,7 +10,7 @@ tier: A
 languages: [python]
 defaultLanguage: python
 level: intro
-estimatedMinutes: 12
+estimatedMinutes: 14
 teaches: [math.fraction]
 requires: [math.unit-fraction, math.thanh-so, math.multiplication, math.division-partitive, math.compare-on-number-line, math.don-vi, core.output, core.arithmetic, core.division, core.boolean, ctrl.comparison]
 concepts: [math.don-vi-va-thuoc, math.thanh-so, math.tu-va-mau]
@@ -115,6 +115,36 @@ True
 Máy vừa đồng ý: ba cái thước `1/4` đặt liền nhau đúng bằng `3/4`. Nhưng máy
 không chứng minh gì cả — bằng chứng nằm ngoài vườn, ở chỗ bạn đặt thước ba lần
 mà không thêm không bớt một tấc đất nào.
+
+Và cái trọng tài này có **phạm vi** của nó, phải nói ra ngay kẻo bạn tự vấp:
+máy giữ mấy con số ấy chỉ **gần đúng**. Cách ghi số của nó ghi trọn được những
+cái thước bẻ đôi, bẻ tư, bẻ tám — với chúng máy không lệch một chút nào — nhưng
+ghi hụt cái thước `1/5`. Nên hỏi nó đúng câu định nghĩa vừa học, chỉ đổi mỗi cỡ
+thước:
+
+```python title=readonly
+print(3/5 == 1/5 + 1/5 + 1/5)
+```
+
+thì máy trả lời:
+
+```text
+False
+```
+
+Ba miếng `1/5` đúng là `3/5`, không sai chỗ nào. Chỗ này **máy sai, không phải
+toán sai** — Realm 1 có hẳn một bài kể vì sao: *Số thực chỉ là số gần đúng*.
+
+Chỗ lệch ấy nhỏ xíu: nó chỉ trồi lên khi ta cộng nhiều miếng lại rồi bắt máy
+trả lời **bằng đúng hay không**. Hỏi bên nào lớn hơn, hay hỏi hai lượng khác
+hẳn nhau có bằng nhau không, thì với những con số của bài này máy vẫn trả lời
+đúng.
+
+Vậy nên khi nhờ máy làm trọng tài, ta hỏi về những cái thước bài chọn sẵn: bẻ
+đôi, bẻ tư, bẻ tám. Còn khi cần chắc chắn với mọi cỡ thước thì có một lối đi
+không bao giờ hỏng, và bài 35 sẽ dùng tới nó: đếm bằng **số miếng nguyên** —
+hỏi máy "mỗi bên gồm mấy miếng", một câu hỏi chỉ có phép nhân, không có phép
+chia nào để mà lệch.
 ::::
 
 ::::predict{#doan-ben-nao-dai-hon commitOnce}
@@ -197,37 +227,43 @@ gạo, và về sau sẽ có cả `1/4` **của cả cái vườn**. Cùng viế
 ::::
 
 ::::code{#hoi-may-hai-cau}
-Byte muốn tự tay hỏi máy hai câu về đúng hai luống ban nãy:
+Byte muốn tự tay hỏi máy hai câu. Câu đầu về hai luống ban nãy, câu sau về một
+luống vừa đo xong bằng cái thước khác:
 
 - **Luống rau muống**: thước `1/4` sải, đặt vừa 3 lần → `3/4` sải.
 - **Luống hành**: thước `1/5` sải, đặt vừa 3 lần → `3/5` sải.
+- **Luống rau thơm**: thước `1/8` sải — sải dây bẻ làm tám — đặt vừa 3 lần.
+
+Câu 2 là chỗ bạn tự áp cái luật lên một cỡ thước bài chưa làm mẫu: viết `3/8`
+ra thì tự nó phải đúng bằng ba lần cái thước `1/8`, không cần ai nhắc.
 
 Hai chỗ trống là hai câu hỏi. Hai câu này được chọn để cho ra hai câu trả lời
 **khác nhau**: gõ cứng `False` vào cả hai thì câu 2 sai, gõ cứng `True` thì câu
 1 sai. Chỉ hai câu hỏi viết thật mới qua được cả hai.
 
 ```python title=starter
-# Câu 1: hai luống cùng "ba miếng" — chúng có bằng nhau không?
+# Câu 1: rau muống với hành, cùng "ba miếng" — hai luống có bằng nhau không?
 print(___)
 
-# Câu 2: 3/4 sải có đúng là BA LẦN cái thước 1/4 sải không?
+# Câu 2: 3/8 sải có đúng là BA LẦN cái thước 1/8 sải không?
 print(___)
 ```
 
 ```python title=solution
-# Câu 1: hai luống cùng "ba miếng" — chúng có bằng nhau không?
+# Câu 1: rau muống với hành, cùng "ba miếng" — hai luống có bằng nhau không?
 print(3/4 == 3/5)
 
-# Câu 2: 3/4 sải có đúng là BA LẦN cái thước 1/4 sải không?
-print(3/4 == 1/4 + 1/4 + 1/4)
+# Câu 2: 3/8 sải có đúng là BA LẦN cái thước 1/8 sải không?
+print(3/8 == 1/8 + 1/8 + 1/8)
 ```
 
 ```python title=test
-# Ba assert này chốt lại đúng ba điều bài vừa dạy. Chúng không chấm chữ bạn
+# Bốn assert này chốt lại đúng bốn điều bài vừa dạy. Chúng không chấm chữ bạn
 # gõ — chúng canh cho chính bài học: nếu một ngày cái máy chạy bài đổi cách
 # tính, cổng sẽ đỏ lên chứ không dạy sai lặng lẽ.
 assert 3/4 != 3/5, "cùng ba miếng, nhưng hai cỡ thước khác nhau thì hai lượng khác nhau"
 assert 3/4 == 1/4 + 1/4 + 1/4, "3/4 đúng là ba lần cái thước 1/4 — cả bài nằm ở dòng này"
+assert 3/8 == 1/8 + 1/8 + 1/8, "đổi cỡ thước thì luật vẫn thế: 3/8 là ba lần thước 1/8"
 assert 3/4 > 3/5, "miếng cỡ 1/4 to hơn miếng cỡ 1/5, nên ba miếng bên trái nhiều đất hơn"
 ```
 
@@ -235,9 +271,9 @@ assert 3/4 > 3/5, "miếng cỡ 1/4 to hơn miếng cỡ 1/5, nên ba miếng b�
 - kind: attention
   body: Ngay phía trên mỗi chỗ trống có một câu hỏi viết bằng tiếng Việt. Việc của bạn là viết lại đúng câu hỏi ấy cho máy nghe, chứ không phải tự trả lời hộ nó.
 - kind: strategy
-  body: "Cả hai câu đều là câu hỏi bằng — dấu so sánh bằng của Realm 0, hai dấu bằng viết liền nhau. Câu 1 đặt hai luống ở hai vế. Câu 2 đặt luống ở vế trái, còn vế phải phải viết ra ba cái thước 1/4 cộng lại."
+  body: "Cả hai câu đều là câu hỏi bằng — dấu so sánh bằng của Realm 0, hai dấu bằng viết liền nhau. Câu 1 đặt hai luống ở hai vế. Câu 2 đặt luống rau thơm ở vế trái, còn vế phải phải viết ra ba cái thước 1/8 cộng lại."
 - kind: one-line
-  body: "Chỗ trống thứ nhất là `3/4 == 3/5`, chỗ trống thứ hai là `3/4 == 1/4 + 1/4 + 1/4`."
+  body: "Chỗ trống thứ nhất là `3/4 == 3/5`, chỗ trống thứ hai là `3/8 == 1/8 + 1/8 + 1/8`."
 :::
 
 :::validate
@@ -247,10 +283,12 @@ assert 3/4 > 3/5, "miếng cỡ 1/4 to hơn miếng cỡ 1/5, nên ba miếng b�
   onFail: mỗi chỗ trống phải là một câu hỏi so sánh bằng (`==`) viết bằng phân số — gõ thẳng `True` hay `False` thì không hỏi máy điều gì cả
   requireAst:
   # `==` min 2 vì có hai câu hỏi, và khung chưa có dấu `==` nào — luật này
-  # chặn đúng cái đáp án gõ cứng hai chữ True/False. `/` min 2 buộc câu hỏi
-  # phải viết bằng phân số, không phải bằng một con số đã tính sẵn.
+  # chặn đúng cái đáp án gõ cứng hai chữ True/False. Khung cũng chưa có dấu
+  # `/` nào, nên `/` min 4 đòi mỗi chỗ trống ít nhất hai phân số: một câu tự
+  # đúng cho xong chuyện như `1 == 1` hay `0.75 == 0.75` chỉ góp được 0–2 dấu
+  # `/` nên trượt, còn cách viết thật — kể cả `3/8 == 3 * (1/8)` — thì đủ.
   - kind: uses-operator, target: ==, min: 2
-  - kind: uses-operator, target: /, min: 2
+  - kind: uses-operator, target: /, min: 4
 - tier: output
   match: regex
   expect: ^False\nTrue\s*$

@@ -152,7 +152,7 @@ Gần đúng ở chỗ bạn tính không sai một bước: `3 × 3 = 9`, rồi
 An lộ ra chỗ chưa xong.
 
 Chỗ ra ngoài phạm vi: dòng `print` không in cái tên ấy, nó in kết quả của dấu `<`.
-Dấu `<` là một câu hỏi có–không (R0 bài 6), nên thứ đi ra khỏi nó luôn là `True`
+Dấu `<` là một câu hỏi có–không (R0 bài 24), nên thứ đi ra khỏi nó luôn là `True`
 hoặc `False`, không bao giờ là một con số. Muốn thấy số 4 thì viết
 `print(thua_theo_an)`.
 ::
@@ -183,12 +183,15 @@ Hôm nay Byte đo hai thứ trong vườn, bằng hai cái thước khác nhau:
 - **Nắm hạt**: 20 hạt, đóng thành từng gói 6 hạt. Byte đóng được **3 gói**.
 
 Mỗi lần đo in hai dòng: dòng trên là phần còn thừa, dòng dưới là câu kiểm
-*"phần thừa có nhỏ hơn cái thước không"* — dòng ấy đã viết sẵn. Việc của bạn là
-hai chỗ trống: tính ra phần còn thừa.
+*"phần thừa có nhỏ hơn cái thước không"*. Câu kiểm của lần đo thứ nhất đã viết
+sẵn làm mẫu; câu kiểm của lần đo thứ hai thì bạn tự viết lấy. Ba chỗ trống tất
+cả: hai chỗ tính phần còn thừa, một chỗ phát biểu chính cái luật của bài.
 
 Bài chấm bằng **cả hai** lần đo, và hai lần này cố tình dùng hai cỡ thước khác
-nhau với hai số dư khác nhau. Gõ cứng một con số vào cả hai chỗ thì chỉ đúng
-được nhiều nhất một lần; chỉ phép tính viết thật mới qua được cả hai.
+nhau với hai số dư khác nhau. Gõ cứng một con số vào hai chỗ tính thì chỉ đúng
+được nhiều nhất một lần; chỉ phép tính viết thật mới qua được cả hai. Chỗ trống
+thứ ba cũng vậy: nó phải hỏi bằng **cái tên** vừa tính ra, không phải bằng con
+số chép lại.
 
 ```python title=starter
 thua_day = ___
@@ -197,7 +200,7 @@ print(thua_day < 3)
 
 thua_hat = ___
 print(thua_hat)
-print(thua_hat < 6)
+print(___)
 ```
 
 ```python title=solution
@@ -225,21 +228,27 @@ assert thua_hat < 6, "dư phải nhỏ hơn cái gói 6 hạt — nếu không t
 - kind: attention
   body: Phần còn thừa là chỗ chênh giữa lượng lúc đầu và phần đã bị các lần đặt thước ăn hết. Đề bài cho sẵn cả ba con số cần dùng cho mỗi lần đo.
 - kind: strategy
-  body: Với sợi dây, các đoạn ăn hết `3 * 4` mét, còn lúc đầu có 13 mét. Lấy cái lớn trừ đi cái đã bị ăn hết là ra phần trên tay. Nắm hạt làm y hệt, chỉ đổi ba con số.
+  body: Với sợi dây, các đoạn ăn hết `3 * 4` mét, còn lúc đầu có 13 mét. Lấy cái lớn trừ đi cái đã bị ăn hết là ra phần trên tay. Nắm hạt làm y hệt, chỉ đổi ba con số. Chỗ trống cuối thì chép đúng hình dạng của dòng câu kiểm ở lần đo thứ nhất, đổi sang tên và cỡ thước của lần đo thứ hai.
 - kind: one-line
-  body: "Thay `___` thứ nhất bằng `13 - (3 * 4)` và `___` thứ hai bằng `20 - (6 * 3)`."
+  body: "Thay `___` thứ nhất bằng `13 - (3 * 4)`, `___` thứ hai bằng `20 - (6 * 3)`, và `___` thứ ba bằng `thua_hat < 6`."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: static
-  onFail: mỗi chỗ trống phải là một phép tính có nhân và có trừ (`lượng ban đầu - (thước * số lần)`) — chép thẳng con số đáp án thì không tính ra được gì
+  onFail: hai chỗ trống đầu phải là một phép tính có nhân và có trừ (`lượng ban đầu - (thước * số lần)`), còn chỗ trống thứ ba phải hỏi `thua_hat` có nhỏ hơn 6 không — chép thẳng con số đáp án thì không tính và không kiểm được gì
   requireAst:
   # Hai lần đo, mỗi lần một phép nhân và một phép trừ. Khung chưa có dấu `*`
   # hay `-` nào, nên luật này chặn được đúng cái đáp án chép cứng hai con số.
   - kind: uses-operator, target: *, min: 2
   - kind: uses-operator, target: -, min: 2
+  # Khung có sẵn đúng MỘT dấu `<` (câu kiểm mẫu của lần đo thứ nhất), nên
+  # `min: 2` ép chỗ trống thứ ba phải là câu kiểm thật chứ không phải `True`.
+  - kind: uses-operator, target: <, min: 2
+  # Và khung mới ĐỌC `thua_hat` một lần, nên `min: 2` ép câu kiểm ấy hỏi bằng
+  # cái tên vừa tính ra, chặn đáp án `print(2 < 6)` chép cứng con số.
+  - kind: uses-name, target: thua_hat, min: 2
 - tier: output
   match: regex
   expect: ^1\nTrue\n2\nTrue\s*$

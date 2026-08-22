@@ -10,7 +10,7 @@ tier: A
 languages: [python]
 defaultLanguage: python
 level: intro
-estimatedMinutes: 12
+estimatedMinutes: 13
 teaches: [math.number-line-add]
 requires: [math.thanh-so, math.addition-as-union, core.variable, core.reassign, core.rhs-first, core.arithmetic, core.print-variable]
 concepts: [math.buoc-tren-thanh-so, math.don-vi, math.moc-khong]
@@ -185,13 +185,19 @@ cùng lấy đầu luống làm mốc 0.
 
 - **Byte** đang ở vạch `4`, cuốc thêm `7` sải nữa.
 - **An** đang ở vạch `9`. Trời đổ mưa nên An không cuốc thêm sải nào — `0` bước.
+- **Hôm sau, An sang luống mới**, bắt đầu ở vạch `2`. Sáng cuốc thêm `3` sải,
+  nghỉ trưa, chiều cuốc thêm `4` sải nữa.
 
-Điền hai chỗ trống để máy nói ra mỗi người dừng ở vạch nào.
+Điền bốn chỗ trống để máy nói ra mỗi chuyến dừng ở vạch nào.
 
-Bài chấm bằng **cả hai người**, và hai người này được chọn để cho ra hai con số
-khác nhau: một người có bước, một người đứng yên. Gõ cứng `11` vào cả hai chỗ
-thì An sai; gõ cứng `9` thì Byte sai. Chỉ một phép cộng viết thật mới qua được
-cả hai.
+Bài chấm bằng **cả ba chuyến**, và chúng được chọn để cho ra những con số khác
+nhau: một người có bước, một người đứng yên, một người đi hai chặng. Gõ cứng
+`11` vào mọi chỗ thì An sai; gõ cứng `9` thì Byte sai. Chỉ phép cộng viết thật
+mới qua được cả ba.
+
+Chuyến thứ ba có chỗ đáng để ý: cái tên `vi_tri_an` **không** giữ số sải đã
+cuốc, nó giữ **chỗ đang đứng** — đúng như `vi_tri` ở bước đoán phía trên. Sau
+buổi sáng nó đã dời chỗ, nên buổi chiều phải đi tiếp **từ chỗ mới ấy**.
 
 ```python title=starter
 cho_dung_byte = 4
@@ -202,8 +208,14 @@ cho_dung_an = 9
 so_buoc_an = 0
 cho_toi_an = ___
 
+# Hôm sau, luống mới. An bắt đầu ở vạch 2.
+vi_tri_an = 2
+vi_tri_an = ___   # sáng cuốc thêm 3 sải
+vi_tri_an = ___   # chiều cuốc thêm 4 sải
+
 print(cho_toi_byte)
 print(cho_toi_an)
+print(vi_tri_an)
 ```
 
 ```python title=solution
@@ -215,25 +227,32 @@ cho_dung_an = 9
 so_buoc_an = 0
 cho_toi_an = cho_dung_an + so_buoc_an
 
+# Hôm sau, luống mới. An bắt đầu ở vạch 2.
+vi_tri_an = 2
+vi_tri_an = vi_tri_an + 3   # sáng cuốc thêm 3 sải
+vi_tri_an = vi_tri_an + 4   # chiều cuốc thêm 4 sải
+
 print(cho_toi_byte)
 print(cho_toi_an)
+print(vi_tri_an)
 ```
 
 ```python title=test
-# Ba câu chốt lại đúng ba điều bài vừa nói, trên hai người khác nhau — nên một
-# con số gõ cứng chỉ qua được nhiều nhất một câu.
+# Bốn câu chốt lại đúng những điều bài vừa nói, trên ba chuyến khác nhau — nên
+# một con số gõ cứng chỉ qua được nhiều nhất một câu.
 assert cho_toi_byte == 11, "đứng ở vạch 4, bước sang phải 7 vạch thì tới vạch 11"
 assert cho_toi_an == 9, "An bước 0 bước, nên An vẫn ở vạch cũ"
 assert cho_toi_an == cho_dung_an, "cộng 0 là đứng yên — chỗ tới phải trùng chỗ đứng"
+assert vi_tri_an == 9, "đi hai chặng từ vạch 2: 3 sải rồi 4 sải, dừng ở vạch 9"
 ```
 
 :::hints
 - kind: attention
-  body: Nhìn hai dòng ngay phía trên mỗi chỗ trống. Một dòng cho biết người đó đang đứng ở vạch nào, dòng kia cho biết người đó bước mấy bước. Chỗ trống cần cả hai, không chỉ một.
+  body: Nhìn hai dòng ngay phía trên mỗi chỗ trống. Một dòng cho biết người đó đang đứng ở vạch nào, dòng kia cho biết người đó bước mấy bước. Chỗ trống cần cả hai, không chỉ một. Riêng hai chỗ trống cuối thì chỗ đứng nằm ở dòng ngay trên nó, và nó đổi sau mỗi chặng.
 - kind: strategy
-  body: Trên thanh số, chỗ tới = chỗ đứng dời sang phải bấy nhiêu vạch. Viết nó bằng hai cái tên có sẵn nối bằng dấu cộng — đừng viết thẳng con số đích, vì con số ấy chính là thứ bạn đang nhờ máy tìm hộ.
+  body: Trên thanh số, chỗ tới = chỗ đứng dời sang phải bấy nhiêu vạch. Viết nó bằng hai cái tên có sẵn nối bằng dấu cộng — đừng viết thẳng con số đích, vì con số ấy chính là thứ bạn đang nhờ máy tìm hộ. Ở chuyến thứ ba, chỗ đứng lúc chiều chính là `vi_tri_an` sau buổi sáng, nên tên ấy phải có mặt ở cả hai vế.
 - kind: one-line
-  body: "Chỗ trống thứ nhất là `cho_dung_byte + so_buoc_byte`, chỗ trống thứ hai là `cho_dung_an + so_buoc_an`."
+  body: "Ba chỗ đầu là `cho_dung_byte + so_buoc_byte`, `cho_dung_an + so_buoc_an`, `vi_tri_an + 3`; chỗ cuối là `vi_tri_an + 4`."
 :::
 
 :::validate
@@ -242,17 +261,24 @@ assert cho_toi_an == cho_dung_an, "cộng 0 là đứng yên — chỗ tới ph�
 - tier: static
   onFail: mỗi chỗ trống phải là một phép cộng giữa chỗ đứng và số bước — gõ thẳng con số đích thì máy không tính gì cả, bạn tính hộ nó rồi
   requireAst:
-  # `min: 2` vì có hai người, mỗi người một phép cộng. Khung khởi đầu chưa có
-  # dấu `+` nào, nên luật này chặn được đúng cái đáp án chép cứng hai con số.
-  - kind: uses-operator, target: +, min: 2
+  # `min: 4` vì có bốn chỗ trống, mỗi chỗ một phép cộng. Khung khởi đầu chưa có
+  # dấu `+` nào, nên luật này chặn được đúng cái đáp án chép cứng bốn con số.
+  - kind: uses-operator, target: +, min: 4
+  # Hai chặng của chuyến thứ ba phải ĐỌC LẠI chỗ đang đứng, không được viết
+  # `2 + 3` rồi `5 + 4`. `min: 3` = hai lần đọc trong hai chặng, cộng lần đọc
+  # ở `print`.
+  - kind: uses-name, target: vi_tri_an, min: 3
+- tier: tests
+  timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^11\n9\s*$
+  expect: ^11\n9\n9\s*$
 :::
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Vạch 11 và vạch 9. Đi bảy bước hay đứng yên, mình đều theo chân được.
+Vạch 11, vạch 9, rồi lại vạch 9. Đi bảy bước, đứng yên, hay đi hai chặng — mình
+đều theo chân được.
 ::::
 
 ::::reflect{#nghi-lai}
@@ -264,10 +290,15 @@ thêm một đơn vị, và Byte cuốc được thêm một sải.
 Nhưng cái thanh số nằm đó cả hai chiều. Không có gì trên hình cấm Byte quay
 người lại và bước ngược về phía đầu luống.
 
-Vậy bước sang **trái** là phép gì? Nó phải có tên, vì Byte hỏi nó suốt: *sâu ăn
-mất mấy cây rồi còn mấy cây*, *đong ra ba lon rồi trong thùng còn mấy lon*, *đi
-được 5 mét rồi còn phải cuốc bao xa nữa*. Ba câu ấy nghe khác nhau — nhưng có
-thật là chúng cùng một phép không?
+Vậy bước sang **trái** là phép gì? Nó phải có tên, vì Byte hỏi nó suốt. Ba câu
+sau đây Byte hỏi gần như mỗi ngày, và cố ý dùng chung đúng một cặp số — `12` với
+`5` — để bạn nhìn ra thứ đáng nhìn:
+
+- *Luống có 12 cây, sâu ăn mất 5 cây thì còn mấy cây?*
+- *Thùng có 12 lon gạo, đong ra 5 lon thì trong thùng còn mấy lon?*
+- *Cả luống dài 12 sải, Byte cuốc tới vạch 5 thì còn phải cuốc mấy sải nữa?*
+
+Ba câu ấy nghe khác nhau — nhưng có thật là chúng cùng một phép không?
 
 Bài sau trả lời vế đầu.
 ::::
