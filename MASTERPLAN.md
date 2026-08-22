@@ -24,7 +24,7 @@
 | 10 | Chấm bài | **Assertion tất định trên artifact của học viên.** Không bao giờ chấm bằng free-text LLM, không so khớp trace với hệ thật, không so stdout với runtime khác | golden-trace matching, LLM-as-judge, byte-sim pass@all cho prompt |
 | 11 | Self-test compiler | Chạy solution trong **ĐÚNG runtime shipped** (Pyodide dưới Node, byte-rust WASM, TS worker) — CI bắt buộc | CPython/Node native (sai lệch ngữ nghĩa) |
 | 12 | Sao/huy hiệu | **4 huy hiệu không thứ bậc** (Hoàn thành · Tự lực · Tinh gọn · Giải thích được), cộng dồn, không mất. Xoá cơ chế "3 sao = không dùng hint" | Phạt việc dùng gợi ý, tụt hạng khi sai |
-| 13 | Phạm vi v1.0 | **~180 lesson TIER-A** (Realm 0 + Realm 1 Python + Math T2.1–T2.3) + **toàn bộ 159 chương ở TIER-C reading mode**. Mọi thứ khác vào `roadmap.yaml`, KHÔNG schema-validate, KHÔNG vào build | Đóng băng 282 quest / 1.680 lesson, "ship khi đủ 10 realm" |
+| 13 | Phạm vi v1.0 | **302 lesson TIER-A** (R0 40 + R1 150 + R2.T1–T3 112) + **toàn bộ 159 chương ở TIER-C reading mode**. Mọi thứ khác vào `roadmap.yaml`, KHÔNG schema-validate, KHÔNG vào build | Đóng băng 282 quest / 1.680 lesson, "ship khi đủ 10 realm" |
 | 14 | App Store 2.5.2 | Content pack **hai lớp**: PROSE (OTA tự do) và EXEC (trong bundle app, iOS từ chối EXEC đến từ OTA). Tab "Test" hiện `testCode` **xem và sửa được** | OTA toàn bộ content pack kèm `testCode` ẩn |
 
 ---
@@ -1215,9 +1215,24 @@ Dùng gợi ý **không mất** huy hiệu `Hoàn thành`; chỉ ảnh hưởng 
 
 | Artifact | Nội dung | Được validate? | Vào build? |
 |---|---|---|---|
-| `content/curriculum/skill-tree.v1.yaml` | **CHỈ R0 + R1 + R2.T1–T3 + R3.T1–T2**, mức lesson, ~180 lesson TIER-A | ✅ blocking | ✅ |
+| `content/curriculum/skill-tree.v1.yaml` | **CHỈ R0 + R1 + R2.T1–T3**, mức lesson, **302 lesson TIER-A** | ✅ blocking | ✅ |
 | `content/curriculum/roadmap.yaml` | R2.T4–T7, R4–R9, mức **TRACK**, không mức lesson | ❌ | ❌ |
 | `content/curriculum/BACKLOG.md` | Mọi đề xuất mở rộng (ngôn ngữ thứ 4, realm mới) | ❌ | ❌ |
+
+> **Sửa số 2026-08-22 — phạm vi v1.0 là 302, không phải ~180.**
+>
+> Con số `~180` xuất hiện ở cả quyết định 13 lẫn bảng trên, và nó sai ở cả hai
+> chỗ: R0 (40) + R1 (150) + R2.T1–T3 (112) = **302**. Không có cách đọc nào
+> của ba phần ấy ra 180.
+>
+> Bảng này còn liệt kê thêm R3.T1–T2 (64 bài) trong khi quyết định 13 thì
+> không — hai artifact định nghĩa "xong" theo hai cách khác nhau. Chốt theo
+> quyết định 13, vì nó là hàng đóng băng: **R3 chuyển sang `roadmap.yaml`**.
+>
+> Sai số này không vô hại. `~180` là ngưỡng "v1 xong", và giữ nó nghĩa là dự
+> án sẽ tuyên bố hoàn thành khi mới đi được 60% quãng đường — đúng loại lỗi
+> mà cả tập cổng kiểm trong repo này được dựng lên để chặn: một con số xanh
+> không đo cái nó nói là đang đo.
 
 ### 9.1 Cây đầy đủ 10 Realm (trạng thái đóng băng ghi rõ)
 
