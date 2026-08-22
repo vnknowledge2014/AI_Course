@@ -7,6 +7,9 @@ public/thu-vien/
 # byte_rust.wasm build từ crates/byte-rust bằng `pnpm run wasm`.
 public/wasm/
 
+# lib.d.ts gộp từ node_modules/typescript bằng `pnpm run ts-lib`.
+public/ts-lib/
+
 # Runtime Pyodide (12 MB) sao từ node_modules bằng `pnpm run pyodide`.
 # Không commit: nó là bản phát hành của bên thứ ba, phiên bản đã ghim trong
 # package.json rồi.

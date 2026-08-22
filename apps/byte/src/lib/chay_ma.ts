@@ -79,5 +79,53 @@ export async function chay(
   the_gioi?: unknown,
 ): Promise<KetQuaChay> {
   if (ngon_ngu === 'rust') return chay_rust(ma, ma_kiem_tra);
+  if (ngon_ngu === 'typescript') return chay_typescript(ma, ma_kiem_tra);
   return chay_python(ma, ma_kiem_tra, the_gioi);
+}
+
+/* ── TypeScript ─────────────────────────────────────────────────────────── */
+
+/** Bộ thực thi TypeScript, nạp LƯỜI.
+ *
+ *  Trình biên dịch `typescript` nặng 8,7 MB và bảng `lib.d.ts` thêm 3,1 MB.
+ *  Nạp chúng lúc mở ứng dụng nghĩa là bắt mọi người học Python trả giá cho
+ *  một thứ họ không dùng — nên chúng chỉ được nạp khi có bài TypeScript thật
+ *  sự chạy, và Vite tách chúng thành chunk riêng.
+ *
+ *  Kiểm kiểu ở HOST chứ không trong worker: mã sai kiểu không được xuống tới
+ *  worker, đúng luật chung của cả ba engine (ADR-002).
+ */
+let may_ts: import('@byte/exec-typescript').BoThucThiTypeScript | null = null;
+
+async function tao_may_ts() {
+  if (may_ts) return may_ts;
+
+  const [{ BoThucThiTypeScript, kiemKieu }, TS, lib] = await Promise.all([
+    import('@byte/exec-typescript'),
+    import('typescript'),
+    fetch(`${import.meta.env.BASE_URL}ts-lib/lib.json`).then((r) => {
+      if (!r.ok) throw new Error(`không nạp được lib.d.ts (HTTP ${r.status})`);
+      return r.json() as Promise<Record<string, string>>;
+    }),
+  ]);
+
+  may_ts = new BoThucThiTypeScript(
+    () => {
+      const w = new Worker(new URL('./typescript.worker.ts', import.meta.url), { type: 'module' });
+      return {
+        gui: (tin) => w.postMessage(tin),
+        khiNhan: (xu_ly: (t: TinNhanTuWorker) => void) => {
+          w.onmessage = (e: MessageEvent<TinNhanTuWorker>) => xu_ly(e.data);
+        },
+        giet: () => w.terminate(),
+      };
+    },
+    (ma) => kiemKieu(TS as never, ma, (ten) => lib[ten]),
+  );
+  return may_ts;
+}
+
+export async function chay_typescript(ma: string, ma_kiem_tra?: string): Promise<KetQuaChay> {
+  const m = await tao_may_ts();
+  return ma_kiem_tra ? m.chay(ma, { maKiemTra: ma_kiem_tra }) : m.chay(ma);
 }

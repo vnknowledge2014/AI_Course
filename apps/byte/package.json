@@ -10,11 +10,12 @@
     "typecheck": "svelte-check --tsconfig ./tsconfig.json",
     "noi-dung": "node ../../packages/content-compiler/dist/cli.js build ../../content public/noi-dung",
     "pyodide": "node -e \"const p=require('node:path').dirname(require.resolve('pyodide/package.json')),f=require('node:fs');f.mkdirSync('public/pyodide',{recursive:true});for(const n of ['pyodide.asm.js','pyodide.asm.wasm','pyodide.mjs','python_stdlib.zip','pyodide-lock.json'])f.copyFileSync(p+'/'+n,'public/pyodide/'+n)\"",
-    "chuan-bi": "pnpm run noi-dung && pnpm run thu-vien && pnpm run pyodide && pnpm run wasm",
+    "chuan-bi": "pnpm run noi-dung && pnpm run thu-vien && pnpm run pyodide && pnpm run wasm && pnpm run ts-lib",
     "tauri": "tauri",
     "test": "tsc src/lib/cay_ky_nang.ts src/lib/tien_do.ts --outDir dist-test --module esnext --target es2022 --moduleResolution bundler --skipLibCheck --types vite/client && node --test test/*.test.mjs",
     "thu-vien": "node ../../packages/content-compiler/dist/cli.js legacy ../../content public/thu-vien",
-    "wasm": "cargo build --release --target wasm32-unknown-unknown -p byte-rust && node -e \"require('node:fs').mkdirSync('public/wasm',{recursive:true});require('node:fs').copyFileSync('../../target/wasm32-unknown-unknown/release/byte_rust.wasm','public/wasm/byte_rust.wasm')\""
+    "wasm": "cargo build --release --target wasm32-unknown-unknown -p byte-rust && node -e \"require('node:fs').mkdirSync('public/wasm',{recursive:true});require('node:fs').copyFileSync('../../target/wasm32-unknown-unknown/release/byte_rust.wasm','public/wasm/byte_rust.wasm')\"",
+    "ts-lib": "node -e \"const p=require('node:path').dirname(require.resolve('typescript')),f=require('node:fs');const m={};for(const n of f.readdirSync(p).filter(x=>/^lib\\\\..*\\\\.d\\\\.ts$/.test(x)))m[n]=f.readFileSync(p+'/'+n,'utf8');f.mkdirSync('public/ts-lib',{recursive:true});f.writeFileSync('public/ts-lib/lib.json',JSON.stringify(m));console.log(Object.keys(m).length+' lib.d.ts -> public/ts-lib/lib.json')\""
   },
   "dependencies": {
     "@byte/content-schema": "workspace:*",
@@ -23,7 +24,9 @@
     "pyodide": "^0.29.4",
     "@byte/exec-core": "workspace:*",
     "@byte/exec-python": "workspace:*",
-    "@byte/exec-rust": "workspace:*"
+    "@byte/exec-rust": "workspace:*",
+    "@byte/exec-typescript": "workspace:*",
+    "sucrase": "^3.35.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
