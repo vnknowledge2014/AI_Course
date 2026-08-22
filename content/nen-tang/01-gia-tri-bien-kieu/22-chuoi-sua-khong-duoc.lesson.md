@@ -221,13 +221,13 @@ print(ten)
 ```python title=test
 # Ba câu hỏi khác nhau, một chỗ trống. Phải đúng cả ba mới là hiểu bài.
 # 1. Chuỗi mới dựng đúng chưa — sai một ô là lệch ngay.
-assert ten_moi == "Trà sữa"
+assert ten_moi == "Trà sữa", "cột tên khoản đòi chữ đầu viết hoa, nên tấm biển mới phải đọc ra là Trà sữa"
 # 2. Chuỗi cũ có suy suyển không. Đây là chỗ luật bất biến hiện ra: bất kỳ cách
 #    nào "sửa tại chỗ" đều đã nổ TypeError từ trước, nên `ten` buộc phải nguyên.
-assert ten == "trà sữa"
+assert ten == "trà sữa", "tấm biển cũ vẫn nguyên chữ khách gõ — không ai mài lại được một nét của chuỗi đã dựng"
 # 3. Sáu ô sau phải lấy từ chính `ten`, không phải gõ tay một chuỗi khác:
 #    ghép chữ hoa với phần đuôi của `ten` thì kết quả trùng khít.
-assert ten_moi == "T" + ten[1] + ten[2] + ten[3] + ten[4] + ten[5] + ten[6]
+assert ten_moi == "T" + ten[1] + ten[2] + ten[3] + ten[4] + ten[5] + ten[6], "sáu ký tự đằng sau phải lấy ra từ chính tên khách gõ, không phải gõ tay lại một tên khác"
 ```
 
 :::hints

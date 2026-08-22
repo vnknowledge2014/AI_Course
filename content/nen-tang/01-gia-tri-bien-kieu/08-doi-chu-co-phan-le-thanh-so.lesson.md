@@ -217,13 +217,13 @@ print(doc_tien("220"))
 # Chấm trên BỐN ô khác nhau. Ô "220" không có dấu chấm — nó là ô mà `int()`
 # cũng đọc trôi, nên nếu chỉ chấm bằng ô đó thì đáp án sai vẫn qua. Ô "32.3"
 # và "25.5" mới là chỗ phân biệt.
-assert doc_tien("32.3") == 32300
-assert doc_tien("25.5") == 25500
-assert doc_tien("220") == 220000
-assert doc_tien("7") == 7000
+assert doc_tien("32.3") == 32300, "ô trên phiếu ghi 32.3 nghìn thì đọc ra ba mươi hai nghìn ba trăm đồng"
+assert doc_tien("25.5") == 25500, "ô ghi 25.5 là hai mươi lăm nghìn rưỡi — phần sau dấu chấm cũng là tiền, không được bỏ"
+assert doc_tien("220") == 220000, "ô không có dấu chấm vẫn là số nghìn, nên 220 đọc ra là 220 nghìn đồng"
+assert doc_tien("7") == 7000, "người ghi sổ gõ mỗi số 7 là bảy nghìn đồng, không phải bảy đồng"
 # Ra khỏi hàm thì tiền phải là số ĐẾM, đúng luật bài 7: số nguyên in ra không
 # có đuôi `.0`, số thực thì có.
-assert f"{doc_tien('32.3')}" == "32300"
+assert f"{doc_tien('32.3')}" == "32300", "ra khỏi hàm thì tiền phải là số đồng đếm được, in ra không kèm đuôi .0"
 ```
 
 :::hints

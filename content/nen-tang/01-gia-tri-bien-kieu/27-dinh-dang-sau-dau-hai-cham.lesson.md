@@ -226,11 +226,11 @@ print(dong_tet)
 #   2500000 / 7  = 357142.857…  → cắt ra .85, làm tròn ra .86, chỉ một cái đúng.
 # Số chữ số lẻ cũng bị soi: `.1f` cho 45333.3, `.3f` cho 45333.333, `.0f` cho
 # 45333 — cả ba đều trượt assert đầu tiên.
-assert dong_thang == "Trung bình mỗi ngày: 45333.33đ"
-assert dong_tet == "Bảy ngày Tết mỗi ngày: 357142.86đ"
+assert dong_thang == "Trung bình mỗi ngày: 45333.33đ", "1360 nghìn chia đều cho 30 ngày, và dòng báo cáo chỉ đọc hai chữ số sau dấu chấm"
+assert dong_tet == "Bảy ngày Tết mỗi ngày: 357142.86đ", "2500 nghìn chia bảy ngày Tết ra đuôi .857, mà tiền thì làm tròn lên chứ không cắt cụt xuống"
 # Phần định dạng chỉ đổi cách VIẾT RA, không đổi giá trị đang được đặt tên.
-assert trung_binh == 1360000 / 30
-assert bay_ngay_tet == 2500000 / 7
+assert trung_binh == 1360000 / 30, "lời dặn cách viết chỉ làm gọn dòng in ra; mức trung bình tháng vẫn giữ nguyên cái đuôi dài của nó"
+assert bay_ngay_tet == 2500000 / 7, "mức trung bình ngày Tết cũng vậy — không ai được làm tròn sẵn con số trước khi in"
 ```
 
 :::hints

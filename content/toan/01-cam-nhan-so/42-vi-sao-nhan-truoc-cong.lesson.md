@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 14
 teaches: [math.order-of-operations]
-requires: [math.unit-rate, core.arithmetic, core.variable, core.print-variable, core.number-literal]
+requires: [math.unit-rate, math.multiplication, math.addition-as-union, math.multiply-distributive, math.additive-inverse, math.division-quotative, core.arithmetic, core.variable, core.print-variable, core.number-literal]
 concepts: [math.thu-tu-phep-toan, math.ky-hieu]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -156,8 +156,9 @@ cũng có bước ấy: đếm hết luống rồi mới đổ túi ra đếm ti
 Máy báo lỗi vì một dòng đọc được theo hai cách
 ::why
 Gần đúng ở chỗ bạn nhớ một luật đắt giá của Realm 0 bài 3: máy không tự bổ sung
-ý bạn quên nói, và gặp chỗ không có câu trả lời đúng duy nhất thì nó dừng lại
-hỏi — đó chính là cách `TypeError` ra đời.
+ý bạn quên nói, nó làm đúng nghĩa đen. Và khi việc bạn bảo nó làm không có quy
+ước nào — cộng một câu chữ với một con số chẳng hạn — thì nó dừng hẳn và nói ra;
+đó là `TypeError` của R0 bài 16.
 
 Chỗ lệch là dòng này không mập mờ với máy. Người đọc thấy hai cách vì người đọc
 chưa có luật; máy thì có sẵn một luật đọc và áp nó không do dự. Điều đáng hỏi
@@ -183,24 +184,54 @@ ngược lại thì mỗi câu "mấy luống mỗi luống mấy hạt, cộng 
 kèm một dấu báo hiệu — mà loại dấu ấy là chuyện của bài sau.
 
 Và luật này còn trả một món nợ cũ. Bài 21 cắt mảng 7 × 13 thành hai miếng rồi
-viết:
+viết — để ý hai cặp ngoặc:
 
 ```text
-7 × 13  =  7 × 10  +  7 × 3
+7 × 13  =  (7 × 10) + (7 × 3)
 ```
 
-Vế phải của dòng ấy chỉ đúng nếu **cả hai phép nhân xong trước** rồi mới cộng.
-Lúc ấy bạn đã dùng luật này rồi, chỉ chưa ai nói tên nó ra. Giờ thì nói rồi, và
-lý do cũng đúng lý do cũ: `7 × 10` với `7 × 3` là hai miếng đã cắt của cùng một
-mảng — hai cái khối — nên phải gói xong mới gộp lại được.
+Bài 21 giữ nguyên hai cặp ngoặc ấy để bạn nhìn thấy hai cái miếng, và hứa một
+câu: *nhiều người bỏ ngoặc mà dòng vẫn ra 91 — vì sao bỏ được, bài 42 sẽ trả
+lời*. Đây là câu trả lời. Hai cặp ngoặc chỉ đang nói ra bằng dấu đúng cái thứ
+tự mà luật vừa dựng đã bảo đảm sẵn: `7 × 10` với `7 × 3` là hai miếng cắt ra
+của cùng một mảng — hai cái khối — nên phải gói xong mới gộp được, có ngoặc hay
+không cũng thế. Luật đã lo phần ấy thì ngoặc thành thừa, và
+`7 × 13 = 7 × 10 + 7 × 3` vẫn đúng 91.
 
-Hai chú thích ngắn, cả hai đều là đồ bạn đã có:
+Nhớ cách nói đó, vì nó là chỗ bài sau bắt đầu: ngoặc không biến mất khỏi toán,
+nó chỉ hết việc ở những dòng mà luật mặc định vốn đã đoán đúng.
+
+Ba chú thích ngắn, cả ba đều là đồ bạn đã có:
 
 - **Phép chia đứng cùng hạng với phép nhân.** Bài 27 cho thấy chia cũng là một
   cách gói: "mấy đoạn 3 mét lọt vào 12 mét" cũng là một khối, không phải hai
   lượng ngang hàng.
 - **Phép trừ đứng cùng hạng với phép cộng.** Bài 18 đã cho thấy trừ chính là
   cộng với số đối, nên nó không thể có hạng riêng.
+- **Trong cùng một hạng thì đọc từ trái sang phải.** Lý do vẫn là lý do cũ:
+  cùng hạng nghĩa là không còn cái khối nào phải gói trước, nên chỉ còn thứ tự
+  kể chuyện. `12 / 2 * 3` là chia đôi khúc dây 12 mét rồi lấy 3 lần khúc ấy —
+  18 mét; nó **không** phải 12 mét chia cho 6. `10 - 3 + 2` là bớt 3 rồi thêm 2
+  — còn 9, không phải 5.
+
+Chú thích cuối là chỗ dễ tự dựng lại một luật sai nhất, nên kiểm luôn bằng máy:
+
+```python title=readonly
+print(12 / 2 * 3)
+print(10 - 3 + 2)
+print(12 / 6)
+```
+
+```text
+18.0
+9
+2.0
+```
+
+Dòng thứ ba in ra `2.0` — đó là con số bạn ra nếu gộp `2 * 3` lại trước rồi mới
+chia. Nó tả một câu chuyện khác: một khúc dây chia cho 6 người. Trong dòng
+`12 / 2 * 3` không có gì nói lên câu chuyện ấy, và muốn nói ra thì phải có thêm
+một loại dấu — đúng cái loại dấu mà bài sau đưa cho bạn.
 ::::
 
 ::::byte{trigger=enter mood=thinking pose=point-editor}
@@ -298,7 +329,7 @@ bằng `3 + 4 × 5`. Câu chuyện còn lại chưa có dòng nào để viết 
 
 Vậy khi hình dạng trong đầu bạn không trùng với hình dạng mà luật đọc mặc định
 giả sử, bạn nói nó ra bằng gì? Bài sau trả lời — và món đồ ấy bạn đã cầm trong
-tay từ lâu mà chưa biết tên nó.
+tay từ bài 21, chỉ chưa biết nó còn làm được việc gì ngoài chỉ chỗ cắt mảng.
 ::::
 
 ::::checkpoint{mastery=0.8}

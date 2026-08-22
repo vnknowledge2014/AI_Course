@@ -230,9 +230,9 @@ for o in cot:
 #                      cuối dãy không nổ, chỉ đưa phần còn lại)
 #   "trà tắc"       —  7 ký tự, thêm một ca ngắn để cắt sai kiểu `[0:7]` cũng
 #                      lộ ra ở tên trên
-assert cot == ["cà phê sữa đ", "bún chả", "trà tắc"]
+assert cot == ["cà phê sữa đ", "bún chả", "trà tắc"], "cột rộng đúng 12 chỗ: tên khoản 13 ký tự phải bị cắt cho vừa, hai tên ngắn hơn thì để nguyên"
 # Lát cắt dựng chuỗi mới; sổ gốc không được suy suyển ký tự nào.
-assert so_tay == ["cà phê sữa đá", "bún chả", "trà tắc"]
+assert so_tay == ["cà phê sữa đá", "bún chả", "trà tắc"], "cắt chỉ để xếp cột, còn sổ gốc vẫn phải đọc ra đủ tên khoản như lúc ghi vào"
 ```
 
 :::hints

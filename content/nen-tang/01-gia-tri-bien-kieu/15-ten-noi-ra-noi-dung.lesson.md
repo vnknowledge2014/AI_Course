@@ -235,9 +235,9 @@ print(f"Thối lại {tien_thoi_lai}đ")
 # 145000 cho `tien_khach_dua` thì trượt ở đây.
 # Câu thứ ba: phép trừ đã quay đúng chiều. Chỉ đổi tên mà giữ nguyên
 # `tien_hoa_don - tien_khach_dua` thì vẫn ra -55000 và trượt đúng câu này.
-assert tien_khach_dua == 200000
-assert tien_hoa_don == 145000
-assert tien_thoi_lai == 55000
+assert tien_khach_dua == 200000, "khách đưa tờ 200 nghìn, nên con số ấy thuộc về ô tiền khách đưa"
+assert tien_hoa_don == 145000, "hoá đơn hết 145 nghìn, nên con số ấy thuộc về ô hoá đơn chứ không phải ô tiền khách đưa"
+assert tien_thoi_lai == 55000, "khách đưa 200 nghìn cho hoá đơn 145 nghìn thì phải thối lại 55 nghìn, và thối lại thì không bao giờ là số âm"
 ```
 
 :::hints

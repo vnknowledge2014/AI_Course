@@ -243,11 +243,11 @@ print(ten_ba)
 #   thừa bên phải  (lan_hai) → phép chỉ dọn đầu trái để nguyên 9 ký tự;
 #   thừa cả hai    (lan_ba)  → phép dọn một nhát mỗi đầu để lại 8 ký tự.
 # Chỉ một phép ăn liên tục ở CẢ HAI đầu mới đưa được cả ba về đúng "cà phê".
-assert ten_mot == "cà phê"
-assert ten_hai == "cà phê"
-assert ten_ba == "cà phê"
+assert ten_mot == "cà phê", "người thứ nhất quệt thừa khoảng trắng ở đầu trái, dọn xong phải còn đúng tên khoản cà phê"
+assert ten_hai == "cà phê", "người thứ hai quệt thừa ở đầu phải, dọn xong cũng phải về đúng tên khoản ấy"
+assert ten_ba == "cà phê", "người thứ ba thừa cả hai đầu, mà chỉ sót lại một dấu cách thôi là sổ đã coi đây là khoản khác"
 # Và chuỗi gốc phải còn nguyên: phương thức trả về chuỗi mới, không sửa tại chỗ.
-assert lan_ba == "  cà phê  "
+assert lan_ba == "  cà phê  ", "dọn là để đem so cho khớp; nguyên văn người thứ ba gõ vẫn còn khoảng trắng ở hai đầu"
 ```
 
 :::hints

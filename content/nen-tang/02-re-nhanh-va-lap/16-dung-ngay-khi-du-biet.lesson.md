@@ -215,7 +215,7 @@ print("Xem tới đây thôi")
 ```python title=test
 # Vòng lặp phải thoát ngay ở ngày 4, trước khi dòng đếm ngày kịp chạy.
 # Nếu thiếu lệnh cắt ngang, `ngay` sẽ chạy tiếp và không còn bằng 4.
-assert ngay == 4
+assert ngay == 4, "ngày 4 tiêu 620 nghìn là ngày đầu tiên quá 500 nghìn — gấp sổ ngay ở đó thì số đếm ngày đứng lại ở 4, chưa kịp sang ngày 5"
 ```
 
 :::hints

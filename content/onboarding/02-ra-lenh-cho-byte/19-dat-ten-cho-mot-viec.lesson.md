@@ -176,7 +176,7 @@ ghi_lai = io.StringIO()
 with contextlib.redirect_stdout(ghi_lai):
     chao_khach()
 
-assert "Quán Phở Thìn xin chào" in ghi_lai.getvalue()
+assert "Quán Phở Thìn xin chào" in ghi_lai.getvalue(), "việc chào khách khi được gọi ra phải nói đúng câu chào của quán — gọi mà màn hình vẫn trắng nghĩa là chưa có ai làm việc đã ghi"
 ```
 
 :::hints

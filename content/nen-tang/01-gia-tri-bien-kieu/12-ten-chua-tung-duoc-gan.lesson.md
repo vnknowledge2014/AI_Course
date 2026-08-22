@@ -257,7 +257,7 @@ for tien_tip in cac_buoi:
 # Hai buổi, hai kết quả khác nhau — một dòng giữ chỗ đúng phải làm cả hai
 # cùng đúng. Giữ chỗ bằng `0` hay bằng `""` thì buổi trưa lọt xuống nhánh
 # `else` và in sai; không giữ chỗ gì thì buổi trưa nổ `NameError`.
-assert ket_qua == [None, "khách boa thêm"]
+assert ket_qua == [None, "khách boa thêm"], "buổi trưa không ai boa nên ghi chú vẫn là chưa có gì, buổi tối có khách boa nên chỗ giữ chỗ được ghi đè bằng nội dung thật"
 ```
 
 :::hints

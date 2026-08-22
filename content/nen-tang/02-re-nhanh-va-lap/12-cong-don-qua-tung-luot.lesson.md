@@ -220,7 +220,7 @@ print(f"Cả tuần tiêu {tong} đồng")
 ```python title=test
 # Byte cộng tay sáu con số trong sổ và được 750000. Dòng báo cáo giữa vòng
 # cũng phải lớn dần lên, nên đây không phải chuyện gán bừa một con số ở cuối.
-assert tong == 750000
+assert tong == 750000, "sáu ngày trong sổ cộng lại là 750 nghìn; ra 210 nghìn thì mỗi ngày lại mở một quyển sổ mới nên chỉ còn tiền ngày cuối"
 ```
 
 :::hints

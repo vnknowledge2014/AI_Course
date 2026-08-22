@@ -259,11 +259,23 @@ assert vi_tri_an == 9, "đi hai chặng từ vạch 2: 3 sải rồi 4 sải, d�
 - tier: run
   timeoutMs: 4000
 - tier: static
-  onFail: mỗi chỗ trống phải là một phép cộng giữa chỗ đứng và số bước — gõ thẳng con số đích thì máy không tính gì cả, bạn tính hộ nó rồi
+  onFail: mỗi chỗ trống phải là một phép cộng giữa hai cái tên đứng ngay trên nó — chỗ đứng cộng số bước; gõ thẳng con số thì máy không tính gì cả, bạn tính hộ nó rồi
   requireAst:
   # `min: 4` vì có bốn chỗ trống, mỗi chỗ một phép cộng. Khung khởi đầu chưa có
   # dấu `+` nào, nên luật này chặn được đúng cái đáp án chép cứng bốn con số.
   - kind: uses-operator, target: +, min: 4
+  # Có dấu `+` thôi thì chưa đủ: `cho_toi_byte = 4 + 7` cũng là một phép cộng
+  # mà chẳng đọc cái tên nào — người viết nó đã tự tra hai con số ra khỏi đề
+  # rồi cộng hộ máy. Bốn luật dưới đây buộc hai chuyến đầu phải GỘP đúng hai
+  # cái tên đứng ngay trên chỗ trống. Khung khởi đầu không đọc tên nào trong
+  # bốn tên này, nên `min: 1` là đủ chặn.
+  - kind: uses-name, target: cho_dung_byte, min: 1
+  - kind: uses-name, target: so_buoc_byte, min: 1
+  - kind: uses-name, target: cho_dung_an, min: 1
+  # `so_buoc_an` giữ số 0. Không có luật này thì `cho_dung_an + 0` vẫn qua, mà
+  # đó đúng là chỗ bài muốn người học thấy "cộng 0 là đứng yên" bằng cái tên,
+  # chứ không phải bằng con số 0 gõ tay.
+  - kind: uses-name, target: so_buoc_an, min: 1
   # Hai chặng của chuyến thứ ba phải ĐỌC LẠI chỗ đang đứng, không được viết
   # `2 + 3` rồi `5 + 4`. `min: 3` = hai lần đọc trong hai chặng, cộng lần đọc
   # ở `print`.

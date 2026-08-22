@@ -174,8 +174,8 @@ for mon in thuc_don:
 # Chạy xong vòng lặp, cái tên trong vòng lặp còn giữ giá trị của lượt cuối cùng.
 # Nếu nó đang giữ "Phở nạm" thì vòng lặp đã đi qua từng MÓN của danh sách, chứ
 # không phải đi qua các con số chỉ chỗ đứng.
-assert mon == "Phở nạm"
-assert thuc_don == ["Phở tái", "Phở chín", "Phở nạm"]
+assert mon == "Phở nạm", "đi hết bảng ba món thì món cuối cùng vòng lặp cầm trên tay là Phở nạm — món nằm cuối thực đơn, chứ không phải con số chỗ đứng của nó"
+assert thuc_don == ["Phở tái", "Phở chín", "Phở nạm"], "in bảng ra giấy là đọc bảng chứ không sửa bảng, nên hết vòng lặp thực đơn vẫn còn nguyên ba món theo đúng thứ tự cũ"
 ```
 
 :::hints

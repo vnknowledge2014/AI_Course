@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 13
 teaches: [math.division-quotative]
-requires: [math.division-partitive, math.thuoc-do, math.multiplication, math.multiply-commutative, math.thanh-so, core.arithmetic, core.output, core.variable, core.reassign, core.accumulator, ctrl.for-range, ctrl.if, ctrl.comparison]
+requires: [math.division-partitive, math.thuoc-do, math.multiplication, math.multiply-commutative, math.thanh-so, core.arithmetic, core.division, core.output, core.variable, core.reassign, core.accumulator, ctrl.for-range, ctrl.if, ctrl.comparison]
 concepts: [math.chia-do, math.dat-thuoc-lap-lai, math.thua-so-con-thieu]
 gradingMatrix:
   web-chrome: [static, run, tests, output]

@@ -220,12 +220,12 @@ print(cho_ca_phe, cho_gui_xe, cho_di_cho)
 ```python title=test
 # Ba khoản, ba độ dài khác nhau — 5, 4 và 7 chữ số. Một chỗ trống điền bừa cho
 # ra cùng một con số ở cả ba dòng thì trượt ít nhất hai assert.
-assert cho_ca_phe == 5
-assert cho_gui_xe == 4
-assert cho_di_cho == 7
+assert cho_ca_phe == 5, "khoản cà phê 25000 đồng viết ra giấy chiếm 5 chỗ trong cột"
+assert cho_gui_xe == 4, "khoản gửi xe 5000 đồng ít hơn một chữ số nên chỉ chiếm 4 chỗ"
+assert cho_di_cho == 7, "khoản đi chợ 1250000 đồng chiếm 7 chỗ — vẫn lọt cột mười chỗ"
 # Và ba khoản tiền phải còn là SỐ để còn cộng trừ được: `str` viết ra bản chép,
 # nó không biến cái tên cũ thành chữ.
-assert tien_ca_phe + tien_gui_xe == 30000
+assert tien_ca_phe + tien_gui_xe == 30000, "cà phê với gửi xe cộng lại là 30 nghìn: viết một khoản ra thành chữ chỉ là chép lại, khoản tiền vẫn phải cộng trừ được"
 ```
 
 :::hints

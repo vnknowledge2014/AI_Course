@@ -80,7 +80,7 @@ Có một bức tranh thứ ba làm chuyện này nhìn thấy được ngay, g�
 dải** — vẽ cả lượng thành một dải, rồi cắt:
 
 ```text
-             cả luống: 12 sải
+                   cả luống: 12 sải
    ├───────────────────────────────────────────────┤
    ├───────────────────┼───────────────────────────┤
       đã cuốc: 5 sải       còn phải cuốc: ? sải
@@ -306,6 +306,18 @@ assert gio_bay_gio + con_may_tieng == gio_tau_chay, "6 giờ cộng phần chờ
   # dấu `-` nào (hai dòng cuối chỉ có `+` và `==`), nên luật này chặn được đúng
   # cái đáp án chép cứng hai con số.
   - kind: uses-operator, target: -, min: 2
+  # Có dấu `-` thôi thì chưa đủ: `con_phai_cuoc = 12 - 5` cũng là một phép trừ
+  # mà không đọc cái tên nào giữ mốc — mà cả bài này là chuyện HAI CÁI MỐC nằm
+  # cách nhau bao xa, nên hai cái mốc phải có mặt bằng tên.
+  #
+  # `min: 2` chứ không phải `min: 1`: khung khởi đầu đã đọc sẵn mỗi tên một lần
+  # ở hai dòng thử lại (`da_cuoc + con_phai_cuoc == ca_luong` và dòng dưới nó),
+  # nên `min: 1` thoả ngay cả khi chỗ trống chép cứng con số. Lần đọc thứ hai
+  # chỉ có thể tới từ chính chỗ trống.
+  - kind: uses-name, target: ca_luong, min: 2
+  - kind: uses-name, target: da_cuoc, min: 2
+  - kind: uses-name, target: gio_tau_chay, min: 2
+  - kind: uses-name, target: gio_bay_gio, min: 2
 - tier: tests
   timeoutMs: 4000
 - tier: output

@@ -131,6 +131,10 @@ True
   đặt được.
 - **3 cây một ô** — 72 cây trên 24 ô, quy về một đơn vị.
 
+Để ý con số 18 trong bài này xuất hiện hai lần mà là hai thứ khác hẳn nhau: 18
+**hạt** không nảy, và bờ dài 18 **mét**. Cùng một chữ số, hai câu trả lời cho hai
+câu hỏi *mấy cái gì* khác nhau — đúng chỗ bài 1 dặn.
+
 Chặng 8 là chặng dễ hỏng nhất, và hỏng vì đúng thứ bài trước vừa nói: cái gạch
 phân số của `3/4` là một cặp ngoặc ẩn. Viết `18 / 3 / 4` thì máy chia hai lần
 liên tiếp, ra 1.5 — và cái ô 3/4 mét tan mất trước khi kịp thành một cái thước.
@@ -157,8 +161,11 @@ print(hat_gieo - hat_gieo * 20 / 100)
 90, 18.0 rồi 0.0
 ::why
 Gần đúng ở chỗ bạn đọc từ trái sang phải, tới đâu tính tới đó. Cách đọc ấy đúng
-với chữ viết, và đúng cả trong toán khi cả dòng chỉ toàn cộng với trừ — bài 10 và
-bài 18 đã cho thấy ở đó thứ tự không đổi kết quả.
+với chữ viết, và đi từ trái sang phải thì không bao giờ sai với một dòng chỉ toàn
+cộng với trừ — và bài 18 nói vì sao: đổi mọi phép trừ thành cộng số đối thì cả
+dòng chỉ còn phép cộng, mà những đống của bài 10 thì gộp theo thứ tự nào cũng ra
+một kết quả. Chưa đổi như thế thì vẫn phải đi từ trái sang phải: `10 − 3 + 2` ra
+9, chứ không phải `10 − (3 + 2)` ra 5.
 
 Ranh giới: dòng 3 có một dấu nhân và một dấu chia xen vào, và ba con số bên phải
 dấu trừ đã dính thành **một khối** — "hai mươi phần trăm của 90 hạt". Bài 42 nói
@@ -210,7 +217,8 @@ số ấy thì chặng cuối chỉ còn một phép chia.
 Ba chỗ trống, ba chặng khác nhau — và không chỗ nào chép được của chỗ kia:
 
 1. `hat_chet` — **phần trăm của cái gì**: 20% ấy đo số hạt **gieo**, không đo số
-   cây sống.
+   cây sống. Và nó đếm phần **không nảy**, chứ không phải phần còn nảy được —
+   hai phần ấy ráp lại mới ra cả đống gieo.
 2. `cay_song` — **bớt đi**: cả đống gieo bỏ phần không nảy.
 3. `so_o` — **chia đo**: cái thước 3/4 mét đặt lên bờ 18 mét được mấy lần. Cái
    gạch của `3/4` là một cặp ngoặc ẩn, và ép xuống một dòng thì phải dựng nó lại
@@ -250,6 +258,11 @@ print(so_o)
 ```
 
 ```python title=test
+# Hai câu `!=` chốt hai cái bẫy mà bài đã nói thẳng ra, và chúng đứng TRƯỚC vì
+# chương trình dừng ở câu vỡ đầu tiên — câu gọi tên một lỗi cụ thể mà xếp sau câu
+# `==` bao trùm nó thì không bao giờ chạy tới.
+assert hat_chet != 72, "72 là phần NẢY ĐƯỢC — 80% còn lại. Đề hỏi phần KHÔNG nảy: 20% của 90 hạt gieo"
+assert so_o != 1.5, "thiếu cặp ngoặc thì `18 / 3 / 4` chia hai lần liên tiếp, và cái ô 3/4 mét tan mất"
 # Bảy câu trên ba chặng khác nhau, nên một con số gõ cứng chỉ qua được nhiều
 # nhất một câu.
 assert hat_gieo == 90, "mảng 6 luống × 15 hạt là 90 hạt"
@@ -257,9 +270,6 @@ assert hat_chet == 18, "20% của 90 hạt gieo — một phần năm của 90"
 assert cay_song == 72, "90 hạt gieo, bớt đi 18 hạt không nảy"
 assert cay_song + hat_chet == hat_gieo, "phần chết và phần sống ráp lại phải đúng cả đống gieo ban đầu"
 assert so_o == 24, "cái thước 3/4 mét đặt lên bờ 18 mét được 24 lần"
-# Hai câu `!=` chốt hai cái bẫy mà bài đã nói thẳng ra.
-assert hat_chet != 14.4, "14.4 là 20% của 72 cây SỐNG — nhưng đề nói 20% của số hạt gieo"
-assert so_o != 1.5, "thiếu cặp ngoặc thì `18 / 3 / 4` chia hai lần liên tiếp, và cái ô 3/4 mét tan mất"
 ```
 
 :::hints
@@ -336,11 +346,13 @@ print(f"Mỗi ô được {cay_moi_o} cây")
 ```
 
 ```python title=test
+# Cái bẫy của bài trước, đặt vào đúng chỗ nó hay sập: bỏ cặp ngoặc quanh 3/4.
+# Câu này đứng trước hai câu `==` phía dưới, vì xếp sau thì nó không bao giờ chạy
+# tới — `assert cay_moi_o == 3` đã vỡ trước và chương trình dừng ngay tại đó.
+assert cay_moi_o != 48, "thiếu ngoặc thì `18 / 3 / 4` ra 1.5 mét, và mỗi ô bỗng được 48 cây"
 assert cay_moi_o == 3, "72 cây sống chia cho 24 ô thì mỗi ô 3 cây"
 # Ráp ngược lại: 24 ô, mỗi ô 3 cây, phải ra đúng số cây sống.
 assert cay_moi_o * 24 == 72, "24 ô mỗi ô 3 cây thì ráp lại đúng 72 cây sống"
-# Cái bẫy của bài trước, đặt vào đúng chỗ nó hay sập: bỏ cặp ngoặc quanh 3/4.
-assert cay_moi_o != 48, "thiếu ngoặc thì `18 / 3 / 4` ra 1.5 mét, và mỗi ô bỗng được 48 cây"
 ```
 
 :::hints

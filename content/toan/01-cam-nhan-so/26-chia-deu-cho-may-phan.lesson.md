@@ -261,15 +261,18 @@ print(moi_luong_an)
 ```
 
 ```python title=test
+# Câu != đứng ĐẦU để nó thật sự chạy tới. Xếp nó sau mấy câu == thì cái bẫy nó
+# canh — điền cùng một con số vào cả hai chỗ trống — không bao giờ sập, vì câu
+# == đã dừng bài trước đó rồi.
+assert moi_luong_byte != moi_luong_an, "hai vườn khác nhau thì cỡ mỗi luống khác nhau — nếu bằng nhau là có chỗ điền cứng"
 # Hai vườn cho hai số luống khác nhau, nên một con số điền bừa vào cả hai chỗ
-# trống không thể qua nổi cả hai dòng đầu. Hai assert giữa khoá lại điều bài
+# trống không thể qua nổi cả hai dòng dưới. Hai assert cuối khoá lại điều bài
 # dạy: cỡ tìm được phải gộp ngược về đúng cái đống ban đầu — và cỡ đứng TRƯỚC
 # dấu nhân, số luống đứng SAU, đúng thứ tự "lô to bao nhiêu × lấy mấy lô".
 assert moi_luong_byte == 4, "12 hạt vào 3 luống thì mỗi luống 4 hạt — không cỡ nào khác gộp lại vừa khít 12"
 assert moi_luong_an == 5, "20 hạt vào 4 luống thì mỗi luống 5 hạt"
 assert moi_luong_byte * 3 == 12, "lô 4 hạt lấy 3 lô thì về đúng đống ban đầu, không thừa không thiếu"
 assert moi_luong_an * 4 == 20, "lô 5 hạt lấy 4 lô thì cũng về đúng đống ban đầu"
-assert moi_luong_byte != moi_luong_an, "hai vườn khác nhau thì cỡ mỗi luống khác nhau — nếu bằng nhau là có chỗ điền cứng"
 ```
 
 :::hints

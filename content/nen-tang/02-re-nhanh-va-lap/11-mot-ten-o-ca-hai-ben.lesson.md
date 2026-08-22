@@ -210,8 +210,8 @@ print(f"Cả buổi chợ mua được {mon} món")
 ```python title=test
 # 100 nghìn chia cho 25 nghìn một món là bốn món, và ví phải sạch trơn.
 # Kiểm cả hai: đếm đúng số món, và không ai lỡ tay sửa số tiền.
-assert mon == 4
-assert vi == 0
+assert mon == 4, "cầm 100 nghìn ra chợ, mỗi món 25 nghìn, thì cả buổi chợ mua được đúng bốn món"
+assert vi == 0, "bốn món 25 nghìn tiêu trọn 100 nghìn nên ví phải sạch trơn — việc đếm món không được đụng tới số tiền trong ví"
 ```
 
 :::hints

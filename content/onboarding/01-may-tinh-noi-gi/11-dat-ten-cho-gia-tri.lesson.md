@@ -192,7 +192,7 @@ print("Đã ghi giá mới")
 # tồn tại và có đang giữ đúng con số hay không — mà điều đó không hiện lên màn
 # hình. Người học không nhìn thấy khối này; nó hỏi máy một câu mà bài học chưa
 # dạy cách hỏi.
-assert gia_dac_biet == 65000
+assert gia_dac_biet == 65000, "quán vừa tăng giá tô đặc biệt lên 65 nghìn, nên cái tên ghi giá đó phải đang giữ đúng con số ấy"
 ```
 
 :::hints

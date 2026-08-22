@@ -238,8 +238,8 @@ print(f"Đủ tiền mua xe sau {thang} tháng")
 # Byte nhẩm tay: 100k sẵn có, mỗi tháng thêm 100k, tới hết tháng thứ tư là
 # chạm 500k. Kiểm cả hai cái tên — số tháng phải đúng, và số tiền cuối cùng
 # cũng phải đúng.
-assert thang == 4
-assert da_de_danh == 500000
+assert thang == 4, "heo đất mở màn với 100 nghìn, mỗi tháng dày thêm 100 nghìn, nên phải hết tháng thứ tư mới đủ tiền xe đạp"
+assert da_de_danh == 500000, "chiếc xe đạp giá 500 nghìn, và tháng cuối cùng đưa heo đất chạm đúng con số ấy — thiếu một đồng thì chưa mua được xe"
 ```
 
 :::hints

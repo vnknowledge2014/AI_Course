@@ -170,7 +170,7 @@ for mon in thuc_don:
 ```python title=test
 # Chạy xong chương trình, dãy phải có đúng bốn món và món mới phải nằm ở CUỐI.
 # Thứ tự khác đi nghĩa là món mới đã chen vào giữa chứ không được gắn thêm.
-assert thuc_don == ["Phở tái", "Phở chín", "Phở nạm", "Phở gầu"]
+assert thuc_don == ["Phở tái", "Phở chín", "Phở nạm", "Phở gầu"], "giữa buổi bếp báo thêm Phở gầu, nên thực đơn thành bốn món và món mới viết xuống dưới cùng, sau Phở nạm"
 ```
 
 :::hints

@@ -255,9 +255,9 @@ print(f"{loai_khoan}: {so_nguoi} người, mỗi người {tien_moi_nguoi}đ")
 # Giá trị phải đi theo đúng tên cũ của nó: ai đổi tên xong mà gán nhầm 2 cho
 # `tien_moi_nguoi` thì trượt ở đây chứ không lọt qua bằng một dòng in trông
 # giông giống.
-assert so_nguoi == 2
-assert loai_khoan == "ăn ngoài"
-assert tien_moi_nguoi == 60000
+assert so_nguoi == 2, "dòng sổ này chia cho hai người, và con số ấy phải nằm ở một cái tên máy chịu đọc"
+assert loai_khoan == "ăn ngoài", "khoản chi này thuộc loại ăn ngoài, và chữ ấy giờ phải nằm ở một cái tên không phải từ khoá"
+assert tien_moi_nguoi == 60000, "mỗi người trả 60 nghìn — đổi tên xong thì giá trị vẫn phải đi theo đúng ô cũ của nó, không lẫn sang số người"
 ```
 
 :::hints

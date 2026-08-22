@@ -302,9 +302,9 @@ print(f"Tuần trước: {ngay} ngày, tổng {tong} nghìn, trung bình {tong /
 # Khối này khẳng định ba cái tên sau khi chạy hết đoạn đang giữ kết quả của
 # cuốn sổ thứ hai — tức là vòng thứ hai đã đi trọn năm lượt, không dừng sớm và
 # không mang theo con số của tuần trước đó.
-assert ngay == 5
-assert tong == 750
-assert tong / ngay == 150.0
+assert ngay == 5, "sổ tuần trước ghi được năm ngày, nên lượt duyệt cuốn ấy phải gạch đúng năm vạch — không mang theo bảy vạch của tuần này"
+assert tong == 750, "năm ngày của tuần trước cộng lại hết 750 nghìn"
+assert tong / ngay == 150.0, "750 nghìn chia cho năm ngày là mỗi ngày 150 nghìn — trung bình chỉ ra đúng khi cả tổng lẫn số ngày cùng là của một cuốn sổ"
 ```
 
 :::hints

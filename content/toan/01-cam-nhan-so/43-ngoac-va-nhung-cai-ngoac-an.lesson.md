@@ -94,9 +94,13 @@ Từ đó ra hai hệ quả, và cả hai đều dùng được ngay:
   là lúc dấu ngoặc kiếm sống: khi hình dạng trong đầu bạn không trùng hình dạng
   mà luật giả sử.
 
-Ngoặc lồng trong ngoặc thì gói từ **trong ra ngoài** — cái khối nhỏ phải thành
-hình trước thì cái khối lớn mới có gì mà ôm. Ví dụ `18 : (3 : 4)` khoanh riêng
-`3 : 4` thành một lượng, rồi mới đem 18 đo bằng lượng ấy.
+**Ngoặc lồng trong ngoặc** thì gói từ **trong ra ngoài** — cái khối nhỏ phải
+thành hình trước thì cái khối lớn mới có gì mà ôm. Ví dụ `2 × (3 + (4 × 5))`:
+gói `4 × 5` thành 20 trước, rồi `3 + 20` thành 23, rồi mới nhân 2 — ra 46.
+
+Và một cặp ngoặc đứng một mình cũng đủ đổi cả câu chuyện, kể cả khi bên trong nó
+là một phép chia: `18 : (3 : 4)` khoanh `3 : 4` lại thành **một lượng**, rồi mới
+đem 18 đo bằng lượng ấy. Nhớ dòng này — bài sau cần đúng nó.
 ::::
 
 ::::explain{#nhung-cai-ngoac-an}
@@ -246,12 +250,14 @@ print(phan_moi_luong)
 ```
 
 ```python title=test
+# Hai câu `!=` đứng trước để bắt đúng hai kiểu hỏng quen thuộc và gọi tên chúng
+# ra; hai câu `==` phía sau chốt phần còn lại. Chương trình dừng ở câu vỡ đầu
+# tiên, nên câu chẩn đoán phải đứng trước câu chốt bao trùm nó.
+assert so_hat_cua_an != 23, "thiếu ngoặc thì dòng ấy tụt về vườn của bài 42 — 3 hạt lẻ và một khối 4 × 5"
+assert phan_moi_luong != 14.0, "thiếu ngoặc thì chỉ mình 8 kg tro bị chia, còn 12 kg phân chuồng không đến luống nào"
 # Hai việc cho hai con số khác nhau, nên không có đáp án nào điền chung được.
 assert so_hat_cua_an == 35, "3 luống cũ gộp 4 luống mới là 7 luống, mỗi luống 5 hạt"
 assert phan_moi_luong == 5.0, "đống trộn nặng 20 kg, chia đều cho 4 luống thì mỗi luống 5 kg"
-# Hai câu `!=` chốt đúng hai kiểu hỏng khi cái rào bị bỏ quên.
-assert so_hat_cua_an != 23, "thiếu ngoặc thì dòng ấy tụt về vườn của bài 42 — 3 hạt lẻ và một khối 4 × 5"
-assert phan_moi_luong != 14.0, "thiếu ngoặc thì chỉ mình 8 kg tro bị chia, còn 12 kg phân chuồng không đến luống nào"
 ```
 
 :::hints

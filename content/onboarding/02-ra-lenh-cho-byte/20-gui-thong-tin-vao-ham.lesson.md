@@ -182,7 +182,7 @@ ghi_lai = io.StringIO()
 with contextlib.redirect_stdout(ghi_lai):
     chao_khach("bác Tư")
 
-assert "Chào bác Tư" in ghi_lai.getvalue()
+assert "Chào bác Tư" in ghi_lai.getvalue(), "người bước vào quán lần này là bác Tư, nên câu chào phải gọi đúng bác Tư — chào cứng một cái tên khác nghĩa là hàm không nghe ai đưa vào cả"
 ```
 
 :::hints

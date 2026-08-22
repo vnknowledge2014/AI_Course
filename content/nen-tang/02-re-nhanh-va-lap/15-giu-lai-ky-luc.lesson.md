@@ -253,7 +253,7 @@ assert cao_nhat in chi_tieu, f"cao_nhat đang là {cao_nhat} — không ngày n�
 # Giữ con số cuối cùng thì ra 210000, giữ con số đầu tiên thì ra 45000.
 assert cao_nhat == 260000, f"cao_nhat đang là {cao_nhat}, phải là 260000"
 # Sổ chi tiêu chỉ để đọc — vòng lặp không được sửa nó.
-assert chi_tieu == [45000, 120000, 30000, 260000, 85000, 210000]
+assert chi_tieu == [45000, 120000, 30000, 260000, 85000, 210000], "sáu ngày trong sổ phải còn nguyên như lúc chép vào — đi tìm kỷ lục là đọc sổ, không phải sửa sổ"
 ```
 
 :::hints

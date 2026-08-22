@@ -278,9 +278,9 @@ print(f"Tuần trước có {diem_lai_so(tuan_truoc)} ngày ghi sổ")
 #                           đếm cả ngày trống;
 #   `if tien == 0: pass`  → y hệt trên, sổ tuần này ra 7 thay vì 4;
 #   `if tien != 0:`       → bỏ đúng những ngày CÓ ghi, sổ toàn ngày trống ra 3.
-assert diem_lai_so([120000, 0, 95000, 0, 260000, 0, 80000]) == 4
-assert diem_lai_so([0, 210000, 45000]) == 2
-assert diem_lai_so([0, 0, 0]) == 0
+assert diem_lai_so([120000, 0, 95000, 0, 260000, 0, 80000]) == 4, "sổ tuần này bảy ngày mà bà chủ quên ghi ba ngày, nên chỉ còn bốn ngày có con số để điểm"
+assert diem_lai_so([0, 210000, 45000]) == 2, "sổ tuần trước bỏ trống đúng ngày đầu, hai ngày sau vẫn có ghi — bỏ một ngày không được bỏ nốt phần còn lại"
+assert diem_lai_so([0, 0, 0]) == 0, "quyển sổ mà ngày nào cũng để trống thì không có ngày nào đáng điểm cả"
 ```
 
 :::hints

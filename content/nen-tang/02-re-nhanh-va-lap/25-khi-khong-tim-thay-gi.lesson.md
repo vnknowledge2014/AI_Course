@@ -298,8 +298,8 @@ else:
 # Hai tuần cùng chạy trọn bảy lượt, nên `ngay` bằng 7 ở cả hai — chính vì thế
 # `ngay` không phân biệt được tìm thấy với không tìm thấy, chỉ `ngay_vuot` mới
 # làm được. Khối này khẳng định vòng lặp thứ hai đã gặp `break` ở ngày 7.
-assert ngay == 7
-assert ngay_vuot == 7
+assert ngay == 7, "cả hai tuần đều là sổ bảy ngày, nên đếm tới ngày cuối là đếm tới 7 — con số này giống nhau ở tuần tiêu dè lẫn tuần có ngày vượt, nên một mình nó không nói được là có tìm thấy gì không"
+assert ngay_vuot == 7, "tuần trước tiêu dè sáu ngày, tới ngày 7 mới đãi bạn một bữa quá 200 nghìn — ô trả lời bị gạch đi và ghi vào đúng ngày ấy"
 ```
 
 :::hints

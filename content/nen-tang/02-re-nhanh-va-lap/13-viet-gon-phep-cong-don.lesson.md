@@ -190,7 +190,7 @@ print(f"Cả tuần tiêu {tong} đồng")
 ```python title=test
 # Byte cộng tay sáu con số trong sổ và được 750000. Sau khi vòng chạy xong,
 # cái tên `tong` phải đang giữ đúng con số đó.
-assert tong == 750000
+assert tong == 750000, "sáu ngày trong sổ cộng lại là 750 nghìn — lối viết gọn phải cộng dồn được y hệt lối viết dài, không sót ngày nào"
 ```
 
 :::hints

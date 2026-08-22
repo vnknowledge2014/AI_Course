@@ -176,13 +176,13 @@ print(f"Còn thừa: {con_thua}đ")
 ```
 
 ```python title=test
-assert moi_nguoi == 64443
-assert con_thua == 3
+assert moi_nguoi == 64443, "hoá đơn 257775 đồng chia đều cho bốn người thì mỗi người đưa 64443 đồng"
+assert con_thua == 3, "chia xong còn 3 đồng lẻ, không đủ thêm một suất cho ai"
 # Tiền không tự sinh ra cũng không tự mất đi: bốn phần bằng nhau cộng phần thừa
 # phải đúng bằng hoá đơn. Một chỗ trống điền sai là đẳng thức này gãy.
-assert moi_nguoi * so_nguoi + con_thua == phai_tra
+assert moi_nguoi * so_nguoi + con_thua == phai_tra, "bốn phần bằng nhau cộng phần lẻ phải đúng bằng hoá đơn — tiền không tự sinh ra cũng không tự mất đi"
 # Và mỗi người đưa một số đồng chẵn — phép chia thường sẽ cho 64443.75.
-assert type(moi_nguoi) is int
+assert type(moi_nguoi) is int, "mỗi người đưa một số đồng chẵn, không ai đưa được ba phần tư đồng"
 ```
 
 :::hints
@@ -303,13 +303,13 @@ if ghi_chu is None:
 
 ```python title=test
 # Năm chỗ trống, năm phép kiểm riêng — sai chỗ nào lộ chỗ ấy.
-assert ten == "bún chả"          # khoảng trắng đã cắt, chữ đã về thường
-assert tong == 245500            # tiền đã về đơn vị đồng
-assert type(tong) is int         # và là số nguyên, không còn đuôi .0
-assert phi == 12275              # 5% của 245500, vẫn là số nguyên
-assert phai_tra == 257775
-assert moi_nguoi == 64443 and con_thua == 3
-assert ghi_chu is None
+assert ten == "bún chả", "người gõ '  Bún Chả  ' thì sổ phải ghi bún chả: sạch khoảng trắng hai đầu và về hết chữ thường"
+assert tong == 245500, "245,5 nghìn là 245500 đồng — sổ đếm tiền bằng đơn vị nhỏ nhất"
+assert type(tong) is int, "đã đếm bằng đồng thì không còn nửa đồng nào, nên con số không được mang đuôi .0 của số thực"
+assert phi == 12275, "quán thu 5% phí phục vụ trên 245500 đồng, và phí thu về cũng là một số đồng chẵn"
+assert phai_tra == 257775, "hoá đơn cả nhóm phải trả là tiền món cộng thêm phí phục vụ"
+assert moi_nguoi == 64443 and con_thua == 3, "bốn người chia hoá đơn 257775 đồng thì mỗi người 64443 đồng, còn lẻ 3 đồng"
+assert ghi_chu is None, "hôm nay chưa ai viết gì vào ô ghi chú, mà chưa viết gì thì là None chứ không phải số 0 hay chuỗi rỗng"
 # Bề rộng hai ô thì phần chấm theo màn hình lo: chữ đ phải rơi vào chỗ thứ 23.
 ```
 

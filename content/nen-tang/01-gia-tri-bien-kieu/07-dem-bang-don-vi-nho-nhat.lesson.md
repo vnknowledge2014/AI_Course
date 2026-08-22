@@ -222,15 +222,15 @@ print(sang_dong(153.2) + sang_dong(48.6) + sang_dong(220.0) == 421800)
 # Chấm trên BỐN khoản, không phải một: một chỗ trống mà chỉ thử đúng một con
 # số thì đáp án chép cứng cũng lọt. Khoản 32.3 là khoản gắt nhất — nó là chỗ
 # duy nhất phân biệt phép làm tròn với phép cắt.
-assert sang_dong(153.2) == 153200
-assert sang_dong(48.6) == 48600
-assert sang_dong(220.0) == 220000
-assert sang_dong(32.3) == 32300
+assert sang_dong(153.2) == 153200, "sổ ghi 153,2 nghìn thì trong máy phải là 153 nghìn 2 trăm đồng"
+assert sang_dong(48.6) == 48600, "48,6 nghìn tiền nước là 48 nghìn 6 trăm đồng, không rụng mất trăm nào"
+assert sang_dong(220.0) == 220000, "khoản chẵn 220 nghìn thì đổi ra vẫn phải chẵn 220 nghìn đồng"
+assert sang_dong(32.3) == 32300, "32,3 nghìn là ba mươi hai nghìn ba trăm đồng — cắt phần lẻ thì mất một đồng mà không ai báo"
 # Trả về phải là số ĐẾM chứ không phải số đo: số nguyên in ra không có đuôi
 # `.0`, số thực thì có — nên `so_nghin * 1000` để trần sẽ trượt đúng câu này.
-assert f"{sang_dong(48.6)}" == "48600"
+assert f"{sang_dong(48.6)}" == "48600", "tiền là thứ đếm bằng đồng, nên in ra không mang cái đuôi .0 của một thứ đo được"
 # Và cộng ba khoản lại phải khớp tuyệt đối, không xê xích.
-assert sang_dong(153.2) + sang_dong(48.6) + sang_dong(220.0) == 421800
+assert sang_dong(153.2) + sang_dong(48.6) + sang_dong(220.0) == 421800, "điện nước mạng cộng lại phải đúng bằng 421 nghìn 8, không xê xích một đồng"
 ```
 
 :::hints

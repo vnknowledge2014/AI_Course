@@ -262,8 +262,8 @@ else:
 #
 # Khối này khẳng định thêm rằng vòng thứ hai đã đi trọn năm chuyến: cái tên
 # `gio` còn giữ giờ của chuyến cuối cùng, nghĩa là không lượt nào gặp `break`.
-assert gio == 13
-assert gio_muon == 14
+assert gio == 13, "chuyến cuối trong ngày chạy lúc 13 giờ — lần ra ga thứ hai phải hỏi hết cả năm chuyến, tới chuyến cuối cùng, mới dám nói là hết tàu"
+assert gio_muon == 14, "lần ra ga thứ hai là lúc 14 giờ, muộn hơn cả chuyến 13 giờ, nên không chuyến nào còn kịp"
 ```
 
 :::hints

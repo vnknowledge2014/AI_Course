@@ -295,9 +295,9 @@ print(f"Sổ B — ngày {ngay_ky_luc} tiêu nhiều nhất: {tien_ky_luc} đồ
 # của sổ A đứng cuối sổ, nên "cứ lượt nào cũng ghi" cũng ra đúng con số ấy.
 # Sổ B là cuốn nói thật — kỷ lục của nó rơi vào ngày 2, và ba cái tên sau khi
 # chạy hết đoạn đang giữ kết quả của chính cuốn này.
-assert ngay == 5
-assert tien_ky_luc == 330000
-assert ngay_ky_luc == 2
+assert ngay == 5, "sổ B có năm ngày, và phải lật trọn cả năm mới chắc là không ngày nào phá nổi kỷ lục"
+assert tien_ky_luc == 330000, "ngày tiêu mạnh nhất của sổ B hết 330 nghìn — con số ấy có sẵn trong sổ, không phải cộng ra"
+assert ngay_ky_luc == 2, "sổ B lập kỷ lục ngay từ ngày 2, bốn ngày sau không ngày nào tiêu hơn"
 ```
 
 :::hints
@@ -421,12 +421,12 @@ else:
 ```python title=test
 # Năm câu trả lời, kiểm từng câu một. Bốn dòng đầu chỉ đúng nếu vòng lặp
 # đi trọn mười ngày; dòng cuối chỉ đúng nếu cái cổng giá trị canh còn nguyên.
-assert tong == 1530000
-assert ngay == 10
-assert so_ngay_vuot == 3
-assert ngay_ky_luc == 5
-assert tien_ky_luc == 310000
-assert ngay_dau_vuot == 2
+assert tong == 1530000, "mười ngày trong sổ cộng lại hết 1 triệu 530 nghìn"
+assert ngay == 10, "sổ ghi mười ngày, nên lượt duyệt phải đi trọn mười ngày mới hết sổ"
+assert so_ngay_vuot == 3, "ba ngày trong kỳ tiêu quá 200 nghìn: ngày 2, ngày 5 và ngày 8"
+assert ngay_ky_luc == 5, "ngày tiêu nhiều nhất cả kỳ là ngày 5"
+assert tien_ky_luc == 310000, "ngày 5 tiêu hết 310 nghìn, nhiều nhất trong mười ngày"
+assert ngay_dau_vuot == 2, "ngày 2 là ngày ĐẦU TIÊN vượt ngưỡng — ngày 5 và ngày 8 cũng vượt, nhưng chúng tới sau và không được ghi đè lên"
 ```
 
 :::hints

@@ -252,9 +252,9 @@ print(f"Khách tối gõ {hoi_toi_khi_co_so(khach_toi)} đồng")
 #                           khi chưa có số, hàm trả về chuỗi rỗng;
 #   `if True:` ở chỗ hai  → thoát ngay lượt đầu, khách sáng ra chuỗi rỗng;
 #   `while False:`        → thân không chạy lượt nào, `tra_loi` chưa hề có.
-assert hoi_toi_khi_co_so(["", "", "45000"]) == "45000"
-assert hoi_toi_khi_co_so(["120000"]) == "120000"
-assert hoi_toi_khi_co_so(["", "", "", "", "80000"]) == "80000"
+assert hoi_toi_khi_co_so(["", "", "45000"]) == "45000", "khách sáng bấm Enter suông hai lần rồi mới gõ 45000 — hai lần suông đó không phải câu trả lời, con số mới là"
+assert hoi_toi_khi_co_so(["120000"]) == "120000", "khách trưa gõ số ngay lần hỏi đầu tiên, nên không được hỏi lại lần nào nữa"
+assert hoi_toi_khi_co_so(["", "", "", "", "80000"]) == "80000", "khách tối bấm Enter suông bốn lần — khách còn bấm suông thì còn phải hỏi lại, không đoán trước được mấy lần"
 ```
 
 :::hints

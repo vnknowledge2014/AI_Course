@@ -237,7 +237,7 @@ assert dem < 10, f"dem đang là {dem} — nó đang giữ số tiền chứ kh�
 # Đếm mọi lượt thì ra 6; không lượt nào được tính thì ra 0.
 assert dem == 2, f"dem đang là {dem}, phải là 2"
 # Sổ chi tiêu chỉ để đọc — vòng lặp không được sửa nó.
-assert chi_tieu == [45000, 120000, 30000, 260000, 85000, 210000]
+assert chi_tieu == [45000, 120000, 30000, 260000, 85000, 210000], "đếm ngày vượt ngưỡng là việc chỉ nhìn: xem xong sáu ngày thì sổ chi tiêu phải còn nguyên như lúc mở ra"
 ```
 
 :::hints

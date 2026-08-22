@@ -233,11 +233,11 @@ print(doc_o_tien(""))
 # Chấm trên BỐN ô, vì một ô thì không phân biệt được gì. Điều kiện lúc nào
 # cũng đúng thì nổ ngay ở ô rỗng; điều kiện lúc nào cũng sai thì qua được ô
 # rỗng nhưng trượt ba ô còn lại.
-assert doc_o_tien("32.3") == 32300
-assert doc_o_tien("220") == 220000
-assert doc_o_tien("") == 0
+assert doc_o_tien("32.3") == 32300, "ô có chữ thì vẫn phải đọc ra tiền như bài trước: 32.3 nghìn là 32 nghìn 3 trăm đồng"
+assert doc_o_tien("220") == 220000, "ô ghi 220 nghìn là ô có nội dung, nên nó phải được đi tiếp vào chỗ đổi kiểu"
+assert doc_o_tien("") == 0, "người ghi sổ bấm Enter suông thì ô ấy tính là 0 đồng, chứ không được để máy dừng giữa chừng"
 # Ô có gõ hẳn số không: đã nhập, nên vẫn phải đi qua nhánh đổi kiểu.
-assert doc_o_tien("0") == 0
+assert doc_o_tien("0") == 0, "ô gõ hẳn một số không là ô đã nhập — nó có một ký tự nên không phải ô để trống"
 ```
 
 :::hints

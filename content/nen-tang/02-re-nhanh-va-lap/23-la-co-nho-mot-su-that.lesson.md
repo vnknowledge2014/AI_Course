@@ -307,8 +307,8 @@ else:
 # Quên hẳn hai dòng ấy, hoặc thụt chúng vào thân vòng ngày, thì vòng tuần chạy
 # trọn bốn lượt và `tuan` là 4. Viết `break` trần không kèm dòng đọc cờ thì nó
 # cắt ngay từ tuần 1, lúc `da_vuot` còn chưa được kéo lên.
-assert da_vuot
-assert tuan == 3
+assert da_vuot, "tháng này có ngày 17 tiêu 260 nghìn, nên dò xong lá cờ phải đang treo — nó là thứ duy nhất còn nhớ chuyện đó sau khi vòng lặp kết thúc"
+assert tuan == 3, "ngày vượt ngưỡng đầu tiên nằm ở tuần 3, biết rồi thì thôi không mở tuần 4 ra nữa"
 ```
 
 :::hints

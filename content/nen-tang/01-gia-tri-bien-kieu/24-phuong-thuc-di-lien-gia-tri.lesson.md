@@ -240,13 +240,9 @@ for dong in ket_qua:
 #   "CÀ PHÊ" — hoa tất, cũng phải nhận ra (chép tay `"cà phê"` vào chỗ trống thì
 #              ca này lộ ngay, vì lúc đó cả ba dòng đều thành "đúng khoản")
 #   "Bún Chả" — khoản khác hẳn, phải rơi vào nhánh else
-assert ket_qua == [
-    "Cà Phê → đúng khoản trong sổ",
-    "CÀ PHÊ → đúng khoản trong sổ",
-    "Bún Chả → khoản mới",
-]
+assert ket_qua == ["Cà Phê → đúng khoản trong sổ", "CÀ PHÊ → đúng khoản trong sổ", "Bún Chả → khoản mới"], "hai kiểu viết hoa của cà phê đều là khoản đã có trong sổ, chỉ bún chả mới là khoản chưa từng ghi"
 # Phương thức chuỗi đưa lại bản mới; danh sách khách gõ phải nguyên si.
-assert khach_go == ["Cà Phê", "CÀ PHÊ", "Bún Chả"]
+assert khach_go == ["Cà Phê", "CÀ PHÊ", "Bún Chả"], "câu trả lời phải nhắc lại đúng nguyên văn khách gõ, kể cả chữ hoa — hạ chữ thường chỉ để đem đối chiếu"
 ```
 
 :::hints

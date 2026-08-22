@@ -272,9 +272,9 @@ print(f"Tổng: {tien_pho + tien_ca_phe}đ")
 # Câu thứ ba: cái tên `int` phải còn nguyên là công cụ đổi kiểu. Ai điền `int`
 # vào chỗ trống thì đã nổ từ dòng 5; ai lách qua được dòng đó bằng một đường
 # vòng nào khác mà vẫn đè lên `int` thì trượt đúng câu này.
-assert tien_pho == 45000
-assert tien_ca_phe == 25000
-assert int("7") == 7
+assert tien_pho == 45000, "ô tiền phở trên phiếu ghi 45000, và con số ấy phải nằm ở cái tên của riêng nó"
+assert tien_ca_phe == 25000, "ô tiền cà phê ghi 25000, và nó là một khoản riêng chứ không dồn chung với tiền phở"
+assert int("7") == 7, "int vẫn phải là công cụ đổi chữ thành số — ai lấy cái tên ấy đặt cho tiền của mình thì máy hết đường đọc ô tiếp theo"
 ```
 
 :::hints

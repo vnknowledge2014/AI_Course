@@ -280,7 +280,7 @@ print(f"Còn lại {tien_cho} đồng, không mua nữa")
 # Ranh giới nằm ở đúng lượt thứ tư: lúc ấy trong túi còn vừa vặn 60 nghìn, và
 # vừa vặn 60 nghìn thì vẫn mua được — nên tiêu hết sạch, còn lại 0 đồng.
 # Điều kiện bỏ sót điểm bằng sẽ dừng sớm một lượt và để lại 60 nghìn.
-assert tien_cho == 0
+assert tien_cho == 0, "240 nghìn tiền chợ chia vừa hết cho món 60 nghìn, nên mua tới lúc dừng thì trong túi không còn đồng nào; còn lại 60 nghìn là đã bỏ lỡ lượt mua cuối, lúc trong túi vừa vặn đủ đúng một món"
 ```
 
 :::hints

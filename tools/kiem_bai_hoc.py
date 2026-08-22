@@ -25,6 +25,7 @@ Cú pháp thang hai chấm (MASTERPLAN §6):
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import pathlib
 import re
@@ -119,6 +120,40 @@ def kiem(f: pathlib.Path) -> list[str]:
     for b, than in buoc:
         if b == "code" and ":::hints" not in than:
             bao("bước `code` không có `:::hints` — người bí sẽ mắc kẹt")
+
+    # ── 5b. Mọi `assert` trong khối test phải nói ra điều gì đã sai ───────
+    #
+    # `assert x == 1` hỏng thì người học thấy đúng hai dòng: "AssertionError"
+    # và một câu giải thích chung về `assert` là gì. Không có gì nói cho họ
+    # biết PHÉP KIỂM NÀO trượt, hay vì sao nó phải đúng.
+    #
+    # Cả đường ống này lấy chẩn đoán ba tầng làm nguyên tắc — chuyện gì xảy
+    # ra / vì sao / sửa thế nào. Một khối test trả về `AssertionError` trơ
+    # trọi là chỗ duy nhất trong sản phẩm phá nguyên tắc ấy, và nó rơi đúng
+    # lúc người học vừa làm sai.
+    #
+    # Dùng `ast` của Python chứ KHÔNG đếm dấu phẩy bằng tay. Bản đếm tay có
+    # hai lỗ, và một agent viết bài đã báo lại cả hai thay vì lặng lẽ đi vòng:
+    #   1. comment đuôi chứa dấu phẩy bị nhận nhầm là thông điệp —
+    #      `assert phi == 12275  # 5% của 245500, vẫn là số nguyên` lọt lưới
+    #   2. `assert` trải nhiều dòng bị báo oan, vì nó quét từng dòng một
+    # Cả hai biến mất khi hỏi đúng thứ đã phân tích cú pháp Python: nút
+    # `ast.Assert` có trường `msg`, và nó hoặc có hoặc không.
+    for m in re.finditer(r"```python title=test\s*\n(.*?)```", t, re.S):
+        than = m.group(1)
+        try:
+            cay = ast.parse(than)
+        except SyntaxError:
+            # Khối test không parse được là việc của trình biên dịch và cổng
+            # chạy-thật; ở đây bỏ qua để không báo trùng.
+            continue
+        for nut in ast.walk(cay):
+            if not isinstance(nut, ast.Assert):
+                continue
+            if nut.msg is None:
+                bao(f"`assert` không có thông điệp: {ast.unparse(nut.test)[:56]}")
+            elif isinstance(nut.msg, ast.Constant) and not str(nut.msg.value).strip():
+                bao("`assert` có thông điệp rỗng")
 
     # ── 6. Không hạ thấp người đọc ───────────────────────────────────────
     thap = t.lower()

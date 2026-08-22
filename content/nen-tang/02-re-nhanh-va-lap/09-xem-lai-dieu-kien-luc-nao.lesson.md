@@ -224,7 +224,7 @@ print("Về nhà")
 ```python title=test
 # Dòng bạn điền chỉ được BÁO số tiền, không được sửa nó: sau lượt cuối ví
 # phải còn đúng 10 nghìn — không đủ một tô nữa nên vòng dừng ở đó.
-assert tien_con == 10000
+assert tien_con == 10000, "một trăm nghìn ăn được hai tô phở 45 nghìn, ví còn đúng 10 nghìn — dòng báo cáo chỉ nói lại số tiền đang có chứ không được tiêu thêm đồng nào"
 ```
 
 :::hints

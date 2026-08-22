@@ -308,8 +308,8 @@ print(f"Tuần trước: ngày {ngay_tuan_truoc}")
 # Tuần này vượt ngưỡng ở ngày 3, tuần trước ở ngày 5 — hai con số khác nhau.
 # Chép thẳng một con số vào chỗ trống thì đúng được một cuốn sổ và sai cuốn kia.
 # Ghi nhầm `tien` thì nó giữ 260 và 240; quên hẳn dòng ghi thì cả hai vẫn là 0.
-assert ngay_tuan_nay == 3
-assert ngay_tuan_truoc == 5
+assert ngay_tuan_nay == 3, "tuần này tiêu dè hai ngày đầu, ngày 3 mới là ngày đầu tiên quá 200 nghìn"
+assert ngay_tuan_truoc == 5, "tuần trước mãi tới ngày 5 mới có ngày quá 200 nghìn — cùng một câu hỏi, hai cuốn sổ ra hai ngày khác nhau"
 ```
 
 :::hints

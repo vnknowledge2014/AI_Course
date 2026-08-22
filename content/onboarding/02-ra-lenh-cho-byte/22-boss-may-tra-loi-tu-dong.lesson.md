@@ -235,10 +235,10 @@ print(gia_to("to"))
 ```python title=test
 # Byte gọi hàm với cả ba cỡ tô, và thêm một cỡ không có trong thực đơn để xem
 # nhánh cuối có đỡ được trường hợp lạ không.
-assert gia_to("nhỏ") == 40000
-assert gia_to("vừa") == 45000
-assert gia_to("to") == 55000
-assert gia_to("khổng lồ") == 0
+assert gia_to("nhỏ") == 40000, "bảng giá quán ghi tô nhỏ 40 nghìn"
+assert gia_to("vừa") == 45000, "bảng giá quán ghi tô vừa 45 nghìn"
+assert gia_to("to") == 55000, "bảng giá quán ghi tô to 55 nghìn"
+assert gia_to("khổng lồ") == 0, "quán không bán cỡ tô này, và cỡ nào không có trong bảng thì tra ra 0 đồng — đó là con số để cái máy biết mà xin lỗi khách thay vì báo bừa một giá"
 ```
 
 :::hints
@@ -349,9 +349,9 @@ else:
 ```python title=test
 # Byte kiểm ba chỗ, mỗi chỗ ứng với một chỗ trống bạn vừa điền.
 # Bảng giá đã in đủ ba cỡ hay chưa thì phần chấm theo màn hình lo.
-assert gia_to("to") == 55000
-assert so_to == 2
-assert gia_mot_to * so_to == 90000
+assert gia_to("to") == 55000, "bảng giá bày sẵn từ đầu chương trình vẫn phải tra ra tô to 55 nghìn"
+assert so_to == 2, "khách trả lời lấy hai tô, nên tới lúc tính tiền số tô phải là một con số đếm được bằng 2, không còn là câu chữ khách gõ vào"
+assert gia_mot_to * so_to == 90000, "hai tô vừa, mỗi tô 45 nghìn, thì hoá đơn báo cho khách là 90 nghìn"
 ```
 
 :::hints

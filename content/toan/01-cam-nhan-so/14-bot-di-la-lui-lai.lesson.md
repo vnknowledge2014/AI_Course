@@ -239,6 +239,15 @@ assert (cay_con_lai + cay_sau_an) - cay_sau_an == cay_con_lai, "tiến rồi lù
   # `min: 2` vì có hai chuyện, mỗi chuyện một phép trừ. Khung khởi đầu chưa có
   # dấu `-` nào, nên luật này chặn được đúng cái đáp án chép cứng hai con số.
   - kind: uses-operator, target: -, min: 2
+  # Có dấu `-` thôi thì chưa đủ: `cay_con_lai = 12 - 5` cũng là một phép trừ mà
+  # chẳng đọc cái tên nào — người viết nó đã tự tra hai con số ra khỏi đề rồi
+  # trừ hộ máy, đúng cái việc mà `onFail` bảo đừng làm. Bốn luật dưới buộc mỗi
+  # chỗ trống phải trừ ĐÚNG HAI CÁI TÊN đứng ngay trên nó. Khung khởi đầu không
+  # đọc tên nào trong bốn tên này, nên `min: 1` là đủ chặn.
+  - kind: uses-name, target: cay_tren_luong, min: 1
+  - kind: uses-name, target: cay_sau_an, min: 1
+  - kind: uses-name, target: vach_dang_dung_an, min: 1
+  - kind: uses-name, target: so_buoc_lui_an, min: 1
 - tier: tests
   timeoutMs: 4000
 - tier: output

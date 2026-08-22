@@ -180,9 +180,9 @@ print(f"Khách trả {hoa_don} đồng")
 ```python title=test
 # Byte tự gọi hàm với vài số tô khác nhau và cầm lấy kết quả để so.
 # Cầm được kết quả như thế này chỉ có thể khi hàm đã `return`.
-assert tinh_tien(2) == 90000
-assert tinh_tien(1) == 45000
-assert tinh_tien(0) == 0
+assert tinh_tien(2) == 90000, "hai tô phở, mỗi tô 45 nghìn, thì con số đưa về tận tay người gọi phải là 90 nghìn"
+assert tinh_tien(1) == 45000, "một tô thì tiền đúng bằng giá một tô: 45 nghìn"
+assert tinh_tien(0) == 0, "khách chưa gọi tô nào thì hoá đơn phải là 0 đồng, và cái số 0 ấy vẫn phải ra được khỏi hàm"
 ```
 
 :::hints

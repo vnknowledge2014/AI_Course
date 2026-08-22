@@ -216,10 +216,10 @@ print(f"Số người chia: {so_nguoi_chia}")
 # Ba ô, ba nghĩa. Điền cùng một thứ vào cả ba là hỏng ít nhất một dòng.
 # `type(tien_gui_xe) == type(0)` là để chặn `False`: `False == 0` cho True,
 # nhưng nhãn của nó là bool chứ không phải int, và ô tiền thì phải là con số.
-assert tien_gui_xe == 0
-assert type(tien_gui_xe) == type(0)
-assert ghi_chu == ""
-assert type(so_nguoi_chia) == type(None)
+assert tien_gui_xe == 0, "đã hỏi bà chủ và quán cho gửi miễn phí, nên ô này là một câu trả lời: không mất đồng nào"
+assert type(tien_gui_xe) == type(0), "ô tiền giữ một con số; câu đúng-sai cũng bằng 0 nhưng nó không phải một khoản chi"
+assert ghi_chu == "", "đã hỏi khách và khách bảo khỏi ghi gì, nên ô ghi chú là ô đã nhập mà nhập rỗng"
+assert type(so_nguoi_chia) == type(None), "cả bàn còn đang gọi món, chưa ai chốt mấy người — ô này mang nghĩa chưa có gì, không phải số 0 cũng không phải ô rỗng"
 ```
 
 :::hints

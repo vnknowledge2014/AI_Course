@@ -1,7 +1,7 @@
 ---
 id: toan.cam-nhan-so.quy-ve-mot-don-vi
 title: Quy về một đơn vị
-summary: Hai bộ đôi không chép được cho nhau thì kéo cả hai về cùng một cỡ — "mấy hạt trên một luống" — rồi mới so.
+summary: Hai bộ đôi không chép nguyên lần được cho nhau thì kéo cả hai về cùng một cỡ — "mấy hạt trên một luống" — rồi mới so.
 locale: vi
 track: toan
 module: cam-nhan-so
@@ -178,12 +178,24 @@ Hai vườn trông khác hẳn nhau — 90 hạt 6 luống với 75 hạt 5 lu�
 một luống thì **bằng nhau đúng khít**: cả hai đều 15 hạt trên một luống. Không
 vườn nào dày hơn vườn nào.
 
+Đến đây phải quay lại câu đầu bài. Mình bảo không có số lượt nào biến `75 : 5`
+thành `90 : 6`, rồi đã kịp chữa lại thành không có số lượt **nguyên** nào — và
+bây giờ thấy vì sao phải chữa: chép được cho nhau thật, chỉ là số lần chép lẻ.
+`75 × 1,2 = 90` và `5 × 1,2 = 6`. Hai bộ đôi bằng nhau khít là vì thế. Nhưng
+muốn tìm ra con số 1,2 ấy bằng cách chép tới chép lui thì mò tới bao giờ; quy
+về một luống cho ra ngay câu trả lời mà không phải mò lần nào.
+
 Đó là điều mà hai bộ đôi thô không cho thấy được. Phải kéo cả hai về cùng một
 cỡ mới đọc ra.
 
 Cái dấu chấm trong `15.0` không có gì lạ: R0 bài 15 đã nói phép chia bằng dấu
 `/` luôn trả về một số có phần lẻ, kể cả khi phần lẻ bằng không. Ở đây điều đó
-lại tiện: độ dày của vườn hiếm khi tròn, và bạn sẽ cần chỗ cho phần lẻ ấy.
+lại tiện: độ dày của vườn hiếm khi tròn, và bạn sẽ cần chỗ cho phần lẻ ấy ngay
+ở bài tập bên dưới.
+
+Nửa hạt trên một luống không phải nửa cái hạt nằm ngoài vườn — nó là cách nói
+gọn của "bốn luống chia nhau 62 hạt", và đó đúng là thứ mà chép nguyên lần
+không viết ra nổi.
 ::::
 
 ::::explain{#mot-ky-hieu-ba-cach-doc}
@@ -218,7 +230,7 @@ Ba vườn lần này. Vẫn đúng một cách: kéo mỗi vườn về một l
 Ba nhà cùng gieo xong, đếm được:
 
 - **Vườn nhà Tú**: 84 hạt trên 7 luống.
-- **Vườn nhà Hà**: 60 hạt trên 4 luống.
+- **Vườn nhà Hà**: 62 hạt trên 4 luống.
 - **Vườn nhà Sen**: 96 hạt trên 8 luống.
 
 Sáu con số đếm được đã đặt sẵn tên ở đầu bài. Điền ba chỗ trống bằng độ dày của
@@ -234,7 +246,7 @@ nào làm cả hai câu hỏi cùng đúng.
 hat_tu = 84
 luong_tu = 7
 
-hat_ha = 60
+hat_ha = 62
 luong_ha = 4
 
 hat_sen = 96
@@ -253,7 +265,7 @@ print(day_tu > day_sen)
 hat_tu = 84
 luong_tu = 7
 
-hat_ha = 60
+hat_ha = 62
 luong_ha = 4
 
 hat_sen = 96
@@ -272,7 +284,7 @@ print(day_tu > day_sen)
 # Ba vườn, ba phép quy về một luống. Hai câu so sánh cho hai câu trả lời ngược
 # nhau, nên không có đáp án gõ cứng nào qua được cả hai.
 assert day_tu == 12.0, "84 hạt trên 7 luống — quy về một luống phải ra 12"
-assert day_ha == 15.0, "60 hạt trên 4 luống — quy về một luống phải ra 15"
+assert day_ha == 15.5, "62 hạt trên 4 luống — quy về một luống phải ra 15,5"
 assert day_sen == 12.0, "96 hạt trên 8 luống — quy về một luống phải ra 12"
 # Hai vườn khác hẳn cỡ mà cùng một độ dày: đây đúng là điều bài 40 hứa và bài
 # này kiểm được — chia cả hai vế cho cùng một số thì quan hệ không đổi.
@@ -281,7 +293,7 @@ assert day_ha > day_tu, "vườn Hà phải dày hơn vườn Tú"
 # Quy về một luống rồi chép trở lại đủ số luống thì phải ra đúng đống hạt cũ —
 # không có hạt nào sinh ra hay mất đi trong lúc quy đổi.
 assert day_tu * luong_tu == hat_tu, "12 hạt một luống, 7 luống — chép lại phải ra đúng 84 hạt"
-assert day_ha * luong_ha == hat_ha, "15 hạt một luống, 4 luống — chép lại phải ra đúng 60 hạt"
+assert day_ha * luong_ha == hat_ha, "15,5 hạt một luống, 4 luống — chép lại phải ra đúng 62 hạt"
 ```
 
 :::hints
@@ -300,12 +312,15 @@ assert day_ha * luong_ha == hat_ha, "15 hạt một luống, 4 luống — chép
   onFail: mỗi chỗ trống phải là một phép chia thật — cái tên giữ số hạt chia cho cái tên giữ số luống — chứ không phải con số kết quả gõ sẵn
   requireAst:
   - kind: uses-operator, target: /, min: 3
+  - kind: uses-name, target: hat_tu, min: 1
+  - kind: uses-name, target: hat_ha, min: 1
+  - kind: uses-name, target: hat_sen, min: 1
   - kind: uses-name, target: luong_tu, min: 1
   - kind: uses-name, target: luong_ha, min: 1
   - kind: uses-name, target: luong_sen, min: 1
 - tier: output
   match: regex
-  expect: ^12\.0 15\.0 12\.0\nTrue\nFalse\s*$
+  expect: ^12\.0 15\.5 12\.0\nTrue\nFalse\s*$
 :::
 ::::
 

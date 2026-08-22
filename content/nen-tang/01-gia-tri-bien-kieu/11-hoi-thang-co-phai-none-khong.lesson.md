@@ -248,7 +248,7 @@ for o in cac_o:
 # Ba ô, ba nhãn khác nhau — một điều kiện đúng phải làm cả ba dòng cùng đúng.
 # Điều kiện luôn đúng thì cả ba thành "(chưa hỏi khách)".
 # Điều kiện luôn sai thì ô None tụt xuống nhánh else và lọt nguyên `None`.
-assert dong_in == ["cà phê cho anh Tuấn", "(khách không ghi gì)", "(chưa hỏi khách)"]
+assert dong_in == ["cà phê cho anh Tuấn", "(khách không ghi gì)", "(chưa hỏi khách)"], "ba dòng sổ ba tình cảnh: dòng có nội dung in nguyên nội dung, dòng khách để rỗng nói là khách không ghi gì, dòng chưa hỏi được nói là chưa hỏi khách"
 ```
 
 :::hints

@@ -288,7 +288,7 @@ print(f"Có {so_tuan_vuot} tuần vượt ngưỡng")
 #   cột 8  (thân vòng ngày, ngoài thân if) → không dòng nào, đếm ra 0;
 #   cột 12 (thân if — đáp án)              → ba dòng tuần, đếm ra 3;
 #   xoá hẳn dòng break                     → năm dòng tuần, đếm ra 5.
-assert so_tuan_vuot == 3
+assert so_tuan_vuot == 3, "tuần 1, tuần 3 và tuần 4 đều có ngày tiêu quá 200 nghìn, tuần 2 thì không — và tuần có tới hai ngày vượt vẫn chỉ tính là một tuần"
 ```
 
 :::hints
