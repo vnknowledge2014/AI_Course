@@ -4,6 +4,7 @@
   import Byte from './Byte.svelte';
   import { chay_python } from '../lib/chay_ma';
   import SanKhau from './SanKhau.svelte';
+  import ThanhSo from './ThanhSo.svelte';
   import type { CodeStep, KetQuaChay } from './kieu';
 
   let {
@@ -19,12 +20,12 @@
   let so_lan_sai = $state(0);
 
   /** Cấu hình sân khấu, nếu bước này có thế giới. */
-  const luoi = $derived(
-    (buoc as { liveView?: { world?: { family?: string; params?: unknown } } }).liveView?.world
-      ?.family === 'grid-bot'
-      ? ((buoc as { liveView: { world: { params: unknown } } }).liveView.world.params as never)
-      : null,
+  const the_gioi = $derived(
+    (buoc as { liveView?: { world?: { family?: string; params?: unknown } } }).liveView?.world ?? null,
   );
+  const luoi = $derived(the_gioi?.family === 'grid-bot' ? (the_gioi.params as never) : null);
+  const thanh_so = $derived(the_gioi?.family === 'number-line' ? (the_gioi.params as never) : null);
+  const co_the_gioi = $derived(luoi ?? thanh_so);
 
   // Chỉ nạp mã khởi đầu MỘT lần cho mỗi bước. Không có bảo vệ này thì mỗi lần
   // Svelte tính lại `khe`, bài sẽ xoá sạch thứ người học đang gõ dở.
@@ -44,7 +45,7 @@
     try {
       // Mã kiểm tra chạy CÙNG không gian tên, ngay sau mã người học — đó là
       // điều làm `assert tinh_tien(3) == 9` kiểm được đúng hàm họ vừa viết.
-      ket_qua = await chay_python(ma, san_choi ? undefined : khe['test'], luoi ?? undefined);
+      ket_qua = await chay_python(ma, san_choi ? undefined : khe['test'], co_the_gioi ?? undefined);
       if (!ket_qua.ok && !san_choi) so_lan_sai += 1;
     } finally {
       dang_chay = false;
@@ -61,11 +62,9 @@
   <RichText noi_dung={buoc.body} />
 
   {#if luoi}
-    <SanKhau
-      {luoi}
-      su_kien={(ket_qua?.suKien ?? []) as never}
-      thang={ket_qua?.thang ?? false}
-    />
+    <SanKhau {luoi} su_kien={(ket_qua?.suKien ?? []) as never} thang={ket_qua?.thang ?? false} />
+  {:else if thanh_so}
+    <ThanhSo thanh={thanh_so} su_kien={(ket_qua?.suKien ?? []) as never} thang={ket_qua?.thang ?? false} />
   {/if}
 
   <label class="soan">

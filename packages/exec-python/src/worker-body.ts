@@ -13,6 +13,7 @@
 
 import type { PhanHoiChay, YeuCauChay } from '@byte/exec-core';
 import { chayTrenLuoi, type CauHinhLuoi } from './the-gioi.js';
+import { chayTrenThanhSo, type CauHinhThanhSo } from './the-gioi-so.js';
 
 /** Bề mặt Pyodide mà worker này dùng tới — khai báo hẹp để không kéo cả kiểu của gói vào. */
 export interface Pyodide {
@@ -38,7 +39,15 @@ export function chayTrongWorkerPython(yeuCau: YeuCauChay, py: Pyodide): PhanHoiC
   try {
     // Bài có sân khấu: chạy trong thế giới lưới và trả kèm chuỗi sự kiện.
     if (yeuCau.luoi) {
-      const kq = chayTrenLuoi(py, yeuCau.ma, yeuCau.luoi as CauHinhLuoi);
+      // Phân biệt thế giới bằng HÌNH DẠNG cấu hình, không bằng một trường
+      // `family` riêng: cấu hình đã nói ra nó là thế giới nào (`rong`/`cao`
+      // cho lưới, `tu`/`den` cho thanh số), và thêm một trường nữa chỉ tạo
+      // thêm một chỗ để hai bên lệch nhau.
+      const ch = yeuCau.luoi as Record<string, unknown>;
+      const kq =
+        typeof ch['tu'] === 'number' && typeof ch['den'] === 'number'
+          ? chayTrenThanhSo(py, yeuCau.ma, ch as unknown as CauHinhThanhSo)
+          : chayTrenLuoi(py, yeuCau.ma, ch as unknown as CauHinhLuoi);
       return {
         loai: 'xong',
         id: yeuCau.id,

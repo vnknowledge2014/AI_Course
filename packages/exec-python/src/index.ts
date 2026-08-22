@@ -244,3 +244,5 @@ export { chayTrongWorkerPython, gan, type Pyodide } from './worker-body.js';
 export { kiemAst, type TruyVanAst, type KetQuaAst } from './kiem-ast.js';
 
 export { chayTrenLuoi, type SuKien, type CauHinhLuoi, type KetQuaLuoi } from './the-gioi.js';
+
+export { chayTrenThanhSo, type CauHinhThanhSo, type KetQuaThanhSo } from './the-gioi-so.js';

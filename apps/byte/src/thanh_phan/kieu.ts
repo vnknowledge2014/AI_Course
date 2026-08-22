@@ -5,4 +5,4 @@
  */
 export type { CodeStep, PredictStep, ReflectStep, Step, Lesson, RichText, ByteMood } from '@byte/content-schema';
 export type { KetQuaChay, ChanDoan } from '@byte/exec-core';
-export type { SuKien, CauHinhLuoi } from '@byte/exec-python';
+export type { SuKien, CauHinhLuoi, CauHinhThanhSo } from '@byte/exec-python';

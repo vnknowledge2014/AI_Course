@@ -253,6 +253,25 @@ assert lat * lat == 1, "hai lần lật gộp lại là không đổi gì — đ
 Lật một cái rễ thành mầm. Lật cái nữa nó về chỗ cũ. Không cần học thuộc.
 ::::
 
+::::sandbox{#lat-thu}
+Byte đang đứng ở mốc 0. Thử tự tay lật thanh số xem.
+
+Đây là sân chơi — không có đáp án đúng, không ai chấm. Chạy lại bao nhiêu lần
+cũng được, và hãy thử cả những thứ bạn nghĩ sẽ lạ: lật ba lần thì sao, nhân
+`-2` khác gì nhân `-1` rồi nhân `2`, và `nhan(0)` đưa bạn về đâu.
+
+```python title=starter
+di(3)
+nhan(-1)
+nhan(-1)
+noi(dang_o())
+```
+
+:::world{number-line}
+{ "tu": -10, "den": 10, "bat_dau": 0, "buoc_vach": 1 }
+:::
+::::
+
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
