@@ -2,6 +2,7 @@
   import { muc_luc, bai_hoc, thu_tu, type MucLuc } from './lib/noi_dung';
   import { dung_ban_do, bai_ke_tiep, so_ky_nang } from './lib/cay_ky_nang';
   import BanDo from './thanh_phan/BanDo.svelte';
+  import ThuVien from './thanh_phan/ThuVien.svelte';
   import { doc, danh_dau_buoc, danh_dau_xong } from './lib/tien_do';
   import Buoc from './thanh_phan/Buoc.svelte';
   import Byte from './thanh_phan/Byte.svelte';
@@ -12,6 +13,7 @@
   let so_buoc_hien = $state(1);
   let tien_do = $state(doc());
   let loi = $state<string | null>(null);
+  let o_thu_vien = $state(false);
 
   let realm = $state<ReturnType<typeof thu_tu>>([]);
 
@@ -96,8 +98,16 @@
       </footer>
     </article>
 
+  {:else if o_thu_vien}
+    <ThuVien dong={() => (o_thu_vien = false)} />
+
   {:else}
     <BanDo {ban_do} so_ky_nang={ky_nang} {ke_tiep} mo={(id) => mo(id)} />
+    <!-- Thư viện đặt DƯỚI bản đồ, không ngang hàng: bài tương tác là đường
+         chính, chương đọc là chỗ tra khi đường chính chưa tới. -->
+    <button class="mo-thu-vien" onclick={() => (o_thu_vien = true)}>
+      Thư viện — 159 chương đọc, phủ những lĩnh vực bài tập chưa với tới →
+    </button>
   {/if}
 </main>
 
@@ -123,6 +133,13 @@
     font-size: 0.88rem; cursor: pointer; padding: 0;
   }
   .quay-lai:hover { color: var(--nhan); }
+  .mo-thu-vien {
+    width: 100%; margin-top: 2.4rem; text-align: left;
+    background: none; border: 1.5px dashed var(--vien); border-radius: 12px;
+    padding: 0.9rem 1.1rem; font: inherit; font-size: 0.9rem;
+    color: var(--chu-mo); cursor: pointer;
+  }
+  .mo-thu-vien:hover { border-color: var(--nhan); color: var(--nhan); }
   .loi { display: flex; flex-direction: column; gap: 0.8rem; }
   .mach { font-size: 0.9rem; color: var(--chu-mo); }
 </style>

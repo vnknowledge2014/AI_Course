@@ -13,6 +13,7 @@ import { readdir, readFile, mkdir, writeFile, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { bien_dich, LoiBienDich } from './lesson.js';
+import { doc_richtext } from './richtext.js';
 import { LoiDirective } from './directive.js';
 import { LoiFrontmatter } from './frontmatter.js';
 
@@ -221,6 +222,75 @@ async function build(goc: string, dich: string): Promise<number> {
   return loi;
 }
 
+/** Biên dịch chương TIER-C: đọc thuần, không bước, không chấm.
+ *
+ *  Chương ở tier C tồn tại để "không lĩnh vực nào trống" (MASTERPLAN §0 quyết
+ *  định 13): người vào tìm hiểu DDD hay parser combinator phải đọc được cái gì
+ *  đó ngay, kể cả khi bài tương tác cho lĩnh vực ấy chưa viết.
+ *
+ *  Chuyển sang RichText ở đây chứ không để ứng dụng tự đọc markdown: dùng lại
+ *  đúng bộ kết xuất của bài học nghĩa là danh sách, bảng, khối mã hiện ra
+ *  giống hệt nhau ở cả hai nơi — và một bộ đọc markdown thứ hai trong ứng dụng
+ *  là một chỗ nữa để hai bên lệch nhau.
+ */
+async function build_legacy(goc: string, dich: string): Promise<number> {
+  const goc_legacy = join(goc, 'legacy');
+  if (!existsSync(goc_legacy)) {
+    console.log('không có content/legacy — bỏ qua tier C');
+    return 0;
+  }
+  const tep: string[] = [];
+  async function di(d: string): Promise<void> {
+    for (const e of await readdir(d, { withFileTypes: true })) {
+      const p = join(d, e.name);
+      if (e.isDirectory()) await di(p);
+      else if (e.name.endsWith('.chapter.md')) tep.push(p);
+    }
+  }
+  await di(goc_legacy);
+  tep.sort();
+
+  await rm(dich, { recursive: true, force: true });
+  await mkdir(dich, { recursive: true });
+
+  const muc_luc = [];
+  for (const t of tep) {
+    const raw = await readFile(t, 'utf-8');
+    const m = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/.exec(raw);
+    if (!m) {
+      console.error(`✖ ${relative(goc, t)}: thiếu frontmatter`);
+      continue;
+    }
+    const fm: Record<string, unknown> = {};
+    for (const dong of m[1]!.split('\n')) {
+      const kv = /^([a-zA-Z]\w*):\s*(.*)$/.exec(dong);
+      if (kv) {
+        try {
+          fm[kv[1]!] = JSON.parse(kv[2]!);
+        } catch {
+          fm[kv[1]!] = kv[2];
+        }
+      }
+    }
+    const id = String(fm['id']);
+    await writeFile(
+      join(dich, `${id}.json`),
+      JSON.stringify({ ...fm, body: doc_richtext(m[2]!) }, null, 2),
+      'utf-8',
+    );
+    const { body: _bo, ...tom } = fm;
+    muc_luc.push(tom);
+  }
+
+  await writeFile(
+    join(dich, 'index.json'),
+    JSON.stringify({ tier: 'C', chapters: muc_luc }, null, 2),
+    'utf-8',
+  );
+  console.log(`${muc_luc.length}/${tep.length} chương TIER-C → ${dich}`);
+  return tep.length - muc_luc.length;
+}
+
 const [, , lenh, ...dsl] = process.argv;
 
 if (lenh === 'new') {
@@ -236,6 +306,10 @@ if (lenh === 'new') {
   const tep = join(thu_muc, `${slug}.lesson.md`);
   await writeFile(tep, KHUNG(track, mod, slug), { flag: 'wx' });
   console.log(`✓ ${tep}`);
+} else if (lenh === 'legacy') {
+  const goc = dsl[0] ?? 'content';
+  const dich = dsl[1] ?? 'dist/legacy';
+  process.exit((await build_legacy(goc, dich)) > 0 ? 1 : 0);
 } else if (lenh === 'build' || lenh === undefined) {
   const goc = dsl[0] ?? 'content';
   const dich = dsl[1] ?? 'dist/content';

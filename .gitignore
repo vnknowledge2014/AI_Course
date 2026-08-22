@@ -19,3 +19,11 @@ repos/*/
 references/repos/
 
 .DS_Store
+.phan-bien/
+
+# TIER-C: 159 chương chép từ `fp/*_Books` bằng `tools/di_tru_sach.py`.
+#
+# Sinh ra được nên không commit — nguồn (`fp/*_Books`) đã nằm trong repo, và
+# chép 3,3 MB vào git chỉ để có sẵn một bản y hệt là trả tiền hai lần cho cùng
+# một nội dung. Chạy lại lệnh trên là có ngay.
+content/legacy/

@@ -60,3 +60,46 @@ export async function bai_hoc(id: string): Promise<Lesson> {
 export function thu_tu(): Realm[] {
   return cache_thu_tu;
 }
+
+/* ── Thư viện TIER-C ────────────────────────────────────────────────────── */
+
+/** Một chương sách ở chế độ đọc. Không có bước, không chấm, không cấp mastery.
+ *
+ *  Tier C tồn tại để "không lĩnh vực nào trống": người vào tìm hiểu DDD hay
+ *  parser combinator phải đọc được cái gì đó ngay, kể cả khi bài tương tác cho
+ *  lĩnh vực ấy chưa được viết. */
+export interface Chuong {
+  id: string;
+  lang: string;
+  part: string;
+  chapter: string;
+  title: string;
+  summary: string;
+  lines: number;
+  estimatedMinutes?: number;
+  sourcePath: string;
+}
+
+const GOC_TV = `${import.meta.env.BASE_URL}thu-vien`;
+
+let cache_tv: Chuong[] | null = null;
+const cache_chuong = new Map<string, Chuong & { body: unknown }>();
+
+export async function thu_vien(): Promise<Chuong[]> {
+  if (cache_tv) return cache_tv;
+  const r = await fetch(`${GOC_TV}/index.json`);
+  if (!r.ok) throw new Error(`không nạp được thư viện (HTTP ${r.status})`);
+  const d = (await r.json()) as { chapters: Chuong[] };
+  cache_tv = d.chapters;
+  return cache_tv;
+}
+
+export async function chuong(id: string): Promise<Chuong & { body: unknown }> {
+  const co = cache_chuong.get(id);
+  if (co) return co;
+  const r = await fetch(`${GOC_TV}/${id}.json`);
+  if (!r.ok) throw new Error(`không nạp được chương \`${id}\` (HTTP ${r.status})`);
+  const c = (await r.json()) as Chuong & { body: unknown };
+  cache_chuong.set(id, c);
+  return c;
+}
