@@ -4,6 +4,9 @@ public/noi-dung/
 # Thư viện TIER-C sinh từ content/legacy/ bằng `pnpm run thu-vien`.
 public/thu-vien/
 
+# byte_rust.wasm build từ crates/byte-rust bằng `pnpm run wasm`.
+public/wasm/
+
 # Runtime Pyodide (12 MB) sao từ node_modules bằng `pnpm run pyodide`.
 # Không commit: nó là bản phát hành của bên thứ ba, phiên bản đã ghim trong
 # package.json rồi.

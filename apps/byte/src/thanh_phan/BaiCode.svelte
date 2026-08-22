@@ -2,7 +2,8 @@
   import RichText from './RichText.svelte';
   import GoiY from './GoiY.svelte';
   import Byte from './Byte.svelte';
-  import { chay_python } from '../lib/chay_ma';
+  // Đổi tên lúc import: component đã có một hàm `chay()` là handler của nút.
+  import { chay as chay_theo_ngon_ngu } from '../lib/chay_ma';
   import SanKhau from './SanKhau.svelte';
   import ThanhSo from './ThanhSo.svelte';
   import type { CodeStep, KetQuaChay } from './kieu';
@@ -45,7 +46,12 @@
     try {
       // Mã kiểm tra chạy CÙNG không gian tên, ngay sau mã người học — đó là
       // điều làm `assert tinh_tien(3) == 9` kiểm được đúng hàm họ vừa viết.
-      ket_qua = await chay_python(ma, san_choi ? undefined : khe['test'], co_the_gioi ?? undefined);
+      ket_qua = await chay_theo_ngon_ngu(
+        khe['language'] ?? 'python',
+        ma,
+        san_choi ? undefined : khe['test'],
+        co_the_gioi ?? undefined,
+      );
       if (!ket_qua.ok && !san_choi) so_lan_sai += 1;
     } finally {
       dang_chay = false;
