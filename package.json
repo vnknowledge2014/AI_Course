@@ -10,7 +10,9 @@
     "test": "turbo test",
     "typecheck": "turbo typecheck",
     "inventory": "python3 tools/inventory.py --check",
-    "conformance": "cargo run --release -p byte-rust-conformance"
+    "conformance": "cargo run --release -p byte-rust-conformance",
+    "cong": "./tools/cong.sh",
+    "cong:nhanh": "./tools/cong.sh --nhanh"
   },
   "devDependencies": {
     "turbo": "^2.5.0",
