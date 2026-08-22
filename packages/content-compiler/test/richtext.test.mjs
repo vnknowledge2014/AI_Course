@@ -38,3 +38,120 @@ test('danh sách đánh số cũng nối được dòng tiếp', () => {
   assert.equal(cay[0].t, 'ol');
   assert.equal(cay[0].items.length, 2);
 });
+
+/** Dấu nháy của YAML không được lọt vào chữ người học nhìn thấy.
+ *
+ *  YAML bắt đặt nháy khi giá trị chứa dấu hai chấm — mà gợi ý thì hay chứa
+ *  (`Viết {x:,} vào chỗ trống`). Bản đầu giữ nguyên cặp nháy ấy, nên 73 gợi ý
+ *  trong repo hiện ra kèm hai dấu nháy thừa, và những gợi ý DẠY VỀ dấu nháy
+ *  còn kèm cả dấu gạch chéo ngược.
+ */
+import { bien_dich } from '../dist/lesson.js';
+
+const KHUNG = (than) => `---
+id: t.m.s
+title: Thử
+summary: Một câu
+locale: vi
+track: t
+module: m
+order: 1
+tier: A
+languages: [python]
+defaultLanguage: python
+level: intro
+estimatedMinutes: 10
+---
+
+::::predict{#p commitOnce}
+Đoán đi.
+
+:::opt{correct}
+đúng
+:::
+
+:::opt
+sai
+::why
+Gần đúng ở chỗ bạn thử.
+::
+:::
+::::
+
+::::code{#c}
+Làm đi.
+
+\`\`\`python title=starter
+x = 1
+\`\`\`
+
+\`\`\`python title=solution
+x = 1
+\`\`\`
+
+\`\`\`python title=test
+assert x == 1
+\`\`\`
+
+:::hints
+${than}
+:::
+
+:::validate
+- tier: run
+  timeoutMs: 4000
+:::
+::::
+
+::::reflect{#r}
+Nghĩ lại.
+::::
+`;
+
+const van = (bai) => {
+  const h = bai.steps.find((s) => s.kind === 'code').hints.rungs;
+  return h.map((r) => r.body.flatMap((n) => n.c ?? []).map((c) => c.v ?? '').join(''));
+};
+
+test('bóc cặp nháy YAML bao trọn dòng', () => {
+  const b = bien_dich('t.md', KHUNG(
+    `- kind: attention
+  body: "Nhìn vào chỗ có dấu hai chấm: ngay sau tên biến."
+- kind: strategy
+  body: Không có nháy thì giữ nguyên
+- kind: one-line
+  body: "Viết x = 1"`,
+  ));
+  const t = van(b);
+  assert.ok(!t[0].startsWith('"'), `còn nháy thừa: ${t[0]}`);
+  assert.match(t[0], /^Nhìn vào chỗ/);
+  assert.equal(t[1], 'Không có nháy thì giữ nguyên');
+  assert.ok(!t[2].startsWith('"'));
+});
+
+test('gỡ escape cho nháy nằm bên trong', () => {
+  const b = bien_dich('t.md', KHUNG(
+    `- kind: attention
+  body: "Viết \\"Xin chào\\" vào chỗ trống."
+- kind: strategy
+  body: s
+- kind: one-line
+  body: s`,
+  ));
+  const t = van(b)[0];
+  assert.ok(!t.includes('\\'), `còn dấu gạch chéo ngược: ${t}`);
+  assert.equal(t, 'Viết "Xin chào" vào chỗ trống.');
+});
+
+test('nháy KHÔNG ôm trọn dòng thì giữ nguyên', () => {
+  // `"Đủ tiền" nghĩa là…` — ở đây cặp nháy là một phần của điều đang dạy.
+  const b = bien_dich('t.md', KHUNG(
+    `- kind: attention
+  body: "Đủ tiền" nghĩa là khách đưa nhiều hơn giá.
+- kind: strategy
+  body: s
+- kind: one-line
+  body: s`,
+  ));
+  assert.match(van(b)[0], /^"Đủ tiền" nghĩa là/);
+});

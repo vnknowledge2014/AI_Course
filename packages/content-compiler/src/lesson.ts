@@ -420,6 +420,39 @@ function lam_step(d: Directive, tep: string): Step | null {
   }
 }
 
+/**
+ * Bóc cặp nháy bao quanh một giá trị YAML.
+ *
+ * YAML bắt đặt nháy khi giá trị chứa dấu hai chấm — mà gợi ý thì hay chứa
+ * (`Viết \`{x:,}\` vào chỗ trống`). Không bóc thì cặp nháy ấy trở thành CHỮ và
+ * hiện ra trên màn hình người học: 73 gợi ý trong repo đang bị như vậy.
+ *
+ * Chỉ bóc khi cặp nháy ôm trọn cả dòng. `Gõ "xin chào" vào đây` giữ nguyên —
+ * ở đó dấu nháy là một phần của điều đang dạy.
+ */
+function boc_nhay(s: string): string {
+  const v = s.trim();
+  if (v.length < 2) return s;
+
+  // Chuỗi nháy kép: YAML cho phép nháy BÊN TRONG nếu nó được escape, và gợi ý
+  // dạy chuỗi thì gần như luôn có (`Viết \"Xin chào\" vào chỗ trống`). Không
+  // gỡ escape thì người học thấy đúng dấu gạch chéo ngược ấy trên màn hình.
+  if (v.startsWith('"') && v.endsWith('"')) {
+    const trong = v.slice(1, -1);
+    // Mọi nháy bên trong phải được escape — nếu không thì cặp nháy ngoài
+    // không ôm trọn dòng, và bóc nó đi sẽ cắt mất nghĩa.
+    if (!/(^|[^\\])"/.test(trong)) {
+      return trong.replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+    }
+    return s;
+  }
+
+  if (v.startsWith("'") && v.endsWith("'") && !v.slice(1, -1).includes("'")) {
+    return v.slice(1, -1);
+  }
+  return s;
+}
+
 function doc_thang_goi_y(d: Directive): unknown {
   // `:::hints` chứa danh sách YAML dạng `- kind: … / body: …`
   const rungs: { kind: string; body: RichNode[] }[] = [];
@@ -441,7 +474,7 @@ function doc_thang_goi_y(d: Directive): unknown {
     }
     const b = /^\s*body:\s*(.*)$/.exec(l);
     if (b) {
-      body.push(b[1]!);
+      body.push(boc_nhay(b[1]!));
       continue;
     }
     if (l.trim() !== '') body.push(l.trim());
