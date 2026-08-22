@@ -4,6 +4,7 @@
   import Byte from './Byte.svelte';
   // Đổi tên lúc import: component đã có một hàm `chay()` là handler của nút.
   import { chay as chay_theo_ngon_ngu } from '../lib/chay_ma';
+  import { tab, tab_nguoc, enter, backspace } from '../lib/soan_thao';
   import SanKhau from './SanKhau.svelte';
   import ThanhSo from './ThanhSo.svelte';
   import type { CodeStep, KetQuaChay } from './kieu';
@@ -62,6 +63,36 @@
   // học "thắng" một sân chơi là biến nó thành bài tập, mà bài tập thì đã có ở
   // bước trước rồi.
   const dat = $derived(san_choi || ket_qua?.ok === true);
+
+  let o_soan = $state<HTMLTextAreaElement | null>(null);
+
+  /** Xử lý phím thụt lề.
+   *
+   *  Python quyết định khối lệnh bằng thụt lề, nên mặc định của trình duyệt
+   *  (Tab chuyển focus) làm ô soạn không dùng được: người học viết `if`, bấm
+   *  Tab, con trỏ nhảy sang nút bấm — và họ tưởng mình vừa làm sai Python.
+   */
+  function phim(e: KeyboardEvent) {
+    const el = e.currentTarget as HTMLTextAreaElement;
+    const truoc = { van: el.value, dau: el.selectionStart, cuoi: el.selectionEnd };
+    let sau = null;
+
+    if (e.key === 'Tab') sau = e.shiftKey ? tab_nguoc(truoc) : tab(truoc);
+    else if (e.key === 'Enter') sau = enter(truoc);
+    else if (e.key === 'Backspace') sau = backspace(truoc);
+    if (!sau) return;
+
+    e.preventDefault();
+    ma = sau.van;
+    // Đặt con trỏ SAU khi Svelte ghi giá trị mới, nếu không nó nhảy về cuối.
+    queueMicrotask(() => el.setSelectionRange(sau.dau, sau.cuoi));
+  }
+
+  function dat_lai() {
+    ma = khe['starter'] ?? '';
+    ket_qua = null;
+    o_soan?.focus();
+  }
 </script>
 
 <div class="bai-code">
@@ -76,7 +107,9 @@
   <label class="soan">
     <span class="nhan">{san_choi ? 'Sân chơi — đổi gì cũng được' : 'Mã của bạn'}</span>
     <textarea
+      bind:this={o_soan}
       bind:value={ma}
+      onkeydown={phim}
       spellcheck="false"
       autocapitalize="off"
       rows={Math.max(4, ma.split('\n').length + 1)}
@@ -88,6 +121,11 @@
       {dang_chay ? 'Đang chạy…' : 'Chạy thử'}
     </button>
     {#if dat}<button class="tiep" onclick={xong}>{san_choi ? 'Xong, đi tiếp' : 'Đi tiếp'}</button>{/if}
+    <!-- Đặt lại phải luôn có: người học thử một hướng, đi lạc, rồi mắc kẹt vì
+         không còn biết mã ban đầu ra sao. Bắt họ nhớ là bắt sai người. -->
+    {#if ma !== (khe['starter'] ?? '')}
+      <button class="dat-lai" onclick={dat_lai}>Đặt lại</button>
+    {/if}
   </div>
 
   {#if ket_qua}
@@ -139,6 +177,11 @@
     background: none; border: 1.5px solid var(--dung); color: var(--dung);
     border-radius: 999px; padding: 0.55rem 1.3rem; font: inherit; font-weight: 600; cursor: pointer;
   }
+  .dat-lai {
+    background: none; border: none; color: var(--chu-mo); font: inherit;
+    font-size: 0.86rem; cursor: pointer; padding: 0.55rem 0.4rem;
+  }
+  .dat-lai:hover { color: var(--nhan); }
   .ket-qua {
     margin-top: 1.1rem; padding: 1rem 1.1rem; border-radius: 12px;
     background: var(--nen-o); border-left: 3px solid var(--vien);
