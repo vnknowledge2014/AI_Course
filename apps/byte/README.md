@@ -19,18 +19,48 @@ có máy chủ nào để gọi cả.
 
 ## Bảy nền tảng, một bản build
 
-| Nền tảng | Lệnh | Trạng thái |
+| Nền tảng | Trạng thái | Lệnh |
 |---|---|---|
-| Chrome, Firefox | `pnpm --filter @byte/app build` | ✅ chạy |
-| macOS | `pnpm --filter @byte/app tauri build` | ✅ `Byte.app` 4 MB |
-| Linux, Windows | cùng lệnh, chạy trên máy đích | vỏ đã sẵn, chưa build thử |
-| iOS, iPadOS | `pnpm --filter @byte/app tauri ios init` rồi `ios build` | cần Xcode (đã có) |
-| Android | `pnpm --filter @byte/app tauri android init` rồi `android build` | cần Android SDK + NDK |
+| Chrome, Firefox | ✅ build được | `pnpm --filter @byte/app build` |
+| macOS | ✅ `Byte.app` 4 MB | `pnpm --filter @byte/app tauri build` |
+| Android | ✅ APK 12 MB | `tauri android build --apk` |
+| iOS, iPadOS | ⚠️ mã biên dịch được, **chưa đóng gói được** | xem dưới |
+| Linux, Windows | vỏ đã sẵn, phải build trên máy đích | cùng lệnh macOS |
 
 Cùng một bản web nằm trong cả bảy. Vỏ Tauri chỉ thêm đúng một thứ: gọi
 `byte-rust` NATIVE thay vì qua WASM — cùng hàm `kiem_va_chay`, nên kết quả
 chấm bài giống hệt nhau ở mọi nền tảng. Một bài đạt trên Mac mà trượt trên
-Android thì người học không còn tin công cụ nữa.
+Android thì người học không còn tin công cụ nữa, và đó là thứ không lấy lại
+được.
+
+### iOS còn thiếu gì
+
+Đã xong: dự án Xcode sinh ra, runtime simulator iOS 26.5 tải về, và mã Rust
+biên dịch được cho cả `aarch64-apple-ios` lẫn `aarch64-apple-ios-sim`.
+
+Chặn ở đúng một chỗ: **`Signing for "byte-app_iOS" requires a development
+team`**. `security find-identity -v -p codesigning` trả về `0 valid
+identities`. Cần một tài khoản Apple Developer — không có cách nào vòng qua,
+kể cả cho bản simulator: `tauri ios build` luôn archive, và archive thì đòi ký.
+
+Khi đã có tài khoản:
+
+```sh
+# Lấy Team ID ở https://developer.apple.com/account → Membership
+export APPLE_DEVELOPMENT_TEAM=XXXXXXXXXX
+pnpm --filter @byte/app tauri ios build
+```
+
+Hoặc ghi cố định vào `src-tauri/tauri.conf.json`:
+
+```json
+{ "bundle": { "iOS": { "developmentTeam": "XXXXXXXXXX" } } }
+```
+
+Dựng project Xcode độc lập bằng `xcodebuild` KHÔNG thay thế được: bước
+"Build Rust Code" trong project cần Tauri CLI làm tiến trình cha (nó nói
+chuyện qua một WebSocket cục bộ), nên chạy ngoài `tauri ios build` sẽ hỏng ở
+đúng bước đó.
 
 ## Chạy Python
 
