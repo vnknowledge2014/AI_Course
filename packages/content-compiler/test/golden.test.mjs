@@ -125,3 +125,182 @@ test('directive trong code fence không phá cấu trúc', () => {
 test('directive mở mà không đóng bị bắt', () => {
   assert.throws(() => phan_tich_directive('::::code{#a}\nthân\n'), /chưa đóng/);
 });
+
+// ── Hai chế độ hỏng LẶNG LẼ, mỗi cái từng lọt qua cả chín cổng ────────────
+
+test('khối `title=readonly` trong `predict` KHÔNG bị vứt', () => {
+  const l = bien_dich('t.lesson.md', `---
+id: t.m.a
+title: T
+summary: S
+locale: vi
+track: t
+module: m
+order: 1
+tier: A
+languages: [python]
+defaultLanguage: python
+level: intro
+estimatedMinutes: 8
+teaches: []
+requires: []
+concepts: []
+gradingMatrix:
+  web-chrome: [run]
+provenance:
+  authoredBy: human
+  reviewed: false
+---
+
+::::predict{#p commitOnce}
+Đoán xem màn hình in ra gì?
+
+\`\`\`python title=readonly
+print(2 + 3)
+\`\`\`
+
+:::opt{correct}
+5
+:::
+
+:::opt
+23
+::why
+Dấu cộng giữa hai SỐ là phép cộng, không phải phép nối chuỗi.
+::
+:::
+::::
+
+::::reflect{#r}
+Xong.
+::::
+
+::::checkpoint{mastery=0.8}
+::::
+`);
+  const p = l.steps.find((s) => s.kind === 'predict');
+  const khoi = JSON.stringify(p.body).includes('"src":"print(2 + 3)"');
+  assert.ok(khoi, `đoạn mã cần đoán biến mất khỏi thân bước: ${JSON.stringify(p.body)}`);
+});
+
+test('`title=solution` trong `predict` bị NÉM, không im lặng in đáp án', () => {
+  const viet = (title) => `---
+id: t.m.b
+title: T
+summary: S
+locale: vi
+track: t
+module: m
+order: 1
+tier: A
+languages: [python]
+defaultLanguage: python
+level: intro
+estimatedMinutes: 8
+teaches: []
+requires: []
+concepts: []
+gradingMatrix:
+  web-chrome: [run]
+provenance:
+  authoredBy: human
+  reviewed: false
+---
+
+::::predict{#p commitOnce}
+Đoán đi.
+
+\`\`\`python title=${title}
+print(5)
+\`\`\`
+
+:::opt{correct}
+5
+:::
+
+:::opt
+x
+::why
+Vì sao nghĩ thế là tự nhiên.
+::
+:::
+::::
+
+::::reflect{#r}
+Xong.
+::::
+
+::::checkpoint{mastery=0.8}
+::::
+`;
+  assert.throws(() => bien_dich('t.lesson.md', viet('solution')), LoiBienDich);
+  assert.doesNotThrow(() => bien_dich('t.lesson.md', viet('readonly')));
+});
+
+test('`:::validate` bóc nháy khỏi giá trị', () => {
+  const l = bien_dich('t.lesson.md', `---
+id: t.m.c
+title: T
+summary: S
+locale: vi
+track: t
+module: m
+order: 1
+tier: A
+languages: [python]
+defaultLanguage: python
+level: intro
+estimatedMinutes: 8
+teaches: []
+requires: []
+concepts: []
+gradingMatrix:
+  web-chrome: [output]
+provenance:
+  authoredBy: human
+  reviewed: false
+---
+
+::::code{#c}
+Làm đi.
+
+\`\`\`python title=starter
+print("Đơn DH-4KM: xong")
+\`\`\`
+
+\`\`\`python title=solution
+print("Đơn DH-4KM: xong")
+\`\`\`
+
+\`\`\`python title=test
+assert True, "luôn đạt"
+\`\`\`
+
+:::hints
+- kind: attention
+  body: Nhìn dòng đầu.
+- kind: strategy
+  body: Nghĩ theo hướng này.
+- kind: one-line
+  body: Viết đúng một dòng.
+:::
+
+:::validate
+- tier: output
+  expect: 'Đơn DH-4KM: xong'
+:::
+::::
+
+::::reflect{#r}
+Xong.
+::::
+
+::::checkpoint{mastery=0.8}
+::::
+`);
+  const v = l.steps.find((s) => s.kind === 'code').validation;
+  const r = v.rules[0];
+  const gt = JSON.stringify(r);
+  assert.ok(!gt.includes("\\'Đơn"), `dấu nháy còn dính vào giá trị: ${gt}`);
+  assert.ok(gt.includes('Đơn DH-4KM: xong'), gt);
+});

@@ -105,7 +105,7 @@ function lam_byte_beat(d: Directive, tep: string): ByteBeat {
       `Chọn một trong: ${DANG_HOP_LE.join(', ')}.`);
   }
 
-  const line = than_richtext(d);
+  const line = than_richtext(d, tep);
   if (line.length === 0) {
     throw new LoiBienDich('khối `::::byte` không có lời thoại', tep, d.dong,
       'Viết một câu của Byte, tối đa 90 ký tự, không dùng thuật ngữ chưa dạy.');
@@ -136,8 +136,50 @@ function doc_trigger(v: string | undefined, tep: string, dong: number): ByteBeat
   }
 }
 
-function than_richtext(d: Directive): RichNode[] {
-  return doc_richtext(tach_khoi_ma(d.than).van_xuoi);
+/** Thân bước, đã bóc các khối mã có `title=`.
+ *
+ *  `co_cho_ma` nói bước này có một ô riêng để chứa mã hay không.
+ *
+ *  - `true` (example / code / sandbox): bóc hết như cũ, vì chính bước ấy sẽ
+ *    lấy `ma` ra và gắn vào `code`.
+ *  - `false` (explain / predict / reflect / checkpoint): KHÔNG có ô nào để
+ *    hứng, nên bóc ra là **vứt đi**. Bản trước làm đúng như thế, và 136 khối
+ *    mã trong 77 bài biến mất — mỗi bước `predict` hỏi "đoán màn hình in ra
+ *    gì" đều đã vứt mất chính đoạn mã cần đoán. Chín cổng vẫn xanh.
+ *
+ *  Ở nhánh `false`, khối `title=readonly` được giữ nguyên tại chỗ dưới dạng
+ *  khối mã thường — đó đúng là ý người viết: "cho xem, đừng cho sửa". Còn
+ *  `starter`/`solution`/`test` thì NÉM: chúng vô nghĩa ở đây, và một
+ *  `title=solution` nằm trong `predict` sẽ in thẳng đáp án ra cho người học
+ *  ngay trên câu hỏi.
+ */
+function than_richtext(d: Directive, tep: string, co_cho_ma = false): RichNode[] {
+  if (co_cho_ma) return doc_richtext(tach_khoi_ma(d.than).van_xuoi);
+  const { ma } = tach_khoi_ma(d.than);
+  const xau = ma.find((m) => m.title !== 'readonly');
+  if (xau) {
+    throw new LoiBienDich(
+      `bước \`${d.ten}\` không có chỗ chứa mã, nên khối \`\`\`${xau.lang} title=${xau.title}\` ` +
+        `không đi đâu cả`,
+      tep,
+      d.dong,
+      'Dùng `title=readonly` nếu chỉ muốn cho xem. `starter`/`solution`/`test` ' +
+        'chỉ có nghĩa trong bước `code`, `example` hoặc `sandbox`.',
+    );
+  }
+  return doc_richtext(giu_khoi_readonly(d.than));
+}
+
+/** Đổi mọi ```<lang> title=readonly thành ```<lang> trần.
+ *
+ *  Giữ nguyên vị trí trong văn: đoạn mã phải nằm đúng chỗ người viết đặt nó,
+ *  không phải dồn xuống cuối.
+ */
+function giu_khoi_readonly(than: string): string {
+  return than.replace(
+    /^([ \t]*)```([a-zA-Z0-9_+-]*)[ \t]+title=readonly[ \t]*$/gm,
+    (_, thut: string, lang: string) => `${thut}\`\`\`${lang}`,
+  );
 }
 
 function bat_buoc<T>(v: T | undefined, thong_diep: string, tep: string, dong: number, goi_y?: string): T {
@@ -274,14 +316,14 @@ function lam_step(d: Directive, tep: string): Step | null {
       return null;
 
     case 'explain':
-      return { ...chung, body: than_richtext(d) } as Step;
+      return { ...chung, body: than_richtext(d, tep) } as Step;
 
     case 'example': {
       const { ma } = tach_khoi_ma(d.than);
       const chinh = ma[0];
       return {
         ...chung,
-        body: than_richtext(d),
+        body: than_richtext(d, tep, true),
         code: chinh ? { lang: chinh.lang, starter: chinh.src } : undefined,
         runnable: d.thuoc_tinh['runnable'] !== undefined,
       } as unknown as Step;
@@ -307,7 +349,7 @@ function lam_step(d: Directive, tep: string): Step | null {
       }
       return {
         ...chung,
-        body: than_richtext(d),
+        body: than_richtext(d, tep),
         commitOnce: true,
         answer: {
           kind: 'choice',
@@ -369,7 +411,7 @@ function lam_step(d: Directive, tep: string): Step | null {
       }
       return {
         ...chung,
-        body: than_richtext(d),
+        body: than_richtext(d, tep, true),
         code: {
           lang: starter.lang,
           starter: starter.src,
@@ -389,7 +431,7 @@ function lam_step(d: Directive, tep: string): Step | null {
       } as unknown as Step;
 
     case 'reflect':
-      return { ...chung, body: than_richtext(d) } as unknown as Step;
+      return { ...chung, body: than_richtext(d, tep) } as unknown as Step;
 
     case 'sandbox': {
       // Sân chơi: KHÔNG chấm, không có lời giải đúng.
@@ -403,7 +445,7 @@ function lam_step(d: Directive, tep: string): Step | null {
       const dau = ma[0];
       return {
         ...chung,
-        body: than_richtext(d),
+        body: than_richtext(d, tep, true),
         code: dau ? { language: dau.lang, starter: dau.src, solution: dau.src, suggestions: [] } : undefined,
         ...doc_the_gioi(d.con.find((c) => c.ten === 'world')),
       } as unknown as Step;
@@ -568,7 +610,14 @@ function doc_validate(d: Directive | undefined): unknown {
       continue;
     }
     khoa_ds = null;
-    cur[khoa] = gia_tri;
+    // Bóc nháy, giống `doc_muc` và `doc_thang_goi_y`.
+    //
+    // Thiếu một dòng này thì `expect: 'Đơn DH-4KM: ...'` mang theo cả hai dấu
+    // nháy vào `expected` và KHÔNG BAO GIỜ khớp — một luật chấm im lặng không
+    // chạy, mà bảng điều khiển vẫn báo bước ấy có luật. Đúng cùng chế độ hỏng
+    // với `requireAst` rỗng và với các khối mã bị vứt: một con số xanh không
+    // đo cái nó nói là nó đo.
+    cur[khoa] = boc_nhay(gia_tri);
   }
   chot();
   return { rules, stopOnFirstBlocking: true, advisoryAffectsBadge: 'none' };
