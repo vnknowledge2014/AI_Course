@@ -155,3 +155,37 @@ test('nháy KHÔNG ôm trọn dòng thì giữ nguyên', () => {
   ));
   assert.match(van(b)[0], /^"Đủ tiền" nghĩa là/);
 });
+
+/** `target: "*"` phải khớp toán tử nhân, không phải chuỗi ba ký tự.
+ *
+ *  Thiếu bước bóc nháy thì luật `static` im lặng không chạy — cùng chế độ
+ *  hỏng với `requireAst` thành mảng rỗng, và với khung `TODO —` biên dịch
+ *  được: một luật có mặt trong file nhưng không đo gì cả.
+ */
+test('bóc nháy cho giá trị trong mục danh sách của validate', () => {
+  const b = bien_dich('t.md', KHUNG(
+    `- kind: attention
+  body: a
+- kind: strategy
+  body: b
+- kind: one-line
+  body: c`,
+  ).replace(
+    `:::validate
+- tier: run
+  timeoutMs: 4000
+:::`,
+    `:::validate
+- tier: run
+  timeoutMs: 4000
+- tier: static
+  onFail: phải dùng phép nhân
+  requireAst:
+  - kind: uses-operator, target: "*"
+  - kind: uses-call, target: print
+:::`,
+  ));
+  const r = b.steps.find((s) => s.kind === 'code').validation.rules.find((x) => x.tier === 'static');
+  assert.equal(r.requireAst[0].target, '*', `còn nháy: ${JSON.stringify(r.requireAst[0].target)}`);
+  assert.equal(r.requireAst[1].target, 'print');
+});

@@ -79,7 +79,12 @@ def _dem(nguon, cac_truy_van):
                     # target "10000" khớp cả 10000 lẫn "10000" — người viết bài
                     # không phải nhớ kiểu, và trong ngữ cảnh "chặn đáp án chép
                     # cứng" thì cả hai đều là chép cứng.
-                    if tg is None or str(nut.value) == tg:
+                    #
+                    # \`str(tg)\` chứ không phải \`tg\`: bộ đọc \`.lesson.md\` đổi mọi
+                    # giá trị toàn chữ số thành SỐ, nên \`target: 45\` tới đây là int
+                    # 45 và \`str(nut.value) == tg\` không bao giờ đúng — luật im
+                    # lặng không chạy, đúng thứ tệ nhất một luật chấm có thể làm.
+                    if tg is None or str(nut.value) == str(tg):
                         n += 1
             elif kind == "nesting":
                 n += _khop_long(nut, tg)

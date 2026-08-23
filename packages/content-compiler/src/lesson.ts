@@ -586,7 +586,12 @@ function doc_muc(s: string): Record<string, unknown> {
   for (const phan of s.split(',')) {
     const kv = /^\s*([a-zA-Z]\w*):\s*(.*)$/.exec(phan);
     if (!kv) continue;
-    const v = kv[2]!.trim();
+    // Bóc nháy y như mọi giá trị YAML khác. Thiếu bước này thì
+    // `target: "*"` thành chuỗi ba ký tự `"*"`, không khớp toán tử nào, và
+    // luật `static` im lặng không chạy — đúng chế độ hỏng mà cả tầng chấm
+    // này được dựng để tránh. Một agent viết bài đã vấp phải và đi vòng bằng
+    // cách bỏ nháy; vá ở đây để người sau không phải biết mẹo ấy.
+    const v = boc_nhay(kv[2]!).trim();
     ra[kv[1]!] = /^-?\d+$/.test(v) ? Number(v) : v;
   }
   return ra;
