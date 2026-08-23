@@ -76,6 +76,9 @@ function tach_khoi_ma(than: string): { van_xuoi: string; ma: KhoiMa[] } {
  *  phải thiếu sót: sai là dữ liệu, không phải thất bại. Bảng này từ chối luôn
  *  ở tầng biên dịch để không ai vô tình viết được một Byte thất vọng.
  */
+/** Những `title` mà bước `code` gắn vào trường `code` của nó. */
+const TITLE_MA = new Set(['starter', 'solution', 'test']);
+
 const TAM_TRANG_HOP_LE = ['idle', 'thinking', 'happy', 'blocked', 'dizzy', 'curious'] as const;
 const DANG_HOP_LE = ['idle', 'lean-in', 'point-editor', 'point-stage', 'jump'] as const;
 
@@ -153,34 +156,67 @@ function doc_trigger(v: string | undefined, tep: string, dong: number): ByteBeat
  *  `title=solution` nằm trong `predict` sẽ in thẳng đáp án ra cho người học
  *  ngay trên câu hỏi.
  */
-function than_richtext(d: Directive, tep: string, co_cho_ma = false): RichNode[] {
-  if (co_cho_ma) return doc_richtext(tach_khoi_ma(d.than).van_xuoi);
-  const { ma } = tach_khoi_ma(d.than);
-  const xau = ma.find((m) => m.title !== 'readonly');
-  if (xau) {
-    throw new LoiBienDich(
-      `bước \`${d.ten}\` không có chỗ chứa mã, nên khối \`\`\`${xau.lang} title=${xau.title}\` ` +
-        `không đi đâu cả`,
-      tep,
-      d.dong,
-      'Dùng `title=readonly` nếu chỉ muốn cho xem. `starter`/`solution`/`test` ' +
-        'chỉ có nghĩa trong bước `code`, `example` hoặc `sandbox`.',
-    );
+/** Thân bước, sau khi rút ra những khối mã mà CHÍNH bước ấy tiêu thụ.
+ *
+ *  `tieu_thu(khoi, i)` trả `true` cho khối mà bước sẽ gắn vào trường `code`
+ *  của nó. Mọi khối còn lại ở lại ĐÚNG CHỖ trong văn, dưới dạng khối mã
+ *  thường — vì người viết đặt nó ở đó là có ý.
+ *
+ *  Bản trước bóc sạch mọi khối có `title=` rồi để bước tự đi nhặt cái nó cần.
+ *  Cái nó không cần thì không ai nhặt. Hai chỗ rò:
+ *
+ *    - explain / predict / reflect / checkpoint không có trường `code` nào,
+ *      nên KHÔNG nhặt gì: 136 khối trong 77 bài biến mất, gồm cả đoạn mã mà
+ *      mỗi bước `predict` hỏi người học đoán kết quả.
+ *    - example và sandbox chỉ nhặt `ma[0]`: 78 khối nữa biến mất, phần lớn
+ *      là khối `text` in kết quả đặt ngay dưới đoạn mã.
+ *
+ *  Tổng 214 khối trên 1723. Chín cổng xanh suốt.
+ *
+ *  Khối không được tiêu thụ mà mang title khác `readonly` thì NÉM, không giữ:
+ *  `starter`/`solution`/`test` chỉ có nghĩa với bước biết dùng chúng, và một
+ *  `title=solution` nằm trong `predict` sẽ in đáp án lên ngay trên câu hỏi.
+ */
+function than_richtext(
+  d: Directive,
+  tep: string,
+  tieu_thu: (m: KhoiMa, i: number) => boolean = () => false,
+): RichNode[] {
+  const dong = d.than.split('\n');
+  const ra: string[] = [];
+  let i = 0;
+  let k = 0;
+  while (i < dong.length) {
+    const m = /^([ \t]*)```([a-zA-Z0-9_+-]*)[ \t]+title=(\S+)[ \t]*$/.exec(dong[i] ?? '');
+    if (!m) {
+      ra.push(dong[i] ?? '');
+      i++;
+      continue;
+    }
+    const [, thut, lang, title] = m as unknown as [string, string, string, string];
+    const src: string[] = [];
+    i++;
+    while (i < dong.length && !/^[ \t]*```[ \t]*$/.test(dong[i] ?? '')) {
+      src.push(dong[i] ?? '');
+      i++;
+    }
+    const dong_dong = dong[i] ?? '```';
+    i++;
+    if (tieu_thu({ lang: lang.toLowerCase(), title, src: src.join('\n') }, k++)) continue;
+    if (title !== 'readonly') {
+      throw new LoiBienDich(
+        `bước \`${d.ten}\` không dùng tới khối \`\`\`${lang} title=${title}\`, nên nó biến mất`,
+        tep,
+        d.dong,
+        'Dùng `title=readonly` nếu chỉ muốn cho xem. `starter`/`solution`/`test` ' +
+          'chỉ có nghĩa trong bước `code`, `example` hoặc `sandbox`.',
+      );
+    }
+    ra.push(`${thut}\`\`\`${lang}`, ...src, dong_dong);
   }
-  return doc_richtext(giu_khoi_readonly(d.than));
+  return doc_richtext(ra.join('\n'));
 }
 
-/** Đổi mọi ```<lang> title=readonly thành ```<lang> trần.
- *
- *  Giữ nguyên vị trí trong văn: đoạn mã phải nằm đúng chỗ người viết đặt nó,
- *  không phải dồn xuống cuối.
- */
-function giu_khoi_readonly(than: string): string {
-  return than.replace(
-    /^([ \t]*)```([a-zA-Z0-9_+-]*)[ \t]+title=readonly[ \t]*$/gm,
-    (_, thut: string, lang: string) => `${thut}\`\`\`${lang}`,
-  );
-}
 
 function bat_buoc<T>(v: T | undefined, thong_diep: string, tep: string, dong: number, goi_y?: string): T {
   if (v === undefined || v === null || (Array.isArray(v) && v.length === 0)) {
@@ -323,7 +359,7 @@ function lam_step(d: Directive, tep: string): Step | null {
       const chinh = ma[0];
       return {
         ...chung,
-        body: than_richtext(d, tep, true),
+        body: than_richtext(d, tep, (_, i) => i === 0),
         code: chinh ? { lang: chinh.lang, starter: chinh.src } : undefined,
         runnable: d.thuoc_tinh['runnable'] !== undefined,
       } as unknown as Step;
@@ -355,7 +391,7 @@ function lam_step(d: Directive, tep: string): Step | null {
           kind: 'choice',
           options: opts.map((o) => ({
             id: `opt-${o.dong}`,
-            label: doc_richtext(tach_khoi_ma(o.than).van_xuoi),
+            label: than_richtext(o, tep),
             correct: o.thuoc_tinh['correct'] !== undefined,
             why: o.con.find((c) => c.ten === 'why')
               ? doc_richtext(o.con.find((c) => c.ten === 'why')!.than)
@@ -411,7 +447,7 @@ function lam_step(d: Directive, tep: string): Step | null {
       }
       return {
         ...chung,
-        body: than_richtext(d, tep, true),
+        body: than_richtext(d, tep, (m) => TITLE_MA.has(m.title)),
         code: {
           lang: starter.lang,
           starter: starter.src,
@@ -445,7 +481,7 @@ function lam_step(d: Directive, tep: string): Step | null {
       const dau = ma[0];
       return {
         ...chung,
-        body: than_richtext(d, tep, true),
+        body: than_richtext(d, tep, (_, i) => i === 0),
         code: dau ? { language: dau.lang, starter: dau.src, solution: dau.src, suggestions: [] } : undefined,
         ...doc_the_gioi(d.con.find((c) => c.ten === 'world')),
       } as unknown as Step;

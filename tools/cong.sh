@@ -38,6 +38,7 @@ bo_qua() {
 
 # ── 1. Nội dung ───────────────────────────────────────────────────────────
 chay "Biên dịch bài học"      node packages/content-compiler/dist/cli.js build content dist/content
+chay "Mã không bị mất"        python3 tools/kiem_khong_mat.py
 chay "Hiến chương sư phạm"    python3 tools/kiem_bai_hoc.py
 chay "Đồ thị tiền đề"         python3 tools/kiem_do_thi.py
 chay "Số học trong văn xuôi"  python3 tools/kiem_so_hoc.py
