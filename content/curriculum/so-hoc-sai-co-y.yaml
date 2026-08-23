@@ -1,0 +1,31 @@
+# Những khẳng định số học SAI mà bài học cố ý viết ra.
+#
+# `tools/kiem_so_hoc.py` tính lại mọi đẳng thức trong văn xuôi và báo lỗi khi
+# hai vế lệch nhau. Nhưng một phần cách dạy toán ở đây là **viết ngộ nhận ra
+# rồi bác bỏ nó** — người học đang mang sẵn luật "cộng tử với tử, cộng mẫu với
+# mẫu" trong đầu, và giả vờ luật ấy không tồn tại thì không gỡ được nó.
+#
+# Mỗi mục dưới đây là một chỗ như vậy. Khoá là (tên file, biểu thức), KHÔNG
+# phải số dòng: dòng trôi mỗi lần sửa một chữ ở trên nó, và một miễn trừ trôi
+# khỏi chỗ nó canh sẽ lặng lẽ tha cho một lỗi thật ở dòng mới.
+#
+# Biểu thức biến mất khỏi bài thì miễn trừ thành THỪA và cổng báo đỏ. Đó là
+# chủ ý: chỉ có một cách để một miễn trừ ở đây tồn tại, là chỗ nó canh vẫn còn.
+
+- tep: content/toan/01-cam-nhan-so/34-muon-so-sanh-thi-cung-thuoc.lesson.md
+  bieu_thuc: "1/2 + 1/2 = 2/4"
+  vi_sao: >-
+    Bài dựng luật sai "cộng tử với tử, cộng mẫu với mẫu" rồi thử nó lên một
+    phép người học đã biết đáp án, để chính người học thấy nó hỏng: gộp hai
+    nửa sải dây xong vẫn còn nửa sải, nửa kia đi đâu mất.
+
+- tep: content/toan/01-cam-nhan-so/35-cong-phan-so-van-la-luat-cu.lesson.md
+  bieu_thuc: "1/2 + 1/3 = 2/5"
+  vi_sao: >-
+    Nhắc lại luật sai bài 34 để lại, làm điểm xuất phát cho bài này gỡ.
+
+- tep: content/toan/01-cam-nhan-so/35-cong-phan-so-van-la-luat-cu.lesson.md
+  bieu_thuc: "1/2 + 1/2 = 2/4"
+  vi_sao: >-
+    Nhắc lại chỗ hỏng của luật ấy, cùng phản ví dụ bài 34 đã dùng.
+

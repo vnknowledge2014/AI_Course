@@ -40,6 +40,7 @@ bo_qua() {
 chay "Biên dịch bài học"      node packages/content-compiler/dist/cli.js build content dist/content
 chay "Hiến chương sư phạm"    python3 tools/kiem_bai_hoc.py
 chay "Đồ thị tiền đề"         python3 tools/kiem_do_thi.py
+chay "Số học trong văn xuôi"  python3 tools/kiem_so_hoc.py
 chay "Bí mật lọt vào git"     python3 tools/kiem_bi_mat.py
 chay "Schema khớp MASTERPLAN" python3 tools/trich_schema.py --check
 
