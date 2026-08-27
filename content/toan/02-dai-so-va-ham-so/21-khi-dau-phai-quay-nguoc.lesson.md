@@ -223,8 +223,10 @@ hơn 20 000 không? Không. Vậy `n > 10` sai — và một con số cụ thể
 
 Cột `n < 10` khớp cột `lãi > 20000` ở mọi dòng. Cột `n > 10` lệch ở bốn trên
 năm dòng. Để ý dòng `n = 10`: ở đúng cái mốc thì **cả hai** cột đều `False`, nên
-riêng dòng ấy không phân biệt được luật nào đúng. Muốn bắt lỗi thì phải thử một
-số ở **xa** mốc — đó là lý do bài này thử tận `n = 12`.
+riêng dòng ấy không phân biệt được luật nào đúng. Ngoài nó ra thì **số nào cũng
+bắt được lỗi** — `n = 9` sát ngay mốc cũng bắt được, đúng như "bốn trên năm dòng"
+vừa nói. Chỗ duy nhất phải tránh khi kiểm là **chính cái mốc**, chứ không phải
+mấy số gần nó.
 ::::
 
 ::::code{#hai-luat-tranh-nhau}

@@ -97,9 +97,13 @@ chắc bằng `n`. Nên câu tính dừng lại ở đây:
 8n + 6
 ```
 
-Thử rút xem có được không: phần chung của `8n` và `6` phải là thứ có mặt ở
-**cả hai**. `n` chỉ có ở cụm đầu. Số 8 chỉ có ở cụm đầu. Không còn gì để đặt ra
-trước ngoặc.
+Thử rút xem có được không: cái **chữ** đặt ra trước ngoặc được thì phải có mặt ở
+**cả hai** cụm. `n` chỉ có ở cụm đầu, còn `6` không mang chữ nào cả. Nên không
+còn chữ nào để đặt ra trước ngoặc.
+
+(Rút một con số thì vẫn còn: `8n + 6` cũng viết được thành `2 × (4n + 3)`, vì cả
+8 lẫn 6 đều chia hết cho 2. Nhưng đó là rút **số**, không phải gộp hạng tử — nó
+không làm câu tính ngắn đi chỗ nào, và mạch này đang đi tìm cái khác.)
 
 Những cụm gộp được với nhau — cùng mang đúng một chữ, như `3n` với `5n` — gọi
 là **hạng tử đồng dạng**. Gộp chúng lại chính là rút chữ ấy ra ngoài.

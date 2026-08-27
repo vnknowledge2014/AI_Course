@@ -63,8 +63,11 @@ Nên tất cả sự khác biệt gói gọn vào **một con số ở một dò
 
 - Xe An: chưa bán ổ nào thì trong tay đúng **0** đồng.
 - Xe Byte: chưa bán ổ nào mà đã trả 30 nghìn thuê chỗ, nên trong tay
-  **−30 000** đồng. Số âm ở đây không có gì lạ — mốc 0 là "hoà vốn", còn dưới
-  mốc nghĩa là đang thiếu, đúng như T2.1 đã dựng trên trục số.
+  **−30 000** đồng. Số âm ở đây không có gì lạ — mốc 0 là chỗ **gỡ xong tiền
+  thuê chỗ**, còn dưới mốc nghĩa là đang thiếu, đúng như T2.1 đã dựng trên trục
+  số. (Đừng lẫn với "hoà vốn" của bài 17: ở đó còn trừ cả 9 000 tiền vốn mỗi ổ
+  nữa, nên mốc hoà vốn thật rơi vào 5 ổ. Máy `g` của bài này chỉ đếm tiền thu
+  trừ tiền thuê chỗ, chưa đụng tới tiền vốn.)
 
 Viết hai cái máy ra đầy đủ, bằng ký hiệu của bài trước:
 
@@ -311,7 +314,7 @@ assert xe_ti(9) - xe_ti(8) == 15000, "xe Tí cũng bán 15 000 một ổ, nên b
 assert b_an == 0, "An chưa bán ổ nào và cũng không mất gì, nên `b` của An là 0"
 assert b_byte == -30000, "Byte chưa bán ổ nào mà đã trả 30 000 thuê chỗ, nên `b` của Byte là -30000"
 assert b_ti == 45000, "Tí chưa bán ổ nào đã cầm sẵn 45 000 tiền đặt bánh, nên `b` của Tí là 45000"
-assert xe_byte(2) == 0, "bán 2 ổ được 30 000, vừa đúng tiền thuê chỗ — Byte về mốc hoà vốn"
+assert xe_byte(2) == 0, "bán 2 ổ được 30 000, vừa đúng tiền thuê chỗ — máy này về số 0, tức gỡ xong tiền thuê chỗ (chưa trừ tiền vốn mỗi ổ, nên chưa phải hoà vốn của bài 17)"
 assert xe_an(4) - xe_byte(4) == 30000, "khoảng cách giữa hai đường song song là 30 000 ở mọi chỗ, kể cả ở n = 4"
 assert chenh == 75000, "đường của Tí nằm trên 45 000, đường của Byte nằm dưới 30 000: cách nhau 75 000"
 ```

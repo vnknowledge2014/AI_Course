@@ -172,9 +172,10 @@ trọng nhất về luỹ thừa, và bạn cầm chắc nó.
 
 Ranh giới nằm ở chỗ **cái gì được lặp lại**. `2ⁿ` là nhân lặp lại chính **cơ
 số** — ba lần con số 2: `2 × 2 × 2 = 8`. Còn `2 × 3` là cộng lặp lại: ba lần
-con số 2 **cộng** vào nhau. Hai chuyện khác nhau, và chúng tình cờ trùng nhau ở
-đúng một chỗ: `2¹ = 2` cũng bằng `2 × 1 = 2`. Ngoài chỗ ấy thì chúng rời nhau
-rất nhanh — `2⁷ = 128`, còn `2 × 7 = 14`.
+con số 2 **cộng** vào nhau. Hai chuyện khác nhau, và chúng chỉ tình cờ trùng
+nhau ở **hai** chỗ: `2¹ = 2` cũng bằng `2 × 1 = 2`, rồi `2² = 4` cũng bằng
+`2 × 2 = 4`. Từ `n = 3` trở đi thì rời hẳn nhau, càng lúc càng xa — `2⁷ = 128`,
+còn `2 × 7 = 14`.
 ::
 :::
 

@@ -29,13 +29,18 @@ provenance:
 ---
 
 ::::byte{trigger=enter mood=curious pose=lean-in}
-Hôm nay không có gì mới. Chỉ có cái xe, một buổi bán hàng, và cả mạch để tả nó.
+Hôm nay không có **đồ nghề** nào mới. Chỉ có cái xe, một buổi bán hàng khác, và
+cả mạch để tả nó.
 ::::
 
 ::::explain{#mot-buoi-ban-hang}
 Ba mươi lăm bài vừa rồi mỗi bài thêm đúng một thứ. Hôm nay không thêm gì cả —
-chỉ cầm hết chỗ đồ nghề ấy lên một lần, trên đúng cái xe bánh mì đã chạy suốt
-mạch.
+chỉ cầm hết chỗ đồ nghề ấy lên một lần.
+
+Vẫn cái xe bánh mì ấy, nhưng **một buổi khác, con số khác**: thuê chỗ đắt hơn,
+lời lãi tính khác, khách khác. Cố ý như vậy. Chép đáp án của bài 17 hay bài 29
+sang đây là trật hết — thứ mang sang được chỉ có **cách làm**. Nên mấy con số
+dưới đây phải đọc như đọc một đề hoàn toàn mới.
 
 > Xe bánh mì của Byte. Một ổ bán **15 000 đồng**. Mỗi ngày trả **100 000 đồng**
 > tiền thuê chỗ.
@@ -342,9 +347,11 @@ assert lai_ban_7 > 0, "bán 7 ổ đã hết lỗ, nên số này phải dương
 ::::explain{#con-cau-hoi-thu-ba}
 Ba câu hỏi của buổi sáng đã xong. Còn câu thứ ba, và nó là câu khác loại hẳn.
 
-Ba câu kia đều chạy trên một **đường thẳng**: mỗi ổ thêm vào thì lãi thêm đúng
-15 000, không hơn không kém. Câu thứ ba thì không, vì tăng giá làm **hai việc
-cùng lúc và ngược chiều nhau**:
+Câu 1 và câu 2 chạy trên một **đường thẳng**: mỗi ổ thêm vào thì lãi thêm đúng
+15 000, không hơn không kém. Câu 4 thì đã rời đường thẳng rồi, nhưng rời theo lối
+riêng của nó — **nhân đôi mỗi giờ**, đúng cái máy `2ⁿ` mà bài 30 dựng và bài 31
+chỉ ra là không đường thẳng nào đuổi kịp. Còn câu thứ ba rời đường thẳng theo lối
+thứ ba nữa, vì tăng giá làm **hai việc cùng lúc và ngược chiều nhau**:
 
 - giá mỗi ổ **cao lên** — tốt;
 - số ổ bán được **ít đi** — xấu.

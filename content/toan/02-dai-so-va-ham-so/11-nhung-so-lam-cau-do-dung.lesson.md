@@ -215,11 +215,12 @@ suốt:
 | câu | quét 0…40 nói được không? |
 |---|---|
 | "80 là một nghiệm" | không — 80 chưa được hỏi |
-| "trong 0…40 không có nghiệm nào" | được — 41 số đều đã bị hỏi |
+| "trong 0…40 không có nghiệm **nguyên** nào" | được — 41 số nguyên ấy đều đã bị hỏi |
 | "phương trình này không có nghiệm" | không — còn vô số số chưa hỏi |
 
-Cái quét làm được là chuyện của một khoảng. Cái bạn muốn nói lại là chuyện của
-mọi số.
+Cái quét làm được là chuyện của một khoảng, và trong khoảng ấy cũng chỉ là
+chuyện của những số nó thật sự bước qua. Cái bạn muốn nói lại là chuyện của mọi
+số.
 ::::
 
 ::::code{#quet-hai-cai-gio}

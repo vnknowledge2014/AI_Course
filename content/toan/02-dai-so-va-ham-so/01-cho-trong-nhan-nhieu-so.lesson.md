@@ -129,7 +129,11 @@ print(15000 * 3)
 ::why
 Gần đúng ở chỗ bạn đọc hai dòng đầu không sai một đồng, và bạn đang dùng một quy
 tắc rất đúng của cái xe: *bán thêm cho khách nữa thì tiền cả buổi tăng lên*. Cuối
-buổi Byte đúng là muốn biết con số 120 000 ấy.
+buổi Byte đúng là muốn biết một con số cộng dồn như thế.
+
+Nhưng 120 000 dừng lại ở khách thứ hai. Ba dòng này là 3 ổ, rồi 5 ổ, rồi 3 ổ nữa
+— cả buổi 11 ổ, tức 11 × 15 000 = 165 000 đồng. Nên 120 000 không phải tổng cả
+buổi; nó là tổng nửa chừng.
 
 Chỗ lệch nằm ở ranh giới giữa **một lần điền** và **cả buổi bán**. Muốn cộng dồn
 thì phải có một chỗ giữ tổng — một cái tên nhận thêm sau mỗi khách, đúng như biến

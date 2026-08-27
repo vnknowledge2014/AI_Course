@@ -187,9 +187,12 @@ câu tính.
 
 Máy không đọc được hình dạng giúp bạn. Nên ta nhờ nó làm **trọng tài**: đưa cho
 cả ba tờ cùng một số ổ, rồi xem ba con số nhả ra có đúng ba con số Byte đã đọc
-không. Ba tờ khác hình dạng thì cùng một số ổ phải cho **ba** con số khác nhau —
-đó chính là bằng chứng bạn chép ra ba vật khác nhau, chứ không phải ba bản của
-cùng một vật.
+không. Nếu ba tờ cho ra **ba** con số khác nhau thì chắc chắn bạn đã chép ra ba
+vật khác nhau, chứ không phải ba bản của cùng một vật.
+
+Để ý chiều của câu ấy: ba số khác nhau *thì* ba tờ khác nhau. Chiều ngược lại
+chưa chắc đâu — hai tờ trông khác hẳn nhau mà vẫn nhả ra cùng một số ở **mọi**
+chỗ trống là chuyện có thật, và bài 6 dựng riêng để bạn gặp nó.
 
 Cả ba chỗ trống phải viết bằng **chữ `n`**, không bằng con số 8.
 
@@ -235,7 +238,7 @@ print(to_c)
 # chúng không bao giờ chạy tới, và cái bẫy không bao giờ sập.
 assert to_b != 15000 * n + 2, "tờ B nói CẢ CỤM `n cộng hai` mới đem nhân — bỏ cặp ngoặc thì hai ổ phần nhà tụt xuống thành hai đồng"
 assert to_c != 15000 * n - 2, "tờ C nói bớt hai Ổ rồi mới nhân — bỏ cặp ngoặc thì hai ổ cháy tụt xuống thành hai đồng"
-assert to_a != to_b, "tờ A và tờ B là hai hình dạng khác nhau, nên cùng 8 ổ phải cho hai con số khác nhau"
+assert to_a != to_b, "tờ A cộng 20 000 tiền nước, tờ B cộng thêm hai ổ tức 30 000 — hai khoản cộng khác nhau thì cùng 8 ổ không thể ra cùng một số"
 assert to_b != to_c, "tờ B cộng thêm hai ổ, tờ C bớt đi hai ổ — hai vật khác nhau"
 assert to_a != to_c, "tờ A cộng thêm tiền, tờ C bớt đi ổ — hai vật khác nhau"
 # Ba tờ, ba con số — nên một con số gõ cứng chỉ qua được nhiều nhất một câu.
