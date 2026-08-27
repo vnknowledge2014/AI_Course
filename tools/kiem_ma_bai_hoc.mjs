@@ -122,15 +122,25 @@ for (const f of tep) {
     //
     // 31/40 bài Realm 0 chấm bằng tier `output` chứ không bằng assert. Bỏ qua
     // tier này nghĩa là bỏ qua cách chấm chính của học liệu.
-    const luat_out = (b.validation?.rules ?? []).find((r) => r.tier === 'output');
+    // MỌI luật `output`, không phải luật đầu tiên.
+    //
+    // Bản cũ dùng `.find`, nên với 46/236 bước khai nhiều hơn một luật output
+    // thì luật thứ hai trở đi không bao giờ được kiểm. Bước `ghep-ca-may` của
+    // Realm 0 khai hai luật; đổi `gia_mot_to * so_to` thành `+` phá vỡ luật
+    // THỨ HAI, mà cổng vẫn xanh — đúng cái hình dạng lỗi mà chính cổng này
+    // sinh ra để chặn.
+    const luat_out_ds = (b.validation?.rules ?? []).filter((r) => r.tier === 'output');
+    const luat_out = luat_out_ds[0];
+    const khop_het = (xuat) => luat_out_ds.every((r) => khop(xuat, r));
     if (c.solution && luat_out) {
       const r = chay(c.solution);
-      if (r.ok && !khop(r.xuat, luat_out)) {
+      const sai = luat_out_ds.find((lo) => !khop(r.xuat, lo));
+      if (r.ok && sai) {
         hong.push({
           bai: bai.id,
           buoc: b.id,
           loai: 'lời giải KHÔNG ra output mà bài đã hứa',
-          chi_tiet: `hứa ${JSON.stringify(luat_out.expected)}, thật ra ${JSON.stringify(r.xuat)}`,
+          chi_tiet: `hứa ${JSON.stringify(sai.expected)}, thật ra ${JSON.stringify(r.xuat)}`,
         });
       }
     }
@@ -147,7 +157,7 @@ for (const f of tep) {
       for (const bua of ['True', '1', '0']) {
         const thu = c.starter.replaceAll('___', bua);
         const r = chay(c.test ? `${thu}\n${c.test}` : thu);
-        const qua = r.ok && (luat_out ? khop(r.xuat, luat_out) : true);
+        const qua = r.ok && (luat_out ? khop_het(r.xuat) : true);
         if (qua) {
           hong.push({
             bai: bai.id,
@@ -222,7 +232,7 @@ for (const f of tep) {
     if (c.starter && c.solution && !c.starter.includes('___')) {
       const rs = chay(c.starter);
       const dat_san = luat_out
-        ? rs.ok && khop(rs.xuat, luat_out)
+        ? rs.ok && khop_het(rs.xuat)
         : c.test
           ? chay(`${c.starter}\n${c.test}`).ok
           : false;
