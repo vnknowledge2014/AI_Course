@@ -64,20 +64,20 @@ Và đây là chỗ đáng nhớ nhất: **thay số khác thì ra số khác.**
 ::::
 
 ::::example{#dien-vao-hai-cho}
-Xe bánh mì của Byte: mỗi ổ bán 15 000 đ, nguyên liệu cho mỗi ổ hết 5 000 đ. Gọi
+Xe bánh mì của Byte: mỗi ổ bán 15 000 đ, nguyên liệu cho mỗi ổ hết 9 000 đ. Gọi
 `n` là số ổ bán được trong buổi. Tiền lãi cả buổi là:
 
 ```text
-   15000 × n   −   5000 × n
+   15000 × n   −   9000 × n
 ```
 
 Chữ `n` có mặt **hai** chỗ. Byte bán được 20 ổ. Điền vào:
 
 ```text
-   15000 × n   −   5000 × n      ← câu tính; chữ n là một ô trống
-   15000 × 20  −   5000 × 20     ← điền 20 vào MỌI chỗ mang chữ n
-      300000   −      100000     ← mỗi cụm thu lại thành một số
-              200000             ← cả câu thu lại thành ĐÚNG MỘT số
+   15000 × n   −   9000 × n      ← câu tính; chữ n là một ô trống
+   15000 × 20  −   9000 × 20     ← điền 20 vào MỌI chỗ mang chữ n
+      300000   −      180000     ← mỗi cụm thu lại thành một số
+              120000             ← cả câu thu lại thành ĐÚNG MỘT số
 ```
 
 Bốn dòng, và chỉ dòng thứ hai là việc mới của bài này. Dòng ba, dòng bốn là
@@ -86,13 +86,13 @@ những thứ bạn đã làm từ T2.1: nhân trước, trừ sau.
 Thử điền một số khác. Byte bán được 8 ổ:
 
 ```text
-   15000 × 8   −   5000 × 8      ← điền 8 vào cả hai chỗ
-      120000   −      40000      ← mỗi cụm thu lại thành một số
-              80000              ← đúng một con số, khác hẳn 200000
+   15000 × 8   −   9000 × 8      ← điền 8 vào cả hai chỗ
+      120000   −      72000      ← mỗi cụm thu lại thành một số
+              48000              ← đúng một con số, khác hẳn hôm bán 20 ổ
 ```
 
-Cùng một câu tính, hai lần điền, hai con số: 200000 và 80000. Câu tính
-`15000 × n − 5000 × n` **không phải** con số 200000, cũng không phải 80000. Nó
+Cùng một câu tính, hai lần điền, hai con số: 120000 và 48000. Câu tính
+`15000 × n − 9000 × n` **không phải** con số 120000, cũng không phải 48000. Nó
 là cái sinh ra cả hai.
 
 Hỏi máy cho chắc. Trong Python, cái ô trống ấy được gọi bằng một cái tên đọc
@@ -100,50 +100,50 @@ Hỏi máy cho chắc. Trong Python, cái ô trống ấy được gọi bằng 
 
 ```python title=readonly
 so_o = 20
-print(15000 * so_o - 5000 * so_o)
+print(15000 * so_o - 9000 * so_o)
 
 so_o = 8
-print(15000 * so_o - 5000 * so_o)
+print(15000 * so_o - 9000 * so_o)
 ```
 
 Máy in ra:
 
 ```text
-200000
-80000
+120000
+48000
 ```
 
-Dòng `15000 * so_o - 5000 * so_o` được gõ y hệt nhau hai lần. Thứ đổi là con số
+Dòng `15000 * so_o - 9000 * so_o` được gõ y hệt nhau hai lần. Thứ đổi là con số
 nằm trong `so_o` lúc dòng ấy chạy.
 ::::
 
 ::::predict{#doan-hai-cau commitOnce}
 Byte viết hai câu tính rất giống nhau. Chúng dùng đúng ba con số `15000`,
-`5000`, `20` và đúng một ô trống `so_o`. Khác nhau ở chỗ ô trống ấy được dán
+`9000`, `20` và đúng một ô trống `so_o`. Khác nhau ở chỗ ô trống ấy được dán
 vào đâu.
 
 **Trước khi bấm chạy**, bạn đoán màn hình hiện ra gì?
 
 ```python
 so_o = 20
-print(15000 * so_o - 5000 * so_o)
-print(15000 - 5000 * so_o)
+print(15000 * so_o - 9000 * so_o)
+print(15000 - 9000 * so_o)
 ```
 
 :::opt{correct}
-200000 rồi -85000
+120000 rồi -165000
 :::
 
 :::opt
-200000 rồi 200000
+120000 rồi 120000
 ::why
 Gần đúng ở chỗ bạn soi kỹ và thấy hai dòng dùng đúng cùng bộ nguyên liệu: ba con
 số ấy, ô trống ấy, dấu trừ ấy. Quy tắc bạn đang dùng — *cùng nguyên liệu thì
 cùng kết quả* — đúng hoàn toàn khi hai câu chỉ **đổi chỗ** cho nhau, ví dụ
-`5000 × 20` với `20 × 5000`.
+`9000 × 20` với `20 × 9000`.
 
 Chỗ lệch là hai dòng này không đổi chỗ nguyên liệu, chúng đổi **chỗ đứng của ô
-trống**. Dòng trên, `so_o` dán vào cả hai cụm nhân, nên trừ xong còn 200000.
+trống**. Dòng trên, `so_o` dán vào cả hai cụm nhân, nên trừ xong còn 120000.
 Dòng dưới, `so_o` chỉ dán vào cụm sau; số 15000 đứng trơ một mình, không được
 nhân với gì cả. Ô trống nằm ở đâu là một phần của câu tính, không phải chi tiết
 phụ.
@@ -151,7 +151,7 @@ phụ.
 :::
 
 :::opt
-295000 rồi -85000
+291000 rồi -165000
 ::why
 Gần đúng ở chỗ bạn thay 20 vào đúng chỗ đầu tiên và tính `15000 × 20` ra 300000
 không sai một li. Và quy tắc bạn dùng cho chỗ thứ hai — *dùng rồi thì thôi* —
@@ -159,21 +159,21 @@ không sai một li. Và quy tắc bạn dùng cho chỗ thứ hai — *dùng r�
 
 Chỗ lệch là `so_o` không phải một tờ vé. Nó là **tên của một ô trống**, và mọi
 chỗ trong câu mang cái tên ấy đều là cùng một ô. Điền 20 vào ô đó thì cả hai chỗ
-cùng thành 20, nên cụm sau là `5000 × 20`, ra 100000 chứ không phải 5000. Bỏ sót
+cùng thành 20, nên cụm sau là `9000 × 20`, ra 180000 chứ không phải 9000. Bỏ sót
 một chỗ thì câu vẫn còn ô trống — vẫn chưa ra số.
 ::
 :::
 
 :::opt
-10000 rồi -85000
+6000 rồi -165000
 ::why
 Gần đúng, và đây là chỗ nhìn sắc: bạn thấy hai cụm cùng mang một ô trống, nên
-gom phần số lại trước — `15000 − 5000` ra `10000`. Phần gom ấy **đúng**, và mấy
+gom phần số lại trước — `15000 − 9000` ra `6000`. Phần gom ấy **đúng**, và mấy
 bài nữa nó sẽ có tên hẳn hoi.
 
-Chỗ lệch nằm ở bước cuối cùng: gom xong thì câu tính còn là `10000 × so_o`, chứ
-không phải `10000`. Cái ô trống không biến mất khi bạn gom phần số — nó vẫn đứng
-đó chờ được điền. Điền 20 vào thì mới ra `10000 × 20`, tức 200000, đúng bằng con
+Chỗ lệch nằm ở bước cuối cùng: gom xong thì câu tính còn là `6000 × so_o`, chứ
+không phải `6000`. Cái ô trống không biến mất khi bạn gom phần số — nó vẫn đứng
+đó chờ được điền. Điền 20 vào thì mới ra `6000 × 20`, tức 120000, đúng bằng con
 số lúc tính đường vòng.
 ::
 :::
@@ -200,7 +200,7 @@ không gặp chữ nào chưa được điền, nên nó tính bình thường.
 
 Một câu ngắn nhưng có hai chỗ để dành cho các bài sau.
 
-**Chỗ thứ nhất — hai chữ khác nhau là hai ô khác nhau.** Trong `15000 × n − 5000 × n`
+**Chỗ thứ nhất — hai chữ khác nhau là hai ô khác nhau.** Trong `15000 × n − 9000 × n`
 chỉ có một chữ, nên chỉ cần một con số để điền đầy. Nếu Byte bán thêm nước và
 viết `15000 × n + 8000 × c` thì cần **hai** con số, và chúng không buộc phải
 bằng nhau.
@@ -221,14 +221,14 @@ Ba ngày đầu tuần, xe bánh mì bán được:
 - **thứ Ba:** 20 ổ
 - **thứ Tư:** 12 ổ
 
-Tiền lãi mỗi buổi vẫn là đúng một câu tính: `15000 × so_o − 5000 × so_o`.
+Tiền lãi mỗi buổi vẫn là đúng một câu tính: `15000 × so_o − 9000 × so_o`.
 
 Điền ba chỗ trống. **Cả ba chỗ viết giống hệt nhau** — đó chính là điều bài này
 muốn bạn thấy: câu tính chỉ có một, thứ đổi là con số nằm trong `so_o` lúc dòng
 ấy chạy.
 
 Bài chấm bằng **cả ba ngày**, và ba ngày cho ra ba con số khác nhau. Gõ cứng
-`80000` vào mọi chỗ thì thứ Ba sai; gõ cứng `200000` thì thứ Hai sai. Chỉ câu
+`48000` vào mọi chỗ thì thứ Ba sai; gõ cứng `120000` thì thứ Hai sai. Chỉ câu
 tính viết thật, có đọc `so_o`, mới qua được cả ba.
 
 ```python title=starter
@@ -248,13 +248,13 @@ print(tien_lai_thu_4)
 
 ```python title=solution
 so_o = 8
-tien_lai_thu_2 = 15000 * so_o - 5000 * so_o
+tien_lai_thu_2 = 15000 * so_o - 9000 * so_o
 
 so_o = 20
-tien_lai_thu_3 = 15000 * so_o - 5000 * so_o
+tien_lai_thu_3 = 15000 * so_o - 9000 * so_o
 
 so_o = 12
-tien_lai_thu_4 = 15000 * so_o - 5000 * so_o
+tien_lai_thu_4 = 15000 * so_o - 9000 * so_o
 
 print(tien_lai_thu_2)
 print(tien_lai_thu_3)
@@ -266,9 +266,9 @@ print(tien_lai_thu_4)
 # số". Xếp sau các câu `==` thì chúng không bao giờ chạy tới.
 assert tien_lai_thu_2 != tien_lai_thu_3, "thứ Hai bán 8 ổ, thứ Ba bán 20 ổ — hai lần điền khác nhau phải cho hai con số khác nhau"
 assert tien_lai_thu_3 != tien_lai_thu_4, "thứ Ba bán 20 ổ, thứ Tư bán 12 ổ — hai lần điền khác nhau phải cho hai con số khác nhau"
-assert tien_lai_thu_2 == 80000, "điền 8 vào MỌI chỗ mang so_o: 15000 × 8 − 5000 × 8, tức 120000 − 40000, ra 80000"
-assert tien_lai_thu_3 == 200000, "điền 20 vào MỌI chỗ mang so_o: 300000 − 100000 ra 200000"
-assert tien_lai_thu_4 == 120000, "điền 12 vào MỌI chỗ mang so_o: 180000 − 60000 ra 120000"
+assert tien_lai_thu_2 == 48000, "điền 8 vào MỌI chỗ mang so_o: 15000 × 8 − 9000 × 8, tức 120000 − 72000, ra 48000"
+assert tien_lai_thu_3 == 120000, "điền 20 vào MỌI chỗ mang so_o: 300000 − 180000 ra 120000"
+assert tien_lai_thu_4 == 72000, "điền 12 vào MỌI chỗ mang so_o: 180000 − 108000 ra 72000"
 ```
 
 :::hints
@@ -277,7 +277,7 @@ assert tien_lai_thu_4 == 120000, "điền 12 vào MỌI chỗ mang so_o: 180000 
 - kind: strategy
   body: Chép lại đúng câu tính tiền lãi trong đề, giữ nguyên chữ `so_o` ở cả hai chỗ. Ba chỗ trống nhận đúng cùng một dòng chữ, không khác một ký tự nào — máy sẽ tự đọc `so_o` ra ba con số khác nhau vì ba dòng ấy chạy ở ba thời điểm khác nhau.
 - kind: one-line
-  body: "Cả ba chỗ trống đều là `15000 * so_o - 5000 * so_o`."
+  body: "Cả ba chỗ trống đều là `15000 * so_o - 9000 * so_o`."
 :::
 
 :::validate
@@ -294,16 +294,16 @@ assert tien_lai_thu_4 == 120000, "điền 12 vào MỌI chỗ mang so_o: 180000 
   # có ít nhất một phép nhân, vì tiền lãi là mấy nghìn NHÂN số ổ.
   - kind: uses-operator, target: *, min: 3
   forbidAst:
-  # Lưới thứ hai, chặn đúng ba con số KẾT QUẢ. Lời giải viết `15000`, `5000` và
+  # Lưới thứ hai, chặn đúng ba con số KẾT QUẢ. Lời giải viết `15000`, `9000` và
   # ba con số ổ, không viết nguyên văn ba số này, nên luật không cản ai làm thật.
-  - kind: has-literal, target: 80000
-  - kind: has-literal, target: 200000
+  - kind: has-literal, target: 48000
   - kind: has-literal, target: 120000
+  - kind: has-literal, target: 72000
 - tier: tests
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^80000\n200000\n120000\s*$
+  expect: ^48000\n120000\n72000\s*$
 :::
 ::::
 
@@ -315,8 +315,8 @@ con số giữ được.
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-Bạn vừa điền ba lần vào cùng một câu tính và được ba con số. Điền 8 ra 80000,
-điền 20 ra 200000, điền 12 ra 120000. Không lần nào là "câu trả lời đúng" hơn
+Bạn vừa điền ba lần vào cùng một câu tính và được ba con số. Điền 8 ra 48000,
+điền 20 ra 120000, điền 12 ra 72000. Không lần nào là "câu trả lời đúng" hơn
 lần nào — cả ba đều đúng, mỗi cái đúng cho ngày của nó.
 
 Byte bán cả tuần, bảy ngày, bảy con số ổ khác nhau. Byte định làm thế này: điền

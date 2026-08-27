@@ -1,0 +1,53 @@
+# SỔ SỰ THẬT CỦA THẾ GIỚI HƯ CẤU
+#
+# Cái xe bánh mì của Byte chạy suốt mạch T2.2 và ló sang cả T2.1. Mỗi hằng số
+# của nó khai đúng MỘT lần ở đây; `tools/kiem_su_that.py` đối chiếu mọi bài.
+#
+# Vì sao cần: vòng phản biện T2.2 tìm ra tiền nguyên liệu mỗi ổ là 9 000 ở bài
+# 2 và 5 000 ở bài 4; tiền thuê chỗ 30 nghìn ở bài 27 và 100 nghìn ở bài 34.
+# Mỗi bài tự nó nhất quán, nên không cổng nào bắt được — chỉ khi xếp cạnh nhau
+# mâu thuẫn mới lộ. Người học mang con số bài trước sang, ra đáp án khác, và
+# tưởng lỗi ở mình.
+#
+# `tu_khoa` là các mẫu regex; nhóm bắt đầu tiên bắt được một con số chính là
+# con số đem đối chiếu. Viết mẫu hẹp thôi — mẫu rộng thì bắt nhầm con số hàng
+# xóm rồi báo một lỗi không có thật, và một cổng kêu oan sẽ bị người ta tắt đi.
+#
+# `ngoai_le` khai theo tệp, kèm lý do. Ngoại lệ không dùng tới là LỖI: nghĩa
+# là sự thật đã trôi đi chỗ khác mà tờ miễn trừ vẫn nằm lại, sẵn sàng tha cho
+# một lỗi thật — đúng cái bẫy `so-hoc-sai-co-y.yaml` đã tránh.
+
+- ten: gia-ban-mot-o
+  gia_tri: 15000
+  cho_nghin: 1
+  pham_vi: content/toan
+  tu_khoa:
+    - 'mỗi ổ bán[^.\n]{0,12}?(\d[\d. ]*\d|\d)\s*(?:nghìn|đồng|đ\b)'
+    - 'một ổ bán[^.\n]{0,12}?(\d[\d. ]*\d|\d)\s*(?:nghìn|đồng|đ\b)'
+    - 'bán (\d[\d. ]*\d|\d) nghìn một ổ'
+  ngoai_le:
+    - 'content/toan/02-dai-so-va-ham-so/36-boss-xe-banh-mi-cua-byte.lesson.md: câu 3 của BOSS cho GIÁ TĂNG DẦN (15 + x nghìn) — giá không còn là hằng số, đó chính là đề bài'
+    - 'content/toan/02-dai-so-va-ham-so/29-dinh-va-hai-ben-doi-xung.lesson.md: cả bài dựng trên việc TĂNG/HẠ giá bán để tìm đỉnh — giá là biến của bài, không phải hằng số bị trôi'
+
+- ten: von-nguyen-lieu-mot-o
+  gia_tri: 9000
+  cho_nghin: 1
+  pham_vi: content/toan
+  tu_khoa:
+    - '(?:nguyên liệu|tiền vốn)[^.\n]{0,22}?(\d[\d. ]*\d|\d)\s*(?:nghìn|đồng|đ\b)'
+    - 'mỗi ổ tốn (\d[\d. ]*\d|\d)\s*(?:nghìn|đồng|đ\b)'
+
+- ten: tien-thue-cho
+  gia_tri: 30000
+  cho_nghin: 1
+  pham_vi: content/toan
+  tu_khoa:
+    - '(\d[\d. ]*\d|\d)\s*(?:nghìn|đồng|đ\b)[^.\n]{0,16}?(?:tiền )?thuê chỗ'
+    - 'thuê chỗ[^.\n]{0,16}?(\d[\d. ]*\d|\d)\s*(?:nghìn|đồng|đ\b)'
+
+- ten: di-tu-lay-san
+  gia_tri: 2
+  pham_vi: content/toan
+  tu_khoa:
+    - 'dì Tư[^.\n]{0,26}?lấy sẵn[^.\n]{0,8}?(\d+)\s*ổ'
+    - 'dì Tư[^.\n]{0,26}?(\d+)\s*ổ'
