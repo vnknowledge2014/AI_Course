@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 13
 teaches: [core.set]
-requires: [core.dict-accumulator, core.list-membership, core.nested-access, core.list-of-dicts, core.list-append, core.list, core.len, ctrl.for-each, ctrl.if, core.fstring]
+requires: [core.dict-accumulator, core.list-membership, core.dict-nested-index, core.list-of-dicts, core.list-append, core.list, core.len, ctrl.for-each, ctrl.if, core.fstring]
 concepts: [core.cho-chua, core.tap-hop, ctrl.lap]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -71,9 +71,9 @@ Rổ rỗng viết là `set()`, và bỏ một thứ vào rổ là `.add(...)`:
 ro = set()
 
 ro.add("ăn uống")
-ro.add("xe cộ")
+ro.add("xăng xe")
 ro.add("ăn uống")
-ro.add("biếu tặng")
+ro.add("học phí")
 
 print(len(ro))
 print(ro)
@@ -83,7 +83,7 @@ Máy in ra:
 
 ```text title=readonly
 3
-{'xe cộ', 'ăn uống', 'biếu tặng'}
+{'xăng xe', 'ăn uống', 'học phí'}
 ```
 
 Bốn lần `.add`, rổ giữ ba tên. Lần gọi thứ ba bỏ vào `"ăn uống"` — thứ rổ đã
@@ -95,14 +95,14 @@ Bốn chi tiết cần nói rõ ngay, vì cả bốn đều dễ vấp:
 - **Rổ rỗng phải viết `set()`, không viết `{}`.** Cặp ngoặc nhọn rỗng đã có
   chủ: nó là sổ tra cứu rỗng của bài trước.
 - **Rổ có sẵn đồ thì viết được thẳng trong ngoặc nhọn**, ví dụ
-  `{"ăn uống", "xe cộ"}` — bên trong chỉ có các giá trị, không có dấu hai chấm
+  `{"ăn uống", "xăng xe"}` — bên trong chỉ có các giá trị, không có dấu hai chấm
   nào, nên máy không nhầm nó với sổ tra cứu. Đó cũng là cách máy in một cái rổ
   ra màn hình, như dòng thứ hai ở trên.
 - **`.add` sửa thẳng cái rổ và không đưa lại gì.** Nó cư xử như `.append` trên
   danh sách, chứ không như các phương thức chuỗi — chuỗi không sửa được nên
   phương thức của nó phải trả về một chuỗi mới, còn rổ thì sửa được tại chỗ.
   Viết `ro = ro.add("cà phê")` là mất trắng cái rổ.
-- **Dòng thứ hai in ra không theo thứ tự bạn bỏ vào.** Ở đây `"xe cộ"` hiện
+- **Dòng thứ hai in ra không theo thứ tự bạn bỏ vào.** Ở đây `"xăng xe"` hiện
   lên trước `"ăn uống"`, dù nó vào rổ sau. Chạy trên máy bạn, ba cái tên ấy
   còn có thể xếp theo một thứ tự khác nữa. Giữ chi tiết này trong đầu — cuối
   bài ta quay lại.
@@ -117,7 +117,7 @@ Byte bỏ vào rổ ba lần, trong đó có một tên lặp lại.
 ro = set()
 
 ro.add("ăn uống")
-ro.add("xe cộ")
+ro.add("xăng xe")
 ro.add("ăn uống")
 
 print(len(ro))
@@ -173,18 +173,17 @@ Cái rổ còn cho bạn một đường tắt. Đưa cho `set(...)` một danh 
 ngay một cái rổ chứa đúng những giá trị khác nhau có trong danh sách ấy:
 
 ```python title=readonly
-nhom_moi_dong = ["ăn uống", "xe cộ", "ăn uống", "xe cộ", "biếu tặng", "học phí"]
+nhom_moi_dong = ["ăn uống", "xăng xe", "ăn uống", "học phí", "ăn uống", "xăng xe"]
 
 ro = set(nhom_moi_dong)
 
 print(len(ro))
 ```
 
-Sáu tên đi vào, `4` đi ra. Trong danh sách, `"ăn uống"` xuất hiện hai lần,
-`"xe cộ"` hai lần, `"biếu tặng"` một lần, `"học phí"` một lần; cộng lại
-2 + 2 + 1 + 1 = 6 chỗ, nhưng chỉ có bốn giá trị khác nhau. Cả đoạn lọc trùng
-năm dòng của bài trước rút xuống còn một dòng, và câu `if` gác cửa biến mất —
-vì luật "không trùng" giờ nằm trong chỗ chứa chứ không nằm trong tay bạn.
+Sáu tên đi vào, `3` đi ra. Trong danh sách, `"ăn uống"` xuất hiện ba lần,
+`"xăng xe"` hai lần, `"học phí"` một lần; cộng lại 3 + 2 + 1 = 6 chỗ, nhưng
+chỉ có ba giá trị khác nhau. Cả đoạn lọc trùng năm dòng của bài trước rút
+xuống còn một dòng, và câu `if` gác cửa biến mất — vì luật "không trùng" giờ nằm trong chỗ chứa chứ không nằm trong tay bạn.
 
 Còn "giống nhau" ở đây nghĩa là gì? Đúng nghĩa mà `==` đã có từ đầu, không có
 nghĩa nào mới. Hai chuỗi bằng nhau thì rổ coi là một; `"Ăn uống"` và
@@ -198,7 +197,7 @@ việc, là không giữ hai bản của cùng một giá trị.
 ::::
 
 ::::code{#nhung-nhom-da-chi}
-Cuốn sổ tháng sau của bài trước, và câu hỏi của sếp: **tháng này chi vào những
+Cuốn sổ sáu khoản của bài trước, và câu hỏi của sếp: **tháng này chi vào những
 nhóm nào?**
 
 Khung dưới đã có sẵn cuốn sổ, một cái rổ rỗng, vòng duyệt và dòng báo cáo. Còn
@@ -209,12 +208,12 @@ là cả một khoản nhiều trường, còn thứ ta muốn gom chỉ là m�
 
 ```python title=starter
 so = [
-    {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
-    {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
-    {"ten": "học thêm", "tien": 120000, "ngay": 20, "nhom": "học phí"},
+    {"ten": "cà phê", "tien": 25000, "ngay": 2, "nhom": "ăn uống"},
+    {"ten": "xăng", "tien": 60000, "ngay": 5, "nhom": "xăng xe"},
+    {"ten": "bún bò", "tien": 40000, "ngay": 8, "nhom": "ăn uống"},
+    {"ten": "vá lốp", "tien": 30000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "bánh mì", "tien": 15000, "ngay": 14, "nhom": "ăn uống"},
+    {"ten": "vở", "tien": 20000, "ngay": 17, "nhom": "học phí"},
 ]
 
 ro = set()
@@ -227,12 +226,12 @@ print(f"Tháng này chi vào {len(ro)} nhóm")
 
 ```python title=solution
 so = [
-    {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
-    {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
-    {"ten": "học thêm", "tien": 120000, "ngay": 20, "nhom": "học phí"},
+    {"ten": "cà phê", "tien": 25000, "ngay": 2, "nhom": "ăn uống"},
+    {"ten": "xăng", "tien": 60000, "ngay": 5, "nhom": "xăng xe"},
+    {"ten": "bún bò", "tien": 40000, "ngay": 8, "nhom": "ăn uống"},
+    {"ten": "vá lốp", "tien": 30000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "bánh mì", "tien": 15000, "ngay": 14, "nhom": "ăn uống"},
+    {"ten": "vở", "tien": 20000, "ngay": 17, "nhom": "học phí"},
 ]
 
 ro = set()
@@ -246,14 +245,13 @@ print(f"Tháng này chi vào {len(ro)} nhóm")
 ```python title=test
 # Dòng đầu vỡ khi rổ không nhận được gì (còn rỗng), và cũng vỡ khi bạn bỏ
 # nhầm trường khác vào: sáu cái `ten` trong sổ này đều khác nhau, nên rổ sẽ
-# giữ sáu tên chứ không phải bốn.
-# Bốn dòng sau đọc đích danh từng nhóm, để một cái rổ tình cờ có bốn thứ gì
+# giữ sáu tên chứ không phải ba.
+# Ba dòng sau đọc đích danh từng nhóm, để một cái rổ tình cờ có ba thứ gì
 # đó khác vẫn không qua được.
-assert len(ro) == 4, "sáu khoản trong cuốn sổ này chỉ thuộc bốn nhóm khác nhau, nên cái rổ phải giữ đúng bốn tên"
-assert "ăn uống" in ro, "hai khoản cà phê và ăn trưa trong sổ này đều mang nhóm ăn uống, nên tên nhóm ấy phải có trong rổ"
-assert "xe cộ" in ro, "hai khoản xăng và sửa xe trong sổ này mang nhóm xe cộ, nên tên nhóm ấy phải có trong rổ"
-assert "biếu tặng" in ro, "khoản biếu bà trong sổ này mang nhóm biếu tặng, nên tên nhóm ấy phải có trong rổ"
-assert "học phí" in ro, "khoản học thêm ở dòng cuối sổ mang nhóm học phí, nên tên nhóm ấy phải có trong rổ"
+assert len(ro) == 3, "sáu khoản trong cuốn sổ này chỉ thuộc ba nhóm khác nhau, nên cái rổ phải giữ đúng ba tên"
+assert "ăn uống" in ro, "ba khoản cà phê, bún bò và bánh mì trong sổ này đều mang nhóm ăn uống, nên tên nhóm ấy phải có trong rổ"
+assert "xăng xe" in ro, "hai khoản xăng và vá lốp trong sổ này mang nhóm xăng xe, nên tên nhóm ấy phải có trong rổ"
+assert "học phí" in ro, "khoản mua vở ở dòng cuối sổ mang nhóm học phí, nên tên nhóm ấy phải có trong rổ"
 ```
 
 :::hints
@@ -271,9 +269,9 @@ assert "học phí" in ro, "khoản học thêm ở dòng cuối sổ mang nhóm
 - tier: tests
   timeoutMs: 5000
 - tier: output
-  expect: Tháng này chi vào 4 nhóm
+  expect: Tháng này chi vào 3 nhóm
 - tier: static
-  onFail: dòng bạn điền phải lấy tên nhóm ra TỪ khoản đang duyệt, không được gõ sẵn bốn tên nhóm vào rổ
+  onFail: dòng bạn điền phải lấy tên nhóm ra TỪ khoản đang duyệt, không được gõ sẵn ba tên nhóm vào rổ
   requireAst:
   # Khung không ĐỌC `khoan` ở đâu cả — dòng `for` chỉ đặt tên ấy — nên chỉ
   # cần một lần đọc là đủ để phân biệt lời giải thật với một cái rổ gõ cứng.
@@ -282,14 +280,14 @@ assert "học phí" in ro, "khoản học thêm ở dòng cuối sổ mang nhóm
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Bốn tên, sáu lần bỏ vào. Mình không phải hỏi trước lần nào.
+Ba tên, sáu lần bỏ vào. Mình không phải hỏi trước lần nào.
 ::::
 
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-Quay lại chi tiết đã hẹn ở đầu bài. Bỏ vào rổ theo thứ tự "ăn uống", "xe cộ",
-"biếu tặng", rồi in rổ ra, thì thứ tự hiện lên **khác** lúc bỏ vào. Sổ tra cứu
+Quay lại chi tiết đã hẹn ở đầu bài. Bỏ vào rổ theo thứ tự "ăn uống", "xăng xe",
+"học phí", rồi in rổ ra, thì thứ tự hiện lên **khác** lúc bỏ vào. Sổ tra cứu
 ở bài trước thì không như thế: duyệt một `dict` là đi đúng theo thứ tự khoá
 được thêm vào, lần nào cũng vậy.
 

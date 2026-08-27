@@ -1,7 +1,7 @@
 ---
 id: nen-tang.list-dict-set-tuple.loc-ngay-trong-dong-do
 title: Lọc ngay trong dòng đó
-summary: Một chữ `if` đặt ở cuối dòng gọn quyết định khoản nào được lọt ra; phần đầu dòng vẫn quyết định thứ lọt ra là gì.
+summary: Mẩu thứ ba của dòng gọn — `if` đặt ở cuối nói "chỉ lấy khi", còn đầu dòng vẫn giữ nguyên việc nói "lấy gì".
 locale: vi
 track: nen-tang
 module: list-dict-set-tuple
@@ -12,8 +12,8 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 12
 teaches: [core.comprehension-filter]
-practices: [core.list-comprehension, core.list-of-dicts, core.dict-lookup, core.len, core.fstring]
-requires: [core.list-comprehension, core.list-of-dicts, core.dict, core.list, core.list-append, core.len, ctrl.for-each, ctrl.if, core.fstring]
+practices: [core.list-comprehension, core.list-of-dicts, core.nested-index, core.len, core.fstring]
+requires: [core.list-comprehension, core.list-of-dicts, core.nested-index, core.dict, core.list, core.list-append, core.len, ctrl.for-each, ctrl.if, core.fstring]
 concepts: [core.danh-sach, ctrl.re-nhanh]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -29,40 +29,39 @@ provenance:
 ---
 
 ::::byte{trigger=enter mood=curious pose=lean-in}
-Dòng gọn của bạn còn thừa một chỗ ở cuối. Mình để dành nó đúng cho hôm nay.
+Dòng gọn của bạn có hai mẩu. Hôm nay nó mọc thêm mẩu thứ ba, ở cuối.
 ::::
 
-::::explain{#mot-dong-lay-het}
-Bài trước bạn gói cả bốn dòng vào một: nói thẳng **lấy gì**, rồi **từ đâu**, và
-máy dựng ra một danh sách mới.
+::::explain{#mau-thu-ba}
+Bài trước kết ở đúng một chỗ hụt: dòng gọn chỉ có hai mẩu — **lấy gì** và **từ
+đâu** — nên nó lấy hết, không mẩu nào nói được "chỉ lấy khoản nào thoả điều
+kiện". Mà Byte thì đang hỏi *cho mình xem tên những khoản trên 100 nghìn thôi*.
 
-Chỉ có điều dòng ấy lấy **hết**. Cuốn sổ có bao nhiêu khoản thì danh sách ra bấy
-nhiêu tên, kể cả những khoản lẻ tẻ vài chục nghìn.
+Bản bốn dòng có sẵn chỗ cho câu hỏi ấy. Chèn một `if` vào giữa vòng lặp là xong:
 
-Byte thì đang cần một câu hỏi hẹp hơn: *những khoản nào tiêu quá 100 nghìn?*
-
-Viết theo lối dài — cái lối bạn đã gõ bằng tay suốt mấy bài — thì chỗ đặt câu
-hỏi ấy rõ mồn một: một `if` bọc lấy dòng `.append`. Khoản nào lọt qua `if` mới
-được thêm vào.
-
-Dòng gọn cũng có đúng chỗ ấy, và nó nằm ở **cuối dòng**, ngay sau phần `for`:
-
-```text title=readonly
-[  lấy gì   for  từng cái  in  từ đâu  if  điều kiện  ]
+```python title=readonly
+ten_dat = []
+for khoan in so:
+    if khoan["tien"] > 100000:
+        ten_dat.append(khoan["ten"])
 ```
 
-Đọc từ trái sang phải thì thứ tự nghe hơi ngược. Nhưng đọc theo thứ tự **máy làm
-việc** thì nó đúng y lối dài: đi từ đâu trước, hỏi điều kiện, rồi mới lấy.
+Bốn dòng thành năm, và vai thứ năm ấy có tên rất dễ gọi: **chỉ lấy khi**.
+
+Dòng gọn cũng nhận được vai đó, và chỗ của nó là **cuối dòng**, ngay sau phần
+`for`:
+
+```text title=readonly
+[  lấy gì   for  từng cái  in  từ đâu  if  chỉ lấy khi  ]
+```
+
+Ba mẩu, viết liền một hàng. Và vẫn đúng lời dặn của bài trước: thứ tự viết ngược
+với thứ tự máy làm. Máy chạy phần `for` trước để có `khoan`, rồi hỏi `if`, và chỉ
+những lượt trả lời `True` mới đi tiếp lên đầu dòng để lấy giá trị.
 ::::
 
-::::example{#hai-ban-cung-mot-cau}
-Vẫn cuốn sổ của bài 23 — một list các dict, mỗi khoản bốn trường `ten`, `tien`,
-`ngay`, `nhom`. Có điều Byte đã ghi tiếp: cuốn sổ ở bài 23 dừng ở ngày 15 với
-năm khoản, còn cuốn dưới đây chạy tới ngày 22 và dài **tám** khoản. Ba khoản mới
-nằm ở cuối, và khoản cuối cùng trùng tên với khoản ngày 5 — tháng này Byte đổ
-xăng hai lần.
-
-Bản dài trước, bản bạn đã biết đọc:
+::::example{#bon-cai-ten-bai-truoc-hua}
+Vẫn cuốn sổ năm khoản của bài 23. Bản dài trước:
 
 ```python title=readonly
 so = [
@@ -71,46 +70,75 @@ so = [
     {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
     {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
     {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
-    {"ten": "bánh mì", "tien": 15000, "ngay": 17, "nhom": "ăn uống"},
-    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xe cộ"},
-    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xe cộ"},
 ]
 
-dat = []
+cach_cu = []
 for khoan in so:
     if khoan["tien"] > 100000:
-        dat.append(khoan["ten"])
+        cach_cu.append(khoan["ten"])
 
-print(dat)
+cach_moi = [khoan["ten"] for khoan in so if khoan["tien"] > 100000]
+
+print(cach_cu)
+print(cach_moi)
+print(cach_cu == cach_moi)
 ```
 
 Máy in ra:
 
 ```text title=readonly
-['xăng', 'ăn trưa', 'sửa xe', 'biếu bà', 'xăng']
+['xăng', 'ăn trưa', 'sửa xe', 'biếu bà']
+['xăng', 'ăn trưa', 'sửa xe', 'biếu bà']
+True
 ```
 
-Giờ là bản gọn, chạy trên đúng cuốn sổ ấy:
+Đúng bốn cái tên mà bài trước đã hứa, và hai cách cho ra hai danh sách **bằng**
+nhau — dòng thứ ba hỏi thẳng máy chuyện đó.
 
-```python title=readonly
-dat = [khoan["ten"] for khoan in so if khoan["tien"] > 100000]
-print(dat)
-```
+Đặt hai bản cạnh nhau thì thấy dòng gọn dùng lại nguyên si từng mảnh của bản dài:
 
-Cùng một danh sách đi ra. Đặt hai bản cạnh nhau thì thấy chúng dùng lại nguyên si
-từng mảnh:
-
-- `for khoan in so` — y hệt dòng `for` của bản dài.
+- `for khoan in so` — y hệt dòng `for`.
 - `if khoan["tien"] > 100000` — y hệt dòng `if`, mất mỗi dấu hai chấm.
-- `khoan["ten"]` — y hệt thứ nằm trong ngoặc của `.append`, chỉ khác là nó
-  chuyển lên đứng đầu.
+- `khoan["ten"]` — y hệt thứ nằm trong ngoặc của `.append`, chỉ khác là nó chuyển
+  lên đứng đầu.
 
-Ba dòng của bản dài không mất đi đâu cả. Chúng chỉ bị xếp lại thành một hàng, và
-duy nhất **một** mảnh đổi chỗ: thứ được lấy ra chạy lên trước.
+Năm dòng của bản dài không mất đi đâu cả. Chúng bị xếp lại thành một hàng, và duy
+nhất **một** mảnh đổi chỗ: thứ được lấy ra chạy lên trước.
+::::
+
+::::explain{#dau-dong-va-cuoi-dong}
+Một dòng gọn có lọc thì mang **hai** quyết định, và chúng không giẫm lên nhau:
+
+- **Đầu dòng quyết định lấy cái gì.** `khoan["ten"]` cho ra tên,
+  `khoan["tien"]` cho ra tiền, `khoan` trơ trọi cho ra nguyên cả dict.
+- **Cuối dòng quyết định ai được lọt.** `if` không đụng gì tới giá trị; nó chỉ bỏ
+  bớt phần tử. Danh sách ra ngắn hơn cuốn sổ, hoặc dài bằng, không bao giờ dài
+  hơn.
+
+Hai chuyện đó rời nhau, nên bạn đổi một bên mà bên kia đứng yên: muốn số tiền của
+những khoản trên 100 nghìn thì đổi mỗi đầu dòng, muốn tên của những khoản thuộc
+nhóm ăn uống thì đổi mỗi cuối dòng.
+
+Còn một điều bài trước đã nói mà cái đuôi này **không** sửa được: dòng gọn vẫn
+không bỏ trùng. Nó bỏ bớt phần tử theo điều kiện, thế thôi — hai khoản khác nhau
+mà cùng tên thì cả hai vẫn đi ra, miễn là cả hai cùng lọt qua `if`.
+
+> Chỗ dễ vấp: `if` ở đây **không có** dấu hai chấm và **không có** thân thụt vào.
+> Nó không phải một câu lệnh rẽ nhánh đứng riêng, nó là một mảnh nằm trong cặp
+> ngoặc vuông. Gõ thêm dấu hai chấm vào đó là `SyntaxError`.
+
+Và cái đuôi ấy không bắt buộc. Bỏ `if` đi thì dòng quay về đúng dòng của bài
+trước và lấy hết. Thứ hôm nay không thay thế thứ hôm qua — nó gắn thêm vào.
 ::::
 
 ::::predict{#doan-danh-sach-ten commitOnce}
-Vẫn cuốn sổ tám khoản đó, chạy bản gọn.
+Tháng chưa hết, và Byte ghi tiếp. **Cuốn sổ dưới đây không còn là cuốn năm khoản
+nữa**: nó dài **tám** khoản, chạy tới ngày 22. Ba khoản mới nằm ở cuối, và hai
+trong ba khoản ấy cố tình nằm sát ngưỡng — "vá lốp" tròn 100 nghìn, "xăng" ngày
+22 được 105 nghìn. Khoản cuối cũng trùng tên với khoản ngày 5, vì tháng này Byte
+đổ xăng hai lần.
+
+Đoạn code thì không đổi một chữ nào.
 
 **Trước khi bấm chạy**, bạn đoán màn hình in ra gì?
 
@@ -137,25 +165,25 @@ print(dat)
 :::opt
 ['xăng', 'ăn trưa', 'sửa xe', 'biếu bà', 'vá lốp', 'xăng']
 ::why
-Gần đúng ở chỗ khó nhất: bạn đọc ra rằng đầu dòng lấy **tên**, phần `if` chỉ
-chọn ai được lọt, và bạn giữ đúng thứ tự ghi sổ — kể cả chuyện "xăng" xuất hiện
-hai lần.
+Gần đúng ở chỗ khó nhất: bạn đọc ra rằng đầu dòng lấy **tên**, phần `if` chỉ chọn
+ai được lọt, và bạn giữ đúng thứ tự ghi sổ — kể cả chuyện "xăng" xuất hiện hai
+lần.
 
 Chỗ lệch nằm ở đúng một khoản: "vá lốp", tròn 100 nghìn. Dấu `>` hỏi "có **lớn
-hơn** không", mà một con số thì không lớn hơn chính nó — nên ở khoản ấy điều
-kiện đọc ra `False` và nó không được thêm vào.
+hơn** không", mà một con số thì không lớn hơn chính nó — nên ở khoản ấy điều kiện
+đọc ra `False` và nó không được thêm vào.
 
 Muốn "vá lốp" lọt thì phải đổi dấu thành `>=`. Hai dấu ấy chỉ khác nhau ở đúng
-những khoản rơi trúng con số ngưỡng, và cuốn sổ này cố tình có một khoản như vậy
-để chỗ khác nhau đó lộ ra.
+những khoản rơi trúng con số ngưỡng, và ba khoản mới được thêm vào sổ chính là để
+chỗ khác nhau đó lộ ra.
 ::
 :::
 
 :::opt
 [240000, 620000, 500000, 300000, 105000]
 ::why
-Gần đúng ở chỗ bạn theo dõi phần lọc rất chuẩn: đúng năm khoản ấy vượt 100
-nghìn, không thừa không thiếu một khoản nào, và thứ tự cũng đúng.
+Gần đúng ở chỗ bạn theo dõi phần lọc rất chuẩn: đúng năm khoản ấy vượt 100 nghìn,
+không thừa không thiếu một khoản nào, và thứ tự cũng đúng.
 
 Chỗ lệch là ở chuyện **ai** quyết định thứ đi ra. Một dòng gọn có hai việc tách
 bạch: phần `if` ở cuối chỉ nói *khoản này có được lọt hay không*, còn phần đứng
@@ -172,47 +200,26 @@ phần `if` giữ nguyên không đụng tới.
 ::why
 Gần đúng ở chỗ bạn lọc không sai một khoản nào: bốn cái tên này đều thuộc về
 những khoản trên 100 nghìn, và khoản "vá lốp" tròn ngưỡng bị bạn loại ra rất
-chuẩn.
+chuẩn. Đây cũng đúng là kết quả của cuốn sổ **năm khoản** lúc nãy.
 
-Chỗ lệch là ở chuyện chữ "xăng" đã có sẵn trong danh sách rồi thì lần sau có
-được ghi nữa không. Thứ **không** nhận hai lần là cái rổ ở bài 26. List thì
-nhận: nó chỉ chép lại đúng những gì từng lượt `for` đưa cho, theo đúng thứ tự.
+Chỗ lệch là ở khoản thứ tám. Ba khoản mới đã vào sổ, và một trong ba là "xăng"
+ngày 22 hết 105 nghìn — trên ngưỡng, nên nó phải đi ra.
 
-Cuốn sổ có hai khoản tên "xăng" (ngày 5 và ngày 22), cả hai đều trên 100 nghìn,
-nên cả hai đều đi ra — thành hai phần tử riêng, nằm ở hai đầu danh sách.
+Chữ "xăng" đã có sẵn trong danh sách rồi cũng không ngăn được nó: thứ **không**
+nhận hai lần là cái rổ ở bài 26, còn danh sách thì nhận đủ mọi lần xuất hiện,
+đúng như bài trước đã chỉ ra khi lấy trường `nhom`.
 ::
 :::
 ::::
 
-::::explain{#dau-dong-va-cuoi-dong}
-Một dòng gọn có lọc thì mang **hai** quyết định, và chúng không giẫm lên nhau:
-
-- **Đầu dòng quyết định lấy cái gì.** `khoan["ten"]` cho ra tên,
-  `khoan["tien"]` cho ra tiền, `khoan` trơ trọi cho ra nguyên cả dict.
-- **Cuối dòng quyết định ai được lọt.** `if` không đụng gì tới giá trị; nó chỉ
-  bỏ bớt phần tử. Danh sách ra ngắn hơn cuốn sổ, hoặc dài bằng, không bao giờ
-  dài hơn.
-
-Hai chuyện đó rời nhau, nên bạn đổi một bên mà bên kia đứng yên: muốn số tiền
-của những khoản trên 100 nghìn thì đổi mỗi đầu dòng, muốn tên của những khoản
-thuộc nhóm ăn uống thì đổi mỗi cuối dòng.
-
-> Chỗ dễ vấp: `if` ở đây **không có** dấu hai chấm và **không có** thân thụt vào.
-> Nó không phải một câu lệnh rẽ nhánh đứng riêng, nó là một mảnh nằm trong cặp
-> ngoặc vuông. Gõ thêm dấu hai chấm vào đó là `SyntaxError`.
-
-Còn một chuyện đáng nói về cái đuôi này: nó không bắt buộc. Bỏ `if` đi thì dòng
-quay về đúng dòng của bài trước và lấy hết. Nói cách khác, thứ hôm nay không
-thay thế thứ hôm qua — nó gắn thêm vào.
-::::
-
 ::::code{#loc-khoan-tren-mot-tram}
-Byte cần một danh sách tên của những khoản tiêu **quá** 100 nghìn, giữ nguyên
-thứ tự ghi trong sổ.
+Byte cần một danh sách tên của những khoản tiêu **quá** 100 nghìn, giữ nguyên thứ
+tự ghi trong sổ. Vẫn cuốn sổ tám khoản vừa rồi, với hai khoản nằm sát ngưỡng —
+một điều kiện đặt hớ tay sẽ nhận nhầm khoản này hoặc bỏ sót khoản kia.
 
-Cuốn sổ vẫn là tám khoản quen thuộc, và nó cố tình có hai khoản nằm sát ngưỡng:
-"vá lốp" tròn 100 nghìn, "xăng" ngày 22 được 105 nghìn. Một điều kiện đặt hớ tay
-sẽ nhận nhầm khoản này hoặc bỏ sót khoản kia.
+Con số ngưỡng đã được đặt sẵn vào một cái tên `nguong` ngay phía trên — tháng
+sau Byte đổi ngưỡng thì chỉ phải sửa đúng dòng đó. Chỗ trống vì vậy chỉ còn phải
+nói phần so sánh.
 
 Điền điều kiện vào chỗ trống ở cuối dòng.
 
@@ -227,6 +234,8 @@ so = [
     {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xe cộ"},
     {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xe cộ"},
 ]
+
+nguong = 100000
 
 dat = [khoan["ten"] for khoan in so if ___]
 
@@ -246,17 +255,19 @@ so = [
     {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xe cộ"},
 ]
 
-dat = [khoan["ten"] for khoan in so if khoan["tien"] > 100000]
+nguong = 100000
+
+dat = [khoan["ten"] for khoan in so if khoan["tien"] > nguong]
 
 print(dat)
 print(f"Có {len(dat)} khoản trên 100 nghìn")
 ```
 
 ```python title=test
-# So BẰNG cả danh sách chứ không kiểm từng phần: thứ tự cũng là một phần của
-# câu trả lời, và hai khoản sát ngưỡng nằm ở hai phía của dấu so sánh sẽ tố
-# giác ngay một điều kiện đặt hớ tay.
-assert dat == ["xăng", "ăn trưa", "sửa xe", "biếu bà", "xăng"], "cuốn sổ này cho ra năm cái tên theo đúng thứ tự ghi, và 'xăng' có mặt hai lần vì tháng này Byte đổ xăng hai lần, cả hai lần đều trên 100 nghìn — nếu danh sách của bạn có thêm 'vá lốp' thì điều kiện đang nhận cả khoản tròn 100 nghìn, còn nếu thiếu 'xăng' ở cuối thì ngưỡng đang bị đặt cao hơn 105 nghìn"
+# So BẰNG cả danh sách chứ không kiểm mỗi số lượng: thứ tự cũng là một phần của
+# câu trả lời, và hai khoản nằm ở hai phía con số ngưỡng sẽ tố giác ngay một
+# điều kiện đặt hớ tay.
+assert dat == ["xăng", "ăn trưa", "sửa xe", "biếu bà", "xăng"], "cuốn sổ tám khoản này cho ra năm cái tên theo đúng thứ tự ghi, và 'xăng' có mặt hai lần vì cả hai lần đổ xăng đều trên 100 nghìn — nếu danh sách của bạn có thêm 'vá lốp' thì điều kiện đang nhận cả khoản tròn 100 nghìn, còn nếu thiếu 'xăng' ở cuối thì ngưỡng đang bị đặt cao hơn 105 nghìn"
 assert len(dat) == 5, "trong tám khoản của cuốn sổ này có đúng năm khoản vượt 100 nghìn — ba khoản không vượt là cà phê 90 nghìn, bánh mì 15 nghìn và vá lốp tròn 100 nghìn"
 ```
 
@@ -264,9 +275,9 @@ assert len(dat) == 5, "trong tám khoản của cuốn sổ này có đúng năm
 - kind: attention
   body: Chỗ trống nằm ở cuối dòng, ngay sau chữ `if` và trước dấu ngoặc vuông đóng. Ở chỗ đó máy đang cầm trong tay đúng **một** khoản của lượt này, và cái tên gọi nó là `khoan`.
 - kind: strategy
-  body: Câu cần hỏi ở mỗi khoản là "khoản này có tiêu quá 100 nghìn không". Số tiền nằm trong trường `tien` của khoản, lấy ra bằng đúng cặp ngoặc vuông thứ hai mà bạn đã dùng để bóc một tầng. Chú ý chữ **quá** trong đề: khoản tròn 100 nghìn thì chưa quá, nên dấu so sánh phải là dấu nghiêm ngặt chứ không phải dấu có gạch dưới.
+  body: Câu cần hỏi ở mỗi khoản là "khoản này có tiêu quá ngưỡng không". Số tiền nằm trong trường `tien` của khoản, lấy ra bằng đúng cặp ngoặc vuông thứ hai mà bài 24 đã dạy; còn con số đem so thì đã có tên sẵn ở dòng `nguong`. Chú ý chữ **quá** trong đề: khoản tròn 100 nghìn thì chưa quá, nên dấu so sánh phải là dấu nghiêm ngặt chứ không phải dấu có gạch dưới.
 - kind: one-line
-  body: 'Viết `khoan["tien"] > 100000` vào chỗ trống, không thêm dấu hai chấm nào.'
+  body: 'Viết `khoan["tien"] > nguong` vào chỗ trống, không thêm dấu hai chấm nào.'
 :::
 
 :::validate

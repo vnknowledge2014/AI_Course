@@ -61,7 +61,7 @@ Byte dựng một cái rổ ba nhóm rồi hỏi nó phần tử đầu tiên.
 **Trước khi bấm chạy**, bạn đoán máy làm gì?
 
 ```python title=readonly
-ro = {"ăn uống", "xe cộ", "biếu tặng"}
+ro = {"ăn uống", "xăng xe", "học phí"}
 
 print(ro[0])
 ```
@@ -115,7 +115,7 @@ lúc bạn thử gán vào một ô của tuple.
 Chạy thật, và chạy thêm hai câu nữa để thấy rổ làm được gì:
 
 ```python title=readonly
-ro = {"ăn uống", "xe cộ", "biếu tặng"}
+ro = {"ăn uống", "xăng xe", "học phí"}
 
 print("ăn uống" in ro)
 print("du lịch" in ro)
@@ -131,9 +131,9 @@ Máy in ra:
 ```text title=readonly
 True
 False
-xe cộ
+xăng xe
 ăn uống
-biếu tặng
+học phí
 Traceback (most recent call last):
   File "so_chi_tieu.py", line 10, in <module>
     print(ro[0])
@@ -199,7 +199,7 @@ Khung dưới đã có sẵn cái rổ, ba câu hỏi, một danh sách rỗng �
 lời, và đoạn in kết quả. Còn thiếu đúng **điều kiện** của câu `if`.
 
 ```python title=starter
-nhom_thang_nay = {"ăn uống", "xe cộ", "biếu tặng", "học phí"}
+nhom_thang_nay = {"ăn uống", "xăng xe", "học phí"}
 cau_hoi = ["học phí", "du lịch", "ăn uống"]
 
 tra_loi = []
@@ -216,7 +216,7 @@ print(f"ăn uống: {tra_loi[2]}")
 ```
 
 ```python title=solution
-nhom_thang_nay = {"ăn uống", "xe cộ", "biếu tặng", "học phí"}
+nhom_thang_nay = {"ăn uống", "xăng xe", "học phí"}
 cau_hoi = ["học phí", "du lịch", "ăn uống"]
 
 tra_loi = []
@@ -277,8 +277,8 @@ Không có ô số 0 nào cả. Đổi lại, hỏi cái gì mình cũng trả l
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-Byte đem tới hai cái rổ: nhóm chi của tháng này, và nhóm chi của tháng trước.
-Cả hai đã bỏ trùng xong, mỗi tên nằm đúng một lần.
+Byte đem tới hai cái rổ: nhóm chi của tháng Mười, và nhóm chi của tháng Mười
+Một. Cả hai đã bỏ trùng xong, mỗi tên nằm đúng một lần.
 
 Byte hỏi: **nhóm nào tháng nào cũng có?**
 

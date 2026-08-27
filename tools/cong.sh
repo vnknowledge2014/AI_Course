@@ -42,6 +42,7 @@ chay "Mã không bị mất"        python3 tools/kiem_khong_mat.py
 chay "Hiến chương sư phạm"    python3 tools/kiem_bai_hoc.py
 chay "Đồ thị tiền đề"         python3 tools/kiem_do_thi.py
 chay "Số học trong văn xuôi"  python3 tools/kiem_so_hoc.py
+chay "Sổ sự thật thế giới"    python3 tools/kiem_su_that.py
 chay "Bí mật lọt vào git"     python3 tools/kiem_bi_mat.py
 chay "Schema khớp MASTERPLAN" python3 tools/trich_schema.py --check
 

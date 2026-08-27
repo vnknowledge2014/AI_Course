@@ -13,7 +13,7 @@ level: intro
 estimatedMinutes: 14
 teaches: [core.choose-container, core.set-union]
 practices: [core.set, core.set-intersection, core.set-difference, core.list-comprehension, core.dict-comprehension, core.list-of-dicts, core.tuple, core.len, core.fstring]
-requires: [core.list, core.list-index, core.list-of-dicts, core.dict, core.dict, core.dict-comprehension, core.list-comprehension, core.comprehension-filter, core.set, core.set-unordered, core.set-intersection, core.set-difference, core.tuple, core.tuple-immutable, core.parallel-lists, core.len, core.fstring]
+requires: [core.list, core.list-index, core.list-of-dicts, core.dict, core.dict-comprehension, core.list-comprehension, core.comprehension-filter, core.set, core.set-unordered, core.set-intersection, core.set-difference, core.tuple, core.tuple-immutable, core.parallel-lists, core.len, core.fstring]
 concepts: [core.danh-sach, core.chi-so]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -346,7 +346,7 @@ Chọn được rồi. Ghép cả bốn thứ thành một cuốn sổ chi tiêu
 làm nổi không?
 
 Nghĩ thử xem một cuốn sổ như thế phải trả lời những gì: cả tháng hết bao nhiêu,
-chi vào mấy nhóm, mỗi nhóm hết bao nhiêu, khoản nào tốn nhất, khoản nào trên
+chi vào mấy nhóm, mỗi nhóm hết bao nhiêu, ba khoản nào tốn nhất, khoản nào trên
 100 nghìn. Năm câu, và không câu nào cần thêm một công cụ mới — mỗi câu chỉ cần
 bạn chọn đúng một trong bốn chỗ chứa vừa xếp thành bảng.
 

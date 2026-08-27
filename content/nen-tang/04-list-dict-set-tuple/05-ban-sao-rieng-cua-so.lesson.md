@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 12
 teaches: [core.slice-copy]
-requires: [core.list-aliasing, core.list-slice, core.list, core.list-append, core.variable, core.assignment, core.fstring]
+requires: [core.list-aliasing, core.slice-open-end, core.list-slice, core.list, core.list-append, core.variable, core.assignment, core.fstring]
 concepts: [core.danh-sach, core.bien, core.sua-duoc]
 gradingMatrix:
   web-chrome: [static, run, tests, output]

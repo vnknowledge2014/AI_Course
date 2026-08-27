@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 13
 teaches: [core.dict-accumulator]
-requires: [core.nested-access, core.dict-get-default, core.dict-items, core.for-unpack, core.dict, core.list-of-dicts, core.len, ctrl.for-each, core.fstring]
+requires: [core.dict-nested-index, core.dict-get-default, core.dict-items, core.for-unpack, core.dict, core.list-of-dicts, core.len, ctrl.for-each, core.fstring]
 concepts: [core.so-tra-cuu, core.cong-don, ctrl.lap]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -34,12 +34,12 @@ ra trước được.
 
 ::::explain{#hai-loai-ten-bi-nhet-lam-mot}
 Bài trước để lại đúng chỗ này: mỗi nhóm một cái tên riêng — `tong_an_uong`,
-`tong_xe_co`, `tong_bieu_tang` — rồi một chuỗi `if` / `elif` ba nhánh cộng vào
-đúng cái tên ấy. Chạy được, ra đúng số. Nhưng tháng sau Byte đóng học phí, sổ
-mọc ra nhóm `"học phí"`, và chương trình không có nhánh nào cho nó.
+`tong_xang_xe` — rồi một chuỗi `if` mấy nhánh cộng vào đúng cái tên ấy. Chạy
+được, ra đúng số. Nhưng Byte mua vở đi học, sổ mọc ra nhóm `"học phí"`, và
+chương trình không có nhánh nào cho nó.
 
-Câu hỏi thật không phải "thêm nhánh `elif` thứ tư ở đâu". Câu hỏi là vì sao
-hễ dữ liệu đổi thì chương trình cũng phải đổi theo.
+Câu hỏi thật không phải "thêm một nhánh nữa ở đâu". Câu hỏi là vì sao hễ dữ
+liệu đổi thì chương trình cũng phải đổi theo.
 
 Nhìn kỹ thì thấy hai loại tên khác hẳn nhau đang bị nhét làm một:
 
@@ -92,18 +92,18 @@ Khác mỗi chuyện lần này thứ được sinh ra không phải một con s
 chứa có thể mọc thêm ngăn.
 ::::
 
-::::example{#ca-cuon-so-thang-sau}
-Cuốn sổ tháng sau của Byte. Vẫn năm khoản cũ, thêm một khoản học thêm ở ngày
-20 — chính cái nhóm mà chương trình cũ bỏ rơi.
+::::example{#ca-cuon-so-sau-khoan}
+Cuốn sổ bài trước, cộng thêm khoản mua vở ở ngày 17 — chính cái nhóm mà chương
+trình cũ bỏ rơi.
 
 ```python title=readonly
 so = [
-    {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
-    {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
-    {"ten": "học thêm", "tien": 120000, "ngay": 20, "nhom": "học phí"},
+    {"ten": "cà phê", "tien": 25000, "ngay": 2, "nhom": "ăn uống"},
+    {"ten": "xăng", "tien": 60000, "ngay": 5, "nhom": "xăng xe"},
+    {"ten": "bún bò", "tien": 40000, "ngay": 8, "nhom": "ăn uống"},
+    {"ten": "vá lốp", "tien": 30000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "bánh mì", "tien": 15000, "ngay": 14, "nhom": "ăn uống"},
+    {"ten": "vở", "tien": 20000, "ngay": 17, "nhom": "học phí"},
 ]
 
 tong = {}
@@ -119,34 +119,31 @@ for nhom, tien in tong.items():
 Máy in ra:
 
 ```text title=readonly
-ăn uống: 710000 đồng
-xe cộ: 740000 đồng
-biếu tặng: 300000 đồng
-học phí: 120000 đồng
+ăn uống: 80000 đồng
+xăng xe: 90000 đồng
+học phí: 20000 đồng
 ```
 
 Dò lại bằng tay cho chắc, vì một bản tổng kết sai thì trông y hệt một bản
 đúng:
 
-- **ăn uống** gom cà phê với ăn trưa: 90000 + 620000 = 710000.
-- **xe cộ** gom xăng với sửa xe: 240000 + 500000 = 740000.
-- **biếu tặng** chỉ có khoản biếu bà: 300000.
-- **học phí** chỉ có khoản học thêm: 120000.
+- **ăn uống** gom cà phê, bún bò và bánh mì: 25000 + 40000 + 15000 = 80000
+- **xăng xe** gom xăng với vá lốp: 60000 + 30000 = 90000
+- **học phí** chỉ có khoản mua vở: 20000
 
-Cộng cả bốn nhóm: 710000 + 740000 + 300000 + 120000 = 1870000 — đúng bằng tổng
-sáu khoản trong sổ. Không đồng nào rơi ra ngoài, kể cả tiền học thêm của một
-nhóm mà lúc viết chương trình chưa ai nhắc tới.
+Cộng cả ba nhóm: 80000 + 90000 + 20000 = 190000 — đúng bằng tổng sáu khoản
+trong sổ. Không đồng nào rơi ra ngoài, kể cả tiền mua vở của một nhóm mà lúc
+viết chương trình chưa ai nhắc tới.
 
 Hai chỗ đáng dừng lại nhìn:
 
 - **Không dòng nào trong chương trình gõ chữ `"học phí"`.** Khoá ấy đi từ sổ
   chi tiêu vào sổ tổng, qua cái tên `nhom`. Thêm nhóm mới vào sổ thì bản tổng
   kết tự dài thêm một dòng, không ai phải mở chương trình ra sửa.
-- **Bốn nhóm hiện ra theo thứ tự chúng xuất hiện lần đầu trong sổ** — ăn uống
-  ở khoản 1, xe cộ ở khoản 2, biếu tặng mãi khoản 5, học phí ở khoản 6. Duyệt
-  một `dict` là đi theo thứ tự khoá được thêm vào, đúng như lúc bạn duyệt khoá
-  của một sổ tra cứu. Đây là tính chất của `dict`, và bạn sẽ thấy nó đáng nhớ
-  ở bài sau.
+- **Ba nhóm hiện ra theo thứ tự chúng xuất hiện lần đầu trong sổ** — ăn uống ở
+  khoản 1, xăng xe ở khoản 2, học phí mãi khoản 6. Duyệt một `dict` là đi theo
+  thứ tự khoá được thêm vào, đúng như lúc bạn duyệt khoá của một sổ tra cứu.
+  Đây là tính chất của `dict`, và bạn sẽ thấy nó đáng nhớ ở bài sau.
 ::::
 
 ::::predict{#bo-mat-cho-du-phong commitOnce}
@@ -158,9 +155,9 @@ sổ tra cứu rỗng, và khoản đầu tiên thuộc nhóm `"ăn uống"`.
 
 ```python title=readonly
 so = [
-    {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
-    {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
+    {"ten": "cà phê", "tien": 25000, "ngay": 2, "nhom": "ăn uống"},
+    {"ten": "xăng", "tien": 60000, "ngay": 5, "nhom": "xăng xe"},
+    {"ten": "bún bò", "tien": 40000, "ngay": 8, "nhom": "ăn uống"},
 ]
 
 tong = {}
@@ -245,7 +242,7 @@ vòng lặp, giờ mỗi nhóm nhận nó vào đúng lúc nó xuất hiện l�
 ::::
 
 ::::code{#tong-theo-nhom}
-Cuốn sổ tháng sau ở trên, và bản tổng kết theo nhóm.
+Cuốn sổ sáu khoản ở trên, và bản tổng kết theo nhóm.
 
 Khung dưới đã có sẵn cuốn sổ, sổ tổng rỗng, vòng duyệt và đoạn in báo cáo. Còn
 thiếu đúng **dòng cộng dồn** trong thân vòng.
@@ -255,12 +252,12 @@ phải tự dài thêm khi sổ có nhóm mới.
 
 ```python title=starter
 so = [
-    {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
-    {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
-    {"ten": "học thêm", "tien": 120000, "ngay": 20, "nhom": "học phí"},
+    {"ten": "cà phê", "tien": 25000, "ngay": 2, "nhom": "ăn uống"},
+    {"ten": "xăng", "tien": 60000, "ngay": 5, "nhom": "xăng xe"},
+    {"ten": "bún bò", "tien": 40000, "ngay": 8, "nhom": "ăn uống"},
+    {"ten": "vá lốp", "tien": 30000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "bánh mì", "tien": 15000, "ngay": 14, "nhom": "ăn uống"},
+    {"ten": "vở", "tien": 20000, "ngay": 17, "nhom": "học phí"},
 ]
 
 tong = {}
@@ -275,12 +272,12 @@ for nhom, tien in tong.items():
 
 ```python title=solution
 so = [
-    {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
-    {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
-    {"ten": "học thêm", "tien": 120000, "ngay": 20, "nhom": "học phí"},
+    {"ten": "cà phê", "tien": 25000, "ngay": 2, "nhom": "ăn uống"},
+    {"ten": "xăng", "tien": 60000, "ngay": 5, "nhom": "xăng xe"},
+    {"ten": "bún bò", "tien": 40000, "ngay": 8, "nhom": "ăn uống"},
+    {"ten": "vá lốp", "tien": 30000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "bánh mì", "tien": 15000, "ngay": 14, "nhom": "ăn uống"},
+    {"ten": "vở", "tien": 20000, "ngay": 17, "nhom": "học phí"},
 ]
 
 tong = {}
@@ -294,20 +291,19 @@ for nhom, tien in tong.items():
 ```
 
 ```python title=test
-# Năm phép kiểm, mỗi phép chặn một cách làm hỏng khác nhau.
+# Bốn phép kiểm, mỗi phép chặn một cách làm hỏng khác nhau.
 #
 # Dòng 1 vỡ khi dòng bạn điền không mở được ngăn nào (sổ tổng còn rỗng) hoặc
-# mở nhầm ngăn: lấy `ten` làm khoá thì ra sáu ngăn chứ không phải bốn.
-# Dòng 2 và 3 vỡ khi dòng bạn điền GHI ĐÈ thay vì cộng dồn — hai nhóm có hai
-# khoản ấy sẽ chỉ còn giữ tiền của khoản sau.
-# Dòng 4 và 5 là hai nhóm chỉ có một khoản: chúng vẫn đúng cả khi ba dòng
-# trên vỡ, nên một mình chúng không đủ để chấm. Chúng ở đây để bắt trường hợp
-# vòng lặp bỏ sót đoạn cuối sổ.
-assert len(tong) == 4, "sáu khoản trong cuốn sổ này thuộc đúng bốn nhóm khác nhau, nên sổ tổng phải có đúng bốn khoá"
-assert tong["ăn uống"] == 710000, "nhóm ăn uống trong cuốn sổ này có hai khoản, 90000 và 620000 — cộng lại phải ra 710000"
-assert tong["xe cộ"] == 740000, "nhóm xe cộ trong cuốn sổ này có hai khoản, 240000 và 500000 — cộng lại phải ra 740000"
-assert tong["biếu tặng"] == 300000, "nhóm biếu tặng trong cuốn sổ này chỉ có khoản biếu bà 300000 đồng"
-assert tong["học phí"] == 120000, "nhóm học phí trong cuốn sổ này chỉ có khoản học thêm 120000 đồng, và nó nằm ở dòng cuối sổ"
+# mở nhầm ngăn: lấy `ten` làm khoá thì ra sáu ngăn chứ không phải ba.
+# Dòng 2 và 3 vỡ khi dòng bạn điền GHI ĐÈ thay vì cộng dồn — hai nhóm nhiều
+# khoản ấy sẽ chỉ còn giữ tiền của khoản cuối cùng thuộc nhóm.
+# Dòng 4 là nhóm chỉ có một khoản: nó vẫn đúng cả khi ba dòng trên vỡ, nên
+# một mình nó không đủ để chấm. Nó ở đây để bắt trường hợp vòng lặp bỏ sót
+# dòng cuối sổ.
+assert len(tong) == 3, "sáu khoản trong cuốn sổ này thuộc đúng ba nhóm khác nhau, nên sổ tổng phải có đúng ba khoá"
+assert tong["ăn uống"] == 80000, "nhóm ăn uống trong cuốn sổ này có ba khoản, 25000 với 40000 và 15000 — cộng lại phải ra 80000"
+assert tong["xăng xe"] == 90000, "nhóm xăng xe trong cuốn sổ này có hai khoản, 60000 và 30000 — cộng lại phải ra 90000"
+assert tong["học phí"] == 20000, "nhóm học phí trong cuốn sổ này chỉ có khoản mua vở 20000 đồng, và nó nằm ở dòng cuối sổ"
 ```
 
 :::hints
@@ -325,7 +321,7 @@ assert tong["học phí"] == 120000, "nhóm học phí trong cuốn sổ này ch
 - tier: tests
   timeoutMs: 5000
 - tier: output
-  expect: 'ăn uống: 710000 đồng'
+  expect: 'ăn uống: 80000 đồng'
 - tier: static
   onFail: dòng bạn điền phải lấy tên nhóm và số tiền TỪ lượt đang chạy, không được gõ sẵn tên nhóm hay con số tổng
   requireAst:
@@ -337,8 +333,8 @@ assert tong["học phí"] == 120000, "nhóm học phí trong cuốn sổ này ch
   forbidAst:
   # Hai con số này KHÔNG có trong sổ — chúng chỉ ra đời sau phép cộng. Gõ
   # thẳng chúng vào là chép đáp án, không phải cộng dồn.
-  - kind: has-literal, target: 710000
-  - kind: has-literal, target: 740000
+  - kind: has-literal, target: 80000
+  - kind: has-literal, target: 90000
 :::
 ::::
 

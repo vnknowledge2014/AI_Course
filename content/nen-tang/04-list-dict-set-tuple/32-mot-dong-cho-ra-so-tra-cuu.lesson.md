@@ -12,8 +12,8 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 13
 teaches: [core.dict-comprehension]
-practices: [core.comprehension-filter, core.list-comprehension, core.dict-items, core.tuple-unpack, core.dict-lookup, core.len, core.fstring]
-requires: [core.comprehension-filter, core.list-comprehension, core.list-of-dicts, core.dict, core.dict-assign, core.dict, core.dict-items, core.tuple-unpack, core.len, ctrl.for-each, core.fstring]
+practices: [core.comprehension-filter, core.list-comprehension, core.dict-items, core.for-unpack, core.dict, core.len, core.fstring]
+requires: [core.comprehension-filter, core.list-comprehension, core.list-of-dicts, core.dict, core.dict-assign, core.dict-items, core.for-unpack, core.nested-index, core.len, ctrl.for-each, core.fstring]
 concepts: [core.danh-sach, core.bien]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -206,7 +206,8 @@ Byte cần hai cuốn sổ tra cứu từ cùng một cuốn sổ chi tiêu tám
 - `dang_ke` — cũng tra bằng tên, nhưng chỉ giữ những khoản **trên** 100 nghìn.
 
 Ba chỗ trống: hai chỗ hai bên dấu hai chấm ở dòng thứ nhất, một chỗ sau chữ `if`
-ở dòng thứ hai.
+ở dòng thứ hai. Con số ngưỡng đã có tên sẵn là `nguong`, nên chỗ trống cuối chỉ
+còn phải nói phần so sánh.
 
 ```python title=starter
 so = [
@@ -219,6 +220,8 @@ so = [
     {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xe cộ"},
     {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xe cộ"},
 ]
+
+nguong = 100000
 
 tra_cuu = {___: ___ for khoan in so}
 
@@ -241,9 +244,11 @@ so = [
     {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xe cộ"},
 ]
 
+nguong = 100000
+
 tra_cuu = {khoan["ten"]: khoan["tien"] for khoan in so}
 
-dang_ke = {ten: tien for ten, tien in tra_cuu.items() if tien > 100000}
+dang_ke = {ten: tien for ten, tien in tra_cuu.items() if tien > nguong}
 
 print(f"Sổ tra cứu có {len(tra_cuu)} khoá")
 print(f"Xăng: {tra_cuu['xăng']} đồng")
@@ -264,9 +269,9 @@ assert dang_ke == {"xăng": 105000, "ăn trưa": 620000, "sửa xe": 500000, "bi
 - kind: attention
   body: Hai chỗ trống đầu nằm hai bên dấu hai chấm, và chúng nói về cùng một khoản mà `for` vừa lấy ra — cái khoản tên `khoan`. Chỗ trống thứ ba nằm ở cuối dòng dưới, nơi phần `for` đã kịp mở cặp ra thành hai cái tên `ten` và `tien`.
 - kind: strategy
-  body: Sổ tra cứu phải tra được bằng **tên** và cho ra **số tiền**, nên bên trái dấu hai chấm là trường `ten` của khoản, bên phải là trường `tien`. Ở dòng dưới thì không còn `khoan` nào nữa: cặp đã mở rồi, số tiền đang nằm sẵn trong cái tên `tien`, và câu hỏi vẫn là câu hỏi quen thuộc của bài trước — trên 100 nghìn thì giữ, tròn 100 nghìn thì không.
+  body: Sổ tra cứu phải tra được bằng **tên** và cho ra **số tiền**, nên bên trái dấu hai chấm là trường `ten` của khoản, bên phải là trường `tien`. Ở dòng dưới thì không còn `khoan` nào nữa: cặp đã mở rồi, số tiền đang nằm sẵn trong cái tên `tien`, còn con số đem so đã có tên là `nguong`; câu hỏi vẫn là câu hỏi quen thuộc của bài trước — trên 100 nghìn thì giữ, tròn 100 nghìn thì không.
 - kind: one-line
-  body: 'Ba chỗ trống lần lượt là `khoan["ten"]`, `khoan["tien"]` và `tien > 100000`.'
+  body: 'Ba chỗ trống lần lượt là `khoan["ten"]`, `khoan["tien"]` và `tien > nguong`.'
 :::
 
 :::validate
