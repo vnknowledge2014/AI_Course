@@ -316,7 +316,13 @@ assert gap_lai_nuoc == 80000, "7 chai bán lẻ cộng 3 chai gửi sẵn, mỗi
   # Khung khởi đầu có hai dấu cộng và hai dấu nhân; lời giải thêm mỗi loại hai
   # cái nữa — một cho mỗi cuốn sổ.
   - kind: uses-operator, target: +, min: 4
-  - kind: uses-operator, target: *, min: 4
+  # Đúng BỐN dấu nhân, không hơn. Khung có sẵn 2, mỗi chỗ trống thêm đúng 1.
+  #
+  # Trần này mới là chỗ chặn thật của bài. Viết `15000 * n + 15000 * 2` —
+  # tức MỞ ngoặc, đúng bài 7, ngược hẳn bài 8 — ra bằng nhau ở mọi `n`, nên
+  # không assert nào và không tier `output` nào bắt được. Chỉ đếm dấu nhân mới
+  # thấy: dạng gấp lại có 4, dạng khai triển có 6.
+  - kind: uses-operator, target: *, min: 4, max: 4
   forbidAst:
   # Lưới thứ hai, chặn đúng hai con số KẾT QUẢ. Lời giải thật không chứa nguyên
   # văn chúng, nên luật này không cản ai làm thật.

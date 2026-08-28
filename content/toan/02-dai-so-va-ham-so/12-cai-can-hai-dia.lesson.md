@@ -292,6 +292,13 @@ print(c_trai == c_phai)
 # và bẫy phải sập ngay tại đây, trước khi mấy câu `==` kịp che nó đi.
 assert (a_trai == a_phai) != (b_trai == b_phai), "làm ở cả hai đĩa và làm ở một đĩa không thể cùng một kết cục — nếu tay A và tay B cho chung một lời phán thì có một tay bị viết sai"
 assert b_trai != b_phai, "tay B chỉ nhấc bớt ở đĩa trái, nên đĩa trái nhẹ đi mà đĩa phải y nguyên — hai đĩa hết bằng nhau"
+# `b_trai` phải là 400: nhấc ĐÚNG MỘT quả 100 g khỏi đĩa trái.
+#
+# Không có dòng này thì đọc nhầm đề — nhấc 200 g — vẫn qua trọn bộ, vì
+# `b_trai != b_phai` đúng với cả 300 lẫn 400, và không câu nào khác đụng
+# tới `b_trai`. Cái tay B là chỗ bài này đi tìm, mà nó lại là chỗ duy nhất
+# không được chốt bằng một con số.
+assert b_trai == 400, "tay B nhấc đúng MỘT quả 100 g khỏi đĩa trái: 500 g bớt 100 g còn 400 g"
 assert a_trai == a_phai, "tay A nhấc đúng 100 g ở mỗi đĩa, chênh lệch không đổi, cân vẫn ngang"
 assert a_trai == 400, "500 g bớt 100 g còn 400 g, ở cả hai đĩa"
 assert b_phai == 500, "tay B không đụng vào đĩa phải, nên nó vẫn nặng đúng 500 g"

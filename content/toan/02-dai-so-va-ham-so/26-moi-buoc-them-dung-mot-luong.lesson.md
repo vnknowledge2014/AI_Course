@@ -262,7 +262,8 @@ def than(n):
 buoc_thu = ___
 buoc_than = ___
 
-# Đo lại ở chỗ khác trên bảng. Nếu luật đúng thì hai con số phải trùng nhau.
+# Đo lại ở GIỮA bảng, xa chỗ vừa đo: máy thu từ n = 8 sang n = 9, máy than từ
+# n = 5 sang n = 6. Nếu luật đúng thì hai con số phải trùng với hai số trên.
 buoc_thu_cho_khac = ___
 buoc_than_cho_khac = ___
 
@@ -285,7 +286,8 @@ def than(n):
 buoc_thu = thu(1) - thu(0)
 buoc_than = than(1) - than(0)
 
-# Đo lại ở chỗ khác trên bảng. Nếu luật đúng thì hai con số phải trùng nhau.
+# Đo lại ở GIỮA bảng, xa chỗ vừa đo: máy thu từ n = 8 sang n = 9, máy than từ
+# n = 5 sang n = 6. Nếu luật đúng thì hai con số phải trùng với hai số trên.
 buoc_thu_cho_khac = thu(9) - thu(8)
 buoc_than_cho_khac = than(6) - than(5)
 
@@ -335,6 +337,17 @@ assert hai_buoc_thu == 30000, "từ 7 lên 9 là hai bước, mỗi bước 15 0
   # trống (2 lần gọi mỗi chỗ) và `than` ở hai chỗ trống.
   - kind: uses-call, target: thu, min: 6
   - kind: uses-call, target: than, min: 4
+  # Hai ô "đo lại" phải đo ĐÚNG chỗ đề chỉ: n = 8 và n = 5.
+  #
+  # Chép y hệt `thu(1) - thu(0)` xuống ô ấy ra đúng cùng con số, nên không
+  # assert nào bắt được — hai bước bằng nhau CHÍNH LÀ điều bài đang chứng minh,
+  # và một cách chấm dựa vào giá trị thì mù trước chuyện đó. Đòi thấy hai con số
+  # ấy trong mã là cách duy nhất biết người học có đo chỗ khác thật hay không.
+  #
+  # Đòi được vì đề đã CHỈ ĐỊNH chỗ đo. Không chỉ định mà vẫn đòi thì thành đánh
+  # trượt oan người đo ở một chỗ khác cũng hợp lệ.
+  - kind: has-literal, target: 8
+  - kind: has-literal, target: 5
   forbidAst:
   # Lưới thứ hai, chặn con số KẾT QUẢ của chỗ trống cuối. Lời giải thật chỉ
   # chứa 15000, 200, và các số ổ (0, 1, 5, 6, 7, 8, 9) — không chỗ nào có

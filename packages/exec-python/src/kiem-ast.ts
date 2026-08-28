@@ -23,6 +23,17 @@ export interface TruyVanAst {
   kind: string;
   target?: string;
   min?: number;
+  /**
+   * Số lần TỐI ĐA được phép. Có \`max\` mới nói được câu "đừng khai triển ra".
+   *
+   * Bài 8 của T2.2 dạy GẤP \`15000 * n + 15000 * 2\` lại thành
+   * \`15000 * (n + 2)\`. Hai câu ấy bằng nhau ở mọi \`n\`, nên không assert nào
+   * và không tier \`output\` nào phân biệt được — người học làm ĐÚNG NGƯỢC
+   * bài học (mở ngoặc ra, tức bài 7) vẫn qua sạch. Chỉ đếm số dấu nhân mới
+   * thấy: dạng gấp có 1, dạng khai triển có 2. Mà \`min\` thì không nói được
+   * "nhiều nhất bấy nhiêu".
+   */
+  max?: number;
 }
 
 export interface KetQuaAst {
@@ -73,6 +84,18 @@ def _dem(nguon, cac_truy_van):
                 if (isinstance(nut, ast.Name) and isinstance(nut.ctx, ast.Load)
                         and (tg is None or nut.id == tg)):
                     n += 1
+            elif kind == "subscript-assign":
+                # Gán VÀO MỘT Ô: \`chi[khoa] = gia_tri\`. Người viết T1.4 báo
+                # thiếu đúng luật này, và phải lách bằng cách đếm số lần đọc
+                # tên — một con số phụ thuộc số lệnh \`print\` trong khung, nên
+                # sửa khung là luật chấm hỏng lặng lẽ.
+                if isinstance(nut, (ast.Assign, ast.AugAssign)):
+                    dich = nut.targets if isinstance(nut, ast.Assign) else [nut.target]
+                    for d in dich:
+                        if isinstance(d, ast.Subscript):
+                            ten = getattr(d.value, "id", None)
+                            if tg is None or ten == tg:
+                                n += 1
             elif kind == "has-literal":
                 if isinstance(nut, ast.Constant):
                     # So bằng CHUỖI HOÁ để tác giả viết target là văn bản thuần:
@@ -195,7 +218,12 @@ export function kiemAst(
     const thieu = yeu_cau.filter((q, i) => {
       const n = n_yeu[i] ?? 0;
       // `no-*` đảo chiều: có mặt là hỏng.
-      return KIND_PHU_DINH.has(q.kind) ? n > 0 : n < (q.min ?? 1);
+      if (KIND_PHU_DINH.has(q.kind)) return n > 0;
+      // `max` là trần: quá là hỏng. Một truy vấn khai cả `min` lẫn `max` thì
+      // phải lọt vào giữa — đó là cách nói "đúng chừng này, đừng khai triển
+      // thêm".
+      if (q.max !== undefined && n > q.max) return true;
+      return n < (q.min ?? (q.max !== undefined ? 0 : 1));
     });
     const vi_pham = cam.filter((_, i) => (n_cam[i] ?? 0) > 0);
     return {
