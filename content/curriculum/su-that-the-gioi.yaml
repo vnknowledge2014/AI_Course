@@ -61,3 +61,17 @@
     - 'lãi ({SO})\s*(?:nghìn|đồng|đ\b) một ổ'
   ngoai_le:
     - 'content/toan/02-dai-so-va-ham-so/29-dinh-va-hai-ben-doi-xung.lesson.md: cùng lẽ — cả bài chạy trên lãi mỗi ổ đổi theo mức tăng giá'
+
+# ── CLB cờ vua lớp 6A (hiện vật xuyên suốt T2.3) ──────────────────────────
+#
+# Sổ quỹ sáu tháng ghi 40 000 / 25 000 / 60 000 / 15 000 / 30 000 / 45 000 đồng,
+# cộng lại là 215 000. Bài 31 và 32 chạy vòng `while` cộng dồn trên đúng cuốn sổ
+# ấy, nên con số tổng đi vào cả văn xuôi, khối test lẫn tier `output` của hai
+# bài. Khai ở đây để bài nào của T2.3 lỡ đặt một tổng khác thì lộ ra ngay, thay
+# vì để người học cộng lại rồi tưởng mình sai.
+- ten: quy-clb-sau-thang
+  gia_tri: 215000
+  cho_nghin: 1
+  pham_vi: content/toan/03-logic-va-chung-minh
+  tu_khoa:
+    - 'tổng quỹ sáu tháng[^.\n]{0,16}?({SO})\s*(?:nghìn|đồng|đ\b)'

@@ -61,8 +61,24 @@ test('đếm kỹ năng, không đếm bài', () => {
 });
 
 test('track chưa viết bài nào vẫn hiện, với tổng 0', () => {
-  const bd = dung_ban_do(DS, THU_TU, rong);
+  // Dựng một track RỖNG tổng hợp, thay vì trông chờ repo còn track chưa viết.
+  //
+  // Bản trước lọc `tong === 0` trên dữ liệu THẬT rồi khẳng định phải tìm được
+  // ít nhất một. Nó xanh suốt nhiều tháng vì lúc nào cũng còn track dở dang —
+  // rồi ĐỎ đúng vào ngày viết xong bài cuối của v1.0. Một test chỉ đúng khi
+  // công việc CHƯA xong thì nó không kiểm hành vi, nó kiểm tiến độ.
+  //
+  // Hành vi cần giữ vẫn thật và vẫn quan trọng: track đã có mạch mà chưa viết
+  // bài nào PHẢI hiện ra trên bản đồ — không thì người học không thấy đường
+  // trước mặt, và tiến độ trông cao hơn thực tế.
+  const track_rong = { id: 'chua-viet', ten: 'Track chưa viết', module: ['module-khong-co-bai'] };
+  const thu_tu_them_track_rong = [
+    ...THU_TU,
+    { id: 'realm-thu-nghiem', ten: 'Realm thử nghiệm', track: [track_rong] },
+  ];
+
+  const bd = dung_ban_do(DS, thu_tu_them_track_rong, rong);
   const trong = bd.flatMap((r) => r.track).filter((t) => t.tong === 0);
-  assert.ok(trong.length > 0, 'các track đã có mạch nhưng chưa viết phải hiện ra');
+  assert.ok(trong.length > 0, 'track đã có mạch nhưng chưa viết phải hiện ra');
   for (const t of trong) assert.equal(t.xong, 0);
 });
