@@ -45,6 +45,7 @@ chay "Số học trong văn xuôi"  python3 tools/kiem_so_hoc.py
 chay "Sổ sự thật thế giới"    python3 tools/kiem_su_that.py
 chay "Bí mật lọt vào git"     python3 tools/kiem_bi_mat.py
 chay "Schema khớp MASTERPLAN" python3 tools/trich_schema.py --check
+chay "App ship đủ bài"      python3 tools/kiem_app_dong_bo.py
 
 # ── 2. Mã ─────────────────────────────────────────────────────────────────
 chay "Test JS"                pnpm -r --silent test
