@@ -76,9 +76,12 @@ Byte bán 15 ổ. Đọc thẳng ra khỏi dòng cuối, không phải thử s�
 Bây giờ tới phần thú vị: **nếu gỡ ngược thứ tự thì sao?** Thử chia trước.
 
 Chia cả hai đĩa cho 15 000. Đĩa phải thì dễ: `195000 : 15000 = 13`. Đĩa trái
-thì phải cẩn thận — nó có **hai cụm**, và chia một tổng (hay một hiệu) cho một
-số là chia **từng cụm**. Đó đúng là luật phân phối ở bài 7, đọc theo chiều
-chia:
+thì phải cẩn thận — nó có **hai cụm**.
+
+Đi đường vòng qua đồ đã có, thay vì mượn một luật chưa ai dựng. Đĩa trái là
+`15000 × n − 30000`; rút cái chung ra như bài 8 thì nó thành
+`15000 × (n − 2)`. Giờ chia cho 15 000 chỉ là bỏ đúng cái thừa số vừa rút ra —
+không cần luật nào mới:
 
 - `15000 × n` chia cho 15 000 còn `n`
 - `30000` chia cho 15 000 còn `2`

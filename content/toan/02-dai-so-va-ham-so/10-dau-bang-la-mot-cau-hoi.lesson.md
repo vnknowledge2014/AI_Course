@@ -123,8 +123,8 @@ toán gộp chung vào một dấu `=`:
 gia_mot_o = 15000
 
 # hai dấu bằng: HỎI. Đây là một câu hỏi, và máy trả lời đúng hoặc sai.
-print(gia_mot_o * 20 == 300000)
-print(gia_mot_o * 21 == 300000)
+print(gia_mot_o * 2 == 30000)
+print(gia_mot_o * 3 == 30000)
 ```
 
 Máy in ra:

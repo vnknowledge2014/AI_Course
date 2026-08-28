@@ -195,8 +195,10 @@ thì vẫn nằm trên giấy.
 >
 > Số đứng ngoài ngoặc phải nhân vào **từng** cụm bên trong, không sót cụm nào.
 
-Ba chữ `a`, `b`, `c` ở đây là ba ô trống, và câu trên đúng với **mọi** cách điền
-— vì với mỗi cách điền, nó chỉ là một cái khay chữ nhật được cắt làm hai.
+Ba chữ `a`, `b`, `c` ở đây là ba ô trống. Với mọi cách điền bằng **số ổ đếm
+được**, câu trên chỉ là một cái khay chữ nhật cắt làm hai — nhìn cái khay là
+thấy ngay. Luật này còn đúng rộng hơn thế nhiều (số âm, phân số), nhưng cái
+khay thì không vẽ ra được ở đó; phần ấy để dành khi đã có đủ đồ nghề.
 
 Vài chỗ nên để ý:
 

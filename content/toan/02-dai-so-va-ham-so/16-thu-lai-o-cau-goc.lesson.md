@@ -313,6 +313,10 @@ tiền than — và khoản ấy **đi theo số ổ**: bán càng nhiều thì 
 Viết ra thì đĩa phải không còn là một con số trần nữa. Nó cũng có chữ `n` bên
 trong.
 
+Và câu hỏi của quán cũng đổi theo. Bài này hỏi *"cuối buổi còn bao nhiêu tiền
+trong túi"* — một câu tính ra số. Bài sau hỏi câu khác hẳn: *"bán bao nhiêu ổ
+thì tiền thu vừa đúng tiền chi"* — tức hai đĩa mang chữ đứng cân nhau.
+
 Lúc ấy hai đĩa đều mang ô trống, và cách gỡ cũ đuổi vòng quanh: dọn xong đĩa
 trái thì đĩa phải vẫn còn chữ, dọn xong đĩa phải thì đĩa trái vẫn còn chữ.
 

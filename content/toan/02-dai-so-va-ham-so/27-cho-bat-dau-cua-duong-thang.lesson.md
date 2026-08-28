@@ -139,7 +139,10 @@ dưới đúng một hình dạng:
 Trong đó `a` và `b` là hai con số cụ thể, còn `n` vẫn là ô trống như từ bài 1.
 
 *(Sách toán hay viết hình dạng này thành `y = ax + b`. Không có gì mới trong đó:
-`x` là cột "điền gì", `y` là cột "ra gì" — đúng hai cột của cái bảng bài 5, và
+`x` là cột "điền gì", `y` là cột "ra gì" — đúng hai cột của cái bảng bài 5. Chú
+ý `y` KHÔNG phải một ô trống bạn điền vào như `n`: nó là tên của **cả cột kết
+quả**, tức thứ máy nhả ra sau khi bạn đã điền. Đây là chữ cái đầu tiên trong cả
+track không dùng để điền, nên đọc chậm chỗ này. Và
 `y` chính là con số bạn chấm lên trục dọc từ bài 23. Ba cách viết `15000n`,
 `f(n) = 15000n` và `y = 15000x` đang nói cùng một chuyện; bài này dùng cách viết
 có tên máy, vì có tên thì gọi được.)*

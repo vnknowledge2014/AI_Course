@@ -53,9 +53,12 @@ gì. Và khi dòng dài ra thì chuyện càng tệ:
 15 000 × ▢   +   8 000 × ▢   −   9 000 × ▢   −   ▢
 ```
 
-Bốn ô trống trên một dòng. Ô nào là số ổ bán ra, ô nào là số chai, ô nào là số ổ
-đã lấy nguyên liệu, ô nào là tiền thuê chỗ? Đếm từ trái sang mà nhớ thì được vài
-lần rồi thôi.
+Bốn ô trống trên một dòng. Ô nào là số ổ, ô nào là số chai, ô nào là tiền thuê
+chỗ? Đếm từ trái sang mà nhớ thì được vài lần rồi thôi.
+
+Và để ý một chuyện làm việc nhớ còn khó hơn: ô thứ nhất và ô thứ ba là **cùng
+một con số**. Mỗi ổ bán ra đều đã tốn nguyên liệu, nên số ổ bán và số ổ lấy
+nguyên liệu là một. Bốn ô, mà chỉ ba đại lượng.
 
 Cách chữa cũng chính là cách người ta chữa mọi chuyện tương tự ngoài đời: **dán
 nhãn**. Mỗi ô một cái tên riêng, và cái tên ngắn nhất có thể là một **chữ cái**.

@@ -281,7 +281,7 @@ print(ket_nhieu - ket_it)
 # trang để nói tới sẽ biến mất. Xếp chúng sau các câu `==` thì không bao giờ
 # chạy tới, và bẫy không bao giờ sập.
 assert ket_it != ket_nhieu, "3 ổ và 8 ổ phải cho hai khoản tiền khác nhau — chính vì thế máy két mới quay đầu được"
-assert vuong_duong != ket_it, "hai cái máy khác nhau, đo hai thứ khác nhau, nên chúng không thể cùng nhả ra một con số ở đây"
+assert vuong_duong != ket_it, "9 mét vuông và 95 000 đồng — hai con số này khác nhau; đừng nhầm hai cột kết quả với nhau khi điền"
 assert ket(1) != ket(2) and ket(2) != ket(3), "cột kết quả của máy két không lặp lại ở đâu cả, đó là điều kiện một–một"
 assert vuong_duong == vuong_am, "hai đầu vào khác nhau mà máy vuông nhả ra CÙNG một số — đó đúng là chỗ máy ngược gãy"
 assert vuong_duong == 9, "3 nhân 3 bằng 9"
@@ -354,8 +354,14 @@ Một câu hỏi trước khi đi tiếp.
 Tủ của Byte giờ khá đầy: máy thẳng, máy cong, máy nhân đôi, và với những máy
 một–một thì có thêm cả máy ngược đi kèm.
 
-Nhưng chiều nay Byte cần một con số mà **chưa máy nào trong tủ nhả ra được**:
-tiền **lãi**.
+(Tiện thể trả nốt câu hỏi bài 31 để lại — *cần 1000 phần men thì ủ từ mấy giờ?*
+Máy nhân đôi là máy một–một: mỗi giờ một con số, không giờ nào trùng giờ nào,
+nên nó CÓ máy ngược. Chỉ là máy ngược ấy nhả ra một con số nằm **giữa** 9 và 10
+giờ, mà bảng giờ tròn thì không có dòng để dò — đúng chỗ bài 31 dừng lại.)
+
+Nhưng chiều nay Byte cần tiền **lãi** tính từ **số ổ** — và đúng cái máy ấy thì
+chưa có. Máy `lai` của bài 29 có thật, nhưng nó nhận **mức tăng giá**, không
+nhận số ổ; bỏ số ổ vào đó là bỏ nhầm cửa.
 
 Tính nó thì phải làm hai việc, theo đúng thứ tự này:
 

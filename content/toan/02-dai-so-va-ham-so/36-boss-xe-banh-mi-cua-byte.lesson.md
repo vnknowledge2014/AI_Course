@@ -360,7 +360,7 @@ Gọi `x` là số nghìn tăng thêm so với giá đang bán. Giá thành `15 
 số ổ còn `40 − 2x`. Tiền thu là tích của hai thứ ấy:
 
 ```text
-   thu(x) = (15 + x) × (40 − 2x)     (đơn vị: nghìn đồng)
+   L(x) = (15 + x) × (40 − 2x)     (đơn vị: nghìn đồng)
 ```
 
 Đây là chỗ hai cụm cùng chứa `x` nhân với nhau — và mở ngoặc ra thì có `x × x`.
@@ -387,6 +387,12 @@ tấm gương dựng ở chính giữa 2 và 3, và **cái đỉnh nằm trên t
 
 Chú ý `x = −1` vẫn có nghĩa: hạ giá 1 nghìn, bán 14 nghìn một ổ, được 42 ổ. Ô
 trống này nhận cả số âm — nó không phải một cái sân, nó là một mức tăng giá.
+
+Và đây là câu trả lời cho câu hỏi thứ ba. Nếu chỉ tăng theo **nghìn tròn** thì
+tăng 2 hay tăng 3 đều cho 612 nghìn — bằng nhau, chọn cái nào cũng được. Còn
+đỉnh thật thì nằm đúng trên tấm gương, ở `x = 2,5`: bán 17 500 một ổ, được 35 ổ,
+thu 17,5 × 35 = 612,5 nghìn. Nhỉnh hơn một chút, và nó nằm giữa hai ô của bảng
+chứ không nằm trên ô nào — đúng lý do cái gương đáng để đi tìm.
 
 Việc còn lại chỉ là chốt cái đối xứng ấy bằng một dòng: hai mức tăng khác nhau,
 xem thu về có chênh nhau đồng nào không.
