@@ -189,7 +189,14 @@ pass
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: Chan một tô nước dùng
+  # Đếm ĐỦ SÁU dòng, không chỉ "có xuất hiện".
+  #
+  # Luật cũ là `contains`, nên `range(7)` — thậm chí `range(600)` — cũng qua.
+  # Chú thích ngay trong khối test lại viết "hiện ra đủ sáu lượt", tức là bài
+  # tự nhận một điều mà cách chấm của nó không hề kiểm. Mà đếm đủ số lượt CHÍNH
+  # LÀ thứ bài này dạy.
+  match: regex
+  expect: ^(?:Chan một tô nước dùng\n){5}Chan một tô nước dùng\s*$
 :::
 ::::
 

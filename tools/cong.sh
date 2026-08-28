@@ -55,6 +55,7 @@ if [[ $NHANH -eq 1 ]]; then
   bo_qua "Cổng đối chiếu rustc"
 else
   chay "Lời giải chạy thật"   node --max-old-space-size=4096 tools/kiem_ma_bai_hoc.mjs
+  chay "Chấm trượt được đáp án sai" node --max-old-space-size=4096 tools/kiem_dot_bien.mjs
   chay "Test Rust"            cargo test --workspace -q
   chay "Đối chiếu rustc"      bash -c 'cd crates/byte-rust-conformance && cargo run --release -q -- --am'
 fi

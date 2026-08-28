@@ -1,4 +1,4 @@
-# Nợ chấm điểm — 21 lỗ cổng đột biến tìm ra
+# Nợ chấm điểm — ĐÃ PHÂN LOẠI XONG (cổng đã nối vào cong.sh)
 
 `tools/kiem_dot_bien.mjs` lấy chính lời giải, sửa một Ý trong phần người học
 phải điền (mọi nút cùng loại một lượt), rồi hỏi cách chấm có bắt được không.
@@ -49,3 +49,44 @@ chặt.
 | `toan.cam-nhan-so.phan-so-la-may-lan-don-vi-moi` | `hoi-may-hai-cau` | đổi MỌI hằng số 5 thành 6 (1 chỗ) |
 | `toan.dai-so-va-ham-so.dau-bang-la-mot-cau-hoi` | `may-phan-ba-loi-khang-dinh` | đổi MỌI hằng số 21 thành 22 (1 chỗ) |
 | `toan.dai-so-va-ham-so.khi-dau-phai-quay-nguoc` | `hai-luat-tranh-nhau` | đổi MỌI hằng số 20000 thành 20001 (3 chỗ) |
+
+
+---
+
+# Kết quả phân loại
+
+Đã soi từng cái trong 21, và kết luận không giống lúc mới nhìn.
+
+**Chỉ MỘT là lỗ chấm điểm thật, và đã sửa:** `lam-lai-nhieu-lan · chan-nuoc-dung`.
+Bài dạy `range(6)`, chú thích trong khối test viết "hiện ra **đủ sáu lượt**",
+nhưng luật chấm là `contains` — nên `range(7)`, thậm chí `range(600)`, cũng
+xanh. Bài tự nhận một điều cách chấm của nó không kiểm, mà đếm đủ số lượt
+chính là thứ bài dạy. Đã đổi sang `match: regex` đếm đủ sáu dòng.
+
+**20 cái còn lại không phải lỗi của bài nào cả.** Chúng lộ ra một tính chất
+CẤU TRÚC của Realm 0 và Realm 1: bài chấm mã viết thẳng trên ĐÚNG MỘT bộ dữ
+liệu cố định, nên bất kỳ ngưỡng nào bộ dữ liệu ấy không bắc qua đều không kiểm
+được. Muốn kiểm thì hoặc đổi dữ liệu — kéo theo mọi bài dùng chung sổ, đúng
+thứ cổng sổ sự thật dựng ra để chặn — hoặc gói việc vào một hàm rồi gọi nhiều
+lần, mà hàm là khái niệm của T1.3, tới sau.
+
+Thêm nữa, phần lớn những ngưỡng ấy KHÔNG phải khái niệm bài dạy. `neu-thi` dạy
+`if`; thêm một ca đúng 65 tuổi để phân biệt `>` với `>=` là lén đưa vào khái
+niệm thứ hai, phạm luật "mỗi bài đúng một khái niệm mới". Chỗ khác nhau giữa
+hai dấu ấy có bài riêng — `dung-hay-sai` — và bài ấy CÓ chấm đúng cái mốc, bằng
+một tình huống dựng lên chỉ để làm việc đó.
+
+Cả 20 đã khai vào `content/curriculum/dot-bien-bo-qua.yaml`, **từng cái một,
+kèm lý do riêng**. Khai bừa để cổng xanh là tự tay dựng lại đúng thứ cả dự án
+đi bắt.
+
+**Hai chỗ đáng làm sau, cổng chỉ ra được mà người đọc thì không:**
+
+- `chuoi-dai-bao-nhieu` — thêm một cái tên dài ĐÚNG bằng bề rộng cột thì bài
+  mạnh hơn hẳn, vì `<=` mới có chỗ chứng tỏ mình khác `<`.
+- `phan-so-khong-bi-nhot-duoi-mot` — `4/4` rơi ĐÚNG vào mốc 1. Thêm nó làm ca
+  thứ ba thì bài dạy được cả chỗ hoà; bây giờ nó chưa chạm tới.
+
+**Từ T1.3 trở đi không còn cái cớ "bài chưa có hàm".** Bài mới phải chấm được
+chỗ hoà nếu chỗ hoà là thứ nó dạy — lời nhắc cho người viết đã có trong script
+workflow T1.5.

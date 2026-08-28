@@ -1,0 +1,119 @@
+# Đột biến được tha, kèm lý do
+#
+# `tools/kiem_dot_bien.mjs` sửa một Ý trong phần người học phải điền rồi hỏi
+# cách chấm có bắt được không. Bắt không được thì hoặc cách chấm hổng, hoặc
+# đột biến ấy vô hại. Tệp này khai loại thứ hai — TỪNG CÁI MỘT, kèm lý do.
+#
+# Khai bừa vào đây để cổng xanh là tự tay dựng lại đúng thứ cả dự án đi bắt:
+# một con số xanh không đo thứ nó nói là nó đo. Mỗi dòng dưới đây phải trả lời
+# được câu "vì sao đáp án ấy KHÔNG phải là đáp án sai".
+#
+# Một điều rút ra từ vòng phân loại đầu tiên, đáng ghi lại: phần lớn ngưỡng ở
+# Realm 0 và Realm 1 không kiểm được chỗ hoà, vì bài chấm mã viết thẳng trên
+# ĐÚNG MỘT bộ dữ liệu cố định. Muốn kiểm chỗ hoà thì hoặc đổi dữ liệu (kéo
+# theo mọi bài dùng chung sổ ấy), hoặc gói việc vào một hàm rồi gọi nhiều lần
+# — mà hàm là khái niệm của T1.3, tới sau. Từ T1.3 trở đi thì không còn cớ ấy.
+
+# DỮ LIỆU KHÔNG CHẠM MỐC, và khái niệm của bài là `len()`, không phải chỗ hoà của phép so. Đáng ghi vào nợ: nếu sau này thêm một cái tên dài ĐÚNG bằng bề rộng cột thì bài mạnh hơn hẳn.
+- 'nen-tang.gia-tri-bien-kieu.chuoi-dai-bao-nhieu · do-ten-vao-cot · đổi MỌI dấu <= thành < (2 chỗ)'
+
+# DỮ LIỆU KHÔNG CHẠM MỐC. `so_km <= 0` là chốt chặn dữ liệu vô lý; không đơn nào đúng 1 km. Khái niệm của bài là cổng chặn sớm, không phải chỗ hoà.
+- 'nen-tang.ham-vien-gach.chan-ngay-o-cua · cong-cho-don-giao-hang · đổi MỌI hằng số 0 thành 1 (1 chỗ)'
+
+# BÀI BOSS, KHÔNG KHÁI NIỆM MỚI. Ngưỡng 100 000 chỉ là một tham số của đề; không khoản nào đúng 100 000. Bài chấm sáu chặng khác nhau, mỗi chặng một công cụ của cả track.
+- 'nen-tang.list-dict-set-tuple.boss-so-chi-tieu-thang · ghep-ca-cuon-so-thang · đổi MỌI hằng số 100000 thành 100001 (1 chỗ)'
+
+# DỮ LIỆU KHÔNG CÓ CẶP BẰNG NHAU. `<` và `<=` trên tuple chỉ khác nhau khi hai tuple bằng hệt nhau; ba cặp của bài đều khác nhau. Bài dạy thứ tự so sánh ô-đầu-trước, không dạy chỗ hoà.
+- 'nen-tang.list-dict-set-tuple.may-nhin-o-dau-truoc · hoi-thang-may-cap-nao-truoc · đổi MỌI dấu < thành <= (2 chỗ)'
+
+# NGƯỠNG KHÔNG PHẢI KHÁI NIỆM CỦA BÀI — bài dạy thứ tự tính `and`/`or`/`not`. Xem lý do ở `neu-thi`.
+- 'nen-tang.re-nhanh-va-lap.ai-duoc-tinh-truoc · mot-dong-bon-bac · đổi MỌI dấu > thành >= (4 chỗ)'
+
+# TƯƠNG ĐƯƠNG THẬT trên con số kỷ lục. Chỉ khác nếu có hai ngày BẰNG NHAU cùng giữ kỷ lục (khi ấy `>=` giữ ngày sau) — sổ này không có ngày trùng tiền.
+- 'nen-tang.re-nhanh-va-lap.boss-so-chi-tieu-cua-byte · giu-lai-ngay-ky-luc · đổi MỌI dấu > thành >= (2 chỗ)'
+
+# TƯƠNG ĐƯƠNG THẬT. `range(30, 120, 20)` và `range(30, 121, 20)` cùng cho 30, 50, 70, 90, 110 — bước 20 không bao giờ đặt chân vào khoảng 120…121.
+- 'nen-tang.re-nhanh-va-lap.buoc-nhay-cua-range · hot-bot-noi-nuoc-dung · đổi MỌI hằng số 120 thành 121 (1 chỗ)'
+
+# SỔ DÙNG CHUNG BỐN BÀI. Sổ `[45000, 120000, 30000, 260000, 85000, 210000]` xuất hiện 17 chỗ trong bốn bài 12–15; đổi một số để chạm mốc 200 000 sẽ làm trôi tổng của bài 12 và 13 — đúng cái mà cổng sổ sự thật dựng ra để chặn. Khái niệm của bài là ĐẾM LƯỢT, không phải chỗ hoà của ngưỡng.
+- 'nen-tang.re-nhanh-va-lap.dem-nhung-luot-dang-ke · dem-ngay-vuot-nguong · đổi MỌI dấu > thành >= (1 chỗ)'
+
+# NGƯỠNG KHÔNG PHẢI KHÁI NIỆM CỦA BÀI — bài dạy `if` lồng trong `if`. Xem lý do ở `neu-thi`.
+- 'nen-tang.re-nhanh-va-lap.dieu-kien-trong-dieu-kien · them-mot-tang · đổi MỌI dấu > thành >= (2 chỗ)'
+
+# NGƯỠNG KHÔNG PHẢI KHÁI NIỆM CỦA BÀI — bài dạy gộp `if` lồng thành một dòng `and`. Xem lý do ở `neu-thi`.
+- 'nen-tang.re-nhanh-va-lap.duong-di-toi-mot-dong · viet-lai-cho-phang · đổi MỌI dấu > thành >= (1 chỗ)'
+
+# TƯƠNG ĐƯƠNG THẬT. `>` và `>=` trong một vòng tìm max cho ra ĐÚNG cùng một con số, mọi dữ liệu. Không cách chấm nào phân biệt nổi, vì không có gì để phân biệt.
+- 'nen-tang.re-nhanh-va-lap.giu-lai-ky-luc · tim-ngay-cao-nhat · đổi MỌI dấu > thành >= (1 chỗ)'
+
+# SỔ DÙNG CHUNG — xem lý do ở `dem-nhung-luot-dang-ke`. Khái niệm của bài là thứ tự nhánh `elif`: nhánh sau không bao giờ tới lượt nếu nhánh trước đã trùm.
+- 'nen-tang.re-nhanh-va-lap.nhanh-khong-bao-gio-toi · xep-lai-hang-ro · đổi MỌI dấu > thành >= (4 chỗ)'
+
+# NGƯỠNG KHÔNG PHẢI KHÁI NIỆM CỦA BÀI — bài dạy `or`. Xem lý do ở `neu-thi`.
+- 'onboarding.ra-lenh-cho-byte.chi-can-mot-ve-dung · tam-bien-khuyen-mai · đổi MỌI dấu > thành >= (1 chỗ)'
+
+# NGƯỠNG KHÔNG PHẢI KHÁI NIỆM CỦA BÀI — bài dạy `and`. Xem lý do ở `neu-thi`.
+- 'onboarding.ra-lenh-cho-byte.hai-dieu-kien-cung-dung · dan-to-giay-len-tuong · đổi MỌI dấu < thành <= (1 chỗ)'
+
+# NGƯỠNG KHÔNG PHẢI KHÁI NIỆM CỦA BÀI. Bài dạy `if` — đúng một khái niệm. Thêm một ca đúng 65 tuổi để phân biệt `>` với `>=` là lén đưa vào khái niệm thứ hai, phạm luật "mỗi bài đúng một khái niệm mới". Chỗ khác nhau giữa hai dấu ấy do bài `dung-hay-sai` dạy, và bài ấy CÓ chấm đúng cái mốc.
+- 'onboarding.ra-lenh-cho-byte.neu-thi · dat-mien-phi · đổi MỌI dấu > thành >= (2 chỗ)'
+
+# HẰNG SỐ MINH HOẠ. Bài chứng minh phép trừ không giao hoán; `12 − 5 == 5 − 12` và `13 − 5 == 5 − 13` đều `False`, và mọi cặp số khác nhau đều minh hoạ đúng cái luật ấy. Con số cụ thể không phải thứ bài dạy.
+- 'toan.cam-nhan-so.mang-chu-nhat-xoay-mot-goc · trong-tai-hai-cau · đổi MỌI hằng số 12 thành 13 (2 chỗ)'
+
+# HẰNG SỐ MINH HOẠ. Bài dạy "phân số vượt được số 1"; `7/4 > 1` hay `8/4 > 1` đều `True` và đều minh hoạ đúng điều đó.
+- 'toan.cam-nhan-so.phan-so-khong-bi-nhot-duoi-mot · do-hai-luong · đổi MỌI hằng số 7 thành 8 (1 chỗ)'
+
+# HẰNG SỐ MINH HOẠ. `3/4 == 3/5` và `3/4 == 3/6` đều `False`; bài dạy "mẫu khác thì không bằng nhau", đúng với mọi mẫu khác.
+- 'toan.cam-nhan-so.phan-so-la-may-lan-don-vi-moi · hoi-may-hai-cau · đổi MỌI hằng số 5 thành 6 (1 chỗ)'
+
+# HẰNG SỐ MINH HOẠ. Bài dạy dấu `=` là một CÂU HỎI; lời khẳng định sai vẫn sai dù hỏi 21 ổ hay 22 ổ.
+- 'toan.dai-so-va-ham-so.dau-bang-la-mot-cau-hoi · may-phan-ba-loi-khang-dinh · đổi MỌI hằng số 21 thành 22 (1 chỗ)'
+
+# HẰNG SỐ NGƯỠNG KHÔNG BỊ GHIM. Bài CÓ chấm đúng cái mốc n = 10 (lãi đúng 20 000, `con_hon_10` phải `False`), nên nó phân biệt được `>` với `>=` — thứ đột biến này chạm tới chỉ là con số 20 000 trong ngưỡng, mà dữ liệu không có mức lãi nào rơi vào 20 001.
+- 'toan.dai-so-va-ham-so.khi-dau-phai-quay-nguoc · hai-luat-tranh-nhau · đổi MỌI hằng số 20000 thành 20001 (3 chỗ)'
+
+
+# ── Vòng hai: đột biến HẰNG SỐ NGƯỠNG ──────────────────────────────────
+# Tha xong lớp đột biến so sánh thì cổng lộ ra lớp thứ hai ở cùng những bài
+# ấy: đổi chính con số ngưỡng đi 1. Cùng một lẽ — bộ dữ liệu cố định của
+# bài không có giá trị nào rơi vào khe vừa mở ra, và con số ngưỡng là tham
+# số của ĐỀ chứ không phải khái niệm bài dạy.
+
+# Ngưỡng 200 000 là tham số của đề; bài dạy thứ tự tính `and`/`or`/`not`. Sổ dùng chung bốn bài.
+- 'nen-tang.re-nhanh-va-lap.ai-duoc-tinh-truoc · mot-dong-bon-bac · đổi MỌI hằng số 200000 thành 200001 (4 chỗ)'
+
+# Ngưỡng 200 000 là tham số của đề; bài dạy ĐẾM LƯỢT. Sổ `[45000…210000]` nằm ở 17 chỗ trong bốn bài 12–15, nên đổi số là làm trôi tổng của bài 12 và 13 — đúng thứ cổng sổ sự thật dựng ra để chặn.
+- 'nen-tang.re-nhanh-va-lap.dem-nhung-luot-dang-ke · dem-ngay-vuot-nguong · đổi MỌI hằng số 200000 thành 200001 (1 chỗ)'
+
+# Ngưỡng 500 000 là tham số của đề; bài dạy `if` lồng trong `if`.
+- 'nen-tang.re-nhanh-va-lap.dieu-kien-trong-dieu-kien · them-mot-tang · đổi MỌI hằng số 500000 thành 500001 (2 chỗ)'
+
+# Mốc 65 là tham số của đề; bài dạy gộp `if` lồng thành một dòng `and`.
+- 'nen-tang.re-nhanh-va-lap.duong-di-toi-mot-dong · viet-lai-cho-phang · đổi MỌI hằng số 65 thành 66 (1 chỗ)'
+
+# Ngưỡng 200 000 / 100 000 là tham số của đề; bài dạy thứ tự nhánh `elif`. Sổ dùng chung bốn bài.
+- 'nen-tang.re-nhanh-va-lap.nhanh-khong-bao-gio-toi · xep-lai-hang-ro · đổi MỌI hằng số 200000 thành 200001 (2 chỗ)'
+
+# Ngưỡng 200 000 / 100 000 là tham số của đề; bài dạy thứ tự nhánh `elif`. Sổ dùng chung bốn bài.
+- 'nen-tang.re-nhanh-va-lap.nhanh-khong-bao-gio-toi · xep-lai-hang-ro · đổi MỌI hằng số 100000 thành 100001 (2 chỗ)'
+
+# Mốc 65 là tham số của đề; bài dạy `or`.
+- 'onboarding.ra-lenh-cho-byte.chi-can-mot-ve-dung · tam-bien-khuyen-mai · đổi MỌI hằng số 65 thành 66 (1 chỗ)'
+
+# Mốc 8 giờ là tham số của đề; bài dạy `and`.
+- 'onboarding.ra-lenh-cho-byte.hai-dieu-kien-cung-dung · dan-to-giay-len-tuong · đổi MỌI hằng số 8 thành 9 (1 chỗ)'
+
+# Mốc 65 là tham số của ĐỀ, không phải khái niệm; bài dạy `if`. Khách trong bài 70 và 40 tuổi.
+- 'onboarding.ra-lenh-cho-byte.neu-thi · dat-mien-phi · đổi MỌI hằng số 65 thành 66 (2 chỗ)'
+
+# TƯƠNG ĐƯƠNG THẬT, đã tính tay: `12 − 5 == 5 − 12` và `12 − 6 == 6 − 12` đều `False`. Bài chứng minh phép trừ KHÔNG giao hoán, và điều ấy đúng với mọi cặp số khác nhau — con số cụ thể không phải thứ bài dạy.
+- 'toan.cam-nhan-so.mang-chu-nhat-xoay-mot-goc · trong-tai-hai-cau · đổi MỌI hằng số 5 thành 6 (2 chỗ)'
+
+# TƯƠNG ĐƯƠNG THẬT, đã tính tay: `7/4 > 1` và `7/5 > 1` đều `True`; `3/4 > 1` và `3/5 > 1` đều `False`; `4/4 > 1` cũng `False`. Bài dạy "phân số vượt được số 1", đúng với mọi mẫu ấy. ĐÁNG LÀM SAU: `4/4` rơi ĐÚNG vào mốc 1 — thêm nó làm ca thứ ba thì bài dạy được cả chỗ hoà, mà bây giờ nó chưa chạm tới.
+- 'toan.cam-nhan-so.phan-so-khong-bi-nhot-duoi-mot · do-hai-luong · đổi MỌI hằng số 4 thành 5 (2 chỗ)'
+
+# TƯƠNG ĐƯƠNG THẬT, đã tính tay: `7/4 > 1` và `7/5 > 1` đều `True`; `3/4 > 1` và `3/5 > 1` đều `False`; `4/4 > 1` cũng `False`. Bài dạy "phân số vượt được số 1", đúng với mọi mẫu ấy. ĐÁNG LÀM SAU: `4/4` rơi ĐÚNG vào mốc 1 — thêm nó làm ca thứ ba thì bài dạy được cả chỗ hoà, mà bây giờ nó chưa chạm tới.
+- 'toan.cam-nhan-so.phan-so-khong-bi-nhot-duoi-mot · do-hai-luong · đổi MỌI hằng số 3 thành 4 (1 chỗ)'
+

@@ -269,8 +269,13 @@ for (const f of tep) {
       if (qua) {
         const khoa = `${bai.id} · ${b.id} · ${mo_ta}`;
         if (mien_tru.has(khoa)) continue;
+        // Báo HẾT lỗ của một bước, không dừng ở cái đầu.
+        //
+        // Bản cũ `break` sau lỗ đầu tiên. Nghe thì gọn, nhưng nó biến vòng khai
+        // miễn trừ thành trò đập chuột: tha cái thứ nhất thì cái thứ hai mới ló
+        // ra, phải chạy lại cả cổng cho mỗi cái. Tệ hơn, một bước hổng ba chỗ
+        // trông y hệt một bước hổng một chỗ.
         ho.push({ khoa, bai: bai.id, buoc: b.id, mo_ta });
-        break; // một lỗ mỗi bước là đủ để phải sửa; đừng dội chín bản sao.
       }
     }
   }
