@@ -182,11 +182,29 @@ if la_hoc_sinh ___ tuoi_khach > 65:
     print("Giảm 5000 đồng")
 else:
     print("Giá thường")
+
+# Khách thứ hai: không phải học sinh, mà cũng chưa tới 65.
+la_hoc_sinh = False
+tuoi_khach = 40
+
+if la_hoc_sinh ___ tuoi_khach > 65:
+    print("Giảm 5000 đồng")
+else:
+    print("Giá thường")
 ```
 
 ```python title=solution
 la_hoc_sinh = False
 tuoi_khach = 70
+
+if la_hoc_sinh or tuoi_khach > 65:
+    print("Giảm 5000 đồng")
+else:
+    print("Giá thường")
+
+# Khách thứ hai: không phải học sinh, mà cũng chưa tới 65.
+la_hoc_sinh = False
+tuoi_khach = 40
 
 if la_hoc_sinh or tuoi_khach > 65:
     print("Giảm 5000 đồng")
@@ -212,7 +230,13 @@ pass
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: Giảm 5000 đồng
+  # Chấm bằng CẢ HAI khách, theo đúng thứ tự dòng.
+  #
+  # Một khách thì `or` chưa bao giờ phải nói "không": vế sau đúng nên màn hình
+  # luôn ra "Giảm", mà viết nhầm tên biến cũng ra thế. Khách thứ hai hỏng cả hai
+  # vế — chỗ duy nhất thấy được `or` cũng biết trả lời không.
+  match: regex
+  expect: ^Giảm 5000 đồng\nGiá thường\s*$
 :::
 ::::
 

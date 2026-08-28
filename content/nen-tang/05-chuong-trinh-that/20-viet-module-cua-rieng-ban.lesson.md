@@ -91,6 +91,12 @@ Hai chi tiết trong dòng ấy:
 - **Không có đường dẫn.** Máy đi tìm `so_sach.py` bắt đầu từ thư mục chứa
   chương trình đang chạy, nên hai file nằm cạnh nhau là đủ.
 
+Chỗ tìm ấy khác chỗ tìm của `open`, và hai câu không đá nhau vì chúng nói về
+hai việc khác nhau: `open("so.txt")` tính từ thư mục bạn đang đứng lúc gõ lệnh
+— đúng như bài 14 đã chỉ ra — còn `import so_sach` bắt đầu từ thư mục chứa file
+`.py` đang chạy. Nhờ vế sau, để `so_sach.py` nằm cạnh `bao_cao.py` là đủ, dù
+bạn đứng ở đâu lúc gõ lệnh.
+
 Mượn xong thì gọi y như gọi công cụ của `os`: tên hộp, dấu chấm, tên thứ bên
 trong hộp.
 
@@ -397,10 +403,11 @@ biết.
 Một câu hỏi trước khi đi tiếp.
 
 Bản báo cáo vừa rồi ngắn, nên tiền tố `so_sach.` mới hiện ra hai lần. `so.py`
-thì khác hẳn: ba lệnh con, mỗi lệnh mở sổ rồi cộng tiền rồi ghi lại, và cái
-tiền tố ấy lặp lại hai chục lần trên cùng một trang màn hình.
+thì khác: ba lệnh con, mỗi lệnh mở sổ rồi cộng tiền rồi ghi lại, nên cái tiền
+tố ấy rải kín cả file — và mỗi lệnh con bạn thêm vào sau này lại kéo theo một
+nắm nữa.
 
-Nhìn kỹ hơn nữa thì cả file dùng đúng **hai** cái tên trong hộp — `doc_so` và
+Nhìn kỹ hơn thì cả file dùng đúng **hai** cái tên trong hộp — `doc_so` và
 `tong_tien` — mà lần nào cũng phải đi vòng qua tên hộp mới với tới được.
 
 Lấy riêng hai cái tên ấy ra được không? Mượn về thẳng chúng, rồi gọi trần như

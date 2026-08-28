@@ -12,8 +12,8 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 13
 teaches: [core.import-runs-file]
-requires: [core.import-from, core.own-module, core.import-module, mod.import, mod.dotted-access, core.with-open, core.file-write, core.newline-char, core.list, core.len, core.function-def, core.function-call, core.function-return, core.variable, core.assignment, core.string-literal, core.fstring, core.output, core.print-variable]
-concepts: [core.hop-do-nghe, core.le-trai, core.dan-ten]
+requires: [core.import-from, core.own-module, core.import-module, mod.import, mod.dotted-access, core.with-open, core.file-write, core.file-readlines, io.readlines, core.newline-char, core.strip-newline, core.string-split, core.int-cast, core.tuple, core.list, core.list-append, core.len, core.function-def, core.function-call, core.function-return, core.function-parameter, core.docstring, core.variable, core.assignment, core.string-literal, core.fstring, core.output, core.print-variable]
+concepts: [core.mo-dun, core.le-trai, core.dan-ten]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
   web-firefox: [static, run, tests, output]
@@ -32,9 +32,9 @@ Bạn thêm đúng một dòng vào sổ sách. Máy đọc luôn cả cuốn.
 ::::
 
 ::::explain{#cau-do-hien-len-truoc-khi-goi-ham}
-Bài trước bạn lấy riêng một cái tên ra khỏi `so_sach.py`, rồi gõ thêm một dòng
-`print("đang mở sổ...")` ở lề trái file ấy để thử xem nó có được đọc tới
-không. Chạy `main.py` — chưa gọi hàm nào cả — mà câu đó đã hiện lên màn hình.
+Bài trước bạn lấy riêng hai cái tên ra khỏi `so_sach.py`, rồi gõ thêm một dòng
+`print("đang mở sổ...")` ở lề trái file ấy để thử xem nó có được đọc tới không.
+Chạy `bao_cao.py` — chưa gọi hàm nào cả — mà câu đó đã hiện lên màn hình.
 
 Đó không phải trục trặc. Đó là `import` đang làm đúng việc của nó, và việc ấy
 lớn hơn cái tên "mượn một cái tên" nghe có vẻ gợi ra.
@@ -48,73 +48,84 @@ Khi Python gặp dòng `import so_sach`, nó làm ba chuyện, theo thứ tự:
    hộp đó vào chương trình của bạn dưới cái tên `so_sach`.
 
 Bước 2 là bước bị bỏ quên. Cái tên `doc_so` mà bạn muốn mượn không có sẵn ở đâu
-cả — nó chỉ tồn tại **sau khi** dòng `def doc_so():` được chạy qua. Muốn có cái
-tên, phải chạy cái file. Không có đường tắt nào khác.
+cả — nó chỉ tồn tại **sau khi** dòng `def doc_so(ten_file):` được chạy qua. Muốn
+có cái tên, phải chạy cái file. Không có đường tắt nào khác.
 
 Vậy còn dòng `def` thì sao — nó cũng chạy à? Có, và đây là chỗ đáng phân biệt
 cho rõ:
 
 - Một dòng ở lề trái **chạy thật**, ngay lúc đó. `print(...)` thì in ra màn
-  hình. `SO_KHOAN = len(CAC_DONG)` thì đếm và cất kết quả.
-- Dòng `def doc_so():` cũng là một dòng ở lề trái, nên nó cũng chạy thật. Chỉ
-  có điều việc nó làm là **dán cái tên `doc_so` lên thân hàm** rồi thôi. Thân
-  hàm nằm thụt vào trong, và phần thụt vào ấy chỉ chạy khi có người gọi —
-  đúng như bài đầu của T1.3 đã nói.
+  hình. `NGUONG_LON = 100000` thì cất con số vào một cái tên.
+- Dòng `def doc_so(ten_file):` cũng là một dòng ở lề trái, nên nó cũng chạy
+  thật. Chỉ có điều việc nó làm là **dán cái tên `doc_so` lên thân hàm** rồi
+  thôi. Thân hàm nằm thụt vào trong, và phần thụt vào ấy chỉ chạy khi có người
+  gọi — đúng như T1.3 đã nói ngay từ bài đầu.
 
-Nên nhìn từ ngoài vào, `import` cho cảm giác lặng lẽ khi file được mượn chỉ
-toàn `def`: mỗi dòng `def` chạy qua, dán một cái tên, không kêu tiếng nào. Thêm
-một dòng `print` ở lề trái là bạn vừa cho cái file ấy một cái miệng.
+Nên nhìn từ ngoài vào, `import` cho cảm giác lặng lẽ khi file được mượn chỉ toàn
+`def`: mỗi dòng `def` chạy qua, dán một cái tên, không kêu tiếng nào. Thêm một
+dòng `print` ở lề trái là bạn vừa cho file ấy một cái miệng.
 
 Còn một chuyện nữa, và nó là nửa sau của luật: **đúng một lần**. Lần đầu gặp
-`import so_sach`, Python chạy file rồi cất cái hộp lại. Những lần gặp sau — dù
-ở file khác, dù cách đó hai chục dòng — nó thấy hộp đã có sẵn nên đưa lại hộp
-cũ, không đọc lại file lần nào nữa.
+`import so_sach`, Python chạy file rồi cất cái hộp lại. Những lần gặp sau — dù ở
+file khác, dù cách đó hai chục dòng — nó thấy hộp đã có sẵn nên đưa lại hộp cũ,
+không đọc lại file lần nào nữa.
 ::::
 
 ::::example{#hai-file-mot-lan-doc}
-Hai file nằm cạnh nhau trong một thư mục.
+Vẫn `so_sach.py` của bài trước, chỉ khác hai dòng ở lề trái mà Byte vừa thêm
+vào: dòng `print` bạn gõ để thử, và một hằng số `NGUONG_LON` — mức tiền mà cả
+cuốn sổ coi là khoản lớn, đúng cái mốc 100 nghìn quen thuộc từ T1.4.
 
 ```python title=readonly
 # ── so_sach.py ──────────────────────────────────────────────────────
 print("so_sach.py: đang mở sổ...")
 
-CAC_DONG = ["cà phê,25000", "bún bò,40000", "gửi xe,10000"]
-SO_KHOAN = len(CAC_DONG)
+NGUONG_LON = 100000
 
 
-def doc_so():
-    print("so_sach.py: doc_so vừa được gọi")
-    return CAC_DONG
+def doc_so(ten_file):
+    """Đọc file sổ, đưa ra danh sách các khoản dạng (tên, tiền)."""
+    khoan = []
+    with open(ten_file, "r") as f:
+        for dong in f.readlines():
+            manh = dong.strip().split(",")
+            khoan.append((manh[0], int(manh[1])))
+    return khoan
+
+
+def tong_tien(khoan):
+    """Cộng tiền của mọi khoản trong một danh sách khoản."""
+    return sum([tien for ten, tien in khoan])
 ```
 
 ```python title=readonly
-# ── main.py ─────────────────────────────────────────────────────────
+# ── bao_cao.py ──────────────────────────────────────────────────────
 import so_sach
 
-print("main.py: bắt đầu")
-print("main.py: sổ có", so_sach.SO_KHOAN, "khoản")
+print("bao_cao.py: bắt đầu")
+print("bao_cao.py: mức khoản lớn là", so_sach.NGUONG_LON, "đồng")
 ```
 
-Gõ `python main.py`, máy in ra:
+Gõ `python bao_cao.py`, máy in ra:
 
 ```text title=readonly
 so_sach.py: đang mở sổ...
-main.py: bắt đầu
-main.py: sổ có 3 khoản
+bao_cao.py: bắt đầu
+bao_cao.py: mức khoản lớn là 100000 đồng
 ```
 
 Ba chỗ đáng dừng lại nhìn:
 
-- **Dòng của `so_sach.py` đứng TRƯỚC dòng đầu tiên của `main.py`.** Câu
-  `print("main.py: bắt đầu")` là câu lệnh thứ hai của `main.py`, nhưng nó vẫn
-  hiện sau. Vì câu lệnh thứ nhất — `import so_sach` — chưa xong việc: nó còn
-  đang chạy cả một file khác.
-- **`SO_KHOAN` đã bằng 3 mà không ai gọi gì.** Không có lời gọi hàm nào trong
-  `main.py` cả. Con số ấy được tính lúc dòng `SO_KHOAN = len(CAC_DONG)` chạy
-  qua, tức là lúc import.
-- **Câu "doc_so vừa được gọi" không hiện.** Cái tên `doc_so` đã có mặt trong
-  hộp rồi, nhưng thân hàm thì chưa chạy lần nào. Dán tên là một chuyện, gọi là
-  chuyện khác.
+- **Dòng của `so_sach.py` đứng TRƯỚC dòng đầu tiên của `bao_cao.py`.** Câu
+  `print("bao_cao.py: bắt đầu")` là câu lệnh thứ hai của `bao_cao.py`, nhưng nó
+  vẫn hiện sau. Vì câu lệnh thứ nhất — `import so_sach` — chưa xong việc: nó
+  còn đang chạy cả một file khác.
+- **`NGUONG_LON` đã có giá trị mà không ai gọi gì.** Trong `bao_cao.py` không có
+  một lời gọi hàm nào của hộp cả. Con số ấy được cất vào cái tên lúc dòng
+  `NGUONG_LON = 100000` chạy qua, tức là lúc import.
+- **Không có chữ nào của `doc_so` hiện ra.** Cái tên `doc_so` đã nằm trong hộp
+  rồi, nhưng thân hàm thì chưa chạy lần nào — không ai mở file, không ai tách
+  dòng. Dán tên là một chuyện, gọi là chuyện khác.
 
 Viết `from so_sach import doc_so` như bài trước cũng vậy thôi: dạng viết ấy chỉ
 đổi chỗ cái tên đi đâu trong chương trình của bạn, còn bước "chạy cả file được
@@ -122,7 +133,7 @@ mượn" thì vẫn xảy ra nguyên vẹn.
 ::::
 
 ::::predict{#doan-hai-lan-import commitOnce}
-Byte sửa `main.py`: viết hẳn hai dòng `import so_sach` cho chắc, vì hai chỗ
+Byte sửa `bao_cao.py`: viết hẳn hai dòng `import so_sach` cho chắc, vì hai chỗ
 trong file đều cần tới sổ.
 
 **Trước khi bấm chạy**, bạn đoán màn hình hiện ra gì?
@@ -131,23 +142,25 @@ trong file đều cần tới sổ.
 # ── so_sach.py ──────────────────────────────────────────────────────
 print("so_sach.py: đang mở sổ...")
 
-CAC_DONG = ["cà phê,25000", "bún bò,40000", "gửi xe,10000"]
+NGUONG_LON = 100000
+
+# (hai hàm doc_so và tong_tien vẫn nằm dưới đây, y như bài trước)
 ```
 
 ```python title=readonly
-# ── main.py ─────────────────────────────────────────────────────────
+# ── bao_cao.py ──────────────────────────────────────────────────────
 import so_sach
 import so_sach
 
-print("main.py: bắt đầu")
+print("bao_cao.py: bắt đầu")
 ```
 
 :::opt{correct}
-`so_sach.py: đang mở sổ...` một lần, rồi `main.py: bắt đầu`
+`so_sach.py: đang mở sổ...` một lần, rồi `bao_cao.py: bắt đầu`
 :::
 
 :::opt
-`so_sach.py: đang mở sổ...` hai lần, rồi `main.py: bắt đầu`
+`so_sach.py: đang mở sổ...` hai lần, rồi `bao_cao.py: bắt đầu`
 ::why
 Gần đúng ở chỗ bạn theo dõi rất sát cái luật vừa học: `import` chạy cả file
 được mượn, mà đây có hai dòng `import`, nên hai lần chạy. Suy luận ấy đi đúng
@@ -161,131 +174,168 @@ hộp ấy và không mở file lần nào nữa. Dòng `print` ở lề trái c
 :::
 
 :::opt
-Chỉ có `main.py: bắt đầu`, vì `import` chưa dùng tới cái tên nào nên chưa chạy gì
+Chỉ có `bao_cao.py: bắt đầu`, vì chưa ai dùng tới cái tên nào trong hộp
 ::why
 Gần đúng ở chỗ bạn đang nghĩ theo một lối rất hợp lý: chưa cần thì chưa làm.
 Có những công cụ trong lập trình đúng là làm việc theo lối ấy.
 
-Chỗ lệch là `import` không thuộc số đó. Cái tên `so_sach.SO_KHOAN` hay
-`so_sach.doc_so` chỉ tồn tại **sau khi** file kia đã chạy xong — trước đó
-không có gì để mà lấy. Nên Python phải chạy trước, chạy ngay tại dòng `import`,
-rồi mới có hộp để đưa cho bạn.
+Chỗ lệch là `import` không thuộc số đó. Cái tên `so_sach.NGUONG_LON` hay
+`so_sach.doc_so` chỉ tồn tại **sau khi** file kia đã chạy xong — trước đó không
+có gì để mà lấy. Nên Python phải chạy trước, chạy ngay tại dòng `import`, rồi
+mới có hộp để đưa cho bạn.
 ::
 :::
 
 :::opt
-`main.py: bắt đầu` trước, rồi `so_sach.py: đang mở sổ...`
+`bao_cao.py: bắt đầu` trước, rồi `so_sach.py: đang mở sổ...`
 ::why
-Gần đúng ở chỗ bạn đọc đúng thứ tự các dòng trong `main.py` theo một nghĩa nào
-đó: dòng `print` của `main.py` là dòng có chữ "bắt đầu", nghe như nó phải hiện
-đầu tiên.
+Gần đúng ở chỗ bạn đọc đúng thứ tự các dòng theo một nghĩa nào đó: dòng `print`
+của `bao_cao.py` là dòng có chữ "bắt đầu", nghe như nó phải hiện đầu tiên.
 
-Chỗ lệch là ở chỗ máy đọc từ trên xuống, không đọc theo nghĩa của chữ. `import`
-nằm ở dòng trên, nên nó chạy trước, và nó chỉ trả quyền lại cho `main.py` sau
+Chỗ lệch là máy đọc từ trên xuống, không đọc theo nghĩa của chữ. Dòng `import`
+nằm phía trên, nên nó chạy trước, và nó chỉ trả quyền lại cho `bao_cao.py` sau
 khi đã chạy hết file `so_sach.py`. Chữ "bắt đầu" là bạn đặt cho mình đọc, máy
 không nhìn tới.
 ::
 :::
 ::::
 
-::::code{#muon-so-sach-nho}
+::::code{#mot-cai-da-co-mot-cai-phai-goi}
 Đến lượt bạn nhìn tận mắt.
 
-Khung tập này chỉ có một ô nhập, mà `import` thì cần hai file nằm cạnh nhau.
-Nên đoạn đầu cho chương trình **tự ghi ra** file thứ hai — tên nó là
-`so_sach_nho.py`, một bản sổ sách rút gọn ba dòng — bằng đúng động tác
-`with open(...)` bạn học ở bài 3. Đoạn ấy không có chỗ trống nào; bạn chỉ cần
-đọc để biết file kia chứa gì.
+Khung tập chỉ có một ô nhập, mà `import` thì cần hai file nằm cạnh nhau. Nên
+đoạn đầu cho chương trình **tự ghi ra** `so_sach.py` và một cuốn sổ ba dòng,
+bằng đúng động tác `with open(...)` bạn đã dùng suốt từ bài 3. Đoạn ấy không có
+chỗ trống nào; bạn chỉ cần đọc để biết file kia chứa gì.
 
 Hai chỗ trống nằm ở hai câu hỏi khác nhau:
 
 - một câu hỏi thứ **đã có sẵn ngay sau `import`**, do một dòng ở lề trái của
   file kia chạy qua;
-- một câu hỏi thứ **chỉ có khi bạn gọi hàm**.
+- một câu hỏi thứ **chỉ có khi bạn gọi hàm** — và hàm này cần biết đọc cuốn sổ
+  nào, nên nó nhận vào một tên file.
 
 ```python title=starter
-# ── Phần Byte làm sẵn: ghi ra file so_sach_nho.py ────────────────────
-with open("so_sach_nho.py", "w") as f:
-    f.write('print("so_sach_nho.py: đang mở sổ...")\n')
-    f.write('\n')
-    f.write('CAC_DONG = ["cà phê,25000", "bún bò,40000", "gửi xe,10000"]\n')
-    f.write('SO_KHOAN = len(CAC_DONG)\n')
-    f.write('\n')
-    f.write('def doc_so():\n')
-    f.write('    print("so_sach_nho.py: doc_so vừa được gọi")\n')
-    f.write('    return CAC_DONG\n')
+import sys
 
-# ── Từ đây là chương trình của bạn ───────────────────────────────────
-import so_sach_nho
+# ── Phần Byte làm sẵn: ghi ra so_sach.py và một cuốn sổ ba dòng ──────
+NGUON_SO_SACH = '''print("so_sach.py: đang mở sổ...")
 
-# Chưa gọi hàm nào. Nhưng dòng `SO_KHOAN = len(CAC_DONG)` nằm ở lề trái
-# của file kia, nên nó đã chạy rồi. Lấy con số ấy ra khỏi hộp.
-so_khoan_ngay_sau_import = ___
+NGUONG_LON = 100000
+
+
+def doc_so(ten_file):
+    """Đọc file sổ, đưa ra danh sách các khoản dạng (tên, tiền)."""
+    khoan = []
+    with open(ten_file, "r") as f:
+        for dong in f.readlines():
+            manh = dong.strip().split(",")
+            khoan.append((manh[0], int(manh[1])))
+    return khoan
+'''
+
+with open("so_sach.py", "w") as f:
+    f.write(NGUON_SO_SACH)
+
+with open("so-thang-8.txt", "w") as f:
+    f.write("cà phê,25000\n")
+    f.write("bún bò,40000\n")
+    f.write("trà sữa,45000\n")
+
+# Dòng này là việc riêng của trang học: nó dọn chỗ để lần mượn ngay dưới
+# đọc đúng file vừa ghi. Trên máy của bạn không cần nó.
+sys.modules.pop("so_sach", None)
+
+# ── Từ đây là bao_cao.py của bạn ─────────────────────────────────────
+import so_sach
+
+# Chưa gọi hàm nào cả. Nhưng dòng `NGUONG_LON = 100000` nằm ở lề trái của
+# file kia, nên nó đã chạy rồi. Lấy con số ấy ra khỏi hộp.
+nguong_ngay_sau_import = ___
 
 # Bây giờ mới tới lượt gọi hàm.
-cac_dong = ___
+khoan = ___
 
-print(f"Ngay sau import, SO_KHOAN đã bằng {so_khoan_ngay_sau_import}")
-print(f"Gọi hàm xong mới cầm được {len(cac_dong)} dòng")
+print(f"Ngay sau import, NGUONG_LON đã bằng {nguong_ngay_sau_import}")
+print(f"Gọi hàm xong mới cầm được {len(khoan)} khoản")
 ```
 
 ```python title=solution
-# ── Phần Byte làm sẵn: ghi ra file so_sach_nho.py ────────────────────
-with open("so_sach_nho.py", "w") as f:
-    f.write('print("so_sach_nho.py: đang mở sổ...")\n')
-    f.write('\n')
-    f.write('CAC_DONG = ["cà phê,25000", "bún bò,40000", "gửi xe,10000"]\n')
-    f.write('SO_KHOAN = len(CAC_DONG)\n')
-    f.write('\n')
-    f.write('def doc_so():\n')
-    f.write('    print("so_sach_nho.py: doc_so vừa được gọi")\n')
-    f.write('    return CAC_DONG\n')
+import sys
 
-# ── Từ đây là chương trình của bạn ───────────────────────────────────
-import so_sach_nho
+# ── Phần Byte làm sẵn: ghi ra so_sach.py và một cuốn sổ ba dòng ──────
+NGUON_SO_SACH = '''print("so_sach.py: đang mở sổ...")
 
-# Chưa gọi hàm nào. Nhưng dòng `SO_KHOAN = len(CAC_DONG)` nằm ở lề trái
-# của file kia, nên nó đã chạy rồi. Lấy con số ấy ra khỏi hộp.
-so_khoan_ngay_sau_import = so_sach_nho.SO_KHOAN
+NGUONG_LON = 100000
+
+
+def doc_so(ten_file):
+    """Đọc file sổ, đưa ra danh sách các khoản dạng (tên, tiền)."""
+    khoan = []
+    with open(ten_file, "r") as f:
+        for dong in f.readlines():
+            manh = dong.strip().split(",")
+            khoan.append((manh[0], int(manh[1])))
+    return khoan
+'''
+
+with open("so_sach.py", "w") as f:
+    f.write(NGUON_SO_SACH)
+
+with open("so-thang-8.txt", "w") as f:
+    f.write("cà phê,25000\n")
+    f.write("bún bò,40000\n")
+    f.write("trà sữa,45000\n")
+
+# Dòng này là việc riêng của trang học: nó dọn chỗ để lần mượn ngay dưới
+# đọc đúng file vừa ghi. Trên máy của bạn không cần nó.
+sys.modules.pop("so_sach", None)
+
+# ── Từ đây là bao_cao.py của bạn ─────────────────────────────────────
+import so_sach
+
+# Chưa gọi hàm nào cả. Nhưng dòng `NGUONG_LON = 100000` nằm ở lề trái của
+# file kia, nên nó đã chạy rồi. Lấy con số ấy ra khỏi hộp.
+nguong_ngay_sau_import = so_sach.NGUONG_LON
 
 # Bây giờ mới tới lượt gọi hàm.
-cac_dong = so_sach_nho.doc_so()
+khoan = so_sach.doc_so("so-thang-8.txt")
 
-print(f"Ngay sau import, SO_KHOAN đã bằng {so_khoan_ngay_sau_import}")
-print(f"Gọi hàm xong mới cầm được {len(cac_dong)} dòng")
+print(f"Ngay sau import, NGUONG_LON đã bằng {nguong_ngay_sau_import}")
+print(f"Gọi hàm xong mới cầm được {len(khoan)} khoản")
 ```
 
 ```python title=test
-# Chỗ trống 1 bị soi bởi câu ngay dưới đây. Chương trình của bạn không
-# dựng danh sách nào và không đếm gì cả, nên con số 3 chỉ có thể tới từ
-# một dòng đã chạy sẵn bên trong file được mượn.
-assert so_khoan_ngay_sau_import == 3, "so_sach_nho.py giữ ba dòng sổ, và dòng SO_KHOAN = len(CAC_DONG) ở lề trái file ấy đã chạy ngay lúc import, nên ngay sau import con số này phải là 3"
-# Chỗ trống 2 bị soi bởi hai chỗ: câu dưới đây đòi đúng ba dòng của cuốn
-# sổ, còn luật output đòi câu "doc_so vừa được gọi" phải hiện ra — mà câu
-# ấy chỉ hiện khi thân hàm thật sự chạy. Lấy thẳng so_sach_nho.CAC_DONG
-# thì qua được câu này nhưng trượt luật kia.
-assert cac_dong == ["cà phê,25000", "bún bò,40000", "gửi xe,10000"], "doc_so đưa lại đúng ba dòng mà so_sach_nho.py đang giữ, theo thứ tự cà phê,25000 rồi bún bò,40000 rồi gửi xe,10000"
+# Chỗ trống 1 bị soi bởi câu ngay dưới đây. Chương trình của bạn không tự
+# cất con số nào vào đâu cả, nên 100000 chỉ có thể tới từ một dòng đã chạy
+# sẵn bên trong file được mượn.
+assert nguong_ngay_sau_import == 100000, "so_sach.py đặt NGUONG_LON bằng 100000 ở lề trái, và dòng ấy đã chạy ngay lúc import, nên ngay sau import con số này phải là 100000"
+# Chỗ trống 2 bị soi bởi câu này: nó đòi đúng ba khoản của cuốn sổ vừa ghi,
+# mỗi khoản là một cặp (tên, tiền) — thứ chỉ có được khi thân hàm doc_so
+# thật sự chạy trên đúng tên file ấy.
+assert khoan == [("cà phê", 25000), ("bún bò", 40000), ("trà sữa", 45000)], "doc_so đọc so-thang-8.txt và đưa ra ba cặp: cà phê 25000, bún bò 40000, trà sữa 45000"
 # Đọc một cái hộp không làm hộp ấy đổi.
-assert so_sach_nho.SO_KHOAN == 3, "sau khi bạn gọi hàm, hộp so_sach_nho vẫn phải giữ nguyên SO_KHOAN bằng 3"
+assert so_sach.NGUONG_LON == 100000, "sau khi bạn gọi hàm, hộp so_sach vẫn phải giữ nguyên NGUONG_LON bằng 100000"
 ```
 
 :::hints
 - kind: attention
-  body: "Sau dòng `import so_sach_nho`, mọi thứ mà file kia sinh ra đều nằm trong một cái hộp mang đúng cái tên ấy. Chỗ trống thứ nhất hỏi một con số đã nằm sẵn trong hộp; chỗ trống thứ hai hỏi một việc phải nhờ hộp làm giúp."
+  body: "Sau dòng `import so_sach`, mọi thứ mà file kia sinh ra đều nằm trong một cái hộp mang đúng cái tên ấy. Chỗ trống thứ nhất hỏi một con số đã nằm sẵn trong hộp; chỗ trống thứ hai hỏi một việc phải nhờ hộp làm giúp, mà việc ấy cần biết làm trên cuốn sổ nào."
 - kind: strategy
-  body: "Cách lấy đồ trong hộp là viết tên hộp, một dấu chấm, rồi tên món đồ — đúng như bài 20. Với chỗ trống thứ hai, món đồ là một cái hàm, mà một cái hàm chỉ chạy khi có cặp ngoặc đi kèm phía sau; thiếu cặp ngoặc thì bạn mới chỉ cầm cái hàm chứ chưa gọi nó."
+  body: "Cách lấy đồ trong hộp là viết tên hộp, một dấu chấm, rồi tên món đồ — đúng như bài 20. Chỗ trống thứ hai lấy ra một cái hàm, mà một cái hàm chỉ chạy khi có cặp ngoặc theo sau; trong cặp ngoặc ấy đặt tên cuốn sổ vừa được ghi ra ở phần trên, viết trong dấu nháy."
 - kind: one-line
-  body: "Chỗ trống thứ nhất viết `so_sach_nho.SO_KHOAN`, chỗ thứ hai viết `so_sach_nho.doc_so()` — khác nhau đúng cặp ngoặc ở cuối."
+  body: "Chỗ trống thứ nhất viết `so_sach.NGUONG_LON`, chỗ thứ hai viết `so_sach.doc_so(\"so-thang-8.txt\")`."
 :::
 
 :::validate
 - tier: static
-  onFail: cả hai chỗ trống đều phải đi qua hộp `so_sach_nho`, và chỗ thứ hai phải GỌI hàm chứ không lấy thẳng danh sách
+  onFail: cả hai chỗ trống đều phải đi qua hộp `so_sach`, và chỗ thứ hai phải GỌI hàm chứ không lấy thẳng một cái tên khác
   requireAst:
-  # `min: 2` vì có hai chỗ trống, và cái tên `so_sach_nho` chưa được ĐỌC lần
-  # nào trong khung — dòng `import` không tính là đọc. Nên luật này chặn cả
-  # con số 3 chép tay lẫn danh sách gõ lại bằng tay.
-  - kind: uses-name, target: so_sach_nho, min: 2
+  # `min: 2` vì có hai chỗ trống, và cái tên `so_sach` chưa được ĐỌC lần nào
+  # trong khung — dòng `import` không tính là đọc, chuỗi trong `sys.modules.pop`
+  # cũng không. Nên luật này chặn cả con số 100000 chép tay lẫn danh sách gõ lại
+  # bằng tay.
+  - kind: uses-name, target: so_sach, min: 2
   # Và chỗ trống thứ hai phải là một lời GỌI, không phải một phép lấy đồ.
   - kind: uses-call, target: doc_so, min: 1
 - tier: run
@@ -293,11 +343,11 @@ assert so_sach_nho.SO_KHOAN == 3, "sau khi bạn gọi hàm, hộp so_sach_nho v
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: "Ngay sau import, SO_KHOAN đã bằng 3"
+  expect: "so_sach.py: đang mở sổ..."
 - tier: output
-  expect: "Gọi hàm xong mới cầm được 3 dòng"
+  expect: "Ngay sau import, NGUONG_LON đã bằng 100000"
 - tier: output
-  expect: "so_sach_nho.py: doc_so vừa được gọi"
+  expect: "Gọi hàm xong mới cầm được 3 khoản"
 :::
 ::::
 
@@ -308,17 +358,16 @@ Mượn một file là chạy cả file đó. Giờ thì câu chào của nó kh
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-Vậy là rõ: mọi dòng ở lề trái của `so_sach.py` đều chạy, mỗi khi có ai đó
-import nó. Câu chào, phép đếm, và cả những dòng bạn viết ra chỉ để thử cho
-nhanh.
+Vậy là rõ: mọi dòng ở lề trái của `so_sach.py` đều chạy, mỗi khi có ai đó import
+nó. Câu chào, hằng số, và cả những dòng bạn viết ra chỉ để thử cho nhanh.
 
-Mà bạn thì vẫn muốn giữ mấy dòng thử ấy. Gõ `python so_sach.py` một cái là
-thấy ngay sổ đang có mấy khoản — tiện hơn nhiều so với việc mở một file khác
-ra chỉ để kiểm tra. Bỏ chúng đi thì mất chỗ thử; để nguyên thì `main.py` phải
-gánh chúng mỗi lần chạy.
+Mà bạn thì vẫn muốn giữ mấy dòng thử ấy. Gõ `python so_sach.py` một cái là thấy
+ngay sổ đang có mấy khoản — tiện hơn nhiều so với việc mở một file khác ra chỉ
+để kiểm tra. Bỏ chúng đi thì mất chỗ thử; để nguyên thì `bao_cao.py` phải gánh
+chúng mỗi lần chạy.
 
-Làm sao để phần thử **chỉ** chạy khi bạn gọi thẳng file ấy, và nằm im khi nó
-bị mượn?
+Làm sao để phần thử **chỉ** chạy khi bạn gọi thẳng file ấy, và nằm im khi nó bị
+mượn?
 
 Bài sau trả lời.
 ::::

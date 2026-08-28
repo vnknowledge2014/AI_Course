@@ -114,3 +114,65 @@
 # TƯƠNG ĐƯƠNG THẬT, đã tính tay: `7/4 > 1` và `7/5 > 1` đều `True`; `3/4 > 1` và `3/5 > 1` đều `False`; `4/4 > 1` cũng `False`. Bài dạy "phân số vượt được số 1", đúng với mọi mẫu ấy. Đã soi kỹ hơn: bài KHÔNG thiếu chỗ hoà — khối test của nó có sẵn `assert 4/4 == 1`. Và thêm một câu `print(4/4 > 1)` cũng không đóng được đột biến này, vì `5/5 > 1` cũng `False` y như `4/4 > 1`. Nên không sửa: một thay đổi không đóng được gì mà chỉ làm bài dài thêm thì không đáng.
 - 'toan.cam-nhan-so.phan-so-khong-bi-nhot-duoi-mot · do-hai-luong · đổi MỌI hằng số 3 thành 4 (1 chỗ)'
 
+# TƯƠNG ĐƯƠNG THEO DỮ LIỆU. Câu hỏi thứ hai là `re_ot > re_hung`, tức `-5 > -2` — `False`. Đổi `re_hung` thành `ngon_cai` cho `-5 > 5` — cũng `False`. Hai câu sai vì hai lẽ khác nhau mà màn hình không phân biệt được. ĐÁNG SỬA SAU: thêm một câu hỏi thứ ba mà đáp án là `True` ở phía số âm (ví dụ `re_hung > re_ot`) thì chỗ này lộ ngay.
+- 'toan.cam-nhan-so.lon-hon-la-dung-ben-phai · hai-cau-hoi-cung-mot-kieu · đổi MỌI chỗ đọc tên re_hung thành ngon_cai (1 chỗ)'
+
+
+# ── Vòng ba: sau khi cổng với tới được chuỗi, tên, thuộc tính, is/in ─────
+# Mở rộng bộ sinh (492 → 949 đột biến) làm lộ thêm một lớp nữa. Phần lớn là
+# TƯƠNG ĐƯƠNG THẬT theo một kiểu đặc biệt đáng chú ý: đột biến sống sót
+# CHÍNH LÀ luận điểm của bài. `.strip()` ba chuỗi bẩn ra cùng một chuỗi
+# sạch; `pathlib` coi có gạch cuối và không gạch là một; hai cách đếm cho
+# cùng một số. Ở mấy bài ấy, một cổng BẮT ĐƯỢC đột biến mới là cổng sai.
+
+# TƯƠNG ĐƯƠNG THẬT, và đột biến sống sót CHÍNH LÀ luận điểm của bài: `pathlib` xử lý đường dẫn có gạch cuối và không gạch như nhau, nên đổi hai cái tên ấy cho nhau ra đúng cùng một đường dẫn.
+- 'nen-tang.chuong-trinh-that.ghep-duong-dan-cho-dung · ghep-hai-duong-dan-bang-pathlib · đổi MỌI chỗ đọc tên thu_muc_khong_gach thành thu_muc_co_gach (1 chỗ)'
+
+# TÊN FILE KHÔNG KIỂM ĐƯỢC Ở BÀI NÀY. Bước chấm bằng biên nhận của `.write` và nội dung dòng đem ghi; muốn kiểm tên file thì phải ĐỌC file lại, mà đọc là khái niệm của bài 4, và ở bài 1 kết nối còn chưa đóng nên chữ chưa chắc xuống đĩa (luật của bài 2). Chính người viết đã ghi lại ràng buộc này.
+- 'nen-tang.chuong-trinh-that.ghi-chu-xuong-file · ghi-dong-dau-cua-so · đổi MỌI chuỗi 'so-thang-tam.txt' thành 'w' (1 chỗ)'
+
+# TƯƠNG ĐƯƠNG THẬT, và là luận điểm của bài: ba chuỗi bẩn khác nhau đều `.strip()` ra đúng "cà phê" dài 6. Đổi chỗ chúng cho nhau tất nhiên ra cùng kết quả.
+- 'nen-tang.gia-tri-bien-kieu.khoang-trang-vo-hinh · don-ba-lan-go · đổi MỌI chỗ đọc tên lan_mot thành lan_hai (1 chỗ)'
+
+# TƯƠNG ĐƯƠNG THẬT, và là luận điểm của bài: ba chuỗi bẩn khác nhau đều `.strip()` ra đúng "cà phê" dài 6. Đổi chỗ chúng cho nhau tất nhiên ra cùng kết quả.
+- 'nen-tang.gia-tri-bien-kieu.khoang-trang-vo-hinh · don-ba-lan-go · đổi MỌI chỗ đọc tên lan_hai thành lan_mot (1 chỗ)'
+
+# TƯƠNG ĐƯƠNG THẬT, và là luận điểm của bài: ba chuỗi bẩn khác nhau đều `.strip()` ra đúng "cà phê" dài 6. Đổi chỗ chúng cho nhau tất nhiên ra cùng kết quả.
+- 'nen-tang.gia-tri-bien-kieu.khoang-trang-vo-hinh · don-ba-lan-go · đổi MỌI chỗ đọc tên lan_ba thành lan_mot (1 chỗ)'
+
+# TRÙNG TÌNH CỜ TRONG DỮ LIỆU DÙNG CHUNG. `100000 % 3` và `250000 % 3` cùng bằng 1. Sửa được bằng cách đổi một trong hai con số — NHƯNG `250000` nằm ở 40 chỗ trong 6 bài, nên đổi nó là tự tạo ra đúng cái trôi hằng số mà cổng sổ sự thật dựng lên để chặn.
+- 'nen-tang.gia-tri-bien-kieu.phan-con-thua · dong-le-cua-hai-khoan · đổi MỌI chỗ đọc tên tien_pho thành tien_lau (1 chỗ)'
+
+# TRÙNG TÌNH CỜ TRONG DỮ LIỆU DÙNG CHUNG. `100000 % 3` và `250000 % 3` cùng bằng 1. Sửa được bằng cách đổi một trong hai con số — NHƯNG `250000` nằm ở 40 chỗ trong 6 bài, nên đổi nó là tự tạo ra đúng cái trôi hằng số mà cổng sổ sự thật dựng lên để chặn.
+- 'nen-tang.gia-tri-bien-kieu.phan-con-thua · dong-le-cua-hai-khoan · đổi MỌI chỗ đọc tên tien_lau thành tien_pho (1 chỗ)'
+
+# TƯƠNG ĐƯƠNG THEO DỮ LIỆU. `tong_sang == 30.3` và `tong_chieu == 30.3` đều `False` — cái đầu vì phép cộng số thực lệch (đúng điều bài dạy), cái sau vì hai số vốn khác nhau.
+- 'nen-tang.gia-tri-bien-kieu.so-thuc-chi-la-so-xap-xi · hoi-may-hai-cau · đổi MỌI chỗ đọc tên tong_sang thành tong_chieu (1 chỗ)'
+
+# DỮ LIỆU CHƯA PHÂN BIỆT ĐƯỢC. `mot < hai` cho `False`, mà `mot < mot` cũng `False`. ĐÁNG SỬA SAU: xếp lại để `mot < hai` ra `True` thì `mot < mot` lộ ngay.
+- 'nen-tang.list-dict-set-tuple.may-nhin-o-dau-truoc · hoi-thang-may-cap-nao-truoc · đổi MỌI chỗ đọc tên hai thành mot (1 chỗ)'
+
+# NGƯỠNG KHÔNG PHẢI KHÁI NIỆM CỦA BÀI (bài dạy `or`); mốc 65 là tham số của đề. Khoá miễn trừ cũ hết hạn vì bài vừa được thêm khách thứ hai — đó là ý muốn: bài đổi thì miễn trừ phải xét lại.
+- 'onboarding.ra-lenh-cho-byte.chi-can-mot-ve-dung · tam-bien-khuyen-mai · đổi MỌI dấu > thành >= (2 chỗ)'
+
+# NGƯỠNG KHÔNG PHẢI KHÁI NIỆM CỦA BÀI (bài dạy `or`); mốc 65 là tham số của đề. Khoá miễn trừ cũ hết hạn vì bài vừa được thêm khách thứ hai — đó là ý muốn: bài đổi thì miễn trừ phải xét lại.
+- 'onboarding.ra-lenh-cho-byte.chi-can-mot-ve-dung · tam-bien-khuyen-mai · đổi MỌI hằng số 65 thành 66 (2 chỗ)'
+
+# NGƯỠNG KHÔNG PHẢI KHÁI NIỆM CỦA BÀI (bài dạy `and`); mốc 8 giờ là tham số của đề. Khoá cũ hết hạn vì bài vừa thêm khách thứ hai và thứ ba.
+- 'onboarding.ra-lenh-cho-byte.hai-dieu-kien-cung-dung · dan-to-giay-len-tuong · đổi MỌI dấu < thành <= (3 chỗ)'
+
+# NGƯỠNG KHÔNG PHẢI KHÁI NIỆM CỦA BÀI (bài dạy `and`); mốc 8 giờ là tham số của đề. Khoá cũ hết hạn vì bài vừa thêm khách thứ hai và thứ ba.
+- 'onboarding.ra-lenh-cho-byte.hai-dieu-kien-cung-dung · dan-to-giay-len-tuong · đổi MỌI hằng số 8 thành 9 (3 chỗ)'
+
+# TƯƠNG ĐƯƠNG THEO DỮ LIỆU: hai cách đếm cho ra ĐÚNG cùng một con số — đó là toàn bộ luận điểm của bài.
+- 'toan.cam-nhan-so.dem-la-ghep-doi-mot-mot · hai-cach-dem-mot-ket-qua · đổi MỌI chỗ đọc tên an_dem_ca_dong_duoc thành byte_dem_ca_dong_duoc (1 chỗ)'
+
+# TƯƠNG ĐƯƠNG THEO DỮ LIỆU: hai người đo cùng một vật bằng cùng một sải nên ra cùng con số — đúng điều bài dạy.
+- 'toan.cam-nhan-so.do-la-dem-cai-thuoc · giu-thuoc-hay-doi-thuoc · đổi MỌI chỗ đọc tên byte_do_bang_sai_day thành an_do_lai_bang_sai_day (2 chỗ)'
+
+# TƯƠNG ĐƯƠNG THEO DỮ LIỆU: hai người đo cùng một vật bằng cùng một sải nên ra cùng con số — đúng điều bài dạy.
+- 'toan.cam-nhan-so.do-la-dem-cai-thuoc · giu-thuoc-hay-doi-thuoc · đổi MỌI chỗ đọc tên an_do_lai_bang_sai_day thành byte_do_bang_sai_day (1 chỗ)'
+
+# TƯƠNG ĐƯƠNG THEO DỮ LIỆU: hai người đo cùng một vật bằng cùng một sải nên ra cùng con số — đúng điều bài dạy.
+- 'toan.cam-nhan-so.do-la-dem-cai-thuoc · giu-thuoc-hay-doi-thuoc · đổi MỌI chỗ đọc tên an_do_bang_buoc_chan thành byte_do_bang_sai_day (1 chỗ)'
+

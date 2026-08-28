@@ -191,6 +191,12 @@ class _Doi(ast.NodeTransformer):
         self.dinh += 1
         return ast.Compare(left=node.left, ops=[moi()], comparators=node.comparators)
 
+_DUNG_SAN = {
+    'print', 'len', 'int', 'str', 'float', 'bool', 'list', 'dict', 'set',
+    'tuple', 'range', 'sum', 'min', 'max', 'sorted', 'abs', 'round', 'input',
+    'open', 'enumerate', 'zip', 'any', 'all', 'type', 'isinstance',
+}
+
 _PHEP = {'Add': ast.Sub, 'Sub': ast.Add, 'Mult': ast.Add, 'Div': ast.Mult}
 _SS = {'Eq': ast.NotEq, 'NotEq': ast.Eq, 'Lt': ast.LtE, 'LtE': ast.Lt,
        'Gt': ast.GtE, 'GtE': ast.Gt,
@@ -219,7 +225,11 @@ def sinh_dot_bien(ma, dong_duoc_sua, tran=6):
             if nut.value not in chuoi:
                 chuoi.append(nut.value)
         elif isinstance(nut, ast.Name) and isinstance(nut.ctx, ast.Load):
-            if nut.id not in ten:
+            # Không gom hàm dựng sẵn vào rổ thay thế. Đổi một cái tên thành
+            # 'print' hay 'len' không phải lỗi người học nào viết ra — nó chỉ
+            # là nhiễu, và nhiễu trong một cổng thì tốn đúng thứ mà cổng sinh
+            # ra để tiết kiệm: lòng tin rằng đỏ nghĩa là có chuyện.
+            if nut.id not in ten and nut.id not in _DUNG_SAN:
                 ten.append(nut.id)
         elif isinstance(nut, ast.Attribute):
             if nut.attr not in thuoc_tinh:
@@ -300,8 +310,20 @@ function dong_nguoi_hoc_dien(starter, solution) {
 const mien_tru = new Set();
 if (existsSync(MIEN_TRU)) {
   for (const d of readFileSync(MIEN_TRU, 'utf-8').split('\n')) {
-    const m = /^\s*-\s*(?:khoa:\s*)?["']?([^"'#]+?)["']?\s*(?:#.*)?$/.exec(d);
-    if (m) mien_tru.add(m[1].trim());
+    // Bóc đúng MỘT lớp nháy ngoài cùng, không dùng lớp ký tự loại trừ nháy.
+    //
+    // Bản cũ dùng `[^"'#]+?`, nên một khoá có nháy LỒNG bên trong — mà khoá mô
+    // tả đột biến chuỗi thì luôn có, kiểu `đổi MỌI chuỗi 'a.txt' thành 'w'` —
+    // bị cắt cụt ở dấu nháy đầu tiên. Miễn trừ khai đúng mà không bao giờ khớp,
+    // và cổng cứ báo đỏ mãi một chỗ đã được xét.
+    const m = /^\s*-\s*(.*?)\s*(?:#.*)?$/.exec(d);
+    if (m) {
+      let s = m[1].trim();
+      if (s.length >= 2 && (s[0] === '"' || s[0] === "'") && s[s.length - 1] === s[0]) {
+        s = s.slice(1, -1);
+      }
+      if (s) mien_tru.add(s.trim());
+    }
   }
 }
 

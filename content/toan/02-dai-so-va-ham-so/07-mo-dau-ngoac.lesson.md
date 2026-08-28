@@ -233,6 +233,13 @@ gửi sẵn — nên không có con số nào chép được từ chỗ trống 
 Mỗi dòng bạn viết còn được đối chiếu với chính dạng có ngoặc ở ngay trên nó:
 mở ngoặc mà đổi giá trị thì lệch ngay.
 
+Một luật của bài: **viết ra cả hai phép nhân, đừng nhân sẵn cụm thứ hai.** Ở
+trên bài có ghi `15000 × (n + 2) = 15000n + 30000` — đúng, nhưng đó là dạng đã
+đi thêm một bước nữa. Chỗ trống ở đây muốn thấy đúng cái bước MỞ NGOẶC:
+`15000 * n + 15000 * 2`. Viết thẳng `15000 * n + 30000` là bạn đã nhân hộ máy
+cụm thứ hai, và cái phép nhân thứ hai — thứ mà cả bài này dựng lên để nói tới —
+không xuất hiện ở đâu cả. Rút gọn nốt là việc của bài 8.
+
 Nhớ chỗ hay sập: giá một món là cạnh **không** bị cắt, nên nó phải có mặt ở
 **cả hai** miếng.
 

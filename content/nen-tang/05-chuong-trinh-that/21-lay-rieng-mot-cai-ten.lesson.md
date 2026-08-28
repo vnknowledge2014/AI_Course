@@ -44,10 +44,10 @@ con_lai = so_sach.doc_so(ten_khac)
 tong_khac = so_sach.tong_tien(con_lai)
 ```
 
-Trong `so.py` với ba lệnh con, hình dạng ấy lặp lại hai chục lần. Và điều đáng
-để ý là: suốt hai chục lần đó, cả file chỉ với tới đúng **hai** cái tên bên
-trong hộp — `doc_so` và `tong_tien`. Cái hộp không mang lại thông tin gì mới ở
-lần thứ hai mươi; nó chỉ dài thêm ra.
+Trong `so.py` với ba lệnh con, hình dạng ấy rải kín cả file. Và điều đáng để ý
+là: dù nó xuất hiện bao nhiêu lần, cả file cũng chỉ với tới đúng **hai** cái
+tên bên trong hộp — `doc_so` và `tong_tien`. Cái tên hộp không nói thêm điều gì
+ở những lần sau; nó chỉ làm dòng code dài thêm ra.
 
 Python có một dạng mượn thứ hai, dành đúng cho chuyện này:
 

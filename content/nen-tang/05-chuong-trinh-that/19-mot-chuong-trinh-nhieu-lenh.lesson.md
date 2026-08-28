@@ -62,8 +62,9 @@ chương trình một danh sách chữ, và bài trước đã mở nó ra:
 
 ```text title=readonly
 python so.py so-thang-8.txt
-              ↑        ↑
-        sys.argv[0]  sys.argv[1]
+
+  argv[0] = "so.py"            ← máy tự điền, là tên chương trình
+  argv[1] = "so-thang-8.txt"   ← chữ đầu tiên bạn gõ sau tên chương trình
 ```
 
 `argv[0]` là tên chính chương trình, máy tự điền. Còn `argv[1]` là **ô của
@@ -82,6 +83,18 @@ Chữ đứng ở `argv[1]` bây giờ là tên một việc — người ta g�
 Phần `argv` còn lại là dữ liệu cho việc đó, và mỗi việc cần một lượng dữ liệu
 khác nhau: `xem` cần một tên file, `them` cần thêm tên khoản và số tiền, `xoa`
 cần thêm tên khoản phải bỏ.
+
+Mở dòng lệnh dài nhất trong ba dòng ấy ra xem từng ô đựng gì:
+
+```text title=readonly
+python so.py them so-thang-8.txt "trà sữa" 45000
+
+  argv[0] = "so.py"            ← máy tự điền
+  argv[1] = "them"             ← tên việc
+  argv[2] = "so-thang-8.txt"   ← cuốn sổ phải mở
+  argv[3] = "trà sữa"          ← tên khoản mới
+  argv[4] = "45000"            ← số tiền, và nó vẫn là chữ
+```
 
 Bên trong chương trình, chọn việc là một câu `if` / `elif` / `else` mà bạn đã
 viết từ Realm 0 — chỉ khác ở chỗ thứ đem ra so là chữ vừa lấy từ dòng lệnh.
@@ -147,7 +160,7 @@ python so.py so-thang-8.txt xem
 
 Chương trình vẫn là chương trình ở trên, không sửa một chữ.
 
-**Trước khi bấm chạy**, bạn đoán ba dòng cuối hiện ra gì?
+**Trước khi bấm chạy**, bạn đoán màn hình hiện ra gì?
 
 ```python title=readonly
 import sys
@@ -436,9 +449,9 @@ Một câu hỏi trước khi đi tiếp.
 hàm `doc_so` và phần đọc `sys.argv` ở đầu. Nó vẫn là một file, và nó vẫn gọn
 hơn ba file chép chồng lên nhau.
 
-Nhưng Lan đặt hàng thêm một thứ: một chương trình **vẽ biểu đồ** chi tiêu.
-Chương trình ấy không thêm, không xoá, không in tổng — nó dùng đúng một
-thứ trong `so.py`, là hàm `doc_so`.
+Nhưng Lan đặt hàng thêm một thứ nữa: một chương trình làm **bản báo cáo** cuối
+tháng, in ra từng khoản rồi in tổng. Chương trình ấy không thêm, không xoá,
+không nhận lệnh con nào — nó dùng đúng một thứ trong `so.py`, là hàm `doc_so`.
 
 Chép hàm đó sang file mới à? Thế là quay lại đúng chỗ đầu bài: một đoạn code
 nằm ở hai nơi, và ngày bạn sửa một nơi thì phải nhớ sửa cả nơi kia.

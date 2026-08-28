@@ -193,10 +193,46 @@ if la_hoc_sinh ___ gio_den < 8:
     print("Giảm 5000 đồng")
 else:
     print("Giá thường")
+
+# Khách thứ hai: cũng là học sinh, nhưng tới lúc 10 giờ.
+la_hoc_sinh = True
+gio_den = 10
+
+if la_hoc_sinh ___ gio_den < 8:
+    print("Giảm 5000 đồng")
+else:
+    print("Giá thường")
+
+# Khách thứ ba: tới sớm thật, nhưng không phải học sinh.
+la_hoc_sinh = False
+gio_den = 7
+
+if la_hoc_sinh ___ gio_den < 8:
+    print("Giảm 5000 đồng")
+else:
+    print("Giá thường")
 ```
 
 ```python title=solution
 la_hoc_sinh = True
+gio_den = 7
+
+if la_hoc_sinh and gio_den < 8:
+    print("Giảm 5000 đồng")
+else:
+    print("Giá thường")
+
+# Khách thứ hai: cũng là học sinh, nhưng tới lúc 10 giờ.
+la_hoc_sinh = True
+gio_den = 10
+
+if la_hoc_sinh and gio_den < 8:
+    print("Giảm 5000 đồng")
+else:
+    print("Giá thường")
+
+# Khách thứ ba: tới sớm thật, nhưng không phải học sinh.
+la_hoc_sinh = False
 gio_den = 7
 
 if la_hoc_sinh and gio_den < 8:
@@ -223,7 +259,15 @@ pass
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: Giảm 5000 đồng
+  # Chấm bằng CẢ HAI khách, theo đúng thứ tự dòng.
+  #
+  # Một khách thì `and` không bao giờ lộ mặt: mọi vế đều đúng nên màn hình luôn
+  # ra "Giảm", điền `or` vào cũng thế, mà viết nhầm tên biến cũng thế. Khách thứ
+  # hai đúng là học sinh nhưng tới muộn, khách thứ ba tới sớm mà không phải học
+  # sinh. Hai kiểu hỏng ngược nhau, và cần CẢ HAI: thiếu khách thứ ba thì viết
+  # nhầm `gio_den and gio_den < 8` vẫn ra đúng ba dòng ấy.
+  match: regex
+  expect: ^Giảm 5000 đồng\nGiá thường\nGiá thường\s*$
 :::
 ::::
 
