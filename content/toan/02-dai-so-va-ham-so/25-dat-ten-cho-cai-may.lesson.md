@@ -295,7 +295,7 @@ print(nuoc_sang)
 # câu `==` thì chúng không bao giờ chạy tới, và cái bẫy không bao giờ sập.
 assert thu_sang != lai_sang, "cùng bỏ 20 vào, nhưng máy thu và máy lai là hai luật khác nhau nên không được ra cùng một số"
 assert lai_sang != nuoc_sang, "máy lai nhả ra tiền, máy nuoc nhả ra số chai — hai kết quả này không thể bằng nhau"
-assert thu(7) != thu(8), "một cái máy đưa hai đầu vào khác nhau thì ở đây phải cho hai đầu ra khác nhau, không được trả về một con số cố định"
+assert thu(7) != thu(8), "máy thu phải tính THEO chỗ trống n, nên bỏ 7 và bỏ 8 vào phải ra hai số khác nhau — gõ cứng một con số thì máy trả về đúng nó ở mọi đầu vào"
 assert thu_sang == 300000, "20 ổ, mỗi ổ 15 000 đồng: máy thu phải nhả ra 300 000"
 assert lai_sang == 90000, "20 ổ lãi 120 000, bớt 30 000 thuê chỗ: máy lai phải nhả ra 90 000"
 assert nuoc_sang == 60, "20 ổ, lấy gấp ba: máy nuoc phải nhả ra 60 chai"
@@ -356,7 +356,7 @@ Một câu hỏi trước khi đi tiếp.
 
 Cái máy tiền thu giờ đã có tên gọi đàng hoàng: `t(n) = 15000 × n`.
 
-Ở bài 23, bạn đã chấm bảng của **đúng cái máy này** lên mặt phẳng. Bảy cái chấm
+Ở bài 23, bạn đã chấm bảng của **đúng cái máy này** lên mặt phẳng. Chín cái chấm
 hôm ấy nằm thẳng hàng — thẳng đến mức đặt được cây thước lên mà không chấm nào
 lệch ra.
 

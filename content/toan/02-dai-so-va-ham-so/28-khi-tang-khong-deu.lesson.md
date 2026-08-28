@@ -112,7 +112,8 @@ con số trong cột thứ ba.
 Nới từ 5 lên 6 thì thêm một cột 5 ô, một hàng 5 ô, một ô góc: `5 + 5 + 1 = 11`.
 
 Viết chung cho mọi `n`, phần lát thêm luôn là `n + n + 1`, tức `2n + 1` — đây
-chính là luật phân phối của bài 7 đọc trên một hình vuông. Và `2n + 1` là một
+chính là luật **gộp cái cùng loại** của bài 9 (`n + n = 2n`, đúng cái
+`3n + 5n = 8n`) đọc trên một hình vuông. Và `2n + 1` là một
 biểu thức **bậc nhất**: `n` thêm 1 thì nó thêm đúng 2. Con số `2` ở cột thứ tư
 chính là **hai cái cạnh** mà mỗi lần nới đều phải lát thêm.
 

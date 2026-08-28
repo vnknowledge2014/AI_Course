@@ -31,7 +31,7 @@ provenance:
 Chín dòng bảng, chín dấu chấm. Xem chúng rơi vào đâu đã.
 ::::
 
-::::explain{#bay-dong-bay-diem}
+::::explain{#chin-dong-chin-diem}
 Bài trước dựng xong hai trục và chấm được một điểm. Bài này chấm cả bảng.
 
 Bảng ở bài 5 sinh ra từ đúng một câu tính — `15000 × n`. Mỗi lần điền một số ổ

@@ -28,7 +28,7 @@ provenance:
 ---
 
 ::::byte{trigger=enter mood=thinking pose=idle}
-Bảy cái chấm thẳng hàng. Mình muốn biết cái gì bắt chúng phải thẳng.
+Chín cái chấm thẳng hàng. Mình muốn biết cái gì bắt chúng phải thẳng.
 ::::
 
 ::::explain{#nhin-vao-bang-dung-nhin-vao-hinh}

@@ -330,8 +330,9 @@ phân biệt được rồi.
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-Đếm lại xem xe bánh mì đang có bao nhiêu cái máy dùng được. Cả ba đều nhận đúng
-một thứ vào — **số ổ bán được** — và cả ba đều là hàm số:
+Xe bánh mì còn nhiều máy nữa, và chúng bắt đầu chen nhau. Ngoài máy tiền ở
+trên, Byte còn hai cái nữa, cả hai đều nhận đúng một thứ vào — **số ổ bán
+được** — nên cả hai đều là hàm số:
 
 - bỏ số ổ vào, nhả ra **tiền thu**: mỗi ổ 15000 đồng;
 - bỏ số ổ vào, nhả ra **tiền lãi**: mỗi ổ lãi ít hơn thế nhiều;
