@@ -192,8 +192,9 @@ Ba chỗ trống: hai đĩa của **câu gốc**, rồi **cụm mang chữ** đ�
 viết đúng một lần và dùng cho cả hai đĩa — đó chính là chỗ "cùng một lượng"
 hiện ra thành mã.
 
-Ba chỗ ấy cho ra ba con số khác nhau (`75000`, `75000`, `45000`), nên gõ cứng
-một con số vào cả ba thì hỏng ngay từ dòng in thứ ba.
+Ba chỗ ấy cho ra `75000`, `75000` rồi `45000`. Hai số đầu bằng nhau **đúng như
+câu gốc hứa** — ở `n = 5` thì hai đĩa cân nhau, đó là cả điểm của bài. Số thứ ba
+khác, nên gõ cứng một con số vào cả ba thì hỏng ngay ở dòng in thứ ba.
 
 ```python title=starter
 n = 5   # con số vừa gỡ ra được, đang đem đi thử

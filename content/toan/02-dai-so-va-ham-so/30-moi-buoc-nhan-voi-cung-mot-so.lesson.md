@@ -203,8 +203,9 @@ trong cột thứ tư, đúng động tác mà bài 28 đã dạy. Với mảnh 
 tìm ra ngay: cột thứ ba là `+1, +3, +5, +7` và cột thứ tư đứng im ở 2, nên đoán
 được ô kế tiếp mà không cần tính lại.
 
-Ranh giới là bảng này **không dẹt xuống**. Ở mảnh sân, cột thứ ba hơn nhau đúng
-một lượng cố định, nên ô sau suy ra được từ hai ô trước: 1, 2, 3, 4… Ở đây cột
+Ranh giới là bảng này **không dẹt xuống**. Ở mảnh sân, cột thứ ba là `+1, +3,
++5, +7` — bản thân nó chưa đứng yên, nhưng hơn nhau đúng một lượng cố định là 2,
+nên thêm một cột nữa là dẹt hẳn. Ở đây cột
 thứ ba là `+1, +2, +4, +8` — nó không cộng thêm 1 mỗi bước mà **nhân đôi** mỗi
 bước, y hệt cột thứ hai. Nên bước từ giờ 3 sang giờ 4 không phải 4 mà là 8:
 đúng bằng số men đang có, vì thêm bấy nhiêu nữa mới thành gấp đôi.
@@ -240,7 +241,8 @@ giữa hai chỗ ấy mảnh sân còn nhỉnh hơn (9 so với 8). Nhưng từ 
 thì chúng rời nhau, và rời rất nhanh: tới `n = 7` đã là 49 với 128.
 
 Sự khác nhau ấy có nghĩa ngoài đời. Với mảnh sân, muốn diện tích gấp đôi thì
-nới cạnh thêm một chút là được. Với hũ men, muốn gấp đôi thì phải **chờ thêm
+nới cạnh lên khoảng 1,41 lần — cạnh 10 thành 14, vẫn là một mảnh sân người ta đi
+bộ qua được. Với hũ men, muốn gấp đôi thì phải **chờ thêm
 đúng một giờ** — không có cách nào ngắn hơn. Còn chờ hai giờ thì không phải gấp
 bốn cộng thêm gì cả: đúng gấp bốn.
 ::::
@@ -252,8 +254,11 @@ Bạn điền ba chỗ trống: cái máy men, thêm một ô của cột thứ 
 "nhân thử". Hai dòng `nhan_thu_*` kiểm đúng lời hứa của bài — **lấy dòng trước
 nhân 2 thì phải ra đúng dòng sau**.
 
-Bài chấm bằng cả bốn con số, và chúng không bằng nhau — gõ cứng `16` vào mọi
-chỗ thì hỏng ở ba chỗ. Chỉ cái máy viết thật mới qua được cả bốn.
+Bài chấm bằng cả bốn con số: `8`, `16`, `16`, `128`. Hai số giữa bằng nhau —
+đó không phải trùng hợp, nó chính là điều bài vừa nói (thêm từ dòng 4 sang dòng 5
+đúng bằng nhân đôi dòng 3). Nhưng số đầu và số cuối thì khác hẳn, nên gõ cứng
+`16` vào mọi chỗ là hỏng ngay ở dòng in thứ nhất. Chỉ cái máy viết thật mới qua
+được cả bốn.
 
 ```python title=starter
 def men(n):

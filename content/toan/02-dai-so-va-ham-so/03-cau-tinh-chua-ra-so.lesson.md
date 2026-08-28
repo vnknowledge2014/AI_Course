@@ -163,8 +163,8 @@ Hình dạng của một biểu thức là câu trả lời cho câu hỏi: *c�
 phép nào là phép cuối cùng gộp mọi thứ lại?* Bạn đã có sẵn công cụ đọc nó — thứ
 tự phép toán và dấu ngoặc, từ mạch trước.
 
-Ba tờ giấy sau đây dùng đúng những con số như nhau, đúng một chữ `n`, mà là ba
-vật khác nhau:
+Ba tờ giấy sau đây cùng nói về một buổi bán, cùng đúng một chữ `n`, mà là ba
+vật khác nhau — khác ở chỗ **phép nào gộp mọi thứ lại sau cùng**:
 
 ```text
    15 000 × n + 20 000     phép cuối là CỘNG:  một cụm nhân, cộng thêm 20 000

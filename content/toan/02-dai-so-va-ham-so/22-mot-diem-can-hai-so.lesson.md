@@ -140,8 +140,10 @@ Cùng hai con số 2 và 6, không thêm không bớt. Nhưng đó là hai buổ
 khác hẳn nhau — và trên lưới, hai dấu chấm rơi vào hai chỗ khác hẳn nhau, soi
 gương nhau qua đường chéo.
 
-Nên cặp toạ độ là một **cặp có thứ tự**: đổi chỗ hai con số là đổi luôn cái
-điểm. Đây là chỗ nó khác hẳn phép cộng — `2 + 6` với `6 + 2` cho cùng một số,
+Nên cặp toạ độ là một **cặp có thứ tự**: đổi chỗ hai con số **khác nhau** là
+đổi luôn cái điểm. (Hai con số bằng nhau thì đổi chỗ chẳng đi đâu cả — `(4; 4)`
+đảo lại vẫn là `(4; 4)`. Đó đúng là mấy điểm nằm ngay trên đường chéo, chỗ tấm
+gương cắt qua.) Đây là chỗ nó khác hẳn phép cộng — `2 + 6` với `6 + 2` cho cùng một số,
 còn `(2; 6)` với `(6; 2)` thì không cho cùng một chỗ đứng.
 ::::
 

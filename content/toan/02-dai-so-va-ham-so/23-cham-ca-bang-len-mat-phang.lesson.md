@@ -108,7 +108,8 @@ từng dòng:
 > sang trục đứng. Đọc con số ở đó.
 
 Hỏi "bán 4 ổ thì thu bao nhiêu": đi ngang tới 4, ngước lên gặp dấu chấm, rẽ
-sang trái, đọc 60000. Đúng bằng dòng thứ tư của bảng.
+sang trái, đọc 60000. Đúng bằng dòng `n = 4` của bảng — dòng thứ **năm**, vì
+bảng bắt đầu đếm từ `n = 0`.
 
 Có một chỗ đồ thị làm được mà bảng chín dòng thì không: nó gợi ra cả những chỗ
 **giữa** hai dấu chấm — chỗ ứng với 2 ổ rưỡi chẳng hạn. Chỗ ấy có nghĩa gì hay

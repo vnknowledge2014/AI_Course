@@ -240,7 +240,7 @@ print(15000 * so_o)
 # (5 ổ). Hai câu `!=` đứng trước để canh đúng hai cái bẫy: chép cứng một con số
 # vào chỗ trống, và nhầm cột trái với cột phải. Xếp sau `==` thì chúng không bao
 # giờ chạy tới.
-assert tien_thu != so_o, "cột phải là tiền thu, không phải số ổ — hai cột của một bảng không bao giờ là một"
+assert tien_thu != so_o, "cột phải là tiền thu, không phải số ổ — mỗi ổ 15 000 đồng nên hai cột của cái bảng NÀY không thể trùng nhau ở dòng nào"
 assert tien_thu != 15000, "cột phải không ghi giá một ổ; nó ghi tiền thu của cả so_o ổ, nên nó đổi theo từng dòng"
 assert tien_thu == 75000, "dòng cuối của vòng là 5 ổ: 15000 × 5 ra 75000"
 assert so_o == 12, "sau vòng lặp, so_o được điền lại bằng 12 để lấy riêng một dòng ở xa hơn"

@@ -139,8 +139,9 @@ print(15000 - 9000 * so_o)
 ::why
 Gần đúng ở chỗ bạn soi kỹ và thấy hai dòng dùng đúng cùng bộ nguyên liệu: ba con
 số ấy, ô trống ấy, dấu trừ ấy. Quy tắc bạn đang dùng — *cùng nguyên liệu thì
-cùng kết quả* — đúng hoàn toàn khi hai câu chỉ **đổi chỗ** cho nhau, ví dụ
-`9000 × 20` với `20 × 9000`.
+cùng kết quả* — đúng khi hai câu đổi chỗ hai số quanh một dấu **nhân**, ví dụ
+`9000 × 20` với `20 × 9000`. (Quanh dấu **trừ** thì không: `20 − 9000` khác hẳn
+`9000 − 20`. Đổi chỗ được hay không là tuỳ dấu.)
 
 Chỗ lệch là hai dòng này không đổi chỗ nguyên liệu, chúng đổi **chỗ đứng của ô
 trống**. Dòng trên, `so_o` dán vào cả hai cụm nhân, nên trừ xong còn 120000.

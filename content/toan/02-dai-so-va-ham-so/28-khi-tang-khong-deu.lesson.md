@@ -269,9 +269,11 @@ Cho máy tự đo lấy cột thứ ba và cột thứ tư của nó.
 Bạn điền năm chỗ trống: dòng đầu là cái máy, ba dòng giữa là ba ô liền nhau của
 cột thứ ba, dòng cuối là một ô của cột thứ tư.
 
-Bài chấm bằng cả bốn con số, và chúng khác nhau từng đôi một — gõ cứng `9` vào
-mọi chỗ thì ba dòng đầu sai, gõ cứng `2` thì cả bốn dòng sai. Chỉ cái máy viết
-thật mới qua được.
+Bài chấm bằng cả bốn con số, và chúng khác nhau từng đôi một. Gõ cứng `9` vào
+mọi chỗ thì màn hình ra `0, 9, 9, 9` — sai ở dòng 1, 3 và 4. Gõ cứng `2` thì ra
+`0, 2, 2, 2` — sai ở dòng 1, 2 và 3. Con số nào cũng vấp, chỉ vấp ở chỗ khác
+nhau, nên không có một con số nào gõ cứng mà qua được cả bốn dòng. Chỉ cái máy
+viết thật mới qua được.
 
 ```python title=starter
 def san(n):

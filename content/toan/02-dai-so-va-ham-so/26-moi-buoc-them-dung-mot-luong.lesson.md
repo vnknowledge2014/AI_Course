@@ -81,7 +81,7 @@ ba.
 ::::
 
 ::::example{#buoc-deu-thi-thang}
-Đây là năm cái chấm đầu tiên của `thu`, mỗi hàng dọc cách nhau đúng 15 000:
+Đây là sáu cái chấm đầu tiên của `thu`, mỗi hàng dọc cách nhau đúng 15 000:
 
 ```text
   t(n)
@@ -94,8 +94,9 @@ ba.
          0  1  2  3  4  5
 ```
 
-Sang phải một ô, lên một hàng. Sang phải một ô, lên một hàng. Sáu lần như nhau —
-nên đặt cây thước lên là trúng cả sáu chấm.
+Sang phải một ô, lên một hàng. Sang phải một ô, lên một hàng. **Năm** lần như
+nhau — sáu cái chấm thì chỉ có năm khoảng giữa chúng — nên đặt cây thước lên là
+trúng cả sáu chấm.
 
 Muốn chắc thì hỏi thẳng cái máy, và hỏi ở những chỗ xa nhau trên bảng:
 

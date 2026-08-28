@@ -75,8 +75,10 @@ bột thêm   1000   1000   1000   1000   1000   1000   1000
 
 Đọc hàng "men thêm" từ trái sang: `256`, `512`, rồi `1024`. Ngay tại giờ **10**,
 mức thêm của men lần đầu vượt mức thêm của bột. Từ giây phút ấy trở đi, mỗi giờ
-Byte **lấy lại** được một ít khoảng cách — và số lấy lại được ấy còn nhân đôi
-mỗi giờ.
+Byte **lấy lại** được một ít khoảng cách: mỗi giờ men thêm `2ⁿ` còn bột chỉ
+thêm `1000`, nên phần gỡ được là `2ⁿ − 1000`. Số ấy chưa nhân đôi ngay, nhưng
+`1000` thì đứng yên còn `2ⁿ` thì không, nên càng về sau nó càng sát với nhân
+đôi.
 
 Bảng khoảng cách xác nhận đúng điều đó. Cột cuối là `men − bột`: âm nghĩa là
 Byte còn thua.
@@ -198,8 +200,10 @@ Và đây là lý do, gói trong ba câu — nhớ lý do thì không phải nh�
 
 1. Máy cộng đều có mức thêm **đứng yên** ở một con số. Gọi nó là `a`.
 2. Máy nhân đôi có mức thêm **tự nhân đôi**. Nó bắt đầu bé hơn `a`, nhưng nhân
-   đôi mãi thì có lúc phải vượt `a` — vì `a` chỉ là một con số, còn `2ⁿ` thì đi
-   qua mọi con số.
+   đôi mãi thì có lúc phải vượt `a` — vì `a` chỉ là một con số, còn `2ⁿ` thì
+   vượt lên trên mọi con số. (Nó không ghé qua mọi con số: nó nhảy 1, 2, 4, 8,
+   bỏ qua 3, bỏ qua 5. Nhưng nhảy kiểu ấy thì con số nào rồi cũng bị bỏ lại
+   phía dưới.)
 3. Từ giờ đó trở đi, mỗi giờ máy nhân đôi gỡ lại được một ít, và số gỡ được còn
    lớn lên gấp bội. Khoảng cách phải đóng thì hữu hạn; số gỡ được thì không có
    trần. Nên nó đóng — rồi mở ra về phía ngược lại và không đóng lại nữa.
@@ -214,8 +218,9 @@ hai câu; giờ trả lời được cả hai:
 | 1000000 — gấp 1000 lần | 25 |
 
 *Sau 20 giờ thì ai hơn ai?* Với máy trộn thường, men đã dẫn từ giờ 14, và tới
-giờ 20 men có `1048576` phần còn nhà bên mới `20000` — dẫn hơn năm mươi lần,
-đúng bằng cái tỉ lệ mà men đã **thua** ở giờ thứ bảy, chỉ là lật ngược.
+giờ 20 men có `1048576` phần còn nhà bên mới `20000` — dẫn hơn năm mươi lần
+(52,4). Ở giờ thứ bảy men từng **thua** cũng cỡ ấy (54,7 lần). Hai con số không
+bằng nhau đâu, nhưng cùng một cỡ, và cái đáng nhìn là chiều đã lật hẳn.
 
 *Máy trộn khoẻ hơn nữa thì có đổi câu trả lời không?* Không. Nhìn cái bảng trên:
 độ dốc nhân lên **một nghìn lần** — từ 1000 lên một triệu — mà ngày bị vượt chỉ

@@ -223,8 +223,10 @@ Câu ấy mạnh hơn vẻ ngoài của nó. Nó nói rằng bạn **không cầ
 hai con số là dựng lại được mọi dòng của bảng, mọi chấm của hình, mọi câu trả
 lời của máy. Cả một đường dài vô tận gói vào hai con số.
 
-Và nó cũng nói ngược lại: hai cái máy khác nhau thì phải khác nhau ở `a`, hoặc ở
-`b`, hoặc ở cả hai — không còn chỗ nào khác để khác nhau.
+Và nó cũng nói ngược lại: hai cái máy **đường thẳng** khác nhau thì phải khác
+nhau ở `a`, hoặc ở `b`, hoặc ở cả hai — trong họ đường thẳng thì không còn chỗ
+nào khác để khác nhau. (Ngoài họ ấy thì có: `s(n) = n × n` chẳng có `a` với `b`
+nào cả, và bài 28 sẽ mở đúng cánh cửa đó.)
 
 Thử ba xe cùng lúc, cả ba đều bán 15 nghìn một ổ, để thấy `b` làm gì:
 

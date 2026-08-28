@@ -195,7 +195,7 @@ nay nói `8n` với `6` không cùng loại.
 Ranh giới nằm giữa hai chữ **gộp** và **cộng**. "Không gộp được" chỉ có nghĩa là
 không viết gọn lại thành một cụm duy nhất. Nó không có nghĩa là phép cộng ấy vô
 nghĩa: `8n + 6` là một câu tính hoàn chỉnh, hợp lệ, có bảng giá trị đàng hoàng —
-điền `n = 2` vào thì nó ra 22 ổ, đúng số bánh của buổi sáng.
+điền `n = 2` vào thì nó ra 22 ổ, đúng số bánh cả ngày hôm ấy.
 
 Chỗ máy dừng lại ở R0.16 là chuyện khác hẳn: ở đó bạn bảo nó cộng một chuỗi chữ
 với một con số, hai thứ không có phép cộng nào định nghĩa giữa chúng. Còn ở đây

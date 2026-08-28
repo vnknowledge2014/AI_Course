@@ -95,7 +95,9 @@ Nên luật là:
 > **đảo chiều dấu**: `<` thành `>`, `≤` thành `≥`, và ngược lại.
 > Cộng hoặc trừ thì **không** đảo, dù số cộng vào là âm hay dương.
 > Nhân hoặc chia cho số **dương** cũng **không** đảo.
-> (Nhân hai vế với 0 vẫn hỏng, đúng như bài 14 — mọi thứ thành `0 ≥ 0`.)
+> (Nhân hai vế với 0 vẫn hỏng, đúng như bài 14: với `≥` thì mọi thứ thành
+> `0 ≥ 0` — câu nào cũng đúng; với `>` thì thành `0 > 0` — câu nào cũng sai.
+> Hỏng theo hai kiểu ngược nhau, mà kiểu nào cũng mất sạch tập nghiệm.)
 
 Thử lại chỗ gãy ở đầu bài: `n ≥ 5`, nhân hai vế với `−1`, **đảo** dấu → `−n ≤
 −5`. Kiểm với `n = 6`: `−6 ≤ −5`? Đúng. Nghiệm thật vẫn còn là nghiệm.

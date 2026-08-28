@@ -102,7 +102,14 @@ phải kéo một phân số qua suốt phần còn lại.
 Nên thứ tự ở trên là thứ tự **nên dùng**, không phải thứ tự duy nhất **được
 dùng**:
 
-> Gỡ cộng trừ trước, gỡ nhân chia sau — vì đó là cởi ngược thứ tự mặc.
+> Cái mặc vào **sau cùng** thì cởi ra **trước**.
+
+Với câu dạng `a × n + b = c` thì cái mặc sau cùng là phép cộng trừ, nên ở dạng
+ấy: gỡ cộng trừ trước, gỡ nhân chia sau. Nhưng đó là hệ quả của cái luật trên,
+không phải bản thân cái luật. Gặp `15000 × (n − 2) = 195000` thì cái mặc sau
+cùng lại là phép **nhân** — cả cụm `(n − 2)` mới được đem nhân — nên ở đó phải
+gỡ nhân trước. Cứ hỏi "nếu điền một số vào, mình làm việc gì sau cùng?" rồi gỡ
+đúng việc ấy trước; câu hỏi ấy đúng cho mọi dạng.
 ::::
 
 ::::predict{#doan-quen-mot-cum commitOnce}
@@ -186,8 +193,11 @@ Ba điều đáng cất đi:
 - **Thứ tự gỡ là ngược thứ tự tính.** Muốn biết gỡ cái nào trước, cứ hỏi: *nếu
   điền một số vào, mình sẽ làm việc gì sau cùng?* Việc ấy gỡ trước.
 
-Câu có dạng "một số nhân với ô trống, cộng hoặc trừ một số, bằng một số" được
-gọi là **phương trình bậc nhất**. Cả phần còn lại của khối này chỉ là những
+Câu nào **đưa được về** dạng `một số × ô trống = một số` bằng đúng hai loại
+phép của bài 13 và 14 thì gọi là **phương trình bậc nhất** — ô trống chỉ đứng
+một mình, không nhân với chính nó, không nằm dưới mẫu. Định nghĩa theo *đưa
+được về* chứ không theo hình dạng chữ viết, vì `n + 200 = 500` (bài 12) và
+`2n = 12` (bài 14) đều là bậc nhất dù trông chẳng giống cái khuôn nào cả. Cả phần còn lại của khối này chỉ là những
 kiểu bậc nhất khác nhau — chữ ở cả hai đĩa, chữ biến mất hẳn — nhưng đồ nghề
 thì vẫn đúng hai món bạn đang cầm.
 ::::
