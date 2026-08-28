@@ -283,21 +283,29 @@ assert nam_chinh_giua == True, "30000 + 120000 = 150000, đúng bằng hai lần
 - tier: static
   onFail: ba chiều cao phải được TÍNH ra từ giá một ổ và số ổ, còn dòng cuối phải là một phép so sánh thật — điền số đã tính sẵn thì cái bài này vừa dạy không xuất hiện ở đâu cả
   requireAst:
-  # Bốn dấu nhân: ba chiều cao, cộng một lần `tien_giua * 2`. Khung khởi đầu
-  # không có dấu nhân nào, nên luật này chặn được đúng đáp án chép cứng bốn giá
-  # trị.
-  - kind: uses-operator, target: *, min: 4
+  # Ba dấu nhân cho ba chiều cao. Khung khởi đầu không có dấu nhân nào, nên
+  # luật này chặn được đúng đáp án chép cứng ba giá trị.
+  #
+  # Trước đây đòi 4 dấu nhân và ít nhất 1 dấu cộng, tức ngầm bắt phải viết câu
+  # kiểm theo dạng `tien_dau + tien_cuoi == tien_giua * 2`. Như thế đánh trượt
+  # `tien_giua - tien_dau == tien_cuoi - tien_giua` — cùng một sự thật, phát
+  # biểu bằng HIỆU thay vì bằng TỔNG, và nói thẳng ra cái ý "cách đều" hơn.
+  # Hai cách đều phải đọc cả ba chiều cao, nên ba luật `uses-name` dưới đây
+  # giữ đúng chỗ cần giữ.
+  - kind: uses-operator, target: *, min: 3
   # Dòng cuối phải là một câu SO SÁNH, không phải một con số hay một chữ `True`
   # gõ tay.
   - kind: uses-operator, target: ==, min: 1
-  - kind: uses-operator, target: +, min: 1
   # Ba chiều cao phải đọc lại giá một ổ, thay vì tự nhân nhẩm rồi gõ kết quả.
   - kind: uses-name, target: gia_mot_o, min: 3
   - kind: uses-name, target: so_o_dau, min: 1
   - kind: uses-name, target: so_o_giua, min: 1
   - kind: uses-name, target: so_o_cuoi, min: 1
-  # `tien_giua` được đọc hai lần: một lần trong câu so sánh, một lần ở `print`.
+  # Cả ba chiều cao phải có mặt trong câu kiểm — dù viết bằng tổng hay bằng
+  # hiệu. Khung khởi đầu đọc mỗi tên đúng một lần (trong `print`).
   - kind: uses-name, target: tien_giua, min: 2
+  - kind: uses-name, target: tien_dau, min: 2
+  - kind: uses-name, target: tien_cuoi, min: 2
   forbidAst:
   # Bốn con số là KẾT QUẢ. Lời giải thật không chứa nguyên văn cái nào.
   - kind: has-literal, target: 30000

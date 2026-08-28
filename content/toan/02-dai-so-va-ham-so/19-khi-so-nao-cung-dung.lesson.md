@@ -245,6 +245,11 @@ con số nói ra câu ấy thuộc loại nào.
 Sáu chỗ trống, mỗi chỗ là **vế trái trừ vế phải** của một câu, tại cái `n` đang
 đứng ngay phía trên.
 
+Và một luật của bài: **chép nguyên hai vế vào, đừng rút gọn trước.** Câu C viết
+gọn được thành `6000n − 30000` — đúng, nhưng viết thế là bạn đã trừ hộ máy mất
+rồi, mà cái bài này đi tìm chính là chuyện *để máy trừ* hai vế khác hình dạng
+rồi xem con số nói gì. Rút gọn là việc của bài sau.
+
 Bài chấm bằng cả ba câu ở hai lần điền, và ba câu được chọn để cư xử khác hẳn
 nhau: một câu hiệu luôn bằng 0, một câu hiệu là số khác 0 không đổi, một câu
 hiệu đổi hẳn dấu. Gõ cứng một con số vào thì hỏng ngay câu bên cạnh — nên phải
@@ -308,7 +313,7 @@ assert hieu_c_9 == 24000, "câu C ở n = 9: thu 135000, vốn 111000 — dư 24
 - tier: run
   timeoutMs: 4000
 - tier: static
-  onFail: mỗi chỗ trống phải là một phép tính thật dựng trên `n`, không phải con số bạn đã nhẩm sẵn — hiệu hai vế chỉ nói được điều gì khi chính máy tính ra nó
+  onFail: mỗi chỗ trống phải chép NGUYÊN hai vế rồi để máy trừ, không rút gọn trước và không nhẩm sẵn — viết thẳng `6000 * n - 30000` là bạn đã làm hộ máy đúng cái việc bài này giao cho nó
   requireAst:
   # Sáu chỗ trống, mỗi chỗ đọc `n` ít nhất một lần. Khung khởi đầu không đọc
   # `n` lần nào (ba dòng `n = 4`/`n = 9` là gán, không phải đọc), nên luật này

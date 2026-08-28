@@ -343,11 +343,16 @@ assert chenh == 75000, "đường của Tí nằm trên 45 000, đường của 
   # hỏng nếu chỉ có một trong hai. Dấu trừ còn cần thêm một lần nữa ở `chenh`.
   - kind: uses-operator, target: -, min: 2
   - kind: uses-operator, target: +, min: 1
-  # Hai luật dưới đây chặn đáp án gõ cứng `b`: mỗi máy phải bị HỎI ít nhất hai
-  # lần (một lần đọc `b`, một lần ở `chenh`). Khung khởi đầu không gọi máy nào
-  # trong hai máy này.
-  - kind: uses-call, target: xe_byte, min: 2
-  - kind: uses-call, target: xe_ti, min: 2
+  # Hai luật dưới đây chặn đáp án gõ cứng `b`: mỗi máy phải bị HỎI ít nhất một
+  # lần. Khung khởi đầu không gọi máy nào trong hai máy này.
+  #
+  # Trước đây đòi `min: 2`, tức ngầm bắt `chenh` phải GỌI LẠI máy. Như thế đánh
+  # trượt `chenh = b_ti - b_byte` — dùng lại hai con số vừa tính ở hai dòng
+  # trên, đúng toán, đúng ý bài, và là cách viết tự nhiên hơn cách gọi lại. Con
+  # số kết quả vẫn bị chặn bởi `has-literal 75000` phía dưới, nên hạ xuống 1
+  # không mở đường cho ai gõ cứng cả.
+  - kind: uses-call, target: xe_byte, min: 1
+  - kind: uses-call, target: xe_ti, min: 1
   forbidAst:
   # Lưới thứ hai, chặn con số KẾT QUẢ của chỗ trống cuối. Lời giải thật chỉ chứa
   # 15000, 30000, 45000 và số 0 — không chỗ nào có nguyên văn 75000.

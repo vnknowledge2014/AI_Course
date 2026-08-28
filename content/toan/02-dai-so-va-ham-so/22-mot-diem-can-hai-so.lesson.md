@@ -304,12 +304,15 @@ assert diem_nguoc == [45000, 3], "cặp viết ngược: 45000 đi ngang, 3 đi 
 - tier: static
   onFail: mỗi ngăn phải là một cái tên có sẵn ở ngay phía trên, không phải một con số gõ tay — gõ số nghĩa là bạn đã tra bảng hộ máy rồi
   requireAst:
-  # `so_o_byte` được ĐỌC ba lần trong lời giải: một lần ở dòng tính tiền (đã có
-  # sẵn trong khung), một lần ở `diem_byte`, một lần ở `diem_nguoc`. Khung khởi
-  # đầu chỉ đọc nó một lần, nên `min: 3` phân biệt được đúng chỗ cần phân biệt.
-  - kind: uses-name, target: so_o_byte, min: 3
-  # `tien_byte` chưa được đọc lần nào trong khung; lời giải đọc nó hai lần.
-  - kind: uses-name, target: tien_byte, min: 2
+  # `so_o_byte` và `tien_byte` phải được ĐỌC, không được gõ số thay.
+  #
+  # Trước đây đòi 3 và 2, tức ngầm bắt `diem_nguoc` phải viết lại hai cái tên
+  # ấy. Như thế đánh trượt `diem_nguoc = [diem_byte[1], diem_byte[0]]` — thoả
+  # đúng lời Byte dặn ("cùng hai con số ấy, viết ngược thứ tự lại"), và moi ra
+  # từ chính cái điểm vừa dựng thì còn khít hơn. Hai con số KẾT QUẢ vẫn bị chặn
+  # bởi `has-literal` phía dưới.
+  - kind: uses-name, target: so_o_byte, min: 2
+  - kind: uses-name, target: tien_byte, min: 1
   - kind: uses-name, target: so_o_an, min: 2
   - kind: uses-name, target: tien_an, min: 1
   forbidAst:

@@ -328,19 +328,25 @@ assert san(-3) == 9, "cái máy nhận cả số âm: (-3) x (-3) lật thanh s�
 - kind: strategy
   body: Sân vuông thì hai cạnh bằng nhau, nên diện tích là cạnh nhân với chính cạnh — viết bằng cái tên `n`, đừng viết một con số cụ thể, vì hàm này phải chạy được với mọi cạnh. Ba ô của cột thứ ba đều theo một khuôn: dòng dưới trừ dòng trên. Ô của cột thứ tư cũng đúng khuôn ấy, chỉ khác là nó trừ hai ô của cột thứ ba cho nhau chứ không trừ hai diện tích.
 - kind: one-line
-  body: "Lần lượt là `n * n`, `san(5) - san(4)`, `san(6) - san(5)` và `buoc_4_5 - buoc_3_4`."
+  body: "Lần lượt là `n * n` (hoặc `n ** 2`), `san(5) - san(4)`, `san(6) - san(5)` và `buoc_4_5 - buoc_3_4`."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: static
-  onFail: hàm phải nhân `n` với chính nó, ba ô của cột thứ ba phải GỌI hàm ấy, và ô của cột thứ tư phải trừ hai ô cột ba cho nhau — gõ thẳng con số vào là bạn tính hộ máy rồi, cái bảng mà bài này đi tìm không xuất hiện ở đâu cả
+  onFail: hàm phải tính diện tích TỪ `n` (nhân `n` với chính nó, hay nâng `n` lên luỹ thừa hai — cách nào cũng được), ba ô của cột thứ ba phải GỌI hàm ấy, và ô của cột thứ tư phải trừ hai ô cột ba cho nhau — gõ thẳng con số vào là bạn tính hộ máy rồi, cái bảng mà bài này đi tìm không xuất hiện ở đâu cả
   requireAst:
-  # Khung khởi đầu không có dấu nhân nào và không đọc `n` lần nào — chỗ trống
-  # thứ nhất là chỗ duy nhất sinh ra cả hai.
-  - kind: uses-operator, target: *, min: 1
-  - kind: uses-name, target: n, min: 2
+  # Hàm phải ĐỌC `n`. Khung khởi đầu không đọc `n` lần nào, nên chỗ trống thứ
+  # nhất là chỗ duy nhất sinh ra nó.
+  #
+  # Chỉ đòi ĐỌC `n`, không đòi dấu nhân. Bản cũ đòi `uses-operator *` và
+  # `uses-name n min: 2`, tức là ngầm bắt phải viết `n * n` — và như thế đánh
+  # trượt `return n ** 2`, một lời giải đúng và rất tự nhiên: người học có luỹ
+  # thừa từ T2.1 bài 24, còn bài 30 ngay sau đây dùng chính `2 ** n`. Đánh
+  # trượt một đáp án đúng thì tệ hơn cho người học nhiều so với bỏ lọt một đáp
+  # án sai: họ làm đúng mà máy nói sai, và không có cách nào biết vì sao.
+  - kind: uses-name, target: n, min: 1
   # Khung khởi đầu gọi `san` đúng 2 lần. Lời giải gọi 6, vì hai chỗ trống giữa
   # mỗi chỗ cần hai lần gọi. Điền số vào đó thì con số này tụt xuống.
   - kind: uses-call, target: san, min: 6
@@ -356,7 +362,10 @@ assert san(-3) == 9, "cái máy nhận cả số âm: (-3) x (-3) lật thanh s�
   - kind: has-literal, target: 7
   - kind: has-literal, target: 9
   - kind: has-literal, target: 11
-  - kind: has-literal, target: 2
+  # KHÔNG cấm số 2 nữa. Nó từng ở đây để chặn ai gõ thẳng `buoc_cua_buoc = 2`,
+  # nhưng hai luật `uses-name buoc_3_4 / buoc_4_5 min: 2` đã chặn đúng chuyện
+  # ấy rồi (gõ số thì hai cái tên chỉ được đọc một lần). Nó thừa với cái đích
+  # của mình, mà lại chặn `n ** 2` — một lời giải đúng.
 - tier: tests
   timeoutMs: 4000
 - tier: output
