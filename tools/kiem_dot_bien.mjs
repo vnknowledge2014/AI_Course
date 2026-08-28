@@ -179,6 +179,34 @@ class _Doi(ast.NodeTransformer):
             return node.value
         return node
 
+    def visit_BoolOp(self, node):
+        # Đổi and thành or, hoặc ngược lại. Trong Python chúng là BoolOp chứ
+        # không phải BinOp, nên bảng _PHEP không với tới.
+        #
+        # Người viết T2.3 báo đúng chỗ này: cả track LOGIC chỉ điền and, or,
+        # not và vài cái tên — không hằng số, không phép so sánh. Cổng sinh ra
+        # 17 đột biến toàn là đổi tên, bắt hết 17, rồi báo xanh — trong khi nó
+        # KHÔNG hề thử được đúng cái lỗi trung tâm của mạch.
+        self.generic_visit(node)
+        if self.loai != 'boolop' or not self._duoc(node):
+            return node
+        if type(node.op).__name__ != self.khoa:
+            return node
+        moi = ast.Or if isinstance(node.op, ast.And) else ast.And
+        self.dinh += 1
+        return ast.BoolOp(op=moi(), values=node.values)
+
+    def visit_UnaryOp(self, node):
+        # BỎ một chữ not. Thêm vào thì dễ sinh mã vô nghĩa; bỏ đi mới là lỗi
+        # người học thật sự mắc, và nó lật hẳn nghĩa của câu.
+        self.generic_visit(node)
+        if self.loai != 'bo_not' or not self._duoc(node):
+            return node
+        if isinstance(node.op, ast.Not):
+            self.dinh += 1
+            return node.operand
+        return node
+
     def visit_Compare(self, node):
         self.generic_visit(node)
         if self.loai != 'sosanh' or not self._duoc(node) or len(node.ops) != 1:
@@ -251,6 +279,10 @@ def sinh_dot_bien(ma, dong_duoc_sua, tran=6):
             k = ('ten', nut.id, [c for c in ten if c != nut.id][0])
         elif isinstance(nut, ast.Attribute) and len(thuoc_tinh) > 1:
             k = ('thuoc_tinh', nut.attr, [c for c in thuoc_tinh if c != nut.attr][0])
+        elif isinstance(nut, ast.BoolOp):
+            k = ('boolop', type(nut.op).__name__, None)
+        elif isinstance(nut, ast.UnaryOp) and isinstance(nut.op, ast.Not):
+            k = ('bo_not', None, None)
         elif isinstance(nut, ast.Subscript) and isinstance(nut.slice, ast.Slice) \
                 and nut.slice.lower is None and nut.slice.upper is None \
                 and nut.slice.step is None:
@@ -287,6 +319,11 @@ def sinh_dot_bien(ma, dong_duoc_sua, tran=6):
             mo_ta = f'đổi MỌI chỗ đọc tên {khoa} thành {thay} ({t.dinh} chỗ)'
         elif loai == 'thuoc_tinh':
             mo_ta = f'đổi MỌI .{khoa} thành .{thay} ({t.dinh} chỗ)'
+        elif loai == 'boolop':
+            cu_, moi_ = ('and', 'or') if khoa == 'And' else ('or', 'and')
+            mo_ta = f'đổi MỌI {cu_} thành {moi_} ({t.dinh} chỗ)'
+        elif loai == 'bo_not':
+            mo_ta = f'BỎ mọi chữ not ({t.dinh} chỗ)'
         else:
             mo_ta = f'bỏ lát cắt trọn vẹn [:] ({t.dinh} chỗ)'
         ra.append([mo_ta, moi])
