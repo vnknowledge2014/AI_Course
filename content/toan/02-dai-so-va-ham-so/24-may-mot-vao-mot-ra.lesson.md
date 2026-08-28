@@ -90,6 +90,10 @@ Chấm cuốn sổ ấy lên hai trục, số ổ nằm ngang và giờ dựng �
    0  1  2  3  4  5  6  7  8  9  10 11 12
 ```
 
+(Trục đứng ở hình này **cắt gốc**: nó bắt đầu từ 4 chứ không từ 0, để mấy dấu
+chấm không dồn hết lên đỉnh giấy. Hai hình trước thì vẽ đủ từ 0 — nói ra để bạn
+đừng đọc nhầm độ cao.)
+
 Đi ngang tới 12 rồi ngước thẳng lên: cột dựng đứng ở đó xuyên qua **hai** dấu
 chấm. Đó chính là chỗ hỏng, và nó nhìn thấy được:
 

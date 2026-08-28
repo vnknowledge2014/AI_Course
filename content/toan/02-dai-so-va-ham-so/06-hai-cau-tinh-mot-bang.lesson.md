@@ -76,7 +76,9 @@ Chữ **mọi** trong câu ấy gánh toàn bộ sức nặng. Bài này tồn t
 Vì sao chữ "mọi" lại quan trọng đến thế? Vì có những cặp câu tính trùng nhau ở
 vài dòng rồi thôi — và nếu bạn dừng lại đúng ở dòng ấy, bạn sẽ kết luận sai.
 
-Byte có hai khay bánh mì và hai lối đếm:
+Byte có hai khay bánh mì và hai lối đếm. (Chú ý: `n` ở đoạn này là **số ổ mới
+nướng**, không phải số ổ bán ra như mấy bài trước — một chữ chỉ có nghĩa trong
+đúng cái đề đang nói.)
 
 - **Khay của Byte:** `n` ổ mới nướng, cộng thêm 6 ổ để dành từ hôm qua →  `n + 6`
 - **Khay của lò:** lò giao gấp ba số ổ Byte nướng →  `3 × n`

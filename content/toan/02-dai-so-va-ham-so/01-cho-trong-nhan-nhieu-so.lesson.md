@@ -48,8 +48,8 @@ nhất: một tờ giấy dán trên xe.
 Giá đã chốt: **một ổ bánh mì 15 000 đồng**. Khách nào tới cũng hỏi đúng một câu:
 *"mua mấy ổ thì bao nhiêu tiền?"*
 
-Byte không thể viết riêng một tờ giấy cho mỗi khách — sáng nay có ba mươi khách,
-mai lại ba mươi khách khác. Nên Byte viết **một** tờ, và chừa lại một **chỗ
+Byte không thể viết riêng một tờ giấy cho mỗi khách — hôm nào cũng một dãy
+khách khác nhau, mỗi người mua một kiểu. Nên Byte viết **một** tờ, và chừa lại một **chỗ
 trống**:
 
 ```text

@@ -101,8 +101,9 @@ dùng để chấm một điểm thì viết gọn lại trong một dấu ngo�
 Đọc là: đi ngang 3, đi lên 45000.
 
 Cặp `(9; 24000)` của bảng lãi cũng ghi được y như thế — chỉ cần đổi chữ ghi trên
-trục đứng từ *tiền thu* thành *tiền lãi*, và đánh vạch cho vừa. Chỗ ghi thì
-không đổi.
+trục đứng từ *tiền thu* thành *tiền lãi*, và đánh vạch cho vừa. **Cách** ghi thì
+không đổi: vẫn là số nằm trước, số đứng sau. (Chỗ dấu chấm rơi xuống giấy thì
+đổi, tất nhiên — đổi thang vạch là đổi chỗ.)
 ::::
 
 ::::explain{#thu-tu-la-mot-phan-cua-diem}
@@ -132,9 +133,10 @@ Có quy ước rồi thì thử ngay. Cuối mỗi buổi, Byte ghi vào sổ ha
    0  1  2  3  4  5  6  7
 ```
 
-- `(2; 6)` — trưa nắng: 6 người ghé, mà chỉ 2 người mua; bốn người kia hỏi giá
-  rồi đi.
-- `(6; 2)` — chiều mát: đúng 2 khách, nhưng mỗi người ôm luôn 3 ổ về nhà.
+- `(2; 6)` — trưa nắng: bán được **2 ổ**, thu **6** nghìn... không, đọc lại trục
+  đã: ngăn đầu là *số ổ bán được*, ngăn sau là *số khách*. Vậy `(2; 6)` là 2 ổ
+  bán ra cho 6 người ghé — bốn người kia chỉ hỏi giá rồi đi.
+- `(6; 2)` — chiều mát: 6 ổ bán ra mà chỉ 2 khách; mỗi người ôm luôn 3 ổ về.
 
 Cùng hai con số 2 và 6, không thêm không bớt. Nhưng đó là hai buổi bán hàng
 khác hẳn nhau — và trên lưới, hai dấu chấm rơi vào hai chỗ khác hẳn nhau, soi

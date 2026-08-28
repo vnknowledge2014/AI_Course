@@ -54,7 +54,7 @@ luôn: hãy xem dòng đầu tiên, dòng `n = 0`, lúc chưa ai bán ổ nào.
   5 │  75000 │   45000
 ```
 
-Cột thứ ba của cả hai xe đều là +15000 ở mọi dòng — đúng như đã đo. Nhưng hai
+Bước nhảy của cả hai xe đều là +15000 ở mọi dòng — đúng như đã đo. Nhưng hai
 cột kết quả thì lệch nhau **30 000 ở mọi dòng**, không dòng nào nhiều hơn, không
 dòng nào ít hơn. Chỗ lệch ấy sinh ra ngay từ dòng đầu và không bao giờ thu hẹp
 lại, vì mỗi bước hai xe đều thêm như nhau.

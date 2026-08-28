@@ -40,7 +40,8 @@ thì dư 24 000; cả hai đều là "đủ bù". Dấu `=` không nhận chúng
 đúng một chuyện: hai vế có ra **cùng một con số** không.
 
 Cái quán cần một dấu khác. Bạn đã có sẵn nó từ T2.1: trên thanh số, số nào đứng
-bên phải thì lớn hơn. Ba dấu ấy là `<`, `>`, và cái ghép của "hơn hoặc bằng":
+bên phải thì lớn hơn. Hai dấu gốc là `<` và `>`; ghép thêm "hoặc bằng" vào mỗi
+cái thì thành bốn:
 
 | viết trên giấy | đọc | Python viết |
 |---|---|---|

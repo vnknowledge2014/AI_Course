@@ -33,7 +33,9 @@ Hai cái máy đứng cạnh nhau. Bắc một cái ống từ miệng ra của 
 
 ::::explain{#hai-viec-hai-may}
 Bài trước để lại một câu hỏi rất thực tế: muốn biết **tiền lãi** thì phải tính
-**tiền thu** trước rồi mới trừ tiền vốn. Hai việc, làm theo đúng thứ tự ấy.
+**tiền thu** trước, rồi mới trừ **tiền thuê chỗ**. Hai việc, làm theo đúng thứ
+tự ấy. (Nói "tiền thuê chỗ" chứ không nói "tiền vốn": trong track này tiền vốn
+là 9 000 đồng mỗi ổ, một khoản khác hẳn.)
 
 Trong tủ máy của quán, hai việc ấy đã là hai cái máy riêng từ lâu:
 

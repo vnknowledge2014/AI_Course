@@ -1,7 +1,7 @@
 ---
 id: toan.dai-so-va-ham-so.thu-lai-o-cau-goc
 title: Thử lại ở câu gốc
-summary: Một con số gỡ ra được chưa chắc đúng — và chỉ có câu ban đầu mới bắt được nó sai, vì mọi dòng bạn tự viết ra đều đã ngả theo cái sai của bạn.
+summary: Một con số gỡ ra được chưa chắc đúng — và chỉ có câu ban đầu mới bắt được nó sai, vì mọi dòng viết ra SAU chỗ hỏng đều đã ngả theo cái sai ấy.
 locale: vi
 track: toan
 module: dai-so-va-ham-so
@@ -303,7 +303,7 @@ Một câu hỏi trước khi đi tiếp.
 
 Nhìn lại mọi câu bạn đã gỡ từ bài 10 tới giờ. Chúng có một điểm chung mà chưa
 ai nói ra: **chữ `n` chỉ đứng ở một đĩa.** Đĩa kia lúc nào cũng là một con số
-trần — 270 000, 240 000, 195 000. Cả cách gỡ lẫn cách thử lại đều dựa vào
+trần — 270 000, 195 000, 300 000. Cả cách gỡ lẫn cách thử lại đều dựa vào
 chuyện đó.
 
 Nhưng quán không hứa sẽ luôn như vậy. Tới giờ mình vẫn coi 30 000 đồng thuê chỗ

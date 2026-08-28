@@ -301,7 +301,7 @@ print(gio_hoi_cho_rong)
 # Hai câu `!=` đứng TRƯỚC. Câu đầu canh cái bẫy chính của bài: hai lần quét sau
 # hỏi CÙNG một phương trình, nên nếu chỗ trống bị gõ cứng thì hai giỏ ra như
 # nhau và bẫy phải sập ngay tại đây.
-assert gio_hoi_cho_hep != gio_hoi_cho_rong, "cùng một phương trình, chỉ khác bề rộng khoảng quét — mà hai giỏ phải khác nhau, vì khoảng 0…40 với tới 80"
+assert gio_hoi_cho_hep != gio_hoi_cho_rong, "cùng một phương trình, chỉ khác bề rộng khoảng quét — mà hai giỏ phải khác nhau, vì khoảng 0…40 KHÔNG với tới 80"
 assert gio_trua != gio_hoi_cho_rong, "300 000 đồng và 1 200 000 đồng là hai phương trình khác nhau, nên hai giỏ không thể trùng"
 assert gio_trua == [20], "trong 0…40, chỉ 20 ổ cho đúng 300 000 đồng — nên giỏ có đúng một món"
 assert gio_hoi_cho_hep == [], "quét tới 40 thì chưa chạm 80, nên giỏ về rỗng — rỗng ở đây nghĩa là chưa thấy, không phải không có"

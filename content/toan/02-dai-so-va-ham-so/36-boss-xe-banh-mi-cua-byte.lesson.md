@@ -226,11 +226,11 @@ còn máy `lai` đang há miệng chờ, và nó bớt tiếp 100 000 tiền thu
 ::::
 
 ::::byte{trigger=enter mood=thinking pose=point-editor}
-Bốn chỗ trống, bốn câu hỏi của buổi sáng. Không chỗ nào chép được của chỗ kia.
+Bốn chỗ trống, ba câu hỏi — câu thứ ba khó hơn hẳn nên để riêng phần sau. Không chỗ nào chép được của chỗ kia.
 ::::
 
 ::::code{#bon-cau-hoi-cua-buoi-sang}
-Bốn chỗ trống, bốn chặng khác nhau của cùng một buổi:
+Bốn chỗ trống, ba chặng khác nhau của cùng một buổi (câu 3 để dành phần sau):
 
 1. `so_o_can_ban` — **chạy ngược cái máy**: muốn lãi đúng 200 000 thì bán mấy ổ?
    Gỡ tiền thuê chỗ trước, gỡ giá một ổ sau — đúng thứ tự gỡ của bài 15.
@@ -356,7 +356,7 @@ thứ ba nữa, vì tăng giá làm **hai việc cùng lúc và ngược chiều
 - giá mỗi ổ **cao lên** — tốt;
 - số ổ bán được **ít đi** — xấu.
 
-Gọi `x` là số nghìn tăng thêm so với giá đang bán. Giá thành `15 + x` nghìn, và
+Gọi `x` là số nghìn tăng thêm so với giá đang bán. Giá **bán** thành `15 + x` nghìn, và
 số ổ còn `40 − 2x`. Tiền thu là tích của hai thứ ấy:
 
 ```text

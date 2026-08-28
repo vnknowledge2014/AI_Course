@@ -166,9 +166,9 @@ mắt người đọc ra là một đường **uốn**.
 Ba loại máy, cùng một câu hỏi "mỗi bước đổi thế nào":
 
 ```text
-  máy đứng yên  :  ngay cột thứ HAI đã đứng im    ( s(n) = 7 )
+  máy đứng yên  :  ngay cột thứ HAI đã đứng im    ( bay(n) = 7 )
   máy bậc nhất  :  cột thứ BA đứng im             ( thu(n) = 15000n )
-  máy bậc hai   :  cột thứ TƯ đứng im             ( s(n) = n x n )
+  máy bậc hai   :  cột thứ TƯ đứng im             ( san(n) = n x n )
 ```
 ::::
 

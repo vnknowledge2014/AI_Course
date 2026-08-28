@@ -68,8 +68,8 @@ lần điền đã xảy ra**, không phải **những lần điền có thể x
 ::::
 
 ::::example{#tu-cuon-so-thanh-bang}
-Byte chép lại cuốn sổ, lần này bỏ cột ngày và xếp cột trái theo thứ tự, không bỏ
-sót số nào, bắt đầu từ 0:
+Byte không chép lại cuốn sổ nữa — cuốn sổ chỉ có bảy ngày lẻ tẻ. Byte làm một
+bảng **mới**: hỏi câu tính ấy ở MỌI số ổ từ 0 trở lên, không bỏ sót số nào:
 
 ```text
     n     15000 × n

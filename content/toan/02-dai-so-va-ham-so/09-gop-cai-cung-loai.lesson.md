@@ -333,7 +333,8 @@ assert tong_ca_ngay == 38, "32 ổ của khách quen cộng 6 ổ của dì Tư 
 Một câu hỏi trước khi đi tiếp.
 
 Nhìn lại chín bài vừa qua. Bạn đã mở ngoặc, gấp ngoặc, rút cái chung, gộp cái
-cùng loại — bốn cách bẻ một câu tính sang hình dạng khác. Rút gọn hết cỡ rồi,
+cùng loại — bốn cái tên, mà như bài này vừa chỉ ra, chúng là **một luật đọc
+theo bốn chiều**. Rút gọn hết cỡ rồi,
 câu tính của quán còn lại đúng thế này:
 
 ```text

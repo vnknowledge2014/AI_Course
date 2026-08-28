@@ -73,8 +73,10 @@ nghiêng:
         đĩa trái                đĩa phải
 ```
 
-Cân lệch nghĩa là câu vừa viết ra **không còn đúng nữa**. Byte không đơn giản
-hoá cái gì cả — Byte vừa đổi sang một câu khác hẳn, và câu ấy sai.
+Cân lệch nghĩa là câu vừa viết ra **không còn hỏi cùng một chuyện nữa**. Byte
+không đơn giản hoá cái gì cả — Byte vừa đổi sang một câu KHÁC. Câu mới ấy tự nó
+chẳng sai: điền 10 vào thì `2n = 20` đúng hẳn hoi. Nó chỉ không còn là câu của
+Byte, vì nghiệm của nó khác nghiệm câu gốc.
 
 Cách chữa chỉ có một: bốc 8 ổ ở **cả hai** đĩa.
 ::::
