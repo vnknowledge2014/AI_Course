@@ -60,7 +60,14 @@ Cái đòn nằm ngang.
 ```
 
 Bây giờ đọc lại cái cân ấy bằng đúng thứ bài 10 vừa dựng. Gọi cân nặng gói bột
-là `n` gam — một ô trống, vì chưa ai biết số ấy.
+là `n` gam.
+
+Để ý chỗ này, vì hai thứ dễ lẫn vào nhau: **gói bột có đúng một cân nặng thật**
+— nó nằm trên đĩa cân kia kìa, chỉ là Byte chưa biết con số. Còn `n` **trên
+giấy** thì vẫn là một ô trống đúng nghĩa bài 1: một chỗ chờ điền, điền số nào
+cũng viết ra được một câu. Cái cân không biến ô trống thành số bị giấu; nó chỉ
+thêm vào một tin: trong tất cả những số điền được, có đúng một số làm đòn nằm
+ngang.
 
 | trên cân | trên giấy |
 |---|---|

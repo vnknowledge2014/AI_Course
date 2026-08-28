@@ -39,8 +39,10 @@ Bài trước để lại một câu tính và một câu hỏi:
 ```
 
 Khách quen của Byte ai cũng mua đúng như nhau, mỗi người `n` ổ. Sáng có 3 khách
-quen, chiều có 5 khách quen. Hai cụm này không chung nhau con số nào — 3 với 5
-chẳng chung gì.
+quen, chiều có 5 khách quen. (Vẫn cái `n` của bài trước dặn: nó đếm **số ổ mỗi
+khách quen**, không phải cái `n` đếm số ổ bán thêm ở bài 6–8. Một chữ chỉ có
+nghĩa trong đúng cái đề đang nói.) Hai cụm này không chung nhau con số nào — 3
+với 5 chẳng chung gì.
 
 Nhưng luật hôm qua không hề nói phần chung phải là một con số. Nó nói phần chung
 là *thứ có mặt ở mọi cụm*. Và ở đây có đúng một thứ như thế, nằm ngay trên mặt
@@ -348,7 +350,11 @@ thì cũng như hỏi một cái hộp rỗng đựng gì.
 
 Vậy phải thêm cái gì vào mặt giấy thì câu hỏi ấy mới bắt đầu có nghĩa?
 
-Bài sau đặt lên bàn một ký hiệu mà cả track cố ý chưa dùng lần nào: dấu `=`.
+Bài sau bắt dấu `=` làm một việc nó chưa từng làm trong track này. Tới giờ mọi
+dấu `=` bạn gặp — `3n + 5n = 8n`, `a × (b + c) = a × b + a × c` — đều thuộc loại
+LUÔN ĐÚNG: nó nối hai câu tính vốn là một, điền số nào vào cũng khớp. Bài sau
+đưa ra một dấu `=` khác hẳn: loại chỉ đúng với **một vài** con số, và việc của
+bạn là đi tìm chúng.
 ::::
 
 ::::checkpoint{mastery=0.8}

@@ -101,8 +101,9 @@ mình vừa phát hiện ra một luật.
 
 Đặt hai cặp cạnh nhau thì ranh giới hiện rõ:
 
-- Cặp của An và Byte: trùng ở **mọi** dòng → **tương đương**. Chúng là một câu
-  tính, chỉ viết theo hai lối.
+- Cặp của An và Byte: soi tới đâu cũng **chưa thấy dòng nào lệch** → *có lẽ*
+  tương đương. Sáu dòng chưa phải "mọi dòng", nên ta còn nợ một lý do — lát nữa
+  sẽ trả.
 - Cặp hai cái khay: trùng ở **một** dòng → **không** tương đương. Chúng là hai
   câu tính khác nhau, tình cờ gặp nhau một chỗ.
 

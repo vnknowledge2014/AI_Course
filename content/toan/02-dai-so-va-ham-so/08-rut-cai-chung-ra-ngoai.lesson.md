@@ -350,7 +350,15 @@ Nhưng luật không hề nói phần chung phải là số. Nó nói phần chu
 ở mọi cụm*. Vậy còn thứ kia trên mặt giấy thì sao — cái **ô trống**?
 
 Buổi sáng, khách quen của Byte ai cũng mua đúng như nhau: mỗi người `n` ổ. Sáng
-có 3 khách quen, chiều có 5 khách quen. Số bánh cả ngày viết ra là:
+có 3 khách quen, chiều có 5 khách quen.
+
+Dừng một giây ở chữ `n` ấy, vì nó **không phải** cái `n` của mấy bài vừa rồi —
+ở đó `n` đếm số ổ Byte bán thêm, còn ở đây nó đếm số ổ mỗi khách quen mua. Cùng
+một chữ, hai ô trống khác nhau, và điều đó hoàn toàn bình thường: **một chữ chỉ
+có nghĩa bên trong đúng cái đề đang nói.** Đổi đề thì đọc lại nghĩa của nó, đừng
+mang nghĩa cũ sang.
+
+Số bánh cả ngày viết ra là:
 
 ```text
 3n + 5n
