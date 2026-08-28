@@ -274,6 +274,14 @@ assert trai_sau == 30000, "sau khi bớt, đĩa trái còn 6000 × n tức 30000
   # Đĩa phải có hai mảnh: phần đi theo số ổ và 30 000 đứng yên. Thiếu dấu cộng
   # nghĩa là một trong hai mảnh bị bỏ.
   - kind: uses-operator, target: +, min: 1
+  # Số 15 000 chỉ được xuất hiện ĐÚNG MỘT lần — ở đĩa trái.
+  #
+  # Không có trần này thì `bot = 15000 * n - 30000` qua sạch bốn tầng: ở `n = 5`
+  # nó ra đúng 45 000, bằng hệt `9000 * n`. Mà đó lại là đúng cái sai bài này
+  # cảnh báo — `bot` phải là cụm CÓ MẶT Ở CẢ HAI ĐĨA, không phải đĩa trái trừ
+  # tiền thuê. Hai bên bằng nhau ở n = 5 vì n = 5 chính là nghiệm, nên không
+  # cách chấm nào dựa vào giá trị phân biệt nổi; chỉ đếm số 15 000 mới thấy.
+  - kind: has-literal, target: 15000, max: 1
   forbidAst:
   # Lưới thứ hai: hai con số KẾT QUẢ. Lời giải thật dựng chúng từ `n` nên không
   # chứa nguyên văn cái nào; đáp án chép cứng thì chứa.

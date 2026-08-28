@@ -285,7 +285,7 @@ buoc_3_4 = san(4) - san(3)
 buoc_4_5 = ___
 buoc_5_6 = ___
 
-# Cột thứ tư: hai ô liền nhau của cột thứ ba chênh nhau bao nhiêu?
+# Cột thứ tư: lấy bước 4→5 TRỪ bước 3→4 (hai ô liền nhau của cột thứ ba).
 buoc_cua_buoc = ___
 
 print(buoc_3_4)
@@ -303,7 +303,7 @@ buoc_3_4 = san(4) - san(3)
 buoc_4_5 = san(5) - san(4)
 buoc_5_6 = san(6) - san(5)
 
-# Cột thứ tư: hai ô liền nhau của cột thứ ba chênh nhau bao nhiêu?
+# Cột thứ tư: lấy bước 4→5 TRỪ bước 3→4 (hai ô liền nhau của cột thứ ba).
 buoc_cua_buoc = buoc_4_5 - buoc_3_4
 
 print(buoc_3_4)

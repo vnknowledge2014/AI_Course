@@ -289,7 +289,7 @@ assert tong_ca_ngay == 38, "32 ổ của khách quen cộng 6 ổ của dì Tư 
 - kind: attention
   body: Hai dòng `sang` và `chieu` đều có dạng "mấy lần n". Đếm xem cả ngày có tất cả mấy cái gói n. Còn dòng `di_tu` thì không có chữ n nào — hỏi xem nó có vào chung được không.
 - kind: strategy
-  body: Gộp hai cụm cùng chữ là cộng hai con số đứng trước chữ ấy, rồi giữ nguyên chữ. Chỗ trống thứ hai thì lấy cụm vừa gộp cộng thêm 6 và dừng lại — đừng cộng 6 vào con số đứng trước n.
+  body: Gộp hai cụm cùng chữ là cộng hai con số đứng trước chữ ấy, rồi giữ nguyên chữ. Chỗ trống thứ hai thì VIẾT LẠI cụm vừa gộp — `8 * n`, chứ không phải cái tên `gop_khach_quen` — rồi cộng thêm 6 và dừng lại. Đừng cộng 6 vào con số đứng trước n.
 - kind: one-line
   body: "Chỗ trống thứ nhất là `8 * n`, chỗ trống thứ hai là `8 * n + 6`."
 :::

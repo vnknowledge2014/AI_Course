@@ -299,7 +299,12 @@ assert moi_6, "riêng n = 6 thì câu mới phải ra True — hai khay đúng 1
   - kind: uses-name, target: n, min: 6
   # Con số 12 là thứ cả bước biến đổi này sinh ra — 20 bớt đi 8. Lời giải thật
   # có nó; mọi kiểu điền bừa thì không.
-  - kind: has-literal, target: 12
+  # KHÔNG đòi nguyên văn con số 12.
+  #
+  # Bài viết ở trên: "Đĩa phải còn `20 − 8`, tức 12 ổ" — nên `2 * n == 20 - 8`
+  # cũng là chép đúng lời bài, thậm chí còn cho thấy phép bớt ở đĩa phải rõ hơn.
+  # Đòi nguyên văn 12 là đánh trượt đúng một trong hai dạng mà chính bài bày ra.
+  # Chỗ chấm thật nằm ở `==` sáu lần, `n` sáu lần và regex output.
   forbidAst:
   # Lưới thứ hai. Lời giải thật không chứa `True` hay `False` viết tay, nên hai
   # luật này chỉ cản đúng người gõ cứng câu trả lời.

@@ -285,14 +285,24 @@ assert chi_nhieu == 9030000, "9000 × 1000 + 30000 = 9030000 đồng tiền chi 
   onFail: bốn chỗ trống phải dựng từ tên của ngày hôm đó, không phải từ con số đã tính sẵn — gõ cứng bốn con số thì cái bảng này không còn chứng minh được gì
   requireAst:
   # Bốn cái đĩa, bốn phép nhân với số ổ. Khung khởi đầu không có dấu `*` nào.
-  - kind: uses-operator, target: *, min: 4
+  # Hai phép nhân là sàn: mỗi ngày một cái ở đĩa trái. Đĩa phải viết được bằng
+  # hai lối — `9000 * n_it + 30000` hoặc `thu_it + 30000` — và lối thứ hai nói
+  # ra điều bài đi tìm còn rõ hơn, nên đòi bốn phép nhân là đánh trượt nó.
+  - kind: uses-operator, target: *, min: 2
   # Hai đĩa phải đều có 30 000 thuê chỗ cộng vào. Thiếu dấu cộng nghĩa là hai
   # đĩa bị dựng giống hệt nhau, và lúc đó khoảng cách ra 0 vì một lý do sai.
   - kind: uses-operator, target: +, min: 2
   # Mỗi ngày phải được ĐỌC từ cái tên của nó, hai lần — một lần cho mỗi đĩa.
   # Gõ `9000 * 5` cũng ra 45000, nhưng lúc đó ô trống đã bị thay bằng tay.
-  - kind: uses-name, target: n_it, min: 2
-  - kind: uses-name, target: n_nhieu, min: 2
+  # Mỗi ngày phải được ĐỌC ít nhất một lần, không được gõ số thay.
+  #
+  # Trước đây đòi 2, tức ngầm bắt đĩa phải cũng phải viết lại `9000 * n_it`. Như
+  # thế đánh trượt `chi_it = thu_it + 30000` — lời giải đúng số, đúng nghĩa, và
+  # nói ra được điều bài này đi tìm rõ hơn cả lời giải mẫu: hai đĩa lệch nhau
+  # đúng 30 000, không dính gì tới số ổ. Con số kết quả vẫn bị `has-literal`
+  # phía dưới chặn.
+  - kind: uses-name, target: n_it, min: 1
+  - kind: uses-name, target: n_nhieu, min: 1
   forbidAst:
   # Lưới thứ hai: bốn con số KẾT QUẢ. Lời giải thật dựng chúng từ hai cái tên
   # nên không chứa nguyên văn cái nào; đáp án chép cứng thì chứa đủ bốn.
