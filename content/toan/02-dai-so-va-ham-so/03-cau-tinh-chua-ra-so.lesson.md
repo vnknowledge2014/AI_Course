@@ -196,6 +196,11 @@ chỗ trống là chuyện có thật, và bài 6 dựng riêng để bạn gặ
 
 Cả ba chỗ trống phải viết bằng **chữ `n`**, không bằng con số 8.
 
+Và chép cho **giống hình dạng tờ giấy**: tờ B nói *cộng hai ổ rồi mới đem nhân*,
+nên trong câu phải thấy cụm `n + 2` nằm trong ngoặc. Viết `15000 * n + 30000` ra
+đúng cùng con số ấy — nhưng nó là tờ giấy khác, tờ nói *cộng ba mươi nghìn tiền*.
+Bài này đi tìm chỗ khác nhau giữa các hình dạng, nên hình dạng là thứ được chấm.
+
 ```python title=starter
 # Sáng nay bán 8 ổ. Đây là con số đưa cho cả ba tờ giấy.
 n = 8
@@ -277,6 +282,11 @@ assert to_c == 90000, "8 ổ bớt 2 ổ cháy còn 6 ổ, mỗi ổ 15 000"
   - kind: has-literal, target: 140000
   - kind: has-literal, target: 150000
   - kind: has-literal, target: 90000
+  # 30000 là 15000 × 2 nhân sẵn trong đầu. Ai viết `15000 * n + 30000` cho tờ B
+  # thì ra đúng cùng con số, nên không assert nào bắt được — mà đó lại là tờ
+  # giấy khác hẳn: cộng ba mươi nghìn TIỀN, chứ không phải cộng hai Ổ rồi mới
+  # nhân. Lời giải thật không chứa 30000 ở đâu cả.
+  - kind: has-literal, target: 30000
 - tier: tests
   timeoutMs: 4000
 - tier: output

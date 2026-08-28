@@ -111,6 +111,14 @@ _TOAN_TU = {
 }
 
 def _khop_toan_tu(nut, tg):
+    # Dấu âm MỘT NGÔI (\`-3\`) là \`UnaryOp(USub)\`, không phải \`BinOp(Sub)\`, nên
+    # target \`-\` không đếm nó. Trước khi có target riêng này, bài
+    # \`khi-khong-chay-nguoc-duoc\` không có cách nào đòi người học viết ra dấu
+    # âm: máy vuông nhả ĐÚNG CÙNG con số cho 3 và −3 — đó chính là điều bài dạy
+    # — nên không assert nào và không tier \`output\` nào phân biệt nổi
+    # \`dien_tich(3)\` với \`dien_tich(-3)\`. Chỉ nhìn vào MÃ mới thấy.
+    if tg in ("neg", "dau-am"):
+        return 1 if isinstance(nut, ast.UnaryOp) and isinstance(nut.op, ast.USub) else 0
     if tg == "and":
         return 1 if isinstance(nut, ast.BoolOp) and isinstance(nut.op, ast.And) else 0
     if tg == "or":
@@ -129,6 +137,8 @@ def _khop_toan_tu(nut, tg):
     return 0
 
 def _loai(nut, ten):
+    if ten in ("neg", "dau-am"):
+        return isinstance(nut, ast.UnaryOp) and isinstance(nut.op, ast.USub)
     if ten in ("and", "or"):
         lop = ast.And if ten == "and" else ast.Or
         return isinstance(nut, ast.BoolOp) and isinstance(nut.op, lop)

@@ -319,6 +319,13 @@ assert ket(0) == 50000, "bỏ 0 ổ vào máy két thì còn đúng chỗ tiền
   # mỗi máy đúng 1 lần; lời giải gọi 2 lần.
   - kind: uses-call, target: dien_tich, min: 2
   - kind: uses-call, target: ket, min: 2
+  # Hai dấu trừ: một ở `dien_tich(-3)`, một ở `ket_nhieu - ket_it`.
+  #
+  # Không có luật này thì nộp `dien_tich(3)` cho ô ÂM vẫn qua sạch cả bốn tầng
+  # — vì máy vuông nhả ra ĐÚNG CÙNG con số cho 3 và −3, mà đó chính là điều
+  # bài đang dạy. Không assert nào bắt nổi chuyện ấy, không tier `output` nào
+  # bắt nổi: chỉ nhìn vào MÃ mới thấy dấu âm có được viết ra hay không.
+  - kind: uses-operator, target: dau-am, min: 1
   forbidAst:
   # `uses-operator` đếm trên cả file nên không chặn nổi đáp án chép cứng ĐÚNG
   # MỘT chỗ. Bốn luật dưới chặn từng kết quả một. Chúng không cản cách viết hợp
