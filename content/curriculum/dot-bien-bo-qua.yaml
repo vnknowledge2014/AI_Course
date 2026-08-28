@@ -14,9 +14,6 @@
 # theo mọi bài dùng chung sổ ấy), hoặc gói việc vào một hàm rồi gọi nhiều lần
 # — mà hàm là khái niệm của T1.3, tới sau. Từ T1.3 trở đi thì không còn cớ ấy.
 
-# DỮ LIỆU KHÔNG CHẠM MỐC, và khái niệm của bài là `len()`, không phải chỗ hoà của phép so. Đáng ghi vào nợ: nếu sau này thêm một cái tên dài ĐÚNG bằng bề rộng cột thì bài mạnh hơn hẳn.
-- 'nen-tang.gia-tri-bien-kieu.chuoi-dai-bao-nhieu · do-ten-vao-cot · đổi MỌI dấu <= thành < (2 chỗ)'
-
 # DỮ LIỆU KHÔNG CHẠM MỐC. `so_km <= 0` là chốt chặn dữ liệu vô lý; không đơn nào đúng 1 km. Khái niệm của bài là cổng chặn sớm, không phải chỗ hoà.
 - 'nen-tang.ham-vien-gach.chan-ngay-o-cua · cong-cho-don-giao-hang · đổi MỌI hằng số 0 thành 1 (1 chỗ)'
 
@@ -111,9 +108,9 @@
 # TƯƠNG ĐƯƠNG THẬT, đã tính tay: `12 − 5 == 5 − 12` và `12 − 6 == 6 − 12` đều `False`. Bài chứng minh phép trừ KHÔNG giao hoán, và điều ấy đúng với mọi cặp số khác nhau — con số cụ thể không phải thứ bài dạy.
 - 'toan.cam-nhan-so.mang-chu-nhat-xoay-mot-goc · trong-tai-hai-cau · đổi MỌI hằng số 5 thành 6 (2 chỗ)'
 
-# TƯƠNG ĐƯƠNG THẬT, đã tính tay: `7/4 > 1` và `7/5 > 1` đều `True`; `3/4 > 1` và `3/5 > 1` đều `False`; `4/4 > 1` cũng `False`. Bài dạy "phân số vượt được số 1", đúng với mọi mẫu ấy. ĐÁNG LÀM SAU: `4/4` rơi ĐÚNG vào mốc 1 — thêm nó làm ca thứ ba thì bài dạy được cả chỗ hoà, mà bây giờ nó chưa chạm tới.
+# TƯƠNG ĐƯƠNG THẬT, đã tính tay: `7/4 > 1` và `7/5 > 1` đều `True`; `3/4 > 1` và `3/5 > 1` đều `False`; `4/4 > 1` cũng `False`. Bài dạy "phân số vượt được số 1", đúng với mọi mẫu ấy. Đã soi kỹ hơn: bài KHÔNG thiếu chỗ hoà — khối test của nó có sẵn `assert 4/4 == 1`. Và thêm một câu `print(4/4 > 1)` cũng không đóng được đột biến này, vì `5/5 > 1` cũng `False` y như `4/4 > 1`. Nên không sửa: một thay đổi không đóng được gì mà chỉ làm bài dài thêm thì không đáng.
 - 'toan.cam-nhan-so.phan-so-khong-bi-nhot-duoi-mot · do-hai-luong · đổi MỌI hằng số 4 thành 5 (2 chỗ)'
 
-# TƯƠNG ĐƯƠNG THẬT, đã tính tay: `7/4 > 1` và `7/5 > 1` đều `True`; `3/4 > 1` và `3/5 > 1` đều `False`; `4/4 > 1` cũng `False`. Bài dạy "phân số vượt được số 1", đúng với mọi mẫu ấy. ĐÁNG LÀM SAU: `4/4` rơi ĐÚNG vào mốc 1 — thêm nó làm ca thứ ba thì bài dạy được cả chỗ hoà, mà bây giờ nó chưa chạm tới.
+# TƯƠNG ĐƯƠNG THẬT, đã tính tay: `7/4 > 1` và `7/5 > 1` đều `True`; `3/4 > 1` và `3/5 > 1` đều `False`; `4/4 > 1` cũng `False`. Bài dạy "phân số vượt được số 1", đúng với mọi mẫu ấy. Đã soi kỹ hơn: bài KHÔNG thiếu chỗ hoà — khối test của nó có sẵn `assert 4/4 == 1`. Và thêm một câu `print(4/4 > 1)` cũng không đóng được đột biến này, vì `5/5 > 1` cũng `False` y như `4/4 > 1`. Nên không sửa: một thay đổi không đóng được gì mà chỉ làm bài dài thêm thì không đáng.
 - 'toan.cam-nhan-so.phan-so-khong-bi-nhot-duoi-mot · do-hai-luong · đổi MỌI hằng số 3 thành 4 (1 chỗ)'
 

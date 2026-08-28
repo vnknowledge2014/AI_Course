@@ -178,21 +178,27 @@ lỗi gì cả. Để `len` đếm thì con số luôn khớp với cái tên đ
 ::::
 
 ::::code{#do-ten-vao-cot}
-Sổ chi tiêu in ra hai dòng, mỗi dòng một tên khoản. Byte cần biết tên nào vừa
+Sổ chi tiêu in ra ba dòng, mỗi dòng một tên khoản. Byte cần biết tên nào vừa
 cột 12 chỗ, tên nào tràn ra ngoài.
 
-Hai chỗ trống, mỗi khối một chỗ, đều nằm ngay trước dấu `<=`.
+Ba chỗ trống, mỗi khối một chỗ, đều nằm ngay trước dấu `<=`.
 
-Bài chấm bằng **cả hai** dòng chứ không riêng dòng nào. Chấm bằng một dòng thì
+Bài chấm bằng **cả ba** dòng chứ không riêng dòng nào. Chấm bằng một dòng thì
 không phân biệt được: với `"cà phê"` thì gõ thẳng số `6`, gõ `0`, hay gõ
-`len(ten_1)` đều cho ra y hệt câu "vừa cột". Hai tên ở đây kẹp mốc 12 từ hai
+`len(ten_1)` đều cho ra y hệt câu "vừa cột". Hai tên đầu kẹp mốc 12 từ hai
 phía — 6 và 13 — nên chỉ cách đếm thật mới xử đúng cả hai.
+
+Tên thứ ba đứng ĐÚNG trên mốc: `"bạc xỉu nóng"` dài đúng 12 chỗ, không thừa
+không thiếu. Nó ở đây để trả lời một câu mà hai tên kia không trả lời được:
+vừa **khít** cột thì tính là vừa hay là tràn? Dấu `<=` nói vừa — và đó là chỗ
+duy nhất trong cả bài phân biệt được `<=` với `<`.
 
 ```python title=starter
 BE_RONG_COT = 12
 
 ten_1 = "cà phê"
 ten_2 = "cà phê sữa đá"
+ten_3 = "bạc xỉu nóng"
 
 if ___ <= BE_RONG_COT:
     print(ten_1, "— vừa cột")
@@ -203,6 +209,11 @@ if ___ <= BE_RONG_COT:
     print(ten_2, "— vừa cột")
 else:
     print(ten_2, "— tràn cột")
+
+if ___ <= BE_RONG_COT:
+    print(ten_3, "— vừa cột")
+else:
+    print(ten_3, "— tràn cột")
 ```
 
 ```python title=solution
@@ -210,6 +221,7 @@ BE_RONG_COT = 12
 
 ten_1 = "cà phê"
 ten_2 = "cà phê sữa đá"
+ten_3 = "bạc xỉu nóng"
 
 if len(ten_1) <= BE_RONG_COT:
     print(ten_1, "— vừa cột")
@@ -220,12 +232,17 @@ if len(ten_2) <= BE_RONG_COT:
     print(ten_2, "— vừa cột")
 else:
     print(ten_2, "— tràn cột")
+
+if len(ten_3) <= BE_RONG_COT:
+    print(ten_3, "— vừa cột")
+else:
+    print(ten_3, "— tràn cột")
 ```
 
 ```python title=test
-# Chấm bằng TRỌN VẸN màn hình theo đúng thứ tự dòng (`match: regex`), trên HAI
+# Chấm bằng TRỌN VẸN màn hình theo đúng thứ tự dòng (`match: regex`), trên BA
 # tên chứ không phải một — cộng thêm một luật `static` đòi `len` xuất hiện ít
-# nhất hai lần.
+# nhất ba lần.
 #
 # Vì sao cần cả hai lớp:
 #   `True` / `1` / `0`      → cả hai câu điều kiện thành đúng, dòng hai in
@@ -238,6 +255,11 @@ else:
 #
 # 6 và 13 kẹp mốc 12 từ hai phía, nên không có một con số cố định nào điền vào
 # cả hai chỗ trống mà qua được.
+#
+# Tên thứ ba dài ĐÚNG 12 — đúng cái mốc. Không có nó thì `<=` và `<` cho ra y
+# hệt nhau trên cả hai tên kia (6 và 13 đều không chạm mốc), nên bài dạy dấu
+# `<=` mà không hề kiểm được chỗ `<=` khác `<`. Cổng đột biến chỉ ra chỗ ấy:
+# đổi mọi `<=` thành `<` mà vẫn qua sạch. Bây giờ thì không qua nữa.
 #
 # Người học chưa biết viết assert nên khối này không thêm phép kiểm nào; nó ở
 # đây để nói rõ vì sao hai tên là hai, không phải một.
@@ -256,13 +278,13 @@ pass
 :::validate
 - tier: static
   requireAst:
-  - kind: uses-call, target: len, min: 2
+  - kind: uses-call, target: len, min: 3
   onFail: bài này đo độ dài bằng `len`, không bằng con số gõ tay
 - tier: run
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^cà phê — vừa cột\ncà phê sữa đá — tràn cột\s*$
+  expect: ^cà phê — vừa cột\ncà phê sữa đá — tràn cột\nbạc xỉu nóng — vừa cột\s*$
 :::
 ::::
 

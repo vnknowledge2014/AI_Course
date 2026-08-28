@@ -82,10 +82,15 @@ kèm lý do riêng**. Khai bừa để cổng xanh là tự tay dựng lại đ�
 
 **Hai chỗ đáng làm sau, cổng chỉ ra được mà người đọc thì không:**
 
-- `chuoi-dai-bao-nhieu` — thêm một cái tên dài ĐÚNG bằng bề rộng cột thì bài
-  mạnh hơn hẳn, vì `<=` mới có chỗ chứng tỏ mình khác `<`.
-- `phan-so-khong-bi-nhot-duoi-mot` — `4/4` rơi ĐÚNG vào mốc 1. Thêm nó làm ca
-  thứ ba thì bài dạy được cả chỗ hoà; bây giờ nó chưa chạm tới.
+- ~~`chuoi-dai-bao-nhieu`~~ — **ĐÃ LÀM.** Thêm `ten_3 = "bạc xỉu nóng"`, dài
+  đúng 12 chỗ tức đúng bề rộng cột. Giờ `<=` mới có chỗ chứng tỏ mình khác `<`:
+  vừa khít cột thì tính là vừa. Miễn trừ của bài đã BỎ — bài tự phân biệt được,
+  không cần tha nữa.
+- ~~`phan-so-khong-bi-nhot-duoi-mot`~~ — **rút lại.** Soi kỹ thì khối test của
+  bài đã có sẵn `assert 4/4 == 1`, nên chỗ hoà KHÔNG thiếu. Và thêm một câu
+  `print(4/4 > 1)` cũng chẳng đóng được đột biến, vì `5/5 > 1` cũng `False` y
+  như `4/4 > 1`. Không sửa — một thay đổi không đóng được gì mà chỉ làm bài dài
+  thêm thì không đáng.
 
 **Từ T1.3 trở đi không còn cái cớ "bài chưa có hàm".** Bài mới phải chấm được
 chỗ hoà nếu chỗ hoà là thứ nó dạy — lời nhắc cho người viết đã có trong script
