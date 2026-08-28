@@ -80,8 +80,8 @@ Ba máy, ba tên, ba câu trả lời không lẫn vào nhau được nữa:
 > `c(n) = 3 × n` — `c(20) = 60`
 
 **Một chỗ phải cẩn thận, vì nó trông y hệt một thứ khác.** `t(20)` **không**
-phải `t` nhân với 20. Ở T2.1 bạn từng viết `3(20)` và nó đúng là 3 × 20 — nhưng
-ở đó `3` là một **con số**, mà hai con số đứng cạnh nhau thì đúng là nhân. Còn
+phải `t` nhân với 20. Từ bài 7 bạn quen viết `15000n` để nói `15000 × n` — một
+**con số** đứng sát cái gì đó thì đúng là nhân. Còn
 `t` một mình không phải con số nào cả; nó là một cái máy. Nhân một cái máy với
 20 thì không có nghĩa gì. Dấu ngoặc đứng ngay sau **tên một cái máy** mang nghĩa
 khác hẳn: *bỏ cái này vào.*

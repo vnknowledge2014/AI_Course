@@ -246,7 +246,9 @@ assert tien_khach_1 == 30000, "điền 2 vào ô trống: 15 000 × 2"
 assert tien_khach_2 == 75000, "điền 5 vào ô trống: 15 000 × 5"
 assert tien_khach_3 == 135000, "điền 9 vào ô trống: 15 000 × 9"
 # Ráp ngược lại: từ 2 ổ lên 5 ổ là thêm đúng ba ổ, nên tiền chênh phải đúng ba
-# lần giá một ổ. Câu này chỉ đạt khi cả hai chỗ trống cùng dựng trên `gia_mot_o`.
+# lần giá một ổ. Câu này bắt hai chỗ trống ăn khớp NHAU — nó vẫn đạt với đáp án
+# chép cứng 30000 và 75000 (45000 == 45000), nên chỗ chặn chép cứng nằm ở
+# `forbidAst` bên dưới, không nằm ở đây.
 assert tien_khach_2 - tien_khach_1 == gia_mot_o * 3, "từ 2 ổ lên 5 ổ là thêm ba ổ, nên tiền thêm đúng ba lần giá một ổ"
 ```
 

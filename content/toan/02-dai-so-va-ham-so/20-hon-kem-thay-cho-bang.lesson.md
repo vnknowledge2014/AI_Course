@@ -81,7 +81,8 @@ một số nào cả — nó là một lời mô tả về **cả một đám** 
 mọi số lớn hơn nữa. Tập nghiệm không còn là một chấm; nó là một **tia** chạy mãi
 sang phải.
 
-Vẽ nó lên trục số của T2.1:
+Vẽ nó lên **thanh số** của T2.1 — từ đây gọi là **trục số**, vẫn đúng cái
+thanh ấy, chỉ đổi tên cho khớp với lúc nó nằm ngang dưới một mặt phẳng:
 
 ```text
    0   1   2   3   4   5   6   7   8   9  10

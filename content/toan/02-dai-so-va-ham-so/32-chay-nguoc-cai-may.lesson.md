@@ -358,10 +358,10 @@ lưỡng lự.
 
 Bây giờ lôi cái máy ở bài 28 ra — máy đo diện tích mảnh sân hình vuông:
 
-> `dien_tich(n) = n × n`
+> `san(n) = n × n`
 
 Bài 28 đã tách bạch một chuyện, và nó chốt bằng đúng một dòng kiểm:
-`dien_tich(-3)` bằng `9`. **Cái máy** `n × n` nhận mọi con số, kể cả số âm, vì
+`san(-3)` bằng `9`. **Cái máy** `n × n` nhận mọi con số, kể cả số âm, vì
 T2.1 đã dựng đủ số âm cho nó; còn **mảnh sân** chỉ là một lần người ta đem cái
 máy ấy ra dùng.
 

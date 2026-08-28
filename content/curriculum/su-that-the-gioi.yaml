@@ -22,9 +22,9 @@
   cho_nghin: 1
   pham_vi: content/toan
   tu_khoa:
-    - 'mỗi ổ bán[^.\n]{0,12}?(\d[\d. ]*\d|\d)\s*(?:nghìn|đồng|đ\b)'
-    - 'một ổ bán[^.\n]{0,12}?(\d[\d. ]*\d|\d)\s*(?:nghìn|đồng|đ\b)'
-    - 'bán (\d[\d. ]*\d|\d) nghìn một ổ'
+    - 'mỗi ổ bán[^.\n]{0,12}?({SO})\s*(?:nghìn|đồng|đ\b)'
+    - 'một ổ bán[^.\n]{0,12}?({SO})\s*(?:nghìn|đồng|đ\b)'
+    - 'bán ({SO}) nghìn một ổ'
   ngoai_le:
     - 'content/toan/02-dai-so-va-ham-so/36-boss-xe-banh-mi-cua-byte.lesson.md: câu 3 của BOSS cho GIÁ TĂNG DẦN (15 + x nghìn) — giá không còn là hằng số, đó chính là đề bài'
     - 'content/toan/02-dai-so-va-ham-so/29-dinh-va-hai-ben-doi-xung.lesson.md: cả bài dựng trên việc TĂNG/HẠ giá bán để tìm đỉnh — giá là biến của bài, không phải hằng số bị trôi'
@@ -34,16 +34,16 @@
   cho_nghin: 1
   pham_vi: content/toan
   tu_khoa:
-    - '(?:nguyên liệu|tiền vốn)[^.\n]{0,22}?(\d[\d. ]*\d|\d)\s*(?:nghìn|đồng|đ\b)'
-    - 'mỗi ổ tốn (\d[\d. ]*\d|\d)\s*(?:nghìn|đồng|đ\b)'
+    - '(?:nguyên liệu|tiền vốn)[^.\n]{0,22}?({SO})\s*(?:nghìn|đồng|đ\b)'
+    - 'mỗi ổ tốn ({SO})\s*(?:nghìn|đồng|đ\b)'
 
 - ten: tien-thue-cho
   gia_tri: 30000
   cho_nghin: 1
   pham_vi: content/toan
   tu_khoa:
-    - '(\d[\d. ]*\d|\d)\s*(?:nghìn|đồng|đ\b)[^.\n]{0,16}?(?:tiền )?thuê chỗ'
-    - 'thuê chỗ[^.\n]{0,16}?(\d[\d. ]*\d|\d)\s*(?:nghìn|đồng|đ\b)'
+    - '({SO})\s*(?:nghìn|đồng|đ\b)[^.\n]{0,16}?(?:tiền )?thuê chỗ'
+    - 'thuê chỗ[^.\n]{0,16}?({SO})\s*(?:nghìn|đồng|đ\b)'
 
 - ten: di-tu-lay-san
   gia_tri: 2
@@ -57,7 +57,7 @@
   cho_nghin: 1
   pham_vi: content/toan
   tu_khoa:
-    - 'mỗi ổ (?:\*\*)?lãi (?:\*\*)?(\d[\d. ]*\d|\d)\s*(?:nghìn|đồng|đ\b)'
-    - 'lãi (\d[\d. ]*\d|\d)\s*(?:nghìn|đồng|đ\b) một ổ'
+    - 'mỗi ổ (?:\*\*)?lãi (?:\*\*)?({SO})\s*(?:nghìn|đồng|đ\b)'
+    - 'lãi ({SO})\s*(?:nghìn|đồng|đ\b) một ổ'
   ngoai_le:
     - 'content/toan/02-dai-so-va-ham-so/29-dinh-va-hai-ben-doi-xung.lesson.md: cùng lẽ — cả bài chạy trên lãi mỗi ổ đổi theo mức tăng giá'

@@ -38,8 +38,8 @@ Bài trước để lại một câu hỏi rất thực tế: muốn biết **ti
 Trong tủ máy của quán, hai việc ấy đã là hai cái máy riêng từ lâu:
 
 - **Máy `thu`** — bỏ vào **số ổ**, nhả ra **tiền thu**. `thu(n) = 15000 × n`.
-- **Máy `lai`** — bỏ vào **tiền thu**, nhả ra **tiền lãi**. `lai(t) = t − 100000`
-  (một trăm nghìn là tiền thuê chỗ mỗi ngày).
+- **Máy `lai`** — bỏ vào **tiền thu**, nhả ra **tiền lãi**. `lai(t) = t − 30000`
+  (ba mươi nghìn là tiền thuê chỗ mỗi ngày, đúng con số bài 27 đã chốt).
 
 Byte đang phải chạy tay hai lượt: bấm máy thứ nhất, cầm con số nó nhả ra, đi
 mấy bước sang máy thứ hai, bỏ con số ấy vào. Ngày nào cũng thế, mỗi ngày mấy
@@ -62,16 +62,16 @@ thứ**.
 ::::
 
 ::::example{#cai-ong-noi}
-Byte bán 6 ổ. Con số đi qua cái ống:
+Byte bán 1 ổ. Con số đi qua cái ống:
 
 ```text
-   n  ──►  [ thu ]  ──►  90 000  ──►  [ lai ]  ──►  −10 000
+   n  ──►  [ thu ]  ──►  15 000  ──►  [ lai ]  ──►  −15 000
    │                     │                          │
    số ổ                  tiền thu                   tiền lãi
 ```
 
-Con số `90 000` ở giữa **có thật**. Nó nằm trong ống, tồn tại đúng một khoảnh
-khắc. Nhưng người hỏi "bán 6 ổ thì lãi bao nhiêu" không cần thấy nó — họ chỉ
+Con số `15 000` ở giữa **có thật**. Nó nằm trong ống, tồn tại đúng một khoảnh
+khắc. Nhưng người hỏi "bán 1 ổ thì lãi bao nhiêu" không cần thấy nó — họ chỉ
 cần con số bên phải cùng.
 
 Đó chính là điều mới của bài này: khi bắc ống xong, **hai cái máy hoá thành
@@ -81,11 +81,11 @@ riêng của nó:
 ```text
   số ổ n │     thu(n) │  lai(thu(n))
 ─────────┼────────────┼─────────────
-       0 │          0 │      -100000
-       6 │      90000 │       -10000
-       7 │     105000 │         5000
-      20 │     300000 │       200000
-      30 │     450000 │       350000
+       0 │          0 │       -30000
+       1 │      15000 │       -15000
+       2 │      30000 │            0
+      20 │     300000 │       270000
+      30 │     450000 │       420000
 ```
 
 Cột giữa là thứ nằm trong ống. Che nó đi thì còn đúng hai cột — **một cột vào,
@@ -108,15 +108,15 @@ def thu(n):
     return 15000 * n
 
 def lai(t):
-    return t - 100000
+    return t - 30000
 
 # chạy tay hai lượt, cầm con số ở giữa
-tien_thu = thu(6)
+tien_thu = thu(1)
 print(tien_thu)
 print(lai(tien_thu))
 
 # bắc ống: một lượt duy nhất, không ai cầm con số ở giữa
-print(lai(thu(6)))
+print(lai(thu(1)))
 ```
 
 Máy in ra:
@@ -141,7 +141,7 @@ def thu(n):
     return 15000 * n
 
 def lai(t):
-    return t - 100000
+    return t - 30000
 
 print(lai(thu(4)))
 ```
@@ -234,22 +234,22 @@ Ba buổi được chọn để cho ra ba con số khác hẳn nhau — một bu
 lãi vừa, một buổi lãi to. Gõ cứng một con số thì hai buổi kia sai ngay.
 
 Và một luật của riêng bài này: **không mở máy nào ra**. Trong ba chỗ trống,
-đừng viết lại `15000` hay `100000` — cứ gọi tên hai cái máy là đủ.
+đừng viết lại `15000` hay `30000` — cứ gọi tên hai cái máy là đủ.
 
 ```python title=starter
 def thu(n):
     return 15000 * n
 
 def lai(t):
-    return t - 100000
+    return t - 30000
 
-# Ba buổi chợ: 6 ổ, 20 ổ, 30 ổ.
+# Ba buổi chợ: 1 ổ, 20 ổ, 30 ổ.
 # Mỗi lần cho SỐ Ổ đi qua cả hai máy, không cầm con số ở giữa.
-lai_ban_6 = ___
+lai_ban_1 = ___
 lai_ban_20 = ___
 lai_ban_30 = ___
 
-print(lai_ban_6)
+print(lai_ban_1)
 print(lai_ban_20)
 print(lai_ban_30)
 ```
@@ -259,15 +259,15 @@ def thu(n):
     return 15000 * n
 
 def lai(t):
-    return t - 100000
+    return t - 30000
 
-# Ba buổi chợ: 6 ổ, 20 ổ, 30 ổ.
+# Ba buổi chợ: 1 ổ, 20 ổ, 30 ổ.
 # Mỗi lần cho SỐ Ổ đi qua cả hai máy, không cầm con số ở giữa.
-lai_ban_6 = lai(thu(6))
+lai_ban_1 = lai(thu(1))
 lai_ban_20 = lai(thu(20))
 lai_ban_30 = lai(thu(30))
 
-print(lai_ban_6)
+print(lai_ban_1)
 print(lai_ban_20)
 print(lai_ban_30)
 ```
@@ -276,12 +276,12 @@ print(lai_ban_30)
 # Hai câu `!=` chốt đúng cái bẫy của bài — dừng ở giữa ống — và chúng đứng
 # TRƯỚC vì chương trình dừng ngay tại câu vỡ đầu tiên; xếp sau câu `==` bao
 # trùm chúng thì chúng không bao giờ chạy tới.
-assert lai_ban_6 != 90000, "90 000 là tiền THU khi bán 6 ổ — con số ấy mới ra khỏi máy đầu, chưa đi qua máy trừ tiền thuê chỗ"
-assert lai_ban_20 != 300000, "300 000 là tiền THU khi bán 20 ổ; tiền lãi còn phải bớt 100 000 tiền thuê chỗ"
+assert lai_ban_1 != 15000, "15 000 là tiền THU khi bán 1 ổ — con số ấy mới ra khỏi máy đầu, chưa đi qua máy trừ tiền thuê chỗ"
+assert lai_ban_20 != 300000, "300 000 là tiền THU khi bán 20 ổ; tiền lãi còn phải bớt 30 000 tiền thuê chỗ"
 # Ba buổi chợ khác nhau, nên một con số gõ cứng chỉ qua được nhiều nhất một câu.
-assert lai_ban_6 == -10000, "bán 6 ổ thu 90 000, trả 100 000 tiền thuê chỗ, còn thiếu 10 000"
-assert lai_ban_20 == 200000, "bán 20 ổ thu 300 000, trừ 100 000 tiền thuê chỗ"
-assert lai_ban_30 == 350000, "bán 30 ổ thu 450 000, trừ 100 000 tiền thuê chỗ"
+assert lai_ban_1 == -15000, "bán 1 ổ thu 15 000, trả 30 000 tiền thuê chỗ, còn thiếu 15 000"
+assert lai_ban_20 == 270000, "bán 20 ổ thu 300 000, trừ 30 000 tiền thuê chỗ"
+assert lai_ban_30 == 420000, "bán 30 ổ thu 450 000, trừ 30 000 tiền thuê chỗ"
 # Máy nối vẫn là một đường thẳng: mười ổ nữa thì lãi thêm đúng mười lần giá một ổ.
 assert lai_ban_30 - lai_ban_20 == 150000, "thêm 10 ổ thì tiền lãi thêm đúng 150 000 — cái ống không bẻ cong đường thẳng"
 ```
@@ -292,32 +292,34 @@ assert lai_ban_30 - lai_ban_20 == 150000, "thêm 10 ổ thì tiền lãi thêm �
 - kind: strategy
   body: Máy chạy trước là máy nhận được số ổ. Kết quả của nó đem bỏ thẳng vào máy còn lại, nên tên máy chạy trước nằm BÊN TRONG cặp ngoặc của máy chạy sau. Đừng đặt thêm cái tên nào cho con số ở giữa, và đừng viết lại con số nào có sẵn trong ruột hai máy.
 - kind: one-line
-  body: "Ba chỗ trống là `lai(thu(6))`, `lai(thu(20))` và `lai(thu(30))`."
+  body: "Ba chỗ trống là `lai(thu(1))`, `lai(thu(20))` và `lai(thu(30))`."
 :::
 
 :::validate
 - tier: run
   timeoutMs: 4000
 - tier: static
-  onFail: ba chỗ trống phải NỐI hai máy có sẵn — gõ thẳng con số kết quả, hay chép lại 15000 với 100000, đều là mở máy ra thay vì dùng nó
+  onFail: ba chỗ trống phải NỐI hai máy có sẵn — gõ thẳng con số kết quả, hay chép lại 15000 với 30000, đều là mở máy ra thay vì dùng nó
   requireAst:
   # Khung khởi đầu không GỌI máy nào (hai dòng `def` là định nghĩa, không phải
   # lệnh gọi), nên hai luật này chặn được cả đáp án điền bừa lẫn đáp án chỉ
-  # dùng một máy rồi tự trừ tay 100000.
+  # dùng một máy rồi tự trừ tay 30000.
   - kind: uses-call, target: thu, min: 3
   - kind: uses-call, target: lai, min: 3
   forbidAst:
-  # Lưới thứ hai, chặn đúng ba con số KẾT QUẢ. Lời giải thật chỉ chứa 6, 20 và
-  # 30, nên luật này không cản ai làm thật. `10000` chặn cả `-10000`, vì trong
-  # cây cú pháp Python dấu trừ đứng riêng còn hằng số vẫn là 10000.
-  - kind: has-literal, target: 10000
-  - kind: has-literal, target: 200000
-  - kind: has-literal, target: 350000
+  # Lưới thứ hai, chặn hai con số KẾT QUẢ. Lời giải thật chỉ chứa 1, 20 và 30,
+  # nên luật này không cản ai làm thật.
+  #
+  # KHÔNG chặn được 15000 (kết quả buổi thứ nhất là −15000), vì chính ruột máy
+  # `thu` chứa số ấy — luật sẽ nổ ngay trên khung khởi đầu. Chỗ chặn thật cho
+  # buổi ấy là hai luật `uses-call` phía trên: gõ cứng thì không gọi máy nào.
+  - kind: has-literal, target: 270000
+  - kind: has-literal, target: 420000
 - tier: tests
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^-10000\n200000\n350000\s*$
+  expect: ^-15000\n270000\n420000\s*$
 :::
 ::::
 

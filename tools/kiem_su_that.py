@@ -29,9 +29,33 @@ SO_SU_THAT = GOC / 'content/curriculum/su-that-the-gioi.yaml'
 # Một con số trong văn xuôi tiếng Việt: có thể nhóm nghìn bằng dấu cách,
 # dấu cách cứng hoặc dấu chấm.
 SO = r'\d[\d]*(?:[.\u00a0 ]\d{3})*'
+# Dạng dùng trong `tu_khoa`: chữ số HOẶC số viết bằng chữ.
+# (Gán sau khi CHU_RE có giá trị — xem cuối tệp.)
+
+
+# Số viết bằng CHỮ, phần hay gặp trong học liệu tiếng Việt.
+#
+# Bài 34 viết "một trăm nghìn là tiền thuê chỗ" trong khi bài 27 chốt 30 nghìn —
+# một hằng số của thế giới trôi đi, mà cổng này KHÔNG thấy, vì nó chỉ đọc chữ
+# số. Vòng phản biện bắt được bằng mắt; cổng thì không. Một cổng có vùng mù mà
+# không ai biết thì tệ hơn một cổng hẹp mà nói rõ mình hẹp.
+#
+# Bảng này chỉ phủ dạng "<chữ> nghìn" — đủ cho tiền trong mạch T2.1/T2.2. Dạng
+# khác (triệu, tỉ, số ghép dài) vẫn là vùng mù, và `kiem()` in ra điều đó.
+SO_CHU = {
+    'một': 1, 'hai': 2, 'ba': 3, 'bốn': 4, 'năm': 5, 'sáu': 6, 'bảy': 7,
+    'tám': 8, 'chín': 9, 'mười': 10, 'mười lăm': 15, 'hai mươi': 20,
+    'hai mươi lăm': 25, 'ba mươi': 30, 'bốn mươi': 40, 'năm mươi': 50,
+    'sáu mươi': 60, 'một trăm': 100, 'hai trăm': 200, 'ba trăm': 300,
+}
+# Dài trước ngắn, để "hai mươi lăm" không bị "hai" nuốt mất.
+CHU_RE = '|'.join(sorted((re.escape(k) for k in SO_CHU), key=len, reverse=True))
 
 
 def doc_so(s: str) -> int:
+    s = s.strip()
+    if s.lower() in SO_CHU:
+        return SO_CHU[s.lower()] * 1000
     return int(re.sub(r'[.\u00a0 ]', '', s))
 
 
@@ -111,9 +135,15 @@ def kiem():
                 if trong_khoi_ma:
                     continue
                 for kw in tu_khoa:
+                    # `{SO}` trong mẫu bung ra thành "chữ số HOẶC số viết bằng
+                    # chữ". Viết một chỗ thay cho hai chục biến thể, và người
+                    # thêm sự thật mới không phải nhớ bảng số chữ.
+                    kw = kw.replace('{SO}', rf'(?:{SO}|{CHU_RE})')
                     for m in re.finditer(kw, dong, re.I):
                         so_thay = next(
-                            (g for g in m.groups() if g and re.fullmatch(rf'{SO}', g.strip())),
+                            (g for g in m.groups()
+                             if g and (re.fullmatch(rf'{SO}', g.strip())
+                                       or g.strip().lower() in SO_CHU)),
                             None,
                         )
                         if so_thay is None:
@@ -135,6 +165,8 @@ def kiem():
                             'NGOẠI LỆ THỪA — khai miễn trừ mà không có gì để miễn'))
 
     print(f'Đã đối chiếu {tong_kiem} chỗ nhắc tới sự thật thế giới, trên {len(facts)} sự thật đã khai.')
+    print('   (Đọc được chữ số và số viết bằng chữ dạng "<chữ> nghìn". Dạng khác'
+          ' — triệu, tỉ, số ghép dài — vẫn là vùng mù.)')
     if not loi:
         print('✅ Không hằng số nào của thế giới tự đổi giữa các bài.')
         return 0

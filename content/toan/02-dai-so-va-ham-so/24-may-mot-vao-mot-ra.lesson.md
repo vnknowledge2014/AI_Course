@@ -111,9 +111,10 @@ chỉ vào một điều, nên điều ấy đáng có một cái tên:
 
 Hai chỗ đáng cân trong câu ấy:
 
-- **đúng một** — không phải "nhiều nhất một", cũng không phải "ít nhất một".
-  Bỏ vào một lần thì nhận về một con số, và lần sau bỏ đúng số ấy vào thì nhận
-  về đúng con số ấy chứ không phải con số khác.
+- **đúng một** — không phải "nhiều nhất một". Bỏ vào một lần thì nhận về một
+  con số, và lần sau bỏ đúng số ấy vào thì nhận về đúng con số ấy chứ không
+  phải con số khác. (Còn vế "phải có ít nhất một" thì cây thước dựng đứng không
+  soi ra được; nó là chuyện của tập đầu vào, để dành bài sau.)
 - **đầu vào** và **đầu ra** — hai vai khác nhau, không đổi chỗ được, đúng như
   hai ngăn của cặp toạ độ ở bài 22. Đầu vào đi ngang, đầu ra đi lên.
 
