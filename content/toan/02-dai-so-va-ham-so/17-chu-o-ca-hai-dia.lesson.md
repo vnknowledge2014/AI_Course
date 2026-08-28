@@ -175,7 +175,8 @@ Ba điều đi kèm:
   đi. Bớt riêng số 9000, hay bớt riêng chữ `n`, không phải phép nào cả.
 - **Chỉ gộp được cái cùng loại.** `9000 × n` gặp `15000 × n` nên gộp được. Nếu
   đĩa trái chỉ có `15000` trần thì bớt xong nó thành `15000 − 9000 × n`, chẳng
-  gộp thêm gì — vẫn hợp luật, chỉ là chưa gọn.
+  gộp thêm gì — và đó ĐÃ là dạng cuối của nó, đúng như `8n + 6` ở bài 9: hai cụm
+  khác loại thì dừng, mà dừng không phải là chưa xong.
 
 Và chỗ đáng nhớ nhất: bạn vừa dùng luật hai đĩa lên một thứ **chưa biết giá
 trị**. Nếu chữ là "một con số bị giấu" thì việc này đáng ngờ — làm sao nhấc đi

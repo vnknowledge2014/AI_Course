@@ -229,7 +229,10 @@ Dòng cuối đáng nhìn kỹ. Với câu C, hiệu hai vế đi từ âm sang 
 
 Mỗi ổ bán thêm kéo cái hiệu lên đúng 6 000. Nó đi lên đều đặn, cắt qua mốc 0
 đúng một lần — ở `n = 5`. Đó là lý do sâu xa vì sao một phương trình bậc nhất
-có **đúng một** nghiệm chứ không phải hai.
+**thuộc loại thứ ba trong bảng** — loại có hiệu hai vế đổi theo `n` — có đúng
+một nghiệm chứ không phải hai. Hai loại kia thì hiệu đứng yên, nên hoặc nó nằm
+lì trên mốc 0 (số nào cũng đúng), hoặc nó chẳng bao giờ chạm mốc (không số nào
+đúng).
 ::::
 
 ::::code{#do-hieu-hai-ve}

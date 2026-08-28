@@ -120,9 +120,11 @@ Bảng giá trị cho thấy hai cột ấy chỉ khác nhau đúng một dòng 
 ```
 
 Cả cột `thu ≥ vốn` lẫn cột `thu > vốn` đều là những cột **đổi đúng một lần** từ
-`False` sang `True` rồi ở lì bên `True`. Đó là hình dạng của một tia. Một
-phương trình cho một dòng `True` duy nhất; một bất phương trình cho **cả nửa
-bảng**.
+`False` sang `True` rồi ở lì bên `True`. Đó là hình dạng của một tia. Cái
+phương trình `thu = vốn` của bài trước cho đúng một dòng `True`; đổi nó sang
+bất phương trình thì được **cả nửa bảng**. (Không phải phương trình nào cũng
+cho đúng một dòng — bài 19 vừa bày ra ba loại. Ở đây ta đang nói về đúng cái
+phương trình trong bảng này.)
 ::::
 
 ::::predict{#doan-bon-dong commitOnce}

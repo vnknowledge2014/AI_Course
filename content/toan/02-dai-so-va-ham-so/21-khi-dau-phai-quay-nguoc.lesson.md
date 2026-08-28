@@ -42,9 +42,10 @@ n ≥ 5   →   −n ≥ −5
 Kiểm nghiệm bằng `n = 6`: `−6 ≥ −5`? Sai. Một nghiệm thật vừa bị biến thành
 không phải nghiệm.
 
-Chỗ gãy nằm ở chính hình ảnh cái cân, chứ không ở phép tính. Cái cân chỉ nói
-được đúng một chuyện: **hai đĩa có thăng bằng hay không**. Nó chưa bao giờ nói
-được "đĩa nào nặng hơn thì đứng ở đâu", và nó cũng không cân nổi một lượng âm —
+Chỗ gãy nằm ở chính hình ảnh cái cân, chứ không ở phép tính. Cái cân nói được
+cả thăng bằng lẫn lệch — bài 12 đã vẽ nó nghiêng hẳn về một bên. Chỗ nó hết
+dùng được nằm ở phép **nhân với số âm**: bạn không đặt nổi một lượng âm lên
+đĩa, nên không có động tác nào trên cân tương ứng với việc ấy —
 bạn không đặt được `−6` cân bánh mì lên đĩa. Với dấu `=` thì cái cân đủ dùng.
 Với dấu `≥` thì nó hết dùng được, vì `≥` không nói về thăng bằng, nó nói về
 **thứ tự**.
@@ -76,7 +77,7 @@ bên trái. `6 < 14` — dấu giữ nguyên.
 ```text
   -16 -14 -12 -10  -8  -6  -4  -2   0   2   4   6   8
     ├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼─▶
-        ○               ○                 ●       ●
+        ●               ●                 ●       ●
      7×(−2)          3×(−2)               3       7
 ```
 

@@ -260,7 +260,7 @@ print(thieu_nhieu)
 # thì chúng không bao giờ chạy tới.
 assert thu_it != chi_it, "ngày ế: hai đĩa không khớp, nên 5 không phải nghiệm"
 assert thu_nhieu != chi_nhieu, "ngày bán 1000 ổ: hai đĩa vẫn không khớp, nên 1000 cũng không phải nghiệm"
-assert thieu_nhieu != 0, "bán gấp 200 lần mà khoảng cách vẫn chưa khép — không số ổ nào khép được nó"
+assert thieu_nhieu != 0, "bán gấp 200 lần mà khoảng cách vẫn y nguyên 30 000 — và nó y nguyên vì mảnh `9000 × n` có mặt hệt nhau ở hai đĩa rồi tự triệt, nên thứ sống sót là 30 000, không dính gì tới số ổ"
 assert thieu_it == thieu_nhieu, "khoảng cách hai đĩa không đổi theo số ổ: phần `9000 × n` có mặt ở cả hai bên nên tự triệt"
 assert thieu_it == 30000, "thứ sống sót là 30 000 thuê chỗ — khoản duy nhất không đi theo số ổ"
 assert thu_it == 45000, "9000 × 5 = 45000 đồng tiền thu ngày ế"
