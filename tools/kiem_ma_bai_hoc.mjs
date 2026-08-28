@@ -153,11 +153,26 @@ for (const f of tep) {
     //
     // Chỉ báo khi câu điền bừa THẬT SỰ qua được; điền bừa mà chương trình nổ
     // thì không sao, đó là hành vi đúng.
+    // Thử điền bừa phải chạy ĐỦ CÁC TẦNG, kể cả `static`.
+    //
+    // Bản trước chỉ chạy `tests` và `output`, nên nó báo động GIẢ: người viết
+    // T2.3 gặp một bước có chỗ trống là điều kiện `if ___:` — điền `0` vào thì
+    // thân `if` không chạy lần nào, danh sách gom được rỗng đúng bằng đáp án,
+    // nên hai tầng ấy cho qua. Luật `static` chặn được, nhưng cổng không hỏi
+    // tới nó, và người viết phải dựng lại cả bước code cho một lỗi không có
+    // thật.
+    //
+    // Một cổng kêu oan ăn mòn lòng tin đúng như một cổng báo xanh sai: sau vài
+    // lần, người ta bắt đầu bỏ qua nó.
+    const luat_static_som = (b.validation?.rules ?? []).filter((r) => r.tier === 'static');
+    const qua_static = (ma) =>
+      luat_static_som.every((r) => kiemAst(py, ma, r.requireAst ?? [], r.forbidAst ?? []).dat);
+
     if (b.kind === 'code' && c.starter?.includes('___') && (luat_out || c.test)) {
       for (const bua of ['True', '1', '0']) {
         const thu = c.starter.replaceAll('___', bua);
         const r = chay(c.test ? `${thu}\n${c.test}` : thu);
-        const qua = r.ok && (luat_out ? khop_het(r.xuat) : true);
+        const qua = r.ok && (luat_out ? khop_het(r.xuat) : true) && qua_static(thu);
         if (qua) {
           hong.push({
             bai: bai.id,
