@@ -105,10 +105,11 @@ import ast, json
 
 class _Doi(ast.NodeTransformer):
     """Sửa mọi nút khớp \`(loai, khoa)\` nằm trên dòng người học điền."""
-    def __init__(self, dong_duoc_sua, loai, khoa):
+    def __init__(self, dong_duoc_sua, loai, khoa, thay_the=None):
         self.dong = dong_duoc_sua
         self.loai = loai
         self.khoa = khoa
+        self.thay_the = thay_the
         self.dinh = 0
 
     def _duoc(self, node):
@@ -127,6 +128,16 @@ class _Doi(ast.NodeTransformer):
         return ast.BinOp(left=node.left, op=moi(), right=node.right)
 
     def visit_Constant(self, node):
+        # Hai lớp cùng nằm ở Constant: hằng số nguyên và hằng CHUỖI.
+        #
+        # Người viết T1.5 báo cổng này sinh 0 đột biến trên nhiều bài của họ,
+        # vì chỗ trống là chuỗi chế độ mở file, tên phương thức, tên lỗi — không
+        # có phép toán hay số nguyên nào để lật. Cổng xanh mà không kiểm gì.
+        if self.loai == 'chuoi' and self._duoc(node) and isinstance(node.value, str):
+            if node.value == self.khoa and self.thay_the is not None:
+                self.dinh += 1
+                return ast.Constant(value=self.thay_the)
+            return node
         if self.loai != 'hang' or not self._duoc(node):
             return node
         if not isinstance(node.value, int) or isinstance(node.value, bool):
@@ -135,6 +146,38 @@ class _Doi(ast.NodeTransformer):
             return node
         self.dinh += 1
         return ast.Constant(value=node.value + 1)
+
+    def visit_Name(self, node):
+        # Dùng nhầm một cái tên đang bày ngay bên cạnh — lỗi thật hay gặp nhất.
+        if self.loai != 'ten' or not self._duoc(node):
+            return node
+        if isinstance(node.ctx, ast.Load) and node.id == self.khoa and self.thay_the:
+            self.dinh += 1
+            return ast.Name(id=self.thay_the, ctx=ast.Load())
+        return node
+
+    def visit_Attribute(self, node):
+        # .read() thay vì .readlines(), .rstrip() thay vì .strip().
+        self.generic_visit(node)
+        if self.loai != 'thuoc_tinh' or not self._duoc(node):
+            return node
+        if node.attr == self.khoa and self.thay_the:
+            self.dinh += 1
+            return ast.Attribute(value=node.value, attr=self.thay_the, ctx=node.ctx)
+        return node
+
+    def visit_Subscript(self, node):
+        # Bỏ lát cắt trọn vẹn: so[:] thành so. Đúng cái lỗi bí danh mà mấy bài
+        # về bản sao dựng lên để dạy, mà nó không đụng tới con số nào.
+        self.generic_visit(node)
+        if self.loai != 'bo_lat_cat' or not self._duoc(node):
+            return node
+        s = node.slice
+        if (isinstance(s, ast.Slice) and s.lower is None and s.upper is None
+                and s.step is None):
+            self.dinh += 1
+            return node.value
+        return node
 
     def visit_Compare(self, node):
         self.generic_visit(node)
@@ -150,7 +193,8 @@ class _Doi(ast.NodeTransformer):
 
 _PHEP = {'Add': ast.Sub, 'Sub': ast.Add, 'Mult': ast.Add, 'Div': ast.Mult}
 _SS = {'Eq': ast.NotEq, 'NotEq': ast.Eq, 'Lt': ast.LtE, 'LtE': ast.Lt,
-       'Gt': ast.GtE, 'GtE': ast.Gt}
+       'Gt': ast.GtE, 'GtE': ast.Gt,
+       'Is': ast.IsNot, 'IsNot': ast.Is, 'In': ast.NotIn, 'NotIn': ast.In}
 _TEN = {'Add': 'cộng', 'Sub': 'trừ', 'Mult': 'nhân', 'Div': 'chia',
         'Eq': '==', 'NotEq': '!=', 'Lt': '<', 'LtE': '<=', 'Gt': '>', 'GtE': '>='}
 
@@ -164,24 +208,51 @@ def sinh_dot_bien(ma, dong_duoc_sua, tran=6):
     goc_txt = ast.unparse(goc).strip()
 
     # Gom các Ý sửa được, theo thứ tự gặp, không trùng.
+    # Ba lớp chuỗi/tên/thuộc tính đổi lấy MỘT GIÁ TRỊ KHÁC ĐANG CÓ MẶT trong
+    # chính lời giải, không bịa giá trị mới. Đó mới là lỗi thật: chọn nhầm một
+    # trong mấy thứ đang bày ra trước mắt.
+    chuoi, ten, thuoc_tinh = [], [], []
+    for nut in ast.walk(goc):
+        if getattr(nut, 'lineno', None) not in dong_duoc_sua:
+            continue
+        if isinstance(nut, ast.Constant) and isinstance(nut.value, str):
+            if nut.value not in chuoi:
+                chuoi.append(nut.value)
+        elif isinstance(nut, ast.Name) and isinstance(nut.ctx, ast.Load):
+            if nut.id not in ten:
+                ten.append(nut.id)
+        elif isinstance(nut, ast.Attribute):
+            if nut.attr not in thuoc_tinh:
+                thuoc_tinh.append(nut.attr)
+
     y = []
     for nut in ast.walk(goc):
         if getattr(nut, 'lineno', None) not in dong_duoc_sua:
             continue
         if isinstance(nut, ast.BinOp) and type(nut.op).__name__ in _PHEP:
-            k = ('phep', type(nut.op).__name__)
+            k = ('phep', type(nut.op).__name__, None)
         elif isinstance(nut, ast.Compare) and len(nut.ops) == 1 and type(nut.ops[0]).__name__ in _SS:
-            k = ('sosanh', type(nut.ops[0]).__name__)
+            k = ('sosanh', type(nut.ops[0]).__name__, None)
         elif isinstance(nut, ast.Constant) and isinstance(nut.value, int) and not isinstance(nut.value, bool):
-            k = ('hang', nut.value)
+            k = ('hang', nut.value, None)
+        elif isinstance(nut, ast.Constant) and isinstance(nut.value, str) and len(chuoi) > 1:
+            k = ('chuoi', nut.value, [c for c in chuoi if c != nut.value][0])
+        elif isinstance(nut, ast.Name) and isinstance(nut.ctx, ast.Load) and len(ten) > 1:
+            k = ('ten', nut.id, [c for c in ten if c != nut.id][0])
+        elif isinstance(nut, ast.Attribute) and len(thuoc_tinh) > 1:
+            k = ('thuoc_tinh', nut.attr, [c for c in thuoc_tinh if c != nut.attr][0])
+        elif isinstance(nut, ast.Subscript) and isinstance(nut.slice, ast.Slice) \
+                and nut.slice.lower is None and nut.slice.upper is None \
+                and nut.slice.step is None:
+            k = ('bo_lat_cat', None, None)
         else:
             continue
         if k not in y:
             y.append(k)
 
     ra = []
-    for loai, khoa in y[:tran]:
-        t = _Doi(dong_duoc_sua, loai, khoa)
+    for loai, khoa, thay in y[:tran]:
+        t = _Doi(dong_duoc_sua, loai, khoa, thay)
         cay = t.visit(ast.parse(ma))
         if not t.dinh:
             continue
@@ -196,8 +267,18 @@ def sinh_dot_bien(ma, dong_duoc_sua, tran=6):
             mo_ta = f'đổi MỌI hằng số {khoa} thành {khoa + 1} ({t.dinh} chỗ)'
         elif loai == 'phep':
             mo_ta = f'đổi MỌI phép {_TEN[khoa]} thành {_TEN[_PHEP[khoa].__name__]} ({t.dinh} chỗ)'
+        elif loai == 'sosanh':
+            m1 = _TEN.get(khoa, khoa)
+            m2 = _SS[khoa].__name__
+            mo_ta = f'đổi MỌI dấu {m1} thành {_TEN.get(m2, m2)} ({t.dinh} chỗ)'
+        elif loai == 'chuoi':
+            mo_ta = f'đổi MỌI chuỗi {khoa!r} thành {thay!r} ({t.dinh} chỗ)'
+        elif loai == 'ten':
+            mo_ta = f'đổi MỌI chỗ đọc tên {khoa} thành {thay} ({t.dinh} chỗ)'
+        elif loai == 'thuoc_tinh':
+            mo_ta = f'đổi MỌI .{khoa} thành .{thay} ({t.dinh} chỗ)'
         else:
-            mo_ta = f'đổi MỌI dấu {_TEN[khoa]} thành {_TEN[_SS[khoa].__name__]} ({t.dinh} chỗ)'
+            mo_ta = f'bỏ lát cắt trọn vẹn [:] ({t.dinh} chỗ)'
         ra.append([mo_ta, moi])
     return json.dumps(ra, ensure_ascii=False)
 `);
@@ -228,6 +309,17 @@ const tep = readdirSync(THU_MUC).filter((f) => f.endsWith('.json') && f !== 'ind
 const ho = [];
 let da_thu = 0;
 let da_kiem = 0;
+// Bước nào cổng KHÔNG sinh nổi một đột biến nào. Phải đếm và phải in ra.
+//
+// Người viết T1.5 báo: "cổng đột biến sinh 0 đột biến trên cả ba bài, nên nó
+// không chứng minh được gì ở đây". Họ đúng, và im lặng về chuyện đó là đúng
+// cái hình dạng lỗi mà cả tập cổng này dựng lên để chặn — một con số xanh
+// không đo thứ nó nói là nó đo. Một cổng không với tới được thì phải NÓI RA,
+// chứ không được lặng lẽ tính mình là đã kiểm.
+const khong_voi_toi = [];
+// Bước bị bỏ qua vì số dòng `starter` khác `solution`, nên không gióng được
+// chỗ trống. Cũng là vùng mù, cũng phải đếm.
+let lech_dong = 0;
 
 let da_doc = 0;
 for (const f of tep) {
@@ -244,11 +336,12 @@ for (const f of tep) {
     if (!luat_out && !c.test) continue;
 
     const dong = dong_nguoi_hoc_dien(c.starter, c.solution);
-    if (!dong) continue;
+    if (!dong) { lech_dong++; continue; }
     da_kiem++;
 
     let ds;
-    try { ds = JSON.parse(sinh(c.solution, dong)); } catch { continue; }
+    try { ds = JSON.parse(sinh(c.solution, dong)); } catch { ds = []; }
+    if (ds.length === 0) khong_voi_toi.push(`${bai.id} · ${b.id}`);
 
     for (const [mo_ta, ma] of ds) {
       da_thu++;
@@ -282,8 +375,25 @@ for (const f of tep) {
 }
 
 console.log(`Đã thử ${da_thu} đột biến trên ${da_kiem} bước \`code\` có chỗ trống, trong ${tep.length} bài.`);
+
+// PHẠM VI, in ra trước phán quyết. Xanh trên một phạm vi hẹp vẫn là xanh hẹp.
+if (khong_voi_toi.length || lech_dong) {
+  const n = khong_voi_toi.length;
+  console.log(
+    `\n⚠️  PHẠM VI: ${n}/${da_kiem} bước không sinh nổi đột biến nào` +
+      (lech_dong ? `, và ${lech_dong} bước bị bỏ qua vì số dòng starter khác solution` : '') +
+      `.\n   Cổng KHÔNG nói gì về mấy bước ấy — đừng đọc màu xanh dưới đây như thể nó có.`,
+  );
+  for (const k of khong_voi_toi.slice(0, 12)) console.log(`     · ${k}`);
+  if (n > 12) console.log(`     · … và ${n - 12} bước nữa`);
+}
+
 if (ho.length === 0) {
-  console.log('✅ Không cách chấm nào cho lọt đáp án sai.');
+  console.log(
+    khong_voi_toi.length || lech_dong
+      ? `\n✅ Trong ${da_kiem - khong_voi_toi.length} bước cổng VỚI TỚI ĐƯỢC: không cách chấm nào cho lọt đáp án sai.`
+      : '\n✅ Không cách chấm nào cho lọt đáp án sai.',
+  );
   process.exit(0);
 }
 console.log(`❌ ${ho.length} bước có LỖ CHẤM ĐIỂM — sửa lời giải một chỗ mà vẫn qua:\n`);
