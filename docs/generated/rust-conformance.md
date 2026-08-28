@@ -22,6 +22,18 @@ cargo run -- --im      # bỏ chi tiết từng ca, chỉ in bảng
 | **A. Mutant cơ học** (`mutate.rs`) | 58 | 58 (100 %) | 0 | 0 | **0** |
 | **B. Corpus âm thủ công** (`corpus_am.rs`) | 100 | 0 (0 %) | 0 | 0 | **100** |
 
+> **CẢNH BÁO — tài liệu này ĐÃ CŨ.** Nó chụp trạng thái ngày 19/08, lúc còn
+> 100/100 nhận oan. Chạy lại cổng để lấy số thật:
+>
+> ```bash
+> cd crates/byte-rust-conformance && cargo run --release -q -- --am
+> ```
+>
+> Trạng thái hiện tại: **0 nhận oan, 0 từ chối oan, cổng MỞ.** Ba ca cuối
+> (E0499, E0502, E0597) đã bịt bằng `crates/byte-rust/src/borrow_check.rs`.
+> Phần dưới giữ lại vì §2 và §7 vẫn còn giá trị — bài học "nguồn A xanh vì lý
+> do sai" không cũ đi.
+
 **Cổng: FAIL.** 100 chương trình mà `rustc` từ chối được `byte-rust` trả `Dat`.
 
 Phân bố 100 ca nhận oan:

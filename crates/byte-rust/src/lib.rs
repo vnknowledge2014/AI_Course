@@ -14,6 +14,7 @@
 //!    trả về "pass" cho code mà ta không thực sự hiểu.
 
 pub mod ast;
+pub mod borrow_check;
 pub mod diag;
 pub mod interp;
 pub mod lexer;
@@ -63,6 +64,7 @@ pub fn kiem_va_chay(src: &str) -> (String, Diagnostics) {
     tyck::kiem_tra(&ct, &mut d);
     move_check::kiem_tra(&ct, &mut d);
     mut_check::kiem_tra(&ct, &mut d);
+    borrow_check::kiem_tra(&ct, &mut d);
     if d.co_loi() || d.co_chua_ho_tro() {
         return (String::new(), d.rut_gon());
     }
