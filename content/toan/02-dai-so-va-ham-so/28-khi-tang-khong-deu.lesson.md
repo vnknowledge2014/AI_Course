@@ -389,7 +389,7 @@ dừng. Muốn sân rộng nhất thì cứ chọn cạnh lớn nhất — chẳ
 
 Nhưng ở xe bánh mì thì có một đường cong kiểu khác, và nó khó chịu hơn nhiều.
 
-Byte đang bán 15 nghìn một ổ, mỗi ổ lãi 5 nghìn, mỗi ngày hết 60 ổ. Byte tính
+Byte đang bán 15 nghìn một ổ, mỗi ổ lãi 6 nghìn, mỗi ngày hết 64 ổ. Byte tính
 tăng giá. Tăng giá thì **lãi mỗi ổ cao hơn** — nghe là muốn tăng ngay. Nhưng
 khách thấy đắt sẽ bớt mua, nên **số ổ bán được lại ít đi**. Hai thứ kéo ngược
 nhau.

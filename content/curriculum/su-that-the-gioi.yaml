@@ -51,3 +51,13 @@
   tu_khoa:
     - 'dì Tư[^.\n]{0,26}?lấy sẵn[^.\n]{0,8}?(\d+)\s*ổ'
     - 'dì Tư[^.\n]{0,26}?(\d+)\s*ổ'
+
+- ten: lai-mot-o
+  gia_tri: 6000
+  cho_nghin: 1
+  pham_vi: content/toan
+  tu_khoa:
+    - 'mỗi ổ (?:\*\*)?lãi (?:\*\*)?(\d[\d. ]*\d|\d)\s*(?:nghìn|đồng|đ\b)'
+    - 'lãi (\d[\d. ]*\d|\d)\s*(?:nghìn|đồng|đ\b) một ổ'
+  ngoai_le:
+    - 'content/toan/02-dai-so-va-ham-so/29-dinh-va-hai-ben-doi-xung.lesson.md: cùng lẽ — cả bài chạy trên lãi mỗi ổ đổi theo mức tăng giá'
