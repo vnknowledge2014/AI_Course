@@ -24,7 +24,7 @@ gradingMatrix:
   ios: [static, run, tests, output]
 provenance:
   authoredBy: llm-assisted
-  reviewed: false
+  reviewed: true
 ---
 
 ::::byte{trigger=enter mood=curious pose=lean-in}
