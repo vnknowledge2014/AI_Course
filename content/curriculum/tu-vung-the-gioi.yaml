@@ -1,0 +1,31 @@
+# Từ vựng của thế giới hư cấu — tên nhóm chi tiêu
+#
+# `tools/kiem_su_that.py` canh những CON SỐ không được trôi. Tệp này canh những
+# CÁI TÊN.
+#
+# Vòng phản biện T1.4 tìm ra một cuốn sổ trôi qua bốn bài: bài 23–26 chốt nhóm
+# `xăng xe`, bài 30–33 gọi nó là `xe cộ`. Rồi kiểm kê lại toàn Realm 1 thì lộ
+# thêm một ca nữa mà vòng phản biện KHÔNG nêu: bài BOSS của T1.4 và ba bài đầu
+# T1.5 dùng `đi lại` với `học hành` cho đúng hai nhóm ấy.
+#
+# Một cái tên đặt mới trông vô hại ở từng bài. Chỉ khi xếp cả trăm bài cạnh
+# nhau mới lộ — nên việc này phải giao cho máy, người soi bằng mắt đã bỏ sót
+# một lần rồi.
+#
+# Thêm nhóm mới là chuyện hợp lệ. Khai vào đây, kèm một dòng nói nó thuộc
+# tháng nào, để bài sau còn đối chiếu được.
+
+- ten: ăn uống
+  vi_sao: nhóm nền, có ở cả tháng này lẫn tháng trước (bài 28 chốt)
+
+- ten: xăng xe
+  vi_sao: nhóm nền, có ở cả hai tháng (bài 28 chốt). KHÔNG gọi là "xe cộ" hay "đi lại"
+
+- ten: học phí
+  vi_sao: chỉ THÁNG NÀY có — bài 28 dựng phép trừ trên đúng chỗ này. Không gọi là "học hành"
+
+- ten: biếu tặng
+  vi_sao: chỉ THÁNG TRƯỚC có (bài 28). Đặt nó vào sổ tháng này là phá phép trừ của bài 29
+
+- ten: thuê nhà
+  vi_sao: chỉ THÁNG TRƯỚC có (bài 28)

@@ -84,7 +84,7 @@ con số tổng ở đây là tổng của ba khoản ấy, không phải tổng
 so = [
     {"ten": "cà phê", "nhom": "ăn uống", "tien": 25000},
     {"ten": "bún bò", "nhom": "ăn uống", "tien": 40000},
-    {"ten": "gửi xe", "nhom": "đi lại", "tien": 10000},
+    {"ten": "gửi xe", "nhom": "xăng xe", "tien": 10000},
 ]
 
 tong = sum([khoan["tien"] for khoan in so])
@@ -181,7 +181,7 @@ Hai chỗ trống nằm ở hai động tác của bài này: một chỗ nói v
 so = [
     {"ten": "cà phê", "nhom": "ăn uống", "tien": 25000},
     {"ten": "bún bò", "nhom": "ăn uống", "tien": 40000},
-    {"ten": "gửi xe", "nhom": "đi lại", "tien": 10000},
+    {"ten": "gửi xe", "nhom": "xăng xe", "tien": 10000},
 ]
 
 khoan_dau = so[0]
@@ -198,7 +198,7 @@ print(f"Số ký tự đã đặt vào file: {da_ghi}")
 so = [
     {"ten": "cà phê", "nhom": "ăn uống", "tien": 25000},
     {"ten": "bún bò", "nhom": "ăn uống", "tien": 40000},
-    {"ten": "gửi xe", "nhom": "đi lại", "tien": 10000},
+    {"ten": "gửi xe", "nhom": "xăng xe", "tien": 10000},
 ]
 
 khoan_dau = so[0]

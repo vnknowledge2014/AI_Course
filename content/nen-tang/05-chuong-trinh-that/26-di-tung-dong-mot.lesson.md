@@ -178,7 +178,7 @@ thì mắt không bắt được, còn `n` thì vẫn bắt được y như trê
 
 ::::code{#ghi-lai-vet-chay}
 Cùng vòng lặp hỏng ấy, nhưng cuốn sổ đã khác: ba khoản khác, ba số tiền khác. Vệt
-chạy ở phần trên **không** dùng lại được — bạn phải đi lại từng dòng trên cuốn
+chạy ở phần trên **không** dùng lại được — bạn phải xăng xe từng dòng trên cuốn
 sổ mới này.
 
 Bốn khoảnh khắc cần ghi lại, tất cả đều là giá trị của `tong`:

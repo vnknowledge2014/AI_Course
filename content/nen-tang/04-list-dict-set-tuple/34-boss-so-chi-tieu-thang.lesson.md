@@ -86,10 +86,10 @@ def lay_tien(khoan):
 
 so = [
     {"ten": "cà phê", "nhom": "ăn uống", "tien": 25000},
-    {"ten": "sửa xe", "nhom": "đi lại", "tien": 500000},
+    {"ten": "sửa xe", "nhom": "xăng xe", "tien": 500000},
     {"ten": "bún bò", "nhom": "ăn uống", "tien": 40000},
-    {"ten": "đổ xăng", "nhom": "đi lại", "tien": 100000},
-    {"ten": "vở ghi", "nhom": "học hành", "tien": 15000},
+    {"ten": "đổ xăng", "nhom": "xăng xe", "tien": 100000},
+    {"ten": "vở ghi", "nhom": "học phí", "tien": 15000},
 ]
 
 tong_thang = sum([khoan["tien"] for khoan in so])
@@ -120,8 +120,8 @@ SỔ CHI TIÊU — năm khoản đầu tháng
 Tổng chi: 680000 đồng
 Đã chi vào 3 nhóm
   ăn uống: 65000 đồng
-  đi lại: 600000 đồng
-  học hành: 15000 đồng
+  xăng xe: 600000 đồng
+  học phí: 15000 đồng
 Ba khoản tốn nhất: ['sửa xe', 'đổ xăng', 'bún bò']
 Khoản trên 100000 đồng: ['sửa xe']
 ```
@@ -164,7 +164,7 @@ thẳng số tiền của khoản vào khoá.
 so = [
     {"ten": "cà phê", "nhom": "ăn uống", "tien": 25000},
     {"ten": "bún bò", "nhom": "ăn uống", "tien": 40000},
-    {"ten": "đổ xăng", "nhom": "đi lại", "tien": 100000},
+    {"ten": "đổ xăng", "nhom": "xăng xe", "tien": 100000},
 ]
 
 tong_nhom = {}
@@ -175,11 +175,11 @@ print(tong_nhom)
 ```
 
 :::opt{correct}
-`{'ăn uống': 40000, 'đi lại': 100000}`
+`{'ăn uống': 40000, 'xăng xe': 100000}`
 :::
 
 :::opt
-`{'ăn uống': 65000, 'đi lại': 100000}`
+`{'ăn uống': 65000, 'xăng xe': 100000}`
 ::why
 Gần đúng ở chỗ bạn đọc đúng **ý định** của đoạn code: nhóm ăn uống có hai khoản,
 và tổng của chúng là 25000 + 40000 = 65000. Con số ấy là con số Byte muốn, và
@@ -194,7 +194,7 @@ cộng vào, và `.get(khoa, 0)` chính là cái lấy ra ấy, kèm sẵn con s
 :::
 
 :::opt
-`{'ăn uống': 25000, 'đi lại': 100000}`
+`{'ăn uống': 25000, 'xăng xe': 100000}`
 ::why
 Gần đúng ở chỗ bạn nhớ một tính chất có thật và nhớ đúng: **set** không nhận
 cùng một giá trị hai lần. Bỏ vào lần thứ hai thì rổ không đổi.
@@ -260,8 +260,8 @@ cuốn sổ tra cứu.
 ```python title=starter
 so_a = [
     {"ten": "cà phê", "nhom": "ăn uống", "tien": 25000},
-    {"ten": "sửa xe", "nhom": "đi lại", "tien": 500000},
-    {"ten": "vở ghi", "nhom": "học hành", "tien": 15000},
+    {"ten": "sửa xe", "nhom": "xăng xe", "tien": 500000},
+    {"ten": "vở ghi", "nhom": "học phí", "tien": 15000},
 ]
 
 tong_a = {}
@@ -276,7 +276,7 @@ for nhom, tien in tong_a.items():
 so_b = [
     {"ten": "cà phê", "nhom": "ăn uống", "tien": 25000},
     {"ten": "bún bò", "nhom": "ăn uống", "tien": 40000},
-    {"ten": "gửi xe", "nhom": "đi lại", "tien": 10000},
+    {"ten": "gửi xe", "nhom": "xăng xe", "tien": 10000},
     {"ten": "cơm trưa", "nhom": "ăn uống", "tien": 35000},
 ]
 
@@ -293,8 +293,8 @@ for nhom, tien in tong_b.items():
 ```python title=solution
 so_a = [
     {"ten": "cà phê", "nhom": "ăn uống", "tien": 25000},
-    {"ten": "sửa xe", "nhom": "đi lại", "tien": 500000},
-    {"ten": "vở ghi", "nhom": "học hành", "tien": 15000},
+    {"ten": "sửa xe", "nhom": "xăng xe", "tien": 500000},
+    {"ten": "vở ghi", "nhom": "học phí", "tien": 15000},
 ]
 
 tong_a = {}
@@ -309,7 +309,7 @@ for nhom, tien in tong_a.items():
 so_b = [
     {"ten": "cà phê", "nhom": "ăn uống", "tien": 25000},
     {"ten": "bún bò", "nhom": "ăn uống", "tien": 40000},
-    {"ten": "gửi xe", "nhom": "đi lại", "tien": 10000},
+    {"ten": "gửi xe", "nhom": "xăng xe", "tien": 10000},
     {"ten": "cơm trưa", "nhom": "ăn uống", "tien": 35000},
 ]
 
@@ -333,13 +333,13 @@ for nhom, tien in tong_b.items():
 # Nên dòng của sổ A viết sẵn, làm bản mẫu, và ba assert dưới đây chỉ để bảo
 # đảm người học không sửa hỏng nó. Chỗ trống duy nhất nằm ở sổ B — nơi nhóm
 # `ăn uống` có ba khoản, và chỉ ở đó thì ghi đè mới lộ ra.
-assert tong_a["đi lại"] == 500000, "sổ A có đúng một khoản đi lại là sửa xe 500 nghìn, nên nhóm đi lại của sổ A phải giữ 500000"
+assert tong_a["xăng xe"] == 500000, "sổ A có đúng một khoản xăng xe là sửa xe 500 nghìn, nên nhóm xăng xe của sổ A phải giữ 500000"
 assert tong_a["ăn uống"] == 25000, "sổ A có đúng một khoản ăn uống là cà phê 25 nghìn, nên nhóm ăn uống của sổ A phải giữ 25000"
 assert len(tong_a) == 3, "ba khoản của sổ A thuộc ba nhóm khác nhau, nên sổ tra cứu của sổ A phải có đúng ba khoá"
 # Chỗ trống thứ hai bị soi bởi dòng `tong_b["ăn uống"]`: chỉ lời giải có cộng
 # dồn mới ra 100000. Bản ghi đè cho ra 35000 — tiền của khoản cuối cùng.
 assert tong_b["ăn uống"] == 100000, "sổ B có ba khoản ăn uống là 25000, 40000 và 35000, cộng lại thành 100000"
-assert tong_b["đi lại"] == 10000, "sổ B có đúng một khoản đi lại là gửi xe 10 nghìn, nên nhóm đi lại của sổ B phải giữ 10000"
+assert tong_b["xăng xe"] == 10000, "sổ B có đúng một khoản xăng xe là gửi xe 10 nghìn, nên nhóm xăng xe của sổ B phải giữ 10000"
 assert len(tong_b) == 2, "bốn khoản của sổ B chỉ thuộc hai nhóm, nên sổ tra cứu của sổ B phải có đúng hai khoá"
 ```
 
@@ -359,7 +359,7 @@ assert len(tong_b) == 2, "bốn khoản của sổ B chỉ thuộc hai nhóm, n�
   timeoutMs: 6000
 - tier: output
   match: regex
-  expect: ^Sổ A\n  ăn uống: 25000 đồng\n  đi lại: 500000 đồng\n  học hành: 15000 đồng\nSổ B\n  ăn uống: 100000 đồng\n  đi lại: 10000 đồng\s*$
+  expect: ^Sổ A\n  ăn uống: 25000 đồng\n  xăng xe: 500000 đồng\n  học phí: 15000 đồng\nSổ B\n  ăn uống: 100000 đồng\n  xăng xe: 10000 đồng\s*$
 - tier: output
   expect: "ăn uống: 100000 đồng"
 :::
@@ -400,14 +400,14 @@ def lay_tien(khoan):
 
 so = [
     {"ten": "cà phê", "nhom": "ăn uống", "tien": 25000},
-    {"ten": "sửa xe", "nhom": "đi lại", "tien": 500000},
+    {"ten": "sửa xe", "nhom": "xăng xe", "tien": 500000},
     {"ten": "bún bò", "nhom": "ăn uống", "tien": 40000},
-    {"ten": "đổ xăng", "nhom": "đi lại", "tien": 100000},
-    {"ten": "vở ghi", "nhom": "học hành", "tien": 15000},
-    {"ten": "sách", "nhom": "học hành", "tien": 120000},
+    {"ten": "đổ xăng", "nhom": "xăng xe", "tien": 100000},
+    {"ten": "vở ghi", "nhom": "học phí", "tien": 15000},
+    {"ten": "sách", "nhom": "học phí", "tien": 120000},
     {"ten": "cơm trưa", "nhom": "ăn uống", "tien": 35000},
-    {"ten": "gửi xe", "nhom": "đi lại", "tien": 10000},
-    {"ten": "khoá tiếng Anh", "nhom": "học hành", "tien": 300000},
+    {"ten": "gửi xe", "nhom": "xăng xe", "tien": 10000},
+    {"ten": "khoá tiếng Anh", "nhom": "học phí", "tien": 300000},
     {"ten": "trà sữa", "nhom": "ăn uống", "tien": 45000},
 ]
 
@@ -440,14 +440,14 @@ def lay_tien(khoan):
 
 so = [
     {"ten": "cà phê", "nhom": "ăn uống", "tien": 25000},
-    {"ten": "sửa xe", "nhom": "đi lại", "tien": 500000},
+    {"ten": "sửa xe", "nhom": "xăng xe", "tien": 500000},
     {"ten": "bún bò", "nhom": "ăn uống", "tien": 40000},
-    {"ten": "đổ xăng", "nhom": "đi lại", "tien": 100000},
-    {"ten": "vở ghi", "nhom": "học hành", "tien": 15000},
-    {"ten": "sách", "nhom": "học hành", "tien": 120000},
+    {"ten": "đổ xăng", "nhom": "xăng xe", "tien": 100000},
+    {"ten": "vở ghi", "nhom": "học phí", "tien": 15000},
+    {"ten": "sách", "nhom": "học phí", "tien": 120000},
     {"ten": "cơm trưa", "nhom": "ăn uống", "tien": 35000},
-    {"ten": "gửi xe", "nhom": "đi lại", "tien": 10000},
-    {"ten": "khoá tiếng Anh", "nhom": "học hành", "tien": 300000},
+    {"ten": "gửi xe", "nhom": "xăng xe", "tien": 10000},
+    {"ten": "khoá tiếng Anh", "nhom": "học phí", "tien": 300000},
     {"ten": "trà sữa", "nhom": "ăn uống", "tien": 45000},
 ]
 
@@ -485,8 +485,8 @@ assert ba_khoan_ton_nhat == ["sửa xe", "khoá tiếng Anh", "sách"], "ba kho�
 assert khoan_lon == ["sửa xe", "sách", "khoá tiếng Anh"], "ba khoản trên 100 nghìn của sổ tháng này, theo đúng thứ tự đã ghi trong sổ, là sửa xe, sách rồi khoá tiếng Anh — nếu danh sách của bạn có thêm 'đổ xăng' thì điều kiện đang nhận cả khoản đúng 100000 đồng, mà đúng ngưỡng thì chưa phải vượt ngưỡng"
 # Hai câu còn lại không có chỗ trống, nhưng vẫn phải đúng — chúng là hai trong
 # năm câu trả lời mà Byte đặt hàng.
-assert so_nhom == 3, "mười khoản của sổ tháng này chỉ thuộc ba nhóm: ăn uống, đi lại và học hành"
-assert tong_nhom["học hành"] == 435000, "nhóm học hành của sổ tháng này gồm vở ghi 15000, sách 120000 và khoá tiếng Anh 300000, cộng lại thành 435000"
+assert so_nhom == 3, "mười khoản của sổ tháng này chỉ thuộc ba nhóm: ăn uống, xăng xe và học phí"
+assert tong_nhom["học phí"] == 435000, "nhóm học phí của sổ tháng này gồm vở ghi 15000, sách 120000 và khoá tiếng Anh 300000, cộng lại thành 435000"
 ```
 
 :::hints
@@ -505,7 +505,7 @@ assert tong_nhom["học hành"] == 435000, "nhóm học hành của sổ tháng 
   timeoutMs: 6000
 - tier: output
   match: regex
-  expect: ^SỔ CHI TIÊU — cả tháng, mười khoản\nTổng chi: 1190000 đồng\nĐã chi vào 3 nhóm\n  ăn uống: 145000 đồng\n  đi lại: 610000 đồng\n  học hành: 435000 đồng\nBa khoản tốn nhất: \['sửa xe', 'khoá tiếng Anh', 'sách'\]\nKhoản trên 100000 đồng: \['sửa xe', 'sách', 'khoá tiếng Anh'\]\s*$
+  expect: ^SỔ CHI TIÊU — cả tháng, mười khoản\nTổng chi: 1190000 đồng\nĐã chi vào 3 nhóm\n  ăn uống: 145000 đồng\n  xăng xe: 610000 đồng\n  học phí: 435000 đồng\nBa khoản tốn nhất: \['sửa xe', 'khoá tiếng Anh', 'sách'\]\nKhoản trên 100000 đồng: \['sửa xe', 'sách', 'khoá tiếng Anh'\]\s*$
 - tier: output
   expect: "Ba khoản tốn nhất: ['sửa xe', 'khoá tiếng Anh', 'sách']"
 :::

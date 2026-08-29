@@ -204,7 +204,7 @@ Hai chỗ trống là hai dòng mở khối. Mỗi dòng phải nói đủ ba đ
 so = [
     {"ten": "cà phê", "nhom": "ăn uống", "tien": 25000},
     {"ten": "bún bò", "nhom": "ăn uống", "tien": 40000},
-    {"ten": "gửi xe", "nhom": "đi lại", "tien": 10000},
+    {"ten": "gửi xe", "nhom": "xăng xe", "tien": 10000},
 ]
 
 tong = sum([khoan["tien"] for khoan in so])
@@ -224,7 +224,7 @@ print(f"Hai file vừa ghi: {f_so.name} và {f_tom.name}")
 so = [
     {"ten": "cà phê", "nhom": "ăn uống", "tien": 25000},
     {"ten": "bún bò", "nhom": "ăn uống", "tien": 40000},
-    {"ten": "gửi xe", "nhom": "đi lại", "tien": 10000},
+    {"ten": "gửi xe", "nhom": "xăng xe", "tien": 10000},
 ]
 
 tong = sum([khoan["tien"] for khoan in so])

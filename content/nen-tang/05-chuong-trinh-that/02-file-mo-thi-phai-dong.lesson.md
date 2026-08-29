@@ -63,9 +63,9 @@ f.closed
 Ngay sau `open` nó là `False` — chưa đóng. Sau `.close()` nó là `True`.
 
 Và đây là chỗ `.close()` đáng giá hơn một thói quen gọn gàng. Máy **không**
-chạy ra tận đĩa mỗi lần bạn `.write` một mẩu chữ ngắn — đi lại như thế tốn quá.
+chạy ra tận đĩa mỗi lần bạn `.write` một mẩu chữ ngắn — xăng xe như thế tốn quá.
 Nó gom các mẩu ấy lại trong bộ nhớ, rồi đổ xuống đĩa một lượt. `.close()` chính
-là lệnh *đổ hết những gì còn đang gom xuống, rồi đóng đường đi lại*. Nên chỉ
+là lệnh *đổ hết những gì còn đang gom xuống, rồi đóng đường xăng xe*. Nên chỉ
 sau khi đóng, chữ mới **chắc chắn** đã nằm trên đĩa.
 
 Vậy nó tồn tại tới bao giờ? Từ `open` cho tới `.close()`. Đó là cả tuổi đời
@@ -183,7 +183,7 @@ Hai `open` đã viết sẵn, hai `.write` cũng vậy. Việc còn lại là đ
 so = [
     {"ten": "cà phê", "nhom": "ăn uống", "tien": 25000},
     {"ten": "bún bò", "nhom": "ăn uống", "tien": 40000},
-    {"ten": "gửi xe", "nhom": "đi lại", "tien": 10000},
+    {"ten": "gửi xe", "nhom": "xăng xe", "tien": 10000},
 ]
 
 tong = sum([khoan["tien"] for khoan in so])
@@ -205,7 +205,7 @@ print(f"Tóm tắt đã đóng chưa? {f_tom.closed}")
 so = [
     {"ten": "cà phê", "nhom": "ăn uống", "tien": 25000},
     {"ten": "bún bò", "nhom": "ăn uống", "tien": 40000},
-    {"ten": "gửi xe", "nhom": "đi lại", "tien": 10000},
+    {"ten": "gửi xe", "nhom": "xăng xe", "tien": 10000},
 ]
 
 tong = sum([khoan["tien"] for khoan in so])

@@ -102,6 +102,52 @@ def _dat(d, khoa, gt):
     d[khoa] = int(gt) if re.fullmatch(r'-?\d+', gt) else gt
 
 
+
+SO_TU_VUNG = GOC / 'content/curriculum/tu-vung-the-gioi.yaml'
+
+
+def kiem_tu_vung():
+    """Tên nhóm chi tiêu phải lấy từ một danh sách đã khai, không đặt mới.
+
+    Vòng phản biện T1.4 tìm ra một cuốn sổ trôi qua bốn bài: bài 23–26 chốt
+    nhóm `xăng xe`, bài 30–33 gọi nó là `xe cộ`; bài 28–29 chốt `biếu tặng` là
+    nhóm CHỈ tháng trước có, bài 30–33 đặt nó vào tháng này.
+
+    Rồi kiểm kê lại toàn Realm 1 thì lộ thêm một ca nữa mà vòng ấy KHÔNG nêu:
+    bài BOSS của T1.4 và ba bài đầu T1.5 dùng `đi lại` với `học hành`, trong
+    khi mười bài trước chốt `xăng xe` với `học phí`. Cùng lớp lỗi, ngay trong
+    một mạch, và không người nào trong vòng phản biện thấy.
+
+    Đó là lý do luật này phải là máy: một cái tên đặt mới trông vô hại ở từng
+    bài, chỉ khi xếp cả trăm bài cạnh nhau mới lộ. Người soi bằng mắt bỏ sót
+    được, còn `set()` thì không.
+
+    Đặt thêm một nhóm mới là chuyện hợp lệ — khai vào sổ, và khai một dòng nói
+    nó thuộc tháng nào, để lần sau còn đối chiếu được.
+    """
+    if not SO_TU_VUNG.exists():
+        return []
+    cho_phep, muc = {}, None
+    for dong in SO_TU_VUNG.read_text().split('\n'):
+        d = dong.strip()
+        if d.startswith('- ten:'):
+            muc = d.split(':', 1)[1].strip().strip('\'"')
+            cho_phep[muc] = ''
+        elif muc and d.startswith('vi_sao:'):
+            cho_phep[muc] = d.split(':', 1)[1].strip().strip('\'"')
+    loi = []
+    for t in sorted(GOC.glob('content/**/*.lesson.md')):
+        van = t.read_text()
+        for m in re.finditer(r'"nhom":\s*"([^"]+)"', van):
+            if m.group(1) in cho_phep:
+                continue
+            dong = van[: m.start()].count('\n') + 1
+            loi.append((str(t.relative_to(GOC)), dong, 'tên nhóm chi tiêu', None,
+                        None, f'"{m.group(1)}" chưa khai trong '
+                               f'{SO_TU_VUNG.relative_to(GOC)} — '
+                               f'đang cho phép: {", ".join(sorted(cho_phep))}'))
+    return loi
+
 def kiem():
     facts = doc_so_su_that()
     if not facts:
@@ -163,6 +209,8 @@ def kiem():
             if (ten, t) not in da_dung_ngoai_le:
                 loi.append((t, 0, ten, None, gia_tri,
                             'NGOẠI LỆ THỪA — khai miễn trừ mà không có gì để miễn'))
+
+    loi += kiem_tu_vung()
 
     print(f'Đã đối chiếu {tong_kiem} chỗ nhắc tới sự thật thế giới, trên {len(facts)} sự thật đã khai.')
     print('   (Đọc được chữ số và số viết bằng chữ dạng "<chữ> nghìn". Dạng khác'

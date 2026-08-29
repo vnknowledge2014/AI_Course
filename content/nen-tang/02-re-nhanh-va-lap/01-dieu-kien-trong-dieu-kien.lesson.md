@@ -94,7 +94,7 @@ Cách chắc chắn nhất để đọc đoạn này là nhìn **cột lề** c�
   hai đều là thân của `if` ngoài, và chúng chạy theo thứ tự từ trên xuống.
 - Cột 8: `print("Ngày này phải ghi chú lại.")`. Dòng này là thân của `if` trong.
 
-Bây giờ đi lại đúng đường máy đi. `250000 > 200000` cho `True`, nên máy bước
+Bây giờ xăng xe đúng đường máy đi. `250000 > 200000` cho `True`, nên máy bước
 vào thân tầng ngoài. Việc đầu tiên trong thân là in câu nhắc. Việc thứ hai là
 một câu hỏi nữa: `250000 > 500000` — lần này `False`, nên dòng cột 8 bị bỏ qua.
 Xong thân tầng ngoài, máy về lại cột 0 và in câu cuối.
