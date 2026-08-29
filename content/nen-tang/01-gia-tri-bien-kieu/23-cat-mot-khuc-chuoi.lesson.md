@@ -67,8 +67,13 @@ Cách đọc hai con số, một lần cho nhớ luôn: **đầu lấy, cuối c
 - Số sau là chỗ **dừng lại**: ô mang số đó **không** nằm trong khúc.
 
 Chính vì cái ghim thứ hai cắm vào ô đầu tiên bị chừa, có một hệ quả tiện đến mức
-nên dùng làm cách kiểm nhanh: **số ký tự lấy được đúng bằng số sau trừ số đầu.**
-`[0:12]` cho 12 ký tự. `[4:6]` cho 2 ký tự. Không phải đếm lại lần nào.
+nên dùng làm cách kiểm nhanh — **chừng nào cả hai mốc còn nằm trong chuỗi**:
+số ký tự lấy được đúng bằng số sau trừ số đầu. `[4:6]` cho 2 ký tự. `[0:12]`
+trên một tên dài mười ba ký tự cho 12 ký tự. Không phải đếm lại lần nào.
+
+Còn khi mốc sau vượt quá cuối chuỗi thì phép trừ hết đúng — máy đưa phần còn
+lại chứ không đưa đủ số bạn xin, và cũng không báo lỗi. Chỗ ấy nói ngay ở mục
+dưới đây, vì bài tập cuối bài đứng hẳn trên nó.
 ::::
 
 ::::example{#cat-thu-mot-khuc}
@@ -157,13 +162,14 @@ chỗ **dừng lại**: ô số 6 là ô đầu tiên bị chừa. Phép kiểm 
 :::opt
 Hai dòng: `ha` rồi `bun cha`
 ::why
-Gần đúng ở chỗ bạn đếm đúng hai ký tự — bạn đã dùng phép trừ `6 - 4` và ra số 2,
-tức là nửa luật "cuối chừa" bạn nắm chắc rồi.
+Gần đúng ở chỗ bạn đếm đúng hai ký tự — phép trừ `6 - 4` ra số 2, và bạn lấy
+đúng hai ô. Nửa ấy chắc rồi.
 
-Chỗ lệch nằm ở chỗ khởi hành. Bạn đếm ô đầu tiên của `"bun cha"` là ô số 1, nên
-mọi thứ trượt sang phải một nhịp. Python đếm từ 0, y như bài `Đếm từ 0` ở Realm
-0 và y như lúc bạn tra `mon[0]`: `b` là ô 0, `u` là ô 1, `n` là ô 2, dấu cách là
-ô 3, `c` là ô 4.
+Chỗ lệch nằm ở chỗ bạn **đảo hai đầu**: chừa ô số 4 rồi lấy từ đó tới hết ô số
+6 — tức *đầu chừa, cuối lấy*. Luật ngược lại: **đầu lấy, cuối chừa**. Ô số 4
+(`c`) nằm TRONG khúc, còn ô số 6 (`a`) bị bỏ ra. Đếm cho chắc: `b` là ô 0, `u`
+ô 1, `n` ô 2, dấu cách ô 3, `c` ô 4, `h` ô 5, `a` ô 6. Vậy `[4:6]` là `c` với
+`h` — khúc `ch`, hai ký tự bắt đầu sớm hơn một ô so với bạn đoán.
 ::
 :::
 
@@ -239,7 +245,7 @@ assert so_tay == ["cà phê sữa đá", "bún chả", "trà tắc"], "cắt ch�
 - kind: attention
   body: Chỗ trống nằm bên trong `cot.append(...)`, nên thứ bạn điền phải là **một chuỗi** — đúng cái khúc sẽ nằm trong cột. Mỗi vòng, `ten` đang giữ một tên khoản khác nhau, và cột thì lúc nào cũng rộng 12 chỗ.
 - kind: strategy
-  body: Dùng lát cắt trên `ten`: hai con số trong cặp ngoặc vuông, cách nhau dấu hai chấm. Số đầu là ô bắt đầu lấy — ô đầu tiên của một chuỗi mang số 0. Số sau là chỗ dừng, và nhớ phép kiểm nhanh: hiệu hai số phải bằng đúng bề rộng cột. Đừng lo hai tên ngắn hơn 12 — xin một khúc quá cuối dãy thì máy đưa phần còn lại chứ không nổ.
+  body: Dùng lát cắt trên `ten`: hai con số trong cặp ngoặc vuông, cách nhau dấu hai chấm. Số đầu là ô bắt đầu lấy — ô đầu tiên của một chuỗi mang số 0. Số sau là chỗ dừng, và hiệu hai số chính là bề rộng cột bạn ĐẶT ra — 12. Còn số ký tự thật sự nhận về chỉ bằng đúng 12 khi tên dài hơn cột; tên ngắn hơn thì máy đưa nguyên phần còn lại chứ không nổ, và đó là điều bạn muốn ở đây.
 - kind: one-line
   body: Viết `ten[0:12]` vào chỗ trống.
 :::

@@ -146,19 +146,23 @@ loại số.
 
 ::::explain{#mot-giot-muc}
 Một ca nước trong, nhỏ vào đúng một giọt mực. Cả ca đổi màu. Và rót thêm bao
-nhiêu nước trong nữa cũng không lọc ngược lại được — muốn có nước trong thì
-phải đi lấy ca khác.
+nhiêu nước trong nữa cũng không làm ca nước trong lại — cộng thêm, nhân thêm
+bao nhiêu số nguyên cũng vậy. Muốn có nước trong thì phải có một cái vợt riêng,
+chứ không phải rót thêm.
 
 Con số trong Python cũng vậy:
 
 > Trong một phép tính, chỉ cần **một** vế mang nhãn `float` là kết quả mang
-> nhãn `float`. Chỉ khi cả hai vế cùng là `int` thì kết quả mới là `int`.
+> nhãn `float`. Chiều ngược lại thì không chắc: hai vế cùng `int` thường cho
+> `int`, nhưng riêng dấu `/` **luôn** cho `float` — kể cả `90000 / 2`. Đó chính
+> là đường giọt mực rơi vào sổ mà bạn không tự gõ dấu chấm nào.
 
 Đặt cạnh nhau cho rõ:
 
 | phép tính | kết quả | nhãn |
 |---|---|---|
 | `45000 + 5000` | `50000` | `int` |
+| `90000 / 2` | `45000.0` | `float` |
 | `45000.0 + 5000` | `50000.0` | `float` |
 | `45000 * 2` | `90000` | `int` |
 | `120000 * 1.5` | `180000.0` | `float` |

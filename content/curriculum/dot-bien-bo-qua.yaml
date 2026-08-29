@@ -140,12 +140,6 @@
 # TƯƠNG ĐƯƠNG THẬT, và là luận điểm của bài: ba chuỗi bẩn khác nhau đều `.strip()` ra đúng "cà phê" dài 6. Đổi chỗ chúng cho nhau tất nhiên ra cùng kết quả.
 - 'nen-tang.gia-tri-bien-kieu.khoang-trang-vo-hinh · don-ba-lan-go · đổi MỌI chỗ đọc tên lan_ba thành lan_mot (1 chỗ)'
 
-# TRÙNG TÌNH CỜ TRONG DỮ LIỆU DÙNG CHUNG. `100000 % 3` và `250000 % 3` cùng bằng 1. Sửa được bằng cách đổi một trong hai con số — NHƯNG `250000` nằm ở 40 chỗ trong 6 bài, nên đổi nó là tự tạo ra đúng cái trôi hằng số mà cổng sổ sự thật dựng lên để chặn.
-- 'nen-tang.gia-tri-bien-kieu.phan-con-thua · dong-le-cua-hai-khoan · đổi MỌI chỗ đọc tên tien_pho thành tien_lau (1 chỗ)'
-
-# TRÙNG TÌNH CỜ TRONG DỮ LIỆU DÙNG CHUNG. `100000 % 3` và `250000 % 3` cùng bằng 1. Sửa được bằng cách đổi một trong hai con số — NHƯNG `250000` nằm ở 40 chỗ trong 6 bài, nên đổi nó là tự tạo ra đúng cái trôi hằng số mà cổng sổ sự thật dựng lên để chặn.
-- 'nen-tang.gia-tri-bien-kieu.phan-con-thua · dong-le-cua-hai-khoan · đổi MỌI chỗ đọc tên tien_lau thành tien_pho (1 chỗ)'
-
 # TƯƠNG ĐƯƠNG THEO DỮ LIỆU. `tong_sang == 30.3` và `tong_chieu == 30.3` đều `False` — cái đầu vì phép cộng số thực lệch (đúng điều bài dạy), cái sau vì hai số vốn khác nhau.
 - 'nen-tang.gia-tri-bien-kieu.so-thuc-chi-la-so-xap-xi · hoi-may-hai-cau · đổi MỌI chỗ đọc tên tong_sang thành tong_chieu (1 chỗ)'
 

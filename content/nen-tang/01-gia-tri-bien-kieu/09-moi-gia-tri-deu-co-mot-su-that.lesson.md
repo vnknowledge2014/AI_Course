@@ -82,12 +82,14 @@ Luật ngắn đến bất ngờ. Chỉ có một nhóm nhỏ giá trị mang s�
 | `0.0` | `False` | vẫn là số không, chỉ khác kiểu |
 | `""` | `False` | chuỗi rỗng, không một ký tự nào |
 | `[]` | `False` | danh sách rỗng, không một phần tử nào |
+| `False` | `False` | chính nó đã là câu trả lời "không" rồi |
 
-Còn lại **tất cả** đều là `True`. Cách nhớ: rỗng hoặc bằng không thì `False`,
-có gì trong tay thì `True`.
+Còn lại, mọi giá trị bạn đã gặp tới giờ đều là `True`. Cách nhớ: rỗng, bằng
+không, hoặc chính chữ `False` thì `False`; có gì trong tay thì `True`.
 
-Bốn dòng dưới đây là chỗ hay bị đọc nhầm nhất, và cả bốn đều theo đúng luật
-trên — không có ngoại lệ nào:
+Cột bên trái còn dài thêm khi bạn gặp kiểu mới — bài sau bạn sẽ gặp thêm đúng
+một cái nữa. Còn bốn dòng dưới đây là chỗ hay bị đọc nhầm nhất, và cả bốn đều
+theo đúng luật trên:
 
 ```python title=readonly
 print(bool("0"))

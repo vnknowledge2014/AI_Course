@@ -131,26 +131,26 @@ nữa.
 **Trước khi bấm chạy**, bạn đoán màn hình hiện ra hai dòng nào?
 
 ```python
-tong = 1360000
-so_ngay = 30
-trung_binh = tong / so_ngay
+tien_lau = 1000000
+so_nguoi = 6
+moi_nguoi = tien_lau / so_nguoi
 
-print(f"{trung_binh:.2f}")
-print(trung_binh)
+print(f"{moi_nguoi:.2f}")
+print(moi_nguoi)
 ```
 
 :::opt{correct}
-45333.33 rồi 45333.333333333336
+166666.67 rồi 166666.66666666666
 :::
 
 :::opt
-45333.33 rồi 45333.33
+166666.67 rồi 166666.67
 ::why
 Gần đúng ở chỗ bạn thấy dòng đầu quả thật đã làm gọn con số lại, và bạn suy ra
 việc làm gọn ấy có hiệu lực từ đó về sau — một suy luận thẳng thớm.
 
 Chỗ lệch nằm ở thứ bị làm gọn. Cái được rút ngắn là **dãy ký tự in ra màn
-hình**, không phải giá trị nằm dưới cái tên `trung_binh`. F-string dựng một
+hình**, không phải giá trị nằm dưới cái tên `moi_nguoi`. F-string dựng một
 chuỗi mới rồi đưa cho `print`; nó không với tay vào sửa giá trị cũ, y như
 `.strip()` không sửa chuỗi cũ. Dòng 2 hỏi thẳng cái tên nên nó nhận lại nguyên
 con số đầy đủ.
@@ -158,14 +158,18 @@ con số đầy đủ.
 :::
 
 :::opt
-45333.333333333336 rồi 45333.333333333336
+166666.66 rồi 166666.66666666666
 ::why
-Gần đúng ở chỗ bạn nhớ bài số thực xấp xỉ: cái đuôi dài kia là thật, máy không
-bịa ra, và nó không tự nhiên biến mất được. Phần đó bạn hiểu chính xác.
+Gần đúng ở cả hai dòng, gần tới mức chỉ lệch đúng một chữ số cuối. Dòng hai bạn
+đọc chính xác: giá trị không hề đổi. Dòng một bạn cũng đúng ở chỗ chỉ còn hai
+chữ số lẻ.
 
-Chỗ lệch: phần sau dấu hai chấm không đòi máy sửa con số, nó đòi máy **viết ra
-ít chữ số hơn**. Giá trị vẫn dài y nguyên — đó chính là vì sao dòng 2 in ra
-đuôi dài — nhưng dòng 1 đã được dặn viết hai chữ số lẻ, nên nó viết đúng hai.
+Chỗ lệch: bạn giữ lại hai chữ số đầu của cái đuôi và bỏ phần còn lại — tức
+**cắt**, đúng việc `int()` làm ở bài 2. Nhưng `.2f` không cắt, nó **làm tròn**,
+đúng việc `round()` làm ở bài 3. Chữ số thứ ba của đuôi là `6`, quá nửa, nên nó
+nhích chữ số thứ hai từ `6` lên `7`: `166666.67`. Con số này được chọn đúng vì
+cắt và làm tròn cho hai kết quả khác nhau — với `45333.3333` ở ví dụ trên thì
+hai cách trùng nhau và bạn không có cách nào biết mình đang nghĩ cái nào.
 ::
 :::
 

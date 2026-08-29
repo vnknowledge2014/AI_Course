@@ -286,7 +286,9 @@ assert tien_moi_nguoi == 60000, "mỗi người trả 60 nghìn — đổi tên 
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-Máy cấm đúng 35 từ. Ngoài 35 từ ấy ra, nó nhận tuốt — và nhận **như nhau**.
+Máy cấm đúng 35 từ khoá, và cấm thêm hai hình dạng bạn vừa gặp: mở đầu bằng
+chữ số, và có ký tự ngoài chữ, số, `_`. Qua được ba cửa ấy rồi thì nó nhận
+tuốt — và nhận **như nhau**.
 
 Thử nhìn bốn cái tên này, cả bốn đều hợp lệ, cả bốn đều chạy y hệt nhau:
 

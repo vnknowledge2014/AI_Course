@@ -225,8 +225,12 @@ assert ten_moi == "Trà sữa", "cột tên khoản đòi chữ đầu viết ho
 # 2. Chuỗi cũ có suy suyển không. Đây là chỗ luật bất biến hiện ra: bất kỳ cách
 #    nào "sửa tại chỗ" đều đã nổ TypeError từ trước, nên `ten` buộc phải nguyên.
 assert ten == "trà sữa", "tấm biển cũ vẫn nguyên chữ khách gõ — không ai mài lại được một nét của chuỗi đã dựng"
-# 3. Sáu ô sau phải lấy từ chính `ten`, không phải gõ tay một chuỗi khác:
-#    ghép chữ hoa với phần đuôi của `ten` thì kết quả trùng khít.
+# 3. Kết quả trùng khít với chuỗi ghép từ chính các ô của `ten`.
+#
+#    Chú ý: assert này KHÔNG bắt được đáp án gõ tay. `ten` không hề đổi, nên vế
+#    phải của nó luôn tính ra đúng "Trà sữa", và `ten_moi = "Trà sữa"` gõ thẳng
+#    cũng qua. Việc bắt buộc PHẢI ĐỌC `ten` do tier `static` dưới đây làm, không
+#    phải dòng này.
 assert ten_moi == "T" + ten[1] + ten[2] + ten[3] + ten[4] + ten[5] + ten[6], "sáu ký tự đằng sau phải lấy ra từ chính tên khách gõ, không phải gõ tay lại một tên khác"
 ```
 
@@ -246,6 +250,18 @@ assert ten_moi == "T" + ten[1] + ten[2] + ten[3] + ten[4] + ten[5] + ten[6], "s�
   timeoutMs: 4000
 - tier: output
   expect: Trà sữa
+- tier: static
+  onFail: sáu ký tự sau chữ T hoa phải được ĐỌC ra từ `ten`, không gõ tay lại tên khoản
+  requireAst:
+  # `min: 2`, không phải 6. Khung đã sẵn `print(ten)` — một lần đọc — nên mọi
+  # đáp án gõ tay dừng ở 1 và trượt, còn mọi cách dựng thật đều từ 2 trở lên.
+  #
+  # Không đặt cao hơn: `"T" + ten[1:]` chỉ đọc `ten` hai lần mà vẫn là một lời
+  # giải ĐÚNG. Đặt `min: 4` như số lần đọc của lời giải mẫu sẽ đánh trượt nó —
+  # và đánh trượt một người viết đúng thì tệ hơn cho lọt một người viết sai.
+  #
+  # Con số này ăn theo số lệnh `print` trong khung: sửa khung thì phải sửa đây.
+  - kind: uses-name, target: ten, min: 2
 :::
 ::::
 

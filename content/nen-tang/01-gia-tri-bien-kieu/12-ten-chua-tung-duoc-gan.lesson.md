@@ -93,35 +93,12 @@ None
 
 Cùng hai dòng ấy, giờ in ra bình thường. Không phải chữ nào sai; chỉ là thứ tự.
 
-Có một chỗ chuyện này xảy ra mà bạn không cố ý chút nào: dòng gán nằm **bên
-trong một nhánh `if`**.
+Ở hai đoạn trên, cái sai nằm ngay trước mắt: dòng gán đứng dưới dòng dùng, đọc
+một cái là thấy. Nhưng có một chỗ chuyện này xảy ra mà bạn **không cố ý chút
+nào**, và nhìn thẳng vào file cũng không thấy — vì ở đó dòng gán đứng đúng chỗ
+của nó, phía trên hẳn hoi.
 
-```python title=readonly
-tien_tip = 0
-
-if tien_tip > 0:
-    ghi_chu = "khách boa"
-
-print(ghi_chu)
-```
-
-```text
-Traceback (most recent call last):
-  File "so_chi_tieu.py", line 6, in <module>
-    print(ghi_chu)
-          ^^^^^^^
-NameError: name 'ghi_chu' is not defined
-```
-
-Dòng gán **có mặt trong file** — bạn nhìn thấy nó, nó nằm ngay đó. Nhưng hôm nay
-khách không boa, `0 > 0` là sai, nên thân `if` không chạy lần nào. Nét kẻ ô nằm
-trong một khối chưa bao giờ được đi qua, nên cái ô chưa bao giờ được kẻ.
-
-Nói cho chính xác thì luật là: cái tên có mặt kể từ lúc dòng gán của nó **chạy
-qua**, chứ không phải kể từ lúc bạn gõ nó ra.
-
-Và đây là chỗ khó chịu nhất: đoạn code này chạy êm suốt những hôm có khách boa.
-Nó chỉ nổ vào đúng cái hôm không ai boa cả.
+Chỗ ấy là khối `predict` ngay dưới đây.
 ::::
 
 ::::predict{#doan-hom-khong-ai-boa commitOnce}
@@ -178,6 +155,30 @@ chạy khi điều kiện đúng, mà `0 > 0` là sai. Dòng ấy hôm nay bị 
 — nó có mặt trong file nhưng chưa từng chạy, nên chưa tạo ra cái tên nào.
 ::
 :::
+::::
+
+::::explain{#dong-gan-co-mat-nhung-chua-chay}
+Đúng như bạn vừa đoán — máy dừng lại và in ra:
+
+```text
+Traceback (most recent call last):
+  File "so_chi_tieu.py", line 6, in <module>
+    print(ghi_chu)
+          ^^^^^^^
+NameError: name 'ghi_chu' is not defined
+```
+
+Dòng gán **có mặt trong file** — bạn nhìn thấy nó, nó nằm ngay đó, và nó đứng
+phía trên dòng `print` đàng hoàng. Nhưng hôm nay khách không boa, `0 > 0` là
+sai, nên thân `if` không chạy lần nào. Nét kẻ ô nằm trong một khối chưa bao giờ
+được đi qua, nên cái ô chưa bao giờ được kẻ.
+
+Nói cho chính xác thì luật là: cái tên có mặt kể từ lúc dòng gán của nó **chạy
+qua**, chứ không phải kể từ lúc bạn gõ nó ra.
+
+Và đây là chỗ khó chịu nhất: đoạn code này chạy êm suốt những hôm có khách boa.
+Nó chỉ nổ vào đúng cái hôm không ai boa cả — nên nó không nổ trên máy bạn lúc
+viết, nó nổ trên máy người khác vào một hôm bạn không có mặt.
 ::::
 
 ::::explain{#ke-o-truoc-roi-hay-hoi}

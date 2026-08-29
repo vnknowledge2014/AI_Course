@@ -185,7 +185,8 @@ có để dập tắt luật lây của bài trước — vớt giọt mực ra 
 Tối nay quán ghi hai bàn.
 
 - **Bàn A**: `90000` đồng, `2` người chia — chia hết, không dư đồng nào.
-- **Bàn B**: `100000` đồng, `3` người chia — chia không hết.
+- **Bàn B**: `170000` đồng, `3` người chia — chia không hết, và phần lẻ lần
+  này **quá nửa**.
 
 Điền hai chỗ trống để máy in ra phần mỗi người của từng bàn, **dưới dạng số
 nguyên**, không đuôi.
@@ -198,7 +199,7 @@ sự cắt vào tiền.
 tien_ban_a = 90000
 nguoi_ban_a = 2
 
-tien_ban_b = 100000
+tien_ban_b = 170000
 nguoi_ban_b = 3
 
 phan_ban_a = ___
@@ -212,7 +213,7 @@ print(phan_ban_b)
 tien_ban_a = 90000
 nguoi_ban_a = 2
 
-tien_ban_b = 100000
+tien_ban_b = 170000
 nguoi_ban_b = 3
 
 phan_ban_a = int(tien_ban_a / nguoi_ban_a)
@@ -227,12 +228,20 @@ print(phan_ban_b)
 #
 # Hai bàn được chọn để mỗi câu trả lời hụt đều lộ ra ở ít nhất một bàn:
 #   quên `int(...)`                       → bàn A ra 45000.0, bàn B ra
-#                                           33333.333333333336 — sai cả hai;
+#                                           56666.666666666664 — sai cả hai;
 #   chỉ bọc `int(...)` cho một bàn         → bàn kia còn đuôi;
 #   chép nguyên dòng của bàn A xuống dưới  → bàn B ra 45000, sai con số;
-#   điền một con số chết vào chỗ trống     → bàn kia sai.
+#   điền một con số chết vào chỗ trống     → bàn kia sai;
+#   dùng `round(...)` thay `int(...)`      → bàn B ra 56667, TRƯỢT.
+# Câu hụt cuối là câu bài này sinh ra để bắt, nên nó quyết định luôn con số của
+# bàn B. `170000 / 3` cho `56666.666…` — phần lẻ QUÁ NỬA, nên cái thước nhích
+# lên 56667 còn cái kéo đứng lại 56666. Người học ôm hiểu lầm "int() làm tròn"
+# sẽ lộ ra ngay tại đây.
+#
 # Bàn A chia hết nên nó KHÔNG đủ để chấm một mình: ở đó `int(...)` chỉ gỡ cái
-# đuôi `.0`, không cắt mất gì. Bàn B mới là bàn có phần lẻ thật để cắt.
+# đuôi `.0`, không cắt mất gì. Và nếu bàn B lấy phần lẻ DƯỚI nửa — như
+# `100000 / 3` ở khối ví dụ phía trên — thì kéo với thước lại ra cùng một số,
+# và cả bài tập không phân biệt nổi hai thứ nó vừa dạy là khác nhau.
 #
 # Cái nhãn phải hỏi thẳng, vì trong Python `45000.0 == 45000` cho `True` —
 # so sánh bằng một mình không phân biệt nổi `float` với `int`.
@@ -242,9 +251,9 @@ print(phan_ban_b)
 # này dạy đè lên tên có sẵn (`int = 0`). Sau bài ấy, `int` không còn là cái
 # kiểu nữa. Cách hỏi dưới đây không tra một cái tên có sẵn nào.
 assert phan_ban_a == 45000, "bàn A chia đôi phải ra 45000"
-assert phan_ban_b == 33333, "bàn B chia ba phải ra 33333 sau khi cắt phần lẻ"
+assert phan_ban_b == 56666, "bàn B phải ra 56666 vì int() CẮT; round() sẽ nhích lên 56667 và đó là câu trả lời sai bài này đi tìm"
 assert phan_ban_a.__class__.__name__ == "int", "phần bàn A phải mang nhãn int, không còn đuôi .0"
-assert phan_ban_b.__class__.__name__ == "int", "phần bàn B phải mang nhãn int, không còn đuôi .333"
+assert phan_ban_b.__class__.__name__ == "int", "phần bàn B phải mang nhãn int, không còn đuôi .666"
 ```
 
 :::hints
@@ -263,28 +272,30 @@ assert phan_ban_b.__class__.__name__ == "int", "phần bàn B phải mang nhãn 
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^45000\n33333\s*$
+  expect: ^45000\n56666\s*$
 :::
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Hai bàn, hai số nguyên. Bàn B vừa rơi mất một phần ba đồng — và mình không kêu tiếng nào.
+Hai bàn, hai số nguyên. Bàn B vừa rơi mất hai phần ba đồng — cái thước sẽ nhích lên, cái kéo thì không. Và mình không kêu tiếng nào.
 ::::
 
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-Cái kéo luôn cắt về **một phía**. Nó không bao giờ nhích lên. `int(33333.333)`
-bỏ đi một phần ba đồng; `int(45999.99)` bỏ đi gần trọn một đồng. Không hoá đơn
+Cái kéo luôn cắt về **một phía**. Nó không bao giờ nhích lên. `int(56666.666)`
+bỏ đi hai phần ba đồng; `int(45999.99)` bỏ đi gần trọn một đồng. Không hoá đơn
 nào lỗ quá một đồng, và không hoá đơn nào báo lỗi.
 
 Nhưng nó lệch về cùng một bên, mọi lần, không sót lần nào. Một nghìn hoá đơn là
 một nghìn lần thiệt cùng một hướng — mấy trăm đồng bốc hơi mà sổ không ghi lấy
 một dòng.
 
-Và có chỗ phần lẻ ấy không nhỏ. Sổ chợ nhà mình hay ghi bằng **nghìn** cho
-nhanh: `25.5` nghĩa là hai mươi lăm nghìn rưỡi. Đặt cái kéo lên đó thì
-`int(25.5)` cho `25`. Năm trăm đồng, cắt xong không ai biết.
+Và có chỗ phần lẻ ấy không nhỏ. Bác bán thịt đọc giá cho bạn bằng **nghìn**
+cho nhanh — `25.5` nghĩa là hai mươi lăm nghìn rưỡi. Chép thẳng con số ấy ra
+rồi đặt cái kéo lên, `int(25.5)` cho `25`. Năm trăm đồng, cắt xong không ai
+biết. (Quyển sổ thì vẫn ghi bằng đồng như bài trước — `25.5` là lời người ta
+đọc, không phải cách sổ ghi.)
 
 Cắt thì nhanh, nhưng cắt thì thiên vị. Muốn con số nhích về phía **gần nhất** —
 `45000.7` thành `45001`, còn `45000.2` vẫn là `45000` — thì gọi ai?

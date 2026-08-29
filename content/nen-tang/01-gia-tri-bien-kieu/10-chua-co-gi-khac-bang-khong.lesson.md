@@ -100,6 +100,11 @@ Gom lại thành ba câu ngắn, đáng nhớ hơn ba đoạn văn:
 | `0` | đã biết, và bằng không |
 | `""` | đã nhập, và nhập rỗng |
 | `None` | chưa có gì, chưa ai chạm vào |
+
+Và đây là dòng còn thiếu mà bài 9 đã hẹn: `bool(None)` cũng cho `False`. Nghe
+ngược với đoạn ngay trên, chỗ vừa nói `None` là một giá trị **có mặt** hẳn hoi.
+Python vẫn xếp nó cùng phía với `0` và `""`, vì cả ba đều không mang **nội
+dung** nào để làm việc. Có mặt là một chuyện, có nội dung là chuyện khác.
 ::::
 
 ::::predict{#doan-none-bang-cai-gi commitOnce}

@@ -32,8 +32,8 @@ Tên nào mình cũng đọc được như nhau. Người mở lại file này b
 ::::
 
 ::::explain{#ai-con-lai}
-Bài trước kết bằng câu hỏi: máy chỉ cấm 35 từ, ngoài ra nhận tuốt — vậy ai là
-người còn lại quyết định tên nào tốt?
+Bài trước kết bằng câu hỏi: qua được ba cửa của máy rồi thì mọi cái tên đều
+như nhau với nó — vậy ai là người còn lại quyết định tên nào tốt?
 
 **Người đọc.** Và người đọc đầu tiên của code bạn viết hôm nay, chín trên mười
 lần, chính là bạn của ba tháng sau.

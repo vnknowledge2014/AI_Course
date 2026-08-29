@@ -161,8 +161,9 @@ cùng một cách đếm chỗ.
 
 Chỗ lệch nằm ở chính chỗ luật này **không** như nhau. Ô rộng 12 hay 10 thì đúng
 cho cả hai, nhưng phía chèn khoảng trắng lại phụ thuộc kiểu: `str` dạt trái,
-số dạt phải. Đây là chỗ duy nhất trong phần định dạng mà kiểu của giá trị đổi
-được kết quả nhìn thấy.
+số dạt phải. Kiểu của giá trị còn đổi được kết quả ở vài chỗ khác nữa trong
+phần định dạng — bài sau bạn gặp đúng một chỗ như vậy — nhưng ở bài này thì căn
+lề là chỗ nó lộ ra rõ nhất.
 ::
 :::
 ::::

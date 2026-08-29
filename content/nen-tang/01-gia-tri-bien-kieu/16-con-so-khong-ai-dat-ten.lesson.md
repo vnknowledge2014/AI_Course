@@ -316,10 +316,15 @@ bắt đầu ghi **một khoản mới** vào sổ, bạn phải dựng lại đ
 sổ:
 
 ```python
-ten = ""
-tien = 0
+ten = None
+tien = None
 ghi_chu = None
 ```
+
+Cả ba đều là `None` chứ không phải `""` với `0` — dòng sổ vừa mở thì chưa ô nào
+có câu trả lời, và đó đúng nghĩa `None` của bài 10: chưa có gì, chưa ai chạm
+vào. Viết `tien = 0` ở đây là đã nói "đã hỏi rồi, khoản này không tốn đồng
+nào" — một câu chưa ai có quyền nói.
 
 Ba dòng này khác hẳn ba hằng ở trên: chúng không phải ba chuyện riêng, chúng
 là **ba ô của cùng một dòng sổ**. Chúng sinh ra cùng lúc và đi với nhau. Quên

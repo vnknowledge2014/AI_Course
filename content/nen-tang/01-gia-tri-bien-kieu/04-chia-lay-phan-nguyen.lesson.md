@@ -36,7 +36,7 @@ Bài trước cho bạn `round`, và nó đưa con số về mốc nguyên **g�
 nhất thì có khi ở phía trên, có khi ở phía dưới — và với việc chia tiền, hai
 phía ấy không giống nhau chút nào.
 
-Nhóm ba người ăn phở, hoá đơn `100000`. `round(100000 / 3)` cho `33333`. Ba
+Nhóm ba người ăn bún chả, hoá đơn `100000`. `round(100000 / 3)` cho `33333`. Ba
 người đưa mỗi người `33333`, cộng lại được `99999` — thiếu quán một đồng. Một
 đồng thì quán bỏ qua.
 
@@ -65,11 +65,11 @@ Tên gọi của nó: **chia lấy phần nguyên** (tiếng Anh là *floor divi
 Cùng hai con số, đổi mỗi số gạch chéo:
 
 ```python title=readonly
-tien_pho = 100000
+tien_bun = 100000
 
-print(tien_pho / 3)
-print(tien_pho // 3)
-print(type(tien_pho // 3))
+print(tien_bun / 3)
+print(tien_bun // 3)
+print(type(tien_bun // 3))
 ```
 
 Máy in ra:
@@ -185,24 +185,24 @@ cũng cho `33333`, nhưng `250000` chia `6` thì `round` cho `41667` còn `//` c
 `41666`.
 
 ```python title=starter
-tien_pho = 100000
+tien_bun = 100000
 tien_lau = 250000
 
-moi_nguoi_pho = ___
+moi_nguoi_bun = ___
 moi_nguoi_lau = ___
 
-print(f"Phở chia 3: mỗi người {moi_nguoi_pho}đ")
+print(f"Bún chả chia 3: mỗi người {moi_nguoi_bun}đ")
 print(f"Lẩu chia 6: mỗi người {moi_nguoi_lau}đ")
 ```
 
 ```python title=solution
-tien_pho = 100000
+tien_bun = 100000
 tien_lau = 250000
 
-moi_nguoi_pho = tien_pho // 3
+moi_nguoi_bun = tien_bun // 3
 moi_nguoi_lau = tien_lau // 6
 
-print(f"Phở chia 3: mỗi người {moi_nguoi_pho}đ")
+print(f"Bún chả chia 3: mỗi người {moi_nguoi_bun}đ")
 print(f"Lẩu chia 6: mỗi người {moi_nguoi_lau}đ")
 ```
 
@@ -211,16 +211,16 @@ print(f"Lẩu chia 6: mỗi người {moi_nguoi_lau}đ")
 #   gõ cứng một con số            → khoản còn lại sai ngay;
 #   `round(tien_lau / 6)`         → ra 41667, trượt dòng thứ hai;
 #   `tien_lau / 6`                → ra 41666.666..., trượt cả kiểu lẫn con số;
-#   `tien_pho / 3` cho cả hai     → sai luôn con số của khoản lẩu.
+#   `tien_bun / 3` cho cả hai     → sai luôn con số của khoản lẩu.
 # Hai assert giữa chốt phần mà bài 1 để lại: `//` giữa hai số nguyên phải trả
 # về `int` thật, không phải một số thực trông giống số nguyên. Kiểm bằng cách
 # in ra chữ chứ không bằng `isinstance`: bài 13 của chính track này dạy người
 # học đè lên cái tên `int`, nên trong bộ chấm cái tên ấy không đáng tin.
-assert moi_nguoi_pho == 33333, "100000 chia cho 3 người thì mỗi người 33333đ"
+assert moi_nguoi_bun == 33333, "100000 chia cho 3 người thì mỗi người 33333đ"
 assert moi_nguoi_lau == 41666, "250000 chia cho 6 người thì mỗi người 41666đ (round cho 41667 — đưa lên là thu quá)"
-assert f"{moi_nguoi_pho}" == "33333", "kết quả phải là số nguyên, không mang đuôi .0"
+assert f"{moi_nguoi_bun}" == "33333", "kết quả phải là số nguyên, không mang đuôi .0"
 assert f"{moi_nguoi_lau}" == "41666", "kết quả phải là số nguyên, không mang đuôi .0"
-assert moi_nguoi_pho * 3 <= tien_pho, "tổng ba phần không được vượt quá hoá đơn"
+assert moi_nguoi_bun * 3 <= tien_bun, "tổng ba phần không được vượt quá hoá đơn"
 assert moi_nguoi_lau * 6 <= tien_lau, "tổng sáu phần không được vượt quá hoá đơn"
 ```
 
@@ -228,9 +228,9 @@ assert moi_nguoi_lau * 6 <= tien_lau, "tổng sáu phần không được vượ
 - kind: attention
   body: Hai chỗ trống nằm ở vế phải của hai dòng gán. Mỗi chỗ cần một phép chia giữa số tiền và số người — nhưng là phép chia cho ra con số nguyên đồng, không có phần lẻ và không đưa lên.
 - kind: strategy
-  body: Dấu chia bạn cần là dấu có hai gạch chéo liền nhau, đặt giữa tên khoản tiền và số người. Số người của hai khoản khác nhau: phở 3, lẩu 6 — chép nguyên dòng phở xuống dòng lẩu thì con số của lẩu sẽ sai.
+  body: Dấu chia bạn cần là dấu có hai gạch chéo liền nhau, đặt giữa tên khoản tiền và số người. Số người của hai khoản khác nhau: bún chả 3, lẩu 6 — chép nguyên dòng bún chả xuống dòng lẩu thì con số của lẩu sẽ sai.
 - kind: one-line
-  body: "Thay `___` thứ nhất bằng `tien_pho // 3` và `___` thứ hai bằng `tien_lau // 6`."
+  body: "Thay `___` thứ nhất bằng `tien_bun // 3` và `___` thứ hai bằng `tien_lau // 6`."
 :::
 
 :::validate
@@ -240,16 +240,16 @@ assert moi_nguoi_lau * 6 <= tien_lau, "tổng sáu phần không được vượ
   onFail: bài này dạy dấu chia hai gạch `//` — hãy dùng chính nó ở cả hai dòng, đừng chia bằng `/` rồi cắt hay làm tròn lại
   requireAst:
   # `min: 2` vì có hai khoản, mỗi khoản một phép chia. Hỏi `uses-name` không
-  # được: khung đã nhắc `tien_pho` và `tien_lau` ở dòng gán đầu tiên.
+  # được: khung đã nhắc `tien_bun` và `tien_lau` ở dòng gán đầu tiên.
   - kind: uses-operator, target: //, min: 2
   forbidAst:
-  # Đi vòng qua số thực rồi cắt/làm tròn cũng ra đúng con số ở khoản phở, nên
+  # Đi vòng qua số thực rồi cắt/làm tròn cũng ra đúng con số ở khoản bún chả, nên
   # phải chặn bằng hình dạng chứ không chặn được bằng kết quả.
   - kind: uses-operator, target: /
   - kind: uses-call, target: round
 - tier: output
   match: regex
-  expect: ^Phở chia 3: mỗi người 33333đ\nLẩu chia 6: mỗi người 41666đ\s*$
+  expect: ^Bún chả chia 3: mỗi người 33333đ\nLẩu chia 6: mỗi người 41666đ\s*$
 :::
 ::::
 

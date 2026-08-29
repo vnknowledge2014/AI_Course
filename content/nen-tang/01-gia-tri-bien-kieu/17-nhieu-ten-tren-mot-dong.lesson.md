@@ -36,8 +36,8 @@ Câu hỏi bỏ ngỏ của bài trước: ba dòng gán dựng ba ô của **m�
 dọc thì mắt không thấy chúng thuộc về nhau.
 
 ```python title=readonly
-ten = ""
-tien = 0
+ten = None
+tien = None
 ghi_chu = None
 ```
 
@@ -97,7 +97,9 @@ của nó dùng không được. Ở đây "dùng không được" nghĩa là **
 khớp**, và dòng chữ cuối nói thẳng ra: *expected 3, got 2* — chờ ba, nhận hai.
 
 Thừa cũng bị chặn y như thiếu. `ten, tien = "cà phê", 25000, None` cho
-`too many values to unpack (expected 2, got 3)`.
+`too many values to unpack (expected 2)` — lần này máy chỉ nói con số nó **chờ**,
+không nói con số nó nhận. Đếm tới cái thứ ba là nó biết đã thừa rồi, khỏi đếm
+nốt.
 
 Để ý hai chuyện trong cú nổ trên.
 
@@ -239,8 +241,8 @@ Một dòng, ba ô. Nhìn phát là biết chúng đi cùng nhau.
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-Sổ ghi xong thì phát hiện ghi ngược hai ngày: khoản 50 nghìn là của hôm nay,
-còn 30 nghìn mới là của hôm qua. Hai cái tên cần đổi chỗ cho nhau.
+Sổ ghi xong thì phát hiện ghi ngược hai ngày: khoản 30 nghìn là của hôm nay,
+còn 50 nghìn mới là của hôm qua. Hai cái tên cần đổi chỗ cho nhau.
 
 Việc nghe rất gọn, nên bạn viết hai dòng, đọc lên xuôi tai:
 

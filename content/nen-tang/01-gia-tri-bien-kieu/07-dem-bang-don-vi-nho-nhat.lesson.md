@@ -187,10 +187,16 @@ Tới đây có hai cách kéo nó về `int`, và chúng cho hai kết quả kh
 
 Nên bước cuối của phép đổi đơn vị là `round`, không phải `int`.
 
-> Chỗ dễ vấp: `32.3 * 1000` thiếu một chút, nhưng `20.1 * 1000` lại **thừa**
-> một chút. Bạn không đoán được số nào lệch về phía nào, và nhìn bằng mắt cũng
-> không thấy. Vì vậy đừng thử từng số rồi kết luận "số của mình không sao" —
-> cứ dùng `round` cho mọi số, đó là cách duy nhất không phải đoán.
+> Chỗ dễ vấp: `32.3 * 1000` thiếu một chút — `32299.999999999996` — nhưng
+> `16.1 * 1000` lại **thừa** một chút: `16100.000000000002`. Hai con số nhìn
+> giống hệt nhau về hình dạng, mà lệch về hai phía ngược nhau, và bạn không
+> đoán được phía nào trước khi chạy.
+>
+> Trong 999 số một chữ số lẻ từ `0.1` tới `99.9`, đúng **10** số lệch: 4 số
+> thiếu, 6 số thừa. Cả 989 số còn lại thì tròn trịa. Chính vì hiếm mà nó nguy
+> hiểm — thử vài số rồi kết luận "số của mình không sao" là gần như chắc chắn
+> thử trúng số không sao. Cứ dùng `round` cho mọi số, đó là cách duy nhất
+> không phải đoán.
 ::::
 
 ::::code{#doi-mot-khoan-sang-dong}

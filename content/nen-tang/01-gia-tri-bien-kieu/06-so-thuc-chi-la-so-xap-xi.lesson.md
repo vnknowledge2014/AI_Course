@@ -32,8 +32,8 @@ Có những con số mình chép lại không bao giờ hết. Nên mình chép 
 ::::
 
 ::::explain{#so-khong-viet-het-duoc}
-Bài trước để lại một câu hỏi thẳng: sổ chợ ghi bằng nghìn, bánh mì `10.1` và
-cà phê `20.2` — máy cộng ra đúng `30.3` chứ?
+Bài trước để lại một câu hỏi thẳng: sổ chợ ghi bằng nghìn, trứng `10.1` và
+thịt gà `20.2` — máy cộng ra đúng `30.3` chứ?
 
 Trước khi chạy thử, hãy nhớ lại một con số bạn đã quen từ hồi tiểu học: một chia
 ba. Viết bằng thập phân, nó là `0,3333…` và cái đuôi ấy không bao giờ dừng. Muốn
@@ -64,10 +64,10 @@ thấy — và sổ chi tiêu thì toàn là cộng.
 Hỏi thẳng máy ba phép cộng:
 
 ```python title=readonly
-tien_banh_mi = 10.1
-tien_ca_phe = 20.2
+tien_trung = 10.1
+tien_ga = 20.2
 
-print(tien_banh_mi + tien_ca_phe)
+print(tien_trung + tien_ga)
 print(0.1 + 0.2)
 print(0.25 + 0.25)
 ```
@@ -105,9 +105,9 @@ Hỏi máy một câu có–không về đúng hai khoản chợ ban nãy.
 **Trước khi bấm chạy**, bạn đoán màn hình hiện ra gì?
 
 ```python
-tien_banh_mi = 10.1
-tien_ca_phe = 20.2
-print(tien_banh_mi + tien_ca_phe == 30.3)
+tien_trung = 10.1
+tien_ga = 20.2
+print(tien_trung + tien_ga == 30.3)
 ```
 
 :::opt{correct}
@@ -172,7 +172,7 @@ bằng cách hiện ít chữ số hơn số nó đang giữ.
 ::::code{#hoi-may-hai-cau}
 Byte muốn tự tay xác nhận, trên đúng sổ chi tiêu ghi bằng nghìn của mình:
 
-- **Sáng**: bánh mì `10.1` cộng cà phê `20.2` — trên giấy ra `30.3`.
+- **Sáng**: trứng `10.1` cộng thịt gà `20.2` — trên giấy ra `30.3`.
 - **Chiều**: trà đá `3.5` cộng gửi xe `5.25` — trên giấy ra `8.75`.
 
 Mỗi buổi in hai dòng: dòng trên là con số thật máy đang giữ (đã viết sẵn), dòng

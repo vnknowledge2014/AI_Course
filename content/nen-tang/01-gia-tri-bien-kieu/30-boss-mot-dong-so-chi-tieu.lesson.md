@@ -69,7 +69,7 @@ ten_sach = NGUOI_GO[0].strip()
 ten = ten_sach.lower()
 
 tien_nghin = float(NGUOI_GO[1])
-tong = int(tien_nghin * 1000)
+tong = round(tien_nghin * 1000)
 
 print(f"[{ten}]")
 print(tong, type(tong))
@@ -82,15 +82,21 @@ print(tong, type(tong))
 
 Hai dấu ngoặc vuông là của Byte, để bạn thấy hai đầu chuỗi đã sạch khoảng trắng.
 
-Dòng `tong = int(tien_nghin * 1000)` là dòng đáng nhìn kỹ nhất. `tien_nghin`
+Dòng `tong = round(tien_nghin * 1000)` là dòng đáng nhìn kỹ nhất. `tien_nghin`
 đang giữ một số thực, mà một số thực lẫn vào thì cả phép nhân ra số thực —
 `245.5 * 1000` cho `245500.0`. Cái đuôi `.0` ấy sẽ theo con số đi hết chương
-trình nếu không có `int()` chặn lại ngay tại đây. Chặn ở đúng chỗ này là cách
-giữ đúng luật: tiền thì đếm bằng đồng, và đếm thì dùng số nguyên.
+trình nếu không có ai chặn lại ngay tại đây.
+
+Chặn bằng `round`, không phải `int` — đúng như bài 7 đã chốt. Ở riêng con số
+`245.5` thì hai cách cho cùng kết quả, nên nhìn vào đây không thấy khác biệt.
+Nhưng hôm nào khách gõ `32.3` thì `32.3 * 1000` máy giữ là
+`32299.999999999996`, và `int` cắt xuống `32299` — mất một đồng, im lặng,
+không báo lỗi nào. Chọn công cụ theo cả những con số chưa gõ tới, chứ không
+theo con số đang có trước mắt.
 ::::
 
 ::::predict{#doan-cai-duoi commitOnce}
-Giả sử ai đó quên mất `int()` ở dòng vừa rồi, rồi in con số ra kèm dấu ngăn
+Giả sử ai đó quên mất `round()` ở dòng vừa rồi, rồi in con số ra kèm dấu ngăn
 nhóm. **Trước khi bấm chạy**, bạn đoán màn hình hiện ra dòng nào?
 
 ```python
@@ -284,7 +290,7 @@ ten_sach = NGUOI_GO[0].strip()
 ten = ten_sach.lower()
 
 tien_nghin = float(NGUOI_GO[1])
-tong = int(tien_nghin * 1000)
+tong = round(tien_nghin * 1000)
 
 phi = tong * PHAN_TRAM_PHUC_VU // 100
 phai_tra = tong + phi
@@ -317,9 +323,9 @@ assert ghi_chu is None, "hôm nay chưa ai viết gì vào ô ghi chú, mà chư
 - kind: attention
   body: Năm chỗ trống nằm ở năm phần khác nhau. Hai chỗ đầu thuộc phần làm sạch và đổi kiểu; hai chỗ trong dòng `print` đầu tiên là bề rộng hai ô; chỗ cuối nằm trong câu hỏi về ô ghi chú.
 - kind: strategy
-  body: Chỗ một cần phương thức cắt khoảng trắng hai đầu chuỗi. Chỗ hai cần lệnh đưa một số thực về số nguyên đồng. Hai chỗ trong f-string là số chỗ của ô tên và ô tiền, đúng hai con số cuốn sổ đã kẻ. Chỗ cuối là câu hỏi dành riêng cho giá trị "chưa có gì" — không phải phép so sánh bằng thông thường.
+  body: Chỗ một cần phương thức cắt khoảng trắng hai đầu chuỗi. Chỗ hai cần lệnh đưa một số thực về số nguyên đồng — bài 7 đã chỉ đích danh nên dùng cái nào trong hai cái, và vì sao cái kia làm mất tiền. Hai chỗ trong f-string là số chỗ của ô tên và ô tiền, đúng hai con số cuốn sổ đã kẻ. Chỗ cuối là câu hỏi dành riêng cho giá trị "chưa có gì" — không phải phép so sánh bằng thông thường.
 - kind: one-line
-  body: "Lần lượt năm chỗ trống là `strip`, `int`, `12`, `10`, và `is`."
+  body: "Lần lượt năm chỗ trống là `strip`, `round`, `12`, `10`, và `is`."
 :::
 
 :::validate
@@ -331,10 +337,18 @@ assert ghi_chu is None, "hôm nay chưa ai viết gì vào ô ghi chú, mà chư
   match: regex
   expect: ^bún chả {8}257,775đ\n  4 người chia · mỗi người 64,443đ · còn thừa 3đ\n  \(chưa có ghi chú\)\s*$
 - tier: static
-  onFail: chương trình còn thiếu bước làm sạch chuỗi hoặc bước đưa tiền về số nguyên đồng
+  onFail: chương trình còn thiếu bước làm sạch khoảng trắng hai đầu tên khoản
   requireAst:
+  # CHỈ còn luật `strip`. Bản trước đòi thêm `uses-call target: int min: 2` và
+  # nó đánh trượt một lời giải ĐÚNG HƠN lời giải mẫu: điền `round` cho đúng
+  # luật bài 7 thì chương trình chỉ còn một `int` (ở `int(NGUOI_GO[2])`), nên
+  # luật gãy — và người học nhận về câu "còn thiếu bước đưa tiền về số nguyên
+  # đồng", đúng cái bước họ vừa làm cẩn thận hơn.
+  #
+  # Bước đổi kiểu không cần luật tĩnh nào canh: hai `assert` dưới kia đã hỏi
+  # thẳng KẾT QUẢ — `tong == 245500` và `type(tong) is int` — mà không buộc
+  # người học phải đi bằng đúng một cái tên hàm.
   - kind: uses-call, target: strip, min: 1
-  - kind: uses-call, target: int, min: 2
 :::
 ::::
 

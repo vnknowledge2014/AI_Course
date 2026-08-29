@@ -170,24 +170,24 @@ Bài chấm bằng cả hai khoản, vì hai phần thừa ấy là hai con số
 `4`. Điền một con số cố định vào cả hai chỗ thì một trong hai dòng sẽ sai ngay.
 
 ```python title=starter
-tien_pho = 100000
+tien_bun = 100000
 tien_lau = 250000
 
-thua_pho = ___
+thua_bun = ___
 thua_lau = ___
 
-print(f"Phở chia 3 người: mỗi người {tien_pho // 3}đ, còn thừa {thua_pho}đ")
+print(f"Bún chả chia 3 người: mỗi người {tien_bun // 3}đ, còn thừa {thua_bun}đ")
 print(f"Lẩu chia 6 người: mỗi người {tien_lau // 6}đ, còn thừa {thua_lau}đ")
 ```
 
 ```python title=solution
-tien_pho = 100000
+tien_bun = 100000
 tien_lau = 250000
 
-thua_pho = tien_pho % 3
+thua_bun = tien_bun % 3
 thua_lau = tien_lau % 6
 
-print(f"Phở chia 3 người: mỗi người {tien_pho // 3}đ, còn thừa {thua_pho}đ")
+print(f"Bún chả chia 3 người: mỗi người {tien_bun // 3}đ, còn thừa {thua_bun}đ")
 print(f"Lẩu chia 6 người: mỗi người {tien_lau // 6}đ, còn thừa {thua_lau}đ")
 ```
 
@@ -196,23 +196,23 @@ print(f"Lẩu chia 6 người: mỗi người {tien_lau // 6}đ, còn thừa {th
 # chỉ qua được nhiều nhất một dòng. Hai assert cuối kiểm cái luật của bài:
 # phần chia trọn cộng phần còn thừa phải dựng lại đúng hoá đơn ban đầu — thứ
 # mà một đáp án đoán mò không tự nhiên thoả được.
-assert thua_pho == 1, "100000 chia cho 3 người thì còn thừa 1đ"
+assert thua_bun == 1, "100000 chia cho 3 người thì còn thừa 1đ"
 assert thua_lau == 4, "250000 chia cho 6 người thì còn thừa 4đ"
-assert tien_pho // 3 * 3 + thua_pho == tien_pho, "phần mỗi người cộng phần thừa phải bằng đúng hoá đơn"
+assert tien_bun // 3 * 3 + thua_bun == tien_bun, "phần mỗi người cộng phần thừa phải bằng đúng hoá đơn"
 assert tien_lau // 6 * 6 + thua_lau == tien_lau, "phần mỗi người cộng phần thừa phải bằng đúng hoá đơn"
 # Kiểm "không có đuôi .0" bằng cách in ra chữ chứ không bằng `isinstance`: bài
 # 13 của chính track này dạy người học đè lên cái tên `int`, nên trong bộ chấm
 # cái tên ấy không đáng tin.
-assert f"{thua_pho}" == "1" and f"{thua_lau}" == "4", "phần thừa đếm bằng đồng nên phải là số nguyên, không mang đuôi .0"
+assert f"{thua_bun}" == "1" and f"{thua_lau}" == "4", "phần thừa đếm bằng đồng nên phải là số nguyên, không mang đuôi .0"
 ```
 
 :::hints
 - kind: attention
   body: Hai chỗ trống nằm ở vế phải hai dòng gán, và hai dòng `print` bên dưới đã cho bạn xem sẵn phần chia trọn được viết thế nào. Phần thừa hỏi trên đúng cặp số ấy, chỉ đổi dấu.
 - kind: strategy
-  body: Dấu bạn cần là dấu lấy phần dư, đặt giữa tên khoản tiền và số người — cùng chỗ đứng với hai gạch chéo trong dòng `print`. Số người của hai khoản khác nhau, phở 3 và lẩu 6, nên hai dòng không chép được cho nhau.
+  body: Dấu bạn cần là dấu lấy phần dư, đặt giữa tên khoản tiền và số người — cùng chỗ đứng với hai gạch chéo trong dòng `print`. Số người của hai khoản khác nhau, bún chả 3 và lẩu 6, nên hai dòng không chép được cho nhau.
 - kind: one-line
-  body: "Thay `___` thứ nhất bằng `tien_pho % 3` và `___` thứ hai bằng `tien_lau % 6`."
+  body: "Thay `___` thứ nhất bằng `tien_bun % 3` và `___` thứ hai bằng `tien_lau % 6`."
 :::
 
 :::validate
@@ -224,9 +224,22 @@ assert f"{thua_pho}" == "1" and f"{thua_lau}" == "4", "phần thừa đếm bằ
   # `min: 2` vì có hai khoản. Khung đã sẵn hai dấu `//` trong hai dòng `print`
   # nên không hỏi được bằng `//`; `%` thì khung chưa nhắc lần nào.
   - kind: uses-operator, target: %, min: 2
+  # Mỗi khoản phải lấy dư TRÊN CHÍNH KHOẢN ẤY.
+  #
+  # `100000 % 3` và `250000 % 3` cùng bằng 1; `100000 % 6` và `250000 % 6` cùng
+  # bằng 4. Nên đổi `tien_bun` thành `tien_lau` ở chỗ trống — lấy dư của khoản
+  # kia — vẫn ra đúng cả hai con số, qua sạch mọi assert, kể cả đẳng thức
+  # `phần chia trọn + phần thừa = hoá đơn`. Cổng đột biến bắt được, và bản
+  # trước đây khai miễn trừ hai đột biến ấy vì đổi con số thì kéo theo bài 4.
+  #
+  # Luật dưới đây đóng lỗ mà không đụng tới con số nào: khung đã đọc mỗi tên
+  # đúng một lần trong dòng `print` của nó, nên lời giải thật đẩy lên 2, còn
+  # đáp án lấy dư nhầm khoản tụt về 1. Sửa dòng `print` thì phải sửa cả đây.
+  - kind: uses-name, target: tien_bun, min: 2
+  - kind: uses-name, target: tien_lau, min: 2
 - tier: output
   match: regex
-  expect: ^Phở chia 3 người: mỗi người 33333đ, còn thừa 1đ\nLẩu chia 6 người: mỗi người 41666đ, còn thừa 4đ\s*$
+  expect: ^Bún chả chia 3 người: mỗi người 33333đ, còn thừa 1đ\nLẩu chia 6 người: mỗi người 41666đ, còn thừa 4đ\s*$
 :::
 ::::
 
@@ -244,8 +257,8 @@ rớt đồng nào.
 Chúng sạch được như thế vì bạn đang đếm bằng **đồng** — mà đồng thì không có
 phần lẻ để mà lệch.
 
-Nhưng sổ chợ ngoài đời ít ai ghi bằng đồng. Người ta ghi bằng **nghìn**: bánh mì
-`10.1`, cà phê `20.2`. Tay bạn cộng hai con số ấy trên giấy, ra `30.3`, và bạn
+Nhưng sổ chợ ngoài đời ít ai ghi bằng đồng. Người ta ghi bằng **nghìn**: trứng
+`10.1`, thịt gà `20.2`. Tay bạn cộng hai con số ấy trên giấy, ra `30.3`, và bạn
 chắc chắn về nó như chắc chắn về `1 + 1`.
 
 Máy có cho ra đúng `30.3` không? Bài sau hỏi thẳng máy, và câu trả lời của nó

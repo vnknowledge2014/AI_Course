@@ -129,61 +129,61 @@ mới.
 ::::
 
 ::::predict{#doan-hai-dong-doi-cho commitOnce}
-Byte ghi sổ hai ngày rồi phát hiện ghi ngược, và sửa bằng hai dòng gán. **Trước
-khi bấm chạy**, bạn đoán màn hình hiện ra gì?
+Một dòng sổ khác, hai khoản khác, nhưng vẫn đúng hai dòng gán ấy. **Trước khi
+bấm chạy**, bạn đoán màn hình hiện ra gì?
 
 ```python title=readonly
-tien_hom_qua = 30000
-tien_hom_nay = 50000
+tien_sang = 20000
+tien_trua = 65000
 
-tien_hom_qua = tien_hom_nay
-tien_hom_nay = tien_hom_qua
+tien_sang = tien_trua
+tien_trua = tien_sang
 
-print(f"Hôm qua {tien_hom_qua}đ, hôm nay {tien_hom_nay}đ")
+print(f"Sáng {tien_sang}đ, trưa {tien_trua}đ")
 ```
 
 :::opt{correct}
-Hôm qua 50000đ, hôm nay 50000đ
+Sáng 65000đ, trưa 65000đ
 :::
 
 :::opt
-Hôm qua 50000đ, hôm nay 30000đ
+Sáng 65000đ, trưa 20000đ
 ::why
 Gần đúng ở chỗ bạn đọc ra đúng ý định của hai dòng ấy: chúng được viết ra để
 đổi chỗ, và đây chính là kết quả người viết muốn có. Ý định thì không sai chỗ
 nào.
 
-Chỗ lệch nằm ở dòng thứ hai. Lúc nó chạy, `tien_hom_qua` không còn giữ `30000`
-nữa — dòng trước vừa dán cái tên ấy sang `50000` xong. Nên vế phải của dòng
-hai đọc ra `50000`, và `tien_hom_nay` nhận lại đúng con số nó đang có. Muốn
-kết quả này thì phải có ai đó còn giữ `30000` cho tới lúc ấy.
+Chỗ lệch nằm ở dòng thứ hai. Lúc nó chạy, `tien_sang` không còn giữ `20000`
+nữa — dòng trước vừa dán cái tên ấy sang `65000` xong. Nên vế phải của dòng
+hai đọc ra `65000`, và `tien_trua` nhận lại đúng con số nó đang có. Muốn
+kết quả này thì phải có ai đó còn giữ `20000` cho tới lúc ấy.
 ::
 :::
 
 :::opt
-Hôm qua 30000đ, hôm nay 30000đ
+Sáng 20000đ, trưa 20000đ
 ::why
 Gần đúng ở chỗ bạn thấy hai con số cuối cùng phải giống nhau — đúng, một giá
 trị đã mất và cái còn lại chiếm cả hai cái tên. Bạn đọc trúng cái bẫy của đoạn
 này.
 
-Chỗ lệch là ở chỗ giá trị nào sống sót. Dòng `tien_hom_qua = tien_hom_nay`
-chạy trước, và nó dán `tien_hom_qua` sang giá trị của `tien_hom_nay`, tức
-`50000`. Cái mất là `30000`. Đọc mỗi dòng gán theo thứ tự phải-rồi-trái sẽ chỉ
+Chỗ lệch là ở chỗ giá trị nào sống sót. Dòng `tien_sang = tien_trua`
+chạy trước, và nó dán `tien_sang` sang giá trị của `tien_trua`, tức
+`65000`. Cái mất là `20000`. Đọc mỗi dòng gán theo thứ tự phải-rồi-trái sẽ chỉ
 ra ngay ai còn ai mất.
 ::
 :::
 
 :::opt
-Hôm qua 30000đ, hôm nay 50000đ
+Sáng 20000đ, trưa 65000đ
 ::why
 Gần đúng ở chỗ bạn ngờ rằng hai dòng ấy triệt tiêu nhau: dòng sau làm ngược
 lại dòng trước, nên sổ quay về như cũ. Với hai việc thật sự đối xứng thì cách
 nghĩ đó đúng.
 
-Chỗ lệch: dòng sau không làm ngược lại dòng trước, vì nó đọc `tien_hom_qua`
+Chỗ lệch: dòng sau không làm ngược lại dòng trước, vì nó đọc `tien_sang`
 **sau khi** dòng trước đã dán cái tên ấy đi rồi. Muốn quay về như cũ thì phải
-còn ai đó giữ `30000` — mà từ cuối dòng thứ nhất, không cái tên nào giữ nó
+còn ai đó giữ `20000` — mà từ cuối dòng thứ nhất, không cái tên nào giữ nó
 nữa.
 ::
 :::
