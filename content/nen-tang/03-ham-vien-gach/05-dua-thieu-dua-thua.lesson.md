@@ -1,7 +1,7 @@
 ---
 id: nen-tang.ham-vien-gach.dua-thieu-dua-thua
 title: Đưa thiếu, đưa thừa
-summary: Số thứ đưa vào phải khớp đúng số chỗ trống trong chữ ký — thiếu hay thừa đều dừng ngay bằng `TypeError`.
+summary: Số thứ đưa vào phải khớp đúng số chỗ trống TRƠ TRỌI trong chữ ký — thiếu hay thừa đều dừng ngay bằng `TypeError`.
 locale: vi
 track: nen-tang
 module: ham-vien-gach
@@ -114,9 +114,9 @@ nào** trước dòng lỗi. Máy chưa hề bước vào thân hàm. Nó đếm
 và dừng ngay tại lời gọi.
 ::::
 
-::::predict{#loi-hua-trong-nhan commitOnce}
-Byte đọc lại nhãn của mình và thấy nó đã viết sẵn một lối thoát cho người quên
-ghi giá.
+::::predict{#nhan-noi-ba-cho-def-noi-hai commitOnce}
+Byte sửa nhãn cho đầy đủ hơn: nó ghi thêm một chỗ trống thứ ba, `giam_gia`.
+Nhưng nó chỉ sửa nhãn.
 
 **Trước khi bấm chạy**, bạn đoán màn hình hiện ra gì?
 
@@ -126,67 +126,68 @@ def tinh_tien(so_to, gia):
 
     so_to: mấy tô.
     gia: giá một tô, tính bằng đồng.
-    Không ghi giá thì cứ tính theo giá 45000 một tô.
+    giam_gia: giảm bao nhiêu đồng cho cả bàn.
     """
     return so_to * gia
 
-print(tinh_tien(2))
+print(tinh_tien(2, 45000, 0))
 ```
 
 :::opt{correct}
-Máy dừng và báo `TypeError`, nói thiếu đối số `gia`
+Máy dừng và báo `TypeError`, nói hàm nhận 2 chỗ mà được đưa 3
 :::
 
 :::opt
-In ra 90000, vì nhãn đã nói rõ không ghi giá thì tính 45000 một tô
+In ra 90000, vì nhãn đã ghi đủ ba chỗ và số thứ ba là 0 nên không giảm gì
 ::why
-Gần đúng ở chỗ rất đáng thông cảm: bài trước bạn vừa thấy máy **đọc lại** đúng
-câu ấy ra màn hình khi bạn gõ `help`. Máy đọc được thì máy hiểu — suy luận đó
-tự nhiên, và nó đúng với con người.
+Gần đúng ở chỗ bạn đọc nhãn đúng như người viết mong: nó ghi ba chỗ, bạn đưa
+ba thứ, và số thứ ba là `0` nên đưa hay không cũng chẳng đổi con số nào. Về
+mặt ý nghĩa thì bạn tính đúng.
 
-Chỗ lệch nằm ở chữ *đọc*. Máy chép câu ấy ra, y như chép một câu chữ bất kỳ,
-chứ không hiểu nghĩa một chữ nào trong đó. Câu bạn viết trong docstring là lời
-hứa của **bạn** với người đọc, không phải lời hứa của máy.
-
-Muốn máy thật sự tự điền giá khi người ta bỏ trống thì phải nói với nó bằng
-chỗ khác — không phải bằng docstring. Cái chỗ ấy có thật, và bạn sẽ gặp nó ở
-phía trước.
+Chỗ lệch: máy không đếm bằng nhãn. Nó đếm bằng dòng `def`, và dòng ấy chỉ có
+hai chỗ. Số `0` kia không có chỗ nào để rơi vào, nên máy dừng trước khi tính.
+Cái nhãn ghi ba chỗ mà dòng `def` ghi hai — đó là một lời nói dối nằm sẵn
+trong file, và người sửa nhãn mà quên sửa `def` là người dựng ra nó.
 ::
 :::
 
 :::opt
-Máy tính với `gia` để trống, ra kết quả 0
+In ra 90000, và máy lặng lẽ bỏ qua con số thứ ba
 ::why
-Gần đúng ở chỗ bạn hình dung một cái khay có lỗ nào trống thì coi như lỗ ấy
-đựng số không — nhiều bảng biểu ngoài đời làm đúng như vậy, và có những ngôn
-ngữ lập trình cũng chọn cách đó thật.
+Gần đúng ở chỗ bạn ngờ máy sẽ dễ tính: thừa thì bỏ bớt, thiếu mới đáng lo. Có
+những nơi trong lập trình đúng là như vậy thật.
 
-Chỗ lệch: Python không tự điền gì vào chỗ trống. Với nó, "chưa ai điền" khác
-hẳn "điền số 0" — số 0 là một giá trị đàng hoàng mà ai đó đã cố ý đưa vào. Lẫn
-hai thứ ấy vào nhau nghĩa là mọi lời gọi thiếu sót đều lặng lẽ cho ra một con
-số trông như thật, và đó mới là chuyện đáng sợ.
+Chỗ lệch: bỏ qua lặng lẽ là điều tệ nhất máy có thể làm ở đây. Nếu nó nuốt con
+số thứ ba, thì hôm nào bạn gọi `tinh_tien(2, 45000, 5000)` với ý định giảm
+5 nghìn, hoá đơn vẫn ra 90000 — sai đúng 5 nghìn, không một tiếng báo. Máy
+chọn dừng, và dừng ngay tại dòng gây ra chuyện.
 ::
 :::
 
 :::opt
-Máy báo `NameError`, vì `gia` chưa mang giá trị nào
+Máy dừng và báo `TypeError`, nói thiếu đối số `giam_gia`
 ::why
-Gần đúng ở một chỗ tinh: bạn nhớ Realm 0 rất chắc — một cái tên không có giá
-trị thì máy đi tìm không ra và báo `NameError`.
+Gần đúng ở chỗ khó nhất: bạn nhận ra máy sẽ dừng, và dừng bằng `TypeError`.
+Loại lỗi bạn đoán trúng.
 
-Chỗ lệch là ai đang tìm cái tên ấy. `gia` không phải cái tên máy đi tìm ở
-ngoài; nó là một chỗ trống trong chữ ký, và người có nhiệm vụ điền vào là
-**người gọi**. Nên chuyện xảy ra ở đây không phải "tìm không thấy tên" mà là
-"lời gọi không khớp với hàm" — hai thứ không đi với nhau được, tức `TypeError`.
-Máy dừng ngay tại lời gọi, trước khi có ai kịp đi tìm `gia`.
+Chỗ lệch là chiều của cái lệch. Bạn đang đếm chỗ trống theo **nhãn** — nhãn ghi
+ba, đưa ba, nên nếu có thiếu thì thiếu ở đâu đó. Nhưng máy đếm theo dòng
+`def`: hai chỗ, ba thứ được đưa. Nên câu nó nói là *takes 2 positional
+arguments but 3 were given* — thừa, không phải thiếu.
 ::
 :::
 ::::
 
 ::::explain{#lech-la-dung-ngay}
-Gom lại thành một câu dùng được: **số đối số bạn đưa phải bằng đúng số tham số
-trong chữ ký**. Thiếu một cũng dừng, thừa một cũng dừng, và cả hai đều dừng
-bằng `TypeError`.
+Gom lại thành một câu dùng được: **số đối số bạn đưa phải bằng đúng số ô
+TRƠ TRỌI trong chữ ký** — những ô không mang dấu `=`. Thiếu một cũng dừng,
+thừa một cũng dừng, và cả hai đều dừng bằng `TypeError`.
+
+Mấy chữ *trơ trọi* ở đây không thừa. Bài 3 đã in chữ ký
+`round(number, ndigits=None)` rồi nói thẳng: `ndigits` là "một ô bạn **được
+phép bỏ trống**", và bạn đã bỏ trống nó suốt từ mạch trước tới giờ mà máy chưa
+lần nào phàn nàn. Dấu `=` ấy là thứ làm nên khác biệt — nó là chuyện của
+bài 8. Còn `so_to` với `gia` thì trơ trọi, nên không bỏ được ô nào.
 
 Nghe như một luật khó tính. Thật ra đây là chỗ hàm tử tế với bạn nhất.
 
@@ -196,10 +197,15 @@ tới lúc khách thắc mắc thì chẳng còn dấu vết nào chỉ về dò
 ngay tại lời gọi nghĩa là chỗ hỏng và chỗ báo là **cùng một dòng**.
 
 Có một chỗ dễ vấp: đếm chỗ trống thì dễ, đếm đối số lại hay nhầm khi bạn gọi
-một hàm nằm trong một hàm khác. `tinh_tien(gia_to("vừa"))` trông như hai thứ vì
-có hai cặp ngoặc, nhưng `tinh_tien` chỉ nhận **một** đối số — cái nằm giữa cặp
-ngoặc ngoài cùng. Cách đếm chắc chắn: nhìn đúng cặp ngoặc của hàm đang gọi, rồi
-đếm những dấu phẩy ngăn cách bên trong cặp ấy.
+một hàm nằm trong một hàm khác. `tinh_tien(2, gia_to("vừa"))` trông như ba thứ
+vì có ba con số hiện ra, nhưng `tinh_tien` chỉ nhận đúng **hai** đối số: số
+`2`, và kết quả mà `gia_to("vừa")` đưa về. Cặp ngoặc bên trong là của
+`gia_to`, không phải của `tinh_tien`.
+
+Cách đếm chắc chắn: nhìn đúng cặp ngoặc của hàm đang gọi — cặp mở ra ngay sau
+tên nó — rồi đếm những dấu phẩy nằm ở **tầng ngoài cùng** bên trong cặp ấy.
+Dấu phẩy nằm lọt trong một cặp ngoặc con thì không tính, vì nó là chuyện của
+hàm con.
 ::::
 
 ::::code{#dua-du-hai-thu}

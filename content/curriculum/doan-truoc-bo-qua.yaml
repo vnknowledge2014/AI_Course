@@ -9,14 +9,6 @@
 # Khai một ca rồi mà cổng không còn khớp là LỖI, không phải chuyện lành: nghĩa
 # là bài đã đổi và tờ giấy miễn trừ nằm lại, sẵn sàng tha cho một lỗi thật.
 
-# HỎI Ở CHỖ KHÁC. Đoạn trên là hàm KHÔNG có nhãn; đoạn trong `predict` là đúng
-# hàm ấy CÓ thêm một nhãn ghi "không ghi giá thì tính 45000 một tô". Câu hỏi là
-# nhãn có tạo ra giá trị mặc định không — và đáp án đúng giống hệt đoạn trên
-# chính là luận điểm của bài: nhãn không chạy, nó chỉ là chữ. Người học tin
-# nhãn sẽ chọn "In ra 90000", và cuộn lên cũng không cứu được họ, vì đoạn trên
-# là một hàm khác.
-- 'content/nen-tang/03-ham-vien-gach/05-dua-thieu-dua-thua.lesson.md · mã trùng khối `example`'
-
 # LỜI GIẢI CẦN MỘT TỆP TRÊN ĐĨA nên không chạy được ngoài môi trường bài học,
 # và máy không sinh nổi màn hình mẫu để ghim. Hai chỗ này vẫn là nợ thật —
 # ghi ở `docs/no-noi-dung/`, chưa trả.
