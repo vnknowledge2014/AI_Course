@@ -233,6 +233,14 @@ tiền**, chứ không phải phần còn lại của câu hỏi về sổ.
 
 ```python title=starter
 co_ghi_so = True
+tien = 260000
+
+if co_ghi_so:
+    if tien > 200000:
+        print("Ngày này tiêu quá tay.")
+    ___
+        print("Ngày này tiêu vừa phải.")
+
 tien = 120000
 
 if co_ghi_so:
@@ -244,6 +252,14 @@ if co_ghi_so:
 
 ```python title=solution
 co_ghi_so = True
+tien = 260000
+
+if co_ghi_so:
+    if tien > 200000:
+        print("Ngày này tiêu quá tay.")
+    else:
+        print("Ngày này tiêu vừa phải.")
+
 tien = 120000
 
 if co_ghi_so:
@@ -254,19 +270,29 @@ if co_ghi_so:
 ```
 
 ```python title=test
-# Chấm bằng OUTPUT: ngày có ghi sổ và tiêu 120 nghìn, nên câu khen phải hiện
-# ra. Nếu dòng còn thiếu bị đặt ở cột 0 thì nó trả lời cho câu hỏi về sổ, câu
-# hỏi ấy đang đúng, và màn hình sẽ trống trơn.
+# Chấm bằng OUTPUT, và chấm bằng HAI ngày chứ không một.
+#
+# Một ngày thì không đủ. Với riêng ngày 120 nghìn, mọi câu dưới đây đều in ra
+# đúng câu khen và đều lọt: `if True:`, `if co_ghi_so:`, `if tien < 500000:` —
+# không câu nào là `else`, ở đúng bài dạy `else` thuộc về `if` nào.
+#
+# Hai ngày thì chúng lộ hết. Ngày 260 nghìn đi vào nhánh trên; một dòng `if`
+# điền bừa ở cột 4 sẽ chạy THÊM nhánh dưới, nên màn hình ra ba dòng thay vì
+# hai. Chỉ `else` mới loại trừ được nhánh kia.
+#
+# Đặt `else` ở cột 0 thì nó thành phần còn lại của câu hỏi về sổ — câu hỏi ấy
+# đang đúng ở cả hai ngày, nên nhánh dưới không chạy lần nào, và màn hình chỉ
+# còn một dòng.
 pass
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống nằm ở cột 4, ngang hàng với dòng `if tien > 200000:`. Ngang hàng nghĩa là hai dòng ấy sẽ thành hai lối của cùng một ngã ba.
+  body: Hai chỗ trống nhận cùng một câu trả lời — cùng một ngã ba, thử trên hai ngày khác nhau. Cả hai đều nằm ở cột 4, ngang hàng với dòng `if tien > 200000:`. Ngang hàng nghĩa là hai dòng ấy sẽ thành hai lối của cùng một ngã ba.
 - kind: strategy
   body: Bạn cần từ khoá mở ra lối "còn không thì" mà Realm 0 đã dạy. Nó đứng một mình, phía sau không kèm câu hỏi nào, và kết thúc bằng dấu hai chấm vì nó mở ra một khối lệnh.
 - kind: one-line
-  body: "Thay `___` bằng `else:` và giữ nguyên bốn dấu cách phía trước nó."
+  body: "Thay cả hai `___` bằng `else:`, giữ nguyên bốn dấu cách phía trước nó."
 :::
 
 :::validate
@@ -274,7 +300,7 @@ pass
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^Ngày này tiêu vừa phải\.\s*$
+  expect: ^Ngày này tiêu quá tay\.\nNgày này tiêu vừa phải\.\s*$
 :::
 ::::
 

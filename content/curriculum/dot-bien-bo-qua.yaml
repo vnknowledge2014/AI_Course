@@ -39,7 +39,8 @@
 - 'nen-tang.re-nhanh-va-lap.dieu-kien-trong-dieu-kien · them-mot-tang · đổi MỌI dấu > thành >= (2 chỗ)'
 
 # NGƯỠNG KHÔNG PHẢI KHÁI NIỆM CỦA BÀI — bài dạy gộp `if` lồng thành một dòng `and`. Xem lý do ở `neu-thi`.
-- 'nen-tang.re-nhanh-va-lap.duong-di-toi-mot-dong · viet-lai-cho-phang · đổi MỌI dấu > thành >= (1 chỗ)'
+# Số chỗ đi từ 1 lên 4 vì bài bỏ cái hàm ba tham số (chưa bài nào dạy) và trải thành bốn cảnh gán thẳng.
+- 'nen-tang.re-nhanh-va-lap.duong-di-toi-mot-dong · viet-lai-cho-phang · đổi MỌI dấu > thành >= (4 chỗ)'
 
 # TƯƠNG ĐƯƠNG THẬT. `>` và `>=` trong một vòng tìm max cho ra ĐÚNG cùng một con số, mọi dữ liệu. Không cách chấm nào phân biệt nổi, vì không có gì để phân biệt.
 - 'nen-tang.re-nhanh-va-lap.giu-lai-ky-luc · tim-ngay-cao-nhat · đổi MỌI dấu > thành >= (1 chỗ)'
@@ -88,7 +89,7 @@
 - 'nen-tang.re-nhanh-va-lap.dieu-kien-trong-dieu-kien · them-mot-tang · đổi MỌI hằng số 500000 thành 500001 (2 chỗ)'
 
 # Mốc 65 là tham số của đề; bài dạy gộp `if` lồng thành một dòng `and`.
-- 'nen-tang.re-nhanh-va-lap.duong-di-toi-mot-dong · viet-lai-cho-phang · đổi MỌI hằng số 65 thành 66 (1 chỗ)'
+- 'nen-tang.re-nhanh-va-lap.duong-di-toi-mot-dong · viet-lai-cho-phang · đổi MỌI hằng số 65 thành 66 (4 chỗ)'
 
 # Ngưỡng 200 000 / 100 000 là tham số của đề; bài dạy thứ tự nhánh `elif`. Sổ dùng chung bốn bài.
 - 'nen-tang.re-nhanh-va-lap.nhanh-khong-bao-gio-toi · xep-lai-hang-ro · đổi MỌI hằng số 200000 thành 200001 (2 chỗ)'

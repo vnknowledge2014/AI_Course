@@ -28,18 +28,21 @@ provenance:
 ---
 
 ::::byte{trigger=enter mood=curious pose=lean-in}
-Ngày này bà chủ quên ghi. Mình bỏ qua, rồi đi tiếp ngày sau.
+Ngày này quán nghỉ, không tiêu đồng nào. Mình bỏ qua, rồi đi tiếp ngày sau.
 ::::
 
 ::::explain{#mot-tang-thut-le-nua}
-Bài trước để lại một câu hỏi. Sổ chi tiêu có những ngày bà chủ quên không ghi,
-ô để trống. Byte chép sổ vào máy thì điền số `0` cho những ô trống ấy — nghĩa là
-*"ngày này không có con số nào cả"*, chứ không phải *"ngày này tiêu 0 đồng"*.
+Bài trước để lại một câu hỏi. Sổ chi tiêu có những ngày quán nghỉ — bà chủ vẫn
+ghi sổ, và ghi số `0`, nghĩa là *"ngày này đã tính rồi, tiêu đúng 0 đồng"*.
 
-Việc cần làm: điểm lại sổ, ngày nào có ghi thì in ra, ngày nào trống thì bỏ hẳn
-— không in, không đếm — nhưng vẫn phải đi tiếp những ngày sau.
+Đó là số `0` đúng nghĩa mà T1.1 đã chốt: **đã biết, và bằng không**. Một ngày
+chưa ai chạm bút vào thì mới là `None`, và cuốn sổ này không có ngày nào như
+thế — bà chủ ghi đủ bảy ngày.
 
-`break` không dùng được ở đây. `break` gấp sổ lại và đi hẳn; gặp ngày trống đầu
+Việc cần làm: điểm lại sổ, ngày nào có tiêu thì in ra, ngày nghỉ thì bỏ hẳn —
+không in, không đếm — nhưng vẫn phải đi tiếp những ngày sau.
+
+`break` không dùng được ở đây. `break` gấp sổ lại và đi hẳn; gặp ngày nghỉ đầu
 tiên là bao nhiêu ngày sau đó mất trắng.
 
 Cách bạn làm được ngay hôm nay là bọc **toàn bộ** phần còn lại của thân vòng vào
@@ -47,7 +50,7 @@ một câu `if`. Nó chạy đúng. Cái giá nằm ở chỗ khác.
 ::::
 
 ::::example{#boc-ca-than-vao-if}
-Năm ngày đầu tháng, hai ngày trong đó bà chủ quên ghi:
+Năm ngày đầu tháng, hai ngày trong đó quán nghỉ:
 
 ```python title=readonly
 so_chi = [120000, 0, 95000, 0, 260000]
@@ -109,7 +112,7 @@ từ tầng hai về tầng một — ngang hàng với `ngay = ngay + 1`, tức
 với **việc chính của mỗi lượt**.
 
 Đọc thân vòng theo thứ tự từ trên xuống, nó nói đúng như bà chủ nói: *"Ngày
-trống thì bỏ. Còn lại thì ghi ra."*
+nghỉ thì bỏ. Còn lại thì ghi ra."*
 
 Máy chạy dòng `continue` là nó **nhảy ngay lên đầu lượt kế tiếp**. Hai dòng
 `print` nằm dưới không được chạy trong lượt đó. Nhưng vòng lặp vẫn sống nguyên:
@@ -213,14 +216,14 @@ Cách chữa là cách bạn vừa thấy ở ví dụ sổ chi tiêu: đẩy b�
 ::::
 
 ::::code{#diem-lai-so-tuan}
-Byte điểm lại sổ chi tiêu của một tuần. Ô nào bà chủ quên ghi thì trong danh
-sách là số `0`.
+Byte điểm lại sổ chi tiêu của một tuần. Ngày quán nghỉ thì trong danh sách là
+số `0`.
 
-Hàm phải làm ba việc cho mỗi ngày **có ghi**: đếm nó vào tổng số ngày ghi sổ,
-in con số ra, và nếu vượt 200 nghìn thì in thêm một dòng ghi chú. Ngày trống thì
+Hàm phải làm ba việc cho mỗi ngày **có tiêu**: đếm nó vào tổng số ngày có tiêu,
+in con số ra, và nếu vượt 200 nghìn thì in thêm một dòng ghi chú. Ngày nghỉ thì
 không làm việc nào trong ba việc đó — nhưng số thứ tự ngày vẫn phải tăng.
 
-Đoạn dưới thiếu hai chỗ. Chỗ thứ nhất là câu hỏi *"ngày này có phải ngày trống
+Đoạn dưới thiếu hai chỗ. Chỗ thứ nhất là câu hỏi *"ngày này có phải ngày nghỉ
 không?"*; chỗ thứ hai là **lệnh** bỏ lượt.
 
 Byte gọi hàm với hai quyển sổ khác nhau, vì một vòng lặp chỉ được coi là viết
@@ -275,19 +278,19 @@ print(f"Tuần trước có {diem_lai_so(tuan_truoc)} ngày ghi sổ")
 # hụt đều cho ra một con số nào đó, và một con số nào đó thì đôi khi trùng
 # đáp án. Ba quyển đây được chọn để mỗi cách điền hụt đều lộ:
 #   `if True:` ở chỗ một  → câu lệnh sau nó không bỏ được lượt nào, cả ba sổ
-#                           đếm cả ngày trống;
+#                           đếm cả ngày nghỉ;
 #   `if tien == 0: pass`  → y hệt trên, sổ tuần này ra 7 thay vì 4;
-#   `if tien != 0:`       → bỏ đúng những ngày CÓ ghi, sổ toàn ngày trống ra 3.
-assert diem_lai_so([120000, 0, 95000, 0, 260000, 0, 80000]) == 4, "sổ tuần này bảy ngày mà bà chủ quên ghi ba ngày, nên chỉ còn bốn ngày có con số để điểm"
-assert diem_lai_so([0, 210000, 45000]) == 2, "sổ tuần trước bỏ trống đúng ngày đầu, hai ngày sau vẫn có ghi — bỏ một ngày không được bỏ nốt phần còn lại"
-assert diem_lai_so([0, 0, 0]) == 0, "quyển sổ mà ngày nào cũng để trống thì không có ngày nào đáng điểm cả"
+#   `if tien != 0:`       → bỏ đúng những ngày CÓ ghi, sổ toàn ngày nghỉ ra 3.
+assert diem_lai_so([120000, 0, 95000, 0, 260000, 0, 80000]) == 4, "sổ tuần này bảy ngày mà quán nghỉ ba ngày, nên chỉ còn bốn ngày có con số để điểm"
+assert diem_lai_so([0, 210000, 45000]) == 2, "sổ tuần trước nghỉ đúng ngày đầu, hai ngày sau vẫn có ghi — bỏ một ngày không được bỏ nốt phần còn lại"
+assert diem_lai_so([0, 0, 0]) == 0, "quyển sổ mà ngày nào cũng nghỉ thì không có ngày nào đáng điểm cả"
 ```
 
 :::hints
 - kind: attention
   body: Hai chỗ trống nằm trên hai dòng liền nhau và không điền giống nhau. Chỗ thứ nhất là một câu hỏi đúng-sai, nằm giữa `if` và dấu hai chấm. Chỗ thứ hai đứng một mình cả dòng, thụt vào trong `if` — chỗ đó cần một lệnh, không phải một câu hỏi.
 - kind: strategy
-  body: Ngày trống là ngày mà `tien` bằng `0`, nên câu hỏi ở chỗ thứ nhất so `tien` với `0`. Chỗ thứ hai cần lệnh nói "lượt này bỏ, đi tiếp" — không phải lệnh cắt cả vòng lặp, vì những ngày sau vẫn phải được điểm.
+  body: Ngày nghỉ là ngày mà `tien` bằng `0`, nên câu hỏi ở chỗ thứ nhất so `tien` với `0`. Chỗ thứ hai cần lệnh nói "lượt này bỏ, đi tiếp" — không phải lệnh cắt cả vòng lặp, vì những ngày sau vẫn phải được điểm.
 - kind: one-line
   body: "Viết `tien == 0` vào chỗ trống sau `if`, và viết `continue` vào dòng trống bên dưới."
 :::
@@ -304,7 +307,7 @@ assert diem_lai_so([0, 0, 0]) == 0, "quyển sổ mà ngày nào cũng để tr�
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Ngày trống bỏ qua, ngày có ghi vẫn ghi. Sổ nào cũng đọc được.
+Ngày nghỉ bỏ qua, ngày có tiêu vẫn ghi. Sổ nào cũng đọc được.
 ::::
 
 ::::reflect{#nghi-lai}

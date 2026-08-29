@@ -171,8 +171,10 @@ bảy lượt kể từ 3 thì phải viết chỗ dừng là 10.
 ::::explain{#vai-chuyen-gon-ve-hai-moc}
 Ba chuyện đáng cất vào túi:
 
-- **Số lượt = chỗ dừng − điểm khởi hành.** `range(8, 15)` chạy 15 − 8 = 7 lượt.
-  Nhẩm được số lượt trước khi chạy là cách nhanh nhất để bắt lỗi lệch một đơn vị.
+- **Số lượt = chỗ dừng − điểm khởi hành, khi vòng đi từng bước một.**
+  `range(8, 15)` chạy 15 − 8 = 7 lượt. Nhẩm được số lượt trước khi chạy là cách
+  nhanh nhất để bắt lỗi lệch một đơn vị. (Mấy chữ *từng bước một* ở đây là có
+  lý do — bài sau bạn sẽ thấy nó.)
 - **Điểm khởi hành không nhỏ hơn chỗ dừng thì vòng chạy 0 lượt.** `range(15, 8)`
   không báo lỗi gì cả — thân vòng chỉ đơn giản không chạy lần nào. Đúng cảnh im
   lặng bạn đã gặp ở bài `while`: điều kiện sai ngay lần đọc đầu thì vòng chạy 0

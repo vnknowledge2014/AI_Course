@@ -113,9 +113,12 @@ hỏi ấy được giao cho hai vòng lặp rời nhau thì bạn vẫn ghép �
 vì chúng đi cùng một chuyến, tới cuối vòng cả hai con số đã sẵn sàng cùng lúc,
 và phép chia chỉ còn là một dòng.
 
-Một chi tiết nhỏ: máy in `180.0` chứ không phải `180`. Phép chia luôn cho ra số
-có phần lẻ, đúng như Realm 0 đã nói; ở đây `1260 / 7` chia hết nên phần lẻ là
-`.0`, và máy vẫn ghi nó ra.
+Một chi tiết nhỏ: máy in `180.0` chứ không phải `180`. Dấu `/` một gạch luôn
+cho ra số có phần lẻ, đúng như Realm 0 đã nói — kể cả khi chia hết. Ở đây
+`1260 / 7` chia trọn nên phần lẻ là `.0`, và máy vẫn ghi nó ra.
+
+Dấu `//` hai gạch của T1.1 thì khác hẳn: đặt giữa hai số nguyên, nó trả về một
+`int` thật, `1260 // 7` ra `180` không đuôi.
 ::::
 
 ::::predict{#doan-ba-dong-in-ra commitOnce}

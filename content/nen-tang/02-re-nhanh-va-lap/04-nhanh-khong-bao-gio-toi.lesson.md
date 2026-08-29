@@ -177,23 +177,24 @@ Luật để không bao giờ tự tay tạo ra một nhánh chết:
 ::::
 
 ::::code{#xep-lai-hang-ro}
-Sổ chi tiêu của Byte có hai ngày cần xếp loại: ngày 250 nghìn phải ra `Ngày
-tiêu rất nhiều`, ngày 150 nghìn phải ra `Ngày tiêu nhiều`.
+Sổ chi tiêu của Byte có hai ngày cần xếp loại: ngày 150 nghìn và ngày 190
+nghìn, cả hai đều phải ra `Ngày tiêu nhiều`.
 
-Một ngày thôi thì chưa đủ để biết bạn xếp đúng thứ tự hay chưa. Ngày 250 nghìn
-vượt **cả hai** ngưỡng, nên xếp kiểu nào nó cũng rơi vào nhánh trên cùng và
-nhánh trên cùng lúc nào cũng in ra câu "rất nhiều". Phải có thêm một ngày nằm
-**giữa** hai ngưỡng thì thứ tự mới lộ ra.
+Hai ngày ấy được chọn vì cùng nằm **giữa** hai ngưỡng — và chỉ ở khoảng giữa
+thì thứ tự mới lộ ra. Một ngày 250 nghìn thì vượt **cả hai** ngưỡng, nên xếp
+kiểu nào nó cũng rơi vào nhánh trên cùng và nhánh trên cùng lúc nào cũng in ra
+"rất nhiều": xếp đúng hay xếp sai, màn hình giống hệt nhau. Chấm bằng một ngày
+như thế là chấm mà không nhìn.
 
 Nên bài này chép cùng một chuỗi ba nhánh hai lần, chạy trên hai ngày khác nhau.
-Dòng `tien = 150000` ở giữa gán lại cái tên cũ: từ đó trở xuống, `tien` là ngày
+Dòng `tien = 190000` ở giữa gán lại cái tên cũ: từ đó trở xuống, `tien` là ngày
 thứ hai.
 
 Ba câu chữ đã đúng chỗ, hai chuỗi xếp giống hệt nhau. Chỉ còn hai con số
 `100000` và `200000` chưa biết đặt vào đâu. Điền vào bốn chỗ trống.
 
 ```python title=starter
-tien = 250000
+tien = 150000
 
 if tien > ___:
     print("Ngày tiêu rất nhiều")
@@ -202,7 +203,7 @@ elif tien > ___:
 else:
     print("Ngày tiêu ít")
 
-tien = 150000
+tien = 190000
 
 if tien > ___:
     print("Ngày tiêu rất nhiều")
@@ -213,7 +214,7 @@ else:
 ```
 
 ```python title=solution
-tien = 250000
+tien = 150000
 
 if tien > 200000:
     print("Ngày tiêu rất nhiều")
@@ -222,7 +223,7 @@ elif tien > 100000:
 else:
     print("Ngày tiêu ít")
 
-tien = 150000
+tien = 190000
 
 if tien > 200000:
     print("Ngày tiêu rất nhiều")
@@ -235,10 +236,16 @@ else:
 ```python title=test
 # Chấm bằng OUTPUT, và chấm trên TRỌN VẸN hai dòng chứ không phải một dòng.
 #
-# Một dòng thì không phân biệt được đúng với sai: ngày 250 nghìn vượt cả hai
-# ngưỡng, nên đặt `100000` lên trên cũng vẫn in ra "Ngày tiêu rất nhiều". Chỉ
-# ngày 150 nghìn mới tách được hai cách xếp — đặt sai thứ tự thì dòng thứ hai
-# cũng thành "rất nhiều", và hai dòng giống nhau là trượt.
+# Cả hai ngày đều nằm GIỮA hai ngưỡng, và đó là điều kiện để bốn chỗ trống
+# cùng bị chấm. Một ngày vượt cả hai ngưỡng — như 250 nghìn — thì chuỗi chứa
+# nó in ra "rất nhiều" dù xếp kiểu nào, nên hai chỗ trống của chuỗi ấy không
+# bị ràng buộc gì: người học dựng đúng cái nhánh chết mà bài đi kết án, rồi
+# xếp đúng ở chuỗi kia, và vẫn đậu. Bản trước của khối này viết ra đúng nhận
+# xét ấy rồi vẫn để trống hai chỗ.
+#
+# Ở khoảng giữa thì xếp sai làm dòng ấy thành "rất nhiều". Và vì chấm trọn cả
+# hai dòng, xếp đúng một chuỗi mà sai chuỗi kia cũng trượt — đó chính là câu
+# "hai chuỗi phải xếp giống hệt nhau", giờ mới có người canh.
 pass
 ```
 
@@ -246,7 +253,7 @@ pass
 - kind: attention
   body: Bốn chỗ trống nhận đúng hai con số `100000` và `200000`, và hai chuỗi phải xếp giống hệt nhau. Việc cần quyết chỉ là con số nào **lên trên**.
 - kind: strategy
-  body: Nhánh đứng trên phải là nhánh khó thoả hơn. Trong hai ngưỡng này, ngưỡng nào có ít ngày vượt qua hơn thì ngưỡng đó lên trước. Xếp xong, thử nhẩm ngày 150 nghìn xem nó rơi vào nhánh nào.
+  body: Nhánh đứng trên phải là nhánh khó thoả hơn. Trong hai ngưỡng này, ngưỡng nào có ít ngày vượt qua hơn thì ngưỡng đó lên trước. Xếp xong, thử nhẩm cả hai ngày xem chúng rơi vào nhánh nào.
 - kind: one-line
   body: "Trong cả hai chuỗi: viết `200000` vào chỗ trống thứ nhất và `100000` vào chỗ trống thứ hai."
 :::
@@ -256,13 +263,13 @@ pass
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^Ngày tiêu rất nhiều\nNgày tiêu nhiều\s*$
+  expect: ^Ngày tiêu nhiều\nNgày tiêu nhiều\s*$
 :::
 ::::
 
 ::::byte{trigger=success mood=happy pose=jump}
-Cùng một chuỗi, hai ngày, hai câu trả lời khác nhau. Đổi chỗ hai con số là dòng
-thứ hai đổi luôn.
+Cùng một chuỗi, hai ngày ở khoảng giữa. Đổi chỗ hai con số là cả hai dòng nhảy
+lên "rất nhiều" — cái nhánh dưới không bao giờ tới lượt.
 ::::
 
 ::::reflect{#nghi-lai}

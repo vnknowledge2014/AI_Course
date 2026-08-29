@@ -230,13 +230,19 @@ trị lần ghi gần nhất. Nó chỉ còn là 0 khi thân `if` không lần n
 ::::explain{#break-quyet-dinh-dau-tien-hay-cuoi-cung}
 Cái bẫy vừa rồi cho bạn một mẹo đáng nhớ hơn là một lỗi cần tránh:
 
+Cả hai gạch dưới đây nói về trường hợp dòng ghi **không có cổng nào canh** —
+tức lượt nào gặp cũng ghi được:
+
 - **Có `break` thì bạn giữ được lần gặp đầu tiên.** Ghi xong là rời vòng ngay,
   không lượt nào sau đó ghi đè lên được nữa.
 - **Không có `break` thì bạn giữ được lần gặp cuối cùng.** Mỗi lần gặp lại ghi
   đè, nên thứ còn lại sau vòng là lần gặp muộn nhất.
 
-Cả hai đều có lúc dùng. "Ngày đầu tiên tiêu quá 200" cần `break`; "ngày gần nhất
-tiêu quá 200" thì bỏ `break` đi là xong. Một từ khoá quyết định câu trả lời, nên
+Cả hai đều có lúc dùng. "Ngày đầu tiên tiêu quá 200" thì `break` là cách gọn
+nhất; "ngày gần nhất tiêu quá 200" thì bỏ `break` đi là xong. (Giữ lần gặp đầu
+tiên còn một đường nữa — đặt một cái cổng trước dòng ghi, để từ lần thứ hai trở
+đi nó không ghi được. Bài BOSS cuối track đi đúng đường ấy, vì ở đó vòng còn
+phải làm nốt mấy việc khác nên chưa được rời sớm.) Một từ khoá quyết định câu trả lời, nên
 trước khi viết, hãy đọc lại câu hỏi xem nó hỏi đầu hay cuối.
 
 Hai điều nữa gói lại cho gọn:

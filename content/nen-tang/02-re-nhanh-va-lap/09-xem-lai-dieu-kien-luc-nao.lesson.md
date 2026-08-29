@@ -102,8 +102,9 @@ cho lượt này vào thì lượt này chạy trọn.
 - **Đầu lượt 3** — đọc `0 > 0`, ra `False`. Không vào thân. Máy nhảy xuống dòng
   treo biển.
 
-Ba lần đọc điều kiện, hai lượt chạy thân. Lần đọc cuối cùng bao giờ cũng là lần
-cho ra `False`, và đó là lần duy nhất không kèm theo một lượt nào.
+Ba lần đọc điều kiện, hai lượt chạy thân. Chừng nào bạn chưa có công cụ
+dừng-giữa-thân, lần đọc cuối cùng là lần cho ra `False`, và đó là lần duy nhất
+không kèm theo một lượt nào.
 ::::
 
 ::::predict{#noi-rong-tu-dau commitOnce}

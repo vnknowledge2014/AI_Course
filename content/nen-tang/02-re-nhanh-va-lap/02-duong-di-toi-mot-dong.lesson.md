@@ -12,7 +12,7 @@ defaultLanguage: python
 level: intro
 estimatedMinutes: 13
 teaches: [ctrl.condition-path]
-requires: [ctrl.if-nested, logic.and, ctrl.block-indent, core.function-def, core.function-call, core.function-parameter]
+requires: [ctrl.if-nested, logic.and, ctrl.block-indent]
 concepts: [ctrl.re-nhanh, logic.phep-logic]
 gradingMatrix:
   web-chrome: [static, run, tests, output]
@@ -240,30 +240,71 @@ lần, mỗi lần một cảnh khác:
 - hôm lạnh, anh Sáu 40 tuổi, khách quen — không mời;
 - hôm nắng, bác Tư 70 tuổi, khách quen — không mời.
 
-Viết điều kiện gộp vào chỗ trống sao cho **cả bốn** lần gọi đều xử đúng. Bài
-chấm bằng trọn vẹn màn hình, nên câu trả lời đúng in ra đúng một dòng — dòng của
-bác Tư hôm trời lạnh.
+Bốn cảnh ấy nằm nối tiếp nhau bên dưới, mỗi cảnh gán lại ba cái tên rồi hỏi
+lại đúng một câu. Viết điều kiện gộp vào **cả bốn** chỗ trống — cùng một câu,
+chép xuống bốn lần.
+
+Bài chấm bằng trọn vẹn màn hình, nên câu trả lời đúng in ra đúng một dòng —
+dòng của bác Tư hôm trời lạnh.
 
 ```python title=starter
-def moi_tra(troi_lanh, tuoi_khach, la_khach_quen):
-    if ___:
-        print("Tặng bác một chén trà nóng.")
+troi_lanh = True
+tuoi_khach = 70
+la_khach_quen = True
 
-moi_tra(True, 70, True)
-moi_tra(True, 70, False)
-moi_tra(True, 40, True)
-moi_tra(False, 70, True)
+if ___:
+    print("Tặng bác một chén trà nóng.")
+
+troi_lanh = True
+tuoi_khach = 70
+la_khach_quen = False
+
+if ___:
+    print("Tặng bác một chén trà nóng.")
+
+troi_lanh = True
+tuoi_khach = 40
+la_khach_quen = True
+
+if ___:
+    print("Tặng bác một chén trà nóng.")
+
+troi_lanh = False
+tuoi_khach = 70
+la_khach_quen = True
+
+if ___:
+    print("Tặng bác một chén trà nóng.")
 ```
 
 ```python title=solution
-def moi_tra(troi_lanh, tuoi_khach, la_khach_quen):
-    if troi_lanh and tuoi_khach > 65 and la_khach_quen:
-        print("Tặng bác một chén trà nóng.")
+troi_lanh = True
+tuoi_khach = 70
+la_khach_quen = True
 
-moi_tra(True, 70, True)
-moi_tra(True, 70, False)
-moi_tra(True, 40, True)
-moi_tra(False, 70, True)
+if troi_lanh and tuoi_khach > 65 and la_khach_quen:
+    print("Tặng bác một chén trà nóng.")
+
+troi_lanh = True
+tuoi_khach = 70
+la_khach_quen = False
+
+if troi_lanh and tuoi_khach > 65 and la_khach_quen:
+    print("Tặng bác một chén trà nóng.")
+
+troi_lanh = True
+tuoi_khach = 40
+la_khach_quen = True
+
+if troi_lanh and tuoi_khach > 65 and la_khach_quen:
+    print("Tặng bác một chén trà nóng.")
+
+troi_lanh = False
+tuoi_khach = 70
+la_khach_quen = True
+
+if troi_lanh and tuoi_khach > 65 and la_khach_quen:
+    print("Tặng bác một chén trà nóng.")
 ```
 
 ```python title=test
@@ -276,17 +317,23 @@ moi_tra(False, 70, True)
 #   nối bằng `or` thay vì `and`     → in ba hoặc bốn dòng.
 # Chỉ đủ ba vế nối bằng `and` mới cho ra đúng một dòng — nghĩa là chỉ người dò
 # hết đường đi tới dòng `print` mới qua được. Người học chưa viết assert nên
-# khối này không thêm gì; nó ở đây để nói rõ vì sao bốn lần gọi là bốn.
+# khối này không thêm gì; nó ở đây để nói rõ vì sao bốn cảnh là bốn.
+#
+# Bốn cảnh viết thẳng, không bọc vào một hàm: tới lúc này chưa bài nào dạy hàm
+# có quá MỘT tham số — mọi `def` của Realm 0 và T1.1 đều một tham số hoặc
+# không tham số nào. Một hàm ba tham số ở đây bắt người học tự đoán thêm hai
+# luật (dấu phẩy ngăn tham số, và đối số khớp tham số theo thứ tự vị trí) ngay
+# giữa bài đang dạy chuyện khác.
 pass
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống nằm giữa `if` và dấu hai chấm — chỗ đó chỉ chứa được **một** câu trả lời đúng/sai. Đừng vội điền. Quay lên đoạn trong file của quán, đặt ngón tay vào dòng `print`, rồi đi ngược lên chép ra từng dòng có lề nhỏ hơn. Ba cái tên trong ngoặc đơn của `def` là ba thứ mỗi lần gọi đưa vào.
+  body: Bốn chỗ trống nhận cùng MỘT câu trả lời — bốn cảnh khác nhau, cùng một luật. Mỗi chỗ nằm giữa `if` và dấu hai chấm, nên chỉ chứa được **một** câu đúng/sai. Đừng vội điền: quay lên đoạn trong file của quán, đặt ngón tay vào dòng `print`, rồi đi ngược lên chép ra từng dòng có lề nhỏ hơn.
 - kind: strategy
-  body: Ba lần dò cho ba câu hỏi, mà cả ba phải cùng đúng thì bác mới có trà. Realm 0 đã cho bạn từ nối buộc hai câu hỏi có–không thành một, và bài này vừa nói thêm rằng dùng nó hai lần liền nhau thì nối được ba vế. Hai trong ba vế là cái tên đang giữ sẵn giá trị đúng/sai, không cần so sánh gì thêm; vế còn lại là câu hỏi về tuổi. Thử áp câu bạn định viết lên lần lượt bốn cảnh trước khi bấm chạy.
+  body: Ba lần dò cho ba câu hỏi, mà cả ba phải cùng đúng thì bác mới có trà. Realm 0 đã cho bạn từ nối buộc hai câu hỏi có–không thành một, và bài này vừa nói thêm rằng dùng nó hai lần liền nhau thì nối được ba vế. Hai trong ba vế là cái tên đang giữ sẵn giá trị đúng/sai, không cần so sánh gì thêm; vế còn lại là câu hỏi về tuổi. Thử áp câu bạn định viết lên lần lượt bốn cảnh trước khi bấm chạy — ba cảnh sau phải im lặng.
 - kind: one-line
-  body: "Viết `troi_lanh and tuoi_khach > 65 and la_khach_quen` vào chỗ trống, giữ nguyên dấu hai chấm."
+  body: "Viết `troi_lanh and tuoi_khach > 65 and la_khach_quen` vào cả bốn chỗ trống, giữ nguyên dấu hai chấm."
 :::
 
 :::validate

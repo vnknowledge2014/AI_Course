@@ -160,8 +160,8 @@ cùng một kết quả, nhưng hai cái tên đã đổi chỗ cho nhau. Ở d�
 nằm sát bên phải `not` là `vuot_nguong`, tức `False`, nên `not` lật nó thành
 `True`. Còn lại `True and co_trong_so`, tức `True and True`, cho `True`.
 
-Bài học đọc code: khi thấy `not`, việc đầu tiên là nhìn xem **cái tên nào**
-đang đứng sát ngay sau nó.
+Bài học đọc code: khi thấy `not`, việc đầu tiên là nhìn xem **nó ôm tới
+đâu** — hết cả phép so sánh sát bên phải, nhưng dừng lại trước `and`.
 ::
 :::
 
@@ -335,7 +335,8 @@ Bốn bậc trong một dòng, không cần đánh dấu chỗ nào. Bậc thang
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-Bậc thang trả lời được câu hỏi hôm qua: máy lật mỗi cái tên sát bên phải `not`.
+Bậc thang trả lời được câu hỏi hôm qua: `not` ôm phần sát bên phải nó ở các
+bậc trên — một cái tên, hoặc trọn một phép so sánh — rồi dừng lại trước `and`.
 Giờ bạn đọc được mọi dòng máy viết ra.
 
 Nhưng còn chiều ngược lại. Sáng nay Byte tính đi ăn phở, đi được khi **vừa đủ

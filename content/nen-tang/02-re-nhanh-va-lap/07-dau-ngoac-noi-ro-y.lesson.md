@@ -119,10 +119,15 @@ Gần đúng ở chỗ mọi dấu ngoặc bạn gặp cho tới hôm nay đều
 tên: `print(...)`, `input(...)`, `int(...)`. Thấy chúng đi cùng nhau suốt mấy
 chục bài thì nghĩ chúng thuộc về nhau là chuyện tự nhiên.
 
-Chỗ lệch: dấu ngoặc làm hai việc, và máy phân biệt bằng **chỗ nó đứng**. Đứng
-sát ngay sau một cái tên thì nó nghĩa là *"gọi việc này"*. Đứng sau một khoảng
-trắng, như cặp ngoặc đi sau `not` ở dòng thứ năm, nó nghĩa là *"gom cụm này
-lại"*. Cả hai đều hợp lệ.
+Chỗ lệch: dấu ngoặc làm hai việc, và máy phân biệt bằng **thứ đứng ngay
+trước nó**. Đi sau một cái tên gọi được — `print`, `input`, `int` — thì nó
+nghĩa là *"gọi việc này"*. Đi sau một từ khoá hay một dấu phép, tức ở chỗ máy
+đang chờ một giá trị — như cặp ngoặc sau `not` ở dòng thứ năm — thì nó nghĩa
+là *"gom cụm này lại"*. Cả hai đều hợp lệ.
+
+Đừng đo bằng dấu cách: `print (x)` có khoảng trắng mà vẫn là lời gọi, còn
+`not(du_tien and kip_gio)` không có khoảng trắng mà vẫn là gom cụm. Cái quyết
+định là ai đứng trước, không phải bao nhiêu chỗ trống.
 ::
 :::
 ::::

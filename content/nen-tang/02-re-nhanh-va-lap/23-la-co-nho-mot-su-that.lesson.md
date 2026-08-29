@@ -232,9 +232,9 @@ Rút ra ba điều từ cái bẫy vừa rồi:
   kiểu `kiem_tra` hay `trang_thai` thì lúc đọc `if kiem_tra:` bạn không biết
   đang hỏi gì.
 
-Nói cho hết một chuyện mà người mới hay hiểu ngược. Ở Python, một cái tên đã
-được tạo ra thì còn đó tới hết chương trình — vòng lặp không nhốt cái tên nào
-lại, tên sinh trong thân vòng sống y như tên sinh ngoài vòng. Vậy nên lý do
+Nói cho hết một chuyện mà người mới hay hiểu ngược. **Vòng lặp** không nhốt
+cái tên nào lại: tên sinh ra trong thân vòng vẫn còn đó sau khi vòng chạy
+xong, y như tên sinh ra ngoài vòng. Vậy nên lý do
 `da_vuot = False` phải nằm trước vòng không phải là chuyện thụt lề, mà đúng là
 chuyện vừa nói ở gạch đầu dòng thứ hai: để dù thân `if` không lần nào chạy, dòng
 đọc cờ sau vòng vẫn có thứ để đọc.

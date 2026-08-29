@@ -383,6 +383,26 @@ if ___:
     print("Cả mười ngày không có ngày nào vượt ngưỡng")
 else:
     print(f"Ngày đầu tiên vượt ngưỡng: ngày {ngay_dau_vuot}")
+
+# Sổ tháng sau. Mười ngày, không ngày nào vượt ngưỡng — nên nhánh còn lại của
+# câu hỏi cuối mới tới lượt chạy.
+so_chi_tieu_b = [85000, 120000, 95000, 60000, 180000,
+                 75000, 115000, 90000, 130000, 70000]
+
+ngay_b = 0
+ngay_dau_vuot_b = ___
+
+for tien in so_chi_tieu_b:
+    ngay_b += 1
+    if tien > nguong:
+        if ngay_dau_vuot_b == -1:
+            ngay_dau_vuot_b = ngay_b
+
+print("SỔ CHI TIÊU — tháng sau")
+if ___:
+    print("Cả mười ngày không có ngày nào vượt ngưỡng")
+else:
+    print(f"Ngày đầu tiên vượt ngưỡng: ngày {ngay_dau_vuot_b}")
 ```
 
 ```python title=solution
@@ -417,26 +437,56 @@ if ngay_dau_vuot == -1:
     print("Cả mười ngày không có ngày nào vượt ngưỡng")
 else:
     print(f"Ngày đầu tiên vượt ngưỡng: ngày {ngay_dau_vuot}")
+
+# Sổ tháng sau. Mười ngày, không ngày nào vượt ngưỡng — nên nhánh còn lại của
+# câu hỏi cuối mới tới lượt chạy.
+so_chi_tieu_b = [85000, 120000, 95000, 60000, 180000,
+                 75000, 115000, 90000, 130000, 70000]
+
+ngay_b = 0
+ngay_dau_vuot_b = -1
+
+for tien in so_chi_tieu_b:
+    ngay_b += 1
+    if tien > nguong:
+        if ngay_dau_vuot_b == -1:
+            ngay_dau_vuot_b = ngay_b
+
+print("SỔ CHI TIÊU — tháng sau")
+if ngay_dau_vuot_b == -1:
+    print("Cả mười ngày không có ngày nào vượt ngưỡng")
+else:
+    print(f"Ngày đầu tiên vượt ngưỡng: ngày {ngay_dau_vuot_b}")
 ```
 
 ```python title=test
 # Năm câu trả lời, kiểm từng câu một. Bốn dòng đầu chỉ đúng nếu vòng lặp
 # đi trọn mười ngày; dòng cuối chỉ đúng nếu cái cổng giá trị canh còn nguyên.
+#
+# Sổ tháng sau có mặt ở đây vì một lẽ. Với riêng sổ tháng này, `ngay_dau_vuot`
+# luôn bằng 2, nên nhánh "không ngày nào vượt" KHÔNG BAO GIỜ chạy — và chỗ
+# trống thứ ba nhận được MỌI biểu thức cho ra `False`, kể cả
+# `ngay_dau_vuot == 0`, đúng cái lỗi mà bài 25 dựng riêng phần `reflect` để
+# cảnh báo. Bản trước của chính bài BOSS này không bắt được nó.
+#
+# Sổ tháng sau không có ngày nào quá ngưỡng, nên nhánh ấy mới tới lượt chạy,
+# và một giá trị canh sai sẽ in ra "ngày -1" thay vì câu kết luận.
 assert tong == 1530000, "mười ngày trong sổ cộng lại hết 1 triệu 530 nghìn"
 assert ngay == 10, "sổ ghi mười ngày, nên lượt duyệt phải đi trọn mười ngày mới hết sổ"
 assert so_ngay_vuot == 3, "ba ngày trong kỳ tiêu quá 200 nghìn: ngày 2, ngày 5 và ngày 8"
 assert ngay_ky_luc == 5, "ngày tiêu nhiều nhất cả kỳ là ngày 5"
 assert tien_ky_luc == 310000, "ngày 5 tiêu hết 310 nghìn, nhiều nhất trong mười ngày"
 assert ngay_dau_vuot == 2, "ngày 2 là ngày ĐẦU TIÊN vượt ngưỡng — ngày 5 và ngày 8 cũng vượt, nhưng chúng tới sau và không được ghi đè lên"
+assert ngay_dau_vuot_b == -1, "sổ tháng sau không ngày nào quá ngưỡng, nên giá trị canh phải còn nguyên chứ không nhận ngày nào"
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống thứ nhất nằm trong nhóm dòng sinh ra các cái tên, trước khi vòng bắt đầu. Chỗ thứ hai nằm trong thân của `if tien > nguong:`, ngay trên cái cổng. Chỗ thứ ba là điều kiện của nhánh cuối bài.
+  body: Năm chỗ trống, nhưng chỉ ba câu trả lời khác nhau — hai chỗ cuối lặp lại chỗ thứ nhất và thứ ba cho cuốn sổ thứ hai, với tên có thêm `_b`. Chỗ thứ nhất nằm trong nhóm dòng sinh ra các cái tên, trước khi vòng bắt đầu. Chỗ thứ hai nằm trong thân của `if tien > nguong:`, ngay trên cái cổng. Chỗ thứ ba là điều kiện của nhánh cuối.
 - kind: strategy
   body: Chỗ thứ nhất cần giá trị canh mang nghĩa "chưa gặp ngày nào" — cùng con số mà cái cổng bên dưới đem ra so. Chỗ thứ hai là phép đếm có điều kiện: mỗi ngày vượt ngưỡng thì cái tên đếm nhích lên một. Chỗ thứ ba hỏi lại đúng câu mà cái cổng trong vòng đã hỏi.
 - kind: one-line
-  body: "Lần lượt ba chỗ trống là `-1`, `so_ngay_vuot += 1`, và `ngay_dau_vuot == -1`."
+  body: "Lần lượt năm chỗ trống là `-1`, `so_ngay_vuot += 1`, `ngay_dau_vuot == -1`, rồi `-1` và `ngay_dau_vuot_b == -1` cho cuốn sổ thứ hai."
 :::
 
 :::validate
@@ -446,7 +496,7 @@ assert ngay_dau_vuot == 2, "ngày 2 là ngày ĐẦU TIÊN vượt ngưỡng —
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^SỔ CHI TIÊU — mười ngày đầu tháng\nTổng chi: 1530000 đồng\nTrung bình mỗi ngày: 153000\.0 đồng\nSố ngày tiêu quá 200000 đồng: 3\nNgày tiêu nhiều nhất: ngày 5 — 310000 đồng\nNgày đầu tiên vượt ngưỡng: ngày 2\s*$
+  expect: ^SỔ CHI TIÊU — mười ngày đầu tháng\nTổng chi: 1530000 đồng\nTrung bình mỗi ngày: 153000\.0 đồng\nSố ngày tiêu quá 200000 đồng: 3\nNgày tiêu nhiều nhất: ngày 5 — 310000 đồng\nNgày đầu tiên vượt ngưỡng: ngày 2\nSỔ CHI TIÊU — tháng sau\nCả mười ngày không có ngày nào vượt ngưỡng\s*$
 - tier: output
   expect: Ngày tiêu nhiều nhất: ngày 5 — 310000 đồng
 - tier: output

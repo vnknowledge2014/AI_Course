@@ -53,9 +53,32 @@ Bạn đang đứng ở phòng trong cùng, và `break` là cánh cửa **của 
 Nói bằng chữ của Python: `break` thoát khỏi **vòng lặp gần nhất bao quanh nó**.
 Không phải mọi vòng, không phải vòng ngoài cùng. Gần nhất.
 
-"Gần nhất" đo bằng thụt lề — thứ bạn đã dùng từ bài đầu track này. Đứng ở dòng
-`break`, nhìn ngược lên trên: dòng `for` hay `while` đầu tiên có mức thụt lề
-**nhỏ hơn** nó chính là cái vòng nó sẽ thoát ra.
+"Gần nhất" đo bằng thụt lề — thứ bạn đã dùng từ bài đầu track này. Nhưng phải
+đi từng bậc một, không quét một lượt:
+
+1. Đứng ở dòng `break`, nhìn ngược lên tới dòng đầu tiên có thụt lề **nhỏ
+   hơn** nó. Đó là dòng mở **khối đang chứa** nó.
+2. Nếu dòng ấy là `for` hay `while` thì xong — đó là vòng bị cắt.
+3. Nếu nó là `if`, hay bất cứ khối nào khác, thì dóng theo cột **của dòng ấy**
+   rồi làm lại từ bước 1.
+
+Bước 3 là bước dễ bỏ sót nhất, và bỏ sót nó thì đọc sai. Xét đoạn này:
+
+```python title=readonly
+for tuan in range(1, 5):        # cột 0
+    for ngay in range(1, 4):    # cột 4
+        if xau(tuan, ngay):     # cột 8
+            da_vuot = True
+            break               # cột 12 — cắt vòng NGÀY
+    if da_vuot:                 # cột 4
+        break                   # cột 8 — cắt vòng TUẦN
+```
+
+Dòng `break` cột 8: quét một lượt lên trên thì gặp `for ngay` ở cột 4 trước,
+và kết luận nó cắt vòng ngày. Sai. Đi từng bậc thì bậc đầu tiên là `if da_vuot`
+ở cột 4 — một `if`, không phải vòng — nên dóng sang cột 4 rồi đi tiếp, và gặp
+`for tuan` ở cột 0. Nó cắt vòng **tuần**. Chạy thử sẽ thấy `tuan` dừng đúng ở
+tuần xảy ra chuyện, không chạy hết bốn tuần.
 ::::
 
 ::::predict{#doan-man-hinh commitOnce}
