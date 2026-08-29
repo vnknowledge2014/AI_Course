@@ -72,7 +72,10 @@ Một file viết theo lối này có hai phần rõ ràng: **phần cho mượn
 ::::
 
 ::::example{#mot-file-hai-vai}
-Vẫn hai file của bài trước, chỉ thêm ba dòng cuối vào `so_sach.py`.
+Vẫn hai file ấy, nhưng rút gọn hẳn để nhìn cho rõ đúng một chuyện: `doc_so`
+lần này giữ sẵn ba dòng sổ trong `CAC_DONG` thay vì mở file, và `so_sach.py`
+được thêm ba dòng cuối. Cuốn sổ thật thì vẫn đợi ở bài sau — ở đây file nào
+mở file nào không, không phải chuyện đang bàn.
 
 ```python title=readonly
 # ── so_sach.py ──────────────────────────────────────────────────────

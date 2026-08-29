@@ -179,7 +179,9 @@ còn nhát cắt thì không phải khúc thứ ba. Vế thứ hai bạn đoán 
 ::::code{#tach-ca-cuon-so}
 Cuốn sổ bốn khoản của Byte, dòng thứ hai vẫn dính dấu cách gõ vội ở đầu như bài
 trước. Việc của bạn: đi qua từng dòng, xén sạch hai đầu rồi **chẻ tại dấu
-phẩy**, cất tên vào một list và tiền vào một list khác.
+phẩy**, cất mỗi khoản thành một `dict` hai khoá `"ten"` và `"tien"`, tất cả vào **cùng
+một** list — đúng cách T1.4 bài 8 đã chốt, để tên và tiền không bao giờ lệch
+nhau được.
 
 Bốn dòng `f.write` ở đầu chỉ để dựng lại cuốn sổ cho bài chạy được một mình.
 
@@ -193,16 +195,14 @@ with open("so.txt", "w") as f:
 with open("so.txt", "r") as f:
     cac_dong = f.readlines()
 
-ten_khoan = []
-tien_khoan = []
+cac_khoan = []
 for dong in cac_dong:
     manh = dong.strip().___(",")
-    ten_khoan.append(manh[0])
-    tien_khoan.append(manh[1])
+    cac_khoan.append({"ten": manh[0], "tien": manh[1]})
 
-print(ten_khoan)
-print(tien_khoan)
-print(tien_khoan[0] + tien_khoan[1])
+print(cac_khoan[0])
+print(cac_khoan[2]["tien"])
+print(cac_khoan[0]["tien"] + cac_khoan[1]["tien"])
 ```
 
 ```python title=solution
@@ -215,25 +215,27 @@ with open("so.txt", "w") as f:
 with open("so.txt", "r") as f:
     cac_dong = f.readlines()
 
-ten_khoan = []
-tien_khoan = []
+cac_khoan = []
 for dong in cac_dong:
     manh = dong.strip().split(",")
-    ten_khoan.append(manh[0])
-    tien_khoan.append(manh[1])
+    cac_khoan.append({"ten": manh[0], "tien": manh[1]})
 
-print(ten_khoan)
-print(tien_khoan)
-print(tien_khoan[0] + tien_khoan[1])
+print(cac_khoan[0])
+print(cac_khoan[2]["tien"])
+print(cac_khoan[0]["tien"] + cac_khoan[1]["tien"])
 ```
 
 ```python title=test
 # Bốn tên khoản dài ngắn khác nhau (6, 6, 7, 6 ký tự), nên một cách cắt theo
 # chỗ đứng cố định sẽ đúng ở vài dòng và sai ở dòng "bánh mì" — câu kiểm đầu
 # tiên bắt được ngay.
-assert ten_khoan == ["cà phê", "bún bò", "bánh mì", "vá lốp"], f"ten_khoan phải gom đúng mảnh TRƯỚC dấu phẩy của bốn dòng: cà phê, bún bò, bánh mì, vá lốp; đang có {ten_khoan}"
-assert tien_khoan == ["25000", "40000", "15000", "100000"], f"tien_khoan phải gom đúng mảnh SAU dấu phẩy của bốn dòng, và dấu phẩy không được đi theo mảnh nào; đang có {tien_khoan}"
-assert tien_khoan[0] + tien_khoan[1] == "2500040000", "hai mảnh tiền của cà phê và bún bò vẫn đang là chữ, nên dấu + dán chúng thành chuỗi '2500040000' — nếu câu này trượt thì hai mảnh ấy chưa phải thứ lấy ra từ sổ"
+assert cac_khoan == [
+    {"ten": "cà phê", "tien": "25000"},
+    {"ten": "bún bò", "tien": "40000"},
+    {"ten": "bánh mì", "tien": "15000"},
+    {"ten": "vá lốp", "tien": "100000"},
+], f"mỗi khoản phải thành một dict hai khoá, tên là mảnh TRƯỚC dấu phẩy và tiền là mảnh SAU, và dấu phẩy không đi theo mảnh nào; đang có {cac_khoan}"
+assert cac_khoan[0]["tien"] + cac_khoan[1]["tien"] == "2500040000", "hai mảnh tiền của cà phê và bún bò vẫn đang là chữ, nên dấu + dán chúng thành chuỗi '2500040000' — nếu câu này trượt thì hai mảnh ấy chưa phải thứ lấy ra từ sổ"
 ```
 
 :::hints
@@ -252,14 +254,14 @@ assert tien_khoan[0] + tien_khoan[1] == "2500040000", "hai mảnh tiền của c
   timeoutMs: 5000
 - tier: output
   match: regex
-  expect: ^\['cà phê', 'bún bò', 'bánh mì', 'vá lốp'\]\n\['25000', '40000', '15000', '100000'\]\n2500040000\s*$
+  expect: ^\{'ten': 'cà phê', 'tien': '25000'\}\n15000\n2500040000\s*$
 - tier: output
-  expect: "['25000', '40000', '15000', '100000']"
+  expect: "{'ten': 'cà phê', 'tien': '25000'}"
 :::
 ::::
 
 ::::byte{trigger=success mood=curious pose=point-editor}
-Tên một bên, tiền một bên. Nhưng dòng in cuối cùng trông không giống tổng tiền.
+Mỗi khoản một dòng sổ gọn ghẽ. Nhưng dòng in cuối cùng trông không giống tổng tiền.
 ::::
 
 ::::reflect{#nghi-lai}
@@ -271,7 +273,7 @@ Cuốn sổ đã tách xong: `manh[0]` là tên khoản, `manh[1]` là phần ti
 Nên Byte làm chuyện tự nhiên nhất: cộng hai khoản đầu lại.
 
 ```python title=readonly
-print(tien_khoan[0] + tien_khoan[1])
+print(cac_khoan[0]["tien"] + cac_khoan[1]["tien"])
 ```
 
 Máy in ra `2500040000`.
@@ -279,7 +281,7 @@ Máy in ra `2500040000`.
 Không lỗi, không traceback, không một lời phàn nàn nào. Chỉ là một con số dài
 mười chữ số mà không ai tiêu ngần ấy tiền cho cà phê với bún bò.
 
-Nhìn lại hai dòng list vừa in ra thì thấy một chi tiết đã đứng đó từ đầu: cả
+Nhìn lại dòng sổ vừa in ra thì thấy một chi tiết đã đứng đó từ đầu: cả
 `'cà phê'` lẫn `'25000'` đều nằm trong dấu nháy như nhau. Máy đang xếp chúng vào
 cùng một loại.
 

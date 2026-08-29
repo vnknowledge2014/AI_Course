@@ -331,8 +331,14 @@ Một dấu gạch bạn gõ, và máy tự biết phải đặt dấu nào ở 
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-Đường dẫn của bạn giờ đúng ở mọi máy: kể từ gốc nên không phụ thuộc chỗ đứng,
-ghép bằng `pathlib` nên không phụ thuộc dấu ngăn của hệ máy.
+Đường dẫn của bạn giờ không phụ thuộc **chỗ đứng** — vì nó kể từ gốc — và
+không phụ thuộc **dấu ngăn** của hệ máy — vì `pathlib` tự chọn dấu.
+
+Một chỗ vẫn còn nợ, và nói ra cho sòng phẳng: `pathlib` không cấp cho bạn cái
+ổ `C:` mà Windows cần. Đưa `/Users/lan/du-an` cho nó trên Windows thì nó ghép
+ra `\Users\lan\du-an\so.txt` — đúng dấu ngăn, mà vẫn thiếu ổ. Cái gốc thật
+sự của mỗi máy là chuyện máy ấy tự biết, không phải chuyện một dòng code đoán
+được; bài sau đưa bạn cách hỏi máy chỗ ấy thay vì tự viết ra.
 
 Nhưng nhìn lại dòng bạn vừa viết mà xem. Cái tên `"so.txt"` vẫn nằm cứng trong
 code. Lan muốn xem sổ tháng trước — cuốn `so-thang-2.txt` nằm ngay cạnh đó — thì

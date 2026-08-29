@@ -85,6 +85,7 @@ def doc_so(duong_dan):
 with open("so-ngan.txt", "w", encoding="utf-8") as f:
     f.write("cà phê,25000\n")
     f.write("bún bò,40000\n")
+    f.write("gửi xe,10000\n")
 
 print(doc_so("so-ngan.txt"))
 print(tinh_tong(doc_so("so-ngan.txt")))
@@ -94,17 +95,19 @@ print(tinh_tong(["gửi xe,10000\n", "đổ xăng,100000\n"]))
 Máy in ra:
 
 ```text title=readonly
-['cà phê,25000\n', 'bún bò,40000\n']
-65000
+['cà phê,25000\n', 'bún bò,40000\n', 'gửi xe,10000\n']
+75000
 110000
 ```
 
 Ba chỗ đáng dừng lại nhìn:
 
 - **Dòng đọc lên còn dính `\n`.** `.readlines()` giữ nguyên ký tự xuống dòng ở
-  đuôi mỗi phần tử, nên `.strip()` bên trong `tinh_tong` không phải phép lịch
-  sự — không có nó thì mảnh cuối của dòng cuối vẫn sạch, còn mảnh cuối của mọi
-  dòng khác thì không.
+  đuôi **mọi** phần tử, kể cả phần tử cuối — vì dòng cuối của sổ cũng được ghi
+  kèm `\n`, bạn nhìn thấy nó trong danh sách vừa in ra. Riêng `int()` thì rộng
+  lượng: `int("40000\n")` vẫn cho 40000. Nên `.strip()` ở đây không cứu phép
+  cộng; nó cứu mọi việc khác — so sánh tên khoản, in ra màn hình, ghép chuỗi —
+  những chỗ mà một ký tự vô hình dính ở đuôi làm hỏng lặng lẽ.
 - **`tinh_tong` không biết file là gì.** Nó nhận một danh sách chuỗi, và nguồn
   gốc của danh sách ấy không phải việc của nó.
 - **Dòng cuối chứng minh điều đó.** `tinh_tong(["gửi xe,10000\n", "đổ xăng,100000\n"])`
@@ -282,6 +285,10 @@ assert bo_qua == 1, "cuốn sổ này có đúng một dòng ghi tiền bằng c
 assert tong_va_bo_qua(["bún bò,40000\n"]) == (40000, 0), "một dòng duy nhất là 'bún bò,40000' thì tổng phải là 40000 và không có dòng nào bị bỏ qua"
 assert tong_va_bo_qua(["bánh mì,mười lăm nghìn\n"]) == (0, 1), "một dòng duy nhất là 'bánh mì,mười lăm nghìn' thì không cộng được đồng nào nên tổng phải là 0, và đúng một dòng bị bỏ qua"
 assert tong_va_bo_qua([]) == (0, 0), "không có dòng nào để đọc thì tổng phải là 0 và số dòng bỏ qua cũng phải là 0"
+# Ca HAI dòng hỏng. Không có nó thì `bo_qua = 1` — gán thay vì tăng, đúng cái
+# lỗi mà một bộ đếm sinh ra để chống — đậu sạch mọi câu kiểm phía trên, vì
+# không cuốn sổ thử nào có quá một dòng hỏng.
+assert tong_va_bo_qua(["bánh mì,mười lăm nghìn\n", "trà đá,năm nghìn\n", "bún bò,40000\n"]) == (40000, 2), "cuốn sổ thử này có HAI dòng ghi tiền bằng chữ, nên tổng chỉ còn 40000 và số dòng bỏ qua phải là 2 — một bộ đếm gán thẳng số 1 sẽ dừng ở 1"
 ```
 
 :::hints

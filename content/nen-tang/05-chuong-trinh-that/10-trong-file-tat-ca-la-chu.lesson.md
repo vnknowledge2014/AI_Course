@@ -46,7 +46,10 @@ Nghĩ lại cái file bạn vừa ghi ra ở những bài trước. Trên đĩa,
 đó dưới dạng một chuỗi ký tự nối đuôi nhau: `c`, `à`, ` `, `p`, `h`, `ê`, `,`,
 rồi `2`, `5`, `0`, `0`, `0`, rồi ký tự xuống dòng. Năm ký tự chữ số ấy **không
 phải** một con số — chúng là năm chữ, y hệt như chữ `c` đứng đầu dòng là một
-chữ. Trên đĩa không có chỗ nào để cất một con số cả; chỉ có chỗ cất ký tự.
+chữ. Một file văn bản không có chỗ nào để cất một con số cả; nó chỉ có chỗ cất ký
+tự. (Sâu xuống nữa thì R0 đã dạy rồi: bản thân mỗi ký tự ấy cũng được ghi
+xuống bằng một con số của bảng quy ước. Nhưng con số ấy là số của **chữ** `2`,
+không phải số hai — hai chuyện khác nhau, và chỗ này đang nói chuyện thứ hai.)
 
 Nên khi `.readlines()` mang nội dung ấy về, thứ mang về là chữ. `.strip()` cắt
 chữ. `.split(",")` cắt chữ ra thành những mẩu chữ nhỏ hơn. Từ đầu tới cuối

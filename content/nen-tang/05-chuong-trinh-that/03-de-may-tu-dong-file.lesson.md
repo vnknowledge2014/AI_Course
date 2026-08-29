@@ -136,7 +136,8 @@ trước khi để lỗi bay tiếp lên màn hình.
 ::::
 
 ::::predict{#doan-sau-khoi-with commitOnce}
-Byte viết một khối `with` gọn ghẽ rồi hỏi `f` một câu ở ngoài khối.
+Byte viết HAI khối `with` nối tiếp, mỗi khối một kết nối riêng, rồi hỏi cả hai
+một câu ở ngoài — cộng thêm một câu về cái tên.
 
 **Trước khi bấm chạy**, bạn đoán dòng cuối in ra gì?
 
@@ -144,15 +145,18 @@ Byte viết một khối `with` gọn ghẽ rồi hỏi `f` một câu ở ngoà
 with open("nhap.txt", "w") as f:
     f.write("cà phê,25000")
 
-print(f.closed)
+with open("tom-tat.txt", "w") as g:
+    g.write("tổng,75000")
+
+print(f.closed, g.closed, f.name)
 ```
 
 :::opt{correct}
-`True`
+`True True nhap.txt`
 :::
 
 :::opt
-`False`, vì trong cả đoạn không có dòng `.close()` nào.
+`False False nhap.txt`, vì trong cả đoạn không có dòng `.close()` nào.
 ::why
 Gần đúng ở chỗ bạn dò rất kỹ và dò đúng: trong đoạn này thật sự không có dòng
 `.close()` nào cả. Bài trước dạy rằng thiếu dòng ấy thì `f.closed` vẫn là
@@ -179,14 +183,15 @@ cái tên thì vẫn còn — đúng như bài trước: đóng kết nối khô
 :::
 
 :::opt
-`nhap.txt`
+`True True tom-tat.txt`
 ::why
-Gần đúng ở chỗ bạn nhớ rằng kết nối có giữ tên file, và nó giữ thật — hỏi
-`f.name` thì đúng ra `nhap.txt`.
+Gần đúng ở hai phần ba đầu: cả hai kết nối đều đã đóng, bạn đọc đúng luật của
+`with` và đọc đúng cho cả hai khối.
 
-Chỗ lệch là chỗ trong câu lệnh: dòng cuối hỏi `f.closed`, không hỏi `f.name`.
-`closed` là câu hỏi *còn mở không*, nên câu trả lời của nó là `True` hoặc
-`False`, không bao giờ là một cái tên.
+Chỗ lệch nằm ở cái tên. Dòng cuối hỏi `f.name`, mà `f` là kết nối của khối
+**thứ nhất** — nó giữ `nhap.txt`. `tom-tat.txt` là tên mà `g` giữ. Đóng kết
+nối không xoá cái tên nó nhớ, cũng không trộn hai kết nối vào nhau: mỗi khối
+`with` lo lấy đúng cái của mình.
 ::
 :::
 ::::

@@ -126,53 +126,54 @@ Lan gõ đúng một dòng lệnh, và Byte chép lại nó vào `sys.argv`.
 ```python title=readonly
 import sys
 
-# Dòng lệnh đã gõ:  python so.py so-thang-3.txt
-sys.argv = ["so.py", "so-thang-3.txt"]
+# Dòng lệnh đã gõ:  python so.py so-thang-2.txt chi-tiet
+sys.argv = ["so.py", "so-thang-2.txt", "chi-tiet"]
 
 print(len(sys.argv))
-print(sys.argv[0])
+print(sys.argv[1])
 ```
 
 :::opt{correct}
-`2` rồi `so.py`
+`3` rồi `so-thang-2.txt`
 :::
 
 :::opt
-`1` rồi `so-thang-3.txt`
+`2` rồi `so-thang-2.txt`
 ::why
-Gần đúng ở chỗ bạn đọc đúng **ý nghĩa** của dòng lệnh: Lan gõ thêm đúng một chữ
-cho chương trình, và chữ ấy là `so-thang-3.txt`. Phần bạn hiểu về ý định của Lan
-là chính xác.
+Gần đúng ở chỗ bạn đọc đúng **ý nghĩa** của dòng lệnh: Lan gõ thêm hai chữ cho
+chương trình, và chữ đầu trong hai chữ ấy đúng là `so-thang-2.txt`. Phần bạn
+hiểu về ý định của Lan là chính xác.
 
 Chỗ lệch là `sys.argv` không chỉ chứa những chữ người dùng gõ thêm. Nó chép lại
 cả câu lệnh kể từ tên chương trình, nên ô số 0 đã bị `"so.py"` chiếm chỗ và
-danh sách dài 2. Nhìn thẳng vào dòng gán ở trên cũng thấy: trong cặp ngoặc
-vuông có hai câu chữ.
+danh sách dài 3, không phải 2. Nhìn thẳng vào dòng gán ở trên cũng thấy: trong
+cặp ngoặc vuông có ba câu chữ.
 ::
 :::
 
 :::opt
-`2` rồi `so-thang-3.txt`
+`3` rồi `so.py`
 ::why
-Gần đúng ở chỗ bạn đếm đúng độ dài: danh sách có hai phần tử, và bạn đọc `len`
+Gần đúng ở chỗ bạn đếm đúng độ dài: danh sách có ba phần tử, và bạn đọc `len`
 không sai.
 
-Chỗ lệch nằm ở nửa sau. Bạn đang đọc `argv[0]` thành "chữ đầu tiên người dùng
-gõ thêm", nhưng nó là "ô số 0 của danh sách", mà ô ấy giữ tên chương trình.
-Chính vì tên chương trình chiếm mất ô số 0 nên chữ người dùng gõ thêm mới bị
-đẩy sang ô số 1 — đây là toàn bộ chỗ lệch một nấc của bài này.
+Chỗ lệch nằm ở nửa sau: bạn lấy ô số 0 trong khi dòng in hỏi ô số **1**. Ô số
+0 giữ tên chương trình, `"so.py"` — và chính vì nó chiếm mất ô số 0 nên chữ
+người dùng gõ thêm mới bị đẩy sang ô số 1. Đây là toàn bộ chỗ lệch một nấc của
+bài này, và dòng `print` vừa hỏi thẳng vào chỗ ấy.
 ::
 :::
 
 :::opt
-`3` rồi `python`
+`4` rồi `so.py`
 ::why
 Gần đúng ở chỗ bạn đếm đúng số chữ trên dòng lệnh thật: `python`, `so.py`,
-`so-thang-3.txt` — Lan gõ ba chữ, không sai.
+`so-thang-2.txt`, `chi-tiet` — Lan gõ bốn chữ, không sai.
 
 Chỗ lệch là chữ `python` dừng lại ở terminal. Nó nói cho hệ máy biết phải gọi
 trình chạy nào; tới lúc chương trình của bạn bắt đầu chạy thì việc ấy đã xong
-rồi. Cái list bắt đầu từ tên chương trình trở đi, nên nó dài 2.
+rồi. Cái list bắt đầu từ tên chương trình trở đi, nên nó dài 3 — và ô số 1,
+thứ dòng in đang hỏi, là `so-thang-2.txt`.
 ::
 :::
 ::::

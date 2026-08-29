@@ -234,12 +234,23 @@ assert so_may_se_tim == os.getcwd() + "/so.txt", "đường dẫn máy sắp m�
   timeoutMs: 4000
 - tier: tests
   timeoutMs: 4000
+# KHÔNG có tầng `output` nào ghim đường dẫn.
+#
+# Bản trước ghim `^Chỗ đang đứng: /home/pyodide...` — tức chấm bằng đúng cái
+# mà bài này vừa dạy là KHÔNG cố định. Trên một máy đứng ở chỗ khác, lời giải
+# ĐÚNG sẽ trượt, và người học không có cách nào biết vì sao. Chú thích trong
+# khối kiểm đã tự cấm điều đó rồi.
+#
+# Nội dung thật do ba `assert` ở tầng `tests` lo — chúng so với `os.getcwd()`
+# của chính máy đang chấm, nên đúng trên mọi máy.
 - tier: output
-  match: regex
-  expect: ^Chỗ đang đứng: /home/pyodide\nMáy sẽ tìm sổ ở: /home/pyodide/so\.txt\s*$
-- tier: output
+  # `contains` KHAI RÕ, không để mặc định. Ở bài này nó là lựa chọn đúng chứ
+  # không phải sơ suất: đường dẫn đầy đủ khác nhau trên mỗi máy — đúng điều
+  # bài dạy — nên chỉ neo được phần câu chữ do người học viết ra.
+  match: contains
   expect: "Máy sẽ tìm sổ ở:"
 - tier: output
+  match: contains
   expect: "/so.txt"
 :::
 ::::

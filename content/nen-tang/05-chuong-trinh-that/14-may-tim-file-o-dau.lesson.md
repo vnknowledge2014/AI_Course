@@ -82,13 +82,13 @@ print(f"Sổ dài {len(noi_dung)} ký tự.")
 Lan mở terminal ở màn hình nền rồi gõ:
 
 ```text title=readonly
-lan@may:/Users/lan/Desktop$ python ../du-an/main.py
+lan@may:/Users/lan$ python du-an/main.py
 ```
 
 **Trước khi bấm Enter**, bạn đoán máy đi mở file nào?
 
 :::opt{correct}
-`/Users/lan/Desktop/so.txt` — không có file nào ở đó, nên `FileNotFoundError`
+`/Users/lan/so.txt` — không có file nào ở đó, nên `FileNotFoundError`
 :::
 
 :::opt
@@ -100,7 +100,7 @@ gõ trong `main.py`, nên "ở đây" nghe như phải là chỗ `main.py` đang
 
 Chỗ lệch là máy không bao giờ hỏi câu "file `.py` này nằm ở đâu" để hoàn tất
 đường dẫn. Nó hoàn tất bằng **thư mục bạn đang đứng lúc gõ lệnh** — ở lượt
-chạy này là `/Users/lan/Desktop`. Đúng file `main.py` ấy, chép sang bất kỳ đâu
+chạy này là `/Users/lan`. Đúng file `main.py` ấy, chép sang bất kỳ đâu
 cũng vậy: đứng chỗ nào thì `so.txt` được tìm ở chỗ đó. Điều đó nghe kỳ, nhưng
 nó chính là thứ cho phép một chương trình đọc cuốn sổ của **thư mục bạn đang
 mở**, thay vì mãi mãi đọc đúng cuốn nằm cạnh nó.
@@ -108,7 +108,7 @@ mở**, thay vì mãi mãi đọc đúng cuốn nằm cạnh nó.
 :::
 
 :::opt
-Máy tìm ở `/Users/lan/du-an` trước, không thấy thì tìm sang `/Users/lan/Desktop`
+Máy tìm ở `/Users/lan/du-an` trước, không thấy thì tìm sang `/Users/lan`
 ::why
 Gần đúng ở chỗ bạn đang thiết kế một hành vi tử tế, và nhiều công cụ khác
 ngoài đời đúng là làm vậy thật.
@@ -149,16 +149,16 @@ Cùng một `main.py`, hai lần chạy từ hai chỗ khác nhau:
 lan@may:/Users/lan/du-an$ python main.py
     → máy mở  /Users/lan/du-an/so.txt      ✓ có, chạy được
 
-lan@may:/Users/lan/Desktop$ python ../du-an/main.py
-    → máy mở  /Users/lan/Desktop/so.txt    ✗ không có, FileNotFoundError
+lan@may:/Users/lan$ python du-an/main.py
+    → máy mở  /Users/lan/so.txt            ✗ không có, FileNotFoundError
 ```
 
 File `main.py` không đổi một chữ. `so.txt` không hề đi đâu. Thứ đổi là **chỗ
 bạn đứng lúc gõ lệnh**, và chỉ riêng nó đã đủ làm chương trình sống hay chết.
 
-Nhìn kỹ dòng thứ hai một lần nữa: `../du-an/main.py` cũng là một đường dẫn
-tương đối, và nó cũng được hoàn tất từ `/Users/lan/Desktop` — nên máy tìm thấy
-`main.py` không chút vướng mắc. Cùng một luật, áp cho cả hai. Máy tìm ra
+Nhìn kỹ dòng thứ hai một lần nữa: `du-an/main.py` cũng là một đường dẫn tương
+đối, và nó cũng được hoàn tất từ `/Users/lan` — nên máy tìm thấy `main.py`
+không chút vướng mắc. Cùng một luật, áp cho cả hai. Máy tìm ra
 chương trình, rồi tìm hụt cuốn sổ, vì hai cái tên được viết theo hai kiểu khác
 nhau: một cái có nói đường đi, một cái không.
 

@@ -42,10 +42,13 @@ lớn hơn cái tên "mượn một cái tên" nghe có vẻ gợi ra.
 Khi Python gặp dòng `import so_sach`, nó làm ba chuyện, theo thứ tự:
 
 1. đi tìm file `so_sach.py`;
-2. **đọc và chạy toàn bộ file ấy**, từ dòng đầu xuống dòng cuối, y như bạn gõ
-   `python so_sach.py`;
+2. **đọc và chạy toàn bộ file ấy**, từ dòng đầu xuống dòng cuối, đúng một lần;
 3. gom mọi cái tên vừa sinh ra trong lúc chạy, gói lại thành một hộp, rồi đặt
    hộp đó vào chương trình của bạn dưới cái tên `so_sach`.
+
+Gần giống lúc bạn gõ `python so_sach.py` — nhưng không giống hệt. Máy còn nói
+cho file được mượn biết rằng nó đang bị mượn chứ không phải đang được chạy
+thẳng, và cái khác biệt ấy sẽ là cả một bài ở cuối cụm này.
 
 Bước 2 là bước bị bỏ quên. Cái tên `doc_so` mà bạn muốn mượn không có sẵn ở đâu
 cả — nó chỉ tồn tại **sau khi** dòng `def doc_so(ten_file):` được chạy qua. Muốn

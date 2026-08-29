@@ -137,7 +137,7 @@ bằng một dấu ngắt dòng như hai dòng trên.
 with open("so.txt", "w") as f:
     f.write("cà phê,25000\n")
     f.write("bún bò,40000\n")
-    f.write("bánh mì,15000\n")
+    f.write("bánh mì,15000")
 
 with open("so.txt", "r") as f:
     cac_dong = f.readlines()

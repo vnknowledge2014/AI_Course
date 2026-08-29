@@ -435,6 +435,20 @@ assert doc_so("so-thang-8.txt") == [("cà phê", 25000), ("bún bò", 40000), ("
   expect: "them: đã ghi trà sữa 45000 đồng vào so-thang-8.txt"
 - tier: output
   expect: "xem: 3 khoản, tổng 110000 đồng"
+- tier: static
+  onFail: cả bốn chỗ trống phải ĐỌC RA từ `sys.argv` — gõ thẳng tên file, tên khoản hay số tiền vào là đưa chúng trở lại nằm cứng trong code, đúng thứ bài này dạy cách gỡ đi
+  requireAst:
+  # Cả bốn lượt chạy dùng đúng một cuốn sổ, và chỉ có ĐÚNG MỘT lượt `them`,
+  # nên chép cứng `ten_file = "so-thang-8.txt"`, `ten_moi = "trà sữa"`,
+  # `tien_moi = 45000` cho ra y hệt kết quả của lời giải mẫu — ba trong bốn
+  # chỗ trống không bị tầng nào chạm tới.
+  #
+  # Luật này hỏi thứ chép cứng KHÔNG có: mỗi chỗ trống phải đọc `sys`.
+  #
+  # KHÔNG kèm `forbidAst` cấm hai hằng số ấy: chính lời giải mẫu phải viết
+  # chúng ra, trong bốn dòng `sys.argv = [...]` dựng lại dòng lệnh. Cấm đi là
+  # đánh trượt lời giải mẫu — cổng bắt được ngay, và bắt đúng.
+  - kind: uses-name, target: sys, min: 9
 :::
 ::::
 

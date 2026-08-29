@@ -66,8 +66,8 @@ chưa chết, chưa xong, chỉ là đứng yên — và trao quyền cho bạn.
 Màn hình lúc đó trông thế này:
 
 ```text title=readonly
-$ python bao_cao.py thang-chin.txt
-> /Users/lan/du-an/bao_cao.py(7)bao_cao()
+$ python main.py so.txt
+> /Users/lan/du-an/main.py(7)bao_cao()
 -> for dong in cac_dong:
 (Pdb) tong
 0
@@ -76,7 +76,7 @@ $ python bao_cao.py thang-chin.txt
 (Pdb) cac_dong[0]
 'cà phê,25000\n'
 (Pdb) ten_file
-'thang-chin.txt'
+'so.txt'
 (Pdb) q
 ```
 
@@ -192,7 +192,7 @@ Tại điểm dừng ấy, Byte gõ ba cái tên: `tong`, `len(cac_dong)`, và `
 Việc của bạn là điền đúng ba câu trả lời mà điểm dừng sẽ in ra.
 
 Cuốn sổ ở đây tên `so-ngan.txt` và chỉ có ba khoản — bản rút ngắn để bạn đi bộ
-bằng mắt được. Cuốn sổ thật của Byte là `thang-chin.txt` với 12 khoản, và bạn sẽ
+bằng mắt được. Cuốn sổ thật của Byte là `so.txt` với 12 khoản, và bạn sẽ
 quay lại nó ở cuối bài.
 
 ```python title=starter
