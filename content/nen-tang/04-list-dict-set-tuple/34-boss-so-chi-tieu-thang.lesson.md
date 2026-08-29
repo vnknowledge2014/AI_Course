@@ -267,7 +267,7 @@ so_a = [
 tong_a = {}
 for khoan in so_a:
     nhom = khoan["nhom"]
-    tong_a[nhom] = ___
+    tong_a[nhom] = tong_a.get(nhom, 0) + khoan["tien"]
 
 print("Sổ A")
 for nhom, tien in tong_a.items():
@@ -324,8 +324,15 @@ for nhom, tien in tong_b.items():
 ```
 
 ```python title=test
-# Chỗ trống thứ nhất bị soi bởi ba dòng `tong_a` — sổ A mỗi nhóm một khoản,
-# nên ba con số ấy phải bằng đúng số tiền đã ghi trong sổ.
+# Sổ A KHÔNG có chỗ trống, và đó là chủ ý.
+#
+# Sổ A mỗi nhóm đúng một khoản, nên bản viết thiếu `.get` —
+# `tong_a[nhom] = khoan["tien"]` — cho ra kết quả giống hệt bản đúng. Đặt một
+# chỗ trống chấm điểm lên đó là chấm mà không nhìn: mọi cách viết đều qua.
+#
+# Nên dòng của sổ A viết sẵn, làm bản mẫu, và ba assert dưới đây chỉ để bảo
+# đảm người học không sửa hỏng nó. Chỗ trống duy nhất nằm ở sổ B — nơi nhóm
+# `ăn uống` có ba khoản, và chỉ ở đó thì ghi đè mới lộ ra.
 assert tong_a["đi lại"] == 500000, "sổ A có đúng một khoản đi lại là sửa xe 500 nghìn, nên nhóm đi lại của sổ A phải giữ 500000"
 assert tong_a["ăn uống"] == 25000, "sổ A có đúng một khoản ăn uống là cà phê 25 nghìn, nên nhóm ăn uống của sổ A phải giữ 25000"
 assert len(tong_a) == 3, "ba khoản của sổ A thuộc ba nhóm khác nhau, nên sổ tra cứu của sổ A phải có đúng ba khoá"
@@ -338,11 +345,11 @@ assert len(tong_b) == 2, "bốn khoản của sổ B chỉ thuộc hai nhóm, n�
 
 :::hints
 - kind: attention
-  body: Bên trái dấu bằng đã có sẵn `tong_a[nhom]` — chỗ cất kết quả. Chỗ trống là bên phải, tức là phần **tính ra** con số sẽ được cất. Con số ấy phải nhắc tới hai thứ: cái đang có trong nhóm này, và tiền của khoản đang xét ở lượt này.
+  body: Dòng cộng dồn của sổ A đã viết sẵn — chép nó xuống thì xong. Nhưng đọc kỹ đã: sổ A mỗi nhóm đúng một khoản, nên ở đó viết thiếu hay viết đủ đều ra cùng một kết quả. Sổ B mới là chỗ phân biệt được, vì nhóm `ăn uống` của nó có tới ba khoản.
 - kind: strategy
   body: Lượt đầu tiên gặp một nhóm, khoá của nhóm ấy chưa tồn tại — nên phép lấy giá trị cũ phải là phép lấy có kèm mặc định, và mặc định đúng cho một bộ cộng dồn là số không. Lấy được giá trị cũ rồi thì cộng thêm ô `"tien"` của khoản trong lượt này.
 - kind: one-line
-  body: 'Chỗ trống thứ nhất viết `tong_a.get(nhom, 0) + khoan["tien"]`, chỗ thứ hai viết `tong_b.get(nhom, 0) + khoan["tien"]` — khác nhau đúng tên cuốn sổ tra cứu.'
+  body: 'Viết `tong_b.get(nhom, 0) + khoan["tien"]` vào chỗ trống — đúng dòng của sổ A ở trên, chỉ đổi tên cuốn sổ tra cứu.'
 :::
 
 :::validate

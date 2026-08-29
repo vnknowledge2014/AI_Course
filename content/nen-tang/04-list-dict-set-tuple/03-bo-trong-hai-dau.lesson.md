@@ -147,44 +147,45 @@ xuôi mà cuốn sổ thì chỉ dài về phía sau.
 ::::
 
 ::::predict{#doan-hai-khuc-cuoi commitOnce}
-Byte cắt hai khúc từ cuốn sổ bảy khoản, và cả hai khúc đều bỏ trống một đầu —
-nhưng một khúc dùng số dương, một khúc dùng số âm.
+Byte lấy lại cuốn sổ tháng Tư — năm khoản — rồi cắt hai khúc, cả hai đều bỏ
+trống một đầu. Nhưng lần này một khúc bỏ trống đầu **sau**, một khúc bỏ trống
+đầu **trước**, và con số của khúc thứ hai là số âm.
 
 **Trước khi bấm chạy**, bạn đoán màn hình hiện ra hai dòng nào?
 
 ```python title=readonly
-so_thang_ba = [25000, 40000, 15000, 60000, 30000, 12000, 55000]
+so_thang_tu = [80000, 20000, 35000, 90000, 45000]
 
-print(so_thang_ba[3:])
-print(so_thang_ba[-3:])
+print(so_thang_tu[2:])
+print(so_thang_tu[:-2])
 ```
 
 :::opt{correct}
-[60000, 30000, 12000, 55000] rồi [30000, 12000, 55000]
+[35000, 90000, 45000] rồi [80000, 20000, 35000]
 :::
 
 :::opt
-[60000, 30000, 12000, 55000] rồi [25000, 40000, 15000, 60000]
+[35000, 90000, 45000] rồi [90000, 45000]
 ::why
-Gần đúng ở chỗ dòng đầu: bạn đọc `[3:]` chuẩn xác — bắt đầu ở chỗ số 3, chạy
-tới hết sổ, bốn khoản.
+Gần đúng ở chỗ dòng đầu: bạn đọc `[2:]` chuẩn xác — bắt đầu ở chỗ số 2, chạy
+tới hết sổ, ba khoản.
 
-Chỗ lệch nằm ở việc dấu hai chấm đứng bên nào của số `-3`. Trong `so[-3:]` thì
-`-3` đứng **trước** dấu hai chấm, nên nó là ghim bắt đầu: cắt từ chỗ thứ ba
-đếm ngược rồi chạy tới hết. Bốn khoản đầu mà bạn chọn chính là kết quả của
-`so[:-3]` — câu ấy có thật, chỉ là nó không phải câu đang chạy ở đây.
+Chỗ lệch nằm ở việc dấu hai chấm đứng bên nào của số `-2`. Trong `so[:-2]` thì
+`-2` đứng **sau** dấu hai chấm, nên nó là chỗ **dừng**: cắt từ đầu sổ tới
+trước khoản thứ hai đếm ngược. Hai khoản cuối mà bạn chọn chính là kết quả của
+`so[-2:]` — câu ấy có thật, chỉ là nó không phải câu đang chạy ở đây.
 ::
 :::
 
 :::opt
-[25000, 40000, 15000] rồi [30000, 12000, 55000]
+[80000, 20000] rồi [80000, 20000, 35000]
 ::why
-Gần đúng ở chỗ dòng thứ hai: `[-3:]` cho đúng ba khoản cuối sổ, bạn đọc chiều
+Gần đúng ở chỗ dòng thứ hai: `[:-2]` cho đúng ba khoản đầu sổ, bạn đọc chiều
 đếm ngược không sai.
 
-Chỗ lệch nằm ở dòng đầu. Trong `so[3:]` con số đứng **trước** dấu hai chấm, nên
-nó là ghim bắt đầu chứ không phải chỗ dừng — cắt từ chỗ số 3 trở đi. Ba khoản
-đầu mà bạn chọn là kết quả của `so[:3]`, tức là cùng con số ấy nhưng đặt sang
+Chỗ lệch nằm ở dòng đầu. Trong `so[2:]` con số đứng **trước** dấu hai chấm, nên
+nó là ghim bắt đầu chứ không phải chỗ dừng — cắt từ chỗ số 2 trở đi. Hai khoản
+đầu mà bạn chọn là kết quả của `so[:2]`, tức là cùng con số ấy nhưng đặt sang
 bên kia dấu hai chấm.
 ::
 :::

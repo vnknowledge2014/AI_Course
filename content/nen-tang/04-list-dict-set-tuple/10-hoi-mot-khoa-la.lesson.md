@@ -119,9 +119,12 @@ Còn `KeyError` thì việc vẫn tồn tại, chỉ là cái khoá không có m
 > **Đây là một món quà, không phải một tai nạn.** Cả track này đang đuổi theo
 > đúng một thứ: lỗi không tự nói ra. Ở bài hai dãy song song, bạn xoá một tên
 > mà quên xoá tiền, rồi máy in tên một đằng tiền một nẻo — **không một tiếng
-> báo**. Với cuốn sổ tra bằng khoá thì chuyện đó không xảy ra được nữa: hỏi
-> nhầm một khoá là máy dừng lại và gọi thẳng tên cái khoá ấy ra. Một lỗi biết
-> kêu bao giờ cũng rẻ hơn một con số sai biết im.
+> báo**. Với cuốn sổ tra bằng khoá thì **khi ĐỌC**, chuyện đó không
+> xảy ra được nữa: hỏi nhầm một khoá là máy dừng lại và gọi thẳng tên cái khoá
+> ấy ra. Một lỗi biết kêu bao giờ cũng rẻ hơn một con số sai biết im.
+>
+> (Còn khi GHI vào sổ thì máy lại im — hai bài nữa bạn sẽ gặp, và sẽ thấy vì
+> sao nó buộc phải im.)
 ::::
 
 ::::predict{#doan-man-hinh commitOnce}

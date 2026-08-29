@@ -44,11 +44,11 @@ def lay_tien(cap):
     return cap[1]
 
 chi = {
-    "bún bò": 40000,
+    "mua sách": 40000,
     "xăng xe": 60000,
     "cà phê": 25000,
     "sửa xe": 500000,
-    "học phí": 300000,
+    "biếu bà": 300000,
 }
 
 cac_cap = list(chi.items())
@@ -60,9 +60,9 @@ for ten, tien in xep:
 
 ```text title=readonly
 cà phê: 25000 đồng
-bún bò: 40000 đồng
+mua sách: 40000 đồng
 xăng xe: 60000 đồng
-học phí: 300000 đồng
+biếu bà: 300000 đồng
 sửa xe: 500000 đồng
 ```
 
@@ -81,8 +81,13 @@ for i in range(len(xep)):
 Ba dòng, và dòng khó nhất là `xep[len(xep) - 1 - i]`. Cuốn sổ có năm ô nên ô
 cuối mang chỗ đứng số 4, mà `i` thì bắt đầu từ 0 — nên phải trừ đi một rồi mới
 trừ tiếp `i`. Quên số một ấy là máy dừng ngay với `IndexError`, vì bạn vừa xin
-một ô nằm ngoài sổ. Trừ dư thì không lỗi nào cả: khoản tốn nhất lặng lẽ rơi khỏi
-báo cáo, còn báo cáo thì vẫn in ra đàng hoàng.
+một ô nằm ngoài sổ.
+
+Trừ **dư** một thì còn khó chịu hơn, vì máy không kêu tiếng nào: lượt cuối xin
+ô `-1`, mà `-1` là ô cuối sổ (bài 1 dạy đúng chuyện ấy), nên danh sách vẫn đủ
+năm khoản — không khoản nào rơi ra. Chỉ có thứ tự bị xáo, và ba dòng đầu của
+báo cáo in ra ba khoản không phải ba khoản tốn nhất. Báo cáo vẫn đẹp, vẫn đủ
+dòng, vẫn sai người.
 
 Ba dòng để làm một việc mà `sorted` vốn đã biết làm.
 ::::
@@ -117,11 +122,11 @@ def lay_tien(cap):
     return cap[1]
 
 chi = {
-    "bún bò": 40000,
+    "mua sách": 40000,
     "xăng xe": 60000,
     "cà phê": 25000,
     "sửa xe": 500000,
-    "học phí": 300000,
+    "biếu bà": 300000,
 }
 
 cac_cap = list(chi.items())
@@ -137,11 +142,11 @@ Máy in ra:
 
 ```text title=readonly
 sửa xe: 500000 đồng
-học phí: 300000 đồng
+biếu bà: 300000 đồng
 xăng xe: 60000 đồng
-bún bò: 40000 đồng
+mua sách: 40000 đồng
 cà phê: 25000 đồng
-Sổ gốc vẫn là: [('bún bò', 40000), ('xăng xe', 60000), ('cà phê', 25000), ('sửa xe', 500000), ('học phí', 300000)]
+Sổ gốc vẫn là: [('mua sách', 40000), ('xăng xe', 60000), ('cà phê', 25000), ('sửa xe', 500000), ('biếu bà', 300000)]
 ```
 
 Hai chuyện đáng ghi lại:
@@ -228,11 +233,11 @@ def lay_tien(cap):
     return cap[1]
 
 chi = {
-    "bún bò": 40000,
+    "mua sách": 40000,
     "xăng xe": 60000,
     "cà phê": 25000,
     "sửa xe": 500000,
-    "học phí": 300000,
+    "biếu bà": 300000,
 }
 
 cac_cap = list(chi.items())
@@ -250,11 +255,11 @@ def lay_tien(cap):
     return cap[1]
 
 chi = {
-    "bún bò": 40000,
+    "mua sách": 40000,
     "xăng xe": 60000,
     "cà phê": 25000,
     "sửa xe": 500000,
-    "học phí": 300000,
+    "biếu bà": 300000,
 }
 
 cac_cap = list(chi.items())
@@ -273,8 +278,8 @@ for ten, tien in top_ba:
 assert xep[0] == ("sửa xe", 500000), "xếp từ lớn xuống nhỏ thì ô đầu phải là cặp ('sửa xe', 500000) — khoản tốn nhiều nhất trong năm khoản của cuốn sổ này"
 assert xep[4] == ("cà phê", 25000), "cùng cách xếp ấy đẩy khoản rẻ nhất của cuốn sổ này — cặp ('cà phê', 25000) — xuống ô cuối cùng"
 assert len(top_ba) == 3, "bản báo cáo cần đúng ba dòng, nên lát cắt phải lấy ba ô đầu chứ không lấy cả năm"
-assert top_ba == [("sửa xe", 500000), ("học phí", 300000), ("xăng xe", 60000)], "ba khoản tốn nhất của cuốn sổ này, theo chiều giảm dần, là sửa xe 500000, học phí 300000, rồi xăng xe 60000"
-assert cac_cap == [("bún bò", 40000), ("xăng xe", 60000), ("cà phê", 25000), ("sửa xe", 500000), ("học phí", 300000)], "sổ gốc phải còn nguyên thứ tự ghi chép: bún bò, xăng xe, cà phê, sửa xe, học phí"
+assert top_ba == [("sửa xe", 500000), ("biếu bà", 300000), ("xăng xe", 60000)], "ba khoản tốn nhất của cuốn sổ này, theo chiều giảm dần, là sửa xe 500000, biếu bà 300000, rồi xăng xe 60000"
+assert cac_cap == [("mua sách", 40000), ("xăng xe", 60000), ("cà phê", 25000), ("sửa xe", 500000), ("biếu bà", 300000)], "sổ gốc phải còn nguyên thứ tự ghi chép: mua sách, xăng xe, cà phê, sửa xe, biếu bà"
 ```
 
 :::hints
@@ -293,7 +298,7 @@ assert cac_cap == [("bún bò", 40000), ("xăng xe", 60000), ("cà phê", 25000)
   timeoutMs: 6000
 - tier: output
   match: regex
-  expect: ^BA KHOẢN TỐN NHẤT\nsửa xe: 500000 đồng\nhọc phí: 300000 đồng\nxăng xe: 60000 đồng\s*$
+  expect: ^BA KHOẢN TỐN NHẤT\nsửa xe: 500000 đồng\nbiếu bà: 300000 đồng\nxăng xe: 60000 đồng\s*$
 - tier: output
   expect: 'xăng xe: 60000 đồng'
 :::

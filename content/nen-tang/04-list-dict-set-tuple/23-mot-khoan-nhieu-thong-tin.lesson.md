@@ -277,7 +277,11 @@ assert so[3] == {"ten": "vá lốp", "tien": 30000, "ngay": 11, "nhom": "xăng x
   timeoutMs: 6000
 - tier: output
   match: regex
-  expect: ^Sổ đang có 5 khoản\nKhoản thứ ba: \{'ten': 'bún bò', 'tien': 40000, 'ngay': 8, 'nhom': 'ăn uống'\}\nKhoản cuối sổ: \{'ten': 'bánh mì', 'tien': 15000, 'ngay': 14, 'nhom': 'ăn uống'\}\s*$
+  # Dòng GIỮA không neo thứ tự bốn khoá, vì `print` in dict theo thứ tự CHÈN
+  # còn khối test lại hứa thẳng "thứ tự bạn viết bốn khoá ra sao cũng được".
+  # Neo cứng nó là đánh trượt một lời giải đúng — và đánh trượt bằng đúng lời
+  # hứa bài vừa đưa ra. Hai dòng ngoài không do người học sinh ra nên neo được.
+  expect: ^Sổ đang có 5 khoản\n.*\nKhoản cuối sổ: \{'ten': 'bánh mì', 'tien': 15000, 'ngay': 14, 'nhom': 'ăn uống'\}\s*$
 - tier: output
   expect: Khoản cuối sổ: {'ten': 'bánh mì', 'tien': 15000, 'ngay': 14, 'nhom': 'ăn uống'}
 :::

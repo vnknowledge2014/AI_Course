@@ -252,6 +252,16 @@ assert can_xoa == [500000, 999000, 85000], "danh sách cần xoá chỉ để đ
   timeoutMs: 4000
 - tier: tests
   timeoutMs: 4000
+- tier: static
+  onFail: câu hỏi của `if` phải hỏi chính cuốn sổ xem có khoản này không, chứ không so khoản đang xét với một con số gõ sẵn
+  requireAst:
+  # Khung đã ĐỌC tên `so` hai lần: `so.remove(khoan)` và `{so}` trong dòng in.
+  # Lời giải đúng đọc thêm lần thứ ba, ở vế phải chữ `in`. Nên `min: 3`.
+  #
+  # Không có luật này thì `khoan != 999000` qua sạch cả bốn tầng — chạy được,
+  # hai assert đạt, regex khớp từng chữ — ở đúng bài mà `in` là khái niệm mới
+  # duy nhất. Người học không gõ chữ `in` lần nào vẫn được khen.
+  - kind: uses-name, target: so, min: 3
 - tier: output
   match: regex
   expect: ^Đã xoá khoản 500000 đồng\nSổ không có khoản 999000 đồng\nĐã xoá khoản 85000 đồng\nSổ còn: \[240000, 120000\]\s*$

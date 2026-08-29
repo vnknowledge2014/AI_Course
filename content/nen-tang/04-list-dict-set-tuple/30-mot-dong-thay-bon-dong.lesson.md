@@ -74,15 +74,17 @@ Lối viết này có tên riêng trong tiếng Anh của giới lập trình Py
 ::::
 
 ::::example{#hai-cach-mot-ket-qua}
-Chạy cả hai cách trên đúng cuốn sổ năm khoản của bài 23, rồi đem so.
+Từ đây tới hết mạch, Byte mở một cuốn sổ **tháng mới** — vẫn năm khoản, vẫn
+đúng bốn ô mỗi khoản như bài 23 đã dựng, nhưng số tiền lớn hơn hẳn vì tháng
+này có khoản sửa xe. Chạy cả hai cách trên cuốn ấy rồi đem so.
 
 ```python title=readonly
 so = [
     {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
+    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xăng xe"},
     {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
+    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "học phí", "tien": 300000, "ngay": 15, "nhom": "học phí"},
 ]
 
 cach_cu = []
@@ -100,8 +102,8 @@ print(cach_cu == cach_moi)
 Máy in ra:
 
 ```text title=readonly
-['cà phê', 'xăng', 'ăn trưa', 'sửa xe', 'biếu bà']
-['cà phê', 'xăng', 'ăn trưa', 'sửa xe', 'biếu bà']
+['cà phê', 'xăng', 'ăn trưa', 'sửa xe', 'học phí']
+['cà phê', 'xăng', 'ăn trưa', 'sửa xe', 'học phí']
 True
 ```
 
@@ -134,66 +136,30 @@ Máy in ra:
 ```
 ::::
 
-::::explain{#mot-dong-nay-khong-loc-va-khong-bo-trung}
-Bốn bài vừa rồi toàn nói về rổ, nên chỗ này phải nói rõ để khỏi lẫn.
-
-**Dòng bạn vừa viết lấy hết, không bỏ sót phần tử nào.** Cuốn sổ có năm khoản thì
-danh sách ra năm phần tử, không hơn không kém. Trong dòng ấy mới có đúng hai mẩu
-— **lấy gì** và **từ đâu** — và không mẩu nào nói "chỉ lấy khoản nào thoả điều
-kiện". Cũng phải thôi: bốn dòng mà nó đang thay thế cũng chẳng có câu `if` nào.
-
-**Và nó không bỏ trùng.** Ngoặc vuông dựng ra một danh sách, mà danh sách thì
-nhận đủ mọi lần xuất hiện — đúng như `.append` không bao giờ hỏi "đã có chưa".
-Lấy trường `nhom` của cuốn sổ trên thì `ăn uống` hiện ra **hai** lần và `xe cộ`
-cũng hai lần:
-
-```python title=readonly
-nhom_cac_khoan = [khoan["nhom"] for khoan in so]
-print(nhom_cac_khoan)
-print(len(nhom_cac_khoan))
-```
-
-Máy in ra:
-
-```text title=readonly
-['ăn uống', 'xe cộ', 'ăn uống', 'xe cộ', 'biếu tặng']
-5
-```
-
-Muốn bỏ trùng thì vẫn là việc của bài 26: bọc kết quả lại bằng `set(...)`, và năm
-phần tử ấy rút xuống còn ba nhóm khác nhau.
-
-> Chỗ dễ vấp: thứ tự **viết** trong dòng ngược với thứ tự **máy làm**. Máy chạy
-> phần `for khoan in so` trước để có `khoan`, rồi mới tính `khoan["ten"]` — nhưng
-> `khoan["ten"]` lại được viết trước. Lý do là dòng này viết theo lối kể cho
-> người nghe: người ta hỏi "lấy gì" trước, "từ đâu" sau. Nếu đọc mà thấy rối, cứ
-> đọc từ chữ `for` trở đi trước, rồi quay lại đầu dòng.
-::::
-
 ::::predict{#doan-mot-dong commitOnce}
 Byte lấy trường `nhom` của cuốn sổ năm khoản ấy. Trong sổ, `cà phê` và `ăn trưa`
-cùng thuộc nhóm `ăn uống`; `xăng` và `sửa xe` cùng thuộc nhóm `xe cộ`.
+cùng thuộc nhóm `ăn uống`; `xăng` và `sửa xe` cùng thuộc nhóm `xăng xe`.
 
 **Trước khi bấm chạy**, bạn đoán màn hình hiện ra gì?
 
 ```python title=readonly
 so = [
     {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
+    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xăng xe"},
     {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
+    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "học phí", "tien": 300000, "ngay": 15, "nhom": "học phí"},
 ]
 
 print([khoan["nhom"] for khoan in so])
 ```
 
 :::opt{correct}
-`['ăn uống', 'xe cộ', 'ăn uống', 'xe cộ', 'biếu tặng']` — năm phần tử, hai cái tên nằm hai lần
+`['ăn uống', 'xăng xe', 'ăn uống', 'xăng xe', 'học phí']` — năm phần tử, hai cái tên nằm hai lần
 :::
 
 :::opt
-`['ăn uống', 'xe cộ', 'biếu tặng']` — ba phần tử, trùng bị bỏ
+`['ăn uống', 'xăng xe', 'học phí']` — ba phần tử, trùng bị bỏ
 ::why
 Gần đúng ở chỗ bạn đang mang theo bốn bài về rổ vừa học, và ba nhóm ấy đúng là ba
 nhóm khác nhau có trong sổ. Nếu câu hỏi là "sổ này chi vào những nhóm nào" thì
@@ -207,7 +173,7 @@ nhận đủ mọi lần xuất hiện. Bốn dòng mà một dòng này thay th
 :::
 
 :::opt
-`['cà phê', 'xăng', 'ăn trưa', 'sửa xe', 'biếu bà']`
+`['cà phê', 'xăng', 'ăn trưa', 'sửa xe', 'học phí']`
 ::why
 Gần đúng ở phần khó: bạn đọc ra rằng kết quả có năm phần tử, đúng bằng số khoản
 trong sổ, và giữ nguyên thứ tự ghi sổ. Phần suy luận về hình dạng kết quả của bạn
@@ -233,6 +199,43 @@ cần ai gán trước. Trong một dòng gọn, phần `for` vẫn giữ nguyê
 :::
 ::::
 
+::::explain{#mot-dong-nay-khong-loc-va-khong-bo-trung}
+Đúng như bạn vừa đoán. Bốn bài vừa rồi toàn nói về rổ, nên chỗ này phải nói rõ
+để khỏi lẫn.
+
+**Dòng bạn vừa viết lấy hết, không bỏ sót phần tử nào.** Cuốn sổ có năm khoản thì
+danh sách ra năm phần tử, không hơn không kém. Trong dòng ấy mới có đúng hai mẩu
+— **lấy gì** và **từ đâu** — và không mẩu nào nói "chỉ lấy khoản nào thoả điều
+kiện". Cũng phải thôi: bốn dòng mà nó đang thay thế cũng chẳng có câu `if` nào.
+
+**Và nó không bỏ trùng.** Ngoặc vuông dựng ra một danh sách, mà danh sách thì
+nhận đủ mọi lần xuất hiện — đúng như `.append` không bao giờ hỏi "đã có chưa".
+Lấy trường `nhom` của cuốn sổ trên thì `ăn uống` hiện ra **hai** lần và `xăng xe`
+cũng hai lần:
+
+```python title=readonly
+nhom_cac_khoan = [khoan["nhom"] for khoan in so]
+print(nhom_cac_khoan)
+print(len(nhom_cac_khoan))
+```
+
+Máy in ra:
+
+```text title=readonly
+['ăn uống', 'xăng xe', 'ăn uống', 'xăng xe', 'học phí']
+5
+```
+
+Muốn bỏ trùng thì vẫn là việc của bài 26: bọc kết quả lại bằng `set(...)`, và năm
+phần tử ấy rút xuống còn ba nhóm khác nhau.
+
+> Chỗ dễ vấp: thứ tự **viết** trong dòng ngược với thứ tự **máy làm**. Máy chạy
+> phần `for khoan in so` trước để có `khoan`, rồi mới tính `khoan["ten"]` — nhưng
+> `khoan["ten"]` lại được viết trước. Lý do là dòng này viết theo lối kể cho
+> người nghe: người ta hỏi "lấy gì" trước, "từ đâu" sau. Nếu đọc mà thấy rối, cứ
+> đọc từ chữ `for` trở đi trước, rồi quay lại đầu dòng.
+::::
+
 ::::code{#lay-hai-cot-ra-khoi-so}
 Byte cần hai danh sách rút ra từ cuốn sổ: một danh sách **tên** các khoản, và một
 danh sách **số tiền** của chúng — cùng thứ tự với sổ.
@@ -243,10 +246,10 @@ lối viết một dòng.
 ```python title=starter
 so = [
     {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
+    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xăng xe"},
     {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
+    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "học phí", "tien": 300000, "ngay": 15, "nhom": "học phí"},
 ]
 
 ten_cac_khoan = ___
@@ -260,10 +263,10 @@ print(f"Cả sổ hết: {sum(so_tien)} đồng")
 ```python title=solution
 so = [
     {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
+    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xăng xe"},
     {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
+    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "học phí", "tien": 300000, "ngay": 15, "nhom": "học phí"},
 ]
 
 ten_cac_khoan = [khoan["ten"] for khoan in so]
@@ -278,7 +281,7 @@ print(f"Cả sổ hết: {sum(so_tien)} đồng")
 # So cả danh sách chứ không so mỗi `len` hay mỗi tổng: lấy nhầm trường `nhom`
 # vẫn ra đủ năm phần tử, và một danh sách tiền xáo thứ tự vẫn cộng ra đúng
 # con số tổng.
-assert ten_cac_khoan == ["cà phê", "xăng", "ăn trưa", "sửa xe", "biếu bà"], "danh sách tên phải giữ nguyên thứ tự năm khoản trong sổ: cà phê, xăng, ăn trưa, sửa xe, biếu bà"
+assert ten_cac_khoan == ["cà phê", "xăng", "ăn trưa", "sửa xe", "học phí"], "danh sách tên phải giữ nguyên thứ tự năm khoản trong sổ: cà phê, xăng, ăn trưa, sửa xe, học phí"
 assert so_tien == [90000, 240000, 620000, 500000, 300000], "danh sách tiền phải là số tiền của năm khoản theo đúng thứ tự sổ, và là số nguyên chứ không phải chuỗi"
 assert sum(so_tien) == 1750000, "năm khoản trong cuốn sổ này cộng lại hết 1 triệu 750 nghìn"
 ```
@@ -299,7 +302,7 @@ assert sum(so_tien) == 1750000, "năm khoản trong cuốn sổ này cộng lạ
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^Tên các khoản: \['cà phê', 'xăng', 'ăn trưa', 'sửa xe', 'biếu bà'\]\nSố tiền từng khoản: \[90000, 240000, 620000, 500000, 300000\]\nCả sổ hết: 1750000 đồng\s*$
+  expect: ^Tên các khoản: \['cà phê', 'xăng', 'ăn trưa', 'sửa xe', 'học phí'\]\nSố tiền từng khoản: \[90000, 240000, 620000, 500000, 300000\]\nCả sổ hết: 1750000 đồng\s*$
 - tier: output
   expect: Cả sổ hết: 1750000 đồng
 - tier: static
@@ -322,7 +325,7 @@ tử. Đó vừa là chỗ mạnh vừa là chỗ hụt của nó.
 
 Byte hỏi tiếp một câu rất đời thường: *cho mình xem tên những khoản trên 100
 nghìn thôi.* Trong cuốn sổ năm khoản vừa rồi, đó là `xăng`, `ăn trưa`, `sửa xe`
-và `biếu bà` — bốn khoản, không phải năm.
+và `học phí` — bốn khoản, không phải năm.
 
 Bản bốn dòng có sẵn chỗ cho câu hỏi ấy: chèn một câu `if` vào giữa vòng lặp —
 đúng câu `if` mà bài 25, bài 28 và bài 29 đều đã gõ — rồi chỉ những khoản lọt qua

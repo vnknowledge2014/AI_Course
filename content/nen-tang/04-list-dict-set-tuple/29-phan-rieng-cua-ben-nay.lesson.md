@@ -70,8 +70,68 @@ moi_phat_sinh = thang_nay - thang_truoc
 Đọc thành lời: *lấy cả rổ bên trái, rồi bỏ đi những gì bên phải cũng có.*
 ::::
 
+::::predict{#doi-cho-thi-sao commitOnce}
+Byte viết hai dòng, cùng một phép hiệu nhưng hai cái rổ đặt theo hai thứ tự
+ngược nhau.
+
+**Trước khi bấm chạy**, bạn đoán màn hình hiện ra gì?
+
+```python title=readonly
+thang_nay = {"ăn uống", "xăng xe", "học phí"}
+thang_truoc = {"ăn uống", "xăng xe", "biếu tặng", "thuê nhà"}
+
+print(len(thang_nay - thang_truoc))
+print(len(thang_truoc - thang_nay))
+```
+
+:::opt{correct}
+`1` rồi `2`
+:::
+
+:::opt
+`1` rồi `1` — đổi chỗ vẫn ra chừng ấy, y như `&` ở bài trước
+::why
+Gần đúng ở chỗ bạn mang một phát hiện thật của bài trước sang bài này, và con số
+`1` cho dòng đầu thì chính xác: `học phí` là nhóm duy nhất tháng này có mà tháng
+trước không có.
+
+Chỗ lệch nằm ở chỗ hai phép hỏi hai câu khác nhau. `&` hỏi "có mặt ở cả hai
+không" — câu đó không nêu tên bên nào đứng trước. `-` hỏi "có ở bên **này** mà
+không có ở bên **kia**", tức là nó phát cho hai cái rổ hai vai khác hẳn nhau: một
+bên được giữ lại, một bên đi gạch tên. Đổi vai thì đổi kết quả.
+::
+:::
+
+:::opt
+`2` rồi `1`
+::why
+Gần đúng tới mức chỉ còn một bước: hai con số `1` và `2` đúng là hai con số bài
+này cho ra, bạn đã tính ra cả hai.
+
+Chỗ lệch là con số nào ứng với dòng nào. Trong `a - b`, phần được giữ lại lấy từ
+**`a`**, tức là rổ đứng trước dấu trừ. Dòng đầu để `thang_nay` đứng trước, nên nó
+giữ phần riêng của tháng này — chỉ `học phí`, một nhóm. Dòng sau để `thang_truoc`
+đứng trước, giữ phần riêng của tháng trước — `biếu tặng` và `thuê nhà`, hai nhóm.
+::
+:::
+
+:::opt
+`3` rồi `4` — trừ nghĩa là bỏ hẳn rổ bên phải đi, còn nguyên rổ bên trái
+::why
+Gần đúng ở chỗ bạn đọc dấu `-` theo đúng nghĩa quen thuộc của nó: bớt cái này ra
+khỏi cái kia. Nghĩa ấy không sai, chỉ chưa đủ chi tiết.
+
+Chỗ lệch: máy không bỏ cả rổ bên phải, nó chỉ gạch **từng nhóm** của bên phải ra
+khỏi bên trái, và chỉ gạch được những nhóm bên trái thật sự có. Hai nhóm bị gạch
+chính là phần chung của bài trước. Rổ bên trái ở dòng đầu có 3 nhóm nên còn
+3 − 2 = 1; ở dòng sau có 4 nhóm nên còn 4 − 2 = 2.
+::
+:::
+::::
+
 ::::example{#hai-chieu-hai-cau-tra-loi}
-Chạy phép hiệu theo cả hai chiều, trên đúng hai cái rổ ấy.
+Chạy thật cả hai chiều, trên đúng hai cái rổ ấy, để nhìn tận mắt điều bạn vừa
+đoán.
 
 ```python title=readonly
 thang_nay = {"ăn uống", "xăng xe", "học phí"}
@@ -137,64 +197,6 @@ hàng, hỏi `in` thì trả lời ngay — đủ tính nết của bài 26 và 
 > là "bên này chẳng có gì mà bên kia không có", chứ không phải máy quên làm việc.
 ::::
 
-::::predict{#doi-cho-thi-sao commitOnce}
-Byte viết hai dòng, cùng một phép hiệu nhưng hai cái rổ đặt theo hai thứ tự
-ngược nhau.
-
-**Trước khi bấm chạy**, bạn đoán màn hình hiện ra gì?
-
-```python title=readonly
-thang_nay = {"ăn uống", "xăng xe", "học phí"}
-thang_truoc = {"ăn uống", "xăng xe", "biếu tặng", "thuê nhà"}
-
-print(len(thang_nay - thang_truoc))
-print(len(thang_truoc - thang_nay))
-```
-
-:::opt{correct}
-`1` rồi `2`
-:::
-
-:::opt
-`1` rồi `1` — đổi chỗ vẫn ra chừng ấy, y như `&` ở bài trước
-::why
-Gần đúng ở chỗ bạn mang một phát hiện thật của bài trước sang bài này, và con số
-`1` cho dòng đầu thì chính xác: `học phí` là nhóm duy nhất tháng này có mà tháng
-trước không có.
-
-Chỗ lệch nằm ở chỗ hai phép hỏi hai câu khác nhau. `&` hỏi "có mặt ở cả hai
-không" — câu đó không nêu tên bên nào đứng trước. `-` hỏi "có ở bên **này** mà
-không có ở bên **kia**", tức là nó phát cho hai cái rổ hai vai khác hẳn nhau: một
-bên được giữ lại, một bên đi gạch tên. Đổi vai thì đổi kết quả.
-::
-:::
-
-:::opt
-`2` rồi `1`
-::why
-Gần đúng tới mức chỉ còn một bước: hai con số `1` và `2` đúng là hai con số bài
-này cho ra, bạn đã tính ra cả hai.
-
-Chỗ lệch là con số nào ứng với dòng nào. Trong `a - b`, phần được giữ lại lấy từ
-**`a`**, tức là rổ đứng trước dấu trừ. Dòng đầu để `thang_nay` đứng trước, nên nó
-giữ phần riêng của tháng này — chỉ `học phí`, một nhóm. Dòng sau để `thang_truoc`
-đứng trước, giữ phần riêng của tháng trước — `biếu tặng` và `thuê nhà`, hai nhóm.
-::
-:::
-
-:::opt
-`3` rồi `4` — trừ nghĩa là bỏ hẳn rổ bên phải đi, còn nguyên rổ bên trái
-::why
-Gần đúng ở chỗ bạn đọc dấu `-` theo đúng nghĩa quen thuộc của nó: bớt cái này ra
-khỏi cái kia. Nghĩa ấy không sai, chỉ chưa đủ chi tiết.
-
-Chỗ lệch: máy không bỏ cả rổ bên phải, nó chỉ gạch **từng nhóm** của bên phải ra
-khỏi bên trái, và chỉ gạch được những nhóm bên trái thật sự có. Hai nhóm bị gạch
-chính là phần chung của bài trước. Rổ bên trái ở dòng đầu có 3 nhóm nên còn
-3 − 2 = 1; ở dòng sau có 4 nhóm nên còn 4 − 2 = 2.
-::
-:::
-::::
 
 ::::code{#hai-chieu-cua-mot-dau-tru}
 Byte muốn hai con số cho bản tổng kết: **tháng này phát sinh thêm mấy nhóm**, và

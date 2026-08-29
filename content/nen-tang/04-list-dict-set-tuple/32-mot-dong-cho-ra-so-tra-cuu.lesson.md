@@ -61,7 +61,7 @@ Lấy ba khoản đầu cuốn sổ cho dễ nhìn. Bản dài trước:
 ```python title=readonly
 so_ngan = [
     {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
+    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xăng xe"},
     {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
 ]
 
@@ -106,13 +106,13 @@ hết 105 nghìn.
 ```python title=readonly
 so = [
     {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
+    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xăng xe"},
     {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
+    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "học phí", "tien": 300000, "ngay": 15, "nhom": "học phí"},
     {"ten": "bánh mì", "tien": 15000, "ngay": 17, "nhom": "ăn uống"},
-    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xe cộ"},
-    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xe cộ"},
+    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xăng xe"},
+    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xăng xe"},
 ]
 
 tra_cuu = {khoan["ten"]: khoan["tien"] for khoan in so}
@@ -212,13 +212,13 @@ còn phải nói phần so sánh.
 ```python title=starter
 so = [
     {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
+    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xăng xe"},
     {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
+    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "học phí", "tien": 300000, "ngay": 15, "nhom": "học phí"},
     {"ten": "bánh mì", "tien": 15000, "ngay": 17, "nhom": "ăn uống"},
-    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xe cộ"},
-    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xe cộ"},
+    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xăng xe"},
+    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xăng xe"},
 ]
 
 nguong = 100000
@@ -235,13 +235,13 @@ print(f"Đáng kể: {len(dang_ke)} khoản")
 ```python title=solution
 so = [
     {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
+    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xăng xe"},
     {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
+    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "học phí", "tien": 300000, "ngay": 15, "nhom": "học phí"},
     {"ten": "bánh mì", "tien": 15000, "ngay": 17, "nhom": "ăn uống"},
-    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xe cộ"},
-    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xe cộ"},
+    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xăng xe"},
+    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xăng xe"},
 ]
 
 nguong = 100000
@@ -262,7 +262,7 @@ print(f"Đáng kể: {len(dang_ke)} khoản")
 assert len(tra_cuu) == 7, "tám khoản nhưng chỉ có bảy cái TÊN khác nhau, vì 'xăng' được ghi hai lần và hai lần ấy dùng chung một khoá"
 assert tra_cuu["ăn trưa"] == 620000, "khoá phải là tên khoản và giá trị phải là số tiền — tra 'ăn trưa' ra 620000; nếu chỗ này báo KeyError thì hai vế quanh dấu hai chấm đang bị đảo chỗ"
 assert tra_cuu["xăng"] == 105000, "khoản xăng ngày 22 hết 105 nghìn là lần ghi SAU, nên nó đè lên con số của lần ghi ngày 5; khoá 'xăng' giữ lại 105000"
-assert dang_ke == {"xăng": 105000, "ăn trưa": 620000, "sửa xe": 500000, "biếu bà": 300000}, "trong bảy khoá của sổ tra cứu, đúng bốn khoá có giá trị trên 100 nghìn là xăng, ăn trưa, sửa xe và biếu bà — cà phê 90 nghìn, bánh mì 15 nghìn và vá lốp tròn 100 nghìn đều không lọt"
+assert dang_ke == {"xăng": 105000, "ăn trưa": 620000, "sửa xe": 500000, "học phí": 300000}, "trong bảy khoá của sổ tra cứu, đúng bốn khoá có giá trị trên 100 nghìn là xăng, ăn trưa, sửa xe và học phí — cà phê 90 nghìn, bánh mì 15 nghìn và vá lốp tròn 100 nghìn đều không lọt"
 ```
 
 :::hints

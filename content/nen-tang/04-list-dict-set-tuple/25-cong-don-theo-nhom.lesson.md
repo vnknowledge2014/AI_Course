@@ -325,10 +325,15 @@ assert tong["học phí"] == 20000, "nhóm học phí trong cuốn sổ này ch�
 - tier: static
   onFail: dòng bạn điền phải lấy tên nhóm và số tiền TỪ lượt đang chạy, không được gõ sẵn tên nhóm hay con số tổng
   requireAst:
-  # Khung đã ĐỌC sẵn `nhom` một lần (trong f-string cuối bài) và `khoan` một
-  # lần (ở dòng `nhom = khoan["nhom"]`), nên phải hỏi `min: 2` thì luật mới
-  # phân biệt được lời giải thật với một chỗ trống điền bừa.
-  - kind: uses-name, target: nhom, min: 2
+  # KHÔNG hỏi `uses-name target: nhom`. Bản trước đòi `min: 2` và luật ấy đánh
+  # trượt một lời giải ĐÚNG: người học bỏ qua biến bắc cầu, viết thẳng
+  # `tong[khoan["nhom"]] = tong.get(khoan["nhom"], 0) + khoan["tien"]` — chạy
+  # đúng, qua cả bốn assert lẫn tier output — mà chỉ đọc `nhom` một lần.
+  #
+  # Hỏi thẳng thứ thật sự cần: dòng ấy phải GÁN VÀO MỘT Ô của `tong`, và phải
+  # lấy tiền từ lượt đang chạy. Cả hai lối viết đều thoả.
+  - kind: subscript-assign, target: tong
+  # Khung đọc `khoan` một lần, nên chỗ trống vẫn buộc phải chạm vào lượt này.
   - kind: uses-name, target: khoan, min: 2
   forbidAst:
   # Hai con số này KHÔNG có trong sổ — chúng chỉ ra đời sau phép cộng. Gõ

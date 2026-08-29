@@ -125,9 +125,9 @@ print(sum(chi.values()))
 Máy in ra `825000`. Bốn dòng thu về một.
 
 Chỗ phải cẩn thận nằm ở chữ **số**. `sum` cộng đúng thứ bạn đưa cho nó, không
-tự đoán bạn muốn phần nào của cuốn sổ. Đưa `chi.values()` thì nó nhận được ba
-con số. Còn đưa thẳng `chi`, thứ nó nhận được là ba cái nhãn — và bạn vừa thấy
-ở bài trước chuyện gì xảy ra khi một con số bị bảo cộng với một cái tên.
+tự đoán bạn muốn phần nào của cuốn sổ.
+
+Vậy đưa nhầm thì sao? Khối dưới đây hỏi thẳng bạn chuyện ấy.
 ::::
 
 ::::predict{#dua-nham-cho-sum commitOnce}
@@ -184,6 +184,15 @@ một dòng in ra bình thường, nhưng nó là dấu chấm hết chứ khôn
 trong bản báo cáo — đúng như `ValueError` bạn gặp ở Realm 0.
 ::
 :::
+::::
+
+::::explain{#dua-nham-thi-may-noi-gi}
+Đúng như bạn vừa đoán. Đưa `chi.values()` thì `sum` nhận được ba **con số**.
+Còn đưa thẳng `chi`, thứ nó nhận được là ba **cái nhãn** — và bài trước đã cho
+thấy chuyện gì xảy ra khi một con số bị bảo cộng với một cái tên.
+
+Cuốn sổ không tự biết bạn muốn phần nào của nó. Hỏi phần nào thì phải nói ra
+phần ấy, và `.values()` chính là câu nói ra.
 ::::
 
 ::::code{#so-sanh-hai-thang}

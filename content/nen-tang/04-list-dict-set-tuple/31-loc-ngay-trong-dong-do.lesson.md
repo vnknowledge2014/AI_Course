@@ -61,15 +61,15 @@ những lượt trả lời `True` mới đi tiếp lên đầu dòng để lấ
 ::::
 
 ::::example{#bon-cai-ten-bai-truoc-hua}
-Vẫn cuốn sổ năm khoản của bài 23. Bản dài trước:
+Vẫn cuốn sổ tháng mới của bài trước. Bản dài trước:
 
 ```python title=readonly
 so = [
     {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
+    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xăng xe"},
     {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
+    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "học phí", "tien": 300000, "ngay": 15, "nhom": "học phí"},
 ]
 
 cach_cu = []
@@ -87,8 +87,8 @@ print(cach_cu == cach_moi)
 Máy in ra:
 
 ```text title=readonly
-['xăng', 'ăn trưa', 'sửa xe', 'biếu bà']
-['xăng', 'ăn trưa', 'sửa xe', 'biếu bà']
+['xăng', 'ăn trưa', 'sửa xe', 'học phí']
+['xăng', 'ăn trưa', 'sửa xe', 'học phí']
 True
 ```
 
@@ -145,13 +145,13 @@ trong ba khoản ấy cố tình nằm sát ngưỡng — "vá lốp" tròn 100 
 ```python title=readonly
 so = [
     {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
+    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xăng xe"},
     {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
+    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "học phí", "tien": 300000, "ngay": 15, "nhom": "học phí"},
     {"ten": "bánh mì", "tien": 15000, "ngay": 17, "nhom": "ăn uống"},
-    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xe cộ"},
-    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xe cộ"},
+    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xăng xe"},
+    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xăng xe"},
 ]
 
 dat = [khoan["ten"] for khoan in so if khoan["tien"] > 100000]
@@ -159,11 +159,11 @@ print(dat)
 ```
 
 :::opt{correct}
-['xăng', 'ăn trưa', 'sửa xe', 'biếu bà', 'xăng']
+['xăng', 'ăn trưa', 'sửa xe', 'học phí', 'xăng']
 :::
 
 :::opt
-['xăng', 'ăn trưa', 'sửa xe', 'biếu bà', 'vá lốp', 'xăng']
+['xăng', 'ăn trưa', 'sửa xe', 'học phí', 'vá lốp', 'xăng']
 ::why
 Gần đúng ở chỗ khó nhất: bạn đọc ra rằng đầu dòng lấy **tên**, phần `if` chỉ chọn
 ai được lọt, và bạn giữ đúng thứ tự ghi sổ — kể cả chuyện "xăng" xuất hiện hai
@@ -196,7 +196,7 @@ phần `if` giữ nguyên không đụng tới.
 :::
 
 :::opt
-['xăng', 'ăn trưa', 'sửa xe', 'biếu bà']
+['xăng', 'ăn trưa', 'sửa xe', 'học phí']
 ::why
 Gần đúng ở chỗ bạn lọc không sai một khoản nào: bốn cái tên này đều thuộc về
 những khoản trên 100 nghìn, và khoản "vá lốp" tròn ngưỡng bị bạn loại ra rất
@@ -226,13 +226,13 @@ nói phần so sánh.
 ```python title=starter
 so = [
     {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
+    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xăng xe"},
     {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
+    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "học phí", "tien": 300000, "ngay": 15, "nhom": "học phí"},
     {"ten": "bánh mì", "tien": 15000, "ngay": 17, "nhom": "ăn uống"},
-    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xe cộ"},
-    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xe cộ"},
+    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xăng xe"},
+    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xăng xe"},
 ]
 
 nguong = 100000
@@ -246,13 +246,13 @@ print(f"Có {len(dat)} khoản trên 100 nghìn")
 ```python title=solution
 so = [
     {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
+    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xăng xe"},
     {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
+    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "học phí", "tien": 300000, "ngay": 15, "nhom": "học phí"},
     {"ten": "bánh mì", "tien": 15000, "ngay": 17, "nhom": "ăn uống"},
-    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xe cộ"},
-    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xe cộ"},
+    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xăng xe"},
+    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xăng xe"},
 ]
 
 nguong = 100000
@@ -267,7 +267,7 @@ print(f"Có {len(dat)} khoản trên 100 nghìn")
 # So BẰNG cả danh sách chứ không kiểm mỗi số lượng: thứ tự cũng là một phần của
 # câu trả lời, và hai khoản nằm ở hai phía con số ngưỡng sẽ tố giác ngay một
 # điều kiện đặt hớ tay.
-assert dat == ["xăng", "ăn trưa", "sửa xe", "biếu bà", "xăng"], "cuốn sổ tám khoản này cho ra năm cái tên theo đúng thứ tự ghi, và 'xăng' có mặt hai lần vì cả hai lần đổ xăng đều trên 100 nghìn — nếu danh sách của bạn có thêm 'vá lốp' thì điều kiện đang nhận cả khoản tròn 100 nghìn, còn nếu thiếu 'xăng' ở cuối thì ngưỡng đang bị đặt cao hơn 105 nghìn"
+assert dat == ["xăng", "ăn trưa", "sửa xe", "học phí", "xăng"], "cuốn sổ tám khoản này cho ra năm cái tên theo đúng thứ tự ghi, và 'xăng' có mặt hai lần vì cả hai lần đổ xăng đều trên 100 nghìn — nếu danh sách của bạn có thêm 'vá lốp' thì điều kiện đang nhận cả khoản tròn 100 nghìn, còn nếu thiếu 'xăng' ở cuối thì ngưỡng đang bị đặt cao hơn 105 nghìn"
 assert len(dat) == 5, "trong tám khoản của cuốn sổ này có đúng năm khoản vượt 100 nghìn — ba khoản không vượt là cà phê 90 nghìn, bánh mì 15 nghìn và vá lốp tròn 100 nghìn"
 ```
 
@@ -287,7 +287,7 @@ assert len(dat) == 5, "trong tám khoản của cuốn sổ này có đúng năm
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^\['xăng', 'ăn trưa', 'sửa xe', 'biếu bà', 'xăng'\]\nCó 5 khoản trên 100 nghìn\s*$
+  expect: ^\['xăng', 'ăn trưa', 'sửa xe', 'học phí', 'xăng'\]\nCó 5 khoản trên 100 nghìn\s*$
 - tier: output
   expect: Có 5 khoản trên 100 nghìn
 :::

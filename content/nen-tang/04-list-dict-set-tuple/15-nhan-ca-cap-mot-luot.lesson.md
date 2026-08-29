@@ -244,8 +244,9 @@ chọn theo việc bạn định làm:
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-`.items()` trao cả cặp rồi, nhưng in thử một cặp ra thì màn hình cho một thứ
-bạn chưa từng gặp:
+`.items()` trao cả cặp rồi, nhưng in thử một cặp ra thì màn hình cho một hình
+dạng bạn đã **thoáng gặp** ở mạch Hàm — hồi một hàm trả về hai thứ một lúc —
+mà chưa bài nào trong mạch này gọi tên nó ra:
 
 ```text
 ('sửa xe', 500000)

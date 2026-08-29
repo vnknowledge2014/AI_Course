@@ -82,51 +82,8 @@ cuốn sổ:
 Đọc một khoá lạ là dấu hiệu có gì đó sai, nên máy kêu. Ghi vào một khoá lạ thì
 thường là bạn đang cố ý thêm mới, nên máy im và làm theo.
 
-> **Cái giá của sự im lặng ấy.** Máy im nghĩa là gõ nhầm tên khoá cũng không
-> ai báo: `gia["Phơ bò"] = 50000` sẽ đẻ ra một khoá thứ tư trông rất giống
-> khoá cũ, còn `"Phở bò"` thì vẫn 45000 như chưa có chuyện gì. Đây đúng loại
-> lỗi biết im mà cả track này đang đuổi theo từ hai dãy song song. Khi ghi, hãy
-> chép tên khoá từ chính cuốn sổ ra chứ đừng gõ lại theo trí nhớ.
-::::
-
-::::example{#ba-khoa-thanh-bon-khoa}
-Cả hai việc trong một đoạn, và bản in ra ở hai thời điểm để bạn thấy chỗ đổi:
-
-```python title=readonly
-gia = {
-    "Phở bò": 45000,
-    "Lẩu gà": 60000,
-    "Trà đá": 5000,
-}
-
-print(f"Phở bò lúc đầu: {gia['Phở bò']} đồng")
-print(f"Quẩy lúc đầu: {gia.get('Quẩy', 0)} đồng")
-
-gia["Phở bò"] = 50000
-gia["Quẩy"] = 10000
-
-print(f"Phở bò lúc sau: {gia['Phở bò']} đồng")
-print(f"Quẩy lúc sau: {gia['Quẩy']} đồng")
-```
-
-Máy in ra:
-
-```text
-Phở bò lúc đầu: 45000 đồng
-Quẩy lúc đầu: 0 đồng
-Phở bò lúc sau: 50000 đồng
-Quẩy lúc sau: 10000 đồng
-```
-
-Dòng thứ hai phải hỏi bằng `.get` mới in ra được, vì lúc đó khoá `"Quẩy"` chưa
-tồn tại — hỏi bằng ngoặc vuông ở chỗ ấy thì chương trình đã dừng từ đầu. Còn
-dòng cuối thì ngoặc vuông dùng được, vì khoá đã mọc ra ở dòng ghi phía trên.
-
-Và đây là chỗ trả nợ cho cuối mạch Hàm. Ngày ấy tên món nằm ở `ten_mon`, giá
-món nằm ở `gia_mon`, hai dãy rời nhau; thêm `"Quẩy"` vào dãy tên mà quên
-`10000` ở dãy giá thì hoá đơn ra một con số sai không kèm tiếng báo nào. Bây
-giờ tên món và giá món đi vào sổ bằng **cùng một dòng**, nên không có cách nào
-thêm được nửa món.
+Máy im thì tiện. Nhưng im cũng có cái giá của nó, và khối dưới đây hỏi thẳng
+bạn cái giá ấy là gì.
 ::::
 
 ::::predict{#doan-gia-pho commitOnce}
@@ -191,6 +148,58 @@ khoá khác nhau, hết chuyện — nên nó im lặng làm theo, và con bọ 
 chỉ ra hộ bạn.
 ::
 :::
+::::
+
+::::explain{#cai-gia-cua-su-im-lang}
+Đúng như bạn vừa đoán: **máy im nghĩa là gõ nhầm tên khoá cũng không ai báo.**
+
+`gia["Phở Bò"] = 50000` không sửa giá phở. Nó đẻ ra một khoá thứ tư trông rất
+giống khoá cũ, còn `"Phở bò"` thì vẫn 45000 như chưa có chuyện gì xảy ra. Cuốn
+sổ giờ có hai dòng phở, và không dòng nào sai cú pháp.
+
+Đây đúng loại lỗi biết im mà cả track này đuổi theo từ hai dãy song song: không
+một tiếng báo, chỉ có một con số sai nằm chờ tới lúc ai đó cộng sổ. Khi ghi,
+hãy chép tên khoá từ chính cuốn sổ ra chứ đừng gõ lại theo trí nhớ.
+::::
+
+::::example{#ba-khoa-thanh-bon-khoa}
+Cả hai việc trong một đoạn, và bản in ra ở hai thời điểm để bạn thấy chỗ đổi:
+
+```python title=readonly
+gia = {
+    "Phở bò": 45000,
+    "Lẩu gà": 60000,
+    "Trà đá": 5000,
+}
+
+print(f"Phở bò lúc đầu: {gia['Phở bò']} đồng")
+print(f"Quẩy lúc đầu: {gia.get('Quẩy', 0)} đồng")
+
+gia["Phở bò"] = 50000
+gia["Quẩy"] = 10000
+
+print(f"Phở bò lúc sau: {gia['Phở bò']} đồng")
+print(f"Quẩy lúc sau: {gia['Quẩy']} đồng")
+```
+
+Máy in ra:
+
+```text
+Phở bò lúc đầu: 45000 đồng
+Quẩy lúc đầu: 0 đồng
+Phở bò lúc sau: 50000 đồng
+Quẩy lúc sau: 10000 đồng
+```
+
+Dòng thứ hai phải hỏi bằng `.get` mới in ra được, vì lúc đó khoá `"Quẩy"` chưa
+tồn tại — hỏi bằng ngoặc vuông ở chỗ ấy thì chương trình đã dừng từ đầu. Còn
+dòng cuối thì ngoặc vuông dùng được, vì khoá đã mọc ra ở dòng ghi phía trên.
+
+Và đây là chỗ trả nợ cho cuối mạch Hàm. Ngày ấy tên món nằm ở `ten_mon`, giá
+món nằm ở `gia_mon`, hai dãy rời nhau; thêm `"Quẩy"` vào dãy tên mà quên
+`10000` ở dãy giá thì hoá đơn ra một con số sai không kèm tiếng báo nào. Bây
+giờ tên món và giá món đi vào sổ bằng **cùng một dòng**, nên không có cách nào
+thêm được nửa món.
 ::::
 
 ::::code{#tang-gia-va-them-mon}

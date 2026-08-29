@@ -113,45 +113,9 @@ gian: khoản nào tiêu trước, khoản nào tiêu sau. Một công cụ mà 
 mất thứ tự ấy là một công cụ lấy đi của bạn một thông tin có thật, mà không hỏi.
 ::::
 
-::::example{#hai-danh-sach-nam-canh-nhau}
-Chạy thử trọn vẹn, in cả hai danh sách ra để nhìn tận mắt.
-
-```python title=readonly
-tien = [500000, 25000, 300000, 60000, 40000]
-
-da_xep = sorted(tien)
-
-print(f"Sổ gốc: {tien}")
-print(f"Đã xếp: {da_xep}")
-```
-
-Máy in ra:
-
-```text title=readonly
-Sổ gốc: [500000, 25000, 300000, 60000, 40000]
-Đã xếp: [25000, 40000, 60000, 300000, 500000]
-```
-
-Hai dòng, hai danh sách. Dòng dưới là hàng đã xếp: `25000` đứng đầu, `500000`
-đứng cuối. Dòng trên không đổi một chỗ nào so với lúc bạn viết nó ra.
-
-Cách nói của giới lập trình cho chuyện này: `sorted` **trả về** một danh sách
-mới — đúng chữ `return` bạn đã gặp ở mạch Hàm, nghĩa là kết quả được đưa ra
-ngoài cho chỗ gọi hứng lấy.
-
-Còn chuyện `sorted` không đụng tới cuốn sổ bạn đưa vào thì là nết riêng của nó,
-không phải luật chung của mọi hàm: ở bài 4 bạn đã thấy một hàm nhận cuốn sổ rồi
-`.append` thêm một dòng, và ra ngoài thì cuốn sổ của bạn có dòng ấy thật.
-
-Vì kết quả được đưa ra ngoài, bạn phải hứng lấy nó bằng một cái tên. Viết
-`sorted(tien)` đứng trơ một mình giữa chương trình thì danh sách mới ấy sinh ra
-xong không ai giữ, và nó biến mất ngay dòng sau — y hệt chuyện gọi một hàm có
-`return` mà quên gán lại.
-::::
-
 ::::predict{#so-goc-con-lai-gi commitOnce}
-Byte chạy đoạn dưới. Hai dòng đầu bạn đã thấy ở trên rồi; dòng cuối mới là chỗ
-đáng đoán.
+Byte chạy đoạn dưới. Dòng `sorted` bạn vừa gặp; câu đáng đoán nằm ở **dòng in
+cuối cùng** — sau khi xếp xong, cuốn sổ gốc còn lại gì.
 
 **Trước khi bấm chạy**, bạn đoán dòng cuối in ra gì?
 
@@ -211,6 +175,42 @@ nguyên trong `tien`; năm con số trong `da_xep` là năm giá trị được 
 chỗ khác. Không có con số nào bị lấy khỏi cuốn sổ gốc, nên nó không rỗng đi.
 ::
 :::
+::::
+
+::::example{#hai-danh-sach-nam-canh-nhau}
+Chạy thử trọn vẹn, in cả hai danh sách ra để nhìn tận mắt điều bạn vừa đoán.
+
+```python title=readonly
+tien = [500000, 25000, 300000, 60000, 40000]
+
+da_xep = sorted(tien)
+
+print(f"Sổ gốc: {tien}")
+print(f"Đã xếp: {da_xep}")
+```
+
+Máy in ra:
+
+```text title=readonly
+Sổ gốc: [500000, 25000, 300000, 60000, 40000]
+Đã xếp: [25000, 40000, 60000, 300000, 500000]
+```
+
+Hai dòng, hai danh sách. Dòng dưới là hàng đã xếp: `25000` đứng đầu, `500000`
+đứng cuối. Dòng trên không đổi một chỗ nào so với lúc bạn viết nó ra.
+
+Cách nói của giới lập trình cho chuyện này: `sorted` **trả về** một danh sách
+mới — đúng chữ `return` bạn đã gặp ở mạch Hàm, nghĩa là kết quả được đưa ra
+ngoài cho chỗ gọi hứng lấy.
+
+Còn chuyện `sorted` không đụng tới cuốn sổ bạn đưa vào thì là nết riêng của nó,
+không phải luật chung của mọi hàm: ở bài 4 bạn đã thấy một hàm nhận cuốn sổ rồi
+`.append` thêm một dòng, và ra ngoài thì cuốn sổ của bạn có dòng ấy thật.
+
+Vì kết quả được đưa ra ngoài, bạn phải hứng lấy nó bằng một cái tên. Viết
+`sorted(tien)` đứng trơ một mình giữa chương trình thì danh sách mới ấy sinh ra
+xong không ai giữ, và nó biến mất ngay dòng sau — y hệt chuyện gọi một hàm có
+`return` mà quên gán lại.
 ::::
 
 ::::code{#xep-cot-tien}

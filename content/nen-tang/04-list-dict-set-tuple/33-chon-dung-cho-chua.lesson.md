@@ -82,13 +82,13 @@ riêng ba con số đầu là đủ thấy chúng không phải bốn cách vi�
 ```python title=readonly
 so = [
     {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
+    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xăng xe"},
     {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
+    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "học phí", "tien": 300000, "ngay": 15, "nhom": "học phí"},
     {"ten": "bánh mì", "tien": 15000, "ngay": 17, "nhom": "ăn uống"},
-    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xe cộ"},
-    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xe cộ"},
+    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xăng xe"},
+    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xăng xe"},
 ]
 
 ten_khoan = [khoan["ten"] for khoan in so]
@@ -100,7 +100,7 @@ print(len(ten_khoan))
 print(len(tra_cuu))
 print(len(nhom))
 print(khoan_ton_nhat[0], khoan_ton_nhat[1])
-print("xe cộ" in nhom)
+print("xăng xe" in nhom)
 ```
 
 Máy in ra:
@@ -120,7 +120,7 @@ Cùng một cuốn sổ, ba con số khác nhau — và không con số nào sai
 - **7** — sổ tra cứu gộp hai khoản "xăng" vào một khoá. Nó trả lời được câu
   *xăng hết bao nhiêu* ngay lập tức, và trả bằng cách quên mất một lần đổ.
 - **3** — rổ nhóm chỉ còn ba nhóm cho tám khoản. Nó không trả lời nổi câu nào về
-  tiền, nhưng câu *tháng này có chi vào xe cộ không* thì nó đáp ngay, không dò.
+  tiền, nhưng câu *tháng này có chi vào xăng xe không* thì nó đáp ngay, không dò.
 - Cặp `("ăn trưa", 620000)` giữ tên dính chặt vào tiền. Đọc bằng `[0]` và `[1]`
   như list, chỉ khác một điều: không ai gán đè lên ô nào được.
 
@@ -155,8 +155,8 @@ cả hai rổ.
 **Trước khi bấm chạy**, bạn đoán ba dòng in ra ba con số nào?
 
 ```python title=readonly
-thang_nay = {"ăn uống", "xe cộ", "biếu tặng"}
-thang_truoc = {"ăn uống", "xe cộ", "điện nước", "học phí"}
+thang_nay = {"ăn uống", "xăng xe", "học phí"}
+thang_truoc = {"ăn uống", "xăng xe", "biếu tặng", "thuê nhà"}
 
 print(len(thang_nay & thang_truoc))
 print(len(thang_nay - thang_truoc))
@@ -174,7 +174,7 @@ Gần đúng ở hai dòng đầu, và chúng là hai dòng dùng đúng thứ �
 nhóm chung, `-` cho một nhóm riêng của tháng này. Bạn đọc cả hai không sai.
 
 Chỗ lệch ở dòng thứ ba là phép cộng cỡ hai rổ: `3 + 4 = 7`. Phép ấy chỉ đúng khi
-hai rổ không có gì chung — mà ở đây "ăn uống" và "xe cộ" nằm trong cả hai.
+hai rổ không có gì chung — mà ở đây "ăn uống" và "xăng xe" nằm trong cả hai.
 
 Kết quả của một phép trên rổ vẫn là một cái **rổ**, và rổ thì không chứa hai
 lần, đúng luật bài 26. Hai nhóm chung đi vào một lần thôi, nên bảy tụt xuống
@@ -188,12 +188,12 @@ còn năm.
 Gần đúng ở dòng đầu và dòng cuối, kể cả dòng cuối là dòng chưa ai dạy bạn — bạn
 đoán ra `|` gộp hai rổ và đếm đúng năm nhóm.
 
-Chỗ lệch ở dòng giữa. Con số 3 là số nhóm **khác nhau ở hai phía**: "biếu tặng"
-của tháng này, cộng "điện nước" và "học phí" của tháng trước. Nhưng dấu `-` của
-bài 29 không hỏi câu đó — nó chỉ lấy từ rổ đứng **trước** dấu trừ.
+Chỗ lệch ở dòng giữa. Con số 3 là số nhóm **khác nhau ở hai phía**: "học phí"
+của tháng này, cộng "biếu tặng" và "thuê nhà" của tháng trước. Nhưng dấu `-`
+của bài 29 không hỏi câu đó — nó chỉ lấy từ rổ đứng **trước** dấu trừ.
 
 `thang_nay - thang_truoc` vì vậy chỉ nhặt trong ba nhóm của tháng này, và chỉ
-"biếu tặng" là nhóm tháng trước không có.
+"học phí" là nhóm tháng trước không có.
 ::
 :::
 
@@ -203,10 +203,10 @@ bài 29 không hỏi câu đó — nó chỉ lấy từ rổ đứng **trước*
 Gần đúng ở hai dòng đầu — bạn tách phần chung và phần riêng chính xác.
 
 Chỗ lệch ở dòng thứ ba là chỗ đặt kết quả. Con số 4 là cỡ của rổ tháng trước,
-nghe như "đổ tháng này vào tháng trước thì được rổ tháng trước". Nhưng "biếu
-tặng" là nhóm mà tháng trước chưa từng có, nên nó phải làm rổ dài thêm một chỗ.
+nghe như "đổ tháng này vào tháng trước thì được rổ tháng trước". Nhưng "học
+phí" là nhóm mà tháng trước chưa từng có, nên nó phải làm rổ dài thêm một chỗ.
 
-Bốn nhóm cũ cộng thêm "biếu tặng" là năm. Phép gộp lấy hết những gì **một
+Bốn nhóm cũ cộng thêm "học phí" là năm. Phép gộp lấy hết những gì **một
 trong hai** rổ có, không bỏ sót bên nào.
 ::
 :::
@@ -246,17 +246,17 @@ từng cái một.
 ```python title=starter
 so = [
     {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
+    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xăng xe"},
     {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
+    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "học phí", "tien": 300000, "ngay": 15, "nhom": "học phí"},
     {"ten": "bánh mì", "tien": 15000, "ngay": 17, "nhom": "ăn uống"},
-    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xe cộ"},
-    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xe cộ"},
+    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xăng xe"},
+    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xăng xe"},
 ]
 
 # Tháng trước Byte đã tổng kết xong, chỉ còn giữ lại cái rổ nhóm.
-thang_truoc = {"ăn uống", "xe cộ", "điện nước", "học phí"}
+thang_truoc = {"ăn uống", "xăng xe", "biếu tặng", "thuê nhà"}
 
 # Nhóm chi tháng này: chỉ cần biết CÓ những nhóm nào. Không cần thứ tự, và
 # "ăn uống" nằm trong sổ ba lần thì cũng chỉ tính một.
@@ -275,17 +275,17 @@ print(f"Tháng trước chưa có: {len(thang_truoc_chua_co)} nhóm")
 ```python title=solution
 so = [
     {"ten": "cà phê", "tien": 90000, "ngay": 3, "nhom": "ăn uống"},
-    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xe cộ"},
+    {"ten": "xăng", "tien": 240000, "ngay": 5, "nhom": "xăng xe"},
     {"ten": "ăn trưa", "tien": 620000, "ngay": 8, "nhom": "ăn uống"},
-    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xe cộ"},
-    {"ten": "biếu bà", "tien": 300000, "ngay": 15, "nhom": "biếu tặng"},
+    {"ten": "sửa xe", "tien": 500000, "ngay": 11, "nhom": "xăng xe"},
+    {"ten": "học phí", "tien": 300000, "ngay": 15, "nhom": "học phí"},
     {"ten": "bánh mì", "tien": 15000, "ngay": 17, "nhom": "ăn uống"},
-    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xe cộ"},
-    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xe cộ"},
+    {"ten": "vá lốp", "tien": 100000, "ngay": 19, "nhom": "xăng xe"},
+    {"ten": "xăng", "tien": 105000, "ngay": 22, "nhom": "xăng xe"},
 ]
 
 # Tháng trước Byte đã tổng kết xong, chỉ còn giữ lại cái rổ nhóm.
-thang_truoc = {"ăn uống", "xe cộ", "điện nước", "học phí"}
+thang_truoc = {"ăn uống", "xăng xe", "biếu tặng", "thuê nhà"}
 
 # Nhóm chi tháng này: chỉ cần biết CÓ những nhóm nào. Không cần thứ tự, và
 # "ăn uống" nằm trong sổ ba lần thì cũng chỉ tính một.
@@ -306,10 +306,10 @@ print(f"Tháng trước chưa có: {len(thang_truoc_chua_co)} nhóm")
 # phép so BẰNG cả rổ chứ không kiểm mỗi số lượng: ba ký hiệu trên hai cái rổ
 # này có thể tình cờ cho ra cùng một con số đếm, nhưng không thể tình cờ cho
 # ra cùng những nhóm.
-assert thang_nay == {"ăn uống", "xe cộ", "biếu tặng"}, "tám khoản của cuốn sổ này chỉ rơi vào ba nhóm: ăn uống, xe cộ và biếu tặng — 'ăn uống' được ghi ba lần và 'xe cộ' bốn lần, mà chỗ chứa ở dòng này phải gộp mỗi nhóm về đúng một lần"
-assert thang_nao_cung_chi == {"ăn uống", "xe cộ"}, "hai tháng cùng chi vào ăn uống và xe cộ; 'biếu tặng' chỉ tháng này có, còn 'điện nước' với 'học phí' chỉ tháng trước có"
-assert moi_nhom_tung_chi == {"ăn uống", "xe cộ", "biếu tặng", "điện nước", "học phí"}, "gộp hai rổ lại được năm nhóm — ba nhóm của tháng này cộng thêm điện nước và học phí của tháng trước, còn ăn uống với xe cộ có ở cả hai rổ nhưng chỉ vào một lần"
-assert thang_truoc_chua_co == {"biếu tặng"}, "chỉ 'biếu tặng' là nhóm tháng này có mà tháng trước chưa có; nếu bạn nhận về điện nước hay học phí thì hai cái rổ đang đứng nhầm chỗ ở hai bên ký hiệu"
+assert thang_nay == {"ăn uống", "xăng xe", "học phí"}, "tám khoản của cuốn sổ này chỉ rơi vào ba nhóm: ăn uống, xăng xe và học phí — 'ăn uống' được ghi ba lần và 'xăng xe' bốn lần, mà chỗ chứa ở dòng này phải gộp mỗi nhóm về đúng một lần"
+assert thang_nao_cung_chi == {"ăn uống", "xăng xe"}, "hai tháng cùng chi vào ăn uống và xăng xe; 'học phí' chỉ tháng này có, còn 'biếu tặng' với 'thuê nhà' chỉ tháng trước có"
+assert moi_nhom_tung_chi == {"ăn uống", "xăng xe", "học phí", "biếu tặng", "thuê nhà"}, "gộp hai rổ lại được năm nhóm — ba nhóm của tháng này cộng thêm biếu tặng và thuê nhà của tháng trước, còn ăn uống với xăng xe có ở cả hai rổ nhưng chỉ vào một lần"
+assert thang_truoc_chua_co == {"học phí"}, "chỉ 'học phí' là nhóm tháng này có mà tháng trước chưa có; nếu bạn nhận về biếu tặng hay thuê nhà thì hai cái rổ đang đứng nhầm chỗ ở hai bên ký hiệu"
 ```
 
 :::hints
