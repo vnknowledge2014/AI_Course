@@ -36,3 +36,35 @@ thì một vòng phản biện chết sạch trả về **mảng rỗng**, và w
 
 Chuyện này đã xảy ra thật với vòng phản biện T1.1, trong đúng một workflow
 sinh ra để đi tìm loại lỗi ấy. Nên đếm số `null` TRƯỚC khi lọc, và `throw`.
+
+## Một cổng KHÔNG nên dựng: đối chiếu khẳng định Python trong văn xuôi
+
+Sau ba vòng phản biện R1, 14/52 lỗi CHẶN thuộc lớp "sai sự thật về Python".
+Nhìn qua thì đó là lớp máy làm được: bài viết `<biểu thức>` cho `<kết quả>`,
+máy chạy thử rồi đối chiếu. Đã dựng thử và đo trên cả 302 bài.
+
+**Kết quả: 79 khẳng định kiểm được, 19 báo lệch — cả 19 đều là báo oan.**
+
+- "cho", "ra", "là", "thành" là những chữ quá phổ biến trong tiếng Việt, nên
+  biểu thức chính quy vơ luôn những cặp không có quan hệ tính toán nào: mạch
+  Toán viết `9/12 + 8/12 = 17/12` bằng ký hiệu phân số, không phải Python.
+- `"Phở bò"` với `'Phở bò'` chỉ khác kiểu dấu nháy.
+- Nhiều câu nói về KIỂU chứ không về giá trị: "`50000 * 10` cho một `int`".
+- Nhiều câu nói về phép BIẾN ĐỔI: "làm tròn `45000.7` ra `45001`".
+
+Và điều quyết định: đối chiếu ngược lại 14 lỗi CHẶN có thật, cổng này **không
+bắt được ca nào**. Vì chúng không có hình dạng `biểu thức → hằng số`:
+
+- "`20.1 * 1000` lại **thừa** một chút" — không có kết quả nào để so;
+- "`ten, tien = ...` cho `too many values to unpack (expected 2, got 3)`" —
+  vế trái là câu lệnh, vế phải là thông báo lỗi;
+- "phép chia luôn cho ra số có phần lẻ" — một luật, không một phép tính;
+- "`not` lật mỗi cái tên sát bên phải" — một luật về cú pháp.
+
+Mười bốn lỗi ấy là những khẳng định **phát biểu bằng lời** về hành vi của máy.
+Muốn kiểm chúng thì phải hiểu câu tiếng Việt, chứ không phải chạy một biểu
+thức. Đó là việc của vòng phản biện, và tới giờ vẫn chưa có cách nào rẻ hơn.
+
+Ghi lại đây để lần sau đừng dựng lại: một cổng bắt 0 lỗi thật và sinh 19 báo
+oan thì tệ hơn không có cổng nào — người ta sẽ tắt nó, và tắt rồi thì nó cũng
+không bắt được ca thật nào nữa.
