@@ -260,7 +260,8 @@ assert len(cac_dong) == 4, "cả bốn dòng đều phải được đọc lên 
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: "Cộng được: 160000 đồng"
+  match: regex
+  expect: ^Cộng được: 160000 đồng\nBỏ qua 1 dòng hỏng\s*$
 - tier: output
   expect: "Bỏ qua 1 dòng hỏng"
 :::

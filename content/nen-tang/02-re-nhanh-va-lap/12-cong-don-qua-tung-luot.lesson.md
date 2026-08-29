@@ -238,7 +238,8 @@ assert tong == 750000, "sáu ngày trong sổ cộng lại là 750 nghìn; ra 21
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Cộng xong một ngày, tổng đang là 165000 đồng
+  match: regex
+  expect: ^Cộng xong một ngày, tổng đang là 45000 đồng\nCộng xong một ngày, tổng đang là 165000 đồng\nCộng xong một ngày, tổng đang là 195000 đồng\nCộng xong một ngày, tổng đang là 455000 đồng\nCộng xong một ngày, tổng đang là 540000 đồng\nCộng xong một ngày, tổng đang là 750000 đồng\nCả tuần tiêu 750000 đồng\s*$
 - tier: output
   expect: Cả tuần tiêu 750000 đồng
 :::

@@ -329,7 +329,8 @@ assert tu_khoan_thu_tu_tro_di([25000, 40000, 15000]) == [], "cuốn sổ này m�
 - tier: tests
   timeoutMs: 5000
 - tier: output
-  expect: Ba khoản gần nhất cộng lại: 97000 đồng
+  match: regex
+  expect: ^Ba khoản gần nhất cộng lại: 97000 đồng\nTừ khoản thứ tư trở đi cộng lại: 157000 đồng\s*$
 - tier: output
   expect: Từ khoản thứ tư trở đi cộng lại: 157000 đồng
 - tier: static

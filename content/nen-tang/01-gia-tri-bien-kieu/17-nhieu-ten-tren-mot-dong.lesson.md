@@ -230,7 +230,8 @@ assert ghi_chu == "đi cùng Lan", "ô thứ ba là ghi chú"
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: ăn trưa | 60000đ | đi cùng Lan
+  match: regex
+  expect: ^cà phê \| 25000đ \| None\năn trưa \| 60000đ \| đi cùng Lan\s*$
 :::
 ::::
 

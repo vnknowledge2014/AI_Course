@@ -315,7 +315,8 @@ assert ngay_ky_luc == 2, "sổ B lập kỷ lục ngay từ ngày 2, bốn ngày
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Sổ A — ngày 5 tiêu nhiều nhất: 310000 đồng
+  match: regex
+  expect: ^Sổ A — ngày 5 tiêu nhiều nhất: 310000 đồng\nSổ B — ngày 2 tiêu nhiều nhất: 330000 đồng\s*$
 - tier: output
   expect: Sổ B — ngày 2 tiêu nhiều nhất: 330000 đồng
 :::
@@ -444,7 +445,8 @@ assert ngay_dau_vuot == 2, "ngày 2 là ngày ĐẦU TIÊN vượt ngưỡng —
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Tổng chi: 1530000 đồng
+  match: regex
+  expect: ^SỔ CHI TIÊU — mười ngày đầu tháng\nTổng chi: 1530000 đồng\nTrung bình mỗi ngày: 153000\.0 đồng\nSố ngày tiêu quá 200000 đồng: 3\nNgày tiêu nhiều nhất: ngày 5 — 310000 đồng\nNgày đầu tiên vượt ngưỡng: ngày 2\s*$
 - tier: output
   expect: Ngày tiêu nhiều nhất: ngày 5 — 310000 đồng
 - tier: output

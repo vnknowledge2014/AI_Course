@@ -243,7 +243,8 @@ assert gia_niem_yet == 45000, "tấm bảng ngoài hàm phải vẫn là 45 ngh�
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Giá khuyến mãi hôm nay: 40000 đồng
+  match: regex
+  expect: ^Giá khuyến mãi hôm nay: 40000 đồng\nGiá niêm yết trên bảng: 45000 đồng\s*$
 - tier: output
   expect: Giá niêm yết trên bảng: 45000 đồng
 :::

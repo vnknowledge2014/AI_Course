@@ -268,7 +268,8 @@ assert thoi_lai == 65000, "khách đưa 200 nghìn cho bàn hết 135 nghìn th�
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: Thối lại: 65000 đồng
+  match: regex
+  expect: ^Tiền hàng: 135000 đồng\nKhách đưa: 200000 đồng\nThối lại: 65000 đồng\s*$
 :::
 ::::
 

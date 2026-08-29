@@ -243,7 +243,8 @@ assert chenh == 675000, "lấy 825000 của tháng này trừ 150000 của thán
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Tháng này tiêu hơn 675000 đồng
+  match: regex
+  expect: ^Tháng này: 825000 đồng\nTháng trước: 150000 đồng\nTháng này tiêu hơn 675000 đồng\s*$
 - tier: output
   expect: Tháng trước: 150000 đồng
 - tier: static

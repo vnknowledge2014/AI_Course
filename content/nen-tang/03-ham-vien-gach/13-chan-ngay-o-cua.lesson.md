@@ -298,7 +298,8 @@ assert bao_gia_ship(11) == "Xa hơn 10 km, quán chưa giao tới", "quá 10 câ
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Phí giao: 15000 đồng
+  match: regex
+  expect: ^Phí giao: 15000 đồng\nChưa biết quãng đường\nXa hơn 10 km, quán chưa giao tới\s*$
 - tier: output
   expect: Chưa biết quãng đường
 - tier: output

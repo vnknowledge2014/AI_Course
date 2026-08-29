@@ -254,7 +254,8 @@ assert sang_dong(153.2) + sang_dong(48.6) + sang_dong(220.0) == 421800, "điện
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: 153200
+  match: regex
+  expect: ^153200\n48600\nTrue\s*$
 - tier: static
   onFail: chỗ trống phải TÍNH ra số đồng từ `so_nghin`, không chép sẵn con số nào
   requireAst:

@@ -211,7 +211,8 @@ pass
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: Chúc ngon miệng
+  match: regex
+  expect: ^Chúc ngon miệng\s*$
 :::
 ::::
 

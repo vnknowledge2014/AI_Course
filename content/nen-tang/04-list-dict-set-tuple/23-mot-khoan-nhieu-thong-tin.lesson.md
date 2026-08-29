@@ -276,7 +276,8 @@ assert so[3] == {"ten": "vá lốp", "tien": 30000, "ngay": 11, "nhom": "xăng x
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: Sổ đang có 5 khoản
+  match: regex
+  expect: ^Sổ đang có 5 khoản\nKhoản thứ ba: \{'ten': 'bún bò', 'tien': 40000, 'ngay': 8, 'nhom': 'ăn uống'\}\nKhoản cuối sổ: \{'ten': 'bánh mì', 'tien': 15000, 'ngay': 14, 'nhom': 'ăn uống'\}\s*$
 - tier: output
   expect: Khoản cuối sổ: {'ten': 'bánh mì', 'tien': 15000, 'ngay': 14, 'nhom': 'ăn uống'}
 :::

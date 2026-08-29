@@ -328,7 +328,8 @@ assert so_hom_nay == [25000, 40000, 15000, 60000, 30000, 12000], "sổ hôm nay 
 - tier: tests
   timeoutMs: 5000
 - tier: output
-  expect: Sổ hôm nay — khoản cuối: 12000 đồng
+  match: regex
+  expect: ^Sổ hôm qua — khoản cuối: 15000 đồng\nSổ hôm nay — khoản cuối: 12000 đồng\s*$
 - tier: static
   onFail: câu này phải nói ra "khoản cuối" mà không phải hỏi sổ dài bao nhiêu — bỏ `len` đi và dùng chiều đếm ngược
   requireAst:

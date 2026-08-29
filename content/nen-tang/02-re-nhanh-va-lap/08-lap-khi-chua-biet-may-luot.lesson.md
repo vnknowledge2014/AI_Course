@@ -298,7 +298,8 @@ assert tien_cho == 0, "240 nghìn tiền chợ chia vừa hết cho món 60 ngh�
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Còn lại 0 đồng, không mua nữa
+  match: regex
+  expect: ^Mua thêm một món\nMua thêm một món\nMua thêm một món\nMua thêm một món\nCòn lại 0 đồng, không mua nữa\s*$
 :::
 ::::
 

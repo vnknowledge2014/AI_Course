@@ -280,7 +280,8 @@ assert dang_ke == {"xăng": 105000, "ăn trưa": 620000, "sửa xe": 500000, "bi
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Sổ tra cứu có 7 khoá
+  match: regex
+  expect: ^Sổ tra cứu có 7 khoá\nXăng: 105000 đồng\nĐáng kể: 4 khoản\s*$
 - tier: output
   expect: Xăng: 105000 đồng
 - tier: output

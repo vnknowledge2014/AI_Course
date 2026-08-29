@@ -267,7 +267,8 @@ assert tien_ban_nam == 180000, "bàn năm gọi ba tô đặc biệt giá 60 ngh
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: Bàn năm: 180000 đồng
+  match: regex
+  expect: ^Bàn ba: 90000 đồng\nBàn năm: 180000 đồng\s*$
 :::
 ::::
 

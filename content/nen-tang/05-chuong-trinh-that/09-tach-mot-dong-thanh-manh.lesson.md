@@ -251,7 +251,8 @@ assert tien_khoan[0] + tien_khoan[1] == "2500040000", "hai mảnh tiền của c
 - tier: tests
   timeoutMs: 5000
 - tier: output
-  expect: "['cà phê', 'bún bò', 'bánh mì', 'vá lốp']"
+  match: regex
+  expect: ^\['cà phê', 'bún bò', 'bánh mì', 'vá lốp'\]\n\['25000', '40000', '15000', '100000'\]\n2500040000\s*$
 - tier: output
   expect: "['25000', '40000', '15000', '100000']"
 :::

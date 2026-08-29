@@ -272,7 +272,8 @@ assert goi_do[1] == 2400, "thuế 0.08 trên 30000 tiền hàng là 2400 đồng
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Tiền hàng: 120000 đồng
+  match: regex
+  expect: ^Tiền hàng: 120000 đồng\nTiền thuế: 12000 đồng\s*$
 - tier: output
   expect: Tiền thuế: 12000 đồng
 :::

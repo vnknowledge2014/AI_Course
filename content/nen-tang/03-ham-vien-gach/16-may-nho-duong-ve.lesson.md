@@ -351,7 +351,8 @@ assert tinh_thue("vừa") == 49500, "tinh_thue vẫn phải TRẢ VỀ 49500 —
 - tier: tests
   timeoutMs: 5000
 - tier: output
-  expect: ra tinh_thue, đang cầm 49500
+  match: regex
+  expect: ^vào dung_cau\nvào tinh_thue\nvào tra_gia\nra tra_gia\nra tinh_thue, đang cầm 49500\nra dung_cau\nTất cả 49500 đồng\s*$
 - tier: output
   expect: ra tra_gia
 - tier: static

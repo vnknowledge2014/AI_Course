@@ -286,7 +286,8 @@ assert len(dat) == 5, "trong tám khoản của cuốn sổ này có đúng năm
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: ['xăng', 'ăn trưa', 'sửa xe', 'biếu bà', 'xăng']
+  match: regex
+  expect: ^\['xăng', 'ăn trưa', 'sửa xe', 'biếu bà', 'xăng'\]\nCó 5 khoản trên 100 nghìn\s*$
 - tier: output
   expect: Có 5 khoản trên 100 nghìn
 :::

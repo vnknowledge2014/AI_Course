@@ -238,7 +238,8 @@ assert so[0]["tien"] == 25000, "ghi sổ xuống file là việc chỉ đọc: k
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: "Dòng đem ghi: cà phê,25000"
+  match: regex
+  expect: ^Dòng đem ghi: cà phê,25000\nSố ký tự đã đặt vào file: 12\s*$
 - tier: output
   expect: "Số ký tự đã đặt vào file: 12"
 :::

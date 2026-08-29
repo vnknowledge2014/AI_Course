@@ -290,7 +290,8 @@ assert tong_ca_ngay == 0, "`tong_ca_ngay` nằm ngoài hàm, và hàm thuần kh
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: 180000
+  match: regex
+  expect: ^90000\n90000\n180000\s*$
 :::
 ::::
 

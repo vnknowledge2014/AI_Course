@@ -299,7 +299,8 @@ assert thue_cua_don(25000) == 3000, "tô 25 nghìn cộng phí phục vụ thàn
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Tô 40 nghìn: thuế 4500 đồng
+  match: regex
+  expect: ^Tô 40 nghìn: thuế 4500 đồng\nTô 55 nghìn: thuế 6000 đồng\s*$
 - tier: output
   expect: Tô 55 nghìn: thuế 6000 đồng
 - tier: static

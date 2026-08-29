@@ -232,7 +232,8 @@ assert chi.get("sửa nhà", -1) == -1, "hỏi bằng .get là chỉ đọc: sau
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Sửa nhà: 0 đồng
+  match: regex
+  expect: ^Ăn sáng: 85000 đồng\nĐổ xăng: 120000 đồng\nSửa nhà: 0 đồng\nTổng ba dòng: 205000 đồng\s*$
 - tier: output
   expect: Tổng ba dòng: 205000 đồng
 - tier: static

@@ -276,7 +276,8 @@ assert ket_qua == [None, "khách boa thêm"], "buổi trưa không ai boa nên g
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Ghi chú: (chưa có)
+  match: regex
+  expect: ^Ghi chú: \(chưa có\)\nGhi chú: khách boa thêm\s*$
 :::
 ::::
 

@@ -235,7 +235,8 @@ assert diem_lam_tron == 5, "4.6 nằm gần cọc 5 hơn cọc 4, nên số nguy
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Tên món dài 14 ký tự
+  match: regex
+  expect: ^Tên món dài 14 ký tự\nHai tô hết 90000 đồng\nQuán được 5 sao\s*$
 - tier: output
   expect: Hai tô hết 90000 đồng
 - tier: output

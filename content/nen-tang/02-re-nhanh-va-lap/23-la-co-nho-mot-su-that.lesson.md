@@ -326,7 +326,8 @@ assert tuan == 3, "ngày vượt ngưỡng đầu tiên nằm ở tuần 3, bi�
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Tháng này có ngày tiêu quá 200 nghìn
+  match: regex
+  expect: ^Đang dò tuần 1\nĐang dò tuần 2\nĐang dò tuần 3\nTháng này có ngày tiêu quá 200 nghìn\s*$
 :::
 ::::
 

@@ -231,7 +231,8 @@ assert tien_giam(300000) == 30000, "bàn 300 nghìn được giảm mười ph�
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: Bàn 110 nghìn được giảm: 11000 đồng
+  match: regex
+  expect: ^Bàn 60 nghìn được giảm: 0 đồng\nBàn 110 nghìn được giảm: 11000 đồng\nBàn 300 nghìn được giảm: 30000 đồng\s*$
 - tier: static
   onFail: mức giảm phải tính từ chính `tien_hang`, không phải một con số chép cứng
   requireAst:
@@ -401,7 +402,8 @@ assert tien_thoi_lai(50000, 50000) == 0, "khách đưa vừa đủ thì thối l
 - tier: tests
   timeoutMs: 8000
 - tier: output
-  expect: Phải trả: 107800 đồng
+  match: regex
+  expect: ^PHỞ THÌN — HOÁ ĐƠN\n- Phở bò: 45000 đồng\n- Lẩu gà: 60000 đồng\n- Trà đá: 5000 đồng\nPhải trả: 107800 đồng\nKhách đưa: 200000 đồng\nThối lại: 92200 đồng\s*$
 - tier: output
   expect: Thối lại: 92200 đồng
 - tier: static

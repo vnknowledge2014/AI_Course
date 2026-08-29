@@ -292,7 +292,8 @@ assert cac_cap == [("bún bò", 40000), ("xăng xe", 60000), ("cà phê", 25000)
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: 'sửa xe: 500000 đồng'
+  match: regex
+  expect: ^BA KHOẢN TỐN NHẤT\nsửa xe: 500000 đồng\nhọc phí: 300000 đồng\nxăng xe: 60000 đồng\s*$
 - tier: output
   expect: 'xăng xe: 60000 đồng'
 :::

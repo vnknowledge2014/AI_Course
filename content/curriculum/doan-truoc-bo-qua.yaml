@@ -1,0 +1,26 @@
+# Khối `predict` được phép hỏi lại một đoạn mã đã in kèm đáp án — khai ở đây,
+# kèm lý do. Cổng: `tools/kiem_doan_truoc.py`.
+#
+# Khai một ca ở đây là nói rằng biết trước đáp án KHÔNG làm hỏng phép đo của
+# khối ấy. Chỉ đúng khi câu hỏi thật sự nằm ở chỗ khác — thường là khi đoạn mã
+# trên và đoạn trong `predict` khác nhau ở đúng thứ bài đang dạy, mà cái khác
+# ấy KHÔNG đổi kết quả.
+#
+# Khai một ca rồi mà cổng không còn khớp là LỖI, không phải chuyện lành: nghĩa
+# là bài đã đổi và tờ giấy miễn trừ nằm lại, sẵn sàng tha cho một lỗi thật.
+
+# HỎI Ở CHỖ KHÁC. Đoạn trên là hàm KHÔNG có nhãn; đoạn trong `predict` là đúng
+# hàm ấy CÓ thêm một nhãn ghi "không ghi giá thì tính 45000 một tô". Câu hỏi là
+# nhãn có tạo ra giá trị mặc định không — và đáp án đúng giống hệt đoạn trên
+# chính là luận điểm của bài: nhãn không chạy, nó chỉ là chữ. Người học tin
+# nhãn sẽ chọn "In ra 90000", và cuộn lên cũng không cứu được họ, vì đoạn trên
+# là một hàm khác.
+- 'content/nen-tang/03-ham-vien-gach/05-dua-thieu-dua-thua.lesson.md · mã trùng khối `example`'
+
+# LỜI GIẢI CẦN MỘT TỆP TRÊN ĐĨA nên không chạy được ngoài môi trường bài học,
+# và máy không sinh nổi màn hình mẫu để ghim. Hai chỗ này vẫn là nợ thật —
+# ghi ở `docs/no-noi-dung/`, chưa trả.
+- 'content/nen-tang/05-chuong-trinh-that/28-boss-so-chi-tieu-cua-byte.lesson.md · chấm màn hình bằng `contains` ngầm'
+# `__name__` dưới `exec` cho `builtins` chứ không cho `__main__`, nên máy đo
+# hụt chính bài dạy `__name__`. Không phải lỗi của bài.
+- 'content/nen-tang/05-chuong-trinh-that/23-phan-tu-chay-va-phan-cho-muon.lesson.md · chấm màn hình bằng `contains` ngầm'

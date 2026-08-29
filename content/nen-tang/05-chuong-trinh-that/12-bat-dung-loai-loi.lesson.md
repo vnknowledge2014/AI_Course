@@ -328,7 +328,8 @@ assert so_dong_thieu_cot == 1, "dòng 'nước suối' không có dấu phẩy n
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: "Cộng được: 145000 đồng"
+  match: regex
+  expect: ^Cộng được: 145000 đồng\nDòng ghi tiền bằng chữ: 1\nDòng thiếu hẳn cột tiền: 1\s*$
 - tier: output
   expect: "Dòng thiếu hẳn cột tiền: 1"
 :::

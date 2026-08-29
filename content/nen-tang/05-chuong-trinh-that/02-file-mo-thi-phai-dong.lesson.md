@@ -249,7 +249,8 @@ assert f_tom.name == "tom-tat-thang-tam.txt", "f_tom phải là kết nối tớ
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: "Sổ đã đóng chưa? True"
+  match: regex
+  expect: ^Sổ đã đóng chưa\? True\nTóm tắt đã đóng chưa\? True\s*$
 - tier: output
   expect: "Tóm tắt đã đóng chưa? True"
 :::

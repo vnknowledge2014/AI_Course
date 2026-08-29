@@ -242,7 +242,8 @@ assert tien_con == 10000, "một trăm nghìn ăn được hai tô phở 45 ngh�
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Còn 55000 đồng
+  match: regex
+  expect: ^Còn 55000 đồng\nCòn 10000 đồng\nVề nhà\s*$
 - tier: output
   expect: Còn 10000 đồng
 - tier: static

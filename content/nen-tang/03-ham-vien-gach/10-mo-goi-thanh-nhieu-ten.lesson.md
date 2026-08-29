@@ -251,7 +251,8 @@ assert tien_thue == 9000, "thuế bằng một phần mười tiền hàng, tứ
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Tiền hàng: 90000 đồng
+  match: regex
+  expect: ^Tiền hàng: 90000 đồng\nTiền thuế: 9000 đồng\s*$
 - tier: output
   expect: Tiền thuế: 9000 đồng
 :::

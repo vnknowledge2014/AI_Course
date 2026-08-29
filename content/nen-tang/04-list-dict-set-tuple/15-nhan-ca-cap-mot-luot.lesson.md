@@ -204,7 +204,8 @@ assert str(cac_cap[2]) == "('biếu bà', 300000)", "món cuối cùng phải ma
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: ('sửa xe', 500000)
+  match: regex
+  expect: ^\('sửa xe', 500000\)\n\('cà phê', 25000\)\n\('biếu bà', 300000\)\nSổ có 3 khoản\s*$
 - tier: output
   expect: Sổ có 3 khoản
 - tier: static

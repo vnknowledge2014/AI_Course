@@ -233,7 +233,8 @@ assert may_tim_o_dau("/Users/lan/du-an", "thang-truoc/so.txt") == "/Users/lan/du
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: "/Users/lan/du-an/so.txt"
+  match: regex
+  expect: ^/Users/lan/du-an/so\.txt\n/Users/lan/Desktop/so\.txt\n/Users/lan/du-an/thang-truoc/so\.txt\s*$
 - tier: output
   expect: "/Users/lan/Desktop/so.txt"
 - tier: output

@@ -235,7 +235,8 @@ assert so_may_se_tim == os.getcwd() + "/so.txt", "đường dẫn máy sắp m�
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: "Chỗ đang đứng:"
+  match: regex
+  expect: ^Chỗ đang đứng: /home/pyodide\nMáy sẽ tìm sổ ở: /home/pyodide/so\.txt\s*$
 - tier: output
   expect: "Máy sẽ tìm sổ ở:"
 - tier: output

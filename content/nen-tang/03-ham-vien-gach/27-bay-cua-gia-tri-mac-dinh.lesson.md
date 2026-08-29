@@ -280,7 +280,8 @@ assert them_mon("gân") == ["gân"], "cuốn sổ mặc định của dòng `def
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: ['nạm', 'gầu']
+  match: regex
+  expect: ^\['tái'\]\n\['nạm', 'gầu'\]\s*$
 :::
 ::::
 

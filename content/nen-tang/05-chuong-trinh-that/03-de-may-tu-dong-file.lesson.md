@@ -268,7 +268,8 @@ assert f_tom.mode == "w", "khối thứ hai cũng đi GHI, nên chữ trao cho o
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: "Sổ đã đóng chưa? True"
+  match: regex
+  expect: ^Sổ đã đóng chưa\? True\nTóm tắt đã đóng chưa\? True\nHai file vừa ghi: so-thang-tam\.txt và tom-tat-thang-tam\.txt\s*$
 - tier: output
   expect: "Hai file vừa ghi: so-thang-tam.txt và tom-tat-thang-tam.txt"
 :::

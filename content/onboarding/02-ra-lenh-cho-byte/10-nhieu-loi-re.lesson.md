@@ -220,7 +220,8 @@ pass
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: 45000 đồng
+  match: regex
+  expect: ^45000 đồng\s*$
 :::
 ::::
 

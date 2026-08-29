@@ -232,7 +232,8 @@ assert cu_1 == ("cà phê", 25000), "tấm thẻ gốc của khoản cà phê ph
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: ('cà phê', 30000)
+  match: regex
+  expect: ^\('cà phê', 30000\)\n\('bún bò', 45000\)\s*$
 - tier: static
   onFail: cặp mới phải dựng TỪ cặp cũ — lấy tên ra bằng chỉ số và cộng thêm vào số tiền cũ, chứ không gõ thẳng con số mới
   requireAst:

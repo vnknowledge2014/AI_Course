@@ -274,7 +274,8 @@ assert tinh_tien_ban(50000, 3) == 150000, "đổi giá một tô thành 50 nghì
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Bàn ăn hết 135000 đồng
+  match: regex
+  expect: ^Bàn ăn hết 135000 đồng\nThêm hai tô nữa là 225000 đồng\s*$
 - tier: output
   expect: Thêm hai tô nữa là 225000 đồng
 - tier: static

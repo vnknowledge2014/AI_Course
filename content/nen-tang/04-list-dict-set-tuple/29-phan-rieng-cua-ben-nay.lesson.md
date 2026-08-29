@@ -248,7 +248,8 @@ assert "ăn uống" not in moi_phat_sinh, "ăn uống có mặt ở cả hai r�
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Tháng này phát sinh thêm: 1 nhóm
+  match: regex
+  expect: ^Tháng này phát sinh thêm: 1 nhóm\nTháng trước có mà tháng này không: 2 nhóm\s*$
 - tier: output
   expect: Tháng trước có mà tháng này không: 2 nhóm
 - tier: static

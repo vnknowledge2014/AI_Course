@@ -261,7 +261,8 @@ assert tinh_hoa_don(3, 45000, thue=0.08) == 145800, "ba tô 45000 là 135000 ti�
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Bàn 1: 99000 đồng
+  match: regex
+  expect: ^Bàn 1: 99000 đồng\nBàn 2: 145800 đồng\s*$
 - tier: output
   expect: Bàn 2: 145800 đồng
 :::

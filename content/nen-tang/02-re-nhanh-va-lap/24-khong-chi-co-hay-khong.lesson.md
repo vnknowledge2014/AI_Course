@@ -327,7 +327,8 @@ assert ngay_tuan_truoc == 5, "tuần trước mãi tới ngày 5 mới có ngày
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Tuần này: ngày 3
+  match: regex
+  expect: ^Tuần này: ngày 3\nTuần trước: ngày 5\s*$
 :::
 ::::
 

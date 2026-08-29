@@ -249,7 +249,8 @@ assert ten_moi == "T" + ten[1] + ten[2] + ten[3] + ten[4] + ten[5] + ten[6], "s�
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Trà sữa
+  match: regex
+  expect: ^Trà sữa\ntrà sữa\s*$
 - tier: static
   onFail: sáu ký tự sau chữ T hoa phải được ĐỌC ra từ `ten`, không gõ tay lại tên khoản
   requireAst:

@@ -343,7 +343,8 @@ assert so_sach.NGUONG_LON == 100000, "sau khi bạn gọi hàm, hộp so_sach v�
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: "so_sach.py: đang mở sổ..."
+  match: regex
+  expect: ^so_sach\.py: đang mở sổ\.\.\.\nNgay sau import, NGUONG_LON đã bằng 100000\nGọi hàm xong mới cầm được 3 khoản\s*$
 - tier: output
   expect: "Ngay sau import, NGUONG_LON đã bằng 100000"
 - tier: output

@@ -233,7 +233,8 @@ assert ngay == 4, "ngày 4 tiêu 620 nghìn là ngày đầu tiên quá 500 ngh�
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Ngày 4 tiêu 620000 đồng
+  match: regex
+  expect: ^Ngày 4 tiêu 620000 đồng\nXem tới đây thôi\s*$
 :::
 ::::
 

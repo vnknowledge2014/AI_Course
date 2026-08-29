@@ -262,7 +262,8 @@ assert moc[4] == 20000, "lượt ba xử lý khoản bánh mì 20000 trên một
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: "Sau dòng cộng ở lượt 1: 15000"
+  match: regex
+  expect: ^Sau dòng cộng ở lượt 1: 15000\nSau dòng trao số 0 ở lượt 1: 0\nSau dòng cộng ở lượt 2: 45000\nSau khi vòng lặp xong: 0\s*$
 - tier: output
   expect: "Sau dòng cộng ở lượt 2: 45000"
 - tier: output

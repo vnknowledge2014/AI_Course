@@ -292,7 +292,8 @@ assert cac_dong[11] == "in tài liệu,20000\n", "dòng cuối trong 12 dòng �
 - tier: tests
   timeoutMs: 5000
 - tier: output
-  expect: "MẮT 1 — máy đang cầm 12 dòng"
+  match: regex
+  expect: ^MẮT 1 — máy đang cầm 12 dòng\nMẮT 2 — dòng đầu dài 13 ký tự\s*$
 - tier: output
   expect: "MẮT 2 — dòng đầu dài 13 ký tự"
 :::

@@ -229,7 +229,8 @@ pass
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: Hôm nay hết phở rồi, bác ạ
+  match: regex
+  expect: ^Hôm nay hết phở rồi, bác ạ\s*$
 :::
 ::::
 

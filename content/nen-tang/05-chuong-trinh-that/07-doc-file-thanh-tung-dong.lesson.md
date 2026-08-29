@@ -254,7 +254,8 @@ assert cac_dong[3].startswith("vá lốp,100000"), "phần tử thứ tư của 
 - tier: tests
   timeoutMs: 5000
 - tier: output
-  expect: "Sổ đang có 4 khoản"
+  match: regex
+  expect: ^Sổ đang có 4 khoản\ncà phê,25000\n\nbún bò,40000\n\nbánh mì,15000\n\nvá lốp,100000\s*$
 - tier: output
   expect: "vá lốp,100000"
 :::

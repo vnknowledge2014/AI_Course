@@ -290,7 +290,8 @@ assert isinstance(phai_tra_pho, int), "tiền phải ở nguyên trong int đồ
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Phở 54000đ
+  match: regex
+  expect: ^Cà phê 27000đ\nPhở 54000đ\nCơm gà 81000đ\s*$
 - tier: static
   onFail: ba công thức phải nhìn vào cái hằng ở đầu file, không chép trần lại con số phần trăm
   requireAst:

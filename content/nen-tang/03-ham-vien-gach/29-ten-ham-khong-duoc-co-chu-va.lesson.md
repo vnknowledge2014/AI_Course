@@ -291,7 +291,8 @@ assert in_dong_hoa_don("Trà đá", 5000) is None, "`in_dong_hoa_don` lo đúng 
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: Phở bò: 90000 đồng
+  match: regex
+  expect: ^Phở bò: 90000 đồng\nCơm rang: 75000 đồng\nCộng cả bàn: 165000 đồng\s*$
 - tier: output
   expect: Cộng cả bàn: 165000 đồng
 :::

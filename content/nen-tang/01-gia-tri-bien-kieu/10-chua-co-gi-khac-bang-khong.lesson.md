@@ -242,7 +242,8 @@ assert type(so_nguoi_chia) == type(None), "cả bàn còn đang gọi món, chư
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Số người chia: None
+  match: regex
+  expect: ^Gửi xe: 0đ\nGhi chú: \nSố người chia: None\s*$
 :::
 ::::
 

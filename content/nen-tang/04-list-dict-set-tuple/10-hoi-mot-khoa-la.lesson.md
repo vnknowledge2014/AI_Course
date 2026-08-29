@@ -96,10 +96,8 @@ KeyError: 'học phí'
   đúng cặp ngoặc vuông có lỗi.
 - **Dòng trên nữa** nói lỗi nằm ở dòng số 8.
 
-Và có một chuyện quan trọng không nằm trong traceback, nằm ở chỗ **thiếu**:
-hai lệnh `print` phía dưới không in được chữ nào. Máy dừng ngay tại dòng 8.
-Mọi dòng sau đó, dù viết đúng tới đâu, cũng không được chạy — y hệt cách
-`ValueError` đã cắt ngang chương trình đổi kiểu ở Realm 0.
+Còn một chuyện quan trọng nữa không nằm trong traceback — nó nằm ở chỗ
+**thiếu**, và khối đoán phía dưới sẽ hỏi thẳng bạn về nó.
 ::::
 
 ::::explain{#ho-hang-voi-value-error}
@@ -127,8 +125,7 @@ Còn `KeyError` thì việc vẫn tồn tại, chỉ là cái khoá không có m
 ::::
 
 ::::predict{#doan-man-hinh commitOnce}
-Đoạn dưới đây là đoạn Byte vừa chạy. Cuốn sổ có bốn khoá, và dòng tra hỏi một
-khoá thứ năm.
+Cuốn sổ ấy CÓ khoá `"ăn sáng"`. Nhưng Byte gõ vội, và gõ hoa chữ đầu.
 
 **Trước khi bấm chạy**, bạn đoán màn hình hiện ra gì?
 
@@ -140,57 +137,62 @@ chi = {
     "đổ xăng": 120000,
 }
 
-tien = chi["học phí"]
-print(f"Học phí: {tien} đồng")
+tien = chi["Ăn sáng"]
+print(f"Ăn sáng: {tien} đồng")
 print("Đã in xong báo cáo")
 ```
 
 :::opt{correct}
-Máy dừng lại với `KeyError: 'học phí'`, và không lệnh `print` nào kịp in ra chữ nào
+Máy dừng lại với `KeyError: 'Ăn sáng'`, và không lệnh `print` nào kịp in ra chữ nào
 :::
 
 :::opt
-In `Học phí: 0 đồng`, rồi in `Đã in xong báo cáo`
+In `Ăn sáng: 85000 đồng`, rồi in `Đã in xong báo cáo`
 ::why
-Gần đúng ở chỗ bạn đọc cuốn sổ theo nghĩa đời thường, và nghĩa ấy hợp lý:
-tháng này sổ không ghi dòng học phí nào, vậy học phí hết 0 đồng. Nếu tự tay
-làm báo cáo trên giấy, bạn sẽ viết đúng con số 0 vào đó.
+Gần đúng ở chỗ bạn đọc ra đúng ý người viết: họ muốn tra khoản ăn sáng, và
+khoản ấy có thật trong sổ, đúng 85000 đồng. Ý định thì không sai chỗ nào.
 
-Chỗ lệch nằm ở chỗ máy không được phép đoán hộ. Một cuốn sổ *có* khoá `học
-phí` mang giá trị 0, và một cuốn sổ *không có* khoá `học phí` là hai chuyện
-khác nhau — nhưng nếu máy trả về 0 cho cả hai thì bạn mất đường phân biệt.
-Con số 0 ấy là thứ bạn phải tự quyết định, và bài sau sẽ cho bạn cách nói ra
-quyết định đó.
+Chỗ lệch: cuốn sổ không tra bằng ý định, nó tra bằng khoá. Và khoá của Python
+so từng ký tự một — `"Ăn sáng"` khác `"ăn sáng"` ngay ký tự đầu, y như
+`"Trà sữa"` khác `"trà sữa"` ở bài chuỗi. Máy không có cách nào biết bạn định
+gõ chữ thường; nó chỉ thấy một khoá nó chưa từng ghi.
 ::
 :::
 
 :::opt
-In `Học phí: None đồng`, rồi in `Đã in xong báo cáo`
+In `Ăn sáng: 0 đồng`, rồi in `Đã in xong báo cáo`
 ::why
-Gần đúng ở chỗ bạn nhớ `None` — cái tên Realm 0 đặt cho *chưa có gì* — và đây
-đúng là một tình huống "chưa có gì". Cách nối hai ý ấy lại rất tự nhiên, và
-trong Python có một lối tra khác **thật sự** cho ra `None` khi khoá vắng mặt.
-Bài sau sẽ gặp nó.
+Gần đúng ở chỗ bạn thấy khoá này lệch so với sổ, và cho rằng máy sẽ trả về
+một thứ trung tính thay vì dừng hẳn. Có công cụ làm đúng như vậy thật — bài
+sau sẽ đưa bạn một cái.
 
-Chỗ lệch nằm ở lối tra mà đoạn này đang dùng: cặp ngoặc vuông `chi["học phí"]`
-không có nhánh dự phòng nào. Nó chỉ biết một việc là đưa ra giá trị của khoá,
-nên khi không có khoá thì nó không còn gì để đưa, và nó dừng chương trình.
+Chỗ lệch: `0` là một câu trả lời, không phải một lời từ chối. Nếu cặp ngoặc
+vuông trả `0` thì cuốn sổ ghi *ăn sáng hết 0 đồng* — một con số sai mà không
+kêu tiếng nào. Cặp ngoặc vuông chọn kêu.
 ::
 :::
 
 :::opt
-Báo lỗi ở dòng tra, nhưng hai lệnh `print` phía dưới vẫn chạy bình thường
+Máy dừng lại với `KeyError`, nhưng dòng `Ăn sáng:` đã kịp in ra trước đó
 ::why
-Gần đúng ở chỗ khó nhất: bạn nhận ra dòng `tien = chi["học phí"]` là dòng gây
-lỗi, và bạn nhận ra đúng. Phần đọc code của bạn chính xác.
+Gần đúng ở chỗ khó nhất: bạn nhận ra dòng tra là dòng gây lỗi, và bạn hình
+dung máy đi từ trên xuống. Cả hai đều đúng.
 
-Chỗ lệch là chuyện xảy ra **sau** khi lỗi hiện ra. Một lỗi lúc chạy không phải
-một lời cảnh báo để chương trình đi tiếp — nó dừng chương trình ngay tại dòng
-đó, y như `ValueError` đã dừng đoạn đổi kiểu ở Realm 0. Và ở đây có thêm một
-lý do vật chất: dòng dưới cần giá trị của `tien`, mà `tien` chưa bao giờ nhận
-được giá trị nào.
+Chỗ lệch nằm ở thứ tự bên trong một dòng. Dòng `tien = chi["Ăn sáng"]` đứng
+TRƯỚC hai lệnh `print`, và nó nổ ngay tại đó — nên chưa lệnh `print` nào tới
+lượt. Máy dừng đúng chỗ nổ, không chạy nốt phần còn lại rồi mới báo.
 ::
 :::
+::::
+
+::::explain{#hai-lenh-print-khong-kip-chay}
+Đúng như bạn vừa đoán: hai lệnh `print` phía dưới không in được chữ nào.
+
+Máy dừng ngay tại dòng 8. Mọi dòng sau đó, dù viết đúng tới đâu, cũng không
+được chạy — y hệt cách `ValueError` đã cắt ngang chương trình đổi kiểu ở
+Realm 0. Một chương trình chết giữa chừng không để lại nửa bản báo cáo; nó để
+lại không có gì, và đó thường là điều may, vì nửa bản báo cáo thì trông y như
+một bản đầy đủ.
 ::::
 
 ::::code{#tra-dung-khoa-so-dang-giu}

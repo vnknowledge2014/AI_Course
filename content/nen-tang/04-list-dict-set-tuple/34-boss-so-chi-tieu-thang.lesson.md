@@ -351,7 +351,8 @@ assert len(tong_b) == 2, "bốn khoản của sổ B chỉ thuộc hai nhóm, n�
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: "ăn uống: 25000 đồng"
+  match: regex
+  expect: ^Sổ A\n  ăn uống: 25000 đồng\n  đi lại: 500000 đồng\n  học hành: 15000 đồng\nSổ B\n  ăn uống: 100000 đồng\n  đi lại: 10000 đồng\s*$
 - tier: output
   expect: "ăn uống: 100000 đồng"
 :::
@@ -496,7 +497,8 @@ assert tong_nhom["học hành"] == 435000, "nhóm học hành của sổ tháng 
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: "Tổng chi: 1190000 đồng"
+  match: regex
+  expect: ^SỔ CHI TIÊU — cả tháng, mười khoản\nTổng chi: 1190000 đồng\nĐã chi vào 3 nhóm\n  ăn uống: 145000 đồng\n  đi lại: 610000 đồng\n  học hành: 435000 đồng\nBa khoản tốn nhất: \['sửa xe', 'khoá tiếng Anh', 'sách'\]\nKhoản trên 100000 đồng: \['sửa xe', 'sách', 'khoá tiếng Anh'\]\s*$
 - tier: output
   expect: "Ba khoản tốn nhất: ['sửa xe', 'khoá tiếng Anh', 'sách']"
 :::

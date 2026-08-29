@@ -250,7 +250,8 @@ assert tong_doanh_thu == 90000, "sau hai lần ghi 45 nghìn, cái tên ngoài h
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Cuối ngày: 90000 đồng
+  match: regex
+  expect: ^Ghi 45000 đồng — tổng đang là 45000 đồng\nGhi 45000 đồng — tổng đang là 90000 đồng\nCuối ngày: 90000 đồng\s*$
 :::
 ::::
 

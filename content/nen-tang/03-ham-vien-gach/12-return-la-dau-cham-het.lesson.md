@@ -241,7 +241,8 @@ assert gia_phai_tra(55000, False) == 60000, "khách thường với giá gốc 5
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Học sinh: 45000 đồng
+  match: regex
+  expect: ^Học sinh: 45000 đồng\nKhách thường: 50000 đồng\s*$
 - tier: output
   expect: Khách thường: 50000 đồng
 - tier: static

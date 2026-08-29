@@ -273,7 +273,8 @@ pass
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: Ngày này tiêu vừa phải.
+  match: regex
+  expect: ^Ngày này tiêu vừa phải\.\s*$
 :::
 ::::
 

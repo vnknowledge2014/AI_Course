@@ -317,7 +317,8 @@ with open("/Users/lan/du-an/sao-luu/so.txt", "r") as f:
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: "Sổ đang dùng: /Users/lan/du-an/so.txt"
+  match: regex
+  expect: ^Sổ đang dùng: /Users/lan/du-an/so\.txt\nBản sao lưu: /Users/lan/du-an/sao-luu/so\.txt\nTrong du-an: cà phê,25000\nTrong sao-luu: bún bò,40000\s*$
 - tier: output
   expect: "Bản sao lưu: /Users/lan/du-an/sao-luu/so.txt"
 :::

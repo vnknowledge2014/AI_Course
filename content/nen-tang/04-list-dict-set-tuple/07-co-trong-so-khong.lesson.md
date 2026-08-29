@@ -253,7 +253,8 @@ assert can_xoa == [500000, 999000, 85000], "danh sách cần xoá chỉ để đ
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Đã xoá khoản 500000 đồng
+  match: regex
+  expect: ^Đã xoá khoản 500000 đồng\nSổ không có khoản 999000 đồng\nĐã xoá khoản 85000 đồng\nSổ còn: \[240000, 120000\]\s*$
 - tier: output
   expect: Sổ không có khoản 999000 đồng
 - tier: output

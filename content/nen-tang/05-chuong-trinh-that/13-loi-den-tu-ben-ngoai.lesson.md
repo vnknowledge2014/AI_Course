@@ -303,7 +303,8 @@ assert dem_khoan("so-cua-lan-nam-ngoai.txt") == 0, "so-cua-lan-nam-ngoai.txt cũ
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: "Sổ tháng này: 2 khoản"
+  match: regex
+  expect: ^Sổ tháng này: 2 khoản\nSổ tháng trước: 0 khoản\s*$
 - tier: output
   expect: "Sổ tháng trước: 0 khoản"
 :::

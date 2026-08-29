@@ -257,7 +257,8 @@ assert tra_loi[2] == "có", "ăn uống nằm trong rổ nhóm của tháng này
 - tier: tests
   timeoutMs: 5000
 - tier: output
-  expect: 'du lịch: không'
+  match: regex
+  expect: ^học phí: có\ndu lịch: không\năn uống: có\s*$
 - tier: static
   onFail: điều kiện phải đem cái tên của lượt này ra tra trong rổ `nhom_thang_nay`, không được là một phép so sánh tự chế
   requireAst:

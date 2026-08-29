@@ -224,7 +224,8 @@ with open("so.txt", "r") as kiem:
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: "cà phê,25000"
+  match: regex
+  expect: ^cà phê,25000\nĐọc lên có đúng thứ vừa ghi không\? True\s*$
 - tier: output
   expect: "Đọc lên có đúng thứ vừa ghi không? True"
 :::

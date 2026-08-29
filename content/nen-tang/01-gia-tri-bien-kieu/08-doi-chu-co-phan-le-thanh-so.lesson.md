@@ -241,7 +241,8 @@ assert f"{doc_tien('32.3')}" == "32300", "ra khỏi hàm thì tiền phải là 
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: 32300
+  match: regex
+  expect: ^32300\n220000\s*$
 - tier: static
   onFail: chỗ trống phải ĐỌC con số nằm trong `o_tien`, bằng công cụ nhận được dấu chấm
   requireAst:

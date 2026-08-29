@@ -263,7 +263,8 @@ assert so_cua_byte == so_chung, "hai cái tên phải luôn cho ra cùng một n
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: 'Cả nhà nhìn thấy: [85000, 240000, 120000, 95000]'
+  match: regex
+  expect: ^Byte nhìn thấy:   \[85000, 240000, 120000, 95000\]\nCả nhà nhìn thấy: \[85000, 240000, 120000, 95000\]\s*$
 - tier: static
   onFail: chỗ trống phải chỉ thẳng vào cuốn sổ đã có tên `so_chung`, không phải chép tay một danh sách mới
   requireAst:

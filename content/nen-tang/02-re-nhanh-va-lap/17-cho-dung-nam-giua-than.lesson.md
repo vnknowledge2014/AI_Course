@@ -272,7 +272,8 @@ assert hoi_toi_khi_co_so(["", "", "", "", "80000"]) == "80000", "khách tối b�
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Khách tối gõ 80000 đồng
+  match: regex
+  expect: ^Khách sáng gõ 45000 đồng\nKhách trưa gõ 120000 đồng\nKhách tối gõ 80000 đồng\s*$
 :::
 ::::
 

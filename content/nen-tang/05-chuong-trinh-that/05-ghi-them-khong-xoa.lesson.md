@@ -248,7 +248,8 @@ with open("so.txt", "r") as kiem:
 - tier: tests
   timeoutMs: 5000
 - tier: output
-  expect: "cà phê,25000bún bò,40000"
+  match: regex
+  expect: ^cà phê,25000bún bò,40000\ncà phê,25000bún bò,40000bánh mì,15000\s*$
 - tier: output
   expect: "cà phê,25000bún bò,40000bánh mì,15000"
 :::

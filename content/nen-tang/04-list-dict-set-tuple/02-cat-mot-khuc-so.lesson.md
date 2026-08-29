@@ -316,7 +316,8 @@ assert cong_tien(ba_khoan_dau([25000, 40000, 15000, 60000, 30000, 12000])) == 80
 - tier: tests
   timeoutMs: 5000
 - tier: output
-  expect: Tháng Ba — ba khoản đầu cộng lại: 80000 đồng
+  match: regex
+  expect: ^Tháng Ba — ba khoản đầu cộng lại: 80000 đồng\nTháng Tư — ba khoản đầu cộng lại: 135000 đồng\s*$
 - tier: static
   onFail: khúc cắt phải đọc RA TỪ cuốn sổ được đưa vào, không chép cứng mấy con số vào thân hàm
   requireAst:

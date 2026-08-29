@@ -318,7 +318,8 @@ assert sys.argv[0] == "so.py", "ô số 0 của lần gán cuối vẫn phải l
 - tier: tests
   timeoutMs: 8000
 - tier: output
-  expect: "Lượt 1 — so-thang-3.txt: 540000 đồng"
+  match: regex
+  expect: ^Lượt 1 — so-thang-3\.txt: 540000 đồng\nLượt 2 — so-thang-2\.txt: 65000 đồng\nLượt 3 — so-thang-2\.txt: 65000 đồng\s*$
 - tier: output
   expect: "Lượt 3 — so-thang-2.txt: 65000 đồng"
 :::

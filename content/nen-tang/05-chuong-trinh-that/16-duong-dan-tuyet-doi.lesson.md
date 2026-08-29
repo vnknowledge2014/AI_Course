@@ -283,7 +283,8 @@ with open("/Users/lan/Desktop/so.txt", "r") as f:
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: "Trong du-an: cà phê,25000"
+  match: regex
+  expect: ^Trong du-an: cà phê,25000\nTrên Desktop: bún bò,40000\nKý tự đầu của hai đường dẫn: / và /\s*$
 - tier: output
   expect: "Trên Desktop: bún bò,40000"
 :::

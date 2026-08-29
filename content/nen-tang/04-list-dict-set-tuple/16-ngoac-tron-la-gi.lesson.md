@@ -232,7 +232,8 @@ assert tien == 500000, "cặp ('sửa xe', 500000) có ô 1 là số tiền — 
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Khoản: sửa xe
+  match: regex
+  expect: ^Khoản: sửa xe\nSố tiền: 500000 đồng\s*$
 - tier: static
   onFail: hai chỗ trống phải LẤY RA từ chính cặp `cap`, không gõ lại giá trị bằng tay
   requireAst:

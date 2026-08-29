@@ -298,7 +298,8 @@ assert sum(so_tien) == 1750000, "năm khoản trong cuốn sổ này cộng lạ
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Tên các khoản: ['cà phê', 'xăng', 'ăn trưa', 'sửa xe', 'biếu bà']
+  match: regex
+  expect: ^Tên các khoản: \['cà phê', 'xăng', 'ăn trưa', 'sửa xe', 'biếu bà'\]\nSố tiền từng khoản: \[90000, 240000, 620000, 500000, 300000\]\nCả sổ hết: 1750000 đồng\s*$
 - tier: output
   expect: Cả sổ hết: 1750000 đồng
 - tier: static

@@ -187,7 +187,8 @@ pass
 - tier: run
   timeoutMs: 4000
 - tier: output
-  expect: 45000
+  match: regex
+  expect: ^Phở Thìn\n45000\s*$
 :::
 ::::
 

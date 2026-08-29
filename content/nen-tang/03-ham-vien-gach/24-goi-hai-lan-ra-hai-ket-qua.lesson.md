@@ -276,7 +276,8 @@ assert lan_sau_thue == 4500, "gọi lần thứ hai với cùng con số phải 
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: ghi_doanh_thu(45000) hai lần: 45000 rồi 90000
+  match: regex
+  expect: ^ghi_doanh_thu\(45000\) hai lần: 45000 rồi 90000\ntinh_thue\(45000\) hai lần: 4500 rồi 4500\s*$
 - tier: output
   expect: tinh_thue(45000) hai lần: 4500 rồi 4500
 - tier: static

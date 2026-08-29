@@ -259,7 +259,8 @@ assert gia["Trà đá"] == 5000, "chỉ hai khoá được đụng tới trong �
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Phở bò: 50000 đồng
+  match: regex
+  expect: ^Phở bò: 50000 đồng\nQuẩy: 10000 đồng\nLẩu gà: 60000 đồng\s*$
 - tier: output
   expect: Quẩy: 10000 đồng
 - tier: static

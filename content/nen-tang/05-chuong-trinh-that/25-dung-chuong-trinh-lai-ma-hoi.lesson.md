@@ -277,7 +277,8 @@ assert tong == 75000, "chạy hết chương trình, ba khoản 25000, 40000 và
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: "Ở điểm dừng, tong là 0"
+  match: regex
+  expect: ^Ở điểm dừng, tong là 0\nỞ điểm dừng, len\(cac_dong\) là 3\nỞ điểm dừng, ten_file là so-ngan\.txt\nChạy hết chương trình thì tổng là 75000 đồng\s*$
 - tier: output
   expect: "Chạy hết chương trình thì tổng là 75000 đồng"
 :::

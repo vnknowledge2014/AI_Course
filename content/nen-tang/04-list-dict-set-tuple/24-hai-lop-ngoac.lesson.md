@@ -271,7 +271,8 @@ assert ngay_khoan_cuoi == 14, "ô cuối cuốn sổ này là ổ bánh mì, và
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: Khoản thứ ba tiêu hết 40000 đồng
+  match: regex
+  expect: ^Khoản thứ ba tiêu hết 40000 đồng\nKhoản đầu sổ thuộc nhóm ăn uống\nKhoản cuối sổ chi vào ngày 14\s*$
 - tier: output
   expect: Khoản cuối sổ chi vào ngày 14
 - tier: static

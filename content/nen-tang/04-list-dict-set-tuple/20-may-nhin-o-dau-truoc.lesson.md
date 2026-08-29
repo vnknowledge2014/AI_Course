@@ -229,7 +229,8 @@ assert ba_truoc_mot == True, 'cặp ba và cặp một cùng mở đầu bằng 
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: 'cặp ba đứng trước cặp một: True'
+  match: regex
+  expect: ^cặp một đứng trước cặp hai: False\ncặp ba đứng trước cặp một: True\s*$
 - tier: output
   expect: 'cặp một đứng trước cặp hai: False'
 - tier: static

@@ -257,7 +257,8 @@ assert doc_o_tien("0") == 0, "ô gõ hẳn một số không là ô đã nhập 
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: 32300
+  match: regex
+  expect: ^32300\n0\s*$
 - tier: static
   onFail: điều kiện phải hỏi về chính ô chữ `o_tien`, không phải một giá trị cố định
   requireAst:

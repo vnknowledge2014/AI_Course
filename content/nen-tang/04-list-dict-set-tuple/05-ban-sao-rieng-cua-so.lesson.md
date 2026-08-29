@@ -232,7 +232,8 @@ assert so_thang_tam == [85000, 240000, 120000], "ghi thêm 60000 vào bản nhá
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: 'Bản nháp: [85000, 240000, 120000, 500000]'
+  match: regex
+  expect: ^Bản nháp: \[85000, 240000, 120000, 500000\]\nSổ thật:  \[85000, 240000, 120000\]\s*$
 - tier: output
   expect: 'Sổ thật:  [85000, 240000, 120000]'
 - tier: static

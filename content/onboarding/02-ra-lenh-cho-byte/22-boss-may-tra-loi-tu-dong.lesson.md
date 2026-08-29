@@ -369,7 +369,8 @@ assert gia_mot_to * so_to == 90000, "hai tô vừa, mỗi tô 45 nghìn, thì ho
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: tô to: 55000 đồng
+  match: regex
+  expect: ^PHỞ THÌN — bảng giá hôm nay\n- tô nhỏ: 40000 đồng\n- tô vừa: 45000 đồng\n- tô to: 55000 đồng\n2 tô vừa, tổng cộng 90000 đồng\s*$
 - tier: output
   expect: 2 tô vừa, tổng cộng 90000 đồng
 :::

@@ -299,7 +299,8 @@ assert tong_va_bo_qua([]) == (0, 0), "không có dòng nào để đọc thì t�
 - tier: tests
   timeoutMs: 6000
 - tier: output
-  expect: "Tổng đọc được: 675000 đồng"
+  match: regex
+  expect: ^Tổng đọc được: 675000 đồng\nBỏ qua 1 dòng hỏng\s*$
 - tier: output
   expect: "Bỏ qua 1 dòng hỏng"
 :::

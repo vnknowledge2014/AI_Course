@@ -267,7 +267,8 @@ assert co_hoc_phi is False, "học phí chỉ nằm trong rổ tháng này; thá
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Số nhóm tháng nào cũng chi: 2
+  match: regex
+  expect: ^Số nhóm tháng nào cũng chi: 2\nĂn uống tháng nào cũng chi: True\nHọc phí tháng nào cũng chi: False\s*$
 - tier: output
   expect: Học phí tháng nào cũng chi: False
 - tier: static

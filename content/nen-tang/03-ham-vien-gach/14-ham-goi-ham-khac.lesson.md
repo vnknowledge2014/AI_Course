@@ -314,7 +314,8 @@ assert tinh_hoa_don("lớn") == "Tô lớn: 55000 đồng, thuế 5500 đồng",
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Tô vừa: 45000 đồng, thuế 4500 đồng
+  match: regex
+  expect: ^Tô vừa: 45000 đồng, thuế 4500 đồng\nTô nhỏ: 40000 đồng, thuế 4000 đồng\nTô lớn: 55000 đồng, thuế 5500 đồng\s*$
 - tier: output
   expect: Tô lớn: 55000 đồng, thuế 5500 đồng
 - tier: static

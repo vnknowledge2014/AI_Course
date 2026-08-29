@@ -230,7 +230,8 @@ assert ten == "biếu bà", "cặp cuối cùng của sổ này là ('biếu bà
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: sửa xe: 500000 đồng
+  match: regex
+  expect: ^sửa xe: 500000 đồng\ncà phê: 25000 đồng\nbiếu bà: 300000 đồng\nTổng: 825000 đồng\s*$
 :::
 ::::
 

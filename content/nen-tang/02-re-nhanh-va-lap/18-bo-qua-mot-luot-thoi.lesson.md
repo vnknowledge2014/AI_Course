@@ -298,7 +298,8 @@ assert diem_lai_so([0, 0, 0]) == 0, "quyển sổ mà ngày nào cũng để tr�
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Tuần trước có 2 ngày ghi sổ
+  match: regex
+  expect: ^Ngày 1: 120000 đồng\nNgày 3: 95000 đồng\nNgày 5: 260000 đồng\n   \(ngày tiêu mạnh\)\nNgày 7: 80000 đồng\nTuần này có 4 ngày ghi sổ\nNgày 2: 210000 đồng\n   \(ngày tiêu mạnh\)\nNgày 3: 45000 đồng\nTuần trước có 2 ngày ghi sổ\s*$
 :::
 ::::
 

@@ -229,7 +229,8 @@ assert vi == 0, "bốn món 25 nghìn tiêu trọn 100 nghìn nên ví phải s�
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Mua món thứ 1, ví còn 75000 đồng
+  match: regex
+  expect: ^Mua món thứ 1, ví còn 75000 đồng\nMua món thứ 2, ví còn 50000 đồng\nMua món thứ 3, ví còn 25000 đồng\nMua món thứ 4, ví còn 0 đồng\nCả buổi chợ mua được 4 món\s*$
 - tier: output
   expect: Cả buổi chợ mua được 4 món
 :::

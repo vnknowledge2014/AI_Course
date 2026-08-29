@@ -257,7 +257,8 @@ assert da_de_danh == 500000, "chiếc xe đạp giá 500 nghìn, và tháng cu�
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Hết tháng 1: đã có 200000 đồng
+  match: regex
+  expect: ^Hết tháng 1: đã có 200000 đồng\nHết tháng 2: đã có 300000 đồng\nHết tháng 3: đã có 400000 đồng\nHết tháng 4: đã có 500000 đồng\nĐủ tiền mua xe sau 4 tháng\s*$
 - tier: output
   expect: Đủ tiền mua xe sau 4 tháng
 :::

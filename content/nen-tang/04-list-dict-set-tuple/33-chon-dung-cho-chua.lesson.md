@@ -327,7 +327,8 @@ assert thang_truoc_chua_co == {"biếu tặng"}, "chỉ 'biếu tặng' là nhó
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: Tháng này chi vào 3 nhóm
+  match: regex
+  expect: ^Tháng này chi vào 3 nhóm\nTháng nào cũng chi: 2 nhóm\nMọi nhóm từng chi: 5 nhóm\nTháng trước chưa có: 1 nhóm\s*$
 - tier: output
   expect: Mọi nhóm từng chi: 5 nhóm
 - tier: output

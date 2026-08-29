@@ -258,7 +258,8 @@ assert tien == [500000, 25000, 300000, 60000, 40000], "cuốn sổ gốc phải 
 - tier: tests
   timeoutMs: 4000
 - tier: output
-  expect: 'Đã xếp: [25000, 40000, 60000, 300000, 500000]'
+  match: regex
+  expect: ^Sổ gốc: \[500000, 25000, 300000, 60000, 40000\]\nĐã xếp: \[25000, 40000, 60000, 300000, 500000\]\s*$
 - tier: output
   expect: 'Sổ gốc: [500000, 25000, 300000, 60000, 40000]'
 - tier: static
