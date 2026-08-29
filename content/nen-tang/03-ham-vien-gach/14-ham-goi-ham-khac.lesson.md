@@ -32,10 +32,28 @@ Mình không phải tự làm hết. Việc nào có người làm rồi thì m�
 ::::
 
 ::::explain{#cat-ra-roi-ghep-lai}
-Bài trước để lại một hàm phẳng nhưng vẫn dài, và cái dài của nó có lý do rõ
-ràng: nó làm ba việc khác hẳn nhau. Tra giá theo cỡ tô là một việc. Tính thuế
-trên một số tiền là việc thứ hai. Dựng câu chữ để đưa ra cho người đọc là việc
-thứ ba.
+Bài trước làm phẳng được cái hình thang, nhưng hàm vẫn dài. Hôm nay quán đổi
+cách ghi đơn: khách chỉ nói cỡ tô, giá thì hàm tự tra; và hàm phải đưa ra sẵn
+một câu chữ để dán lên hoá đơn. Viết thẳng tuột, tất cả trong một hàm, thì ra
+thế này:
+
+```python title=readonly
+def tinh_hoa_don(co):
+    """Dựng câu hoá đơn cho một tô, theo cỡ tô."""
+    if co == "nhỏ":
+        gia = 40000
+    elif co == "vừa":
+        gia = 45000
+    else:
+        gia = 55000
+    thue = gia // 10
+    return f"Tô {co}: {gia} đồng, thuế {thue} đồng"
+```
+
+Nó chạy đúng, và cái dài của nó có lý do rõ ràng: **nó làm ba việc khác hẳn
+nhau**. Tra giá theo cỡ tô là một việc. Tính thuế trên một số tiền là việc thứ
+hai. Dựng câu chữ để đưa ra cho người đọc là việc thứ ba. Ba việc ấy không
+liên quan gì nhau ngoài chuyện tình cờ bị viết chung một chỗ.
 
 Cắt ra thì gọn ngay. Mỗi việc một hàm, mỗi hàm một cái tên nói đúng việc nó
 làm:

@@ -184,8 +184,13 @@ nữa. Thứ tự các dòng quyết định mỗi lần `.append()` rơi vào c
 :::opt
 Máy báo lỗi, vì hàm sửa một danh sách mà không khai báo `global`
 ::why
-Gần đúng ở chỗ bạn nhớ đúng vai của `global`: muốn phép gán trong hàm trỏ ra
-biến ngoài thì phải khai báo, không khai báo mà đòi sửa là chuyện máy chặn.
+Gần đúng ở chỗ bạn nhớ đúng vai của `global`: muốn một phép **gán** trong hàm
+trỏ ra biến ngoài thì phải khai báo, không khai báo thì cái tên ngoài kia
+không đổi.
+
+Nhưng máy không báo lỗi trong trường hợp ấy. Bài 22 đã cho thấy: thiếu
+`global`, phép gán vẫn chạy trót lọt — nó chỉ đẻ ra một cái tên cục bộ mới rồi
+bỏ đi cùng lượt gọi. Máy chưa bao giờ chặn chuyện này.
 
 Chỗ lệch là ở đây chẳng có phép gán nào nhắm ra ngoài cả. Cuốn sổ tự đi vào hàm
 qua tham số, đàng hoàng, đúng cửa chính — nên máy không có gì để chặn. Đó mới

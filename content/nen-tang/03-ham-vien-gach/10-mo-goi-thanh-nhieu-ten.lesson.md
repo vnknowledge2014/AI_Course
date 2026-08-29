@@ -36,7 +36,7 @@ Bài trước để lại đúng một chỗ vướng. Hàm đưa ra được ha
 nhận thì cái gói vẫn còn nguyên đai nguyên kiện:
 
 ```python
-goi = tinh_hoa_don(45000, 2)
+goi = tinh_hoa_don(2, 45000)
 print(goi[0])
 print(goi[1])
 ```
@@ -54,7 +54,7 @@ Python cho làm đúng động tác ấy. Đặt **hai cái tên** bên trái d�
 bằng dấu phẩy:
 
 ```python
-tien_hang, tien_thue = tinh_hoa_don(45000, 2)
+tien_hang, tien_thue = tinh_hoa_don(2, 45000)
 print(tien_hang)
 print(tien_thue)
 ```
@@ -80,12 +80,12 @@ Cả đoạn, viết trọn một lần. Hàm bên trong dùng hai cái tên ng�
 ngoài đặt hai cái tên dài hơn cho dễ đọc.
 
 ```python title=readonly
-def tinh_hoa_don(gia_mot_to, so_to):
-    hang = gia_mot_to * so_to
-    thue = hang // 10
-    return hang, thue
+def tinh_hoa_don(so_to, gia, thue=0.1):
+    tien_hang = so_to * gia
+    tien_thue = int(tien_hang * thue)
+    return tien_hang, tien_thue
 
-tien_hang, tien_thue = tinh_hoa_don(45000, 2)
+tien_hang, tien_thue = tinh_hoa_don(2, 45000)
 
 print(f"Tiền hàng: {tien_hang} đồng")
 print(f"Tiền thuế: {tien_thue} đồng")
@@ -100,8 +100,9 @@ Tiền thuế: 9000 đồng
 
 Đi lại đúng đường máy đi ở dòng mở gói:
 
-- Vế phải chạy trước, y như mọi dòng gán. `tinh_hoa_don(45000, 2)` chạy trọn thân
-  hàm, `hang` thành 90000, `thue` thành 9000, và `return hang, thue` buộc hai con
+- Vế phải chạy trước, y như mọi dòng gán. `tinh_hoa_don(2, 45000)` chạy trọn thân
+  hàm, `tien_hang` thành 90000, `tien_thue` thành 9000, và
+  `return tien_hang, tien_thue` buộc hai con
   số ấy thành một gói hai phần.
 - Máy đếm: bên trái hai tên, bên phải gói hai phần. Khớp.
 - Máy chia: phần đứng trước về `tien_hang`, phần đứng sau về `tien_thue`.
@@ -111,7 +112,7 @@ là tiền thuế, không phải đi tra `return` xem ai đứng trước ai.
 
 Còn một chỗ máy **không** đỡ được cho bạn, giống hệt chỗ máy không đỡ ở gán
 nhiều: nó đếm số lượng, nhưng nó không đọc được ý nghĩa. Viết
-`tien_thue, tien_hang = tinh_hoa_don(45000, 2)` thì dòng gán vẫn chạy êm, và từ
+`tien_thue, tien_hang = tinh_hoa_don(2, 45000)` thì dòng gán vẫn chạy êm, và từ
 đó `tien_thue` giữ 90000. Thứ tự bên trái phải khớp thứ tự trong `return`, và
 người giữ việc đó là bạn.
 ::::
@@ -123,12 +124,12 @@ thì vẫn là hàm cũ, vẫn `return` đúng hai thứ.
 **Trước khi bấm chạy**, bạn đoán màn hình hiện ra gì?
 
 ```python
-def tinh_hoa_don(gia_mot_to, so_to):
-    hang = gia_mot_to * so_to
-    thue = hang // 10
-    return hang, thue
+def tinh_hoa_don(so_to, gia, thue=0.1):
+    tien_hang = so_to * gia
+    tien_thue = int(tien_hang * thue)
+    return tien_hang, tien_thue
 
-tien_hang, tien_thue, tien_ship = tinh_hoa_don(45000, 2)
+tien_hang, tien_thue, tien_ship = tinh_hoa_don(2, 45000)
 print(f"Tiền hàng: {tien_hang} đồng")
 ```
 
@@ -194,8 +195,8 @@ ra đọc. `help(tinh_hoa_don)` in lại docstring — chỗ người viết hà
 gì về. Còn nếu docstring chưa nói rõ, gán tạm vào **một** cái tên rồi `print` nó
 ra: cái gói hiện nguyên hình cùng số phần của nó.
 
-> Chỗ dễ vấp: một cái tên bên trái thì **không** phải mở gói. `goi = tinh_hoa_don(45000, 2)`
-> cho `goi` giữ trọn cái gói, còn `tien_hang, tien_thue = tinh_hoa_don(45000, 2)`
+> Chỗ dễ vấp: một cái tên bên trái thì **không** phải mở gói. `goi = tinh_hoa_don(2, 45000)`
+> cho `goi` giữ trọn cái gói, còn `tien_hang, tien_thue = tinh_hoa_don(2, 45000)`
 > chia gói ra hai. Dấu phẩy bên trái dấu `=` mới là thứ bật chế độ mở gói lên, và
 > nó nhỏ đến mức rất dễ gõ sót.
 ::::
@@ -208,23 +209,23 @@ Chỗ trống là **vế trái**. Hai dòng `print` bên dưới đang chờ hai
 đúng hai cái tên ấy, đúng thứ tự mà `return` trong thân hàm đã xếp.
 
 ```python title=starter
-def tinh_hoa_don(gia_mot_to, so_to):
-    hang = gia_mot_to * so_to
-    thue = hang // 10
-    return hang, thue
+def tinh_hoa_don(so_to, gia, thue=0.1):
+    tien_hang = so_to * gia
+    tien_thue = int(tien_hang * thue)
+    return tien_hang, tien_thue
 
-___ = tinh_hoa_don(45000, 2)
+___ = tinh_hoa_don(2, 45000)
 print(f"Tiền hàng: {tien_hang} đồng")
 print(f"Tiền thuế: {tien_thue} đồng")
 ```
 
 ```python title=solution
-def tinh_hoa_don(gia_mot_to, so_to):
-    hang = gia_mot_to * so_to
-    thue = hang // 10
-    return hang, thue
+def tinh_hoa_don(so_to, gia, thue=0.1):
+    tien_hang = so_to * gia
+    tien_thue = int(tien_hang * thue)
+    return tien_hang, tien_thue
 
-tien_hang, tien_thue = tinh_hoa_don(45000, 2)
+tien_hang, tien_thue = tinh_hoa_don(2, 45000)
 print(f"Tiền hàng: {tien_hang} đồng")
 print(f"Tiền thuế: {tien_thue} đồng")
 ```

@@ -164,10 +164,17 @@ Và đây là chỗ đáng nhớ nhất của bài: **bản hợp đồng không
 sách nào cả — nó đi kèm cái hàm, nằm sẵn trong máy.** Bạn không cần mạng, không
 cần sách, không cần hỏi ai. Gặp một cái tên lạ, hỏi thẳng cái máy đang chạy nó.
 
-> Chỗ dễ vấp: `help` in ra rất nhiều dòng, và người mới hay đọc từ trên xuống rồi
-> nản. Nhìn có mục đích thì nhanh hơn — bạn đang tìm đúng **một** dòng: dòng có
-> tên hàm kèm cặp ngoặc. Dòng ấy là chữ ký. Mọi thứ còn lại là mô tả, đọc sau
-> cũng được.
+> Chỗ dễ vấp: `help` in ra rất nhiều dòng, và người mới hay đọc từ trên xuống
+> rồi nản. Nhìn có mục đích thì nhanh hơn — nhưng phải nhìn đủ **hai** chỗ, vì
+> tấm phiếu ba điều của bài 2 nằm rải ở hai nơi trong bản in này:
+>
+> - **tên hàm và những ô phải điền** nằm gọn trên đúng một dòng: dòng có tên
+>   hàm kèm cặp ngoặc;
+> - **thứ hàm đưa ra** — điều thứ ba, thứ mà bài 2 đã cho thấy bỏ qua là máy
+>   nổ — nằm trong mấy dòng chữ bên dưới, thường ở câu bắt đầu bằng *trả về*
+>   hoặc *đưa ra*.
+>
+> Đọc hai chỗ ấy là đủ. Phần còn lại mới là chuyện đọc sau cũng được.
 ::::
 
 ::::code{#hoi-roi-goi}

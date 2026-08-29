@@ -192,9 +192,16 @@ tâm rằng đường ra chỉ có một. Đường thứ hai vẫn mở, lặng
 `ghi_them` có một cửa ra được khai — `return len(danh_sach)` — và một cửa ra
 không được khai: cái danh sách đi vào rồi đi ra khác lúc vào.
 
-Nên câu luật lúc nãy cần đọc kỹ hơn một chút. "Mọi thứ hàm tạo ra đi ra qua
-`return`" cũng có nghĩa là: **thứ đi vào qua cửa trước thì không được đổi**.
-Hàm mượn để đọc, không mượn để sửa.
+Nên câu luật lúc nãy cần đọc kỹ hơn một chút. Thứ bị cấm không phải là *sửa
+đồ của người gọi* — mà là **sửa lén**:
+
+> Mọi thứ hàm tạo ra đi ra qua `return`. Còn nếu hàm sinh ra để sửa chính thứ
+> nó nhận, thì cái tên và dòng mô tả phải nói thẳng điều đó ra.
+
+`ghi_them` phạm đúng vế sau: cái tên hứa "thêm một món vào thực đơn" nghe như
+một việc của riêng nó, dòng mô tả không nhắc gì tới chuyện thực đơn của người
+gọi dài thêm, mà nó vẫn dài thêm. Một hàm tên `ghi_vao_thuc_don(thuc_don, mon)`
+làm đúng việc ấy thì không lén chút nào — bạn đọc tên là biết.
 
 Vậy khi bạn thật sự muốn thực đơn dài thêm thì làm sao? Đưa việc gắn vào cho
 **người gọi**. Hàm lo phần tính, người gọi lo phần cất:

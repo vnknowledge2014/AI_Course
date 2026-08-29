@@ -177,10 +177,12 @@ việc nó đứng bên nào của dấu `=`:
 - Đứng ở bên **trái** dấu `=` — máy không đi tìm gì cả. Nó dựng thẳng một cái
   tên cục bộ mới cho lượt gọi này.
 
-Hệ quả dùng được ngay: **hàm của bạn không thể vô tình làm hỏng thứ nằm ngoài
-nó**. Bạn đặt tên biến trong hàm thoải mái, không phải nhớ xem ngoài kia đã có
-ai xài cái tên ấy chưa. Đây là một chuyện tốt, và nó chính là thứ khiến bạn dám
-gọi một hàm mà không cần mở ra xem — đúng trục của cả mạch này.
+Hệ quả dùng được ngay: **một phép gán trong hàm không thể vô tình dán lại cái
+tên của người khác**. Bạn đặt tên biến trong hàm thoải mái, không phải nhớ xem
+ngoài kia đã có ai xài cái tên ấy chưa.
+
+Đó mới là một đường — đường của những cái **tên**. Hàm còn chạm ra ngoài được
+bằng đường nào nữa không, thì ba bài tới trả lời.
 
 > Chỗ dễ vấp: đặt trùng tên thì máy không phàn nàn, nhưng người đọc lại tưởng
 > hai chỗ ấy là một. Trong hàm, nếu con số bạn đang tính không phải thứ ngoài
@@ -202,6 +204,7 @@ gia_niem_yet = 45000
 
 def bao_gia_khuyen_mai():
     ___
+    print(f"Trong hàm, gia_niem_yet đang là {gia_niem_yet} đồng")
     return gia_niem_yet
 
 gia_hom_nay = bao_gia_khuyen_mai()
@@ -214,6 +217,7 @@ gia_niem_yet = 45000
 
 def bao_gia_khuyen_mai():
     gia_niem_yet = 40000
+    print(f"Trong hàm, gia_niem_yet đang là {gia_niem_yet} đồng")
     return gia_niem_yet
 
 gia_hom_nay = bao_gia_khuyen_mai()
@@ -224,13 +228,19 @@ print(f"Giá niêm yết trên bảng: {gia_niem_yet} đồng")
 ```python title=test
 # Hai phép kiểm hỏi hai chuyện khác nhau, và bài chỉ đạt khi cả hai cùng đúng:
 # thứ hàm đưa ra là con số của buổi trưa, còn thứ nằm ngoài thì không suy suyển.
+#
+# Dòng `print` trong thân hàm có mặt vì cách chấm, không vì câu chuyện. Không
+# có nó thì `return 40000` — câu trả lời của người CHƯA hiểu bài — qua sạch cả
+# hai assert lẫn hai tier output, ở đúng chỗ trống DUY NHẤT nơi khái niệm mới
+# của bài phải được chứng minh. Có nó rồi thì `return 40000` làm dòng ấy đọc
+# `gia_niem_yet` ở ngoài, in ra 45000, và màn hình lệch ngay dòng đầu.
 assert gia_hom_nay == 40000, "hàm phải đưa ra 40 nghìn — dòng bạn điền dựng một cái tên cục bộ mang giá buổi trưa, và dòng `return` ngay dưới đọc lại đúng cái tên ấy"
 assert gia_niem_yet == 45000, "tấm bảng ngoài hàm phải vẫn là 45 nghìn — phép gán trong thân hàm không ghi đè cái tên ở ngoài, nên đừng sửa dòng đầu tiên"
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống nằm ngay dòng đầu thân hàm, phía trên dòng `return`. Dòng `return` ấy đi tìm một cái tên, và máy luôn tìm trong hàm trước khi ra ngoài.
+  body: Chỗ trống nằm ngay dòng đầu thân hàm, phía trên dòng `print`. Cả dòng `print` lẫn dòng `return` bên dưới đều đi tìm cùng một cái tên, và máy luôn tìm trong hàm trước khi ra ngoài.
 - kind: strategy
   body: Cần đúng một phép gán, dán cái tên `gia_niem_yet` lên con số của buổi trưa. Phép gán này nằm trong thân hàm nên nó tự dựng một cái tên cục bộ mới — cái tên ngoài kia không việc gì phải lo.
 - kind: one-line
@@ -244,7 +254,7 @@ assert gia_niem_yet == 45000, "tấm bảng ngoài hàm phải vẫn là 45 ngh�
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^Giá khuyến mãi hôm nay: 40000 đồng\nGiá niêm yết trên bảng: 45000 đồng\s*$
+  expect: ^Trong hàm, gia_niem_yet đang là 40000 đồng\nGiá khuyến mãi hôm nay: 40000 đồng\nGiá niêm yết trên bảng: 45000 đồng\s*$
 - tier: output
   expect: Giá niêm yết trên bảng: 45000 đồng
 :::

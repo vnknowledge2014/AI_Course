@@ -284,16 +284,16 @@ Bây giờ một bàn có thể gọi thêm trà đá, và bà chủ thỉnh tho
 quen một khoản:
 
 ```python title=readonly
-def tinh_tien(so_to, gia, so_tra_da, giam):
+def tinh_tien(so_to, gia, so_tra_da, giam_gia):
     """Tính tiền một bàn.
 
     so_to: mấy tô phở.
     gia: giá một tô, tính bằng đồng.
     so_tra_da: mấy ly trà đá, mỗi ly 5000 đồng.
-    giam: giảm bao nhiêu đồng cho cả bàn.
+    giam_gia: giảm bao nhiêu đồng cho cả bàn.
     Trả về số tiền phải trả.
     """
-    return so_to * gia + so_tra_da * 5000 - giam
+    return so_to * gia + so_tra_da * 5000 - giam_gia
 ```
 
 Hàm vẫn đàng hoàng: chữ ký nói đủ bốn chỗ trống, docstring nói rõ từng chỗ mong

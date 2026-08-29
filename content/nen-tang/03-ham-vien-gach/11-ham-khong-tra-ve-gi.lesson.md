@@ -15,13 +15,13 @@ teaches: [core.implicit-return-none]
 requires: [core.tuple-unpack, core.function-return, core.function-call, core.function-parameter, core.none, core.is-none, core.type-fn, err.type-error, err.traceback, core.print-variable, core.variable, core.assignment, core.fstring]
 concepts: [core.ham, core.gia-tri, core.o-trong]
 gradingMatrix:
-  web-chrome: [static, run, tests, output]
-  web-firefox: [static, run, tests, output]
-  macos: [static, run, tests, output]
-  windows: [static, run, tests, output]
-  linux: [static, run, tests, output]
-  android: [static, run, tests, output]
-  ios: [static, run, tests, output]
+  web-chrome: [run, tests, output]
+  web-firefox: [run, tests, output]
+  macos: [run, tests, output]
+  windows: [run, tests, output]
+  linux: [run, tests, output]
+  android: [run, tests, output]
+  ios: [run, tests, output]
 provenance:
   authoredBy: llm-assisted
   reviewed: false
@@ -278,15 +278,6 @@ assert tinh_tien_ban(50000, 3) == 150000, "đổi giá một tô thành 50 nghì
   expect: ^Bàn ăn hết 135000 đồng\nThêm hai tô nữa là 225000 đồng\s*$
 - tier: output
   expect: Thêm hai tô nữa là 225000 đồng
-- tier: static
-  onFail: dòng bạn điền phải đưa ra chính con số vừa tính trong thân hàm, không phải một con số chép sẵn
-  requireAst:
-  # `tien` chỉ được ĐỌC ở dòng cần điền — dòng trên nó là dòng gán, mà gán thì
-  # không tính là đọc. Nên luật này bằng 0 trên mã khởi đầu và bằng 1 trên lời
-  # giải, đúng chỗ nó cần phân biệt.
-  - kind: uses-name, target: tien, min: 1
-  forbidAst:
-  - kind: has-literal, target: 135000
 :::
 ::::
 

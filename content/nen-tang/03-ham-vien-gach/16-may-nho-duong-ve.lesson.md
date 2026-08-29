@@ -36,7 +36,7 @@ Bài trước chốt một điều chắc chắn — máy tính từ trong ra, �
 trước khi hàm ngoài bắt đầu chạy. Nhưng câu ấy mới nói tới **thứ tự chạy
 xong**. Nó chưa trả lời câu hỏi để hở ở cuối bài.
 
-Lúc `tinh_thue` đang cộng dở, `dung_cau` nằm ở đâu?
+Lúc `tong_phai_tra` đang cộng dở, `dung_cau_tong` nằm ở đâu?
 
 Nó không biến mất, vì lát nữa nó vẫn phải dựng ra câu chữ. Nó cũng không chạy
 song song, vì máy làm một việc một lúc. Nó đang **đứng đợi**, và đợi ở một chỗ
@@ -59,8 +59,9 @@ phiếu, ghi ba thứ:
 - những giá trị hàm ấy đang cầm trong tay,
 - và quan trọng nhất — **dòng nào ở hàm gọi đang đứng đợi kết quả**.
 
-Hàm chạy tới `return` thì máy vứt tờ phiếu trên cùng đi, nhìn tờ nằm ngay dưới,
-rồi chạy tiếp đúng cái dòng ghi trên đó. Đó là đường về, và nó không phải trí
+Hàm chạy hết thân mình — tới `return`, hoặc hết dòng để chạy — thì máy vứt tờ
+phiếu trên cùng đi, nhìn tờ nằm ngay dưới, rồi chạy tiếp đúng cái dòng ghi
+trên đó. Đó là đường về, và nó không phải trí
 nhớ mơ hồ — nó là một tờ giấy có thật.
 
 Cách gọi của giới lập trình: cái chồng ấy tên là **chồng lời gọi**.
@@ -77,32 +78,32 @@ def tra_gia(co_to):
     print("ra tra_gia")
     return tien
 
-def tinh_thue(co_to):
-    print("vào tinh_thue")
+def tong_phai_tra(co_to):
+    print("vào tong_phai_tra")
     tien = tra_gia(co_to)
     tong = tien + tien // 10
-    print("ra tinh_thue")
+    print("ra tong_phai_tra")
     return tong
 
-def dung_cau(co_to):
-    print("vào dung_cau")
-    tong = tinh_thue(co_to)
+def dung_cau_tong(co_to):
+    print("vào dung_cau_tong")
+    tong = tong_phai_tra(co_to)
     cau = f"Tất cả {tong} đồng"
-    print("ra dung_cau")
+    print("ra dung_cau_tong")
     return cau
 
-print(dung_cau("vừa"))
+print(dung_cau_tong("vừa"))
 ```
 
 Máy in ra:
 
 ```text
-vào dung_cau
-vào tinh_thue
+vào dung_cau_tong
+vào tong_phai_tra
 vào tra_gia
 ra tra_gia
-ra tinh_thue
-ra dung_cau
+ra tong_phai_tra
+ra dung_cau_tong
 Tất cả 49500 đồng
 ```
 
@@ -111,19 +112,19 @@ cùng là cái đóng trước nhất.
 
 Đi lại từng bước, và nhìn cái chồng cao lên rồi thấp xuống:
 
-- Dòng cuối chương trình gọi `dung_cau`. Máy đặt phiếu **dung_cau** lên chồng.
+- Dòng cuối chương trình gọi `dung_cau_tong`. Máy đặt phiếu **dung_cau_tong** lên chồng.
   Chồng cao 1.
-- `dung_cau` chạy tới dòng `tong = tinh_thue(co_to)`. Nó chưa xong. Máy ghi lên
-  phiếu của nó rằng nó đang đợi ở dòng ấy, rồi đặt phiếu **tinh_thue** lên
+- `dung_cau_tong` chạy tới dòng `tong = tong_phai_tra(co_to)`. Nó chưa xong. Máy ghi lên
+  phiếu của nó rằng nó đang đợi ở dòng ấy, rồi đặt phiếu **tong_phai_tra** lên
   trên. Chồng cao 2.
-- `tinh_thue` chạy tới `tien = tra_gia(co_to)`, cũng chưa xong, cũng đứng đợi
+- `tong_phai_tra` chạy tới `tien = tra_gia(co_to)`, cũng chưa xong, cũng đứng đợi
   ở dòng ấy. Phiếu **tra_gia** lên trên cùng. Chồng cao 3.
 - `tra_gia` không gọi ai nữa. Nó chạy trọn và `return 45000`. Máy bỏ phiếu
-  **tra_gia** đi, nhìn tờ dưới, và nối con số 45000 vào đúng chỗ `tinh_thue`
+  **tra_gia** đi, nhìn tờ dưới, và nối con số 45000 vào đúng chỗ `tong_phai_tra`
   đang đợi. Chồng còn 2.
-- `tinh_thue` cộng nốt phần thuế rồi trả 49500 về. Bỏ phiếu, chồng còn 1, và
-  `dung_cau` chạy tiếp từ đúng dòng nó đang đợi.
-- `dung_cau` dựng câu chữ rồi trả về. Chồng rỗng, chương trình hết việc.
+- `tong_phai_tra` cộng nốt phần thuế rồi trả 49500 về. Bỏ phiếu, chồng còn 1, và
+  `dung_cau_tong` chạy tiếp từ đúng dòng nó đang đợi.
+- `dung_cau_tong` dựng câu chữ rồi trả về. Chồng rỗng, chương trình hết việc.
 
 Ba lần đặt phiếu, ba lần gỡ phiếu, và thứ tự gỡ ngược hẳn với thứ tự đặt. Con
 số đi lên theo đúng con đường lúc nãy đi xuống.
@@ -146,10 +147,10 @@ dừng lại và in ra:
 ```text
 Traceback (most recent call last):
   File "quan_pho.py", line 22, in <module>
-    print(dung_cau("vừa"))
-  File "quan_pho.py", line 17, in dung_cau
-    tong = tinh_thue(co_to)
-  File "quan_pho.py", line 10, in tinh_thue
+    print(dung_cau_tong("vừa"))
+  File "quan_pho.py", line 17, in dung_cau_tong
+    tong = tong_phai_tra(co_to)
+  File "quan_pho.py", line 10, in tong_phai_tra
     tien = tra_gia(co_to)
   File "quan_pho.py", line 2, in tra_gia
     return int(co_to) * 1000
@@ -165,8 +166,8 @@ chồng** — một lời gọi đang dở, chưa được gỡ ra. Đọc từ 
 tờ trên cùng xuống tới tờ dưới đáy:
 
 - `in tra_gia` — tờ trên cùng, chỗ chương trình đang đứng khi nó vấp.
-- `in tinh_thue` — tờ dưới nó, đang đợi ở dòng `tien = tra_gia(co_to)`.
-- `in dung_cau` — đang đợi ở dòng `tong = tinh_thue(co_to)`.
+- `in tong_phai_tra` — tờ dưới nó, đang đợi ở dòng `tien = tra_gia(co_to)`.
+- `in dung_cau_tong` — đang đợi ở dòng `tong = tong_phai_tra(co_to)`.
 - `in <module>` — tờ dưới đáy, là chính chương trình của bạn, đang đợi ở dòng
   cuối cùng.
 
@@ -265,16 +266,16 @@ ra khi nó cao mãi thì để dành cho phía trước.
 ::::
 
 ::::code{#bao-lai-luc-quay-ve}
-Byte muốn nhìn tận mắt cái khoảnh khắc `tinh_thue` **được trả lại quyền chạy**.
+Byte muốn nhìn tận mắt cái khoảnh khắc `tong_phai_tra` **được trả lại quyền chạy**.
 
-Trong đoạn dưới, `tinh_thue` báo một câu lúc vào, nhưng lúc ra thì im lặng.
+Trong đoạn dưới, `tong_phai_tra` báo một câu lúc vào, nhưng lúc ra thì im lặng.
 Byte muốn nó cũng báo một câu lúc ra, và câu ấy nói luôn con số nó đang cầm
 trong tay ngay khi đó.
 
 Hãy điền dòng còn thiếu, đặt đúng vào chỗ trống — sau khi `tra_gia` đã trả về
-và phép cộng đã xong, nhưng trước khi `tinh_thue` trả kết quả đi.
+và phép cộng đã xong, nhưng trước khi `tong_phai_tra` trả kết quả đi.
 
-Câu Byte muốn thấy có dạng: `ra tinh_thue, đang cầm <con số>`.
+Câu Byte muốn thấy có dạng: `ra tong_phai_tra, đang cầm <con số>`.
 
 ```python title=starter
 def tra_gia(co_to):
@@ -283,21 +284,21 @@ def tra_gia(co_to):
     print("ra tra_gia")
     return tien
 
-def tinh_thue(co_to):
-    print("vào tinh_thue")
+def tong_phai_tra(co_to):
+    print("vào tong_phai_tra")
     tien = tra_gia(co_to)
     tong = tien + tien // 10
     ___
     return tong
 
-def dung_cau(co_to):
-    print("vào dung_cau")
-    tong = tinh_thue(co_to)
+def dung_cau_tong(co_to):
+    print("vào dung_cau_tong")
+    tong = tong_phai_tra(co_to)
     cau = f"Tất cả {tong} đồng"
-    print("ra dung_cau")
+    print("ra dung_cau_tong")
     return cau
 
-cau_cuoi = dung_cau("vừa")
+cau_cuoi = dung_cau_tong("vừa")
 print(cau_cuoi)
 ```
 
@@ -308,41 +309,41 @@ def tra_gia(co_to):
     print("ra tra_gia")
     return tien
 
-def tinh_thue(co_to):
-    print("vào tinh_thue")
+def tong_phai_tra(co_to):
+    print("vào tong_phai_tra")
     tien = tra_gia(co_to)
     tong = tien + tien // 10
-    print(f"ra tinh_thue, đang cầm {tong}")
+    print(f"ra tong_phai_tra, đang cầm {tong}")
     return tong
 
-def dung_cau(co_to):
-    print("vào dung_cau")
-    tong = tinh_thue(co_to)
+def dung_cau_tong(co_to):
+    print("vào dung_cau_tong")
+    tong = tong_phai_tra(co_to)
     cau = f"Tất cả {tong} đồng"
-    print("ra dung_cau")
+    print("ra dung_cau_tong")
     return cau
 
-cau_cuoi = dung_cau("vừa")
+cau_cuoi = dung_cau_tong("vừa")
 print(cau_cuoi)
 ```
 
 ```python title=test
 # Câu chữ cuối cùng chỉ ra được nếu con số đi trọn cả ba tầng rồi quay ngược
-# về: tra_gia đưa 45000 lên cho tinh_thue, tinh_thue cộng thuế thành 49500 rồi
-# đưa lên cho dung_cau, dung_cau mới dựng nổi câu này.
+# về: tra_gia đưa 45000 lên cho tong_phai_tra, tong_phai_tra cộng thuế thành 49500 rồi
+# đưa lên cho dung_cau_tong, dung_cau_tong mới dựng nổi câu này.
 assert cau_cuoi == "Tất cả 49500 đồng", "câu cuối phải là 'Tất cả 49500 đồng' — 45000 tiền phở cộng 4500 tiền thuế, và con số ấy phải leo ngược đủ ba tầng phiếu mới về tới dòng cuối chương trình"
 # Gọi thẳng tầng giữa để chắc rằng nó vẫn trả ra con số, chứ không phải chỉ in
 # ra màn hình rồi thôi.
-assert tinh_thue("vừa") == 49500, "tinh_thue vẫn phải TRẢ VỀ 49500 — dòng bạn thêm vào chỉ báo lại con số đang cầm, không được thay chỗ của return"
+assert tong_phai_tra("vừa") == 49500, "tong_phai_tra vẫn phải TRẢ VỀ 49500 — dòng bạn thêm vào chỉ báo lại con số đang cầm, không được thay chỗ của return"
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống nằm giữa hai dòng đã có sẵn. Dòng ngay trên nó vừa tính xong `tong`, dòng ngay dưới nó mới trả `tong` đi. Vậy tại đúng chỗ trống ấy, `tinh_thue` đang cầm con số đã cộng đủ thuế và vẫn còn quyền chạy.
+  body: Chỗ trống nằm giữa hai dòng đã có sẵn. Dòng ngay trên nó vừa tính xong `tong`, dòng ngay dưới nó mới trả `tong` đi. Vậy tại đúng chỗ trống ấy, `tong_phai_tra` đang cầm con số đã cộng đủ thuế và vẫn còn quyền chạy.
 - kind: strategy
-  body: Câu cần in có kèm một con số đang nằm trong một cái tên, nên dùng đúng lối in kèm giá trị bạn đã quen từ Realm 0. Byte muốn thấy đúng chữ `ra tinh_thue, đang cầm ` rồi tới con số. Đừng gõ thẳng con số vào câu chữ — hãy để cái tên tự nói ra nó, vì đó mới là bằng chứng rằng tờ phiếu của `tinh_thue` còn giữ nguyên thứ nó cầm.
+  body: Câu cần in có kèm một con số đang nằm trong một cái tên, nên dùng đúng lối in kèm giá trị bạn đã quen từ Realm 0. Byte muốn thấy đúng chữ `ra tong_phai_tra, đang cầm ` rồi tới con số. Đừng gõ thẳng con số vào câu chữ — hãy để cái tên tự nói ra nó, vì đó mới là bằng chứng rằng tờ phiếu của `tong_phai_tra` còn giữ nguyên thứ nó cầm.
 - kind: one-line
-  body: 'Viết `print(f"ra tinh_thue, đang cầm {tong}")` vào chỗ trống, thụt vào bốn dấu cách cho thẳng hàng với dòng ngay trên nó.'
+  body: 'Viết `print(f"ra tong_phai_tra, đang cầm {tong}")` vào chỗ trống, thụt vào bốn dấu cách cho thẳng hàng với dòng ngay trên nó.'
 :::
 
 :::validate
@@ -352,18 +353,24 @@ assert tinh_thue("vừa") == 49500, "tinh_thue vẫn phải TRẢ VỀ 49500 —
   timeoutMs: 5000
 - tier: output
   match: regex
-  expect: ^vào dung_cau\nvào tinh_thue\nvào tra_gia\nra tra_gia\nra tinh_thue, đang cầm 49500\nra dung_cau\nTất cả 49500 đồng\s*$
+  expect: ^vào dung_cau_tong\nvào tong_phai_tra\nvào tra_gia\nra tra_gia\nra tong_phai_tra, đang cầm 49500\nra dung_cau_tong\nTất cả 49500 đồng\s*$
 - tier: output
   expect: ra tra_gia
 - tier: static
   onFail: dòng bạn điền phải in ra con số mà `tong` đang giữ, chứ không phải một câu chữ cố định
   requireAst:
-  # Khung đã có sẵn MỘT f-string (câu chữ trong `dung_cau`), nên dòng bạn điền
-  # phải là cái thứ hai. Hỏi thẳng `has-literal: 49500` không chặn được kiểu
-  # gõ cứng con số vào GIỮA câu chữ, vì lúc đó cả câu là một hằng chuỗi.
-  - kind: uses-fstring, min: 2
+  # KHÔNG ép riêng f-string. Bản trước đòi `uses-fstring min: 2` và luật ấy
+  # đánh trượt `print("ra tong_phai_tra, đang cầm", tong)` — một lời giải ĐÚNG:
+  # dấu phẩy của `print` chèn đúng một dấu cách nên chuỗi in ra khớp y hệt,
+  # qua cả run, tests lẫn regex output. Lối `print("nhãn:", ten)` ấy chính là
+  # lối T1.1 đã dạy, nên đánh trượt nó là phạt người học vì nhớ bài cũ.
+  #
+  # Luật đọc tên dưới đây một mình đã chặn được kiểu gõ cứng, và chặn cho cả
+  # hai lối viết.
+  #
   # `tong` được ĐỌC hai lần trong khung (`return tong` và câu chữ của
-  # `dung_cau`). Dòng bạn điền phải là lần đọc thứ ba.
+  # `dung_cau_tong`). Dòng bạn điền phải là lần đọc thứ ba: gõ thẳng
+  # `print("ra tong_phai_tra, đang cầm 49500")` thì dừng ở 2 và trượt.
   - kind: uses-name, target: tong, min: 3
   - kind: uses-call, target: print, min: 7
 :::

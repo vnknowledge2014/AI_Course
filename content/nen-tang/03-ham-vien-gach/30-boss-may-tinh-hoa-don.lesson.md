@@ -440,8 +440,9 @@ Không một tiếng báo lỗi. Không một dòng đỏ. Món quẩy chỉ đ�
 mặt, và `tinh_hoa_don` trả về một con số sai mà không báo lỗi nào cả.
 
 Đây là loại lỗi tệ nhất, đúng loại mà cả track này đã đuổi theo từ bài 6: lỗi
-không tự nói ra. Và lần này nó không nằm ở hàm nào cả — mọi hàm đều kín, đều
-thuần khiết, đều có tên thật thà. Nó nằm ở chỗ tên món và giá món là hai thứ
+không tự nói ra. Và lần này nó không nằm ở hàm nào cả — cả tầng tính đều kín
+và thuần khiết, cái vỏ ngoài thì chỉ làm đúng việc in, và hàm nào cũng có tên
+thật thà. Nó nằm ở chỗ tên món và giá món là hai thứ
 rời nhau, chỉ được buộc lại bằng một cái chỉ số mà không ai canh.
 
 Có cách nào buộc tên món dính chặt vào giá của nó?

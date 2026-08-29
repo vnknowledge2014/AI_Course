@@ -73,10 +73,17 @@ Không có `NameError` nào cả. Hàm `vuot_nguong` nhận đúng một thứ q
 
 Đây là luật máy đang chạy theo, và nó là một thứ tự chứ không phải một chỗ:
 
-> Gặp một cái tên trong thân hàm, máy tìm **trong lượt gọi này trước** — tham
-> số và những tên đã gán trong thân. Không thấy thì nó **bước ra ngoài**, tìm
-> trong những cái tên viết sát lề trái của file. Thấy thì dùng. Ra tới đó vẫn
-> không thấy thì mới `NameError`.
+> Gặp một cái tên trong thân hàm, máy hỏi trước một câu: **thân hàm này có
+> gán cho cái tên ấy ở đâu không?**
+>
+> - **Có** — thì suốt lượt gọi, cái tên ấy là tên cục bộ, và máy không ra
+>   ngoài tìm nữa. Đọc nó trước dòng gán thì máy dừng ngay và báo lỗi.
+> - **Không** — thì máy **bước ra ngoài**, tìm trong những cái tên viết sát lề
+>   trái của file. Thấy thì dùng. Ra tới đó vẫn không thấy thì mới `NameError`.
+
+Câu hỏi ấy máy trả lời **trước khi chạy**, bằng cách đọc trọn thân hàm một
+lượt — chứ không phải vừa chạy vừa dò. Nên nó không phụ thuộc dòng nào chạy
+trước dòng nào.
 
 Cái tên nằm ở tầng ngoài ấy gọi là **biến toàn cục** — *toàn cục* vì nó không
 thuộc riêng lượt gọi nào, nên mọi hàm trong file đều với tới được. Nó đứng đối
@@ -86,6 +93,10 @@ Nhìn theo tờ giấy nháp thì dễ hình dung: tờ giấy nháp không ph�
 kín, nó là một tờ giấy đặt **lên trên** trang giấy lớn của cả chương trình.
 Máy đọc tờ nháp trước vì nó nằm trên; chỗ nào tờ nháp không có chữ thì nhìn
 xuyên xuống trang bên dưới.
+
+Có một chỗ tờ nháp **không** trong suốt: những cái tên mà thân hàm có gán. Máy
+đã chừa sẵn ô cho chúng trên tờ nháp ngay từ đầu lượt, nên nhìn xuống không
+thấy gì cả — ô ấy chỉ chưa có chữ. Bài 22 và bài 23 sống hẳn ở chỗ này.
 
 Chuyện này giải thích luôn một điều bạn đã dùng suốt mà chưa để ý: hàm gọi
 được hàm khác (bài 14) chính vì tên của hàm kia cũng là một cái tên ở tầng

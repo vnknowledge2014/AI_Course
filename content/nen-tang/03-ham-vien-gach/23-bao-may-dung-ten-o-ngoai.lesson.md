@@ -36,14 +36,39 @@ Byte muốn một cái tên `tong_doanh_thu` sống suốt cả ngày, và mỗi
 một tô thì nó lớn thêm. Việc cộng dồn ấy Byte muốn gói vào một hàm để chỗ nào
 cũng gọi được.
 
-Bài trước vừa chỉ ra vì sao cách viết thẳng tuột không chạy: phép gán trong
-thân hàm luôn dựng một cái tên cục bộ mới, nên con số cộng dồn lớn lên trên một
-tờ giấy nháp rồi bỏ đi cùng lượt gọi. Cuối ngày tấm bảng ngoài kia vẫn ghi 0.
+Viết thẳng tuột thì thế này:
+
+```python title=readonly
+tong_doanh_thu = 0
+
+def ghi_doanh_thu(tien):
+    tong_doanh_thu = tong_doanh_thu + tien
+
+ghi_doanh_thu(45000)
+```
+
+```text
+Traceback (most recent call last):
+  File "quan.py", line 6, in <module>
+    ghi_doanh_thu(45000)
+  File "quan.py", line 4, in ghi_doanh_thu
+    tong_doanh_thu = tong_doanh_thu + tien
+                     ^^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'tong_doanh_thu' where it is not associated with a value
+```
+
+Nó không cộng nhầm chỗ. Nó **không chạy nổi một lượt nào**.
+
+Đọc bằng luật bài trước thì hiểu ngay: thân hàm có một phép gán cho
+`tong_doanh_thu`, nên suốt lượt gọi cái tên ấy là tên cục bộ, và máy không ra
+ngoài tìm nữa. Vế phải `tong_doanh_thu + tien` đọc đúng cái ô cục bộ ấy — một
+ô máy đã chừa sẵn nhưng chưa ai viết gì vào. Cái `0` ngoài kia máy không thèm
+nhìn tới, vì nó đã quyết xong từ trước khi chạy.
 
 Chỗ thiếu không phải là một phép gán khác. Phép gán đã đúng rồi. Chỗ thiếu là
-máy **không biết** bạn đang nói tới cái tên nào, và nó có sẵn một luật để
-đoán — bên trái dấu `=` thì dựng tên cục bộ. Luật ấy đúng cho hầu hết trường
-hợp, nên muốn khác đi thì bạn phải nói ra.
+máy đang hiểu bạn nói tới **cái tên nào**, và nó có sẵn một luật để đoán — bên
+trái dấu `=` thì dựng tên cục bộ. Luật ấy đúng cho hầu hết trường hợp, nên
+muốn khác đi thì bạn phải nói ra.
 
 Câu nói ra ấy là `global`:
 

@@ -183,8 +183,10 @@ Dòng cuối cùng — dòng đáng đọc nhất, theo đúng luật đọc l�
 ::::explain{#vi-sao-chong-khong-bao-gio-go}
 Giờ trả lời thẳng câu hỏi bài trước để lại.
 
-Cái chồng gỡ ra được là nhờ `return`. Mỗi lần một hàm chạy hết việc, tờ phiếu
-trên cùng bị bỏ đi và tầng dưới được chạy tiếp. Ở `tra_gia` bài trước, chuỗi
+Cái chồng gỡ ra được là nhờ một lượt gọi **chạy hết thân mình** — chạy tới
+`return`, hoặc đơn giản là hết dòng để chạy. Bài 11 đã chốt: hàm không viết
+`return` vẫn xong lượt, và vẫn đưa ra `None`. Mỗi lần một hàm chạy hết việc,
+tờ phiếu trên cùng bị bỏ đi và tầng dưới được chạy tiếp. Ở `tra_gia` bài trước, chuỗi
 gọi chạm tới một hàm **không gọi ai nữa**, và đó là chỗ chồng bắt đầu thấp
 xuống.
 
