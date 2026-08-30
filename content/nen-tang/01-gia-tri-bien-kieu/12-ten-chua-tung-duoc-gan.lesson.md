@@ -139,8 +139,12 @@ Gần đúng ở chỗ bạn nghĩ một ô chưa ghi gì thì in ra sẽ chẳn
 ô `""` ở bài trước, in ra một dòng trắng.
 
 Chỗ lệch nằm ở việc `""` là một giá trị đã được gán vào một cái tên có mặt hẳn
-hoi. Ở đây không có giá trị nào, cũng không có cái tên nào. `print` không có gì
-để in ra, kể cả một dòng trắng — nó chưa hề được chạy tới.
+hoi. Ở đây không có giá trị nào, cũng không có cái tên nào.
+
+Máy **có** chạy tới dòng `print(ghi_chu)` — traceback chỉ đích danh dòng ấy.
+Nhưng trước khi trao gì cho `print`, nó phải đi tìm giá trị của `ghi_chu`, và
+nó dừng ngay ở bước đi tìm. `print` chưa bao giờ được gọi, nên không có dòng
+nào in ra, kể cả một dòng trắng.
 ::
 :::
 

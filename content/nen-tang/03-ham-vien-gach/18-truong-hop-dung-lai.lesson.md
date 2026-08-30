@@ -53,8 +53,8 @@ Cái nhánh mà người đầu dãy đi vào — nhánh **trả lời thẳng, 
 tên riêng: **trường hợp cơ sở**.
 
 Nói bằng ngôn ngữ của cái chồng phiếu ở bài 16: trường hợp cơ sở là lượt gọi
-duy nhất **không đặt thêm phiếu nào lên chồng**. Nó chạy xong, nó `return`, và
-tờ phiếu của nó được gỡ đi. Tờ nằm dưới lập tức được chạy tiếp, rồi cũng gỡ.
+duy nhất **không đặt thêm phiếu nào lên chồng**. Nó chạy hết thân mình mà
+không nhờ ai, nên tờ phiếu của nó được gỡ đi ngay. Tờ nằm dưới lập tức được chạy tiếp, rồi cũng gỡ.
 Cả cái chồng đổ xuống theo dây chuyền, từ trên xuống dưới, nhanh y như lúc nó
 cao lên.
 ::::

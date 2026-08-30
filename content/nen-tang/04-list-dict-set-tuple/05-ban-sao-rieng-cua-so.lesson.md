@@ -97,8 +97,9 @@ dựng cuốn mới.**
 ::::
 
 ::::predict{#doan-ba-cai-ten commitOnce}
-Byte dựng ba cái tên cho một cuốn sổ: một bằng lát cắt, một bằng dấu bằng trần.
-Rồi Byte ghi thêm một dòng qua cái tên gốc.
+Byte có một cuốn sổ tên `so`, rồi đặt thêm hai cái tên nữa từ nó: một cái viết
+bằng lát cắt, một cái viết bằng dấu bằng trần. Rồi Byte ghi thêm một dòng qua
+cái tên gốc.
 
 **Trước khi bấm chạy**, bạn đoán hai dòng cuối in ra gì?
 

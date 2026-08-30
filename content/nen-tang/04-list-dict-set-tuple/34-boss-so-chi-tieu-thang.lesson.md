@@ -226,8 +226,14 @@ mảnh, và thiếu mảnh nào cũng hỏng theo một kiểu riêng.
 
 - Mảnh **lấy ra**: `tong_nhom.get(nhom, 0)`. Nó trả lời câu "nhóm này đã cộng
   được bao nhiêu rồi", và trả lời được cả khi nhóm ấy chưa từng xuất hiện — đó
-  là việc của con số `0` đứng thứ hai. Không có mảnh này thì lượt đầu tiên của
-  mỗi nhóm sẽ hỏi một khoá chưa có và chương trình dừng vì `KeyError`.
+  là việc của con số `0` đứng thứ hai.
+
+  Bỏ **hẳn** mảnh này — đúng như phần đoán vừa rồi — thì chương trình không
+  dừng lấy một lần: nó lặng lẽ ghi đè, và đó mới là kiểu hỏng đáng sợ. Còn nếu
+  bạn giữ phép lấy ra mà bỏ con số `0`, tức viết
+  `tong_nhom[nhom] = tong_nhom[nhom] + khoan["tien"]`, thì lượt đầu tiên của
+  mỗi nhóm hỏi một khoá chưa có và chương trình dừng vì `KeyError`. Hai kiểu
+  bỏ, hai kiểu hỏng khác hẳn nhau.
 - Mảnh **ghi lại**: `tong_nhom[nhom] = ...`. Nó cất kết quả vào đúng khoá ấy.
   Không có mảnh này thì phép cộng vẫn chạy nhưng không ai giữ lại, y hệt chuyện
   gọi một phương thức chuỗi mà quên gán.

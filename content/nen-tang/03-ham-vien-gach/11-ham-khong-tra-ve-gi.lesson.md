@@ -70,9 +70,10 @@ nghe thấy con số nhưng tay không cầm gì. Hàm `chao` làm đúng như v
 lên màn hình, và không đưa gì về chỗ gọi.
 
 Chỗ khác biệt với đời thường nằm ở đây: **máy không có kiểu "không đưa gì cả"**.
-Mỗi lượt gọi hàm đều phải kết thúc bằng việc đưa ra một thứ, vì bên gọi đang chờ
-một thứ để dán vào `x`. Khi thân hàm chạy hết dòng cuối mà không gặp `return` nào,
-máy vẫn phải đưa ra một cái gì đó — và cái nó đưa ra là `None`.
+Mỗi lượt gọi hàm đều kết thúc bằng việc đưa một thứ về chỗ gọi — dù chỗ gọi
+có ai hứng lấy hay không. Viết `chao("Lan")` một mình, không dán vào cái tên
+nào, thì thứ ấy vẫn được đưa về, chỉ là không ai giữ nó lại. Khi thân hàm chạy
+hết dòng cuối mà không gặp `return` nào, thứ nó đưa về là `None`.
 
 Nói cho gọn: `None` chính là câu "tôi chẳng có gì để đưa cho anh cả", viết thành
 một giá trị.

@@ -262,7 +262,10 @@ if tien_chu_nhat > 200000:
 #   chép nguyên dòng của thứ Bảy xuống chỗ trống thứ hai
 #                                → chủ nhật lại in thừa dòng "ngày kỷ lục".
 # 520000 và 480000 kẹp mốc 500000 từ hai phía, nên chỉ ngưỡng nằm giữa hai số
-# ấy mới qua được — cổng chấm đúng con số mà gợi ý đã dặn.
+# ấy mới qua được. Nói cho chính xác: cổng KHÔNG chấm riêng con số 500000 —
+# mọi ngưỡng trong khoảng 480001…520000 đều cho ra đúng màn hình ấy. Muốn ghim
+# đúng một con số thì phải thêm một ngày nữa để bóp khoảng lại, hoặc một luật
+# `static` đòi hằng số ấy có mặt.
 # Người học chưa biết viết assert nên khối này không thêm gì; nó ở đây để nói
 # rõ vì sao hai ngày là hai, không phải một.
 pass
