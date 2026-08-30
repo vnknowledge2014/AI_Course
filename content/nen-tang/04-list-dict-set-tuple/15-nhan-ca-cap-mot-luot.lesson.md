@@ -74,10 +74,9 @@ Máy in ra:
 ('biếu bà', 300000)
 ```
 
-Ba lượt, ba món — chứ không phải sáu lượt. Sổ có ba khoá thì `.items()` chạy ba
-vòng, y hệt `.keys()` và `.values()`. Điểm khác là mỗi vòng nó trao cho bạn một
-món **có hai thứ bên trong**, nên `print(cap)` in được cả tên lẫn tiền chỉ với
-một cái tên duy nhất.
+Điểm đáng nhìn ở đây là **hình dạng** của thứ mỗi vòng trao cho bạn: một món
+**có hai thứ bên trong**, nên `print(cap)` in được cả tên lẫn tiền chỉ với một
+cái tên duy nhất. (Còn mỗi lần chạy bao nhiêu vòng thì khối dưới hỏi bạn.)
 
 Nhìn kỹ hình dạng thứ vừa hiện lên màn hình:
 

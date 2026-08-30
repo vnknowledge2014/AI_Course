@@ -230,6 +230,16 @@ for gio in gio_tau:
         break
 ___:
     print(f"Ra ga lúc {gio_muon} giờ: hôm nay hết tàu rồi")
+
+# Chủ nhật không có chuyến nào — danh sách rỗng.
+gio_tau_chu_nhat = []
+gio_muon = 6
+for gio in gio_tau_chu_nhat:
+    if gio >= gio_muon:
+        print(f"Ra ga lúc {gio_muon} giờ: đi được chuyến {gio} giờ")
+        break
+___:
+    print(f"Ra ga lúc {gio_muon} giờ: hôm nay hết tàu rồi")
 ```
 
 ```python title=solution
@@ -250,6 +260,16 @@ for gio in gio_tau:
         break
 else:
     print(f"Ra ga lúc {gio_muon} giờ: hôm nay hết tàu rồi")
+
+# Chủ nhật không có chuyến nào — danh sách rỗng.
+gio_tau_chu_nhat = []
+gio_muon = 6
+for gio in gio_tau_chu_nhat:
+    if gio >= gio_muon:
+        print(f"Ra ga lúc {gio_muon} giờ: đi được chuyến {gio} giờ")
+        break
+else:
+    print(f"Ra ga lúc {gio_muon} giờ: hôm nay hết tàu rồi")
 ```
 
 ```python title=test
@@ -263,7 +283,14 @@ else:
 # Khối này khẳng định thêm rằng vòng thứ hai đã đi trọn năm chuyến: cái tên
 # `gio` còn giữ giờ của chuyến cuối cùng, nghĩa là không lượt nào gặp `break`.
 assert gio == 13, "chuyến cuối trong ngày chạy lúc 13 giờ — lần ra ga thứ hai phải hỏi hết cả năm chuyến, tới chuyến cuối cùng, mới dám nói là hết tàu"
-assert gio_muon == 14, "lần ra ga thứ hai là lúc 14 giờ, muộn hơn cả chuyến 13 giờ, nên không chuyến nào còn kịp"
+assert gio_muon == 6, "lần ra ga thứ ba là sáng chủ nhật lúc 6 giờ, và hôm ấy nhà ga không chạy chuyến nào"
+# Ba lần ra ga, vì hai lần không đủ. Ba câu trả lời hụt, ba kiểu lộ khác nhau:
+#   `if True:`            → in thừa ở CẢ ba lần, ra bốn dòng thay vì ba;
+#   `if gio < gio_muon:`  → lần một và lần ba đều im, chỉ ra hai dòng;
+#   `if not gio:`         → chỉ ra một dòng.
+# Riêng lần thứ ba — danh sách RỖNG — là lần duy nhất tách được `else` khỏi
+# mọi câu hỏi dựa vào giá trị của `gio`, vì ở đó vòng không chạy lượt nào và
+# `gio` vẫn còn giữ 13 của lần trước.
 ```
 
 :::hints
@@ -282,7 +309,7 @@ assert gio_muon == 14, "lần ra ga thứ hai là lúc 14 giờ, muộn hơn c�
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^Ra ga lúc 8 giờ: đi được chuyến 9 giờ\nRa ga lúc 14 giờ: hôm nay hết tàu rồi\s*$
+  expect: ^Ra ga lúc 8 giờ: đi được chuyến 9 giờ\nRa ga lúc 14 giờ: hôm nay hết tàu rồi\nRa ga lúc 6 giờ: hôm nay hết tàu rồi\s*$
 :::
 ::::
 

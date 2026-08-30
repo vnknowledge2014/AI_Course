@@ -222,7 +222,7 @@ print(f"Phải trả {tong} đồng")
 ```python title=test
 # Ba mức giá khác nhau, vì một dòng chỉ in ra màn hình mà không đưa gì ra sẽ
 # khiến hàm trả về None — và None thì trượt ngay ở phép so đầu tiên.
-assert tien_phai_tra(0) == 0, "món hàng 0 đồng thì thuế cũng 0 đồng, nên phải trả 0 đồng"
+assert tien_phai_tra(0) == 0, "món hàng 0 đồng thì thuế cũng 0 đồng, nên phải trả 0 đồng. Nếu câu này trượt mà màn hình VẪN in ra số 0, thì chỗ trống của bạn đang `print` chứ không `return` — in ra là cho người xem, đưa ra mới là cho người gọi, và thứ hàm đưa về lúc ấy là `None`"
 assert tien_phai_tra(45000) == 49500, "tô phở 45 nghìn chịu 4500 tiền thuế, nên phải trả 49500 đồng"
 assert tien_phai_tra(120000) == 132000, "món 120 nghìn chịu 12 nghìn tiền thuế, nên phải trả 132 nghìn — con số này phải TÍNH ra từ đối số, không phải một số ghi cứng trong thân hàm"
 ```
