@@ -250,10 +250,20 @@ assert so_hat == 37 + 270, "cái ô rỗng bị bỏ quên đáng đúng 270 h�
   requireAst:
   # Ba luật này chặn ba kiểu đi tắt khác nhau: chép cứng chuỗi "307" (không có
   # f-string), ghép mà bỏ qua cột rỗng (không đọc tên `bo`), và chép cứng con
-  # số 307 (không có phép cộng nào).
+  # số 307 (không cộng gì cả).
+  #
+  # `+` để `min: 1`, KHÔNG phải 3. Đặt 3 là đo theo hình dạng lời giải mẫu
+  # (`100 + 100 + 100 + 0 + 7`) chứ không đo theo thứ bài đòi:
+  # `so_hat = 300 + 0 + 7` đọc đúng cả ba cột mà chỉ có hai dấu cộng.
+  #
+  # Và không được đòi khúc `+ 0` phải có mặt: khối predict ngay trên vừa dạy
+  # rằng bỏ `+ 0` khỏi một phép cộng thì chẳng đổi gì. Đòi nó là bài tự chọi
+  # bài. Việc chặn chép cứng để `forbidAst` lo.
   - kind: uses-fstring, min: 1
   - kind: uses-name, target: bo, min: 1
-  - kind: uses-operator, target: +, min: 3
+  - kind: uses-operator, target: +, min: 1
+  forbidAst:
+  - kind: has-literal, target: 307
 - tier: tests
   timeoutMs: 4000
 - tier: output
