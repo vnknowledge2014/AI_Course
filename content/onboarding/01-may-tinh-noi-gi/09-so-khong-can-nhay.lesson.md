@@ -93,19 +93,19 @@ chữ x). Dấu chia có một chuyện riêng khá bất ngờ, vài bài nữa
 ::::
 
 ::::predict{#doan-tien-hai-mon commitOnce}
-Khách gọi một tô phở 20.000đ cho trẻ con và một tô 25.000đ. Byte sắp chạy dòng
-dưới. **Trước khi bấm chạy**, bạn đoán nó in ra gì?
+Khách gọi thêm một đĩa quẩy 10.000đ và một cốc trà đá 5.000đ. Byte sắp chạy
+dòng dưới. **Trước khi bấm chạy**, bạn đoán nó in ra gì?
 
 ```python title=readonly
-print(20000 + 25000)
+print(10000 + 5000)
 ```
 
 :::opt{correct}
-45000
+15000
 :::
 
 :::opt
-20000 + 25000
+10000 + 5000
 ::why
 Gần đúng ở chỗ bạn nhớ rất chắc bài số 1: `print("2 + 3")` in ra nguyên văn
 `2 + 3`, không tính toán gì cả. Điều đó đúng — nhưng lúc đó phép cộng nằm **trong
@@ -118,19 +118,19 @@ xong rồi mới nói.
 :::
 
 :::opt
-Máy báo `NameError`, vì `20000` không có nháy mà cũng chẳng phải cái tên nào bạn đặt
+Máy báo `NameError`, vì `10000` không có nháy mà cũng chẳng phải cái tên nào bạn đặt
 ::why
 Gần đúng, và bạn đang dùng đúng luật vừa học ở bài trước: gặp thứ không nháy,
 máy đi tìm một cái tên; tìm không ra thì `NameError`.
 
 Chỗ lệch nằm ở chữ "đi tìm". Máy chỉ đi tìm khi thứ nó thấy **có thể** là một
-tên, mà tên thì phải mở đầu bằng chữ cái. `20000` mở đầu bằng chữ số, nên máy
+tên, mà tên thì phải mở đầu bằng chữ cái. `10000` mở đầu bằng chữ số, nên máy
 biết ngay đây là số và không đi tìm ai cả.
 ::
 :::
 
 :::opt
-2000025000
+100005000
 ::why
 Gần đúng ở một chỗ đáng giá: bạn đang nghi ngờ dấu `+` có thể làm việc gì đó
 khác chứ không chỉ cộng. Giữ lấy mối nghi ấy — bài sau sẽ cho thấy bạn nghi

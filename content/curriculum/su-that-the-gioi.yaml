@@ -108,3 +108,20 @@
   pham_vi: content/onboarding
   tu_khoa:
     - 'tô to[^.\n]{0,14}?({SO})\s*(?:nghìn|đồng|đ\b)'
+
+# Hai món phụ của quán. Thêm 2026-08-30 sau khi bài 09 bị bắt quả tang bán
+# "một tô 25.000đ" — một cái giá không có trong bảng nào, và cổng không thấy vì
+# luật cũ chỉ soi khi có chữ "tô nhỏ" / "tô vừa" / "tô to" đứng ngay trước.
+- ten: gia-dia-quay
+  gia_tri: 10000
+  cho_nghin: 1
+  pham_vi: content/onboarding
+  tu_khoa:
+    - 'quẩy[^.\n]{0,14}?({SO})\s*(?:nghìn|đồng|đ\b)'
+
+- ten: gia-tra-da
+  gia_tri: 5000
+  cho_nghin: 1
+  pham_vi: content/onboarding
+  tu_khoa:
+    - 'trà đá[^.\n]{0,14}?({SO})\s*(?:nghìn|đồng|đ\b)'

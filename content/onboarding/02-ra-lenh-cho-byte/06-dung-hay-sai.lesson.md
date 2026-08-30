@@ -148,8 +148,12 @@ màn hình vẫn hiện một dòng.
 ::::explain{#mot-kieu-moi}
 Bạn vừa gặp một kiểu giá trị mới.
 
-Trước đây bạn có chữ (`"Phở Thìn"`) và số (`45000`). Giờ có thêm loại thứ ba,
-loại chỉ có đúng hai giá trị trong toàn bộ thế giới: `True` và `False`.
+Trước đây bạn có ba nhãn: `str` cho chữ (`"Phở Thìn"`), `int` cho số nguyên
+(`45000`), và `float` cho số có phần lẻ — cái nhãn thứ ba mà bài số lẻ và số
+nguyên đã đưa cho bạn.
+
+Đây là nhãn **thứ tư**, và nó lạ hơn cả ba cái kia: cả thế giới của nó chỉ có
+đúng hai giá trị, `True` và `False`. Không có cái thứ ba.
 
 Thử hỏi máy xem nó gọi loại này là gì:
 

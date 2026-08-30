@@ -154,7 +154,13 @@ bạn biết — chương trình vẫn chạy, chỉ tính sai tiền của khá
 Cách chọn: đọc lại tờ giấy dán tường bằng tiếng Việt, rồi tìm chữ bản lề.
 
 - Thấy chữ **"và"**, **"vừa... vừa..."**, **"phải có đủ"** → dùng `and`.
-- Thấy chữ **"hoặc"**, **"một trong hai"**, **"chỉ cần"** → dùng `or`.
+- Thấy chữ **"hoặc"**, **"chỉ cần"**, **"ít nhất một"** → dùng `or`.
+
+Để ý cụm **"một trong hai"** không có trong danh sách, dù tiếng Việt hay dùng
+nó cạnh chữ "hoặc". Lý do là thứ bạn vừa gỡ ở khối trên: "chọn một trong hai"
+hàm ý *lấy cả hai thì không được*, mà `or` lại đậu khi cả hai vế đều đúng. Gặp
+cụm ấy thì phải đọc kỹ xem người ta có thật sự loại trừ hay không — `or` một
+mình không diễn tả được ý loại trừ.
 
 Hai câu dưới đây khác nhau đúng một từ, và khác nhau cả một chính sách bán hàng:
 

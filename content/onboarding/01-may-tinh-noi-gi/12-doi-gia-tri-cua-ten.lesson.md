@@ -59,23 +59,25 @@ Cái tên bạn đặt ở bài trước chính là tấm thẻ đó.
 ::::
 
 ::::example{#buoc-the-lan-thu-hai}
-Đây là tấm thẻ được chuyển, viết bằng Python:
+Đây là tấm thẻ được chuyển, viết bằng Python — và đây đúng là hai dòng bài
+trước đã hẹn sẽ chạy, không phải hai dòng nào khác. Tuần trước quán tăng giá
+tô đặc biệt lên 65.000đ; tuần này quán hạ xuống 60.000đ.
 
 ```python title=readonly
-gia_pho = 45000
-gia_pho = 50000
+gia_dac_biet = 65000
+gia_dac_biet = 60000
 ```
 
 Đọc hai dòng này thành **hai việc xảy ra lần lượt**, chứ không phải hai lời tuyên
 bố cùng đứng một chỗ:
 
-- Dòng 1: máy làm ra giá trị `45000`, rồi buộc tấm thẻ `gia_pho` vào nó.
-- Dòng 2: máy làm ra giá trị `50000`, rồi **gỡ** tấm thẻ `gia_pho` ra khỏi chỗ cũ và buộc vào giá trị mới.
+- Dòng 1: máy làm ra giá trị `65000`, rồi buộc tấm thẻ `gia_dac_biet` vào nó.
+- Dòng 2: máy làm ra giá trị `60000`, rồi **gỡ** tấm thẻ `gia_dac_biet` ra khỏi chỗ cũ và buộc vào giá trị mới.
 
 Chỗ này cần nói thẳng ra, vì nó là chỗ vấp của gần như tất cả người mới: dấu `=`
 đây **không phải** dấu "bằng" trong sách toán.
 
-Trong sách toán, viết `gia_pho = 45000` rồi viết tiếp `gia_pho = 50000` là tự mâu
+Trong sách toán, viết `gia_dac_biet = 65000` rồi viết tiếp `gia_dac_biet = 60000` là tự mâu
 thuẫn — một thứ không thể vừa bằng con số này vừa bằng con số kia. Ở đây không có
 mâu thuẫn nào cả, vì `=` không nói *hai bên bằng nhau*. Nó ra một mệnh lệnh:
 
@@ -86,22 +88,22 @@ Mệnh lệnh thì làm xong là xong. Và ra lệnh lại lúc nào cũng đư�
 
 ::::predict{#the-dang-o-dau commitOnce}
 Byte vừa chạy đúng hai dòng ở trên. **Trước khi xem đáp án**, bạn đoán tấm thẻ
-`gia_pho` bây giờ đang buộc vào con số nào?
+`gia_dac_biet` bây giờ đang buộc vào con số nào?
 
 ```python
-gia_pho = 45000
-gia_pho = 50000
+gia_dac_biet = 65000
+gia_dac_biet = 60000
 ```
 
 :::opt{correct}
-50000 — chỉ một mình nó
+60000 — chỉ một mình nó
 :::
 
 :::opt
-45000, vì dòng đầu tiên mới là dòng đặt tên
+65000, vì dòng đầu tiên mới là dòng đặt tên
 ::why
-Gần đúng ở chỗ bạn nhớ chính xác dòng đầu đã làm gì: nó buộc thẻ `gia_pho` vào
-`45000`. Suốt cả bài trước, điều đó đúng.
+Gần đúng ở chỗ bạn nhớ chính xác dòng đầu đã làm gì: nó buộc thẻ `gia_dac_biet` vào
+`65000`. Suốt cả bài trước, điều đó đúng.
 
 Chỗ lệch nằm ở thứ tự. Máy đọc từ trên xuống, nên dòng thứ hai chạy **sau** — và
 lúc nó chạy xong thì tấm thẻ đã không còn ở nồi cũ nữa. Dòng đầu không phải một
@@ -110,7 +112,7 @@ lời hứa giữ mãi mãi; nó chỉ là việc đã làm ở giây thứ nh�
 :::
 
 :::opt
-Cả hai: `gia_pho` giữ 45000 và 50000
+Cả hai: `gia_dac_biet` giữ 65000 và 60000
 ::why
 Gần đúng ở chỗ bạn nhận ra cả hai con số đều đã thật sự có mặt trong máy. Chúng
 được làm ra thật, không phải bịa.
@@ -122,7 +124,7 @@ tên, tại một lúc, trỏ vào đúng một giá trị.
 :::
 
 :::opt
-Máy dừng lại và báo lỗi, vì cái tên `gia_pho` đã dùng ở dòng trên rồi
+Máy dừng lại và báo lỗi, vì cái tên `gia_dac_biet` đã dùng ở dòng trên rồi
 ::why
 Gần đúng ở chỗ bạn đang đọc dấu `=` như một lời tuyên bố — mà tuyên bố hai lần
 với hai con số khác nhau thì nghe đúng là vô lý. Cách đọc ấy rất tự nhiên, vì
@@ -136,19 +138,19 @@ thứ hai thì máy chỉ việc buộc lại lần nữa. Không có gì để 
 
 ::::explain{#sau-hai-dong-con-lai-gi}
 Đúng như bạn vừa đoán: sau hai dòng, trong máy có đúng **một** tấm thẻ mang tên
-`gia_pho`, và nó đang buộc vào `50000`. Không phải hai tấm thẻ, cũng không phải
+`gia_dac_biet`, và nó đang buộc vào `60000`. Không phải hai tấm thẻ, cũng không phải
 một tấm thẻ buộc vào hai chỗ.
 ::::
 
 ::::explain{#gia-tri-cu-di-dau}
-Giờ trả lời thẳng câu hỏi cuối bài trước: `45000` đi đâu?
+Giờ trả lời thẳng câu hỏi cuối bài trước: `65000` đi đâu?
 
 Trong bếp, nồi phở bò vẫn còn — chị Hạnh nhìn thấy nó, muốn múc thì múc. Trong
 máy thì khác đúng một chi tiết, và chi tiết đó quyết định mọi thứ: **cách duy
 nhất để bạn với tới một giá trị là gọi tên nó.** Không có mắt nào nhìn vào bộ nhớ
 cả.
 
-Tấm thẻ vừa chuyển đi, nên từ giờ không còn đường nào dẫn tới `45000` nữa. Nó
+Tấm thẻ vừa chuyển đi, nên từ giờ không còn đường nào dẫn tới `65000` nữa. Nó
 không nổ, không báo lỗi, không để lại dấu vết. Máy dọn nó đi lúc nào thì bạn
 không cần bận tâm. Với chương trình của bạn, coi như nó không còn.
 
@@ -203,7 +205,7 @@ pass
 - kind: attention
   body: Dòng thứ hai trông rất giống dòng thứ nhất. Cùng một cái tên bên trái dấu `=`, chỉ khác con số bên phải.
 - kind: strategy
-  body: "Nhớ lại đoạn `gia_pho` ở trên: chuyển thẻ chỉ là ra lệnh lại. Đừng nghĩ ra tên mới như `so_to_da_ban_2` — cả bài này nói rằng không cần."
+  body: "Nhớ lại đoạn `gia_dac_biet` ở trên: chuyển thẻ chỉ là ra lệnh lại. Đừng nghĩ ra tên mới như `so_to_da_ban_2` — cả bài này nói rằng không cần."
 - kind: one-line
   body: "Viết `so_to_da_ban = 12` vào chỗ trống."
 :::

@@ -151,7 +151,19 @@ bốn dòng khác nhau.
 Vài chuyện gọn cần biết về biến lặp:
 
 - **Tên gì cũng được.** `lan`, `so`, `i`, `so_thu_tu` — máy không quan tâm bạn đặt tên gì, nó chỉ quan tâm cái tên ấy đứng đúng chỗ giữa `for` và `in`. Người đọc lại code sau này thì có quan tâm, nên đặt tên nói đúng thứ nó giữ.
-- **Muốn đánh số từ 1** thì cộng thêm một lúc in: `print(f"Tô thứ {so + 1}")`. Máy tính `so + 1` xong mới thay vào câu. Phép cộng số bạn đã biết từ bài số thì máy tính được.
+- **Muốn đánh số từ 1** thì cộng thêm một lúc in: `print(f"Tô thứ {so + 1}")`.
+
+  Chỗ này nới rộng một luật bạn đã học, nên phải nói ra. Bài chèn giá trị vào
+  câu chốt rằng *trong ngoặc nhọn phải là cái tên máy tìm được*, và ngay trong
+  bài hôm nay bạn vừa đọc lại luật ấy. `so + 1` **không** phải một cái tên.
+
+  Luật đầy đủ rộng hơn một chút: trong ngoặc nhọn viết được **thứ gì máy tính
+  ra được một giá trị**. Một cái tên là trường hợp đơn giản nhất — máy tra ra
+  giá trị rồi thay vào. `so + 1` thì máy phải cộng trước, xong mới thay. Cả
+  hai đều là "tính ra một giá trị rồi thay vào", chỉ khác chỗ tốn mấy bước.
+
+  Luật cũ vẫn đúng nguyên vẹn ở chỗ nó cấm: gõ nhầm một cái tên không tồn tại
+  thì vẫn `NameError`, vì máy vẫn phải tìm cho ra `so` mới cộng được.
 - **Bên trong vòng lặp bạn viết được nhiều dòng**, miễn là cùng lùi vào bốn dấu cách. Cả khối ấy chạy lại từ đầu ở mỗi lượt.
 ::::
 

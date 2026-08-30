@@ -122,12 +122,12 @@ Chỗ lệch chỉ là hình thức: máy in ra **nguyên văn** câu trả lờ
 Quán đếm được số tô bán trong ngày. Hãy hỏi máy xem giá trị đó thuộc **loại** gì.
 
 ```python title=starter
-so_to_da_ban = 128
+so_to_da_ban = 47
 print(___)
 ```
 
 ```python title=solution
-so_to_da_ban = 128
+so_to_da_ban = 47
 print(type(so_to_da_ban))
 ```
 
