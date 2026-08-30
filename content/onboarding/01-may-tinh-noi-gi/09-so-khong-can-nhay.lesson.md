@@ -79,8 +79,8 @@ Máy in ra:
 5
 ```
 
-Dòng đầu bạn đã gặp ở bài số 1: `2 + 3` nằm trong nháy nên nó là ba ký tự xếp
-cạnh nhau, máy đọc nguyên văn.
+Dòng đầu bạn đã gặp ở bài số 1: `2 + 3` nằm trong nháy nên nó là năm ký tự xếp
+liền nhau — hai dấu cách cũng tính — và máy đọc nguyên văn cả năm.
 
 Dòng thứ hai không có dấu nháy nào. Nên với máy, ở đây có hai con số và một dấu
 `+` thật. Máy làm hai việc, theo đúng thứ tự này:

@@ -72,7 +72,12 @@ và hỏi: *có ai tên như thế này không?*
 Lúc này sổ tên của bạn đang trống trơn — bạn chưa đặt tên cho thứ gì cả. Nên mọi
 từ không nháy đều rơi vào trường hợp thứ hai.
 
-Đó chính là câu trả lời cho câu hỏi treo từ bài 1.
+Đó chính là câu trả lời cho câu hỏi treo từ bài 1: bỏ hai dấu nháy trong
+`print("Phở")` thì `Phở` thành một cái tên, và sổ tên chưa có dòng nào tên ấy.
+
+Còn `print(Xin chào)` — hai tiếng, có dấu cách ở giữa — thì máy không đi tra sổ
+tên lần nào cả. Nó vấp sớm hơn thế, ngay lúc đọc dòng, và vấp bằng một loại lỗi
+khác. Bài cuối mạch này nói về đúng loại ấy.
 ::::
 
 ::::example{#thu-ngay-o-terminal}

@@ -75,10 +75,11 @@ print("2 + 3")
 5
 ::why
 Gần đúng ở chỗ bạn nhận ra `2 + 3` là một phép cộng. Nhưng ở đây nó nằm **trong
-dấu nháy kép** — nên với máy, đó chỉ là ba ký tự `2`, `+`, `3` xếp cạnh nhau,
-y như `"mèo"` là ba chữ cái. Máy đọc nguyên văn, không tính.
+dấu nháy kép** — nên với máy, đó chỉ là năm ký tự xếp liền nhau: `2`, một dấu
+cách, `+`, một dấu cách nữa, rồi `3`. Dấu cách cũng là ký tự, và máy in ra đủ
+cả năm, y như `"mèo"` là ba ký tự. Máy đọc nguyên văn, không tính.
 
-Cuối module này bạn sẽ thử bỏ dấu nháy đi, và thấy nó đổi khác ngay.
+Vài bài nữa bạn sẽ thử bỏ dấu nháy đi, và thấy nó đổi khác ngay.
 ::
 :::
 
@@ -137,6 +138,13 @@ pass
 - tier: tests
   timeoutMs: 4000
 - tier: output
+  # `match: trim`, không để mặc định `contains`. Đề bài đòi "đúng câu Xin
+  # chào", mà `contains` cho `print("Xin chào các bạn")` đậu luôn — ở đúng bài
+  # mà luận điểm trung tâm là máy làm CHÍNH XÁC điều bạn bảo.
+  #
+  # `trim` cắt ký tự xuống dòng nên mọi cách viết đúng (nháy đơn, nháy kép)
+  # vẫn đạt; chỉ phần chữ thừa mới trượt.
+  match: trim
   expect: Xin chào
 :::
 ::::
@@ -144,10 +152,14 @@ pass
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp:
 
-Nếu bạn viết `print(Xin chào)` — **không có** dấu nháy — bạn nghĩ máy sẽ làm gì?
+Lấy một tiếng thôi cho gọn. Nếu bạn viết `print(Phở)` — **không có** dấu
+nháy — bạn nghĩ máy sẽ làm gì?
 
-Đừng trả lời vội. Cuối module này bạn sẽ thử, và câu trả lời sẽ giải thích luôn vì sao
-dấu nháy tồn tại.
+Đừng trả lời vội. Bảy bài nữa bạn sẽ thử, và câu trả lời sẽ giải thích luôn vì
+sao dấu nháy tồn tại.
+
+(Còn `print(Xin chào)` — hai tiếng, có dấu cách ở giữa — thì máy vấp theo một
+kiểu khác hẳn, và nó vấp còn sớm hơn. Chuyện ấy để bài cuối mạch này.)
 ::::
 
 ::::checkpoint{mastery=0.8}

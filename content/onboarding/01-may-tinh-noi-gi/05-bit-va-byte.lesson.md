@@ -78,9 +78,16 @@ ghi từ trên xuống:
 Tám ký tự đó nói đủ mọi thứ về bảng điện, không thiếu, không thừa. Người nhận
 biết quy ước thì dựng lại được nguyên cái bảng.
 
-Máy tính chứa đồ đúng theo kiểu này. Chỉ khác hai chỗ: ô của nó nhỏ tới mức một
-mẩu bằng móng tay chứa được hàng tỉ ô, và "bật/tắt" của nó không phải cái cần
-gạt mà là có dòng điện đi qua hay không.
+Máy tính chứa đồ đúng theo kiểu này. Chỉ khác hai chỗ: ô của nó nhỏ tới mức
+một mẩu bằng móng tay chứa được hàng tỉ ô, và cái cần gạt được thay bằng một
+**dấu vết giữ được** — trên ổ cứng là một vệt từ tính, trong ổ thể rắn là một
+ô điện tích bị nhốt lại. Cả hai đều nằm nguyên đó khi rút điện, đúng như cuốn
+sổ ở bài trước.
+
+(Trên bảng con — chỗ ghi tạm của bài 4 — cũng có những ô hai trạng thái như
+thế, nhưng ở đó trạng thái được giữ bằng dòng điện chạy liên tục. Nên rút điện
+là mất sạch. Cùng một ý tưởng ô, hai cách giữ khác nhau, và đó chính là chỗ
+khác nhau giữa bảng con với cuốn sổ.)
 
 Một cái ô như vậy — hai trạng thái, không có nấc giữa — gọi là một **bit**.
 ::::

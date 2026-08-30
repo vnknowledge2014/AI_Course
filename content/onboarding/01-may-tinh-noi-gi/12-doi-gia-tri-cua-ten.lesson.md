@@ -72,9 +72,6 @@ bố cùng đứng một chỗ:
 - Dòng 1: máy làm ra giá trị `45000`, rồi buộc tấm thẻ `gia_pho` vào nó.
 - Dòng 2: máy làm ra giá trị `50000`, rồi **gỡ** tấm thẻ `gia_pho` ra khỏi chỗ cũ và buộc vào giá trị mới.
 
-Sau hai dòng, trong máy có đúng một tấm thẻ mang tên `gia_pho`, và nó đang buộc
-vào `50000`.
-
 Chỗ này cần nói thẳng ra, vì nó là chỗ vấp của gần như tất cả người mới: dấu `=`
 đây **không phải** dấu "bằng" trong sách toán.
 
@@ -137,6 +134,12 @@ thứ hai thì máy chỉ việc buộc lại lần nữa. Không có gì để 
 :::
 ::::
 
+::::explain{#sau-hai-dong-con-lai-gi}
+Đúng như bạn vừa đoán: sau hai dòng, trong máy có đúng **một** tấm thẻ mang tên
+`gia_pho`, và nó đang buộc vào `50000`. Không phải hai tấm thẻ, cũng không phải
+một tấm thẻ buộc vào hai chỗ.
+::::
+
 ::::explain{#gia-tri-cu-di-dau}
 Giờ trả lời thẳng câu hỏi cuối bài trước: `45000` đi đâu?
 
@@ -154,73 +157,6 @@ cái tên mới là thứ đi.
 
 Từ đây trở đi, việc này có một tên gọi: **gán lại**. Gán lần đầu là dán thẻ lên
 một giá trị; gán lại là chuyển thẻ ấy sang giá trị khác.
-::::
-
-::::explain{#ve-phai-lam-truoc}
-Còn một luật nhỏ nữa, và nó quyết định phần còn lại của bài:
-
-> Máy làm cho xong **vế phải** dấu `=` trước. Xong rồi mới đụng tới cái tên bên
-> trái. Đây là điều quan trọng cần nhớ.
-
-Đọc theo tấm thẻ: chị Hạnh phải bắc xong nồi gà rồi mới buộc thẻ sang. Không ai
-buộc thẻ vào chỗ trống rồi mới đi nấu.
-
-Luật này chưa cần đến khi vế phải là một con số viết sẵn như `50000` — chẳng có
-gì để làm cho xong cả. Nó thành ra quan trọng ngay khi vế phải có một phép tính,
-và quan trọng nhất khi phép tính ấy nhắc tới **chính cái tên đang đứng bên trái**.
-::::
-
-::::predict{#tu-cong-them-mot commitOnce}
-Quán đếm số tô bán được trong ngày. Đến giữa buổi, cái tên `so_to_da_ban` đang
-giữ `12`. Có thêm một khách gọi phở, và chị Hạnh chạy đúng dòng này:
-
-```python
-so_to_da_ban = 12
-so_to_da_ban = so_to_da_ban + 1
-```
-
-**Trước khi xem đáp án**, bạn đoán sau dòng thứ hai, `so_to_da_ban` giữ con số nào?
-
-:::opt{correct}
-13
-:::
-
-:::opt
-Vẫn là 12
-::why
-Gần đúng ở chỗ bạn nhìn ra đúng chỗ khó nhất của dòng này: cái tên `so_to_da_ban`
-xuất hiện ở **cả hai** bên dấu `=`. Đó là chi tiết đáng dừng lại thật.
-
-Chỗ lệch là thứ tự. Máy làm vế phải trước, và lúc nó làm vế phải thì tấm thẻ vẫn
-còn nguyên ở chỗ cũ: nó đi tìm `so_to_da_ban`, thấy `12`, tính `12 + 1`, ra `13`.
-Đến lúc đó nó mới chuyển thẻ sang `13`. Hai bên dấu `=` không xảy ra cùng lúc.
-::
-:::
-
-:::opt
-Máy báo lỗi, vì không con số nào bằng chính nó cộng một
-::why
-Gần đúng — và xét theo sách toán thì bạn hoàn toàn có lý: `x = x + 1` là một
-phương trình vô nghiệm, không con số nào thoả được nó.
-
-Chỗ lệch nằm ở chỗ dấu `=` trong Python không hỏi "hai bên có bằng nhau không".
-Nó ra lệnh: *tính vế phải cho xong, rồi buộc cái tên bên trái vào kết quả*. Đọc
-như mệnh lệnh thì dòng này bình thường tới mức cả bếp làm suốt ngày — **lấy số
-cũ, cộng thêm một, ghi đè lên chỗ ghi số tô.**
-::
-:::
-
-:::opt
-1, vì gán lại làm mất con số cũ trước khi kịp cộng
-::why
-Gần đúng ở chỗ bạn nhớ đúng điều bài này vừa nói: gán lại thì giá trị cũ mất
-đường về. Điều đó có thật.
-
-Chỗ lệch là **lúc nào** nó mất. Giá trị cũ chỉ mất đường về sau khi tấm thẻ đã
-chuyển đi — mà thẻ chỉ chuyển sau khi vế phải đã tính xong. Vế phải kịp đọc `12`
-trước khi có gì kịp mất.
-::
-:::
 ::::
 
 ::::explain{#vi-sao-viec-nay-quan-trong}

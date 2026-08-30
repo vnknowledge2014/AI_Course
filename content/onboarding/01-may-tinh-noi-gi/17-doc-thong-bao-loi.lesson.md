@@ -217,8 +217,10 @@ Bạn vừa sửa lỗi bằng cách đọc, không phải bằng cách thử. H
 Một câu hỏi trước khi đi tiếp.
 
 Để ý điểm chung của mọi thông báo bạn gặp hôm nay và bài trước: máy đều **đã
-chạy được vài dòng** rồi mới vấp. Traceback tồn tại chính vì có một đoạn đường
-để kể lại — dòng 1 và dòng 2 chạy xong xuôi, tới dòng 3 mới hỏng.
+bắt đầu chạy** rồi mới vấp. Có khi vấp ở dòng 3, sau khi hai dòng đầu chạy
+xong xuôi — như ví dụ đầu bài. Có khi vấp ngay ở dòng 1, như bài tập bạn vừa
+làm. Nhưng lần nào máy cũng đã đọc xong cả chương trình, đã bắt tay vào chạy,
+rồi mới gặp chuyện — nên nó mới kể lại được mình đang đứng ở đâu.
 
 Vậy thử nghĩ ngược lại: có loại lỗi nào máy phát hiện ra **trước khi chạy dòng
 đầu tiên** không? Nếu có, thông báo của nó sẽ trông thế nào — nó lấy đâu ra một

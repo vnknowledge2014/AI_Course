@@ -206,8 +206,8 @@ nháy** đi thì sao?
 Giờ bạn có thêm một manh mối mà hôm ấy chưa có. Bài 6 nói: chữ nằm giữa hai dấu
 nháy được máy tra bảng ra số rồi giữ nguyên văn, không cố hiểu.
 
-Vậy khi hai dấu nháy biến mất, `Xin chào` không còn là chữ để đọc nguyên văn
-nữa. Máy sẽ **thấy** nó là cái gì? Và nó sẽ đi tìm cái gì?
+Vậy khi hai dấu nháy biến mất, `Phở` không còn là chữ để đọc nguyên văn nữa.
+Máy sẽ **thấy** nó là cái gì? Và nó sẽ đi tìm cái gì?
 
 Đừng trả lời vội. Bài sau gõ đúng dòng đó vào `>>>` và xem máy đáp lại thế nào.
 ::::

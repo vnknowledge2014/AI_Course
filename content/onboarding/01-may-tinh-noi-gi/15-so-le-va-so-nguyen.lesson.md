@@ -38,8 +38,9 @@ Bài trước bạn học được rằng mọi giá trị đều mang sẵn m�
 - `str` — câu chữ, viết giữa hai dấu nháy.
 - `int` — số nguyên, viết trần không nháy.
 
-Rồi câu hỏi cuối bài để lại một chỗ hở. Quán bán được `45000` đồng, hai người
-chia đôi. `45000` chia `2` được `22500` — chẵn chằn chặn, không dư một đồng nào.
+Rồi câu hỏi cuối bài để lại một chỗ hở. Hai người ăn chung một tô phở `45000`
+đồng, giờ chia đôi tiền. `45000` chia `2` được `22500` — chẵn chằn chặn, không
+dư một đồng nào.
 
 Kết quả nguyên vẹn như thế thì máy dán nhãn gì cho nó?
 
@@ -52,8 +53,8 @@ Byte sắp chạy đúng phép chia đó. **Trước khi bấm chạy**, bạn �
 ra con số nào?
 
 ```python
-tien_ca_ngay = 45000
-print(tien_ca_ngay / 2)
+tien_mot_to = 45000
+print(tien_mot_to / 2)
 ```
 
 :::opt{correct}
@@ -96,9 +97,9 @@ hiểu ra một thứ khác hẳn. Muốn một cân rưỡi thì gõ `1.5`.
 Byte chạy, và hỏi luôn cái nhãn:
 
 ```python title=readonly
-tien_ca_ngay = 45000
-print(tien_ca_ngay / 2)
-print(type(tien_ca_ngay / 2))
+tien_mot_to = 45000
+print(tien_mot_to / 2)
+print(type(tien_mot_to / 2))
 ```
 
 Máy trả lời:
