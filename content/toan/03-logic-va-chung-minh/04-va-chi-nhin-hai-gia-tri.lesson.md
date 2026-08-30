@@ -203,10 +203,19 @@ thích ghi bên cạnh mỗi cột:
 Hai cột đầu là cùng hai vế, đổi chỗ. Cột thứ ba là hai vế khác hẳn, nói về
 chuyện khác hẳn — chỉ trùng với hai vế kia ở đúng một thứ: hai cột giá trị Đ/S.
 
-Bài chấm bằng **cả ba cột**, và mỗi cột phải được viết từ đúng hai cái tên của
-nó. Chép câu của cột này sang cột kia thì cột "chuyện khác" không còn nhắc tới
-trời mưa lần nào, và điều bài này dựng lên để nói tới sẽ không được chứng minh
-ở đâu cả.
+Vế **trái** của cả ba câu ghép đã viết sẵn cho bạn; bạn điền vế phải.
+
+Sẵn tiện nói luôn vì sao lại chừa nửa vời như thế, vì nó chính là chuyện bài
+này đang dạy. Điều bài muốn bạn thấy — đổi chỗ hai vế thì cột kết quả không
+đổi — làm cho hai cột đầu **bằng nhau dù bạn viết thế nào**. Nên nếu chừa cả
+câu, thì viết `nga and khoc` vào cả hai chỗ cũng ra hai cột y hệt, và không có
+cách nào máy biết bạn có thật sự đổi chỗ hay không. Không cách nào — không
+phải "cổng chưa đủ tinh", mà là **không thể**: hai câu ấy bằng nhau ở mọi
+buổi, đó đúng là điều phải chứng minh.
+
+Chừa sẵn vế trái thì hình dạng bị ép, và lúc ấy máy mới nói được điều gì đó
+thật: điền nhầm một cái tên vào bất kỳ chỗ nào trong ba chỗ, cột kết quả lệch
+ngay và bài trượt.
 
 ```python title=starter
 # Bốn buổi sinh hoạt, đọc từ sổ của Lan.
@@ -226,9 +235,9 @@ for i in range(4):
     khoc = nam_khoc[i]
     mua = troi_mua[i]
     deo_the = nam_deo_the[i]
-    xuoi.append(___)
-    nguoc.append(___)
-    chuyen_khac.append(___)
+    xuoi.append(nga and ___)
+    nguoc.append(khoc and ___)
+    chuyen_khac.append(mua and ___)
 
 print(xuoi)
 print(nguoc)
@@ -278,11 +287,11 @@ assert chuyen_khac == xuoi, "'Trời mưa' mang đúng cột giá trị của 'N
 
 :::hints
 - kind: attention
-  body: Mỗi chỗ trống là **một câu ghép**, không phải một giá trị Đ/S gõ sẵn. Đọc lại chú thích nằm ngay bên phải mỗi cột: nó ghi đủ hai vế và chữ nối của câu ấy. Rồi nhìn bốn dòng ngay phía trên ba chỗ trống — chúng vừa lấy ra bốn cái tên, mỗi tên giữ giá trị Đ/S của một câu **tại buổi đang xét**.
+  body: Mỗi chỗ trống là **vế phải** của một câu ghép, không phải một giá trị Đ/S gõ sẵn. Đọc lại chú thích nằm ngay bên phải mỗi cột: nó ghi đủ hai vế của câu ấy, mà vế trái thì dòng code đã có sẵn. Rồi nhìn bốn dòng ngay phía trên — chúng vừa lấy ra bốn cái tên, mỗi tên giữ giá trị Đ/S của một câu **tại buổi đang xét**.
 - kind: strategy
-  body: "Dịch từng chữ một. Chữ VÀ là `and`, còn hai vế thì lấy đúng hai cái tên mà chú thích gọi tên. Cột xuôi và cột ngược dùng chung hai cái tên, chỉ khác thứ tự đặt chúng quanh chữ `and` — cứ viết đúng thứ tự chú thích ghi, rồi để máy nói cho bạn biết thứ tự ấy có đổi gì không. Cột thứ ba dùng hai cái tên còn lại, hai cái chưa xuất hiện ở hai cột trên."
+  body: "Mỗi dòng đã có sẵn vế trái và chữ `and`; bạn chỉ điền vế phải. Đọc chú thích nằm bên phải mỗi cột: nó ghi đủ hai vế, và vế bạn cần là vế mà dòng ấy chưa có. Để ý cột xuôi và cột ngược dùng chung đúng hai cái tên, chỉ đảo thứ tự — đó là chỗ đáng nhìn kỹ. Cột thứ ba dùng hai cái tên còn lại."
 - kind: one-line
-  body: "Ba chỗ lần lượt là `nga and khoc`, `khoc and nga`, và `mua and deo_the`."
+  body: "Ba chỗ lần lượt là `khoc`, `nga`, và `deo_the`."
 :::
 
 :::validate

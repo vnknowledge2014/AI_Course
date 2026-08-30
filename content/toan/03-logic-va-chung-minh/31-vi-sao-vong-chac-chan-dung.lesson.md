@@ -347,9 +347,18 @@ assert cong_quy([0, 0])[1] == 2, "hai tháng chẳng thu được đồng nào v
   # Thước đo phải nhắc tới chính cuốn sổ. Khung khởi đầu đọc `so` 2 lần
   # (`len(so)` và `so[i]`); lời giải đọc 4.
   - kind: uses-name, target: so, min: 4
-  # …và phải nhắc tới số tháng ĐÃ đọc. Khung khởi đầu đọc `i` 3 lần; lời giải
-  # đọc 5. Không có luật này thì `truoc = len(so)` cho cả hai chỗ vẫn lọt.
-  - kind: uses-name, target: i, min: 5
+  # …và phải nhắc tới số tháng ĐÃ đọc. Khung khởi đầu đọc `i` 3 lần.
+  #
+  # `min: 4`, không phải 5. Chỗ trống thứ nhất nằm TRƯỚC vòng, lúc `i` còn
+  # đúng bằng 0 — nên `truoc = len(so)` là một lời giải ĐÚNG, dựng từ chính
+  # cuốn sổ đang cầm, không phải "một con số nhớ sẵn". Đặt 5 là đo theo hình
+  # dạng lời giải mẫu và đánh trượt nó oan, với một câu `onFail` còn đổ tội
+  # nhầm ("không nhắc tới cuốn sổ") trong khi họ vừa gõ `len(so)`.
+  #
+  # 4 vẫn chặn đúng ca luật này sinh ra để chặn — `len(so)` ở CẢ HAI chỗ (chỉ
+  # đọc `i` 3 lần). Ca ấy tầng `run` cũng bắt được, nhưng `truoc = 6` thì run
+  # KHÔNG bắt (đã thử: nó chạy êm trên cả năm cuốn sổ), nên luật này vẫn cần.
+  - kind: uses-name, target: i, min: 4
   # Thước đo là một phép TRỪ. Khung khởi đầu có đúng 1 dấu trừ (trong câu
   # `assert sau <= truoc - 1`); lời giải có 3.
   - kind: uses-operator, target: -, min: 3

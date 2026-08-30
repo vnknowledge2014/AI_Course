@@ -209,9 +209,18 @@ Ba câu cần điền, đúng theo chú thích ghi bên phải mỗi cột:
 Viết cả ba bằng hàm `keo_theo` đã có sẵn ở trên, và bằng chữ `not` cho mỗi vế bị
 phủ định — đó là hình dạng mà bài này dạy, và cũng là hình dạng mà máy chấm đọc.
 
-Bài chấm bằng **cả ba cột**, và ba cột được chọn để cư xử khác nhau: hai cột
-trùng khít nhau, cột còn lại lệch khỏi chúng ở hai dòng. Gõ cùng một thứ vào cả
-ba chỗ trống thì ba cột giống hệt nhau và hỏng ngay.
+**Vế trước** của cả ba câu đã viết sẵn cho bạn; bạn điền vế sau.
+
+Chừa nửa vời như thế là có lý do, và lý do ấy chính là điều bài này sắp chứng
+minh. Cột đảo và cột phản **trùng khít nhau ở cả bốn dòng** — đó là kết quả
+của bài. Nên nếu chừa cả câu, thì viết câu phản vào chỗ cột đảo và câu đảo vào
+chỗ cột phản cũng ra hai cột y hệt, và không cách nào máy biết bạn có nhớ
+ngược tên hai khái niệm hay không. Không cách nào — không phải "cổng chưa đủ
+tinh", mà là **không thể**, vì hai câu ấy bằng nhau ở mọi dòng.
+
+Chừa sẵn vế trước thì hình dạng bị ép, và lúc ấy máy mới nói được điều gì đó
+thật: điền nhầm vế sau ở bất kỳ chỗ nào trong ba chỗ, cột kết quả lệch ngay.
+Bài chấm bằng cả ba cột, và cột gốc lệch khỏi hai cột kia ở hai dòng.
 
 ```python title=starter
 def keo_theo(truoc, sau):
@@ -225,9 +234,9 @@ cot_phan = []  # "nếu Nam không phải thành viên thì Nam không đeo th�
 
 for p in [True, False]:
     for q in [True, False]:
-        cot_goc.append(___)
-        cot_dao.append(___)
-        cot_phan.append(___)
+        cot_goc.append(keo_theo(p, ___))
+        cot_dao.append(keo_theo(q, ___))
+        cot_phan.append(keo_theo(not p, ___))
 
 print(cot_goc)
 print(cot_dao)
@@ -270,11 +279,11 @@ assert cot_phan == [True, True, False, True], "câu phản cũng chỉ sai ở d
 
 :::hints
 - kind: attention
-  body: Mỗi chỗ trống là **một câu "nếu... thì"** viết bằng hàm `keo_theo`, không phải một giá trị Đ/S gõ sẵn. Đọc lại chú thích bên phải mỗi cột: nó ghi rõ vế nào đứng trước, vế nào đứng sau. Trong tay mỗi lượt có `p` (câu "Nam là thành viên") và `q` (câu "Nam đeo thẻ").
+  body: Mỗi chỗ trống là **vế sau** của một câu "nếu... thì" — vế trước thì dòng code đã đưa vào `keo_theo` sẵn rồi. Đọc lại chú thích bên phải mỗi cột: nó ghi rõ vế nào đứng trước, vế nào đứng sau. Trong tay mỗi lượt có `p` (câu "Nam là thành viên") và `q` (câu "Nam đeo thẻ").
 - kind: strategy
-  body: "`keo_theo` nhận hai thứ theo đúng thứ tự: vế trước rồi vế sau. Câu gốc đưa vào theo thứ tự `p` rồi `q`. Câu đảo đưa vào theo thứ tự ngược lại. Câu phản giữ nguyên thứ tự của câu gốc, nhưng mỗi vế phải đem phủ định trước khi đưa vào — chữ \"không\" của bài 3 viết là `not` đặt trước tên."
+  body: "Nhìn vế trước đã viết sẵn ở mỗi dòng, rồi hỏi: câu ấy nói vế sau là gì? Cột gốc mở bằng `p` nên vế sau là `q`. Cột đảo mở bằng `q` — nó đổi chỗ hai vế — nên vế sau là `p`. Cột phản mở bằng `not p`: nó giữ nguyên thứ tự của câu gốc mà phủ định cả hai vế, nên vế sau là `q` đã phủ định. Chữ \"không\" của bài 3 viết là `not` đặt trước tên."
 - kind: one-line
-  body: "Ba chỗ lần lượt là `keo_theo(p, q)`, `keo_theo(q, p)`, và `keo_theo(not p, not q)`."
+  body: "Ba chỗ lần lượt là `q`, `p`, và `not q`."
 :::
 
 :::validate

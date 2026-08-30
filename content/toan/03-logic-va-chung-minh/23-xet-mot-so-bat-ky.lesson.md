@@ -319,8 +319,17 @@ assert san([], so_chan) is None, "danh sách rỗng thì không có cặp nào �
   onFail: hai chỗ trống phải viết ra phép tính thật theo `p`, `q` và theo `a`, `b` — gõ cứng một con số hay một giá trị Đ/S thì bước gom của chứng minh không được đối chiếu ở đâu cả
   requireAst:
   # Khung khởi đầu không có dấu nhân nào (chú thích không nằm trong cây cú
-  # pháp), nên luật này chặn mọi đáp án không viết ra phép nhân với 2.
-  - kind: uses-operator, target: '*', min: 1
+  # pháp), nên `min` chặn mọi đáp án không viết ra phép nhân với 2.
+  #
+  # `max: 1` mới là chỗ đáng nói. Không có nó thì `return 2 * p + 2 * q` đậu
+  # sạch bốn nấc — mà đó đúng là VẾ TRÁI của dòng cốt lõi, tức bước GOM chưa
+  # làm, tức thứ duy nhất bài này sinh ra để giữ. Hai cách viết bằng nhau ở
+  # mọi `p`, `q` nên không assert nào và không tier output nào phân biệt nổi;
+  # chỉ đếm dấu nhân mới thấy: dạng đã gom có 1, dạng chưa gom có 2. Đây đúng
+  # lớp lỗi mà T2.2 bài 8 đã phải thêm trường `max` để xử.
+  #
+  # Đã thử: `2 * (p + q)` và `(p + q) * 2` đều QUA, `2 * p + 2 * q` TRƯỢT.
+  - kind: uses-operator, target: '*', min: 1, max: 1
   # Khung khởi đầu không có dấu `%` nào. Luật này chặn `return True`,
   # `return a > b`, và mọi câu hỏi không hỏi tới phần dư.
   - kind: uses-operator, target: '%', min: 1
