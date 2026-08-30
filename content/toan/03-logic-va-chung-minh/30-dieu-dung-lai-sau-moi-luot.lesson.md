@@ -131,9 +131,15 @@ Hai việc xong. Nên câu ấy đúng trước và sau mọi lượt, khỏi c�
 nào.
 
 Đáng để ý: **thứ tự hai dòng trong thân vòng là chỗ chứng minh này sống hay
-chết.** Đảo chúng lại — đẩy `i` lên trước rồi mới cộng — thì sau lượt `tong` chỉ
-bằng `T(i)` của giá trị `i` cũ, mà `i` đã nhích, nên hai bên lệch nhau đúng một
-tháng. Bất biến gãy ngay lượt đầu.
+chết.** Đảo chúng lại — đẩy `i` lên trước rồi mới cộng — thì ngay lượt đầu `i`
+đã là 1 trước khi cộng, nên khoản tháng 1 không bao giờ được cộng vào. Sau lượt
+đầu `tong` là 25 000 (khoản tháng 2), trong khi `T(1)` là 40 000. Bất biến gãy
+ngay lượt đầu.
+
+Và nó không dừng ở chỗ sai một khoản. Cứ đẩy trước như thế thì tới lượt thứ
+sáu `i` đã lên 6, máy đi đọc `so_quy[6]` — một ngăn không tồn tại — và chương
+trình nổ `IndexError`. Bất biến hỏng thì không phải chỉ ra số sai; nó còn kéo
+theo cả cái cớ để tin rằng vòng dừng đúng chỗ.
 ::::
 
 ::::predict{#doan-tong-k-khoan-dau commitOnce}

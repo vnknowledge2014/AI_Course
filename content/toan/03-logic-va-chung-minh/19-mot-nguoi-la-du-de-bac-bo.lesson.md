@@ -315,10 +315,19 @@ assert san_phan_vi_du(["Lan", "Hoa", "Minh"]) == ("Hoa", 2), "trong danh sách n
   # gán, không phải đọc). Luật này một mình chặn mọi đáp án không tra sổ:
   # `if True`, `if ten == "Hoa"`, `if da_xet == 4`.
   - kind: uses-name, target: deo_the, min: 1
-  # Bộ đếm phải ĐỌC giá trị cũ của chính nó. Khung khởi đầu đọc `da_xet` 2 lần
-  # (ở hai câu `return`); lời giải đọc 3 — chỗ thứ ba nằm đúng trong phép cộng
-  # dồn. Gõ `da_xet = 4` thì con số 3 ấy không bao giờ đạt.
-  - kind: uses-name, target: da_xet, min: 3
+  # `min: 2`, không phải 3 — 2 đúng bằng số lần khung khởi đầu đã đọc, nên luật
+  # này chỉ nói "đừng xoá mất hai câu `return`".
+  #
+  # Đặt 3 là đo theo hình dạng lời giải mẫu, và nó đánh trượt một lời giải
+  # ĐÚNG: `da_xet += 1`. `uses-name` cố ý chỉ đếm chỗ ĐỌC tên, mà đích của một
+  # phép cộng dồn là chỗ GÁN — nên `+=` không bao giờ chạm tới 3. Lối viết ấy
+  # không hề lạ: T1.2.13 dạy đúng nó, và T1.2.14 dùng `dem += 1` ngay trong
+  # lời giải. Bài 21 làm cùng một việc mà nhận `da_thu += 1`, vì nó canh bằng
+  # `uses-operator` thay vì đếm tên.
+  #
+  # Thứ thật sự chặn `da_xet = 4` là luật dấu cộng ngay dưới đây — `+=` có dấu
+  # cộng, còn gán thẳng một con số thì không.
+  - kind: uses-name, target: da_xet, min: 2
   # Cộng dồn là một phép CỘNG. Khung khởi đầu không có dấu cộng nào.
   - kind: uses-operator, target: +, min: 1
   forbidAst:

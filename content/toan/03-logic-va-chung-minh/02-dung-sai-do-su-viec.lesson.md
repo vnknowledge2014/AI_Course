@@ -295,12 +295,28 @@ assert hai_cau_cung_gia_tri is True, "sổ ghi Minh chưa nộp và Khanh cũng 
 - tier: static
   onFail: mọi giá trị phải đi ra từ cuốn sổ — gõ thẳng `True` hay `False` vào chỗ trống là bạn đang tự phán xử, mà cả bài này dựng lên để nói rằng giá trị chân lý do sự việc quyết định chứ không do người nói
   requireAst:
-  # Năm lần tra sổ: một ở câu về Nam, một ở câu về Minh, hai ở chỗ so hai giá
-  # trị, một ở chỗ hỏi ô trống. Khung khởi đầu đọc `so_quy` 0 lần (dòng đầu là
-  # gán, không phải đọc), nên luật này một mình đã chặn mọi đáp án gõ cứng.
-  - kind: uses-name, target: so_quy, min: 5
+  # BỐN lần tra sổ, không phải năm. Khung khởi đầu đọc `so_quy` 0 lần nên bốn
+  # lần đã đủ chặn mọi đáp án gõ cứng — mà đặt 5 thì đánh trượt một lời giải
+  # ĐÚNG: chỗ thứ ba viết `cau_minh == so_quy["Khanh"]`, dùng lại giá trị vừa
+  # lấy ra thay vì tra sổ lần nữa. Đề bài nói "câu về Minh và câu về Khanh
+  # mang cùng một giá trị chân lý", mà `cau_minh` CHÍNH LÀ giá trị chân lý của
+  # câu về Minh — nên đó là bản dịch sát nghĩa nhất, không phải đường tắt.
+  - kind: uses-name, target: so_quy, min: 4
   # Chỗ thứ ba là một phép SO hai giá trị với nhau, không phải một giá trị.
   - kind: uses-operator, target: ==, min: 1
+  # Ghim TÊN từng người. Không có ba luật này thì đọc nhầm người vẫn ra đúng
+  # màn hình, vì sổ có hai cặp trùng giá trị: Nam = Lan = True và
+  # Minh = Khanh = False. Chỗ thứ tư còn tệ hơn — không ai trong sổ là `None`,
+  # nên `so_quy[<bất kỳ ai>] is None` đều ra False, không tầng chấm nào theo
+  # giá trị phân biệt nổi. Đây đúng là chỗ dòng 230 tự hứa sẽ bắt.
+  #
+  # Con số đếm cả lần cái tên làm KHOÁ trong dòng `so_quy = {...}` của khung.
+  # Nên `min: 2` nghĩa là "chỗ trống phải nhắc tên ấy đúng một lần".
+  # `Khanh` để 3 vì cả chỗ thứ ba lẫn chỗ thứ tư đều phải nhắc tới Khanh — và
+  # cả hai cách viết đúng của chỗ thứ ba đều thoả.
+  - kind: has-literal, target: Nam, min: 2
+  - kind: has-literal, target: Minh, min: 2
+  - kind: has-literal, target: Khanh, min: 3
 - tier: tests
   timeoutMs: 6000
 - tier: output

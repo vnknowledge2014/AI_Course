@@ -47,10 +47,16 @@ Trước khi mổ xẻ, phải nói rõ một chuyện về chính dòng chữ �
 Bài 1 đòi ở một mệnh đề đúng một chuyện: phải phân xử được. Muốn phân xử thì
 phải biết đem câu ấy đối chiếu với sự việc nào. Dòng trên tấm bảng không nêu tên
 ai, nên chưa biết phải đối chiếu với ai — nó chưa phải một câu phân xử được, nó
-là **cách viết gọn sáu câu**, mỗi thành viên một câu:
+là **cách viết gọn một câu cho mỗi người đi qua tấm bảng ấy**:
 
 > Nếu **Nam** là thành viên thì **Nam** đeo thẻ. · Nếu **Lan** là thành viên thì
-> **Lan** đeo thẻ. · … và tương tự cho Minh, Hoa, Tú, Khanh.
+> **Lan** đeo thẻ. · … và tương tự cho từng người trong lớp 6A.
+
+Để ý chỗ này, vì nó quyết định cả bài sau: dòng nội quy **không** chỉ nói về
+sáu thành viên. Tấm bảng treo ở cửa lớp, ai đi qua cũng đọc, nên nó nói về mọi
+người trong lớp — kể cả những người không vào CLB. Nếu nó chỉ nói về sáu thành
+viên thì vế trước "X là thành viên" lúc nào cũng đúng, và hai dòng cuối của cái
+bảng bạn sắp dựng sẽ không bao giờ xảy ra được.
 
 Chỗ trống trên tấm bảng ấy — cái chỗ mà ta thay tên vào — là một món nợ. Ta để
 nó tới bài 16, và tới đó nó có tên riêng. Suốt bài này ta cầm đúng **một** câu

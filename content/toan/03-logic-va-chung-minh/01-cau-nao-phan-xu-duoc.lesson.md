@@ -274,7 +274,7 @@ assert so_van_da_danh == 4, "đừng sửa cuốn sổ để câu đoán của B
 - tier: run
   timeoutMs: 6000
 - tier: static
-  onFail: mỗi chỗ trống phải là một phép HỎI viết từ tên của sổ, không phải một giá trị Đ/S gõ sẵn — gõ cứng `True` hay `False` là bạn đã tự phân xử hộ máy, mà cả bài này dựng lên để nói rằng việc phân xử phải do sự việc quyết định
+  onFail: mỗi chỗ trống phải là một phép HỎI viết từ tên của sổ, không phải một giá trị Đ/S gõ sẵn — và phép hỏi ấy phải nêu ĐÚNG cái mốc mà câu tiếng Việt nêu (sáu thành viên thì viết ra số 6, ba bàn cờ thì viết ra số 3), chứ không phải một cái mốc khác tình cờ cũng cho ra cùng đáp án trên tờ sổ chiều nay
   requireAst:
   # Ba câu, ba phép hỏi. Khung khởi đầu không có dấu so sánh nào, nên hai luật
   # này một mình đã chặn mọi đáp án gõ cứng `True`/`False` vào ba chỗ trống.
@@ -286,6 +286,21 @@ assert so_van_da_danh == 4, "đừng sửa cuốn sổ để câu đoán của B
   - kind: uses-name, target: so_thanh_vien, min: 2
   - kind: uses-name, target: so_ban_co, min: 1
   - kind: uses-name, target: so_van_da_danh, min: 1
+  # Ghim hai CÁI MỐC. Sổ chỉ có một cảnh (6 thành viên, 3 bàn cờ, 4 ván), nên
+  # không có luật này thì mọi mốc từ 6 trở xuống đều cho `True` và đậu sạch:
+  # `>= 5`, `>= 0`, thậm chí `>= so_van_da_danh` — một câu nói chuyện hoàn toàn
+  # khác. Mà chính đoạn trên vừa hứa bài chấm "một câu chạm ĐÚNG CÁI MỐC nó
+  # nêu ra". Đây là luật chấm số 1 của dự án: chấm một cảnh thì không phải chấm.
+  #
+  # Con số đếm cả lần xuất hiện ở dòng gán trong khung, nên `min: 2` nghĩa là
+  # "chỗ trống phải viết ra con số ấy đúng một lần".
+  - kind: has-literal, target: 6, min: 2
+  - kind: has-literal, target: 3, min: 2
+  forbidAst:
+  # Chặn đường vòng `so_ban_co == so_thanh_vien - 3`: nó cũng có số 3, cũng ra
+  # `True` trên tờ sổ này, nhưng nó không nói "đúng ba bàn cờ" — nó nói "số bàn
+  # cờ kém số thành viên đúng ba". Không lời giải đúng nào của bài cần dấu trừ.
+  - kind: uses-operator, target: '-'
 - tier: tests
   timeoutMs: 6000
 - tier: output

@@ -50,13 +50,25 @@ khoản đầu, với một `i` nào đó không vượt quá 6.*
 
 Mẩu tin còn thiếu nằm ở chính cái cửa mà vòng vừa đi qua.
 
-> Vòng `while` chỉ thoát ra bằng đúng một cách: máy quay lên đọc điều kiện, và
-> đọc thấy **sai**. Nên đứng ở dòng ngay dưới vòng, bạn luôn được cầm thêm một
-> mệnh đề miễn phí: **điều kiện lặp là sai.**
+> Vòng `while` **không có `break`** thì thoát ra bằng đúng một cách: máy quay
+> lên đọc điều kiện, và đọc thấy **sai**. Nên đứng ở dòng ngay dưới một vòng
+> như thế, bạn luôn được cầm thêm một mệnh đề miễn phí: **điều kiện lặp là
+> sai.**
 
 T1.2.9 đã dạy máy xem điều kiện **trước** thân. Bài này chỉ đọc lại sự thật ấy
 theo chiều của người đi chứng minh: cái chỗ đứng dưới vòng không phải chỗ trống
 — nó mang sẵn một tin, và tin ấy là **phủ định** của điều kiện lặp.
+
+Chữ "không có `break`" trong khung không phải câu rào đón. T1.2.16 dạy bạn
+một lối thoát thứ hai: gặp `break` là máy nhảy thẳng ra ngoài, **không** quay
+lên đọc điều kiện lần nào nữa. Đứng dưới một vòng có `break` thì mẩu tin miễn
+phí kia biến mất — điều kiện lặp lúc ấy có thể vẫn đang đúng.
+
+Đây là chỗ đáng ghi lại, vì nó là một mẫu chung của cả mạch này: **một luật
+suy luận chỉ dùng được trong đúng cái phạm vi nó được phát biểu.** Vòng của
+Byte dưới đây không có `break`, nên bạn dùng được. Gặp vòng có `break`, phải
+đi tìm mẩu tin khác — thường là chính cái điều kiện bạn viết trong `if` ngay
+trước `break`.
 ::::
 
 ::::example{#ba-manh-ghep-lai}
@@ -159,8 +171,9 @@ rồi nó đúng thật, không lượt nào sai.
 Chỗ lệch nằm ở lần đọc **cuối cùng** — lần thứ bảy. Sáu lần đọc đầu đều thấy
 đúng và mỗi lần ấy mở ra một lượt. Lần thứ bảy thấy sai, và chính vì nó sai mà
 máy mới đi xuống dòng `print`. Nếu nó vẫn đúng thì máy đã vào thân thêm lượt
-nữa, và ba dòng `print` kia còn chưa tới lượt chạy. Nên đứng dưới vòng thì điều
-kiện lặp **luôn** sai — đó là mẩu tin mà cả bài này đi tìm.
+nữa, và ba dòng `print` kia còn chưa tới lượt chạy. Nên đứng dưới vòng **này**
+thì điều kiện lặp chắc chắn sai — đó là mẩu tin mà cả bài này đi tìm. (Chắc
+chắn được là vì vòng này không có `break`; lý do đã nói ở mảnh 3.)
 ::
 :::
 
@@ -186,10 +199,14 @@ Gần đúng ở chỗ hai dòng đầu bạn đọc trúng hết, kể cả ch�
 
 Chỗ lệch nằm ở dòng ba, và nó là chuyện thứ tự trong thân vòng. Ở lượt cuối,
 dòng `tong = tong + so_quy[i]` chạy **trước** dòng `i = i + 1`, nên khoản 45 000
-của tháng 6 kịp vào `tong` rồi `i` mới nhích lên 6. Nếu hai dòng ấy đổi chỗ cho
-nhau thì mới hụt một tháng thật. Bất biến "trước mỗi lượt `tong` bằng tổng `i`
-khoản đầu" chính là câu nói ra chuyện `i` và `tong` luôn khớp nhau, không cái
-nào chạy trước cái nào.
+của tháng 6 kịp vào `tong` rồi `i` mới nhích lên 6.
+
+Đổi chỗ hai dòng ấy thì không phải "hụt một tháng" — nó hỏng nặng hơn thế. Đẩy
+`i` lên trước làm mất khoản tháng ĐẦU, rồi tới lượt sáu máy đi đọc `so_quy[6]`,
+một ngăn không có, và chương trình nổ `IndexError`. Bất biến "trước mỗi lượt
+`tong` bằng tổng `i` khoản đầu" chính là câu nói ra chuyện `i` và `tong` luôn
+khớp nhau, không cái nào chạy trước cái nào — và khi nó gãy thì cả cái cớ để
+tin vòng dừng đúng chỗ cũng gãy theo.
 ::
 :::
 ::::
@@ -241,7 +258,7 @@ def cong_quy(so):
         assert tong == tong_dung_ra, "bất biến gãy: sau lượt này tong không còn bằng tổng i khoản đầu của sổ"
         assert thuoc_do_bay_gio == con_lai - 1, "thước đo không tụt đúng 1 sau lượt này, nên chưa có gì bảo đảm vòng dừng"
         assert thuoc_do_bay_gio >= 0, "thước đo tụt xuống dưới 0 — nó phải là số nguyên không âm ở mọi lúc vòng còn chạy"
-    assert not (i < len(so)), "thoát vòng nghĩa là điều kiện lặp đã sai; nếu nó còn đúng thì vòng chưa được phép thoát"
+    assert not (i < len(so)), "vòng này không có `break`, nên thoát ra nghĩa là điều kiện lặp đã sai — nếu nó còn đúng thì máy đã vào thân thêm một lượt nữa chứ chưa xuống tới đây"
     so_thang_trong_so = ___
     assert i == so_thang_trong_so, "ghép lại: điều kiện lặp sai cho i không nhỏ hơn số tháng, bất biến giữ i không lớn hơn số tháng"
     return tong
@@ -276,7 +293,7 @@ def cong_quy(so):
         assert tong == tong_dung_ra, "bất biến gãy: sau lượt này tong không còn bằng tổng i khoản đầu của sổ"
         assert thuoc_do_bay_gio == con_lai - 1, "thước đo không tụt đúng 1 sau lượt này, nên chưa có gì bảo đảm vòng dừng"
         assert thuoc_do_bay_gio >= 0, "thước đo tụt xuống dưới 0 — nó phải là số nguyên không âm ở mọi lúc vòng còn chạy"
-    assert not (i < len(so)), "thoát vòng nghĩa là điều kiện lặp đã sai; nếu nó còn đúng thì vòng chưa được phép thoát"
+    assert not (i < len(so)), "vòng này không có `break`, nên thoát ra nghĩa là điều kiện lặp đã sai — nếu nó còn đúng thì máy đã vào thân thêm một lượt nữa chứ chưa xuống tới đây"
     so_thang_trong_so = len(so)
     assert i == so_thang_trong_so, "ghép lại: điều kiện lặp sai cho i không nhỏ hơn số tháng, bất biến giữ i không lớn hơn số tháng"
     return tong

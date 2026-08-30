@@ -213,8 +213,13 @@ chạm 0, đúng như bảng vừa dựng.
 
 Chỗ lệch nằm ở thứ tự hai dòng trong thân vòng. Ở lượt cuối, `tong = tong +
 so_quy[i]` chạy **trước** rồi `i = i + 1` mới chạy — nên khoản 45 000 của tháng
-6 đã kịp vào `tong` rồi `i` mới nhích lên 6. Nếu `i` lên 6 trước thì lượt ấy
-mới bỏ sót một tháng, và 170 000 mới là con số đúng. Đây là chỗ đáng dừng lại:
+6 đã kịp vào `tong` rồi `i` mới nhích lên 6.
+
+Con số 170 000 đúng là tổng khi thiếu khoản 45 000 của tháng cuối. Nhưng muốn
+thiếu nó thì vòng phải **dừng sớm một lượt** — chẳng hạn điều kiện viết nhầm
+thành `i < 5`. Đổi chỗ hai dòng thì không ra 170 000: đẩy `i` lên trước làm mất
+khoản tháng ĐẦU, và tới lượt sáu máy đi đọc `so_quy[6]` rồi nổ `IndexError`.
+Đây là chỗ đáng dừng lại:
 bất biến "trước mỗi lượt `tong` bằng tổng `i` khoản đầu" nói đúng chuyện ấy —
 `i` và `tong` luôn khớp nhau, không cái nào chạy trước cái nào một tháng.
 ::

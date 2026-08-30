@@ -38,7 +38,11 @@ Bài trước dừng ở một câu không cho bạn chỗ đặt tay:
 
 Cả hai lối đã có đều mở đầu bằng cùng một việc — **nhặt vế trước lên làm giả
 thiết**. Lối trực tiếp của bài 23 nhặt nó rồi đi thẳng; lối phản đảo của bài 24
-đổi chỗ hai vế rồi mới nhặt. Câu trên không có vế trước nào để nhặt, nên cả hai
+đổi chỗ hai vế **và phủ định cả hai** rồi mới nhặt.
+
+(Phải nói đủ cả hai việc. Chỉ đổi chỗ mà không phủ định thì đó là câu **đảo**,
+và bài 12 đã chỉ ra câu đảo không đi cùng câu gốc — đi chứng minh nó là chứng
+minh nhầm câu.) Câu trên không có vế trước nào để nhặt, nên cả hai
 lối cùng đứng im ở dòng đầu.
 
 Nhưng có một thứ mà **mọi** mệnh đề đều có, kể cả câu này: **phủ định của nó**.
@@ -160,8 +164,13 @@ Trước khi chứng minh, nhìn xem vì sao nó khó chịu. Thử vài phân s
 
 - `7/5 × 7/5 = 49/25`, mà 2 viết trên cùng cái thước ấy là `50/25 = 2`. Hụt một
   phần hai mươi lăm.
-- `99/70 × 99/70 = 9801/4900`, mà `9800/4900 = 2`. Hụt một phần bốn nghìn chín
-  trăm — nhỏ hơn nhiều, nhưng vẫn hụt.
+- `99/70 × 99/70 = 9801/4900`, mà `9800/4900 = 2`. Lần này **vượt** một phần
+  bốn nghìn chín trăm — hụt hay vượt thì cũng không trúng.
+
+Để ý cái vượt ấy: lần đầu hụt, lần sau vượt. Thử thêm nữa thì nó cứ nhảy so le
+hai bên con số 2, mỗi lần một sát hơn, mà không lần nào đứng đúng lên. Cảm giác
+"sắp tới nơi rồi" ấy chính là thứ làm câu này khó chịu — và cũng là thứ không
+bao giờ thành một bằng chứng.
 
 Thử mãi thế này thì rơi đúng vào chỗ bài 21 đã đóng: máy chỉ nói được về những
 phân số nó đã thử, mà phân số thì thử không bao giờ hết. Nên phải chứng minh.
