@@ -249,6 +249,10 @@ print(f"Tiền thuế: {goi[1]} đồng")
 # phải chép cứng hai con số của bàn kia.
 goi_kiem = tinh_hoa_don(2, 45000)
 assert len(goi_kiem) == 2, "hàm phải đưa ra một gói gồm ĐÚNG hai phần — một phần thì hai dòng in bên dưới không đủ chỗ lấy, ba phần thì có một phần không ai đọc tới"
+# Khái niệm mới của bài là dấu phẩy buộc hai giá trị thành một TUPLE — bài in
+# hẳn `<class 'tuple'>` ra màn hình để chốt. Không có dòng này thì
+# `return [tien_hang, tien_thue]` — một list — qua sạch mọi assert còn lại.
+assert type(goi_kiem) is tuple, "dấu phẩy sau `return` buộc hai con số thành một tuple; gói chúng vào dấu ngoặc VUÔNG thì ra một list — chạy được, nhưng đó là kiểu khác, và cái gói mà bài này nói tới không còn là cái bạn vừa tạo"
 assert goi_kiem[0] == 90000, "phần ĐẦU của gói là tiền hàng: hai tô 45000 là 90000 đồng"
 assert goi_kiem[1] == 9000, "phần SAU của gói là tiền thuế: mức thường của 90000 tiền hàng là 9000 đồng — nếu hai con số này đổi chỗ cho nhau thì hoá đơn in ngược"
 # Gói vẫn phải đúng khi người gọi tự đưa mức thuế khác.

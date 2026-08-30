@@ -273,9 +273,16 @@ pass
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: static
+  onFail: hai câu hỏi phải lật bằng chữ `not`, không phải bằng `== False` — cả hai chạy đúng, nhưng `not` là thứ duy nhất bài này dạy
+  requireAst:
+  # `co_trong_so == False` cho ra y hệt hai dòng ấy và khớp regex, nên không
+  # có luật này thì người học xong bài `teaches: [logic.not]` mà chưa gõ chữ
+  # `not` lần nào.
+  - kind: uses-operator, target: not, min: 2
 - tier: output
   match: regex
-  expect: ^Thứ ba chưa ghi sổ\nThứ tư chưa ghi sổ$
+  expect: ^Thứ ba chưa ghi sổ\nThứ tư chưa ghi sổ\s*$
 :::
 ::::
 

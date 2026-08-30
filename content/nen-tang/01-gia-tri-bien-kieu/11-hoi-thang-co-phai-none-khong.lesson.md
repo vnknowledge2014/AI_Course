@@ -265,6 +265,13 @@ assert dong_in == ["cà phê cho anh Tuấn", "(khách không ghi gì)", "(chưa
   timeoutMs: 4000
 - tier: tests
   timeoutMs: 4000
+- tier: static
+  onFail: câu hỏi dành cho `None` phải viết bằng `is`, không phải bằng `==` — bài này dùng `is None`, và từ đây về sau cũng vậy
+  requireAst:
+  # Không có luật này thì `o == None` qua sạch mọi tầng, ở đúng bài mà `is`
+  # là khái niệm mới DUY NHẤT. Bài còn dặn thẳng người viết Python luôn dùng
+  # `is` — dặn xong rồi không ai canh.
+  - kind: uses-operator, target: is, min: 1
 - tier: output
   expect: (chưa hỏi khách)
 :::

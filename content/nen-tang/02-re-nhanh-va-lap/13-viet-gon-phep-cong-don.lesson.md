@@ -207,6 +207,17 @@ assert tong == 750000, "sáu ngày trong sổ cộng lại là 750 nghìn — l�
   timeoutMs: 4000
 - tier: tests
   timeoutMs: 4000
+- tier: static
+  onFail: bài này đòi lối viết gọn — trong dòng cộng dồn, cái tên `tong` chỉ được nhắc MỘT lần
+  requireAst:
+  # `max: 1` là chỗ phân biệt. Viết `tong = tong + tien` — đúng nguyên văn lời
+  # giải bài 12 — thì `tong` được ĐỌC một lần ở vế phải; viết `tong += tien`
+  # thì không đọc lần nào (`AugAssign` không sinh nút `Load`). Khung đọc `tong`
+  # đúng một lần ở dòng in cuối.
+  #
+  # Không có luật này thì người học chép lại bài 12 và qua sạch cả ba tầng, ở
+  # đúng bài mà lối viết gọn là khái niệm mới duy nhất.
+  - kind: uses-name, target: tong, min: 1, max: 1
 - tier: output
   expect: Cả tuần tiêu 750000 đồng
 :::

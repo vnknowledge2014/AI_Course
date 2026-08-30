@@ -288,7 +288,15 @@ pass
   requireAst:
   - kind: uses-name, target: dong_1, min: 1
   - kind: uses-name, target: dong_2, min: 1
-  onFail: hai câu điều kiện phải đọc ký tự cuối TỪ hai cái tên, không gõ sẵn ký tự vào
+  # Khái niệm mới DUY NHẤT của bài là chỉ số ÂM, và không có luật này thì nó
+  # không bị lớp nào chạm tới: `dong_1[12]` với `dong_2[10]` ra đúng trọn màn
+  # hình, qua cả hai luật trên, và người học xong bài mà chưa gõ dấu trừ nào.
+  #
+  # Hỏi bằng `dau-am` chứ không bằng `forbidAst` mấy con số cụ thể: cách sau
+  # chỉ chặn đúng hai con số ấy, còn `dong_1[len(dong_1) - 1]` — một lối viết
+  # đúng nhưng không phải thứ bài dạy — thì vẫn lọt.
+  - kind: uses-operator, target: dau-am, min: 2
+  onFail: hai câu phải đếm ngược từ cuối dòng bằng chỉ số ÂM — đó là thứ bài này dạy. Đếm xuôi bằng một con số chép cứng cũng ra đúng kết quả, nhưng nó vỡ ngay khi dòng dài ngắn khác đi
 - tier: run
   timeoutMs: 4000
 - tier: output

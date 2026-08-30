@@ -251,37 +251,66 @@ lại từng lượt?*
 ::::
 
 ::::code{#mua-cho-toi-khi-het-tien}
-Byte cầm 240 nghìn tiền chợ. Mỗi món ở chợ hết 60 nghìn, và Byte mua chừng nào
+Byte cầm 250 nghìn tiền chợ. Mỗi món ở chợ hết 60 nghìn, và Byte mua chừng nào
 còn đủ tiền cho một món nữa.
 
 Số món mua được thì bạn đừng đếm hộ máy — hãy viết điều kiện để nó tự dừng đúng
 lúc. Điền vào chỗ trống.
 
 ```python title=starter
-tien_cho = 240000
+tien_cho = 250000
 
 while ___:
     print("Mua thêm một món")
     tien_cho = tien_cho - 60000
 
 print(f"Còn lại {tien_cho} đồng, không mua nữa")
+
+# Hôm sau Byte cầm 240 nghìn — lần này chia vừa hết cho món 60 nghìn.
+tien_cho_2 = 240000
+
+while tien_cho_2 ___ 60000:
+    print("Mua thêm một món")
+    tien_cho_2 = tien_cho_2 - 60000
+
+print(f"Còn lại {tien_cho_2} đồng, không mua nữa")
 ```
 
 ```python title=solution
-tien_cho = 240000
+tien_cho = 250000
 
 while tien_cho >= 60000:
     print("Mua thêm một món")
     tien_cho = tien_cho - 60000
 
 print(f"Còn lại {tien_cho} đồng, không mua nữa")
+
+# Hôm sau Byte cầm 240 nghìn — lần này chia vừa hết cho món 60 nghìn.
+tien_cho_2 = 240000
+
+while tien_cho_2 >= 60000:
+    print("Mua thêm một món")
+    tien_cho_2 = tien_cho_2 - 60000
+
+print(f"Còn lại {tien_cho_2} đồng, không mua nữa")
 ```
 
 ```python title=test
-# Ranh giới nằm ở đúng lượt thứ tư: lúc ấy trong túi còn vừa vặn 60 nghìn, và
-# vừa vặn 60 nghìn thì vẫn mua được — nên tiêu hết sạch, còn lại 0 đồng.
-# Điều kiện bỏ sót điểm bằng sẽ dừng sớm một lượt và để lại 60 nghìn.
-assert tien_cho == 0, "240 nghìn tiền chợ chia vừa hết cho món 60 nghìn, nên mua tới lúc dừng thì trong túi không còn đồng nào; còn lại 60 nghìn là đã bỏ lỡ lượt mua cuối, lúc trong túi vừa vặn đủ đúng một món"
+# HAI ví tiền, vì một ví không đủ để chấm. Hai ví bù cho nhau đúng chỗ:
+#
+#   ví 250 nghìn — chia KHÔNG hết. Nó bắt những câu quên mất ngưỡng:
+#     `tien_cho > 0` và `>= 1` chạy 5 lượt, tụt xuống −50000; `!= 0` thì không
+#     bao giờ dừng. Nhưng nó KHÔNG phân biệt được `>=` với `>`, vì không lượt
+#     nào trong túi còn đúng 60 nghìn.
+#
+#   ví 240 nghìn — chia vừa hết. Ở đây mới có cái ranh giới ấy: lượt thứ tư
+#     trong túi còn vừa vặn 60 nghìn, và vừa vặn thì vẫn mua được. `> 60000`
+#     hay `>= 60001` dừng sớm một lượt và để lại 60 nghìn. Nhưng ví này KHÔNG
+#     bắt được `> 0` với `!= 0` — chúng cũng ra 4 lượt và cũng còn 0.
+#
+# Mỗi ví một mình đều để lọt hai câu trả lời sai khác nhau. Phải có cả hai.
+assert tien_cho == 10000, "250 nghìn mua được bốn món 60 nghìn, còn lại 10 nghìn — không đủ món thứ năm. Còn lại 70 nghìn là đã bỏ lỡ lượt mua cuối; còn số ÂM là điều kiện dừng của bạn cho mua cả món không đủ tiền"
+assert tien_cho_2 == 0, "240 nghìn chia vừa hết cho món 60 nghìn: lượt thứ tư trong túi còn đúng 60 nghìn, và vừa vặn đủ thì vẫn mua được — nên tiêu hết sạch. Còn lại 60 nghìn nghĩa là câu hỏi của bạn bỏ sót điểm BẰNG"
 ```
 
 :::hints
@@ -290,7 +319,7 @@ assert tien_cho == 0, "240 nghìn tiền chợ chia vừa hết cho món 60 ngh�
 - kind: strategy
   body: Câu hỏi ở đầu mỗi lượt là "còn mua thêm được một món nữa không". Mua được nghĩa là số tiền chợ còn lại phải từ 60 nghìn trở lên — vừa đúng 60 nghìn thì vẫn mua được.
 - kind: one-line
-  body: "Viết `tien_cho >= 60000` vào chỗ trống, giữ nguyên dấu hai chấm cuối dòng."
+  body: "Viết `tien_cho >= 60000` vào chỗ trống thứ nhất và `tien_cho_2 >= 60000` vào chỗ thứ hai, giữ nguyên dấu hai chấm cuối dòng."
 :::
 
 :::validate
@@ -300,7 +329,7 @@ assert tien_cho == 0, "240 nghìn tiền chợ chia vừa hết cho món 60 ngh�
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^Mua thêm một món\nMua thêm một món\nMua thêm một món\nMua thêm một món\nCòn lại 0 đồng, không mua nữa\s*$
+  expect: ^(Mua thêm một món\n){4}Còn lại 10000 đồng, không mua nữa\n(Mua thêm một món\n){4}Còn lại 0 đồng, không mua nữa\s*$
 :::
 ::::
 

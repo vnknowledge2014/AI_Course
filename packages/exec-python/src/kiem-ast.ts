@@ -131,6 +131,14 @@ _TOAN_TU = {
     "//": ast.FloorDiv, "%": ast.Mod, "**": ast.Pow,
     "==": ast.Eq, "!=": ast.NotEq, "<": ast.Lt, "<=": ast.LtE,
     ">": ast.Gt, ">=": ast.GtE,
+    # \`is\`, \`in\` và hai dạng phủ định của chúng.
+    #
+    # Thiếu bốn cái này thì mấy bài dạy chính chúng không có cách nào đòi
+    # người học gõ ra: bài \`hoi-thang-co-phai-none-khong\` dạy \`is None\`
+    # mà \`o == None\` đi lọt trọn vẹn, và bài \`co-trong-so-khong\` phải
+    # lách bằng cách đếm số lần đọc một cái tên — một con số ăn theo số lệnh
+    # \`print\` trong khung, nên sửa khung là luật chấm hỏng lặng lẽ.
+    "is": ast.Is, "is not": ast.IsNot, "in": ast.In, "not in": ast.NotIn,
 }
 
 def _khop_toan_tu(nut, tg):
