@@ -310,8 +310,13 @@ with open("/Users/lan/du-an/sao-luu/so.txt", "r") as f:
 - tier: static
   requireAst:
     - kind: uses-name, target: pathlib, min: 2
-    - kind: uses-operator, target: /, min: 1
-  onFail: "hai chỗ trống phải ghép đường dẫn bằng `pathlib`, không bằng phép cộng chuỗi — chỉ có kiểu đường dẫn mới tự lo được dấu ngăn ở chỗ nối"
+    # `min: 3`, không phải 1. `uses-name` chỉ đếm chỗ ĐỌC tên nên
+    # `import pathlib` không tính, và hai chỗ trống mỗi chỗ nhắc `pathlib` một
+    # lần là đã đủ 2 — tức chỗ trống thứ hai chép cứng cả đường dẫn vẫn lọt,
+    # đúng thứ bài này dạy cách bỏ đi. Lời giải mẫu có ba dấu `/`.
+    - kind: uses-operator, target: /, min: 3
+    - kind: uses-name, target: thu_muc_co_gach, min: 1
+  onFail: "hai chỗ trống phải ghép đường dẫn bằng `pathlib` VÀ nối từng tầng bằng dấu `/` như bài vừa dạy — không cộng chuỗi, và cũng đừng dồn hết các tầng vào trong một cặp ngoặc `Path(...)`: cách ấy chạy ra đúng kết quả, nhưng nó bỏ qua chính dấu `/` mà bài đang dạy"
 - tier: run
   timeoutMs: 6000
 - tier: tests

@@ -186,8 +186,8 @@ trong cột ấy — sau này còn tính xem phải chèn bao nhiêu khoảng tr
 dòng thẳng hàng nhau.
 
 Ba khoản có độ dài khác hẳn nhau: `25000` (cà phê), `5000` (gửi xe) và
-`1250000` (đi chợ). Ba chỗ trống nằm trong ngoặc của `len`. Điền vào đó thứ mà
-`len` đo được.
+`1250000` (đi chợ). Ba chỗ trống nằm trong ngoặc của `len`. Điền vào đó **lời
+gọi `str`** đưa con số ra thành chữ — đúng công cụ bài này vừa dạy.
 
 Ba con số khác nhau ở đây là cố ý: chấm bằng một khoản thì không phân biệt nổi
 đúng với gặp may, còn ba khoản 5, 4 và 7 chữ số thì một đáp án chép cứng sẽ sai
@@ -246,7 +246,7 @@ assert tien_ca_phe + tien_gui_xe == 30000, "cà phê với gửi xe cộng lại
   match: regex
   expect: ^5 4 7\s*$
 - tier: static
-  onFail: mỗi chỗ trống cần một lời gọi viết con số ra thành chữ, không phải một dãy chữ số chép cứng
+  onFail: "mỗi chỗ trống cần một lời gọi `str` đưa con số ra thành chữ, không phải một dãy chữ số chép cứng. (F-string cũng viết con số ra thành chữ và cũng cho đúng kết quả — nhưng bài này đang dạy `str`, nên chỗ trống muốn thấy nó.)"
   requireAst:
   - kind: uses-call, target: str, min: 3
 :::

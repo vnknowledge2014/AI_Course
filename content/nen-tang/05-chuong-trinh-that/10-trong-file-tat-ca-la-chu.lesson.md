@@ -248,12 +248,15 @@ assert len(cac_dong) == 3, "sổ có ba dòng, và cả ba đều phải đượ
 
 :::validate
 - tier: static
-  onFail: chỗ trống phải ĐỌC mảnh tiền của dòng đang xét rồi đổi nó thành số, không chép sẵn một con số nào
+  onFail: chỗ trống phải ĐỔI mảnh tiền của dòng đang xét thành số, không chép sẵn một con số nào
   requireAst:
-  # Phải gọi `int`, và phải đọc tới `manh`. Hai điều kiện cùng lúc loại được
-  # cả đáp án gõ bừa một hằng số lẫn đáp án chép cứng con số 80000 chia ba.
+  # CHỈ đòi gọi `int`. Bản trước đòi thêm `uses-name target: manh, min: 1` và
+  # luật ấy đánh trượt một lời giải đúng: người học bỏ biến bắc cầu, viết
+  # thẳng `int(dong.strip().split(",")[1])`, thì `manh` không được đọc lần nào.
+  #
+  # Việc chặn đáp án chép cứng để `int` và mấy `assert` lo — chúng chấm trên
+  # ba dòng sổ khác nhau nên một hằng số gõ sẵn không qua nổi.
   - kind: uses-call, target: int, min: 1
-  - kind: uses-name, target: manh, min: 1
 - tier: run
   timeoutMs: 6000
 - tier: tests

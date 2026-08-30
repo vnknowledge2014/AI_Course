@@ -272,14 +272,18 @@ assert ten_file_dang_chay != ten_file_duoc_muon, "hai cái tên phải khác nha
 
 :::validate
 - tier: static
-  onFail: cả hai chỗ trống phải hỏi tới cái tên `__name__` viết trần, và câu hỏi phải so nó với chuỗi `__main__`
+  onFail: chỗ trống thứ nhất phải hỏi tới cái tên `__name__` viết trần chứ không chép sẵn chuỗi, và câu hỏi ở chỗ thứ hai phải so với đúng chuỗi `__main__`
   requireAst:
-  # `min: 2` vì có hai chỗ trống. Khung chưa đọc `__name__` trần lần nào —
-  # `os.__name__` là lấy đồ trong hộp, không tính — nên luật này chặn cả đáp
-  # án gõ bừa lẫn đáp án chép cứng chuỗi vào chỗ thứ nhất.
-  - kind: uses-name, target: __name__, min: 2
+  # `min: 1`, KHÔNG phải 2. Chỗ trống 1 gán `ten_file_dang_chay = __name__`,
+  # nên chỗ trống 2 viết `ten_file_dang_chay == "__main__"` là đúng nghĩa và
+  # qua hết mọi tầng — mà lúc ấy `__name__` trần chỉ xuất hiện một lần. Đòi 2
+  # là đánh trượt một lời giải đúng, và câu báo lại bảo họ "cả hai chỗ trống"
+  # đều sai.
+  - kind: uses-name, target: __name__, min: 1
   # Câu hỏi phải so với đúng chuỗi ấy, không so với "os" hay một tên file.
-  - kind: has-literal, target: __main__, min: 1
+  # `max: 1` chặn đáp án chép cứng `"__main__"` vào chỗ trống 1 — làm thế thì
+  # chuỗi ấy xuất hiện hai lần.
+  - kind: has-literal, target: __main__, min: 1, max: 1
 - tier: run
   timeoutMs: 5000
 - tier: tests
