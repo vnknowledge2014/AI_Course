@@ -57,6 +57,7 @@ Nhìn hình dạng của một dòng `while`, bạn thấy quen ngay:
 ```python
 while to_con_lai > 0:
     print("Múc một tô cho khách")
+    to_con_lai = to_con_lai - 1
 ```
 
 - `while` — từ khoá, đứng đầu dòng.
@@ -244,7 +245,7 @@ Không lối nào cao cấp hơn lối nào. Chọn lối nào là trả lời m
 lại từng lượt?*
 
 > Cẩn thận: `while` là câu lệnh đầu tiên có thể khiến chương trình chạy mãi
-> không dừng. Để ý trong cả ba vòng lặp hôm nay, thân vòng luôn có một dòng
+> không dừng. Để ý trong cả bốn vòng lặp hôm nay, thân vòng luôn có một dòng
 > làm thứ nằm trong điều kiện đổi đi — nồi vơi một tô, ví bớt một tô phở, câu
 > trả lời được hỏi lại. Dòng đó quan trọng tới mức có hẳn một bài riêng cho nó.
 ::::

@@ -177,6 +177,11 @@ việc nó đứng bên nào của dấu `=`:
 - Đứng ở bên **trái** dấu `=` — máy không đi tìm gì cả. Nó dựng thẳng một cái
   tên cục bộ mới cho lượt gọi này.
 
+> Chỗ dễ vấp: hai gạch trên đúng khi một cái tên chỉ đóng **một** vai trong
+> thân hàm — hoặc chỉ được đọc, hoặc chỉ được gán. Khi cùng một cái tên vừa
+> được gán vừa được đọc trong cùng một hàm thì luật khác hẳn, và bài 23 dựng
+> riêng một cảnh cho nó. Mọi hàm trong bài hôm nay đều chỉ đóng một vai.
+
 Hệ quả dùng được ngay: **một phép gán trong hàm không thể vô tình dán lại cái
 tên của người khác**. Bạn đặt tên biến trong hàm thoải mái, không phải nhớ xem
 ngoài kia đã có ai xài cái tên ấy chưa.

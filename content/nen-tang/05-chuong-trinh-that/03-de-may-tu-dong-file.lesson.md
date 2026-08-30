@@ -40,7 +40,7 @@ Câu hỏi bài trước để lại: nếu giữa `open` và `.close()` có m�
 `dem_khoan`, một cái tên chưa bài nào đặt:
 
 ```python title=readonly
-tong = 75000
+so_khoan = 3
 
 f = open("so-thang-tam.txt", "w")
 f.write("cà phê,25000")

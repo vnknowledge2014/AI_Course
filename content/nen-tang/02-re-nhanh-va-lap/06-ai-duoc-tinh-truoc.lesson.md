@@ -145,7 +145,7 @@ vừa-vượt-ngưỡng, mà cũng không phải ngày vừa-vượt-ngưỡng v
 
 Chỗ lệch: máy không đọc tiếng Việt, nó leo bậc thang. `not` ở bậc 3, `and` ở
 bậc 4, nên `not` gom phần của nó xong thì `and` mới tới lượt. Mà phần `not` gom
-được chỉ là cái tên sát ngay bên phải — một cái, không phải cả cụm.
+được chỉ là thứ nằm sát ngay bên phải nó ở bậc trên — ở dòng này là một cái tên — chứ không phải cả cụm.
 ::
 :::
 
@@ -209,9 +209,15 @@ co_trong_so = True
 print(cuoi_tuan or tien - hoan > 200000 and not co_trong_so)
 ```
 
-Máy in ra `True`. Leo thang: `tien - hoan` cho `50000`; `50000 > 200000` cho
-`False`; `not True` cho `False`; `and` ghép hai cái đó thành `False`; cuối cùng
-`or` mới tới lượt, và `True or False` cho `True`.
+Máy in ra `True`. Bậc thang gom dòng ấy thành
+`cuoi_tuan or ((tien - hoan > 200000) and (not co_trong_so))` — `and` buộc
+chặt hơn nên nó gom trước, `or` đứng ngoài cùng. Soi cụm trong ngoặc:
+`50000 > 200000` cho `False`, `not True` cho `False`, `and` ghép hai cái ấy
+thành `False`. Còn `or` thì `True or False` cho `True`.
+
+(Thật ra máy còn lười hơn thế: `or` thấy vế trái đã `True` là nó thôi, không
+thèm tính cụm bên phải lần nào. Nhưng chuyện lười ấy là bài khác — ở đây ta
+đang đọc **hình dạng** của dòng, và hình dạng thì không đổi.)
 
 Nói gọn lại: `and` buộc chặt hơn `or`, nên một dòng có cả hai luôn đọc thành
 *"cái này, **hoặc là** cụm kia"* — chứ không phải ngược lại.

@@ -65,8 +65,9 @@ thì đó là `so[0:3]` — hai con số, cách nhau dấu hai chấm, nằm tro
 vuông bạn đã quen. Người ta gọi nó là **lát cắt**.
 
 Luật đọc hai con số vẫn nguyên như lúc bạn gặp trên chuỗi: **đầu lấy, cuối
-chừa.** Và hệ quả tiện của nó cũng nguyên: **số khoản lấy được đúng bằng số sau
-trừ số đầu**, không phải đếm lại lần nào.
+chừa.** Và hệ quả tiện của nó cũng nguyên: **số khoản bạn xin đúng bằng số sau
+trừ số đầu** — chừng nào cả hai ghim còn nằm trong sổ thì đó cũng là số khoản
+nhận về, không phải đếm lại lần nào.
 
 Vậy cái mới của bài này nằm ở đâu, nếu ký hiệu thì y hệt?
 
@@ -216,8 +217,9 @@ thẳng ra điều đó, và trong đoạn trên không có câu nào như vậy
 Ba câu dùng được ngay:
 
 - **Hình dạng** — `so[đầu:hết]`, hai con số cách nhau dấu hai chấm.
-- **Luật** — đầu lấy, cuối chừa; số khoản lấy được đúng bằng số sau trừ số đầu.
-  Xin quá cuối sổ thì máy đưa phần đang có chứ không nổ.
+- **Luật** — đầu lấy, cuối chừa. Hiệu hai số là số khoản bạn **xin**; sổ đủ
+  dài thì nhận về đúng bấy nhiêu, còn sổ ngắn hơn thì máy đưa phần đang có chứ
+  không nổ — nên số nhận về có thể ít hơn số xin.
 - **Thứ đi ra** — một danh sách, dùng tiếp được ngay; cuốn sổ gốc vẫn đủ khoản
   như cũ.
 
@@ -305,7 +307,7 @@ assert cong_tien(ba_khoan_dau([25000, 40000, 15000, 60000, 30000, 12000])) == 80
 - kind: attention
   body: Chỗ trống nằm sau `return`, và dòng in bên dưới đưa thẳng kết quả ấy vào `cong_tien` — mà `cong_tien` chạy một vòng `for` trên thứ nó nhận được. Vậy thứ bạn điền phải là một danh sách, không phải một khoản lẻ. Cái tên đang giữ cuốn sổ ở đây là tham số `so`.
 - kind: strategy
-  body: Dùng lát cắt trên `so` — hai con số trong cặp ngoặc vuông, cách nhau dấu hai chấm. Số đầu là chỗ bắt đầu lấy, và khoản đầu tiên của một cuốn sổ mang số 0. Số sau là chỗ dừng, nhớ phép kiểm nhanh là hiệu hai số phải bằng đúng số khoản cần lấy. Cuốn sổ hai khoản thì đừng lo — xin một khúc quá cuối sổ không nổ lỗi.
+  body: Dùng lát cắt trên `so` — hai con số trong cặp ngoặc vuông, cách nhau dấu hai chấm. Số đầu là chỗ bắt đầu lấy, và khoản đầu tiên của một cuốn sổ mang số 0. Số sau là chỗ dừng, và hiệu hai số là số khoản bạn XIN — ở đây là 3. Cuốn sổ hai khoản thì đừng lo: xin một khúc quá cuối sổ không nổ lỗi, chỉ là nhận về ít hơn số xin.
 - kind: one-line
   body: Viết `so[0:3]` vào chỗ trống.
 :::

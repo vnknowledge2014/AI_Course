@@ -303,8 +303,9 @@ Một hàm nhớ chuyện cũ, một hàm thì không. Giờ mình phân biệt 
 Một câu hỏi trước khi đi tiếp.
 
 Cả bài này chỉ có đúng một thủ phạm bị chỉ mặt: dòng `global`. Nó là đường ngầm
-nối hàm với thứ nằm ngoài, và bỏ nó đi thì `ghi_doanh_thu` không ghi ra ngoài
-được nữa — bài trước đã cho thấy như vậy.
+nối hàm với thứ nằm ngoài. Bỏ nó đi thì `ghi_doanh_thu` không những hết ghi
+ra ngoài — nó dừng hẳn ngay lượt gọi đầu bằng `UnboundLocalError`, đúng như
+bài trước đã cho thấy.
 
 Vậy bỏ `global` đi là hết tác dụng phụ chứ?
 

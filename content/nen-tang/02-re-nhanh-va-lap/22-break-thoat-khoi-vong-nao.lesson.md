@@ -142,7 +142,31 @@ bài trước, và dòng đầu tiên nó gặp là `print("Xong")`.
 ::::
 
 ::::explain{#doi-chu-bang-bon-dau-cach}
-Cũng chữ `break` ấy, chỉ lùi ra bốn dấu cách, nó **đổi chủ**:
+Muốn thấy cột quyết định thế nào thì phải so hai đoạn **chỉ khác nhau đúng
+một cột** — không thêm `if`, không thêm dòng nào. Đây là đoạn thứ nhất, `break`
+ở cột 8:
+
+```python title=readonly
+for tuan in range(1, 4):
+    print(f"Tuần {tuan}")
+    for ngay in range(1, 4):
+        print(f"  ngày {ngay}")
+        break
+```
+
+```text title=readonly
+Tuần 1
+  ngày 1
+Tuần 2
+  ngày 1
+Tuần 3
+  ngày 1
+```
+
+Nó cắt vòng **ngày**: mỗi tuần chỉ dò được ngày 1 rồi rời vòng trong, nhưng cả
+ba tuần vẫn tới lượt.
+
+Giờ lùi đúng chữ `break` ấy ra bốn dấu cách — không đụng dòng nào khác:
 
 ```python title=readonly
 for tuan in range(1, 4):
@@ -164,8 +188,9 @@ nhỏ hơn nó là `for tuan`. Nên nó cắt vòng **tuần**. Vòng ngày khô
 — tuần 1 vẫn dò trọn cả ba ngày, chỉ có tuần 2 và tuần 3 là không bao giờ tới
 lượt.
 
-Hai đoạn code vừa rồi có cùng một chữ `break`, cùng một cặp vòng lặp. Thứ duy
-nhất khác nhau là **cột** mà chữ ấy đứng, và kết quả ngược hẳn nhau.
+Hai đoạn vừa rồi giống nhau từng ký tự, trừ bốn dấu cách trước chữ `break`.
+Bốn dấu cách ấy đổi hẳn vòng bị cắt, và đổi luôn màn hình: một đằng ba tuần mỗi
+tuần một ngày, một đằng một tuần trọn ba ngày.
 ::::
 
 ::::example{#bon-tuan-van-in-du}

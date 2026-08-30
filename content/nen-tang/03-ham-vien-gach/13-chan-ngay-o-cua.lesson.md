@@ -314,9 +314,12 @@ assert bao_gia_ship(11) == "Xa hơn 10 km, quán chưa giao tới", "quá 10 câ
 ::::reflect{#nghi-lai}
 Một câu hỏi trước khi đi tiếp.
 
-Thân hàm phẳng lại thật. Nhưng `tinh_hoa_don` vẫn dài 30 dòng: vừa tra giá
-theo cỡ tô, vừa tính thuế trên số tiền ấy, vừa dựng câu chữ để đưa ra cho
-người đọc.
+Thân hàm phẳng lại thật, và mười một dòng thì còn đọc được một lượt.
+
+Nhưng quán sắp đòi thêm: khách chỉ nói **cỡ tô** chứ không đọc giá, và hoá đơn
+phải in ra một **câu chữ** chứ không phải một con số trần. Nhét cả hai việc ấy
+vào cùng cái hàm này thì nó lại dài ra — mà lần này dài vì nó ôm ba việc khác
+hẳn nhau, chứ không phải vì hình thang.
 
 Ba việc khác hẳn nhau nằm chung một chỗ. Bạn đã có `def` để đặt tên cho một
 việc, nên cắt ra thành ba hàm — một hàm tra giá, một hàm tính thuế, một hàm

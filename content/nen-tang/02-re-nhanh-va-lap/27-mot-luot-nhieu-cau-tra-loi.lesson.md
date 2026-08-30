@@ -234,7 +234,7 @@ vẹn, và vòng lặp vẫn chỉ có một.
 
 Còn một chỗ **không** gộp vào lượt duyệt được, và biết trước thì đỡ mất buổi
 tối: câu hỏi nào cần biết kết quả của **cả cuốn sổ** rồi mới trả lời được cho
-từng ngày. Viết `print(tong / ngay)` vào giữa thân vòng thì máy in ra bảy dòng,
+từng ngày. Viết `print(tong / ngay)` thành dòng **cuối** của thân vòng thì máy in ra bảy dòng,
 mỗi dòng là trung bình của phần sổ đã đi qua tới lúc đó — `120.0`, `185.0`,
 `153.33…` — chứ không phải trung bình của cả tuần. Một lượt duyệt trả lời được
 mọi câu hỏi **về từng ngày**; câu hỏi đem từng ngày ra so với con số của cả

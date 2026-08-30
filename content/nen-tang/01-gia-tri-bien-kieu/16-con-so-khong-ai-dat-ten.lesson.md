@@ -270,8 +270,12 @@ print(f"Cơm gà {phai_tra_com_ga}đ")
 assert phai_tra_ca_phe == 27000, "cà phê 25000 cộng 8% phải ra 27000"
 assert phai_tra_pho == 54000, "phở 50000 cộng 8% phải ra 54000"
 assert phai_tra_com_ga == 81000, "cơm gà 75000 cộng 8% phải ra 81000"
-# Nối vào một hằng dạng tỉ lệ (`0.08`) vẫn ra ba con số gần đúng, nhưng tiền
-# rơi khỏi `int` — luật bài 7 gãy mà không lỗi nào nổ.
+# Câu chốt: tiền phải còn nguyên trong `int`.
+#
+# Khai hằng bằng tỉ lệ (`THUE_SUAT = 0.08`) thay vì phần trăm là cách duy nhất
+# làm ba con số trên vẫn ra đúng mà KIỂU thì hỏng — một số thực lẫn vào là cả
+# phép nhân ra số thực, và luật "tiền đếm bằng đồng" của bài 7 gãy mà không
+# lỗi nào nổ. Ba assert trên không thấy chuyện đó; câu này mới thấy.
 assert isinstance(phai_tra_pho, int), "tiền phải ở nguyên trong int đồng"
 ```
 

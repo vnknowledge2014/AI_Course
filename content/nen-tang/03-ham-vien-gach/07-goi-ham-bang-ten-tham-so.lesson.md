@@ -285,7 +285,7 @@ def tinh_hoa_don(so_to, gia, thue):
 ```
 
 Chiều nay Byte gọi nó mười lần cho mười bàn. Chín bàn tính thuế mức thường
-`0.1`; đúng một bàn xin hoá đơn đỏ nên tính `0.08`.
+`0.1`; đúng một bàn đặt tiệc theo hợp đồng nên quán tính mức riêng `0.08`.
 
 Nhờ bài hôm nay, mười dòng gọi ấy đọc ra được hết — không dòng nào còn con số
 trần nào khó hiểu. Nhưng nhìn cả mười dòng xếp cạnh nhau thì thấy một chuyện

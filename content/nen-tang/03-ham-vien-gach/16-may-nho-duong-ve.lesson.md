@@ -145,17 +145,23 @@ def tra_gia(co_to):
 dừng lại và in ra:
 
 ```text
+vào dung_cau_tong
+vào tong_phai_tra
 Traceback (most recent call last):
-  File "quan_pho.py", line 22, in <module>
+  File "quan_pho.py", line 18, in <module>
     print(dung_cau_tong("vừa"))
-  File "quan_pho.py", line 17, in dung_cau_tong
+  File "quan_pho.py", line 13, in dung_cau_tong
     tong = tong_phai_tra(co_to)
-  File "quan_pho.py", line 10, in tong_phai_tra
+  File "quan_pho.py", line 6, in tong_phai_tra
     tien = tra_gia(co_to)
   File "quan_pho.py", line 2, in tra_gia
     return int(co_to) * 1000
 ValueError: invalid literal for int() with base 10: 'vừa'
 ```
+
+Hai dòng `vào ...` ở trên cùng là thật: hai tờ phiếu đã kịp đặt lên chồng và
+kịp in câu chào của mình trước khi tầng thứ ba vấp. Chỉ hai câu `ra ...` là
+không bao giờ tới lượt.
 
 Realm 0 dạy bạn đọc thông báo lỗi **từ dòng cuối lên**: dòng cuối nói loại lỗi,
 dòng ngay trên nói lỗi xảy ra ở dòng số mấy. Lúc ấy mấy dòng ở giữa còn là một
