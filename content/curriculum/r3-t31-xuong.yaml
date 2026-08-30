@@ -1,0 +1,66 @@
+# Xương sống R3.T3.1 — Bit, byte & bộ nhớ (28 bài)
+#
+# Vì sao track này đứng đầu Realm 3: MASTERPLAN §9.1 ghi "dọn đường cho
+# ownership". Người học sẽ gặp Rust ở R4.T4.0b, và mọi thứ khó của ownership
+# đều quy về một câu hỏi họ chưa từng được hỏi: "cái tên này GIỮ giá trị, hay
+# nó chỉ CHỈ TỚI giá trị?" R1 đã cho họ chạm vào chuyện đó một lần —
+# `core.list-aliasing`, bài sửa danh sách qua cái tên thứ hai — nhưng chưa bao
+# giờ mở nắp ra xem vì sao.
+#
+# Ngôn ngữ chủ: Python. Rust chỉ xuất hiện ở bước Rosetta của ba bài cuối.
+#
+# Ràng buộc đã kiểm trước khi viết:
+#   - `core.bit`, `core.byte` do R0.T1 bài 5 dạy; `core.bang-ma`,
+#     `core.ky-tu-la-so` do R0.T1 bài 6 dạy.
+#   - `core.list-aliasing`, `core.slice-copy`, `core.float-precision`,
+#     `core.tuple-immutable`, `core.string-immutable` do R1 dạy.
+#   - Runtime là Pyodide → CPython 3.13.2. Mọi khẳng định về `id()`,
+#     `sys.getsizeof`, `is`, small-int caching PHẢI chạy thử trên đó, vì
+#     CPython khác bản khác nhau ở đúng mấy chỗ này.
+
+track: bit-byte-va-bo-nho
+realm: khoa-hoc-may-tinh
+ten: "T3.1 — Bit, byte & bộ nhớ"
+so_bai: 28
+ngon_ngu_chu: python
+
+# ── Cụm 1 (bài 1–6): đếm bằng hai ngón tay ────────────────────────────────
+# R0 đã nói "ô chỉ chứa 0 hoặc 1". Cụm này biến câu ấy thành một hệ đếm dùng
+# được, và chốt luôn vì sao lập trình viên đọc hex.
+bai:
+  - so: 1
+    slug: dem-bang-hai-ngon-tay
+    title: "Đếm khi chỉ có hai ngón tay"
+    teaches: [mem.binary-counting]
+    requires: [core.bit, core.byte]
+    y_chinh: "Hệ mười là một THOẢ THUẬN, không phải luật tự nhiên. R2.T2.1 bài 9 đã hỏi 'vì sao lại là mười'; đây là câu trả lời khác cho cùng câu hỏi ấy."
+  - so: 2
+    slug: doc-mot-day-bit
+    title: "Đọc một dãy bit ra số"
+    teaches: [mem.binary-to-int]
+    requires: [mem.binary-counting]
+    y_chinh: "Mỗi cột một luỹ thừa của 2 — cùng cái bảng vị trí mà R2.T2.1 bài 36 dựng cho hệ mười."
+  - so: 3
+    slug: viet-mot-so-ra-bit
+    title: "Viết một số thành dãy bit"
+    teaches: [mem.int-to-binary]
+    requires: [mem.binary-to-int, core.modulo, core.floor-division]
+    y_chinh: "Chia lấy dư lặp lại. Đây là lần đầu `%` và `//` của R1 làm việc cùng nhau cho một mục đích thật."
+  - so: 4
+    slug: tam-o-la-mot-byte
+    title: "Tám ô là một byte, và nó chứa được tới đâu"
+    teaches: [mem.byte-range]
+    requires: [mem.int-to-binary]
+    y_chinh: "0..255. Con số 255 phải TỰ TÍNH RA, không được đưa sẵn."
+  - so: 5
+    slug: bon-bit-mot-chu-so
+    title: "Vì sao lập trình viên đọc hex"
+    teaches: [mem.hex]
+    requires: [mem.byte-range]
+    y_chinh: "Bốn bit gói gọn thành đúng một chữ số hex, nên một byte luôn là hai chữ số. Không phải vì hex 'đẹp' mà vì nó chia hết."
+  - so: 6
+    slug: cung-mot-so-ba-cach-viet
+    title: "Cùng một con số, ba cách viết"
+    teaches: [mem.radix-literals]
+    requires: [mem.hex, core.number-literal]
+    y_chinh: "`0b`, `0o`, `0x` trong Python. `255 == 0xff` là MỘT giá trị, hai cách gõ — đúng luật R0 bài 12 về tấm thẻ."
