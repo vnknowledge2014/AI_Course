@@ -15,13 +15,13 @@ teaches: [core.reassign]
 requires: [core.variable]
 concepts: [core.bien, core.gan-lai]
 gradingMatrix:
-  web-chrome: []
-  web-firefox: []
-  macos: []
-  windows: []
-  linux: []
-  android: []
-  ios: []
+  web-chrome: [static, run, tests]
+  web-firefox: [static, run, tests]
+  macos: [static, run, tests]
+  windows: [static, run, tests]
+  linux: [static, run, tests]
+  android: [static, run, tests]
+  ios: [static, run, tests]
 provenance:
   authoredBy: llm-assisted
   reviewed: false
@@ -169,6 +169,56 @@ ngày. Chị Hạnh không cần nghĩ ra bốn mươi bảy cái tên khác nha
 
 Gần như mọi thứ bạn học từ đây trở đi — đếm, cộng dồn, lặp lại — đều dựa lên đúng
 một dòng như dòng vừa rồi.
+::::
+
+::::code{#tam-the-di-theo-buoi}
+Đến lượt bạn chuyển tấm thẻ.
+
+Quán đếm số tô bán được trong ngày. **Đầu buổi sáng** con số ấy là `0`. Tới
+**giữa buổi**, quán đã bán được `12` tô.
+
+Chỉ dùng **một** cái tên `so_to_da_ban` cho cả hai lúc — đúng như đoạn trên vừa
+nói: chị Hạnh không nghĩ ra một cái tên mới cho mỗi con số.
+
+Dòng đầu đã viết sẵn. Bạn viết dòng thứ hai.
+
+```python title=starter
+so_to_da_ban = 0
+___
+```
+
+```python title=solution
+so_to_da_ban = 0
+so_to_da_ban = 12
+```
+
+```python title=test
+# Bài này chấm bằng STATIC. Người học chưa có cách nào nhìn vào một cái tên —
+# `print(so_to_da_ban)` là điều bất ngờ để dành cho bài sau, nên đoạn mã này
+# cố ý không in gì cả. Khối test chỉ khẳng định nó chạy tới dòng cuối.
+pass
+```
+
+:::hints
+- kind: attention
+  body: Dòng thứ hai trông rất giống dòng thứ nhất. Cùng một cái tên bên trái dấu `=`, chỉ khác con số bên phải.
+- kind: strategy
+  body: "Nhớ lại đoạn `gia_pho` ở trên: chuyển thẻ chỉ là ra lệnh lại. Đừng nghĩ ra tên mới như `so_to_da_ban_2` — cả bài này nói rằng không cần."
+- kind: one-line
+  body: "Viết `so_to_da_ban = 12` vào chỗ trống."
+:::
+
+:::validate
+- tier: run
+  timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
+- tier: static
+  onFail: hãy gán lại ĐÚNG cái tên `so_to_da_ban` sang 12, đừng nghĩ ra một cái tên thứ hai — chuyện một cái tên đi theo cả ngày chính là điều bài này dạy
+  requireAst:
+  - kind: gan-ten, target: so_to_da_ban, min: 2
+  - kind: has-literal, target: 12
+:::
 ::::
 
 ::::reflect{#nghi-lai}

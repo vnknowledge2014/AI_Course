@@ -132,3 +132,42 @@ Mười ba ca có thật đều gãy ở đúng bước "nghĩ ra một cách vi
 Luật ấy cùng hai luật nữa rút từ 30 lỗ chấm điểm của vòng R1 đã viết thành
 `docs/workflow/luat-cham-diem.md`, để 1.400 bài còn lại không phải học lại
 bằng cách hỏng.
+
+## Cái xanh giả tôi tự dựng lên — bản biên dịch cũ (2026-08-30)
+
+`tools/kiem_ma_bai_hoc.mjs` đọc `dist/content/*.json`, **không** đọc
+`.lesson.md`. Trong `cong.sh` thì vô hại vì bước biên dịch chạy ngay trước nó.
+Chạy tay một mình sau khi sửa bài thì nó chấm bản dịch cũ và báo xanh — về một
+bài học không còn tồn tại.
+
+Tôi dính đúng bẫy ấy suốt một phiên: sửa bài, chạy cổng, thấy xanh, đi tiếp.
+Chỗ lộ ra là lúc thử đột biến — bỏ hẳn luật chấm của một bài mà cổng **vẫn**
+xanh. Nếu không thử đột biến thì cái xanh ấy còn sống rất lâu.
+
+Nay cổng so `mtime` của `content/**/*.lesson.md` với `dist/content/*.json` và
+**từ chối chạy** nếu nguồn mới hơn. Thà đỏ vì chưa biên dịch còn hơn xanh vì
+đo nhầm bản.
+
+Luật rút ra: **một cổng đọc bản dẫn xuất phải tự kiểm bản ấy còn tươi.** Cổng
+nào cũng vậy, không riêng cổng này.
+
+## Sáu truy vấn AST khai mà chưa cài (2026-08-30)
+
+`PyAstKind` trong `content-schema` khai `recursion`, `frozen-dataclass`,
+`no-mutation`, `pure-fn`, `no-global`, `uses-generator` cho Realm 4 (FP).
+Không tên nào có nhánh xử lý trong `kiem-ast.ts`.
+
+Trước đây viết một trong sáu tên ấy vào bài thì nó đếm được **0**:
+- trong `requireAst` → luật trượt trên chính lời giải, `cong.sh` bắt được;
+- trong `forbidAst` → 0 đúng bằng thứ luật cấm muốn thấy, nên nó **ĐẬU**, và
+  đậu mãi mãi. Một luật canh gác không canh gì cả.
+
+Tôi tự viết `assigns-name` (tên thật là `gan-ten`) và suýt cất nó đi như một
+luật đang canh gác. Nay `kiemAst` kiểm tên truy vấn **trước** mọi `try/catch`
+và ném nếu tên không có thật — ai soạn bài FP đầu tiên sẽ phải cài truy vấn
+trước khi dùng nó, đúng thứ tự.
+
+Chỗ đáng nhớ về khối `catch`: nó quy **mọi** lỗi về "mã người học không phân
+tích được". Với một `kind` viết sai thì kết luận ấy đổ tội nhầm người — code
+người học không sao, luật chấm mới là thứ hỏng, mà họ đọc được thông báo còn
+người soạn bài thì không.

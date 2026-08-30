@@ -14,7 +14,7 @@
  *
  * Mặc định đọc `dist/content`. Chạy `content-compiler build` trước.
  */
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
@@ -87,6 +87,39 @@ function khop(thuc, luat) {
       // content-compiler: `expect:` nêu một dòng, không nêu cả output.
       return thuc.includes(mong.trim());
   }
+}
+
+// Cổng này đọc BẢN ĐÃ BIÊN DỊCH, không đọc `.lesson.md`. Nếu nguồn mới hơn
+// bản dịch thì mọi thứ nó nói ra là về một bài học không còn tồn tại — và nó
+// nói bằng màu xanh.
+//
+// Tôi tự dính đúng bẫy này: sửa bài rồi chạy thẳng cổng, thấy xanh, tưởng đã
+// kiểm. Hai đột biến cố ý bẻ gãy luật chấm cũng xanh nốt. Trong `cong.sh` thì
+// không sao vì bước biên dịch chạy ngay trước; chạy tay một mình mới chết.
+const nguon_moi_nhat = (() => {
+  let t = 0;
+  const di = (d) => {
+    for (const e of readdirSync(d, { withFileTypes: true })) {
+      const p = join(d, e.name);
+      if (e.isDirectory()) di(p);
+      else if (e.name.endsWith('.lesson.md')) t = Math.max(t, statSync(p).mtimeMs);
+    }
+  };
+  di('content');
+  return t;
+})();
+const dich_cu_nhat = Math.min(
+  ...readdirSync(THU_MUC)
+    .filter((f) => f.endsWith('.json'))
+    .map((f) => statSync(join(THU_MUC, f)).mtimeMs),
+);
+if (nguon_moi_nhat > dich_cu_nhat) {
+  console.error(
+    `❌ ${THU_MUC} cũ hơn content/ — cổng này sẽ chấm một bài học không còn tồn tại.\n`
+      + '   Biên dịch lại trước:\n'
+      + '   node packages/content-compiler/dist/cli.js build content dist/content',
+  );
+  process.exit(1);
 }
 
 const tep = readdirSync(THU_MUC).filter((f) => f.endsWith('.json') && f !== 'index.json');
@@ -191,6 +224,7 @@ for (const f of tep) {
     // giải thì bài không thể qua được. Kiểm cả hai chiều là cách duy nhất biết
     // luật ấy có thật sự phân biệt hay không.
     const luat_static = (b.validation?.rules ?? []).filter((r) => r.tier === 'static');
+    let static_phan_biet = false;
     for (const r of luat_static) {
       const yeu = r.requireAst ?? [];
       const cam = r.forbidAst ?? [];
@@ -218,6 +252,10 @@ for (const f of tep) {
             loai: `luật static \`${r.id}\` cho qua cả đáp án điền bừa`,
             chi_tiet: 'thay `___` bằng `True` vẫn thoả — luật không phân biệt được gì',
           });
+        } else {
+          // Luật này CHẶN được đáp án điền bừa, tức nó là một cách trượt thật.
+          // Mục 4 ngay dưới cần biết điều đó.
+          static_phan_biet = true;
         }
       }
     }
@@ -229,15 +267,23 @@ for (const f of tep) {
     // trình biên dịch (có đủ solution/test/hints) và qua cổng sư phạm (có đủ
     // ::why, đủ ba nấc gợi ý) — nhưng nó không dạy được gì, vì không có phản
     // hồi nào phụ thuộc vào thứ người học viết ra.
+    //
+    // Tầng `static` CŨNG là một cách trượt — nhưng chỉ khi nó phân biệt được
+    // thật, và điều đó mục 3b vừa đo xong bằng cách điền bừa vào chỗ trống.
+    // Không tính nó thì mấy bài cố ý không in gì ra màn hình (bài dạy gán lại
+    // một cái tên, ở chỗ người học còn chưa được biết `print` một biến) không
+    // có đường nào hợp lệ để chấm.
     if (b.kind === 'code' && c.solution) {
       const co_assert = c.test ? /\bassert\b|\braise\b/.test(c.test) : false;
       const co_output = luat_out && String(luat_out.expected ?? '').trim() !== '';
-      if (!co_assert && !co_output) {
+      if (!co_assert && !co_output && !static_phan_biet) {
         hong.push({
           bai: bai.id,
           buoc: b.id,
           loai: 'không có cách nào TRƯỢT bài này',
-          chi_tiet: 'khối test không có assert, và không có tier output — gõ gì cũng xanh',
+          chi_tiet:
+            'khối test không có assert, không có tier output, và không luật static nào'
+            + ' chặn nổi đáp án điền bừa — gõ gì cũng xanh',
         });
       }
     }

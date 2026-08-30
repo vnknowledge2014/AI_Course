@@ -62,6 +62,21 @@ def _dem(nguon, cac_truy_van):
     for tv in cac_truy_van:
         kind = tv.get("kind")
         tg = tv.get("target")
+
+        # Một \`kind\` không có trong bảng phải NỔ, không được trả 0 lặng lẽ.
+        #
+        # Trước đây vòng lặp dưới đơn giản là không khớp nhánh nào, nên truy
+        # vấn lạ đếm được 0. Trong \`requireAst\` thì nó lộ ra (luật trượt
+        # trên chính lời giải, cổng bắt); nhưng trong \`forbidAst\` thì 0 lại
+        # đúng bằng thứ luật cấm muốn thấy — nó ĐẬU, và đậu mãi mãi. Tôi tự
+        # viết \`assigns-name\` khi tên thật là \`gan-ten\` và suýt cất nó
+        # đi như một luật đang canh gác.
+        if kind not in _KIND_HOP_LE:
+            raise ValueError(
+                "truy vấn AST không có thật: " + repr(kind)
+                + " — các tên dùng được: " + ", ".join(sorted(_KIND_HOP_LE))
+            )
+
         n = 0
         for nut in ast.walk(cay):
             if kind == "uses-call":
@@ -84,6 +99,19 @@ def _dem(nguon, cac_truy_van):
                 if (isinstance(nut, ast.Name) and isinstance(nut.ctx, ast.Load)
                         and (tg is None or nut.id == tg)):
                     n += 1
+            elif kind == "gan-ten":
+                # Đếm chỗ GÁN một cái tên — đúng thứ \`uses-name\` cố ý bỏ qua.
+                #
+                # Bài \`doi-gia-tri-cua-ten\` dạy đúng một việc: gán LẠI cùng
+                # một cái tên. Không có truy vấn này thì bài ấy không có cách
+                # nào đòi người học làm việc đó, vì \`uses-name\` chỉ đếm chỗ
+                # ĐỌC, mà cả bài không đọc cái tên ấy lần nào.
+                if isinstance(nut, (ast.Assign, ast.AugAssign, ast.AnnAssign)):
+                    dich = nut.targets if isinstance(nut, ast.Assign) else [nut.target]
+                    for d in dich:
+                        for con in ast.walk(d):
+                            if isinstance(con, ast.Name) and (tg is None or con.id == tg):
+                                n += 1
             elif kind == "subscript-assign":
                 # Gán VÀO MỘT Ô: \`chi[khoa] = gia_tri\`. Người viết T1.4 báo
                 # thiếu đúng luật này, và phải lách bằng cách đếm số lần đọc
@@ -125,6 +153,12 @@ def _dem(nguon, cac_truy_van):
                     n += 1
         ra.append(n)
     return ra
+
+_KIND_HOP_LE = {
+    "uses-call", "uses-operator", "uses-fstring", "uses-name", "gan-ten",
+    "subscript-assign", "has-literal", "nesting", "comprehension", "lambda",
+    "match-stmt", "no-import",
+}
 
 _TOAN_TU = {
     "+": ast.Add, "-": ast.Sub, "*": ast.Mult, "/": ast.Div,
@@ -203,6 +237,19 @@ def _khop_long(nut, tg):
 `;
 
 /** Những kind mang nghĩa PHỦ ĐỊNH: xuất hiện là hỏng, dù nằm ở `requireAst`. */
+// Đúng 12 truy vấn CÓ nhánh xử lý thật trong `DEM`. Giữ khớp với `_KIND_HOP_LE`.
+//
+// `PyAstKind` trong content-schema còn khai sáu tên nữa cho Realm 4 —
+// `recursion`, `frozen-dataclass`, `no-mutation`, `pure-fn`, `no-global`,
+// `uses-generator` — mà không tên nào có nhánh xử lý. Trước đây viết một
+// trong sáu tên ấy ra thì nó đếm được 0 và không ai biết. Nay nó ném; ai
+// soạn bài FP đầu tiên sẽ phải cài nó trước khi dùng, đúng thứ tự.
+const KIND_HOP_LE = new Set<string>([
+  'uses-call', 'uses-operator', 'uses-fstring', 'uses-name', 'gan-ten',
+  'subscript-assign', 'has-literal', 'nesting', 'comprehension', 'lambda',
+  'match-stmt', 'no-import',
+]);
+
 const KIND_PHU_DINH = new Set(['no-import', 'no-mutation', 'no-global']);
 
 export function kiemAst(
@@ -211,6 +258,22 @@ export function kiemAst(
   yeu_cau: TruyVanAst[] = [],
   cam: TruyVanAst[] = [],
 ): KetQuaAst {
+  // Kiểm TÊN TRUY VẤN trước, và ném ra ngoài mọi try/catch.
+  //
+  // Khối `catch` phía dưới quy mọi lỗi về "mã người học không phân tích được".
+  // Với một `kind` viết sai thì kết luận ấy đổ tội nhầm người: code người học
+  // không sao cả, luật chấm mới là thứ hỏng — mà họ đọc được thông báo còn
+  // tôi thì không. Ném ở đây để cong.sh vấp lúc soạn bài, không phải người
+  // học vấp lúc làm bài.
+  for (const q of [...yeu_cau, ...cam]) {
+    if (!KIND_HOP_LE.has(q.kind)) {
+      throw new Error(
+        `truy vấn AST không có thật: ${JSON.stringify(q.kind)} — ` +
+          `các tên dùng được: ${[...KIND_HOP_LE].sort().join(', ')}`,
+      );
+    }
+  }
+
   py.runPython(DEM);
   const dem = (cac: TruyVanAst[]): number[] => {
     if (cac.length === 0) return [];

@@ -44,8 +44,11 @@ Không ký tự nào trong ba ký tự đó là 1. Cũng không ký tự nào l�
 
 Vậy chúng nằm ở đâu trong một cái máy chỉ có ô 0 và 1?
 
-Câu trả lời có một chỗ bất ngờ: nó **không nằm trong máy**. Nó nằm trong một
-thoả thuận giữa người với người.
+Câu trả lời có một chỗ bất ngờ. Ba ký tự ấy **có** nằm trong máy — nằm dưới
+dạng ba con số, và bài này sẽ chỉ cho bạn thấy chúng.
+
+Thứ không nằm trong máy là **nghĩa** của chúng: chuyện con số ấy đáng được vẽ
+ra thành hình chữ `P`. Điều đó nằm trong một thoả thuận giữa người với người.
 ::::
 
 ::::example{#thuc-don-danh-so}
@@ -133,9 +136,12 @@ Không hiện gì cả, vì 97 không có trong bảng
 Gần đúng ở chỗ bạn quay lại kiểm tra cái bảng trước khi trả lời — đó đúng là
 việc nên làm, và bạn sẽ làm nó suốt khoá học này.
 
-Chỗ lệch chỉ là do bảng in ở trên bị cắt ngắn. Byte trích ra năm dòng cho dễ
-nhìn, còn bảng thật có 128 dòng liền mạch, và 97 nằm gọn trong đó. Dòng 97 ghi:
-`a`.
+Chỗ lệch là 97 **có** trong bảng — dòng thứ ba, ngay trên dòng khoảng trắng.
+Cuộn lên nhìn lại một lượt: `a` | 97 |.
+
+Đó cũng là lý do nên soi kỹ trước khi kết luận "không có". Bảng Byte in ra mới
+là năm dòng trích cho dễ nhìn; bảng thật có 128 dòng liền mạch, nên kể cả một
+con số không thấy trong phần trích thì nó vẫn nằm trong bảng thật.
 ::
 :::
 ::::
@@ -190,9 +196,16 @@ Máy bên nhận không cài tiếng Việt nên nó không viết được ch�
 Gần đúng, và đây là cách hầu hết mọi người mô tả chuyện này — kể cả dân trong
 nghề, khi nói nhanh.
 
-Chỗ lệch là ở chữ "biết tiếng". Máy không biết tiếng nào cả, kể cả tiếng Anh.
-Nó tra bảng, chấm hết. Câu "máy không hỗ trợ tiếng Việt" thật ra là nói tắt của
-"máy đang tra một cái bảng không có dòng nào dành cho chữ Việt".
+Chỗ lệch là câu này đổ lỗi cho **một** cái máy, trong khi hỏng nằm ở **chỗ
+hai máy không khớp nhau**.
+
+Máy nhận không thiếu gì cả — nó tra được đúng cái bảng mà máy gửi đã dùng, nếu
+có ai nói cho nó biết đó là bảng nào. Chữ hiện ra sai không phải vì bên nhận
+kém hơn bên gửi; nó sai vì bên gửi đóng dấu bằng bảng này còn bên nhận đọc
+bằng bảng kia. Đổi vai hai máy cho nhau thì cũng hỏng y hệt.
+
+Và để ý cả chữ "biết tiếng": máy không biết tiếng nào cả, kể cả tiếng Anh. Nó
+tra bảng, chấm hết.
 
 Phân biệt được hai cách nói đó là một bước tiến: cách sau chỉ thẳng ra chỗ phải
 sửa, cách trước thì không.
