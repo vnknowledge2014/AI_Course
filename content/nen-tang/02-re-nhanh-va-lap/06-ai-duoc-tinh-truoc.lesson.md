@@ -330,7 +330,7 @@ pass
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^Thứ hai cần xem lại\nThứ năm cần xem lại$
+  expect: ^Thứ hai cần xem lại\nThứ năm cần xem lại\s*$
 :::
 ::::
 

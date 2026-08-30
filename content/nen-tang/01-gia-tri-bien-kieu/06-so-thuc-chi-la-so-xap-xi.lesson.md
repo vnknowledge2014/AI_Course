@@ -236,6 +236,12 @@ assert 30.2999 < tong_sang < 30.3, "phần lệch phải cực nhỏ và nằm �
   # `min: 2` vì có hai buổi, mỗi buổi một câu hỏi. Khung chưa có dấu `==` nào,
   # nên luật này chặn được đúng cái đáp án gõ cứng hai chữ True/False.
   - kind: uses-operator, target: ==, min: 2
+  # Nhưng đếm dấu `==` thôi thì chưa đủ: `tong_sang == 1` cũng có một dấu.
+  # Hai chỗ trống nằm TRONG `print(___)` nên không assert nào với tới chúng —
+  # ba assert của bài chỉ soi hai cái tên mà khung đã gán sẵn. Nên phải hỏi
+  # thẳng con số người học đem ra so.
+  - kind: has-literal, target: 30.3, min: 1
+  - kind: has-literal, target: 8.75, min: 1
 - tier: output
   match: regex
   expect: ^30\.299999999999997\nFalse\n8\.75\nTrue\s*$

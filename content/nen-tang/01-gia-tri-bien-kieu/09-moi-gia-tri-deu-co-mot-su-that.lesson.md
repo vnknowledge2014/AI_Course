@@ -240,6 +240,9 @@ assert doc_o_tien("220") == 220000, "ô ghi 220 nghìn là ô có nội dung, n�
 assert doc_o_tien("") == 0, "người ghi sổ bấm Enter suông thì ô ấy tính là 0 đồng, chứ không được để máy dừng giữa chừng"
 # Ô có gõ hẳn số không: đã nhập, nên vẫn phải đi qua nhánh đổi kiểu.
 assert doc_o_tien("0") == 0, "ô gõ hẳn một số không là ô đã nhập — nó có một ký tự nên không phải ô để trống"
+# Câu trên một mình KHÔNG chứng minh được điều nó hứa: đi qua nhánh đổi kiểu
+# hay rẽ nhầm vào `return 0` thì đều ra 0. Ô dưới đây mới tách hai nhánh ra.
+assert doc_o_tien("0.2") == 200, "ô bắt đầu bằng số không vẫn là ô CÓ nội dung — 0,2 nghìn là hai trăm đồng, không phải không đồng. Nếu câu này ra 0 thì cách chấm của bạn đang coi mọi ô bắt đầu bằng 0 là ô trống"
 ```
 
 :::hints

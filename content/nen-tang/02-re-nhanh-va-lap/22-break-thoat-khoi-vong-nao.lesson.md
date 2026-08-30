@@ -355,7 +355,7 @@ assert so_tuan_vuot == 3, "tuần 1, tuần 3 và tuần 4 đều có ngày tiê
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^Tuần 1 có ngày vượt ngưỡng\nTuần 3 có ngày vượt ngưỡng\nTuần 4 có ngày vượt ngưỡng\nCó 3 tuần vượt ngưỡng$
+  expect: ^Tuần 1 có ngày vượt ngưỡng\nTuần 3 có ngày vượt ngưỡng\nTuần 4 có ngày vượt ngưỡng\nCó 3 tuần vượt ngưỡng\s*$
 :::
 ::::
 

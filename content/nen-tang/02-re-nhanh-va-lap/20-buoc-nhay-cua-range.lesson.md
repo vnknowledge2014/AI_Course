@@ -264,7 +264,7 @@ pass
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^Hớt bọt: phút 30\nHớt bọt: phút 50\nHớt bọt: phút 70\nHớt bọt: phút 90\nHớt bọt: phút 110$
+  expect: ^Hớt bọt: phút 30\nHớt bọt: phút 50\nHớt bọt: phút 70\nHớt bọt: phút 90\nHớt bọt: phút 110\s*$
 :::
 ::::
 

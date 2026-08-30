@@ -349,6 +349,10 @@ assert ghi_chu is None, "hôm nay chưa ai viết gì vào ô ghi chú, mà chư
   # thẳng KẾT QUẢ — `tong == 245500` và `type(tong) is int` — mà không buộc
   # người học phải đi bằng đúng một cái tên hàm.
   - kind: uses-call, target: strip, min: 1
+  # Chỗ trống thứ năm — `if ghi_chu ___ None`. Không có luật này thì `==` đi
+  # lọt trọn vẹn: `None == None` vẫn `True` nên màn hình không đổi một chữ,
+  # trong khi chính gợi ý của bài gọi cách viết ấy là sai.
+  - kind: uses-operator, target: is, min: 1
 :::
 ::::
 

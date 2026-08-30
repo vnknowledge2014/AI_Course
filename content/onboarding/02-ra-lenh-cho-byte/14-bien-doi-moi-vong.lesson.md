@@ -216,7 +216,7 @@ pass
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^Bàn 1 - tô số 0\nBàn 1 - tô số 1\nBàn 1 - tô số 2\nBàn 1 - tô số 3\nBàn 1 - tô số 4\nBàn 2 - tô số 0\nBàn 2 - tô số 1\nBàn 2 - tô số 2$
+  expect: ^Bàn 1 - tô số 0\nBàn 1 - tô số 1\nBàn 1 - tô số 2\nBàn 1 - tô số 3\nBàn 1 - tô số 4\nBàn 2 - tô số 0\nBàn 2 - tô số 1\nBàn 2 - tô số 2\s*$
 :::
 ::::
 

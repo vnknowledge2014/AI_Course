@@ -255,7 +255,7 @@ pass
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^Tuần 1\n    ngày 1\n(?:.+\n){28}    ngày 6\n    ngày 7$
+  expect: ^Tuần 1\n    ngày 1\n(?:.+\n){28}    ngày 6\n    ngày 7\s*$
 :::
 ::::
 

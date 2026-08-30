@@ -277,7 +277,7 @@ pass
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^Sáng thứ hai nhịn phở\nSáng thứ tư nhịn phở\nSáng thứ năm nhịn phở$
+  expect: ^Sáng thứ hai nhịn phở\nSáng thứ tư nhịn phở\nSáng thứ năm nhịn phở\s*$
 :::
 ::::
 

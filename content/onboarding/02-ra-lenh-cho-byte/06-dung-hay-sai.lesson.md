@@ -232,7 +232,7 @@ pass
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^True\nFalse\nTrue$
+  expect: ^True\nFalse\nTrue\s*$
 :::
 ::::
 
