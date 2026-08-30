@@ -146,9 +146,14 @@ Gần đúng ở chỗ bạn giữ đúng một sợi dây quan trọng: chỗ �
 dây ấy có thật.
 
 Chỗ lệch là dòng `def` này không tồn tại được để mà khớp với ai. Đặt một tham
-số có mặc định lên trước một tham số bắt buộc thì máy từ chối ngay lúc đọc:
-`so_to` và `gia` sẽ vĩnh viễn không có cách nào nhận được giá trị theo vị trí,
-vì mọi con số trần đưa vào đều bị `thue` đứng chặn ở chỗ đầu tiên.
+số có mặc định lên trước một tham số bắt buộc thì máy từ chối ngay lúc đọc,
+bằng câu `parameter without a default follows parameter with a default` — file
+chưa chạy được một dòng nào.
+
+Vì sao Python chặn: nếu nó cho phép, con số trần đầu tiên bạn đưa vào sẽ luôn
+rơi vào `thue`, nên muốn `thue` dùng giá trị mặc định thì `so_to` với `gia`
+bắt buộc phải gọi theo tên — cái mặc định vừa viết ra đã thành vô dụng. Chặn
+sớm ở đây là chặn trước một cái bẫy, không phải một quy định tuỳ hứng.
 ::
 :::
 

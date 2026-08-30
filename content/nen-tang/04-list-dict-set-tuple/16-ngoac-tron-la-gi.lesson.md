@@ -170,7 +170,7 @@ chuỗi. Dấu nháy chỉ biến mất khi bạn lấy riêng ô ấy ra, như 
 :::
 
 :::opt
-`('cà phê', 25000)` rồi `('cà phê')`
+`('cà phê', 25000)` rồi `('cà phê',)`
 ::why
 Gần đúng ở chỗ bạn phân biệt được hai chuyện khác nhau thật: **lấy một ô** và
 **lấy một đoạn**. Lấy một đoạn của danh sách thì đúng là cho về một chỗ chứa

@@ -119,9 +119,9 @@ Gần đúng ở chỗ bạn tính đúng phép làm tròn: `16666.666…` gần
 và dòng thứ hai bạn đoán trúng.
 
 Chỗ lệch nằm ở dòng thứ nhất. `int(...)` không làm tròn lần nào cả — nó không
-đo, không so, không nhìn hai cái cọc. Hai công cụ này chỉ tình cờ trùng kết quả
-khi phần lẻ nhỏ hơn nửa; ở đây phần lẻ là `.666` nên chúng tách hẳn ra, mỗi
-người một cọc.
+đo, không so, không nhìn hai cái cọc. Hai công cụ này trùng kết quả mỗi khi phần lẻ
+chưa đủ để nhích lên cọc phải; ở đây phần lẻ là `.666` nên chúng tách hẳn ra,
+mỗi người một cọc.
 ::
 :::
 

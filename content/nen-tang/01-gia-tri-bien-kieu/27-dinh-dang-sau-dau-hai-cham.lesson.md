@@ -104,15 +104,15 @@ vẫn giữ con số đầy đủ để còn tính tiếp; phần định dạng
 Còn một điều nữa phải nói rõ, vì nó khác hẳn một bài trước:
 
 ```python title=readonly
-mot_tuan_tet = 2500000 / 7
+mot_tuan_tet = 890000 / 7
 
 print(mot_tuan_tet)
 print(f"{mot_tuan_tet:.2f}")
 ```
 
 ```text
-357142.85714285716
-357142.86
+127142.85714285714
+127142.86
 ```
 
 Chữ số thứ ba sau dấu chấm là `7`, và kết quả cho ra `.86` chứ không phải `.85`.
@@ -189,7 +189,7 @@ sang phần nói viết thế nào". Máy đọc trọn dòng này và chạy b�
 
 ::::code{#hai-dong-bao-cao}
 Báo cáo cuối tháng cần hai dòng trung bình. Dòng thứ nhất: tổng cả tháng
-`1360000` chia đều cho 30 ngày. Dòng thứ hai: `2500000` tiêu trong bảy ngày
+`1360000` chia đều cho 30 ngày. Dòng thứ hai: `890000` tiêu trong bảy ngày
 Tết, chia cho 7.
 
 Hai chỗ trống nằm trong cặp `{}` của hai f-string. Điền vào đó cái tên cần in
@@ -197,13 +197,13 @@ kèm lời dặn viết ra hai chữ số sau dấu chấm.
 
 Hai con số này được chọn để soi ra hai lỗi khác nhau. Số thứ nhất có đuôi
 `.3333…` nên nó tha thứ cho cả cắt lẫn làm tròn; số thứ hai có đuôi `.857…` nên
-cắt cho ra `357142.85` còn làm tròn cho ra `357142.86` — chỉ một trong hai qua
+cắt cho ra `127142.85` còn làm tròn cho ra `127142.86` — chỉ một trong hai qua
 được.
 
 ```python title=starter
 tong_thang = 1360000
 trung_binh = tong_thang / 30
-bay_ngay_tet = 2500000 / 7
+bay_ngay_tet = 890000 / 7
 
 dong_thang = f"Trung bình mỗi ngày: {___}đ"
 dong_tet = f"Bảy ngày Tết mỗi ngày: {___}đ"
@@ -215,7 +215,7 @@ print(dong_tet)
 ```python title=solution
 tong_thang = 1360000
 trung_binh = tong_thang / 30
-bay_ngay_tet = 2500000 / 7
+bay_ngay_tet = 890000 / 7
 
 dong_thang = f"Trung bình mỗi ngày: {trung_binh:.2f}đ"
 dong_tet = f"Bảy ngày Tết mỗi ngày: {bay_ngay_tet:.2f}đ"
@@ -227,14 +227,14 @@ print(dong_tet)
 ```python title=test
 # Hai tình huống, không phải một:
 #   1360000 / 30 = 45333.3333…  → cả cắt lẫn làm tròn đều ra 45333.33;
-#   2500000 / 7  = 357142.857…  → cắt ra .85, làm tròn ra .86, chỉ một cái đúng.
+#   890000 / 7  = 127142.857…  → cắt ra .85, làm tròn ra .86, chỉ một cái đúng.
 # Số chữ số lẻ cũng bị soi: `.1f` cho 45333.3, `.3f` cho 45333.333, `.0f` cho
 # 45333 — cả ba đều trượt assert đầu tiên.
 assert dong_thang == "Trung bình mỗi ngày: 45333.33đ", "1360 nghìn chia đều cho 30 ngày, và dòng báo cáo chỉ đọc hai chữ số sau dấu chấm"
-assert dong_tet == "Bảy ngày Tết mỗi ngày: 357142.86đ", "2500 nghìn chia bảy ngày Tết ra đuôi .857, mà tiền thì làm tròn lên chứ không cắt cụt xuống"
+assert dong_tet == "Bảy ngày Tết mỗi ngày: 127142.86đ", "890 nghìn chia bảy ngày Tết ra đuôi .857 — chữ số thứ ba đã quá nửa nên `.2f` ngả về cọc gần hơn là .86; cắt cụt xuống .85 là việc của công cụ khác, không phải làm tròn"
 # Phần định dạng chỉ đổi cách VIẾT RA, không đổi giá trị đang được đặt tên.
 assert trung_binh == 1360000 / 30, "lời dặn cách viết chỉ làm gọn dòng in ra; mức trung bình tháng vẫn giữ nguyên cái đuôi dài của nó"
-assert bay_ngay_tet == 2500000 / 7, "mức trung bình ngày Tết cũng vậy — không ai được làm tròn sẵn con số trước khi in"
+assert bay_ngay_tet == 890000 / 7, "mức trung bình ngày Tết cũng vậy — không ai được làm tròn sẵn con số trước khi in"
 ```
 
 :::hints
@@ -253,7 +253,7 @@ assert bay_ngay_tet == 2500000 / 7, "mức trung bình ngày Tết cũng vậy �
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^Trung bình mỗi ngày: 45333\.33đ\nBảy ngày Tết mỗi ngày: 357142\.86đ\s*$
+  expect: ^Trung bình mỗi ngày: 45333\.33đ\nBảy ngày Tết mỗi ngày: 127142\.86đ\s*$
 - tier: static
   onFail: mỗi ô trống phải in ra chính cái tên đang giữ con số, kèm lời dặn định dạng — không chép cứng kết quả và không làm tròn sẵn giá trị
   requireAst:
