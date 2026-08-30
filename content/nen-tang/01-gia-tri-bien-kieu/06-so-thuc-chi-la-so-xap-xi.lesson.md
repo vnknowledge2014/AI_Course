@@ -86,7 +86,7 @@ chữ số thứ mười lăm.
 
 Dòng thứ hai là phiên bản nhỏ nhất của cùng câu chuyện: `0.1 + 0.2` không ra
 `0.3`. Đây là ví dụ nổi tiếng nhất về số thực trong máy, và mọi ngôn ngữ lập
-trình dùng số dấu chấm động đều cho ra đúng con số dài ngoằng ấy — không riêng
+trình dùng số dấu chấm động đều **giữ** đúng con số lệch ấy — không riêng
 gì Python.
 
 Dòng thứ ba mới là chỗ dễ bỏ qua nhất: `0.25 + 0.25` ra đúng `0.5`, khít khao,

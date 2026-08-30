@@ -47,8 +47,9 @@ mười lần vẫn đúng 12.
 - Thứ **đếm** được thì có một đơn vị nhỏ nhất, dưới mức đó không còn gì. Kiểu
   của nó là `int`.
 
-Tiền thuộc vế nào? Vế đếm. Đồng bạc lẻ nhất còn tiêu được ở Việt Nam là tờ 200
-đồng, và không có món hàng nào giá nửa đồng. Tiền là thứ **đếm bằng đồng**.
+Tiền thuộc vế nào? Vế đếm. Mọi giá tiền ở Việt Nam đều là một số nguyên đồng —
+không món hàng nào giá nửa đồng, và không ai trả nửa đồng cho ai. Tiền là thứ
+**đếm bằng đồng**.
 
 Vậy mà năm bài vừa rồi bạn đã thấy `float` xen vào bảng tính tiền không dưới
 một lần. Nó xen vào ở đâu?

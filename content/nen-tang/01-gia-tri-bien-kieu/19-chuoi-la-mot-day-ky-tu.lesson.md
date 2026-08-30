@@ -186,8 +186,9 @@ với cái tên mà sổ đang giữ.
 
 Bài chấm bằng **hai** phép so chứ không phải một, và hai phép ấy kéo về hai
 phía ngược nhau: một phép đòi chuỗi ghép phải bằng `"cà phê"`, một phép đòi nó
-**không** được là `"càphê"` dính liền. Điền thiếu thì trượt phép thứ nhất, điền
-thừa một hạt thì trượt cả hai.
+**không** được là `"càphê"` dính liền. Điền **thừa** một hạt thì trượt
+phép thứ nhất; bỏ trống hẳn thì trượt cả hai, vì lúc ấy `ghep` đúng bằng
+`"càphê"` — đúng thứ phép thứ hai dựng ra để chặn.
 
 ```python title=starter
 ten_chuan = "cà phê"

@@ -95,9 +95,11 @@ sửa xe: 500000 đồng
 
 Cột tiền đi từ nhỏ tới lớn, và mỗi con số vẫn còn nguyên cái tên đi kèm.
 
-Cách `sorted` làm việc, nói cho hết: mỗi lần cần so hai phần tử, nó **gọi hàm
-của bạn** trên từng phần tử, rồi so hai thứ mà hàm ấy đưa ra. Với `lay_tien`,
-thứ đưa ra là ô tiền — một con số — nên máy so số với số. Cặp vẫn nguyên vẹn từ
+Cách `sorted` làm việc, nói cho hết: **trước khi xếp**, nó gọi hàm của bạn
+**đúng một lần trên mỗi phần tử** để rút ra thứ đem so, rồi xếp hàng dựa trên
+chính những thứ ấy. Không phải gọi lại mỗi lần so hai phần tử — sổ năm khoản
+thì đúng năm lần gọi, đếm được. Với `lay_tien`, thứ rút ra là ô tiền — một con
+số — nên máy so số với số. Cặp vẫn nguyên vẹn từ
 đầu tới cuối; hàm `key` không sửa gì, nó chỉ **rút ra thứ đem so**.
 
 Nói gọn: `key` là chỗ bạn chỉ tay cho máy biết nhìn vào đâu.
