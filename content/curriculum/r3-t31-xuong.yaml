@@ -64,3 +64,145 @@ bai:
     teaches: [mem.radix-literals]
     requires: [mem.hex, core.number-literal]
     y_chinh: "`0b`, `0o`, `0x` trong Python. `255 == 0xff` là MỘT giá trị, hai cách gõ — đúng luật R0 bài 12 về tấm thẻ."
+
+# ── Cụm 2 (bài 7–12): số âm và chỗ số tràn ────────────────────────────────
+  - so: 7
+    slug: dau-am-nam-o-dau
+    title: "Dấu âm cất ở đâu trong tám cái ô"
+    teaches: [mem.sign-bit]
+    requires: [mem.byte-range]
+    y_chinh: "Cách ngây thơ — dành một ô làm dấu — hỏng ở chỗ có HAI số không. Người học phải tự vấp vào đó."
+  - so: 8
+    slug: bu-hai
+    title: "Bù hai: cách máy thật sự nhớ số âm"
+    teaches: [mem.twos-complement]
+    requires: [mem.sign-bit]
+    y_chinh: "`-5 & 0xff` cho 251, tức `0b11111011`. Cộng 5 với 251 trong tám ô ra 0 — đó là định nghĩa của 'số đối'."
+  - so: 9
+    slug: khi-so-tran-ra-ngoai
+    title: "Khi con số tràn ra khỏi ô"
+    teaches: [mem.overflow]
+    requires: [mem.twos-complement]
+    y_chinh: "Python int KHÔNG tràn (R2.T2.2 đã dùng số lớn tuỳ ý). Bài này dựng một byte GIẢ bằng `& 0xff` để người học thấy tràn là gì, rồi nói rõ Python tự tránh nó bằng cách nào."
+  - so: 10
+    slug: python-khong-tran
+    title: "Vì sao Python không bao giờ tràn"
+    teaches: [mem.arbitrary-precision]
+    requires: [mem.overflow]
+    y_chinh: "`sys.getsizeof(2**300)` LỚN HƠN `getsizeof(2**30)` — số to thì chỗ chứa to theo. Ghim QUAN HỆ, không ghim con số (xem docs/decisions/R3-su-that-do-duoc-tren-pyodide.md)."
+  - so: 11
+    slug: bat-tat-tung-o
+    title: "Bật, tắt, hỏi từng ô một"
+    teaches: [mem.bitwise-and-or]
+    requires: [mem.twos-complement, logic.and, logic.or]
+    y_chinh: "`&` và `|` làm trên BIT đúng việc mà `and`/`or` của R1 làm trên câu hỏi Đ/S. Cùng một ý, khác tầng."
+  - so: 12
+    slug: day-sang-trai-la-nhan-hai
+    title: "Đẩy sang trái là nhân hai"
+    teaches: [mem.bit-shift]
+    requires: [mem.bitwise-and-or]
+    y_chinh: "Nối thẳng về R2.T2.1 bài 36 (kéo bảng vị trí sang phải là chia mười). Ở hệ hai thì kéo một cột là nhân/chia hai."
+
+# ── Cụm 3 (bài 13–18): số lẻ và chỗ nó mất chính xác ──────────────────────
+# R1 đã cho gặp `0.1 + 0.2 != 0.3` (core.float-precision) nhưng chỉ nói "máy
+# xấp xỉ". Cụm này mở nắp ra.
+  - so: 13
+    slug: mot-phan-ba-trong-he-muoi
+    title: "1/3 viết trong hệ mười cũng không xong"
+    teaches: [mem.repeating-fraction]
+    requires: [mem.binary-counting, core.float-precision]
+    y_chinh: "Trước khi trách máy, nhớ rằng hệ mười cũng không viết nổi 1/3. Vấn đề không phải máy dở mà là MỌI hệ đếm đều có phân số nó không viết hết."
+  - so: 14
+    slug: mot-phan-muoi-trong-he-hai
+    title: "1/10 trong hệ hai là số vô hạn tuần hoàn"
+    teaches: [mem.binary-fraction]
+    requires: [mem.repeating-fraction]
+    y_chinh: "Đây là câu trả lời cho `0.1 + 0.2`. `(0.1).hex()` cho `0x1.999999999999ap-4` — cái đuôi `999...a` là chỗ nó bị cắt."
+  - so: 15
+    slug: dau-cham-troi
+    title: "Dấu chấm biết trôi"
+    teaches: [mem.float-layout]
+    requires: [mem.binary-fraction]
+    y_chinh: "Dấu · mũ · phần định trị. Vì sao gọi là 'chấm động' chứ không phải 'chấm cố định'."
+  - so: 16
+    slug: hai-so-float-bang-nhau-khong
+    title: "Đừng hỏi hai số lẻ có bằng nhau không"
+    teaches: [mem.float-compare]
+    requires: [mem.float-layout, ctrl.comparison]
+    y_chinh: "Hỏi 'chênh nhau ít hơn một ngưỡng' thay vì `==`. Đây là bài có ích ngay hôm sau cho bất kỳ ai tính tiền."
+  - so: 17
+    slug: tien-thi-dung-so-nguyen
+    title: "Tính tiền thì đếm bằng đồng, đừng đếm bằng nghìn"
+    teaches: [mem.integer-money]
+    requires: [mem.float-compare]
+    y_chinh: "Quán phở của R0/R1 dùng số nguyên đồng suốt — bây giờ người học biết vì sao đó không phải tình cờ."
+  - so: 18
+    slug: chu-cung-la-byte
+    title: "Chữ cũng chỉ là byte, và tiếng Việt tốn ba"
+    teaches: [mem.utf8-bytes]
+    requires: [mem.hex, core.bang-ma, core.ky-tu-la-so]
+    y_chinh: "`'a'.encode('utf-8')` một byte, `'ở'` BA byte `[225, 187, 159]`. R0.T1 bài 6 hứa 'bảng 128 dòng không đủ cho tiếng Việt' — đây là chỗ trả nợ, và người học tự đếm được."
+
+# ── Cụm 4 (bài 19–24): bộ nhớ có địa chỉ ─────────────────────────────────
+  - so: 19
+    slug: bo-nho-la-day-o-danh-so
+    title: "Bộ nhớ là một dãy ô có đánh số"
+    teaches: [mem.address]
+    requires: [mem.byte-range]
+    y_chinh: "Từ 'ô' của R0 lên 'ô CÓ SỐ NHÀ'. Địa chỉ là một con số, y như mọi thứ khác."
+  - so: 20
+    slug: cai-ten-khong-giu-gia-tri
+    title: "Cái tên không giữ giá trị — nó chỉ tới giá trị"
+    teaches: [mem.name-is-reference]
+    requires: [mem.address, core.list-aliasing, core.reassign]
+    y_chinh: "BẢN LỀ CỦA CẢ TRACK. R0 bài 12 dựng hình 'tấm thẻ buộc vào nồi'; bây giờ nói ra rằng tấm thẻ giữ SỐ NHÀ của cái nồi. Dạy bằng `list`, KHÔNG dạy bằng `is` trên số nguyên — xem docs/decisions/R3-su-that-do-duoc-tren-pyodide.md."
+  - so: 21
+    slug: hai-the-mot-noi
+    title: "Hai tấm thẻ buộc vào một cái nồi"
+    teaches: [mem.aliasing-explained]
+    requires: [mem.name-is-reference]
+    y_chinh: "R1 đã cho gặp cú sốc này (`core.list-aliasing`) mà chưa giải thích. Giờ giải thích, và người học đoán TRƯỚC được kết quả thay vì ngạc nhiên."
+  - so: 22
+    slug: chep-nong-chep-sau
+    title: "Chép cái nồi hay chép tấm thẻ"
+    teaches: [mem.shallow-copy]
+    requires: [mem.aliasing-explained, core.slice-copy]
+    y_chinh: "`a[:]` chép được một tầng. Danh sách trong danh sách thì tầng trong vẫn dùng chung — chỗ này phải cho họ vấp thật."
+  - so: 23
+    slug: sua-duoc-va-khong-sua-duoc
+    title: "Thứ sửa được và thứ không"
+    teaches: [mem.mutability]
+    requires: [mem.shallow-copy, core.tuple-immutable, core.string-immutable]
+    y_chinh: "Vì sao `tuple` và `str` không sửa được, mà `list` và `dict` thì được. Không phải quy định tuỳ tiện — nó quyết định ai được phép dùng chung."
+  - so: 24
+    slug: dua-vao-ham-la-dua-gi
+    title: "Đưa vào hàm là đưa cái gì"
+    teaches: [mem.pass-by-reference]
+    requires: [mem.mutability, core.argument-not-copy]
+    y_chinh: "R1 bài `core.argument-not-copy` chốt 'không phải bản sao'. Giờ nói được nó LÀ gì: một tấm thẻ nữa buộc vào cùng cái nồi."
+
+# ── Cụm 5 (bài 25–28): ai dọn, và cửa sang Rust ─────────────────────────
+  - so: 25
+    slug: khi-khong-con-the-nao-tro-toi
+    title: "Khi không còn tấm thẻ nào trỏ tới"
+    teaches: [mem.refcount]
+    requires: [mem.pass-by-reference]
+    y_chinh: "R0 bài 12 nói giá trị cũ 'coi như không còn'. Giờ nói được VÌ SAO: đếm số thẻ, hết thẻ thì dọn."
+  - so: 26
+    slug: hai-noi-tro-vao-nhau
+    title: "Hai cái nồi trỏ vào nhau thì ai dọn"
+    teaches: [mem.reference-cycle]
+    requires: [mem.refcount]
+    y_chinh: "Chỗ đếm-thẻ thua. Đây là lý do tồn tại của bộ dọn rác, và cũng là lý do Rust chọn đường khác."
+  - so: 27
+    slug: ba-cach-don-dep
+    title: "Ba cách dọn, ba cái giá phải trả"
+    teaches: [mem.memory-strategies]
+    requires: [mem.reference-cycle]
+    y_chinh: "Tự dọn tay (C) · đếm thẻ + gom rác (Python) · để trình dịch quyết (Rust). Không cách nào miễn phí — bài phải nói ra giá của cả ba."
+  - so: 28
+    slug: boss-ke-mot-cau-chuyen-bo-nho
+    title: "BOSS — Kể lại đời một giá trị"
+    teaches: [mem.lifetime-story]
+    requires: [mem.memory-strategies, mem.utf8-bytes, mem.float-compare]
+    y_chinh: "Người học viết một chương trình tự thuật lại: giá trị sinh ra ở đâu, mấy tấm thẻ trỏ tới, chiếm mấy byte, lúc nào không ai với tới nữa. Bước Rosetta cuối cùng hé Rust: cùng câu chuyện ấy, trình dịch kể trước khi chạy."

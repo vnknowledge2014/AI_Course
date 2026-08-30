@@ -37,3 +37,15 @@ realm:
       - cam-nhan-so
       - dai-so-va-ham-so
       - logic-va-chung-minh
+
+  # Realm 3 mở màn M8. T3.1 đứng đầu vì MASTERPLAN §9.1 giao cho nó việc "dọn
+  # đường cho ownership" — người học gặp Rust ở R4.T4.0b, và mọi chỗ khó của
+  # ownership đều quy về một câu hỏi T3.1 dựng lên: cái tên GIỮ giá trị, hay
+  # nó chỉ CHỈ TỚI giá trị?
+  #
+  # Nó đứng sau Realm 1 vì mượn `core.list-aliasing`, `core.slice-copy`,
+  # `core.argument-not-copy`; và sau Realm 2 vì mượn bảng vị trí của T2.1.
+  - id: khoa-hoc-may-tinh
+    ten: "Realm 3 — Khoa học máy tính"
+    track:
+      - bit-byte-va-bo-nho
