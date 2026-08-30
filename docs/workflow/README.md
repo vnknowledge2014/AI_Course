@@ -128,3 +128,7 @@ hiến chương thay vì viết thành cổng:
 > MỘT cách viết đúng khác và đếm lại trên nó.
 
 Mười ba ca có thật đều gãy ở đúng bước "nghĩ ra một cách viết đúng khác".
+
+Luật ấy cùng hai luật nữa rút từ 30 lỗ chấm điểm của vòng R1 đã viết thành
+`docs/workflow/luat-cham-diem.md`, để 1.400 bài còn lại không phải học lại
+bằng cách hỏng.
