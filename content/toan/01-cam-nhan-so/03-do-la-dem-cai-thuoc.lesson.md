@@ -262,6 +262,8 @@ assert an_do_bang_buoc_chan > byte_do_bang_sai_day, "bước chân nhỏ hơn s�
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: static
   onFail: hai chỗ trống hỏi hai kiểu khác nhau — một chỗ hỏi hai con số có bằng nhau không (`==`), chỗ kia hỏi con số nào lớn hơn (`>`); gõ thẳng `True` hay `False` thì không hỏi máy điều gì cả
   requireAst:

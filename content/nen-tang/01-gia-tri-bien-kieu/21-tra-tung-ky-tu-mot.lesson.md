@@ -299,6 +299,8 @@ pass
   onFail: hai câu phải đếm ngược từ cuối dòng bằng chỉ số ÂM — đó là thứ bài này dạy. Đếm xuôi bằng một con số chép cứng cũng ra đúng kết quả, nhưng nó vỡ ngay khi dòng dài ngắn khác đi
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: output
   match: regex
   expect: ^dòng 1 — kết đúng bằng đ\ndòng 2 — thiếu chữ đ ở cuối\s*$

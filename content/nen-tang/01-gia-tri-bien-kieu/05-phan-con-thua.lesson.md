@@ -218,6 +218,8 @@ assert f"{thua_bun}" == "1" and f"{thua_lau}" == "4", "phần thừa đếm bằ
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: static
   onFail: bài này dạy dấu lấy dư `%` — hãy dùng chính nó ở cả hai dòng, đừng dựng lại phần thừa bằng phép nhân rồi trừ
   requireAst:

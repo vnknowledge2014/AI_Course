@@ -308,6 +308,8 @@ assert day_ha * luong_ha == hat_ha, "15,5 hạt một luống, 4 luống — ch�
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: static
   onFail: mỗi chỗ trống phải là một phép chia thật — cái tên giữ số hạt chia cho cái tên giữ số luống — chứ không phải con số kết quả gõ sẵn
   requireAst:

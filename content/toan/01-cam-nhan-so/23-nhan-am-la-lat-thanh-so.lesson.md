@@ -256,6 +256,8 @@ assert re_sau_lat_va_keo == re_sau_mot_lan_lat * keo, \
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: static
   onFail: mỗi lần lật phải là một phép nhân với `lat`, không phải chép cứng kết quả — dòng lật hai lượt cần đúng hai phép nhân, và dòng cuối cần một phép lật rồi một phép kéo giãn qua `keo`
   requireAst:

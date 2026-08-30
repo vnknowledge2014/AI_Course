@@ -236,6 +236,8 @@ assert moi_nguoi_lau * 6 <= tien_lau, "tổng sáu phần không được vượ
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: static
   onFail: bài này dạy dấu chia hai gạch `//` — hãy dùng chính nó ở cả hai dòng, đừng chia bằng `/` rồi cắt hay làm tròn lại
   requireAst:

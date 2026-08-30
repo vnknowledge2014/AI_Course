@@ -240,6 +240,8 @@ assert byte_dem_ca_dong_duoc != an_dem_lai_lan_ba_duoc, "ra 13 thì chắc chắ
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: static
   onFail: mỗi chỗ trống phải là một câu hỏi so sánh bằng (`==`) giữa hai lần đếm — hai lần ra khác số nghĩa là đã có một lần phá luật ghép đôi, và chỉ câu hỏi viết thật mới chỉ ra chỗ lệch đó; gõ thẳng `True` hay `False` thì không hỏi máy điều gì cả
   requireAst:

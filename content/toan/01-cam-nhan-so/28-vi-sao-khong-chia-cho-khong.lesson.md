@@ -253,6 +253,8 @@ assert 999999999 * 0 != 12, "một con số khổng lồ cũng không phải đ�
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: static
   onFail: mỗi chỗ trống phải là một câu hỏi so sánh bằng (`==`) giữa kết quả nhân ngược và con số 12 — và phải so cái TÊN đang giữ kết quả ấy với 12, không phải chép lại con số
   requireAst:

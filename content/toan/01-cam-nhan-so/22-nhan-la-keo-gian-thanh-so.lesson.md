@@ -248,6 +248,8 @@ assert moc_0_sau_keo == 0, "mốc 0 là chỗ ghim sợi dây thun — kéo ki�
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: static
   onFail: mỗi luống phải được kéo giãn bằng chính con số `keo`, không phải chép cứng kết quả — chép cứng thì đổi `keo` sang 5 là bài sai ngay
   requireAst:

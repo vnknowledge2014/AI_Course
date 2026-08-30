@@ -295,6 +295,8 @@ assert gao_mai * 5 == goc_mai * 2, "vế gáo và vế gốc là cùng một b�
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: static
   onFail: mỗi chỗ trống phải chép bộ đôi mẫu lên — tức là nhân `gao_mau` hoặc `goc_mau` với số lượt, chứ không gõ thẳng con số kết quả
   requireAst:

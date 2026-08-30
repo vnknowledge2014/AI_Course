@@ -267,6 +267,8 @@ assert 50 * 6 == 300, "bẻ làm 6 phần thì mỗi phần 50 phân"
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: static
   onFail: mỗi chỗ trống phải là một câu hỏi so sánh bằng (`==`) giữa chiều dài gộp lại và con số 300 — và phải so cái TÊN đang giữ chiều dài ấy với 300, không phải chép lại con số
   requireAst:

@@ -282,6 +282,8 @@ pass
   onFail: bài này đo độ dài bằng `len`, không bằng con số gõ tay
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: output
   match: regex
   expect: ^cà phê — vừa cột\ncà phê sữa đá — tràn cột\nbạc xỉu nóng — vừa cột\s*$

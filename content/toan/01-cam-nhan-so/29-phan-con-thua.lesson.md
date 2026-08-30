@@ -236,6 +236,8 @@ assert thua_hat < 6, "dư phải nhỏ hơn cái gói 6 hạt — nếu không t
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: static
   onFail: hai chỗ trống đầu phải là một phép tính có nhân và có trừ (`lượng ban đầu - (thước * số lần)`), còn chỗ trống thứ ba phải hỏi `thua_hat` có nhỏ hơn 6 không — chép thẳng con số đáp án thì không tính và không kiểm được gì
   requireAst:

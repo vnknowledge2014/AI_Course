@@ -188,6 +188,8 @@ pass
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: output
   expect: Phở bò tái nạm
 :::

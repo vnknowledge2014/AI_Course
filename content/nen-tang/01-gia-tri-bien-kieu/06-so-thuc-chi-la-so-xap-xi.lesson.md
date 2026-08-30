@@ -228,6 +228,8 @@ assert 30.2999 < tong_sang < 30.3, "phần lệch phải cực nhỏ và nằm �
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: static
   onFail: mỗi chỗ trống phải là một câu hỏi so sánh bằng (`==`) giữa tổng và con số bạn mong đợi — gõ thẳng `True` hay `False` thì không hỏi máy điều gì cả
   requireAst:

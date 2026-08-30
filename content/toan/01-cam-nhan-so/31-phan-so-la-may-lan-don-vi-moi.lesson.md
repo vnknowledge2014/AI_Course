@@ -279,6 +279,8 @@ assert 3/4 > 3/5, "miếng cỡ 1/4 to hơn miếng cỡ 1/5, nên ba miếng b�
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: static
   onFail: mỗi chỗ trống phải là một câu hỏi so sánh bằng (`==`) viết bằng phân số — gõ thẳng `True` hay `False` thì không hỏi máy điều gì cả
   requireAst:

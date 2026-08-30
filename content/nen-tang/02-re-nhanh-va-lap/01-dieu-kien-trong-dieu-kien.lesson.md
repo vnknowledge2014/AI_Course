@@ -283,6 +283,8 @@ pass
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: output
   match: regex
   expect: ^Thứ Bảy tiêu hơi nhiều\.\nThứ Bảy là ngày kỷ lục\.\nChủ nhật tiêu hơi nhiều\.\s*$

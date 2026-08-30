@@ -263,6 +263,8 @@ assert gap_doi_3_luot != 6, "số mũ không phải một thừa số thứ hai 
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: static
   onFail: bốn chỗ trống phải viết bằng dấu mũ `**` đặt sau chính cái tên `co_so` hoặc `gap_doi`, không phải chép cứng kết quả — chép cứng thì cái bài này vừa dạy không xuất hiện ở đâu cả
   requireAst:

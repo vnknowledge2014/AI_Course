@@ -246,6 +246,8 @@ pass
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: output
   match: regex
   expect: ^Cả tháng: 1,360,000đ\nMỗi ngày: 45,333\.33đ\s*$

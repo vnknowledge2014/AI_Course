@@ -267,6 +267,8 @@ assert 3/4 != 6/4, "gấp đôi số miếng mà không bẻ nhỏ miếng nào 
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: static
   onFail: mỗi chỗ trống phải là một câu hỏi so sánh bằng (`==`) giữa hai phân số — gõ thẳng `True` hay `False` thì không hỏi máy điều gì cả
   requireAst:

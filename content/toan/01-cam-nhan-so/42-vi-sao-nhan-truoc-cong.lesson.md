@@ -294,6 +294,8 @@ assert chieu - 2 == 42, "gỡ 2 hạt rơi ra, phần còn lại phải là kh�
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: static
   onFail: mỗi dòng phải có đủ một phép nhân cho cái khối và một phép cộng cho nhúm hạt lẻ — gõ thẳng con số đã đếm được thì không viết ra cấu trúc nào cả
   requireAst:

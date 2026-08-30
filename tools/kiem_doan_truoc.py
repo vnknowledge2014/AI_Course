@@ -31,6 +31,17 @@ luật ở đây chỉ đụng tới `predict`, chỗ mà biết trước đáp 
 
 Ca cố ý thì khai vào `content/curriculum/doan-truoc-bo-qua.yaml` kèm lý do.
 
+## Luật C — `assert` viết ra thì phải có đường chạy tới
+
+Một bước khai `tests` trong `gradingMatrix` mà khối `:::validate` không có
+`- tier: tests` thì mọi câu `assert` của nó là mã chết: người học không bao
+giờ chạy tới. Cổng `kiem_ma_bai_hoc.mjs` vẫn xanh, vì nó chạy khối `test`
+thẳng tay để kiểm lời giải mẫu — nó không hỏi bài có CHẤM bằng khối ấy không.
+
+Đếm lần đầu: **121 câu `assert` trên 59 bước**, có bài tới 9 câu. Người viết
+bỏ công nghĩ ra từng câu, viết thông điệp trượt cẩn thận, và không câu nào
+tới tay người học.
+
 ## Luật B — chấm màn hình nhiều dòng thì không được nhìn mỗi một dòng
 
 `- tier: output` không khai `match` thì compiler mặc định `contains`
@@ -144,6 +155,24 @@ def khoi_ma(kh: str):
     return None
 
 
+def soi_assert_chet(van: str, ten: str, vi_pham: list):
+    """Luật C: khối `test` có `assert` mà bước không chấm bằng tier `tests`."""
+    dau = van.split('---')
+    if len(dau) < 3 or 'tests' not in dau[1]:
+        return
+    for kh in re.split(r'\n(?=::::\w)', van):
+        m = re.search(r'```python title=test\n(.*?)^```', kh, re.S | re.M)
+        v = re.search(r':::validate\n(.*?)^:::$', kh, re.S | re.M)
+        if not m or not v or 'assert' not in m.group(1):
+            continue
+        if '- tier: tests' in v.group(1):
+            continue
+        n = m.group(1).count('assert')
+        vi_pham.append((f'{ten} · {n} câu `assert` không bao giờ chạy',
+                        'bước khai `tests` trong `gradingMatrix` nhưng `:::validate` không có\n'
+                        '     `- tier: tests` — người học không có đường chạy tới mấy câu ấy'))
+
+
 def soi_phep_cham(van: str, ten: str, bo_qua: set, dung_khoa: set, vi_pham: list):
     """Luật B: `contains` ngầm trên một lời giải in từ hai dòng trở lên."""
     for kh in re.split(r'\n(?=::::\w)', van):
@@ -179,6 +208,7 @@ def main() -> int:
         ten = t.relative_to(GOC).as_posix()
 
         soi_phep_cham(van, ten, bo_qua, dung_khoa, vi_pham)
+        soi_assert_chet(van, ten, vi_pham)
 
         # Mã đã in kèm kết quả, và mọi khung `text` — tính dồn khi đi xuống.
         ma_co_ket_qua, khung_text = {}, []
@@ -260,7 +290,7 @@ def main() -> int:
 
     if vi_pham or thua:
         return 1
-    print('✅ Không khối `predict` nào chép lại nguyên đoạn mã đã in kèm đáp án.')
+    print('✅ Mọi phép đo đều đo được thứ nó nói nó đo.')
     return 0
 
 

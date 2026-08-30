@@ -229,6 +229,8 @@ assert "hạt" not in bang_cam_o_manh_dat, "mảnh đất đếm bằng luống,
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: static
   onFail: mỗi tấm bảng phải mang đủ hai mảnh — con số và đơn vị của nó, viết liền trong một câu chữ
   requireAst:

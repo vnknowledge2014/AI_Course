@@ -314,6 +314,8 @@ assert ngay_vuot == 7, "tuần trước tiêu dè sáu ngày, tới ngày 7 mớ
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: tests
+  timeoutMs: 4000
 - tier: output
   match: regex
   expect: ^Tuần này: cả tuần không ngày nào tiêu quá 200\nTuần trước: ngày đầu tiên vượt ngưỡng là ngày 7\s*$
