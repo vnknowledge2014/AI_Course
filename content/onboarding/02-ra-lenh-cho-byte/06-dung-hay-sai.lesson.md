@@ -123,8 +123,8 @@ bốn mươi lăm nghìn, nên câu trả lời là `False`.
 :::opt
 -15000
 ::why
-Gần đúng ở chỗ bạn nhận ra máy phải đem hai con số ra so với nhau, và đúng là
-trong ruột máy việc so sánh có liên quan tới chuyện lấy số này trừ số kia.
+Gần đúng ở chỗ bạn nhận ra máy phải đem hai con số ra so với nhau — nó có làm
+việc đó thật.
 
 Nhưng thứ máy **đưa lại cho bạn** không phải khoảng cách giữa hai số. Nó là câu
 trả lời cho một câu hỏi có–không. Muốn biết thiếu bao nhiêu tiền thì phải hỏi

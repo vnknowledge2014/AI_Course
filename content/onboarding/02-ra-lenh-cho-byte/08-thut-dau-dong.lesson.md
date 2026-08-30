@@ -91,8 +91,12 @@ Cùng một chữ, cùng một điều kiện, chỉ khác chỗ đứng. Trong 
 một dòng **là một phần ý nghĩa của nó**.
 
 > Quy ước: thụt vào bằng **bốn dấu cách**. Đừng trộn dấu cách với phím Tab
-> trong cùng một tệp — nhìn thì giống nhau, nhưng với máy đó là hai thứ khác
-> nhau, và nó sẽ từ chối chạy.
+> trong cùng một **khối** — nhìn thì giống hệt nhau, nhưng với máy đó là hai
+> thứ khác nhau, và nó dừng lại với `TabError`.
+>
+> Trộn ở hai khối khác nhau thì máy vẫn chạy, nhưng đừng làm: chỗ nào cũng
+> trông như nhau trên màn hình, và bạn sẽ không nhìn ra được vì sao một khối
+> chạy còn khối kia thì không.
 ::::
 
 ::::predict{#khoi-hai-dong commitOnce}

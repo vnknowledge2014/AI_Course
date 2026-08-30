@@ -75,8 +75,14 @@ print(f"Hai bàn tổng cộng {tien_ban_ba + tien_ban_nam} đồng")
 Chỗ `tinh_tien(2)` đứng, sau khi hàm chạy xong, biến thành `90000`. Cả dòng
 thành `tien_ban_ba = 90000` — y như bạn tự gõ con số vào đó.
 
-Đó là lý do một hàm có `return` đem cộng được, so sánh được trong `if`, cất vào
-danh sách được. Một hàm chỉ `print` thì không.
+Đó là lý do một hàm có `return` đem cộng được, so sánh được trong `if`, cất
+vào danh sách được.
+
+Hàm chỉ `print` thì khác — và khác theo hai kiểu. Đem nó đi **cộng** thì máy
+dừng ngay, vì không cộng được với `None`. Nhưng đem nó đi **cất vào danh
+sách** thì máy chạy êm ru: nó cất đúng cái `None` ấy vào, không kêu một tiếng,
+và bạn chỉ biết khi mở danh sách ra thấy toàn `None`. Kiểu thứ hai mới là kiểu
+khó tìm.
 ::::
 
 ::::predict{#doan-print-vs-return commitOnce}

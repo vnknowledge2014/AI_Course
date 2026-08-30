@@ -215,6 +215,10 @@ pass
 :::validate
 - tier: run
   timeoutMs: 4000
+- tier: static
+  onFail: câu in ra phải CHÈN hai cái tên vào, không phải một câu chữ gõ sẵn — gõ sẵn thì đổi món hay đổi giá là câu chào sai ngay
+  requireAst:
+  - kind: uses-fstring, min: 1
 - tier: output
   expect: Một tô phở tái giá 45000 đồng
 :::

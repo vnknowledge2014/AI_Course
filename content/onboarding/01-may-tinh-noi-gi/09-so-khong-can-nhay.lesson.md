@@ -189,6 +189,12 @@ pass
   timeoutMs: 4000
 - tier: tests
   timeoutMs: 4000
+- tier: static
+  onFail: đề bài cấm gõ thẳng kết quả — hãy để MÁY tính ra con số ấy từ hai số của bài
+  requireAst:
+  - kind: uses-operator, target: +, min: 1
+  forbidAst:
+  - kind: has-literal, target: 55000
 - tier: output
   expect: 55000
 :::

@@ -216,6 +216,12 @@ pass
   timeoutMs: 4000
 - tier: tests
   timeoutMs: 4000
+- tier: static
+  onFail: hãy nối hai CÁI TÊN ở dòng trên bằng dấu `+`, đừng gõ thẳng con số — con số 127 gõ sẵn trông y hệt kết quả, mà nó lại là đúng cái hiểu nhầm bài này đi bác
+  requireAst:
+  - kind: uses-name, target: so_to_sang, min: 1
+  - kind: uses-name, target: so_to_chieu, min: 1
+  - kind: uses-operator, target: +, min: 1
 - tier: output
   expect: 127
 :::

@@ -92,9 +92,13 @@ ngay bạn định viết gì. Bạn đang trông đợi máy cư xử như mộ
 thông cảm — mong muốn ấy rất tự nhiên.
 
 Chỗ lệch quay lại tính cách ở bài 3: máy không tự bổ sung phần bạn quên nói.
-Với dòng `print("Mời vào)`, nó không có cách nào biết câu chữ của bạn kết thúc ở
-đâu — sau chữ `vào`? sau dấu `)`? hay còn kéo dài xuống những dòng bên dưới? Nó
-dừng lại hỏi thay vì chọn hộ bạn.
+Với dòng `print("Mời vào)`, nó không có cách nào biết câu chữ của bạn kết thúc
+ở đâu — sau chữ `vào`? hay sau dấu `)`, tức là dấu ngoặc ấy cũng nằm trong câu
+chữ luôn? Nó dừng lại hỏi thay vì chọn hộ bạn.
+
+(Máy biết chắc một điều: câu chữ ấy phải đóng **trước khi hết dòng**. Nên khi
+đọc tới cuối dòng mà chưa thấy dấu nháy thứ hai, nó không đợi thêm dòng nào
+nữa — nó báo ngay. Đó chính là chữ *detected at line 1* trong thông báo.)
 ::
 :::
 

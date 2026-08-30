@@ -203,6 +203,10 @@ pass
   timeoutMs: 4000
 - tier: tests
   timeoutMs: 4000
+- tier: static
+  onFail: chỗ trống cần THỨ NGƯỜI TA VỪA GÕ — cái tên `ten_khach` — chứ không phải một câu chữ bạn gõ sẵn. Gõ sẵn thì hôm sau khách tên khác, quán vẫn chào Lan
+  requireAst:
+  - kind: uses-name, target: ten_khach, min: 1
 - tier: output
   expect: Chào Lan, mời vào quán
 :::
