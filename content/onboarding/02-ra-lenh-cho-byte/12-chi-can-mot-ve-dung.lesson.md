@@ -250,21 +250,16 @@ Một câu hỏi trước khi đi tiếp.
 Bạn đã dạy được máy rẽ nhánh khá thành thạo: một nhánh, hai nhánh, nhiều nhánh,
 và ghép hai điều kiện bằng `and` hay `or`.
 
-Chiều nay chủ quán nhờ bạn một việc rất khác. Quán có mười món, bà muốn in ra
-màn hình mười dòng để dán lên tường:
+Chiều nay chủ quán nhờ bạn một việc rất khác. Bà muốn in mười tờ giấy giống
+hệt nhau để dán quanh quán, mỗi tờ đúng một dòng:
 
-> Món số 1
->
-> Món số 2
->
-> Món số 3
+> Mời xem bảng giá
 
-...và cứ thế tới `Món số 10`.
+Mười tờ, không tờ nào khác tờ nào.
 
-Cách bạn đang có là gõ mười dòng `print`, gần giống hệt nhau, khác nhau đúng một
-con số. Gõ xong bạn sẽ thấy ba chuyện: mỏi tay, dễ gõ nhầm một số ở giữa mà
-không ai phát hiện, và hôm sau quán thêm món thứ mười một thì phải mở file ra
-sửa tiếp.
+Cách bạn đang có là gõ mười dòng `print` y hệt nhau. Gõ xong bạn sẽ thấy ba
+chuyện: mỏi tay, dễ gõ sót một dòng mà không ai phát hiện, và hôm sau bà muốn
+đổi câu chữ thì phải sửa cả mười chỗ.
 
 Máy tính vốn giỏi nhất đúng cái việc lặp lại không mệt. Vậy có cách nào nói với
 nó **một lần** rằng *"làm việc này mười lượt"*, thay vì chép tay mười dòng?

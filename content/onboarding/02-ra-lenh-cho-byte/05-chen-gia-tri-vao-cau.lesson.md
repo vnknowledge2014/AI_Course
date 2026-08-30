@@ -156,9 +156,10 @@ Gần đúng ở chỗ bạn đang dùng đúng cái trục quan trọng nhất 
 trong nháy là chữ, ngoài nháy là tên máy phải đi tìm. Bạn nhớ luật ấy là rất
 tốt.
 
-Chỗ lệch nằm ở hậu quả. Máy chỉ báo lỗi khi nó **không hiểu** bạn viết gì. Ở đây
-nó hiểu hoàn toàn: bạn đưa cho `print` một câu chữ, và nó đọc câu chữ đó ra. Kết
-quả không như bạn muốn, nhưng với máy thì không có gì trục trặc cả.
+Chỗ lệch nằm ở hậu quả. Máy báo lỗi khi nó **không làm nổi** việc bạn giao —
+như `int()` không đọc được `"ba"` ở bài trước. Ở đây nó làm được: bạn đưa cho
+`print` một câu chữ, và nó đọc câu chữ đó ra. Kết quả không như bạn muốn,
+nhưng với máy thì mọi việc đã xong xuôi.
 ::
 :::
 ::::

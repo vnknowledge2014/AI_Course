@@ -122,8 +122,10 @@ Gần đúng ở chỗ bạn cảm thấy có gì đó thừa — và đúng là
 rồi không gọi thì vô ích. Nhưng "vô ích" khác "sai": máy không có quy tắc nào
 buộc bạn phải dùng một cái tên đã đặt.
 
-Máy chỉ báo lỗi khi nó **không hiểu** hoặc **không tìm thấy** thứ bạn nhắc tới.
-Ở đây nó hiểu hết, và làm đúng từng chữ bạn viết.
+Máy báo lỗi khi nó không đọc nổi câu bạn viết, khi nó không tìm ra cái tên bạn
+nhắc tới, hoặc khi bạn bảo nó làm một việc **không có quy ước nào để làm** —
+như cộng một câu chữ với một con số ở bài 16 mạch trước. Ở đây thì không rơi
+vào ca nào cả: máy làm đúng từng chữ bạn viết.
 ::
 :::
 ::::

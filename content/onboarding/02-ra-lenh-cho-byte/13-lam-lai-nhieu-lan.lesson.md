@@ -32,8 +32,8 @@ Việc phải làm mười lượt, bạn vẫn viết một lần thôi. Phần
 ::::
 
 ::::explain{#muoi-dong-giong-het}
-Bài trước kết bằng một câu hỏi: in bảng giá mười cỡ tô mà gõ mười dòng `print`
-thì sao?
+Bài trước kết bằng một câu hỏi: in mười tờ giấy giống hệt nhau mà gõ mười
+dòng `print` thì sao?
 
 Thì nó ra thế này:
 

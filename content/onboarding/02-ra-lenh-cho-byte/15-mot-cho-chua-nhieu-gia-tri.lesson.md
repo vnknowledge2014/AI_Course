@@ -146,9 +146,19 @@ Vài điều gọn về nó:
 - **Danh sách rỗng viết là `[]`** — một tấm bảng chưa ghi gì lên.
 - **Nó là một kiểu riêng.** Đem `type(thuc_don)` ra hỏi như ở bài mỗi giá trị có một kiểu, máy đáp `<class 'list'>`. Danh sách đứng cạnh chữ và số như một loại giá trị nữa.
 
-> Dễ nhầm: ngoặc vuông `[ ]` không phải ngoặc tròn `( )`. Ngoặc tròn là chỗ đưa
-> thứ gì đó vào cho một việc — `print(...)`, `range(...)`. Ngoặc vuông là chỗ
-> dựng nên một danh sách. Gõ nhầm loại ngoặc thì máy báo lỗi trước khi chạy.
+> Dễ nhầm: ngoặc vuông `[ ]` không phải ngoặc tròn `( )`. Ngoặc tròn là chỗ
+> đưa thứ gì đó vào cho một việc — `print(...)`, `range(...)`. Ngoặc vuông là
+> chỗ dựng nên một danh sách.
+>
+> Và gõ nhầm hai loại ngoặc ấy hỏng theo hai kiểu khác hẳn nhau, **không kiểu
+> nào báo lỗi trước khi chạy**:
+>
+> - Gõ ngoặc tròn thay ngoặc vuông thì máy **không kêu một tiếng nào**. Nó
+>   dựng ra một thứ khác, chạy trơn tru, và bạn chỉ biết khi in ra thấy `( )`
+>   thay vì `[ ]`.
+> - Gõ ngoặc vuông thay ngoặc tròn — `print["Phở tái"]` — thì máy chạy tới
+>   đúng dòng ấy mới dừng, và nó nói `TypeError`: bạn đang xin một ô trong
+>   `print`, mà `print` không phải chỗ có ô để xin.
 ::::
 
 ::::code{#viet-thuc-don}

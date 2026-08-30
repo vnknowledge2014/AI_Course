@@ -189,6 +189,15 @@ ___ co_to == "vua":
     print("45000 đồng")
 else:
     print("55000 đồng")
+
+co_to = "nho"
+
+if co_to == "nho":
+    print("40000 đồng")
+___ co_to == "vua":
+    print("45000 đồng")
+else:
+    print("55000 đồng")
 ```
 
 ```python title=solution
@@ -200,20 +209,38 @@ elif co_to == "vua":
     print("45000 đồng")
 else:
     print("55000 đồng")
+
+co_to = "nho"
+
+if co_to == "nho":
+    print("40000 đồng")
+elif co_to == "vua":
+    print("45000 đồng")
+else:
+    print("55000 đồng")
 ```
 
 ```python title=test
-# Chấm bằng OUTPUT: với cỡ tô "vua", màn hình phải hiện đúng mức giá 45000.
+# Chấm bằng OUTPUT, và bằng HAI cỡ tô chứ không một.
+#
+# Cỡ "vua" một mình KHÔNG phân biệt được `elif` với `if`: điền `if` thì nhánh
+# đầu sai, nhánh hai đúng, `else` không tới lượt — ra đúng một dòng 45000, y
+# hệt lời giải. Mà `elif` lại là khái niệm mới DUY NHẤT của bài này.
+#
+# Cỡ "nho" mới tách được. Với `elif`: nhánh đầu đúng, cả chuỗi dừng, in một
+# dòng 40000. Với `if`: nhánh đầu vẫn in 40000, nhưng `if` thứ hai là một câu
+# hỏi MỚI — "nho" không phải "vua" nên `else` của nó chạy, in thêm 55000. Hai
+# dòng cho một cỡ tô, và quán báo hai giá cho cùng một bát phở.
 pass
 ```
 
 :::hints
 - kind: attention
-  body: Chỗ trống nằm ở **đầu dòng**, sát lề trái, cùng mức với `if` và `else`. Đó là chỗ của một từ khoá, không phải chỗ của một điều kiện.
+  body: Hai chỗ trống nhận cùng một từ — cùng một bảng giá, thử trên hai cỡ tô khác nhau. Mỗi chỗ nằm ở **đầu dòng**, sát lề trái, cùng mức với `if` và `else`. Đó là chỗ của một từ khoá, không phải chỗ của một điều kiện.
 - kind: strategy
   body: Dòng này phải làm hai việc một lúc — vừa nói "nhánh trên sai rồi", vừa mang theo một câu hỏi mới, vì ngay sau chỗ trống đã có sẵn `co_to == "vua"`. Trong bài có đúng một từ làm được cả hai.
 - kind: one-line
-  body: Thay `___` bằng `elif`, giữ nguyên phần `co_to == "vua":` phía sau.
+  body: Thay cả hai `___` bằng `elif`, giữ nguyên phần `co_to == "vua":` phía sau.
 :::
 
 :::validate
@@ -221,7 +248,7 @@ pass
   timeoutMs: 4000
 - tier: output
   match: regex
-  expect: ^45000 đồng\s*$
+  expect: ^45000 đồng\n40000 đồng\s*$
 :::
 ::::
 
