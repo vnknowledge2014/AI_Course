@@ -68,3 +68,63 @@ thức. Đó là việc của vòng phản biện, và tới giờ vẫn chưa c
 Ghi lại đây để lần sau đừng dựng lại: một cổng bắt 0 lỗi thật và sinh 19 báo
 oan thì tệ hơn không có cổng nào — người ta sẽ tắt nó, và tắt rồi thì nó cũng
 không bắt được ca thật nào nữa.
+
+## Một cổng nữa KHÔNG nên dựng: "đáp án đúng có bị chặn oan không"
+
+Vòng phản biện Realm 1 tìm ra **mười ba** ca cách chấm đánh trượt một lời giải
+ĐÚNG — nhiều thứ nhì sau "mâu thuẫn bài trước". Với người học đó là lớp lỗi tệ
+nhất: họ viết đúng, máy nói sai, câu báo trượt còn chỉ sai chỗ.
+
+Điểm chung của cả mười ba: một luật `static` đặt theo **số lần lời giải MẪU**
+chạm vào một cái tên, chứ không theo thứ bài thật sự đòi hỏi.
+
+Nghe rất hợp để giao cho máy. Cổng đột biến hỏi một chiều — "đáp án sai có bị
+chặn không"; cổng này hỏi chiều ngược lại. Đã dựng thử (`kiem_cham_oan.mjs` +
+`noi_thang.py`, xem lịch sử git), đo trên cả 302 bài, rồi **bỏ**.
+
+### Bản đầu tiên báo oan 18 ca, và bằng đúng cái bệnh nó đi chữa
+
+Cách đo: viết lại lời giải mẫu bằng một phép giữ nguyên hành vi (đổi `str(x)`
+thành f-string, bỏ một biến bắc cầu dùng đúng một lần…), đòi output y hệt và
+mọi `assert` vẫn đạt, rồi mới hỏi tầng `static`.
+
+Nó báo 18 ca. Soi lại một ca thì lộ ra chuyện này:
+
+```python
+sang_byte = 12          # ← DÒNG KHUNG, người học không xoá được
+sang_an = 7
+tong_sang = ___         # ← chỗ duy nhất họ điền
+```
+
+Phép "bỏ biến bắc cầu" của cổng đã xoá `sang_byte = 12` đi rồi kết luận cách
+chấm sai. Nhưng **người học chỉ điền được vào chỗ trống**; họ không nộp được
+bản viết lại ấy. Mười tám ca đều là hiện vật của việc tôi quên mất điều đó.
+
+Một cổng dựng ra để bắt "con số xanh không đo thứ nó nói", tự nó cho ra một
+con số đỏ không đo thứ nó nói.
+
+### Sửa hàng rào xong thì cổng gần như mù
+
+Thêm hàng rào đúng — bản viết lại phải giữ nguyên mọi dòng khung không chứa
+`___` — thì con số đi từ 18 xuống **1**, trên **176 bước** có tầng `static`.
+Tức 175 bước cổng không nói được gì, và ca duy nhất còn lại là ca đã cố ý siết
+(bài `muon-cat-so-phai-doi-thanh-chu`: đề bài nay nêu đích danh `str`, và lời
+báo trượt nói thẳng rằng f-string cũng đúng, chỉ là bài đang dạy `str`).
+
+Lý do nó mù: chỗ trống của học liệu này gần như luôn là một **biểu thức ngắn**,
+không phải một câu lệnh có biến để bỏ. Mấy phép biến đổi giữ-nguyên-hành-vi
+đơn giản hầu như không áp được vào chỗ ấy.
+
+Ship nó là thêm một dấu tích xanh thứ mười sáu, và dấu ấy nghĩa là "đã kiểm 1
+bước". Đúng thứ cả dự án đi bắt.
+
+### Vậy lớp lỗi ấy giao cho ai
+
+Vẫn cho vòng phản biện. Nhưng có một luật rẻ tiền rút ra được, đáng viết vào
+hiến chương thay vì viết thành cổng:
+
+> Đặt `min` cho một luật `static` theo thứ **bài thật sự đòi hỏi**, không theo
+> số lần lời giải mẫu chạm vào cái tên ấy. Trước khi chốt con số, hãy nghĩ ra
+> MỘT cách viết đúng khác và đếm lại trên nó.
+
+Mười ba ca có thật đều gãy ở đúng bước "nghĩ ra một cách viết đúng khác".
