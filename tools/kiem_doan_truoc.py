@@ -31,6 +31,20 @@ luật ở đây chỉ đụng tới `predict`, chỗ mà biết trước đáp 
 
 Ca cố ý thì khai vào `content/curriculum/doan-truoc-bo-qua.yaml` kèm lý do.
 
+## Luật D — số thứ tự bài trong một mạch phải là 1..N, không trùng, không hụt
+
+Module `onboarding/02-ra-lenh-cho-byte` có 22 bài mà `order` lớn nhất là 21,
+và giá trị 3 bị dùng cho HAI bài: `03-doi-chu-thanh-so` và
+`04-khi-doi-kieu-that-bai`. Mười chín bài từ đó trở đi lệch một nấc.
+
+Không phải chuyện thẩm mỹ. Bài 04 khai `requires: [core.int-cast]`, mà
+`core.int-cast` do chính bài 03 `teaches`. Hai bài cùng `order` thì thứ tự
+giữa chúng là bất định — rơi vào nhánh 04-trước-03 là người chưa biết gì mở
+bài ra và gặp `int("hai mươi lăm")` trước khi từng thấy `int()`.
+
+Cổng đồ thị tiền đề không thấy, vì nó xét theo THỨ TỰ ĐÃ SẮP chứ không hỏi
+thứ tự ấy có xác định hay không.
+
 ## Luật C — `assert` viết ra thì phải có đường chạy tới
 
 Một bước khai `tests` trong `gradingMatrix` mà khối `:::validate` không có
@@ -155,6 +169,32 @@ def khoi_ma(kh: str):
     return None
 
 
+def soi_so_thu_tu(vi_pham: list):
+    """Luật D: trong mỗi mạch, `order` phải là 1..N, không trùng, không hụt."""
+    for thu_muc in sorted(p for p in (GOC / 'content').iterdir() if p.is_dir()):
+        for mach in sorted(p for p in thu_muc.iterdir() if p.is_dir()):
+            tep = sorted(mach.glob('*.lesson.md'))
+            if not tep:
+                continue
+            so = {}
+            for t in tep:
+                m = re.search(r'^order:\s*(\d+)', t.read_text(), re.M)
+                if m:
+                    so.setdefault(int(m.group(1)), []).append(t.name)
+            trung = {k: v for k, v in so.items() if len(v) > 1}
+            mong = set(range(1, len(tep) + 1))
+            thieu = sorted(mong - set(so))
+            ten_mach = mach.relative_to(GOC / 'content').as_posix()
+            if trung:
+                vi_pham.append((f'{ten_mach} · số thứ tự bài TRÙNG',
+                                'hai bài cùng `order` thì thứ tự giữa chúng là bất định: '
+                                + '; '.join(f'order {k} → {", ".join(v)}'
+                                            for k, v in sorted(trung.items()))))
+            if thieu:
+                vi_pham.append((f'{ten_mach} · số thứ tự bài HỤT',
+                                f'mạch có {len(tep)} bài nhưng thiếu order {thieu}'))
+
+
 def soi_assert_chet(van: str, ten: str, vi_pham: list):
     """Luật C: khối `test` có `assert` mà bước không chấm bằng tier `tests`."""
     dau = van.split('---')
@@ -200,6 +240,7 @@ def main() -> int:
                 bo_qua.add(d[2:].strip().strip('\'"'))
 
     vi_pham, dung_khoa = [], set()
+    soi_so_thu_tu(vi_pham)
     tep = sorted(GOC.glob('content/**/*.lesson.md'))
     so_predict = 0
     for t in tep:

@@ -5,7 +5,7 @@ summary: Khoảng trắng đầu dòng là cách máy biết dòng nào thuộc 
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 7
+order: 8
 tier: A
 languages: [python]
 defaultLanguage: python

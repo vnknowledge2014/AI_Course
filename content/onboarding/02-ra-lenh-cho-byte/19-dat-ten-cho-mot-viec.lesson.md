@@ -5,7 +5,7 @@ summary: Gói nhiều dòng lệnh lại dưới một cái tên, rồi gọi t�
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 18
+order: 19
 tier: A
 languages: [python]
 defaultLanguage: python

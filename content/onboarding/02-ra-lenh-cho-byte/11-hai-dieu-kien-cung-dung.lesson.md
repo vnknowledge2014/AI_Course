@@ -5,7 +5,7 @@ summary: Một từ nối buộc hai câu hỏi có–không lại, và chỉ g�
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 10
+order: 11
 tier: A
 languages: [python]
 defaultLanguage: python

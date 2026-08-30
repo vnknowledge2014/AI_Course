@@ -5,7 +5,7 @@ summary: Một cái tên giữ cả một dãy giá trị có thứ tự, viết
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 14
+order: 15
 tier: A
 languages: [python]
 defaultLanguage: python

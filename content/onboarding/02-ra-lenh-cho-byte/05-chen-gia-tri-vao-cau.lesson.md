@@ -5,7 +5,7 @@ summary: Viết trọn câu chữ một lần, chừa sẵn chỗ trống, rồi
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 4
+order: 5
 tier: A
 languages: [python]
 defaultLanguage: python

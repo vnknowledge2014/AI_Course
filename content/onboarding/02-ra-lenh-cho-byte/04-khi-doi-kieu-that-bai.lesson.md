@@ -5,7 +5,7 @@ summary: Đưa đúng thứ mà int() nhận, nhưng nội dung không đọc ra
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 3
+order: 4
 tier: A
 languages: [python]
 defaultLanguage: python

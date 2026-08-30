@@ -5,7 +5,7 @@ summary: Vòng lặp lấy lần lượt từng món trong danh sách, không c�
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 16
+order: 17
 tier: A
 languages: [python]
 defaultLanguage: python

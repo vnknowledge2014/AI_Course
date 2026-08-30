@@ -5,7 +5,7 @@ summary: Danh sách sửa được - append gắn thêm một món vào cuối d
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 17
+order: 18
 tier: A
 languages: [python]
 defaultLanguage: python

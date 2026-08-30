@@ -5,7 +5,7 @@ summary: Phân biệt hàm hô kết quả lên màn hình với hàm đưa kế
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 20
+order: 21
 tier: A
 languages: [python]
 defaultLanguage: python

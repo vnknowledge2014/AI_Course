@@ -5,7 +5,7 @@ summary: Viết phần việc một lần, nói cho máy biết bao nhiêu lư�
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 12
+order: 13
 tier: A
 languages: [python]
 defaultLanguage: python

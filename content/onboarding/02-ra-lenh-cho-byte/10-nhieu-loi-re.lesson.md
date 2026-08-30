@@ -5,7 +5,7 @@ summary: Ba cỡ tô, ba mức giá. Một từ mới cho phép chương trình 
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 9
+order: 10
 tier: A
 languages: [python]
 defaultLanguage: python

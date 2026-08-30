@@ -5,7 +5,7 @@ summary: Chừa một chỗ trống trong hàm, rồi điền vào chỗ đó m�
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 19
+order: 20
 tier: A
 languages: [python]
 defaultLanguage: python

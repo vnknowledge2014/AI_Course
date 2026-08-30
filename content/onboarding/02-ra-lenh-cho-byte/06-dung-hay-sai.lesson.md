@@ -5,7 +5,7 @@ summary: Có những câu hỏi chỉ có hai câu trả lời. Máy trả lời
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 5
+order: 6
 tier: A
 languages: [python]
 defaultLanguage: python

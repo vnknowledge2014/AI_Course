@@ -5,7 +5,7 @@ summary: Gọi riêng một món trong danh sách bằng chỗ đứng của nó
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 15
+order: 16
 tier: A
 languages: [python]
 defaultLanguage: python

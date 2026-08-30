@@ -5,7 +5,7 @@ summary: Từ nối thứ hai, dễ tính hơn: một vế đúng là đủ đ�
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 11
+order: 12
 tier: A
 languages: [python]
 defaultLanguage: python

@@ -5,7 +5,7 @@ summary: Cái tên đứng sau for không nằm im — mỗi lượt máy dán n
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 13
+order: 14
 tier: A
 languages: [python]
 defaultLanguage: python

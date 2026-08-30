@@ -5,7 +5,7 @@ summary: Khi câu trả lời là False, máy không đứng im nữa. else là 
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 8
+order: 9
 tier: A
 languages: [python]
 defaultLanguage: python

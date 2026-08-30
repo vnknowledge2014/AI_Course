@@ -5,7 +5,7 @@ summary: Ghép hỏi, đổi kiểu, rẽ nhánh, danh sách và hàm thành m�
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 21
+order: 22
 tier: A
 languages: [python]
 defaultLanguage: python

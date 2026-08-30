@@ -5,7 +5,7 @@ summary: Một câu lệnh chỉ chạy khi câu trả lời là True. Máy bắ
 locale: vi
 track: onboarding
 module: ra-lenh-cho-byte
-order: 6
+order: 7
 tier: A
 languages: [python]
 defaultLanguage: python
