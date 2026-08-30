@@ -137,7 +137,7 @@ xăng xe
 ăn uống
 học phí
 Traceback (most recent call last):
-  File "so_chi_tieu.py", line 10, in <module>
+  File "so_chi_tieu.py", line 9, in <module>
     print(ro[0])
           ~~^^^
 TypeError: 'set' object is not subscriptable

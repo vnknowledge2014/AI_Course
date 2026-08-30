@@ -159,11 +159,16 @@ Hai chỗ đáng dừng lại nhìn:
 - **Mỗi dòng hỏng rơi đúng vào nhánh của nó.** Không nhánh nào nhận nhầm phần
   của nhánh kia, vì mỗi nhánh chỉ đón đúng cái tên nó gọi. Nhờ vậy bản báo cáo
   nói được cuốn sổ bẩn theo *kiểu* nào, chứ không chỉ bẩn bao nhiêu dòng.
-- **Đổi nhánh đầu thành `except:` trơn là hỏng cả hai bản báo cáo.** Lưới
-  bắt-tất-cả sẽ đón luôn `IndexError`, dòng `nước suối` bị đếm nhầm sang cột
-  bên trái, và cột bên phải mãi mãi đứng ở 0. Python còn không cho bạn viết như
-  thế ở đây: nhánh bắt-tất-cả bắt buộc phải là nhánh **cuối cùng**, mà ở đây
-  dưới nó còn một nhánh nữa.
+- **Đổi nhánh đầu thành `except:` trơn thì Python từ chối ngay lúc ĐỌC chương
+  trình** — `SyntaxError: default 'except:' must be last`. Nhánh bắt-tất-cả
+  bắt buộc phải là nhánh **cuối cùng**, mà ở đây dưới nó còn một nhánh nữa.
+  Chương trình không chạy lấy một dòng, nên không có bản báo cáo nào để mà
+  hỏng.
+
+  Giả sử Python cho phép đi, thì mới tới cái hại thứ hai: lưới bắt-tất-cả sẽ
+  đón luôn `IndexError`, dòng `nước suối` bị đếm nhầm sang cột bên trái, và
+  cột bên phải mãi mãi đứng ở 0. Đó là lý do luật cú pháp kia tồn tại — nó
+  chặn trước một cái bẫy, chứ không phải một quy định tuỳ hứng.
 ::::
 
 ::::predict{#doan-loi-khong-goi-ten commitOnce}

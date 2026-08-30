@@ -205,8 +205,12 @@ print(f"Máy sẽ tìm sổ ở: {so_may_se_tim}")
 # mỗi máy, và đó chính là điều bài này dạy. Nên khối kiểm hỏi ba chuyện mà
 # một lời giải đúng luôn thoả, còn các lời giải gần đúng thì không.
 #
-# Chỗ trống TÊN HỘP: nêu sai thì dòng `import` dừng chương trình ngay, không
-# câu nào dưới đây chạy tới.
+# Chỗ trống TÊN HỘP hỏng theo hai kiểu, và chú thích phải nói cả hai:
+#   gõ một cái tên KHÔNG hộp nào mang (`oss`) → dòng `import` dừng chương
+#     trình ngay bằng `ModuleNotFoundError`, không câu nào dưới đây chạy tới;
+#   gõ tên một hộp CÓ THẬT nhưng không phải hộp cần (`sys`, `math`) → dòng
+#     `import` chạy trót lọt, và chỗ vỡ rơi xuống câu assert thứ hai, nơi đi
+#     tìm `os` — một cái tên chưa được mang về bàn.
 # Chỗ trống GỌI MÓN ĐỒ: cả ba câu dưới đều soi nó.
 assert isinstance(cho_dang_dung, str), "chỗ đang đứng phải là một chuỗi chữ — viết tên món đồ mà quên cặp ngoặc gọi thì cái tên còn lại là chính món đồ, không phải câu trả lời của nó"
 assert cho_dang_dung == os.getcwd(), "cho_dang_dung phải là chỗ máy này đang đứng thật, hỏi từ hộp os — một đường dẫn gõ cứng sẽ khác nó trên gần như mọi máy"

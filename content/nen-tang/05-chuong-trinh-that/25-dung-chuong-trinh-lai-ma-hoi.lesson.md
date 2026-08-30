@@ -67,8 +67,8 @@ Màn hình lúc đó trông thế này:
 
 ```text title=readonly
 $ python main.py so.txt
-> /Users/lan/du-an/main.py(7)bao_cao()
--> for dong in cac_dong:
+> /Users/lan/du-an/main.py(6)bao_cao()
+-> breakpoint()
 (Pdb) tong
 0
 (Pdb) len(cac_dong)
@@ -77,7 +77,8 @@ $ python main.py so.txt
 'cà phê,25000\n'
 (Pdb) ten_file
 'so.txt'
-(Pdb) q
+(Pdb) c
+Tổng chi: 0 đồng
 ```
 
 Bốn chỗ đáng dừng lại nhìn:
@@ -90,8 +91,16 @@ Bốn chỗ đáng dừng lại nhìn:
 - **Câu trả lời là giá trị THẬT tại đúng khoảnh khắc ấy**, không phải giá trị bạn
   tưởng. `cac_dong[0]` trả về `'cà phê,25000\n'` — có cái `\n` dính đuôi, đúng
   thứ bài 7 đã cảnh báo.
-- **Gõ `q` rồi Enter là thôi**, chương trình bỏ dở và bạn về lại dòng lệnh. Cái
-  `q` ấy chỉ là cách đi ra; nó không phải điều bài này dạy.
+- **Máy dừng ngay TẠI dòng `breakpoint()`**, chứ không phải dòng sau nó. Mũi
+  tên `->` chỉ vào dòng **sắp chạy**, và dòng sắp chạy chính là dòng ấy — nó
+  chưa chạy xong đâu. (Bản Python cũ hơn 3.13 thì dừng ở dòng kế tiếp; nếu máy
+  bạn hiện `-> for dong in cac_dong:` thì không phải bạn gõ sai.)
+- **Gõ `c` rồi Enter là đi tiếp**, chương trình chạy nốt phần còn lại rồi kết
+  thúc bình thường — nên bạn thấy dòng `Tổng chi: 0 đồng` hiện ra ngay sau đó.
+  Còn `q` là bỏ dở giữa chừng: nó cũng đi ra được, nhưng mỗi bản Python lại
+  chào tạm biệt một kiểu — có bản in ra một traceback dài kết thúc bằng
+  `bdb.BdbQuit`, có bản hỏi lại `Quit anyway? [y/n]`. Cái traceback ấy KHÔNG
+  phải lỗi của bạn. Dùng `c` thì khỏi phải nhớ chuyện đó.
 
 Và điểm dừng để lại đúng một dòng trong code — một dòng bạn xoá là xong, chứ
 không phải chín dòng rải hai file.
