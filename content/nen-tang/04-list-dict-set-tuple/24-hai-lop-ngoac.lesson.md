@@ -133,7 +133,10 @@ Còn khối `for` ở cuối là hình dạng cũ chứ không phải hình dạ
 một cái tên thật, giữ trọn một dict ở mỗi lượt, nên `khoan['ngay']` chỉ có
 **một** cặp ngoặc. Vòng lặp đã làm hộ bước thứ nhất rồi.
 
-Trong f-string thì dấu nháy bên trong ngoặc phải khác dấu nháy bọc ngoài, nên ở
+Từ Python 3.12 thì nháy trong với nháy ngoài trùng nhau cũng chạy được, và
+runtime của khoá là 3.13 nên bạn thử sẽ thấy nó chạy. Nhưng để hai lớp nháy
+khác nhau thì mắt đọc dễ hơn hẳn, và đoạn mã còn chạy được cả trên những bản
+Python cũ hơn — nên ở
 đây là `{khoan['ngay']}` — nháy đơn bên trong, nháy kép bọc cả câu.
 ::::
 

@@ -115,8 +115,10 @@ Màn hình hiện ra:
   đúng cả cuốn sổ, không thừa không thiếu khoản nào: đó là hệ quả trực tiếp của
   luật đầu lấy cuối chừa.
 - `[-3:]` — ba khoản cuối sổ. Để ý nó khác dòng ngay trên: `[3:]` neo vào chỗ
-  số 3 đếm xuôi nên cho bốn khoản, `[-3:]` neo vào cái đuôi nên luôn cho ba
-  khoản. Sổ càng dài thêm thì hai khúc này càng lệch nhau.
+  số 3 đếm xuôi nên cho bốn khoản, còn `[-3:]` neo vào cái đuôi — chừng nào sổ
+  còn đủ ba khoản thì nó cho đúng ba khoản cuối. Sổ ngắn hơn ba khoản thì nó
+  đưa hết những gì đang có, y như mọi lát cắt. Sổ càng dài thêm thì hai khúc
+  này càng lệch nhau.
 - `[:]` — cả cuốn.
 
 Và đây là chỗ chiều đếm ngược trả công. Byte ghi thêm khoản của tối nay:

@@ -47,7 +47,9 @@ Cả bốn thứ ấy có chung một chuyện: mỗi giá trị nằm ở **m�
 **bạn** quyết định — bạn `.append` vào cuối, bạn ghi khoá theo thứ tự này thì
 nó nằm theo thứ tự ấy.
 
-Cái rổ thì không. Bài trước bạn đã thấy dấu hiệu: bỏ vào theo một thứ tự, in
+Cái rổ thì không. Bài trước bạn đã thấy dấu hiệu: rổ không hứa thứ tự nào cả —
+chạy lại đúng chương trình ấy, mấy cái tên xếp một kiểu khác. Bỏ vào theo một
+thứ tự, in
 ra theo một thứ tự khác. Đó không phải máy đãng trí. Đó là vì trong một cái rổ
 **không có chỗ đứng nào cả** — không ô số 0, không ô số 1, không "cái đầu
 tiên". Chỉ có: giá trị này có nằm trong rổ, hay không.

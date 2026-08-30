@@ -52,7 +52,9 @@ Vấn đề không nằm ở chỗ cặp có ít ô. Nó nằm ở chỗ **ô th
 Mà chỗ chứa tra bằng tên thì bạn có từ bài 9. Cho mỗi thứ đáng nhớ một khoá.
 
 Từ đây trở đi ta làm việc trên **một cuốn sổ khác**, không phải cuốn của hai bài
-vừa rồi: đây là sổ chi tiêu tháng này của Byte, và mọi con số trong nó đều khác.
+vừa rồi: đây là sổ chi tiêu tháng này của Byte — vài khoản trùng tên và trùng
+số tiền với tháng trước, nhưng ngày thì hoàn toàn mới, và mỗi khoản giờ mang
+thêm một ô nhóm mà tháng trước không có.
 Đừng mang đáp án của bài 22 sang — cuốn sổ ấy đã đóng lại.
 
 ```python title=readonly

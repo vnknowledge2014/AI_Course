@@ -73,8 +73,9 @@ Hai điều cần nhớ về nội dung ấy:
   chữ đầu tiên mà người dùng gõ thêm nằm ở `argv[1]`, không phải `argv[0]`.
 
 Chỗ lệch một nấc ấy là chỗ dễ vấp nhất của bài này, nên đáng nói ra vì sao nó
-lệch: `argv` không phải danh sách những điều người dùng dặn, nó là **cả câu lệnh
-đã gõ**, chép lại từ đầu. Câu lệnh nào cũng bắt đầu bằng tên chương trình, nên
+lệch: `argv` không phải danh sách những điều người dùng dặn, nó là **cả câu
+lệnh kể từ tên chương trình trở đi**. Chữ `python` đã dùng xong ở terminal nên
+nó dừng lại ở đó. Câu lệnh nào cũng bắt đầu bằng tên chương trình, nên
 ô số 0 lúc nào cũng đã có chủ.
 
 Còn một chuyện nói thẳng ngay: trang học này không có terminal thật để bạn gõ

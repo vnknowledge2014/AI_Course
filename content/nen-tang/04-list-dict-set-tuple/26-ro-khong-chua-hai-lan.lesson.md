@@ -287,7 +287,8 @@ Ba tên, sáu lần bỏ vào. Mình không phải hỏi trước lần nào.
 Một câu hỏi trước khi đi tiếp.
 
 Quay lại chi tiết đã hẹn ở đầu bài. Bỏ vào rổ theo thứ tự "ăn uống", "xăng xe",
-"học phí", rồi in rổ ra, thì thứ tự hiện lên **khác** lúc bỏ vào. Sổ tra cứu
+"học phí", rồi in rổ ra, thì thứ tự hiện lên **không hứa** giống lúc bỏ vào — và chạy lại đúng chương
+trình ấy còn có thể ra một thứ tự khác nữa. Sổ tra cứu
 ở bài trước thì không như thế: duyệt một `dict` là đi đúng theo thứ tự khoá
 được thêm vào, lần nào cũng vậy.
 

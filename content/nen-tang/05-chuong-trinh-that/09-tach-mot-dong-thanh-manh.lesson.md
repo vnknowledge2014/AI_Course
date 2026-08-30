@@ -54,7 +54,7 @@ print("bánh mì,15000"[7:])
 Ra `,15000` — dính luôn dấu phẩy. Lý do không có gì bí ẩn: `"cà phê"` dài sáu
 ký tự còn `"bánh mì"` dài bảy, nên dấu phẩy của hai dòng không đứng cùng một
 chỗ. Và tên khoản thì Byte gõ tay, mỗi khoản một độ dài; ngày mai thêm một
-khoản tên `"gửi xe"` hay `"sửa điện thoại"` là con số trong ngoặc lại sai.
+khoản tên `"xăng"` hay `"sửa điện thoại"` là con số trong ngoặc lại sai.
 
 Chỗ hụt nằm ở chỗ này: cắt theo **chỗ đứng** đòi bạn biết trước dấu phẩy nằm ở
 ô số mấy. Nhưng thứ bạn thật sự biết không phải con số ấy — thứ bạn biết là
