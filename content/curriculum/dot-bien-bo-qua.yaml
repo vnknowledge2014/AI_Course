@@ -171,3 +171,20 @@
 # TƯƠNG ĐƯƠNG THEO DỮ LIỆU: hai người đo cùng một vật bằng cùng một sải nên ra cùng con số — đúng điều bài dạy.
 - 'toan.cam-nhan-so.do-la-dem-cai-thuoc · giu-thuoc-hay-doi-thuoc · đổi MỌI chỗ đọc tên an_do_bang_buoc_chan thành byte_do_bang_sai_day (1 chỗ)'
 
+# NGƯỠNG KHÔNG PHẢI KHÁI NIỆM CỦA BÀI. Bài dạy "so hai số lẻ bằng khoảng cách
+# dưới một ngưỡng, đừng dùng ==" — chỗ hoà giữa `<` và `<=` tại đúng biên
+# nguong không phải điều bài nói tới. Với dữ liệu của bài, chênh lệch thật do
+# số lẻ gây ra (~5.5e-17) không bao giờ chạm khít mốc nguong (1e-9), nên `<`
+# và `<=` cho ĐÚNG cùng kết quả trên mọi cảnh bài này dựng — TƯƠNG ĐƯƠNG THẬT,
+# giống ca `giu-lai-ky-luc` ở trên.
+- 'khoa-hoc-may-tinh.bit-byte-va-bo-nho.boss-ke-mot-cau-chuyen-bo-nho · viet-doi-mot-gia-tri · đổi MỌI dấu < thành <= (1 chỗ)'
+
+# NGƯỠNG KHÔNG PHẢI KHÁI NIỆM CỦA BÀI. `gan_bang` dạy "so chênh lệch với một
+# ngưỡng thay vì so bit tuyệt đối bằng ==" — ranh giới biên đúng bằng ngưỡng
+# (`<` loại trừ biên, `<=` bao gồm biên) không phải điều bài nói tới, và cả
+# năm assert của bài đều kiểm chênh lệch RÕ RÀNG nhỏ hơn hoặc RÕ RÀNG lớn hơn
+# ngưỡng, không ca nào chạm khít biên — nên `<` và `<=` cho ĐÚNG cùng kết quả
+# trên mọi cảnh bài này dựng. Cùng lớp với `viet-doi-mot-gia-tri` ở trên
+# (cùng track, cùng tác giả gốc, cùng lý do).
+- 'khoa-hoc-may-tinh.bit-byte-va-bo-nho.hai-so-float-bang-nhau-khong · viet-ham-gan-bang · đổi MỌI dấu < thành <= (1 chỗ)'
+
