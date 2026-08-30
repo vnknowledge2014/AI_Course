@@ -110,60 +110,60 @@ về bên phải nên hàng đơn vị của ba con số thẳng nhau, cộng nh
 ::::
 
 ::::predict{#doan-o-rong commitOnce}
-Byte in một khoản gửi xe, mỗi ô một dòng, vẫn kẹp giữa hai dấu ngoặc vuông.
-`"gửi xe"` có 6 ký tự, `5000` có 4 chữ số.
+Byte in một khoản mới, mỗi ô một dòng, vẫn kẹp giữa hai dấu ngoặc vuông.
+Lần này tên khoản **dài hơn** ô đã kẻ: `"cà phê sữa đá"` có 13 ký tự trong khi
+ô rộng 12. Còn `125000` thì 6 chữ số, vẫn lọt ô 10.
 
 **Trước khi bấm chạy**, bạn đoán hai dòng nào hiện ra?
 
 ```python
-ten = "gửi xe"
-tien = 5000
+ten = "cà phê sữa đá"
+tien = 125000
 
 print(f"[{ten:12}]")
 print(f"[{tien:10}]")
 ```
 
 :::opt{correct}
-`[gửi xe      ]` rồi `[      5000]`
+`[cà phê sữa đá]` rồi `[    125000]`
 :::
 
 :::opt
-`[gửi xe]` rồi `[5000]`
+`[cà phê sữa đ]` rồi `[    125000]`
 ::why
-Gần đúng ở chỗ bạn nhận ra con số trong phần định dạng đang nói về số ký tự —
-nó nói về số ký tự thật.
+Gần đúng ở dòng dưới, và gần đúng ở một suy luận rất hợp lý cho dòng trên: ô
+rộng 12 thì cái gì quá 12 phải bị cắt cho vừa, y như một cái khay có vách.
 
-Chỗ lệch: nó không phải một cái thước đo, mà là một **cái ô đặt sẵn**. Máy
-không đo rồi thôi; nó chèn khoảng trắng vào cho tới khi ô đủ 12 chỗ. Nếu máy in
-đúng 6 ký tự rồi dừng thì dòng dưới lại bắt đầu ở một chỗ khác, và cột lại lệch
-như bài trước.
+Chỗ lệch: con số ấy là chỗ **tối thiểu**, không phải chỗ tối đa. Nội dung ngắn
+hơn thì máy chèn khoảng trắng cho đủ; nội dung dài hơn thì máy để nguyên và ô
+nở ra. Nó thà làm lệch cột còn hơn cắt mất chữ của bạn — vì một cột lệch thì
+bạn nhìn ra ngay, còn một cái tên bị cắt cụt thì trông vẫn như một cái tên.
 ::
 :::
 
 :::opt
-`[      gửi xe]` rồi `[5000      ]`
+`[cà phê sữa đá]` rồi `[125000    ]`
 ::why
-Gần đúng ở chỗ bạn nhận ra máy phải chèn khoảng trắng vào một bên của ô — đúng,
-và bạn còn đếm đúng số khoảng trắng của cả hai ô.
+Gần đúng ở dòng trên: tên dài hơn ô nên ô nở ra, bạn đọc đúng.
 
-Chỗ lệch là **bên nào**. Máy chọn bên theo kiểu của giá trị: chữ dạt về trái,
-số dạt về phải. Đó là mặc định của Python, và ở đây nó rơi đúng vào ý bạn muốn
-— tên khoản đọc từ lề trái, tiền so hàng đơn vị từ lề phải.
+Chỗ lệch nằm ở dòng dưới, ở chuyện chèn khoảng trắng vào **bên nào**. Máy chọn
+bên theo kiểu của giá trị: chữ dạt về trái, số dạt về phải. Đó là mặc định của
+Python, và ở đây nó rơi đúng vào ý bạn muốn — tên khoản đọc từ lề trái, tiền
+so hàng đơn vị từ lề phải.
 ::
 :::
 
 :::opt
-`[gửi xe      ]` rồi `[5000      ]`
+`[cà phê sữa đá]` rồi `[125000]`
 ::why
-Gần đúng ở chỗ bạn cho rằng một luật thì phải áp dụng như nhau cho mọi giá trị
-— và cách nghĩ ấy đúng với hầu hết mọi thứ trong bài này: cùng một cách viết,
-cùng một cách đếm chỗ.
+Gần đúng ở dòng trên, và gần đúng ở một cách nghĩ liền mạch cho dòng dưới: nếu
+ô không ép được cái tên 13 ký tự vào 12 chỗ, thì có lẽ ô chỉ là một lời đề
+nghị, và máy cứ in nguyên thứ nó có.
 
-Chỗ lệch nằm ở chính chỗ luật này **không** như nhau. Ô rộng 12 hay 10 thì đúng
-cho cả hai, nhưng phía chèn khoảng trắng lại phụ thuộc kiểu: `str` dạt trái,
-số dạt phải. Kiểu của giá trị còn đổi được kết quả ở vài chỗ khác nữa trong
-phần định dạng — bài sau bạn gặp đúng một chỗ như vậy — nhưng ở bài này thì căn
-lề là chỗ nó lộ ra rõ nhất.
+Chỗ lệch: ô là chỗ **tối thiểu**. Hai dòng ấy chạy theo hai vế khác nhau của
+cùng một luật, chứ không phải hai luật. Tên 13 ký tự đã quá 12 nên không còn
+gì để chèn — ô nở ra. Còn `125000` mới 6 chữ số, chưa đầy ô 10, nên máy chèn
+thêm bốn khoảng trắng cho đủ. Ô chỉ buông tay khi nội dung đã vượt nó.
 ::
 :::
 ::::

@@ -124,7 +124,7 @@ rồi cất vào một cái tên khác.
 **Trước khi bấm chạy**, bạn đoán màn hình hiện ra gì?
 
 ```python
-o_nhap = "  cà phê sữa  "
+o_nhap = " Bún Chả "
 sach = o_nhap.strip()
 print(len(sach))
 print(sach)
