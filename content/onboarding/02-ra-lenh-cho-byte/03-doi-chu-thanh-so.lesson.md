@@ -210,6 +210,14 @@ pass
   timeoutMs: 4000
 - tier: tests
   timeoutMs: 4000
+- tier: static
+  onFail: chỗ trống phải ĐỌC con số đang nằm trong `tuoi_go_vao` bằng `int` — đừng gõ thẳng con số 25, và cũng đừng gõ lại chuỗi "25"
+  requireAst:
+  # Hai điều kiện cùng lúc. Thiếu điều kiện thứ nhất thì `tuoi = 25` chép cứng
+  # đi lọt; thiếu điều kiện thứ hai thì `int("25")` đi lọt — và cả hai đều bỏ
+  # qua đúng thứ bài dạy: đọc ô chữ mà `input` vừa đưa về.
+  - kind: uses-call, target: int, min: 1
+  - kind: uses-name, target: tuoi_go_vao, min: 1
 - tier: output
   expect: 26
 :::

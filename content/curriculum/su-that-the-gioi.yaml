@@ -75,3 +75,36 @@
   pham_vi: content/toan/03-logic-va-chung-minh
   tu_khoa:
     - 'tổng quỹ sáu tháng[^.\n]{0,16}?({SO})\s*(?:nghìn|đồng|đ\b)'
+
+# ── Quán phở của Realm 0 ────────────────────────────────────────────────────
+#
+# Bảng giá này trôi qua BA bài trước khi có ai đếm lại: bài 22 (BOSS) khoá cứng
+# nó trong `assert gia_to("nhỏ") == 40000` và trong regex tier `output`; bài 10
+# để tô nhỏ 35000 và gọi cỡ thứ ba là "lớn"; bài 9 gọi ba cỡ là
+# "nhỏ / thường / đặc biệt" với giá thứ ba là 60000. Ba bài, ba bảng giá, cùng
+# một quán — và người học đi qua cả ba theo đúng thứ tự ấy.
+#
+# Lấy bộ của BOSS làm chuẩn vì nó là bộ duy nhất có máy canh.
+
+- ten: gia-to-nho
+  gia_tri: 40000
+  cho_nghin: 1
+  pham_vi: content/onboarding
+  tu_khoa:
+    - 'tô nhỏ[^.\n]{0,14}?({SO})\s*(?:nghìn|đồng|đ\b)'
+
+- ten: gia-to-vua
+  gia_tri: 45000
+  cho_nghin: 1
+  pham_vi: content/onboarding
+  tu_khoa:
+    - 'tô vừa[^.\n]{0,14}?({SO})\s*(?:nghìn|đồng|đ\b)'
+  ngoai_le:
+    - 'content/onboarding/02-ra-lenh-cho-byte/22-boss-may-tra-loi-tu-dong.lesson.md: câu "2 tô vừa, tổng cộng 90000 đồng" là TỔNG của hai tô, không phải giá một tô'
+
+- ten: gia-to-to
+  gia_tri: 55000
+  cho_nghin: 1
+  pham_vi: content/onboarding
+  tu_khoa:
+    - 'tô to[^.\n]{0,14}?({SO})\s*(?:nghìn|đồng|đ\b)'

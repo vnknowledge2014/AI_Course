@@ -145,6 +145,7 @@ so với một thông báo lỗi ngay tại dòng gây ra nó.
 Traceback (most recent call last):
   File "quan_pho.py", line 2, in <module>
     print(tuoi + 1)
+          ~~~~~^~~
 TypeError: can only concatenate str (not "int") to str
 ```
 
@@ -152,7 +153,9 @@ TypeError: can only concatenate str (not "int") to str
 
 - Dòng cuối là loại lỗi và lời giải thích: `TypeError` — sai kiểu. Câu tiếng
   Anh dịch ra là *"chỉ nối được str với str, không nối được với int"*.
-- Dòng trên nó chỉ thẳng vào dòng code có vấn đề: `print(tuoi + 1)`.
+- Dòng trên nó là hàng `~` với `^` — mũi nhọn `^` chỉ đúng vào dấu `+`, chỗ
+  máy vấp, y như bài đọc thông báo lỗi đã dạy.
+- Dòng trên nữa chép lại nguyên văn dòng code: `print(tuoi + 1)`.
 - Dòng trên nữa nói lỗi nằm ở dòng số 2 của tệp.
 
 Điều đáng nhớ: đây **không phải lỗi của `input`**. `input` đã làm đúng việc của

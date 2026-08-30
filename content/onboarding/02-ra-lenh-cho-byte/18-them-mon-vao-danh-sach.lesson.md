@@ -183,6 +183,13 @@ assert thuc_don == ["Phở tái", "Phở chín", "Phở nạm", "Phở gầu"], 
 :::
 
 :::validate
+- tier: static
+  onFail: bảng phấn thì viết THÊM một dòng, không chép lại cả tấm bảng — dùng `thuc_don.append(...)` chứ đừng gán lại `thuc_don` một dãy mới
+  requireAst:
+  # `uses-call` khớp cả `nut.func.attr`, nên nó bắt được lời gọi sau dấu chấm.
+  # Không có luật này thì gán lại cả danh sách cũng ra đúng kết quả, và người
+  # học bỏ qua đúng thứ bài dạy.
+  - kind: uses-call, target: append, min: 1
 - tier: run
   timeoutMs: 4000
 - tier: tests

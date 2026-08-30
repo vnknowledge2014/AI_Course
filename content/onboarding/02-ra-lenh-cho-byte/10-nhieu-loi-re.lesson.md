@@ -38,11 +38,11 @@ có, hoặc không, hết.
 
 Nhưng bảng giá treo trên tường quán phở không phải câu hỏi có–không:
 
-> Tô nhỏ — 35000 đồng
+> Tô nhỏ — 40000 đồng
 >
 > Tô vừa — 45000 đồng
 >
-> Tô lớn — 55000 đồng
+> Tô to — 55000 đồng
 
 Ba lối đi, không phải hai. Khách gọi "tô vừa" thì không rơi vào lối nào trong
 hai lối `if` / `else` mà bạn đang có.
@@ -52,7 +52,7 @@ Người phục vụ ngoài đời xử lý chuyện này bằng cách **hỏi l
 - "Tô nhỏ nhé?" — khách lắc đầu.
 - "Vậy tô vừa nhé?" — khách gật.
 
-Tới đây người phục vụ **ngừng hỏi**. Không ai hỏi tiếp "thế có phải tô lớn
+Tới đây người phục vụ **ngừng hỏi**. Không ai hỏi tiếp "thế có phải tô to
 không?" — hỏi thêm là vô nghĩa, vì khách đã gật rồi.
 
 Hai chi tiết đó — hỏi lần lượt, và ngừng ngay khi có người gật — chính là thứ
@@ -67,7 +67,7 @@ Bảng giá ba dòng viết bằng Python:
 co_to = "vua"
 
 if co_to == "nho":
-    print("35000 đồng")
+    print("40000 đồng")
 elif co_to == "vua":
     print("45000 đồng")
 else:
@@ -102,7 +102,7 @@ tien = 60000
 if tien >= 40000:
     print("Mời bạn tô nhỏ")
 elif tien >= 55000:
-    print("Mời bạn tô lớn")
+    print("Mời bạn tô to")
 else:
     print("Chưa đủ tiền một tô")
 ```
@@ -112,7 +112,7 @@ Chỉ một dòng: Mời bạn tô nhỏ
 :::
 
 :::opt
-Cả hai dòng: Mời bạn tô nhỏ, rồi Mời bạn tô lớn
+Cả hai dòng: Mời bạn tô nhỏ, rồi Mời bạn tô to
 ::why
 Gần đúng ở chỗ bạn đã kiểm cả hai điều kiện và thấy cả hai đều đúng —
 `60000 >= 40000` đúng, `60000 >= 55000` cũng đúng. Phần tính toán đó chính xác
@@ -126,7 +126,7 @@ dòng `elif` không được hỏi lần nào.
 :::
 
 :::opt
-Mời bạn tô lớn
+Mời bạn tô to
 ::why
 Gần đúng ở chỗ bạn đang chọn nhánh **hợp lý nhất** cho 60000 đồng. Người bán
 hàng ngoài đời cũng làm đúng thế: có nhiều tiền thì mời tô to.
@@ -134,7 +134,7 @@ hàng ngoài đời cũng làm đúng thế: có nhiều tiền thì mời tô t
 Nhưng máy không so xem nhánh nào khớp hơn. Nó đọc từ trên xuống và dừng ở nhánh
 đúng **đầu tiên** nó gặp. Nhánh 40000 nằm trên, nên nhánh đó thắng.
 
-Muốn máy mời tô lớn, bạn phải đổi **thứ tự** hai nhánh — đưa điều kiện chặt hơn
+Muốn máy mời tô to, bạn phải đổi **thứ tự** hai nhánh — đưa điều kiện chặt hơn
 (`>= 55000`) lên trước. Trong một chuỗi `if / elif`, thứ tự các nhánh là một
 phần ý nghĩa của chương trình, không phải chuyện sắp xếp cho gọn mắt.
 ::
@@ -184,7 +184,7 @@ Hãy điền vào chỗ trống để nhánh giữa trở thành một lối r�
 co_to = "vua"
 
 if co_to == "nho":
-    print("35000 đồng")
+    print("40000 đồng")
 ___ co_to == "vua":
     print("45000 đồng")
 else:
@@ -195,7 +195,7 @@ else:
 co_to = "vua"
 
 if co_to == "nho":
-    print("35000 đồng")
+    print("40000 đồng")
 elif co_to == "vua":
     print("45000 đồng")
 else:

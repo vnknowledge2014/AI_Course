@@ -193,6 +193,13 @@ assert "Quán Phở Thìn xin chào" in ghi_lai.getvalue(), "việc chào khách
   timeoutMs: 4000
 - tier: tests
   timeoutMs: 4000
+- tier: static
+  onFail: hàm đã được ghi sẵn ở trên rồi — việc còn thiếu là GỌI nó ra, chứ không phải gõ lại câu chào bằng tay
+  requireAst:
+  # Không có luật này thì `print("Quán Phở Thìn xin chào")` gõ tay cũng in ra
+  # đúng dòng ấy và đậu — ở đúng bài mà đặt tên cho một việc rồi gọi lại là
+  # khái niệm mới duy nhất.
+  - kind: uses-call, target: chao_khach, min: 1
 - tier: output
   expect: Quán Phở Thìn xin chào
 :::

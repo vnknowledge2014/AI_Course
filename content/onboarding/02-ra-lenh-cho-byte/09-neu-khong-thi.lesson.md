@@ -245,8 +245,8 @@ Ngã ba của bạn có đúng hai lối, và mỗi lần chạy máy đi đúng
 *"đủ tiền hay không"* thì hai lối là vừa đủ, vì câu hỏi ấy chỉ có hai câu trả
 lời.
 
-Nhưng ra quán mà xem. Quán có ba cỡ tô: tô nhỏ 40000, tô thường 45000, tô đặc
-biệt 60000. Khách nói cỡ nào, máy phải báo đúng giá cỡ đó — **ba** câu trả lời
+Nhưng ra quán mà xem. Quán có ba cỡ tô: tô nhỏ 40000, tô vừa 45000, tô to
+55000. Khách nói cỡ nào, máy phải báo đúng giá cỡ đó — **ba** câu trả lời
 khác nhau, chứ không phải hai.
 
 `if` lo một lối, `else` lo tất cả phần còn lại. Hai lối có đủ chỗ cho ba cỡ tô
