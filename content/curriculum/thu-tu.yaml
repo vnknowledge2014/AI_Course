@@ -54,3 +54,8 @@ realm:
       # vừa dạy), và mượn `core.dict`/`core.string-immutable` từ R1 — đứng
       # ngay sau T3.1, không song song.
       - cau-truc-du-lieu
+      # T3.3 đào sâu `func.recursion`/`func.call-stack` (R1.T1.3) bằng cách
+      # nối chúng với `ds.stack` T3.2 vừa dựng, và dùng thẳng `ds.queue`,
+      # `ds.graph-representation`, `ds.tree-traversal` của T3.2 cho BFS/DFS —
+      # đứng ngay sau T3.2, không song song.
+      - thuat-toan-va-do-phuc-tap

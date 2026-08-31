@@ -1,0 +1,265 @@
+# Xương sống R3.T3.3 — Thuật toán & độ phức tạp (34 bài)
+#
+# QUYẾT ĐỊNH ĐÃ KIỂM TRƯỚC KHI VIẾT (đo lại, không đoán):
+#
+#   `func.recursion`, `func.call-stack`, `func.base-case`, `err.recursion-error`
+#   ĐÃ được R1.T1.3 dạy trọn vẹn (bài 16-18: "Máy nhớ đường về" → "Hàm gọi
+#   chính nó" → "Trường hợp dừng lại", cả ba `provenance.reviewed: true`).
+#   T3.2 khi soạn từng ghi nhầm "core.recursion chưa được dạy" — sai, đã tự
+#   sửa (xem commit sửa `r3-t32-xuong.yaml`). Track NÀY không giới thiệu đệ
+#   quy — nó ĐÀO SÂU đệ quy đã có, bắt đầu bằng cách nối nó với chính cái
+#   ngăn xếp T3.2 vừa cho người học tự tay dựng (`ds.stack`) và cái ngăn xếp
+#   tự quản T3.2 bài 30 dùng để duyệt cây KHÔNG đệ quy.
+#
+#   Hệ quả: cụm 1 track này KHÔNG dạy "hàm gọi chính nó là gì" (đã dạy rồi) —
+#   nó dạy "cái ngăn xếp cuộc gọi trông như thế nào, đo được gì từ nó, và nó
+#   giống hệt `ds.stack` bạn vừa tự viết ra sao".
+#
+# QUYẾT ĐỊNH THỨ HAI: hạ tầng chấm HIỆN TẠI chỉ có bốn nấc `static/run/
+# tests/output` (đã đối chiếu `packages/exec-python/src/kiem-ast.ts` thật).
+# MASTERPLAN §7.1 mô tả một nấc S6 TRACE/COMPLEXITY đo độ phức tạp bằng HỒI
+# QUY log-log trên `TraceEvent[]` — nấc đó CHƯA TỒN TẠI trong mã hiện có,
+# không phải hạ tầng khả dụng cho track này. Track dạy Big-O bằng cách CHO
+# NGƯỜI HỌC TỰ ĐẾM: viết một biến đếm bước, tăng nó mỗi lần so sánh/hoán vị,
+# rồi ASSERT trên chính con số đếm được ở vài cỡ dữ liệu khác nhau — đo thật
+# bằng đúng bốn nấc đang có, không chờ hạ tầng chưa xây.
+#
+# QUYẾT ĐỊNH THỨ BA: KHÔNG dùng `class` — cùng lý do T3.2 đã nêu. Thuật toán
+# sắp xếp/tìm kiếm/duyệt đồ thị viết trên `list`/`dict` T3.2 đã dựng (mảng,
+# hàng đợi, ngăn xếp, bảng kề).
+#
+# Ngôn ngữ chủ: Python. Namespace skill: `alg.*`.
+#
+# Ràng buộc đã kiểm trước khi viết:
+#   - `func.recursion`, `func.call-stack`, `func.base-case`,
+#     `err.recursion-error` do R1.T1.3 dạy (bài 16-18).
+#   - `ds.stack`, `ds.queue`, `ds.array-contiguous`, `ds.array-index-address`,
+#     `ds.tree-traversal`, `ds.graph-representation`, `ds.choose-structure`
+#     do R3.T3.2 dạy (giả định T3.2 đã viết xong trước track này).
+#   - Runtime Pyodide/CPython 3.13.2, 32-bit WASM — giới hạn đệ quy thật
+#     (`sys.getrecursionlimit()`) phải ĐO trên chính runtime này trước khi
+#     ghim con số vào bài, không chép từ tài liệu CPython chuẩn (T3.1 đã đo
+#     `sys.getsizeof` lệch sách vì lý do tương tự — 32-bit khác 64-bit).
+
+track: thuat-toan-va-do-phuc-tap
+realm: khoa-hoc-may-tinh
+ten: "T3.3 — Thuật toán & độ phức tạp"
+so_bai: 34
+ngon_ngu_chu: python
+
+# ── Cụm 1 (bài 1–6): Đệ quy — nối lại, không giới thiệu lại ───────────────
+bai:
+  - so: 1
+    slug: de-quy-chinh-la-mot-ngan-xep
+    title: "Đệ quy đã học — giờ nối lại với ngăn xếp bạn vừa tự dựng"
+    teaches: [alg.recursion-is-stack]
+    requires: [func.call-stack, func.recursion, ds.stack]
+    y_chinh: "R1.T1.3 bài 16 gọi nó 'máy nhớ đường về' mà không cho nhìn thấy hình dạng. Giờ nói thẳng: đó là một NGĂN XẾP — mỗi lời gọi ĐẨY một tờ phiếu, mỗi lần trả về LẤY một tờ ra. Đúng kỷ luật vào-sau-ra-trước T3.2 vừa dựng (ds.stack), chỉ khác là trình thông dịch quản nó, không phải bạn."
+  - so: 2
+    slug: viet-lai-bang-de-quy
+    title: "Viết lại đúng việc cũ bằng đệ quy, so với bản vòng lặp"
+    teaches: [alg.recursion-vs-loop]
+    requires: [alg.recursion-is-stack, ds.tree-traversal]
+    y_chinh: "T3.2 bài 30 duyệt cây bằng vòng lặp + một ngăn xếp TỰ QUẢN (một list bạn tự đẩy/lấy). Giờ viết lại CHÍNH VIỆC ĐÓ bằng đệ quy — hai bản side-by-side lộ ra rằng đệ quy chỉ là để trình thông dịch tự làm hộ việc đẩy/lấy ấy."
+  - so: 3
+    slug: de-quy-dung-tran
+    title: "Đệ quy đụng trần — đo thật, đừng đoán"
+    teaches: [alg.recursion-limit]
+    requires: [alg.recursion-vs-loop, err.recursion-error]
+    y_chinh: "R1.T1.3 bài 17 đã cho gặp `RecursionError`. Giờ hỏi: đúng bao nhiêu tầng thì vỡ? `sys.getrecursionlimit()` đo TRÊN CHÍNH Pyodide 32-bit này, không chép số sách giáo khoa — T3.1 đã dạy bài học đó với `getsizeof`."
+  - so: 4
+    slug: mot-ham-goi-chinh-no-hai-lan
+    title: "Một hàm gọi chính nó — nhưng gọi HAI lần"
+    teaches: [alg.double-recursion]
+    requires: [alg.recursion-limit]
+    y_chinh: "R1.T1.3 chỉ dạy đệ quy MỘT nhánh (gọi chính nó đúng một lần mỗi lượt). Nhiều bài toán thật (Fibonacci, duyệt cây nhị phân T3.2) cần gọi chính nó HAI lần trong một lượt — ngăn xếp cuộc gọi giờ phân nhánh, không còn là một cột thẳng."
+  - so: 5
+    slug: cung-mot-cau-hoi-tinh-di-tinh-lai
+    title: "Cùng một câu hỏi, tính đi tính lại"
+    teaches: [alg.recompute-waste]
+    requires: [alg.double-recursion]
+    y_chinh: "Tính Fibonacci bằng đệ quy đôi (bài 4): vẽ cây cuộc gọi ra giấy, đếm bằng mắt xem `fib(2)` bị hỏi lại bao nhiêu lần khi tính `fib(6)`. Cùng một câu hỏi, cùng một câu trả lời, tính LẶP LẠI — đây là chỗ đau mà cụm 6 (ghi nhớ) sẽ chữa."
+  - so: 6
+    slug: dem-xem-tinh-lai-bao-nhieu-lan
+    title: "Đếm xem tính lại bao nhiêu lần — đừng chỉ nhìn bằng mắt"
+    teaches: [alg.count-recursive-calls]
+    requires: [alg.recompute-waste]
+    y_chinh: "Thêm một biến đếm toàn cục, tăng nó mỗi lần hàm được gọi. Đếm bằng SỐ, không phải đếm bằng mắt trên hình vẽ — số lần gọi `fib(30)` lớn tới mức không ai vẽ nổi cây cuộc gọi bằng tay. Đây là công cụ cụm 2 dùng cho MỌI thứ, không riêng đệ quy."
+
+# ── Cụm 2 (bài 7–12): Đo tốc độ bằng cách đếm, không đoán ─────────────────
+  - so: 7
+    slug: dem-buoc-cho-mot-vong-lap
+    title: "Đếm bước cho một vòng lặp, không chỉ đệ quy"
+    teaches: [alg.count-steps-loop]
+    requires: [alg.count-recursive-calls]
+    y_chinh: "Cùng kỹ thuật bài 6 (một biến đếm, tăng mỗi lần chạm việc chính) áp lên vòng `for`/`while` thường. Bước đầu tiên để nói CHÍNH XÁC một đoạn mã 'nhanh' hay 'chậm' — đếm ra một con số, không đoán bằng cảm giác."
+  - so: 8
+    slug: gap-doi-du-lieu-buoc-tang-the-nao
+    title: "Gấp đôi dữ liệu, bước tăng thế nào"
+    teaches: [alg.growth-observed]
+    requires: [alg.count-steps-loop]
+    y_chinh: "Chạy cùng một đoạn mã trên danh sách 10, 20, 40, 80 phần tử, ghi lại số bước đếm được ở mỗi cỡ. Có đoạn bước tăng GẤP ĐÔI đúng như dữ liệu; có đoạn tăng gấp BỐN. Đây là dữ liệu THẬT đo được, chưa có tên gọi."
+  - so: 9
+    slug: dat-ten-cho-hinh-dang-tang
+    title: "Đặt tên cho hình dạng tăng: hằng, tuyến tính, bậc hai"
+    teaches: [alg.growth-shapes]
+    requires: [alg.growth-observed]
+    y_chinh: "Ba hình dạng quan sát được ở bài 8 có tên: KHÔNG đổi dù dữ liệu gấp đôi (hằng số), tăng ĐÚNG GẤP ĐÔI theo dữ liệu (tuyến tính), tăng GẤP BỐN khi dữ liệu gấp đôi (bậc hai, vì vòng lặp lồng vòng lặp)."
+  - so: 10
+    slug: ky-hieu-big-o
+    title: "Ký hiệu Big-O: viết gọn cho hình dạng tăng"
+    teaches: [alg.big-o-notation]
+    requires: [alg.growth-shapes]
+    y_chinh: "T3.2 bài 36 đã hứa: 'nhanh hơn/chậm hơn' ở đó giờ có tên chính thức. O(1), O(n), O(n²) là cách viết gọn cho đúng ba hình dạng bài 9 vừa đặt tên bằng tiếng Việt — không phải ba khái niệm mới, chỉ là một ký hiệu mới cho thứ đã đo được."
+  - so: 11
+    slug: truong-hop-xau-nhat
+    title: "Trường hợp xấu nhất, không phải trường hợp may mắn"
+    teaches: [alg.worst-case]
+    requires: [alg.big-o-notation]
+    y_chinh: "Tìm tuyến tính (chưa dạy tên track này, nhưng người học đã ngầm làm việc này khi tra cứu) có thể may mắn thấy ngay ở ô đầu — 1 bước. Big-O nói về ca XẤU NHẤT: thứ tìm nằm ở ô cuối, hoặc không có mặt. Đo bằng ca xấu, không đo bằng ca may."
+  - so: 12
+    slug: so-sanh-hai-thuat-toan-bang-big-o
+    title: "So sánh hai thuật toán cùng việc bằng Big-O"
+    teaches: [alg.compare-by-big-o]
+    requires: [alg.worst-case]
+    y_chinh: "Bài chốt cụm, không dạy khái niệm mới: cho hai đoạn mã cùng làm một việc, người học phải đếm bước (bài 7), quan sát hình dạng tăng (bài 8-9), rồi gọi tên bằng Big-O (bài 10) và nói đoạn nào THUA ở ca xấu nhất (bài 11)."
+
+# ── Cụm 3 (bài 13–18): Tìm kiếm & chia để trị ─────────────────────────────
+  - so: 13
+    slug: tim-tuyen-tinh
+    title: "Tìm tuyến tính: dò từng ô, không bỏ sót"
+    teaches: [alg.linear-search]
+    requires: [ds.array-index-address, alg.worst-case]
+    y_chinh: "Chính thức đặt tên cho việc bài 11 đã ngầm nhắc: đi từ ô 0 tới hết, so từng ô. Ca xấu nhất — thứ cần tìm ở ô cuối hoặc không có — phải chạm ĐỦ MỌI ô. Không cần dữ liệu đã sắp xếp; đây là cách duy nhất dùng được khi dữ liệu còn lộn xộn."
+  - so: 14
+    slug: tim-nhi-phan
+    title: "Tìm nhị phân: cần dữ liệu đã sắp xếp trước"
+    teaches: [alg.binary-search]
+    requires: [alg.linear-search, alg.big-o-notation]
+    y_chinh: "Đúng việc T3.2 bài 28 đã làm trên CÂY nhị phân, giờ làm trên MẢNG đã sắp: so với ô giữa, nhỏ hơn thì bỏ nửa phải, lớn hơn thì bỏ nửa trái. Đếm bước (cụm 2) lộ ra: không tuyến tính, không bậc hai — một hình dạng mới, sẽ đặt tên ở bài 16."
+  - so: 15
+    slug: tim-nhi-phan-bang-de-quy
+    title: "Tìm nhị phân viết bằng đệ quy"
+    teaches: [alg.binary-search-recursive]
+    requires: [alg.binary-search, alg.recursion-vs-loop]
+    y_chinh: "Áp đúng bài học bài 2 (viết lại bằng đệ quy, so với bản vòng lặp) lên chính thuật toán vừa học. Mỗi lời gọi đệ quy nhận đúng NỬA mảng còn lại — ca dừng (R1.T1.3 bài 18) là khi nửa ấy rỗng hoặc tìm thấy."
+  - so: 16
+    slug: chia-de-tri
+    title: "Chia để trị: cắt nhỏ, giải từng phần, ghép lại"
+    teaches: [alg.divide-and-conquer]
+    requires: [alg.binary-search-recursive]
+    y_chinh: "Đặt tên cho hình dạng chung của bài 14-15: CẮT bài toán làm đôi, GIẢI từng nửa (đệ quy), GHÉP kết quả lại. Tìm nhị phân là ca đơn giản nhất — ghép chỉ là 'lấy kết quả của nửa đúng'. Cụm 4 sẽ gặp một ca ghép phức tạp hơn."
+  - so: 17
+    slug: tron-hai-day-da-sap
+    title: "Trộn hai dãy đã sắp thành một dãy sắp"
+    teaches: [alg.merge-step]
+    requires: [ds.array-contiguous]
+    y_chinh: "Cho hai mảng đã sắp riêng, ghép thành MỘT mảng sắp bằng cách luôn lấy phần tử nhỏ hơn ở đầu hai mảng con. Đứng riêng chưa cần chia để trị — bài sau mới ghép nó vào."
+  - so: 18
+    slug: chon-tim-tuyen-tinh-hay-nhi-phan
+    title: "Chọn tìm tuyến tính hay nhị phân"
+    teaches: [alg.choose-search]
+    requires: [alg.divide-and-conquer, alg.merge-step]
+    y_chinh: "Bài chốt cụm: cho vài tình huống (danh sách chưa sắp, danh bạ đã sắp theo tên), người học chọn đúng cách tìm và giải thích bằng Big-O tại sao cách kia tệ hơn ở đây, hoặc không dùng được."
+
+# ── Cụm 4 (bài 19–24): Sắp xếp — so sánh và đổi chỗ ───────────────────────
+  - so: 19
+    slug: sap-xep-noi-bot
+    title: "Sắp xếp nổi bọt: so hai ô cạnh nhau, đổi chỗ nếu sai thứ tự"
+    teaches: [alg.bubble-sort]
+    requires: [alg.compare-by-big-o, ds.array-index-address]
+    y_chinh: "Đi hết mảng, so từng cặp ô liền kề, đổi chỗ nếu sai thứ tự — lặp lại tới khi không còn đổi chỗ nào. Đếm bước (cụm 2): số phép so sánh tăng theo BÌNH PHƯƠNG cỡ dữ liệu — vòng ngoài lặp n lần, vòng trong cũng vậy."
+  - so: 20
+    slug: sap-xep-chon
+    title: "Sắp xếp chọn: tìm nhỏ nhất, đưa lên đầu"
+    teaches: [alg.selection-sort]
+    requires: [alg.bubble-sort]
+    y_chinh: "Khác cách bài 19 đổi chỗ liên tục: mỗi lượt chỉ tìm PHẦN TỬ NHỎ NHẤT còn lại rồi đổi nó về đúng vị trí — đúng một lần đổi chỗ mỗi lượt, ít hơn nổi bọt, nhưng vẫn phải so hết mọi cặp để tìm nhỏ nhất."
+  - so: 21
+    slug: sap-xep-chen
+    title: "Sắp xếp chèn: chèn từng phần tử vào đúng chỗ trong phần đã sắp"
+    teaches: [alg.insertion-sort]
+    requires: [alg.selection-sort]
+    y_chinh: "Giữ một PHẦN ĐÃ SẮP ở đầu mảng, lấy từng phần tử tiếp theo và chèn nó vào đúng chỗ trong phần đã sắp — đúng việc T3.2 bài 4 mô tả cái giá của chèn giữa mảng (`ds.array-insert-shift`), giờ dùng chính cái giá đó để LÀM một thuật toán."
+  - so: 22
+    slug: ba-cach-sap-xep-cung-mot-hinh-big-o
+    title: "Ba cách sắp xếp trên, cùng một hình Big-O"
+    teaches: [alg.quadratic-sorts-compare]
+    requires: [alg.insertion-sort]
+    y_chinh: "Bài chốt nửa đầu cụm: đếm bước cả ba thuật toán (bài 19-21) trên cùng một dữ liệu — cả ba đều O(n²), dù cách viết khác hẳn nhau. Cùng hình dạng tăng không có nghĩa cùng tốc độ THẬT; số bước cụ thể khác nhau, chỉ HÌNH DẠNG tăng giống nhau."
+  - so: 23
+    slug: sap-xep-tron
+    title: "Sắp xếp trộn: chia để trị đúng nghĩa"
+    teaches: [alg.merge-sort]
+    requires: [alg.divide-and-conquer, alg.merge-step, alg.quadratic-sorts-compare]
+    y_chinh: "Ghép hai công cụ đã có: CẮT mảng làm đôi tới khi còn một phần tử (bài 16), rồi TRỘN từng cặp mảng con đã sắp lại (bài 17) — đây chính là 'bước ghép phức tạp hơn' mà bài 16 hứa hẹn."
+  - so: 24
+    slug: merge-sort-nhanh-hon-o-dau
+    title: "Merge sort nhanh hơn ở đâu — Big-O nói được vì sao"
+    teaches: [alg.merge-sort-complexity]
+    requires: [alg.merge-sort]
+    y_chinh: "Đếm bước merge sort trên cùng dữ liệu đã dùng ở bài 22: tăng chậm hơn hẳn ba thuật toán bậc hai khi dữ liệu lớn dần, dù mảng nhỏ thì có khi chậm hơn. Đây là bài học thật của Big-O: nó nói về xu hướng khi dữ liệu LỚN, không phải tốc độ tuyệt đối ở mọi cỡ."
+
+# ── Cụm 5 (bài 25–30): Duyệt đồ thị ───────────────────────────────────────
+  - so: 25
+    slug: duyet-theo-chieu-rong
+    title: "Duyệt theo chiều rộng: lan ra từng lớp một"
+    teaches: [alg.bfs]
+    requires: [ds.queue, ds.graph-representation]
+    y_chinh: "Bắt đầu từ một đỉnh, thăm hết HÀNG XÓM TRỰC TIẾP trước, rồi mới sang hàng xóm của hàng xóm — đúng kỷ luật vào-trước-ra-trước của hàng đợi T3.2 dựng: đẩy hàng xóm mới vào cuối, lấy đỉnh tiếp theo cần thăm từ đầu."
+  - so: 26
+    slug: bfs-tim-duong-ngan-nhat
+    title: "BFS tìm đường đi ngắn nhất — theo SỐ CẠNH"
+    teaches: [alg.bfs-shortest-path]
+    requires: [alg.bfs]
+    y_chinh: "Vì BFS lan đều từng lớp, đỉnh nào được thăm ở lớp thứ k chắc chắn cách đỉnh gốc ĐÚNG k cạnh, không hơn — cách chứng minh này không cần thử hết mọi đường đi, chỉ cần tin đúng thứ tự lan ra của hàng đợi."
+  - so: 27
+    slug: duyet-theo-chieu-sau
+    title: "Duyệt theo chiều sâu: đi thẳng tới cùng rồi mới quay lại"
+    teaches: [alg.dfs]
+    requires: [ds.stack, ds.graph-representation]
+    y_chinh: "Đối lập bài 25: đi theo MỘT nhánh tới khi hết đường mới quay lại thử nhánh khác — đúng kỷ luật vào-sau-ra-trước của ngăn xếp T3.2 dựng. Cùng dữ liệu đầu vào, hai cấu trúc khác nhau (hàng đợi/ngăn xếp) cho ra hai thứ tự thăm khác hẳn."
+  - so: 28
+    slug: dfs-bang-de-quy
+    title: "DFS viết bằng đệ quy"
+    teaches: [alg.dfs-recursive]
+    requires: [alg.dfs, alg.recursion-vs-loop]
+    y_chinh: "DFS viết bằng ngăn xếp tự quản (bài 27) và DFS viết bằng đệ quy (bài 1-2 đã dạy: đệ quy CHÍNH LÀ một ngăn xếp) ra đúng cùng thứ tự thăm — vì chúng là MỘT thuật toán, chỉ khác ai giữ ngăn xếp."
+  - so: 29
+    slug: bfs-hay-dfs
+    title: "BFS hay DFS — chọn theo câu hỏi đang hỏi"
+    teaches: [alg.bfs-vs-dfs]
+    requires: [alg.bfs-shortest-path, alg.dfs-recursive]
+    y_chinh: "Hỏi 'đường ngắn nhất có mấy cạnh' thì BFS trả lời được ngay khi vừa chạm đích (bài 26); DFS thì không — nó có thể đi lạc theo một nhánh dài trước. Hỏi 'có đường nào tới được không' thì cả hai đều trả lời được, DFS thường tốn ít bộ nhớ hơn."
+  - so: 30
+    slug: phat-hien-chu-trinh-bang-dfs
+    title: "Phát hiện chu trình bằng DFS"
+    teaches: [alg.cycle-detection]
+    requires: [alg.dfs]
+    y_chinh: "Nối lại T3.2 bài 26 ('hai cái nồi trỏ vào nhau thì ai dọn' — vòng tham chiếu): DFS mà gặp lại một đỉnh ĐANG TRÊN ĐƯỜNG ĐI HIỆN TẠI (không phải đã thăm xong) nghĩa là có một chu trình. Đây chính là kỹ thuật đứng sau việc phát hiện vòng tham chiếu bộ dọn rác phải xử lý."
+
+# ── Cụm 6 (bài 31–34): Tổng hợp ────────────────────────────────────────────
+  - so: 31
+    slug: tham-lam
+    title: "Tham lam: chọn tốt nhất ngay lúc này, không nhìn lại"
+    teaches: [alg.greedy]
+    requires: [alg.compare-by-big-o]
+    y_chinh: "Trả lại tiền thừa bằng ÍT ĐỒNG XU NHẤT: mỗi bước chọn đồng xu LỚN NHẤT còn nhỏ hơn số tiền còn thiếu, không cân nhắc các lựa chọn khác. Nhanh — mỗi bước chỉ một lựa chọn, không quay lại — và với hệ đồng xu thường gặp thì luôn ra đáp án đúng."
+  - so: 32
+    slug: khi-tham-lam-sai
+    title: "Khi tham lam sai — không phải lúc nào cũng đúng"
+    teaches: [alg.greedy-fails]
+    requires: [alg.greedy]
+    y_chinh: "Dựng một hệ đồng xu GIẢ (ví dụ 1, 3, 4) mà tham lam chọn sai: trả 6 đồng, tham lam chọn 4+1+1 (ba đồng), trong khi 3+3 (hai đồng) mới là ít nhất. Tham lam nhanh không có nghĩa tham lam LUÔN đúng — phải tự kiểm chứng, không tin theo bản năng."
+  - so: 33
+    slug: nho-lai-thay-vi-tinh-lai
+    title: "Nhớ lại kết quả cũ thay vì tính lại — quy hoạch động nhập môn"
+    teaches: [alg.memoization]
+    requires: [alg.recompute-waste, alg.count-recursive-calls]
+    y_chinh: "Chữa đúng chỗ đau bài 5 dựng lên: giữ một `dict` cất kết quả đã tính (`fib(6)` tính một lần, tra dict những lần sau). Đếm lại bằng bộ đếm bài 6: số lần TÍNH THẬT giảm từ theo cấp số nhân xuống còn đúng bằng số khác nhau cần tính."
+  - so: 34
+    slug: boss-chon-dung-thuat-toan
+    title: "BOSS — Chọn đúng thuật toán, đo bằng Big-O, chứng minh bằng đếm bước"
+    teaches: [alg.choose-algorithm]
+    requires: [alg.memoization, alg.greedy-fails, alg.bfs-vs-dfs, alg.merge-sort-complexity, ds.choose-structure]
+    y_chinh: "Người học nhận vài bài toán thật (sắp xếp danh sách khách hàng, tìm đường đi trong bản đồ, tính số Fibonacci lớn) và phải CHỌN đúng thuật toán, VIẾT nó, rồi TỰ ĐO bằng bộ đếm bước (không đoán) để chứng minh lựa chọn đúng. Không dạy khái niệm mới — tổng kết cả track, khép vòng lặp 'đo trước khi tin' mà mọi cổng máy của dự án này cũng đang làm."
