@@ -1,0 +1,205 @@
+# Xương sống R4.T4.0b — Cổng Rust (24 bài)
+#
+# Track THỨ HAI của M8 dùng ngôn ngữ ngoài Python, và là CỔNG thứ hai của
+# Realm 4 (sau T4.0a — TypeScript). Trong khi T4.0a dạy đúng MỘT Ý ("kiểu
+# được kiểm trước khi chạy"), track này dạy đúng MỘT Ý khác, sâu hơn:
+# **một giá trị có ĐÚNG MỘT chủ sở hữu tại một thời điểm** — và mọi luật
+# khác của Rust (move, borrow, &/&mut) đều là hệ quả trực tiếp của một
+# luật gốc đó.
+#
+# ĐÂY LÀ LÝ DO T3.1 TỒN TẠI (xem thu-tu.yaml, chú thích Realm 3): T3.1 dựng
+# câu hỏi "cái tên GIỮ giá trị, hay nó chỉ CHỈ TỚI giá trị?" (mem.name-is-
+# reference) — Python cho phép NHIỀU cái tên cùng trỏ tới một giá trị, tuỳ
+# ý, không luật nào ngăn. Rust đặt một LUẬT lên đúng bức tranh đó: được
+# phép có nhiều người CHỈ TỚI (borrow), nhưng chỉ đúng MỘT người GIỮ
+# (own). Track này không dạy lại "tên là tham chiếu" — nó dạy CÁI LUẬT mới
+# đặt lên trên nền đó.
+#
+# BA KẾT CỤC, KHÔNG PHẢI HAI — quyết định này chi phối TOÀN BỘ khung dưới
+# đây (xem ADR-002-rust-scope.md và R4-T40b-su-that-do-duoc.md, ĐỌC TRƯỚC
+# KHI VIẾT, không phải đọc sau khi vướng):
+#   `byte-rust` (engine WASM chạy bài này) chỉ kiểm được ownership/borrow
+#   trên MÃ THẲNG HÀNG, KHÔNG rẽ nhánh (hai luật hẹp: move-dùng-lại-sau
+#   trong cùng block, và hai &mut cùng một statement). Mọi tình huống
+#   RỘNG HƠN (move qua if/vòng lặp, mượn xen kẽ qua nhiều statement —
+#   non-lexical lifetimes) → engine THÚ NHẬN "chưa hỗ trợ" (`ChuaHoTro`),
+#   một kết cục THỨ BA, không phải lỗi của người học. Track này dùng:
+#   - Bước `code` có chấm điểm sống CHỈ cho hai luật hẹp đã đo được.
+#   - Bước `predict` (không chạy code, trắc nghiệm) cho mọi tình huống
+#     rộng hơn — câu trả lời đã xác minh bằng `rustc` THẬT (xem
+#     R4-T40b-su-that-do-duoc.md, mục "Xác minh bằng rustc"), không phải
+#     suy đoán, và không phải chạy qua `byte-rust` (nó tự thú nhận không
+#     biết).
+#
+# MỘT DANH SÁCH CẤM RIÊNG cho track này, khác T4.0a: `byte-rust` có một số
+# LỖI CÀI ĐẶT THẬT (từ chối mã Rust hợp lệ) — không phải phạm vi hẹp có
+# chủ đích của ADR-002. Toàn bộ danh sách ở R4-T40b-su-that-do-duoc.md,
+# mục "CẤM TUYỆT ĐỐI". Bảy điều không bao giờ xuất hiện trong track này:
+# `#[derive(...)]`, annotate kiểu tuple tường minh, `enum` struct-variant,
+# `if let`/`while let`, pattern `&x` (deref) trong for/match, `.expect()`,
+# gọi closure qua biến đặt tên (`let f = |x|...; f(x)`).
+#
+# Namespace skill: `rs.*`. Thư mục nội dung: `content/lap-trinh-ham/01-cong-rust/`
+# (số `01` chỉ là thứ tự thư mục trong Realm 4, không phải "T4.1" — track
+# này VẪN là T4.0b theo MASTERPLAN, xem cùng cách đặt tên T4.0a đã ghi).
+
+track: cong-rust
+realm: lap-trinh-ham
+ten: "T4.0b — Cổng Rust"
+so_bai: 24
+ngon_ngu_chu: rust
+
+# ── Cụm 1 (bài 1–3): Cầu nối cú pháp — nhanh, vì đã có kinh nghiệm T4.0a ──
+bai:
+  - so: 1
+    slug: cung-mot-chuong-trinh-ba-ngon-ngu
+    title: "Cùng một chương trình, giờ là ngôn ngữ thứ ba"
+    teaches: [rs.syntax-bridge]
+    requires: [core.variable, core.function-def]
+    y_chinh: "Chuyển đúng một chương trình nhỏ (biến, hàm, in ra) sang Rust — `fn main()`, `let`, `println!(\"{}\", x)`, dấu `;` cuối dòng. Người học đã làm việc này một lần ở T4.0a (Python→TypeScript); lần này nhanh hơn vì đã quen nhịp 'dịch cú pháp, giữ nguyên Ý'. KHÔNG annotate kiểu tường minh cho biến số đơn giản trong bài này — để dành khái niệm kiểu tường minh cho lúc cần (struct/hàm), giữ đúng cảm giác 'suy luận vẫn hoạt động' như Rust thật."
+  - so: 2
+    slug: struct-nhom-du-lieu-co-ten
+    title: "struct — nhóm dữ liệu lại dưới một cái tên"
+    teaches: [rs.struct]
+    requires: [rs.syntax-bridge]
+    y_chinh: "`struct Diem { x: i32, y: i32 }`, khởi tạo `Diem { x: 3, y: 4 }`, đọc `.x`/`.y`. `impl Diem { fn tong(&self) -> i32 { self.x + self.y } }` — phương thức, gọi bằng `d.tong()`. CHƯA giải thích `&self` sâu (dành cho bài 10) — ở đây `&self` chỉ là cú pháp cần có để gọi được, một lời hứa sẽ quay lại sau."
+  - so: 3
+    slug: enum-mot-gia-tri-nhieu-hinh-dang
+    title: "enum — một giá trị là MỘT TRONG NHIỀU hình dạng"
+    teaches: [rs.enum-match]
+    requires: [rs.struct]
+    y_chinh: "`enum HinhDang { Tron(f64), ChuNhat(i32, i32) }` (CHỈ tuple-variant — struct-variant `Bien{truong: T}` là lỗi cài đặt thật của engine, xem R4-T40b-su-that-do-duoc.md, KHÔNG dùng). `match` trên nó, đủ mọi nhánh — engine kiểm exhaustiveness THẬT (thiếu một nhánh là lỗi biên dịch, không phải gợi ý). Gợi lại union type T4.0a (`string | number`) như một điểm tương đồng đáng chú ý: cả hai đều nói 'giá trị này là MỘT TRONG NHIỀU khả năng đã liệt kê', nhưng `enum` có compiler ép bạn XỬ LÝ ĐỦ mọi khả năng lúc dùng (`match` vét cạn), còn union type chỉ ép lúc TRUY CẬP thành viên (T4.0a bài 16) — khác nhau ở CHỖ bị ép, không phải Ở CÓ BỊ ÉP hay không."
+
+# ── Cụm 2 (bài 4–10): OWNERSHIP — trái tim của track này ──────────────────
+  - so: 4
+    slug: mot-gia-tri-dung-mot-chu
+    title: "Một giá trị có ĐÚNG MỘT chủ sở hữu"
+    teaches: [rs.ownership-intro]
+    requires: [mem.name-is-reference, rs.enum-match]
+    y_chinh: "Nối thẳng T3.1: Python cho NHIỀU cái tên cùng trỏ tới một giá trị, không luật nào ngăn (mem.name-is-reference, mem.aliasing-explained). Rust đặt một luật lên đúng bức tranh đó: tại một thời điểm, ĐÚNG MỘT cái tên được coi là CHỦ (owner) của một giá trị. Khi chủ ra khỏi phạm vi (scope), giá trị bị dọn — không cần bộ dọn rác (garbage collector) như Python. Bài này thuần explain/predict, CHƯA code — dựng khái niệm trước khi thấy luật hoạt động."
+  - so: 5
+    slug: gan-la-chuyen-quyen-so-huu
+    title: "Gán một giá trị là CHUYỂN quyền sở hữu, không phải sao chép"
+    teaches: [rs.move-assign]
+    requires: [rs.ownership-intro]
+    y_chinh: "`let s = String::from(\"hi\"); let t = s;` — quyền sở hữu CHUYỂN từ `s` sang `t` (move), không tạo bản sao. Đã đo thật: `byte-rust` chặn dùng `s` sau move bằng BR0530 (\"đã bị chuyển quyền sở hữu đi nơi khác\"), chẩn đoán ba tầng đầy đủ. Bài này CHỈ minh hoạ move xảy ra (ví dụ code không dùng `s` sau đó, chạy sạch) — bài 6 mới đào chuyện dùng lại bị chặn."
+  - so: 6
+    slug: dung-lai-sau-move-bi-chan
+    title: "Dùng lại sau move bị chặn TRƯỚC KHI CHẠY"
+    teaches: [rs.move-after-use-blocked]
+    requires: [rs.move-assign]
+    y_chinh: "Đào sâu bài 5: dùng `s` sau khi đã move sang `t` — BR0530, TỪ CHỐI biên dịch, không phải lỗi lúc chạy. Đối lập với kiểu SỐ NGUYÊN (`i32`, `u8`, ...): `let a = 5; let b = a; println!(\"{}\", a);` chạy được BÌNH THƯỜNG — kiểu số nguyên là `Copy` (sao chép, không move). Đây là bài code có chấm điểm sống ĐẦU TIÊN của track dùng move-check thật (luật hẹp #1 của ADR-002: dùng lại sau move trên chuỗi câu lệnh thẳng hàng)."
+  - so: 7
+    slug: clone-giu-lai-cho-ca-hai
+    title: "`.clone()` giữ lại quyền sở hữu cho CẢ HAI"
+    teaches: [rs.clone]
+    requires: [rs.move-after-use-blocked]
+    y_chinh: "`let t = s.clone();` — tạo một BẢN SAO thật sự, `s` vẫn còn chủ, `t` là chủ của một giá trị khác (cùng nội dung, khác vùng nhớ). Đã đo thật: chạy sạch, cả `s` lẫn `t` dùng được sau đó. Đánh đổi: clone TỐN bộ nhớ/thời gian sao chép — không phải lựa chọn 'luôn đúng', mà là công cụ dùng khi THẬT SỰ cần hai bản độc lập."
+  - so: 8
+    slug: truyen-vao-ham-cung-la-move
+    title: "Truyền vào hàm theo giá trị CŨNG là move"
+    teaches: [rs.move-into-function]
+    requires: [rs.clone]
+    y_chinh: "`fn in_ra(s: String) { println!(\"{}\", s); } in_ra(ten);` — gọi hàm CŨNG chuyển quyền sở hữu, `ten` không dùng lại được sau lời gọi (BR0530, đã đo thật). Đối lập THẲNG với `mem.pass-by-reference` (T3.1 bài 24, Python): Python truyền một THAM CHIẾU, hàm và người gọi CÙNG trỏ tới một giá trị, không ai mất quyền gì cả. Rust truyền GIÁ TRỊ (move) trừ khi tường minh mượn bằng `&` (dành cho cụm 3) — cùng một hành động cú pháp (\"gọi hàm với một biến\"), hai luật hoàn toàn khác nhau."
+  - so: 9
+    slug: move-qua-nhanh-byte-chua-kiem-duoc
+    title: "Move qua nhánh if/vòng lặp — Byte chưa kiểm được, KHÔNG có nghĩa Rust cho phép"
+    teaches: [rs.move-through-branch-unchecked]
+    requires: [rs.move-into-function]
+    y_chinh: "Bài PREDICT, không code chấm điểm sống. Move một biến bên trong THÂN `if` (không phải điều kiện), dùng lại biến đó SAU khối `if` — `byte-rust` trả `ChuaHoTro` (BR0531, \"Byte chưa kiểm được luật mượn... trong tình huống này\"), một kết cục THỨ BA, không phải lỗi của người học nhưng CŨNG không phải xanh. Đã xác minh bằng `rustc` THẬT (R4-T40b-su-that-do-duoc.md): trường hợp này thật ra BỊ TỪ CHỐI (E0382) — bài dạy đúng điều rustc thật nói, không phải điều byte-rust nói (nó không nói gì, nó thú nhận). Cùng luật áp dụng cho move trong thân vòng lặp (BR0532, mã riêng)."
+  - so: 10
+    slug: self-la-mot-tham-so-dac-biet
+    title: "`self` là một tham số đặc biệt — theo giá trị hay theo tham chiếu?"
+    teaches: [rs.self-vs-ref-self]
+    requires: [rs.move-through-branch-unchecked, rs.struct]
+    y_chinh: "Quay lại bài 2's `&self` bỏ ngỏ: `fn an(self) -> i32` (không `&`) NUỐT struct — gọi `d.an()` rồi dùng lại `d` sau đó bị chặn move (BR0530, đã đo thật, struct không `Copy`). `fn tong(&self) -> i32` (có `&`) chỉ MƯỢN — `d` vẫn dùng được sau `d.tong()`. `self`/`&self` không phải hai cú pháp tuỳ thích — đó CHÍNH LÀ move-vs-borrow (bài 5-8) áp dụng lên tham số đầu tiên của method."
+
+# ── Cụm 3 (bài 11–16): BORROWING — mượn mà không lấy quyền sở hữu ─────────
+  - so: 11
+    slug: muon-de-doc
+    title: "`&` — mượn để ĐỌC, không lấy quyền sở hữu"
+    teaches: [rs.borrow-shared]
+    requires: [rs.self-vs-ref-self]
+    y_chinh: "`fn in_ra(s: &String) { println!(\"{}\", s); } in_ra(&ten);` — truyền một THAM CHIẾU, không move. `ten` dùng được BÌNH THƯỜNG sau lời gọi (đã đo thật, đối lập trực tiếp với bài 8). Đây là công cụ GIẢI QUYẾT vấn đề bài 8 nêu ra: muốn hàm ĐỌC một giá trị mà không mất quyền sở hữu, mượn thay vì truyền hẳn."
+  - so: 12
+    slug: muon-de-sua
+    title: "`&mut` — mượn để SỬA"
+    teaches: [rs.borrow-mut]
+    requires: [rs.borrow-shared]
+    y_chinh: "`fn tang(x: &mut i32) { *x += 1; } tang(&mut so);` — mượn KHẢ BIẾN, sửa được giá trị gốc qua tham chiếu (`*x` — giải tham chiếu để CHẠM tới giá trị thật). Đã đo thật: `so` đổi giá trị sau lời gọi. Khác `&` (bài 11): `&` chỉ đọc được, `&mut` sửa được — hai quyền khác nhau, cú pháp khác nhau (`&mut` tường minh ở CẢ tham số lẫn lúc gọi)."
+  - so: 13
+    slug: hai-muon-sua-cung-luc-bi-chan
+    title: "Hai `&mut` tới cùng một chỗ, cùng lúc, bị chặn"
+    teaches: [rs.double-mut-blocked]
+    requires: [rs.borrow-mut]
+    y_chinh: "`fn cong(a: &mut i32, b: &mut i32) {...} cong(&mut x, &mut x);` — BR0355 (\"mượn `x` dạng `&mut` hai lần cùng lúc\"), TỪ CHỐI biên dịch. Đây là luật hẹp #2 của ADR-002 (hai `&mut` trong CÙNG MỘT statement — quyết định được không cần phân tích luồng). Vì sao luật này tồn tại: nếu hai chỗ CÙNG sửa được `x` một lúc, không ai đoán nổi kết quả cuối thuộc về bên nào — Rust xoá bỏ khả năng đó hoàn toàn, không phải bằng quy ước, bằng TỪ CHỐI BIÊN DỊCH."
+  - so: 14
+    slug: nhieu-doc-cung-luc-thi-duoc
+    title: "Nhiều `&` (đọc) cùng lúc thì ĐƯỢC — chỉ `&mut` mới độc quyền"
+    teaches: [rs.multiple-shared-ok]
+    requires: [rs.double-mut-blocked]
+    y_chinh: "Đối lập trực tiếp bài 13: `fn cong(a: &i32, b: &i32) -> i32 { a + b } cong(&x, &x);` — HAI tham chiếu ĐỌC (`&`, không `&mut`) tới cùng một chỗ, cùng lúc — chạy được, đã đo thật. Luật thật của Rust không phải \"không được mượn hai lần\" — mà là \"nhiều người ĐỌC cùng lúc thì được, nhưng ĐÚNG MỘT người SỬA tại một thời điểm, và không được cả đọc lẫn sửa cùng lúc\". Bài 13 minh hoạ nửa sau; bài này minh hoạ nửa đầu."
+  - so: 15
+    slug: doc-va-sua-xen-ke-qua-nhieu-cau-lenh
+    title: "Mượn đọc rồi mượn sửa, xen kẽ qua NHIỀU câu lệnh — luật phụ thuộc vào ai còn 'sống'"
+    teaches: [rs.mixed-borrow-nll]
+    requires: [rs.multiple-shared-ok]
+    y_chinh: "Bài PREDICT — vượt quá phạm vi `byte-rust` (cần phân tích luồng/vùng sống, không quyết định được trên AST, xem ADR-002). Đã xác minh bằng `rustc` THẬT (R4-T40b-su-that-do-duoc.md, hai ví dụ biên dịch thật): mượn `&x` rồi DÙNG NÓ LẦN CUỐI, sau đó mới mượn `&mut x` — ĐƯỢC PHÉP (vùng sống của `&x` đã kết thúc ở lần dùng cuối, không phải ở hết block — non-lexical lifetimes). Nhưng mượn `&x`, rồi mượn `&mut x`, RỒI MỚI dùng `&x` — BỊ TỪ CHỐI (E0502, hai vùng sống chồng nhau). Luật thật: KHÔNG PHẢI thứ tự dòng lệnh quyết định, mà là VÙNG SỐNG (ai còn được dùng ở đâu) — lý do chính xác byte-rust không kiểm được chuyện này trên cây cú pháp."
+  - so: 16
+    slug: do-tong-hop-move-va-muon
+    title: "Đo tổng hợp: ghép move và mượn trong một chương trình nhỏ"
+    teaches: [rs.ownership-borrow-together]
+    requires: [rs.mixed-borrow-nll]
+    y_chinh: "Bài chốt cụm, CODE có chấm điểm sống: một `struct` (nối bài 2/10) với vài phương thức — một phương thức nhận `&self` (đọc), một nhận `&mut self` (sửa) — gọi cả hai đúng thứ tự trong `main`, không vi phạm luật nào (mọi luật ở đây đều nằm trong phạm vi hai luật hẹp ADR-002 kiểm được: KHÔNG rẽ nhánh, KHÔNG mượn xen kẽ qua nhiều statement — bài này chỉ ĐO người học có GHÉP ĐÚNG những gì cụm 2-3 đã dạy, không giới thiệu tình huống ChuaHoTro mới)."
+
+# ── Cụm 4 (bài 17–21): Option/Result — dùng ENUM giải quyết null/lỗi ──────
+  - so: 17
+    slug: option-co-the-khong-co-gi
+    title: "`Option<T>` — có thể có, có thể không có gì cả"
+    teaches: [rs.option]
+    requires: [rs.ownership-borrow-together, rs.enum-match]
+    y_chinh: "`Option<T>` là một `enum` CÓ SẴN trong Rust (nối thẳng bài 3): `Some(gia_tri)` hoặc `None`. Không có `null`/`undefined` riêng trong Rust — MỌI khả năng 'có thể không có gì' đều đi qua `Option`, một kiểu dữ liệu THẬT, không phải một giá trị đặc biệt lén lút. Đối lập T4.0a cụm 3 (`ts.possibly-undefined` — TypeScript CẢNH BÁO một giá trị có thể `undefined`); Rust ĐÒI bạn khai `Option<T>` tường minh nếu muốn khả năng đó tồn tại."
+  - so: 18
+    slug: match-tren-option-buoc-xu-ly-du
+    title: "`match` trên Option buộc xử lý ĐỦ cả hai khả năng"
+    teaches: [rs.option-match]
+    requires: [rs.option]
+    y_chinh: "`match ket_qua { Some(x) => ..., None => ... }` — exhaustiveness (bài 3) áp dụng lên `Option`: THIẾU nhánh `None` là lỗi biên dịch (BR0300), không phải một trường hợp bạn 'quên xử lý' rồi crash lúc chạy như thiếu kiểm tra `None`/`null` ở nhiều ngôn ngữ khác. Compiler ép bạn ĐỐI DIỆN với khả năng rỗng ngay lúc viết, không phải lúc người dùng gặp phải."
+  - so: 19
+    slug: unwrap-lay-lieu
+    title: "`.unwrap()` — lấy liều, panic có kiểm soát nếu không có gì"
+    teaches: [rs.unwrap-panic]
+    requires: [rs.option-match]
+    y_chinh: "`.unwrap()` lấy giá trị bên trong `Some`/`Ok` ngay, hoặc PANIC (dừng chương trình có kiểm soát, chẩn đoán rõ ràng) nếu gặp `None`/`Err` — đã đo thật (BR0551). Đây KHÔNG phải cách 'lười' hợp lệ mọi lúc — dùng khi BẠN CHẮC CHẮN giá trị luôn có, và một panic sớm, dễ hiểu, tốt hơn im lặng sai. `match` (bài 18) mới là cách xử lý ĐẦY ĐỦ khi khả năng rỗng có thể xảy ra thật."
+  - so: 20
+    slug: result-ok-hoac-err
+    title: "`Result<T, E>` — thay cho ném ngoại lệ"
+    teaches: [rs.result]
+    requires: [rs.unwrap-panic]
+    y_chinh: "`Result<T, E>` — một `enum` khác có sẵn: `Ok(gia_tri)` hoặc `Err(loi)`. Rust không có `try`/`except`/`throw` cho lỗi thông thường — một hàm CÓ THỂ THẤT BẠI khai tường minh `-> Result<T, E>` trong CHỮ KÝ (nối thẳng T4.0a cụm 2 — chữ ký là lời hứa), và người gọi buộc phải `match` hoặc `.unwrap()` để lấy giá trị ra, y hệt `Option`."
+  - so: 21
+    slug: toan-tu-lan-truyen-loi
+    title: "`?` — lan truyền lỗi lên trên, không phải xử lý tại chỗ"
+    teaches: [rs.question-mark]
+    requires: [rs.result]
+    y_chinh: "`let x = ham_co_the_loi()?;` — nếu `Err`, HÀM HIỆN TẠI trả về `Err` đó NGAY (thoát sớm); nếu `Ok`, lấy giá trị bên trong gán cho `x`, chạy tiếp bình thường. Đã đo thật qua hai tầng hàm lồng nhau. `?` không phải cú pháp bí ẩn — nó là VIẾT TẮT của một `match` lặp đi lặp lại (Ok thì lấy ra, Err thì trả về ngay) mà gần như hàm nào xử lý lỗi cũng cần."
+
+# ── Cụm 5 (bài 22–24): chốt track ─────────────────────────────────────────
+  - so: 22
+    slug: map-filter-sum-qua-iterator
+    title: "`.map()`/`.filter()`/`.sum()` — biến đổi một dãy giá trị"
+    teaches: [rs.iterator-basics]
+    requires: [rs.question-mark]
+    y_chinh: "`v.iter().map(|x| x * 2).collect()`, `v.into_iter().filter(|x| x % 2 == 0).collect()`, `v.iter().sum()` — closure truyền TRỰC TIẾP cho `.map()`/`.filter()` (đã đo thật, dùng được); CHỈ báo trước một điều CẤM: KHÔNG gán closure vào một biến rồi gọi qua tên (`let f = |x| x+1; f(5)` là lỗi cài đặt thật của engine, xem R4-T40b-su-that-do-duoc.md) — luôn truyền trực tiếp. Bài này hé mở hướng track FP sắp tới (T4.2 HOF & composition) mà không đi sâu — chỉ đủ để BOSS dùng được nếu cần."
+  - so: 23
+    slug: do-tong-hop-truoc-boss
+    title: "Đo tổng hợp trước BOSS"
+    teaches: [rs.gate-review]
+    requires: [rs.iterator-basics]
+    y_chinh: "Bài code có chấm điểm sống, ghép NHIỀU Ý đã học: một `struct` với ít nhất một trường kiểu `Option<T>`, một method `&self` đọc, một method nhận giá trị (move) có chủ đích minh hoạ lại bài 10 — không giới thiệu khái niệm mới, chỉ đòi ghép lại đúng thứ đã học, mọi tình huống vẫn nằm trong phạm vi hai luật hẹp ADR-002 kiểm được."
+  - so: 24
+    slug: boss-cong-rust
+    title: "BOSS — Khép cổng Rust"
+    teaches: [rs.gate-boss]
+    requires: [rs.gate-review]
+    y_chinh: "Người học viết một chương trình nhỏ dùng ĐỦ: `struct`/`enum`/`match` (cụm 1), move và `.clone()` khi cần (cụm 2), `&`/`&mut` đúng chỗ (cụm 3), `Option`/`Result`/`?` (cụm 4). Khép cổng — không dạy khái niệm mới, chỉ đòi ghép lại. Track sau (T4.1, quay lại Python) người học đã MANG THEO câu hỏi mới: 'giá trị này ai đang GIỮ, ai chỉ đang MƯỢN?' — câu hỏi Python không bao giờ tự trả lời được, và câu hỏi TypeScript (T4.0a) cũng không hỏi tới (TS không có ownership)."

@@ -82,3 +82,8 @@ realm:
     ten: "Realm 4 — Lập trình hàm"
     track:
       - cong-typescript
+      # T4.0b mượn `mem.name-is-reference` thẳng từ T3.1 (câu hỏi "tên GIỮ
+      # hay CHỈ TỚI giá trị?" mà ownership Rust đặt luật lên trên) — đứng
+      # sau T4.0a vì đây là track kế tiếp theo đúng thứ tự M8 (không mượn
+      # gì từ T4.0a, chỉ xếp sau vì T4.0a vừa xong).
+      - cong-rust
