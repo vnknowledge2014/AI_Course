@@ -49,3 +49,8 @@ realm:
     ten: "Realm 3 — Khoa học máy tính"
     track:
       - bit-byte-va-bo-nho
+      # T3.2 mượn `mem.address`, `mem.name-is-reference`, `mem.utf8-bytes`,
+      # `mem.mutability` từ T3.1 (một nút liên kết CHÍNH LÀ tham chiếu T3.1
+      # vừa dạy), và mượn `core.dict`/`core.string-immutable` từ R1 — đứng
+      # ngay sau T3.1, không song song.
+      - cau-truc-du-lieu

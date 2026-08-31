@@ -1,0 +1,279 @@
+# Xương sống R3.T3.2 — Cấu trúc dữ liệu (36 bài)
+#
+# Track này trả lời một câu R1.T1.4 chưa từng hỏi: "list, dict, set của Python
+# được XÂY bên trong như thế nào?" T1.4 dạy CÁCH DÙNG chúng; T3.1 vừa dạy
+# NGÔN NGỮ để nói về việc đó — địa chỉ, tham chiếu, cấp phát, dọn rác. Track
+# này dùng đúng ngôn ngữ ấy để mở nắp bảy hộp đen: mảng, ngăn xếp, hàng đợi,
+# danh sách liên kết, bảng băm, cây, đống, đồ thị.
+#
+# QUYẾT ĐỊNH ĐÃ KIỂM TRƯỚC KHI VIẾT: KHÔNG dùng `class`. Toàn bộ chương trình
+# hiện có (`git grep "^teaches:"`) không có một skill OOP/`class` nào — track
+# này vẫn nói tiếp bằng đúng hai công cụ R1 đã giao: `list` và `dict`. Một
+# "nút" của danh sách liên kết là `{"gia_tri": ..., "tiep": None}` — một dict
+# có một trường TỰ TRỎ VỀ CÙNG LOẠI. Lựa chọn này không phải để né `class`;
+# nó giữ đúng trọng tâm của track là MÔ HÌNH THAM CHIẾU (T3.1), không phải cú
+# pháp mới. `class` xuất hiện tự nhiên hơn ở R4/R5 khi ADT và kiểu dữ liệu là
+# trọng tâm.
+#
+# Ngôn ngữ chủ: Python. Không có bước Rust — T3.2 không phải bài lề sang Rust
+# (đó là việc của T3.1 bài 28 và T3.5).
+#
+# Namespace skill: `ds.*` — tách khỏi `mem.*` của T3.1 dù mảng vẫn là chuyện
+# bộ nhớ; track = một namespace, đúng quy ước T3.1 đã lập.
+#
+# Ràng buộc đã kiểm trước khi viết:
+#   - `mem.address`, `mem.byte-range`, `mem.name-is-reference`,
+#     `mem.aliasing-explained`, `mem.mutability`, `mem.utf8-bytes`,
+#     `mem.refcount` do T3.1 dạy.
+#   - `core.dict`, `core.list-slice`, `core.list-comprehension`,
+#     `core.nested-list-dict`, `core.list-of-dicts`, `core.set`,
+#     `core.dict-get-default` do R1.T1.4 dạy.
+#   - `core.modulo`, `core.string-immutable`, `core.reassign` do R1.T1.1 dạy.
+#   - SỬA (đo lại, phát hiện sai khi rà lần hai): `func.recursion`,
+#     `func.call-stack`, `func.base-case` ĐÃ được R1.T1.3 dạy (bài 16-18:
+#     "Máy nhớ đường về" → "Hàm gọi chính nó" → "Trường hợp dừng lại"). Bản
+#     đầu file này ghi nhầm là "chưa dạy" — sai. Track vẫn CHỦ Ý không dùng
+#     đệ quy, nhưng vì lý do khác: cây và duyệt cây viết bằng VÒNG LẶP +
+#     NGĂN XẾP TỰ QUẢN để phơi bày CHÍNH CÁI NGĂN XẾP mà R1.T1.3 "máy nhớ
+#     đường về" đã nói tới nhưng chưa cho nhìn thấy — một danh sách người
+#     học tự quản lý, thay vì trình thông dịch quản lý ngầm. R3.T3.3 (Thuật
+#     toán & độ phức tạp) sẽ ĐÀO SÂU đệ quy đã có, không giới thiệu lại.
+#   - Runtime Pyodide/CPython 3.13.2 — mọi khẳng định về tốc độ chỉ nói ĐỊNH
+#     TÍNH ("phải dịch chuyển mọi phần tử phía sau", "phải đi bộ từ đầu").
+#     Độ phức tạp HÌNH THỨC (Big-O) là việc của T3.3, track này KHÔNG dùng
+#     ký hiệu đó.
+
+track: cau-truc-du-lieu
+realm: khoa-hoc-may-tinh
+ten: "T3.2 — Cấu trúc dữ liệu"
+so_bai: 36
+ngon_ngu_chu: python
+
+# ── Cụm 1 (bài 1–6): Mảng — vùng nhớ liền kề ──────────────────────────────
+bai:
+  - so: 1
+    slug: mang-la-day-o-lien-ke
+    title: "Mảng là các ô liền kề, đánh số từ 0"
+    teaches: [ds.array-contiguous]
+    requires: [mem.address, mem.byte-range]
+    y_chinh: "T3.1 bài 19 dựng 'bộ nhớ là dãy ô có đánh số'. Mảng là quyết định XẾP các ô liên quan NGAY CẠNH NHAU — không phải luật tự nhiên, mà là một lựa chọn có cái giá của nó."
+  - so: 2
+    slug: dia-chi-cua-o-thu-i
+    title: "Địa chỉ của ô thứ i tính được, không cần dò"
+    teaches: [ds.array-index-address]
+    requires: [ds.array-contiguous]
+    y_chinh: "địa_chỉ(i) = địa_chỉ_gốc + i × cỡ_một_ô — một phép nhân, không phải một cuộc tìm kiếm. Đây là lý do `list[999]` và `list[0]` nhanh như nhau."
+  - so: 3
+    slug: list-tu-lon-the-nao
+    title: "Vì sao list Python tự lớn được"
+    teaches: [ds.dynamic-array]
+    requires: [ds.array-index-address]
+    y_chinh: "Mảng liền kề có cỡ CỐ ĐỊNH khi cấp phát. `append` đôi khi phải xin một vùng liền kề MỚI, LỚN HƠN, rồi chép hết ô cũ sang — không phải mọi `append` đều rẻ như nhau."
+  - so: 4
+    slug: chen-giua-mang-phai-doi-cho
+    title: "Chèn vào giữa mảng, mọi phần tử sau phải dời chỗ"
+    teaches: [ds.array-insert-shift]
+    requires: [ds.dynamic-array]
+    y_chinh: "Chèn ở đầu một mảng 1000 phần tử nghĩa là dời cả 1000 ô sang phải một bước trước đã. Cái giá này vô hình khi dùng `list.insert(0, x)` — track này lột nó ra."
+  - so: 5
+    slug: xoa-giua-mang-cung-phai-doi-cho
+    title: "Xoá ở giữa cũng vậy — dồn chỗ trống lại"
+    teaches: [ds.array-delete-shift]
+    requires: [ds.array-insert-shift]
+    y_chinh: "Gương của bài 4. Xoá một ô để lại một LỖ; mảng liền kề không được phép có lỗ, nên mọi ô phía sau phải dồn lên một bước."
+  - so: 6
+    slug: chuoi-cung-la-mot-mang
+    title: "Chuỗi cũng là một mảng, nhưng khoá cứng"
+    teaches: [ds.string-as-array]
+    requires: [ds.array-contiguous, core.string-immutable, mem.utf8-bytes]
+    y_chinh: "R1 đã nói chuỗi không sửa được (core.string-immutable); giờ nói VÌ SAO một cách mới — nó là mảng, và mảng khoá cứng thì đổi một ký tự nghĩa là phải dựng mảng MỚI, không sửa tại chỗ được. Chuỗi tiếng Việt (T3.1 bài 18: 'ở' = 3 byte) khiến việc đó còn rắc rối hơn — chỉ số Python đếm theo KÝ TỰ, không theo byte."
+
+# ── Cụm 2 (bài 7–12): Ngăn xếp & hàng đợi — kỷ luật ra vào ────────────────
+  - so: 7
+    slug: ngan-xep-vao-sau-ra-truoc
+    title: "Ngăn xếp: vào sau, ra trước"
+    teaches: [ds.stack]
+    requires: [ds.dynamic-array]
+    y_chinh: "LIFO. Xây bằng đúng `list.append`/`list.pop` không tham số — cả hai đều thao tác ở ĐUÔI mảng, chỗ duy nhất `append` không phải dời ai (trừ lúc mảng phải lớn lên, bài 3)."
+  - so: 8
+    slug: ngan-xep-lam-gi
+    title: "Ngăn xếp dùng để làm gì — ngoặc có khớp không"
+    teaches: [ds.stack-application]
+    requires: [ds.stack]
+    y_chinh: "Kiểm một chuỗi ngoặc `(){}[]` có khớp không: mở thì đẩy vào, đóng thì lấy ra so đúng loại. Đây không phải bài toán giả — trình biên dịch nào cũng làm việc này."
+  - so: 9
+    slug: hang-doi-vao-truoc-ra-truoc
+    title: "Hàng đợi: vào trước, ra trước"
+    teaches: [ds.queue]
+    requires: [ds.dynamic-array]
+    y_chinh: "FIFO — gương đối xứng của ngăn xếp. Xếp hàng mua vé: ai tới trước ra trước, không phải ai tới sau ra trước."
+  - so: 10
+    slug: hang-doi-bang-mang-la-mot-cai-bay
+    title: "Hàng đợi xây bằng mảng là một cái bẫy"
+    teaches: [ds.queue-array-trap]
+    requires: [ds.queue, ds.array-delete-shift]
+    y_chinh: "Ra khỏi hàng đợi nghĩa là lấy ở ĐẦU mảng — đúng chỗ tốn nhất theo bài 5. Người mới thường xây hàng đợi bằng `list.pop(0)` mà không biết đang trả giá này ở mỗi lần lấy."
+  - so: 11
+    slug: hang-doi-vong
+    title: "Hàng đợi vòng: đi hết thì quay lại đầu"
+    teaches: [ds.circular-queue]
+    requires: [ds.queue-array-trap, core.modulo]
+    y_chinh: "Né cái bẫy bài 10 bằng cách KHÔNG dời ai cả — giữ hai con trỏ đầu/cuối, đi hết mảng thì `% cỡ_mảng` quay lại đầu. Cùng phép `%` mà T3.1 bài 3 dùng để tách bit, giờ dùng để tách VÒNG."
+  - so: 12
+    slug: chon-ngan-xep-hay-hang-doi
+    title: "Chọn ngăn xếp hay hàng đợi cho đúng việc"
+    teaches: [ds.stack-vs-queue-choice]
+    requires: [ds.stack-application, ds.circular-queue]
+    y_chinh: "Bài chốt cụm, không dạy khái niệm mới: cho vài tình huống thật (undo trong trình soạn thảo, hàng chờ máy in), người học phải tự chọn đúng cấu trúc và nói ra TẠI SAO cấu trúc kia sai."
+
+# ── Cụm 3 (bài 13–18): Danh sách liên kết — khi các ô không cần liền kề ──
+  - so: 13
+    slug: nut-nho-gia-tri-va-duong-toi-nut-ke
+    title: "Nút nhớ giá trị, và nhớ đường tới nút kế"
+    teaches: [ds.linked-node]
+    requires: [mem.name-is-reference, core.dict]
+    y_chinh: "Một nút là `{\"gia_tri\": ..., \"tiep\": None}` — một dict TỰ TRỎ VỀ CÙNG LOẠI mình qua trường `tiep`. Đây là chỗ mem.name-is-reference (T3.1 bài 20) trả về giá trị thật: `tiep` không GIỮ nút kế, nó CHỈ TỚI nút kế."
+  - so: 14
+    slug: xau-nhieu-nut-thanh-mot-day
+    title: "Xâu nhiều nút thành một dãy"
+    teaches: [ds.singly-linked-list]
+    requires: [ds.linked-node]
+    y_chinh: "Nối `tiep` của nút này sang nút kia dựng ra một CHUỖI các ô không cần nằm cạnh nhau trong bộ nhớ — khác hẳn mảng của cụm 1. Đi từ đầu tới cuối là đi theo dây, không phải nhảy theo địa chỉ."
+  - so: 15
+    slug: them-vao-dau-danh-sach-lien-ket
+    title: "Thêm vào ĐẦU danh sách liên kết — không cần dời ai"
+    teaches: [ds.linked-insert-head]
+    requires: [ds.singly-linked-list]
+    y_chinh: "Đối lập trực tiếp với bài 4: chèn vào đầu MẢNG phải dời mọi ô sau; chèn vào đầu DANH SÁCH LIÊN KẾT chỉ đổi một trường `tiep`, không ai phải dời chỗ."
+  - so: 16
+    slug: them-vao-giua-phai-di-tu-dau
+    title: "Thêm vào giữa: phải đi bộ từ đầu tới đó"
+    teaches: [ds.linked-insert-middle]
+    requires: [ds.linked-insert-head]
+    y_chinh: "Cái giá danh sách liên kết phải trả: không có địa chỉ tính thẳng như mảng (bài 2), muốn tới nút thứ 50 phải ĐI QUA cả 49 nút trước."
+  - so: 17
+    slug: mang-vs-lien-ket-danh-doi-gi
+    title: "Mảng và danh sách liên kết: đổi cái gì lấy cái gì"
+    teaches: [ds.array-vs-linked-tradeoff]
+    requires: [ds.linked-insert-middle, ds.array-index-address]
+    y_chinh: "Bài chốt cụm, đối chiếu trực diện: mảng — tới thẳng ô bất kỳ nhưng chèn/xoá giữa phải dời; danh sách liên kết — chèn/xoá đầu rẻ nhưng tới ô bất kỳ phải đi bộ. Không cấu trúc nào thắng tuyệt đối."
+  - so: 18
+    slug: danh-sach-lien-ket-hai-chieu
+    title: "Danh sách liên kết hai chiều — đi lùi được"
+    teaches: [ds.doubly-linked-list]
+    requires: [ds.linked-insert-middle]
+    y_chinh: "Thêm một trường `truoc` bên cạnh `tiep`. Trả giá bằng một tham chiếu nữa mỗi nút, đổi lấy khả năng đi NGƯỢC mà danh sách một chiều không có."
+
+# ── Cụm 4 (bài 19–24): Bảng băm — cách dict thật sự hoạt động ─────────────
+  - so: 19
+    slug: bam-la-gi
+    title: "Băm một cái tên thành một con số"
+    teaches: [ds.hash-function]
+    requires: [mem.utf8-bytes, core.modulo]
+    y_chinh: "Đổi một chuỗi thành số bằng cách cộng dồn mã byte của nó (T3.1 bài 18) rồi lấy dư cho một cỡ mảng — hai chuỗi giống hệt nhau LUÔN băm ra cùng một số, đó là luật duy nhất một hàm băm bắt buộc phải giữ."
+  - so: 20
+    slug: bang-bam-la-mang-cong-ham-bam
+    title: "Bảng băm là một mảng, cộng một hàm băm"
+    teaches: [ds.hash-table]
+    requires: [ds.hash-function, ds.array-index-address]
+    y_chinh: "Lấy số băm của bài 19 làm CHỈ SỐ vào một mảng (cụm 1) — cất giá trị vào đúng ô đó. Tra một cái tên không còn phải dò từng ô, chỉ cần băm nó rồi nhảy thẳng tới ô đúng bằng công thức bài 2."
+  - so: 21
+    slug: hai-thu-cung-mot-o
+    title: "Khi hai thứ băm ra cùng một ô — đụng độ"
+    teaches: [ds.hash-collision]
+    requires: [ds.hash-table]
+    y_chinh: "Mảng có cỡ hữu hạn, số chuỗi có thể có là vô hạn — chắc chắn có lúc hai chuỗi khác nhau băm cùng một ô. Đụng độ không phải lỗi thiết kế, nó là hệ quả bắt buộc của việc nhét vô hạn khả năng vào hữu hạn ô."
+  - so: 22
+    slug: giai-quyet-dung-do-bang-xau
+    title: "Giải quyết đụng độ bằng cách xâu chuỗi"
+    teaches: [ds.hash-chaining]
+    requires: [ds.hash-collision, ds.singly-linked-list]
+    y_chinh: "Mỗi ô của bảng băm không giữ MỘT giá trị, nó giữ ĐẦU của một danh sách liên kết (cụm 3) các giá trị cùng đụng độ. Hai cấu trúc tưởng không liên quan giờ ghép vào nhau để giải một vấn đề của cấu trúc kia."
+  - so: 23
+    slug: bam-tot-rai-deu-cac-o
+    title: "Băm tốt là băm rải đều các ô"
+    teaches: [ds.hash-load-factor]
+    requires: [ds.hash-chaining, ds.dynamic-array]
+    y_chinh: "Nếu quá nhiều giá trị dồn vào ít ô, mỗi ô biến thành một danh sách liên kết dài — tra cứu không còn nhanh nữa. Bảng băm cũng phải tự LỚN LÊN như mảng ở bài 3, khi tỉ lệ giá trị/ô vượt một ngưỡng."
+  - so: 24
+    slug: dict-python-chinh-la-bang-bam
+    title: "dict của Python chính là bảng băm"
+    teaches: [ds.dict-is-hash-table]
+    requires: [ds.hash-load-factor]
+    y_chinh: "R1.T1.4 dạy CÁCH DÙNG `dict`; đây là câu trả lời cho VÌ SAO `d[khoa]` nhanh gần như tức thời dù `d` có một triệu mục. Trả nợ luôn một bí ẩn: vì sao `list` không dùng được làm khoá `dict`/phần tử `set` — nó SỬA ĐƯỢC (T3.1 bài 23, mem.mutability), mà số băm của nó phải cố định suốt đời để còn tìm lại đúng ô."
+
+# ── Cụm 5 (bài 25–30): Cây — phân cấp ─────────────────────────────────────
+  - so: 25
+    slug: cay-la-nut-co-nhieu-nhanh
+    title: "Cây: một nút có thể có nhiều nhánh"
+    teaches: [ds.tree]
+    requires: [ds.linked-node]
+    y_chinh: "Danh sách liên kết là nút có ĐÚNG MỘT `tiep`. Cây nới luật đó ra: một nút có thể có NHIỀU nút con — thư mục chứa thư mục con là một cây, không phải một chuỗi."
+  - so: 26
+    slug: cay-nhi-phan
+    title: "Cây nhị phân: mỗi nút tối đa hai nhánh"
+    teaches: [ds.binary-tree]
+    requires: [ds.tree]
+    y_chinh: "Giới hạn số nhánh xuống đúng hai — `trai` và `phai` — để có một cấu trúc đơn giản, đều đặn, dễ suy luận. Phần lớn cây trong thực hành lập trình là cây nhị phân, không phải cây tổng quát."
+  - so: 27
+    slug: cay-tim-kiem-nhi-phan
+    title: "Cây tìm kiếm nhị phân: trái nhỏ hơn, phải lớn hơn"
+    teaches: [ds.bst]
+    requires: [ds.binary-tree]
+    y_chinh: "Thêm một LUẬT lên hình dạng của bài 26: tại mọi nút, cả nhánh trái đều nhỏ hơn nút, cả nhánh phải đều lớn hơn. Luật này biến một cái cây từ chỗ chứa dữ liệu thành một cái MÁY TÌM KIẾM."
+  - so: 28
+    slug: tim-trong-cay-nhi-phan
+    title: "Tìm trong cây nhị phân — mỗi bước bỏ đi một nửa"
+    teaches: [ds.bst-search]
+    requires: [ds.bst]
+    y_chinh: "Đúng luật bài 27: so với gốc, nhỏ hơn thì đi trái BỎ HẲN cả nhánh phải, lớn hơn thì ngược lại. Mỗi bước loại được một nửa số ứng viên còn lại — không cần đi qua từng nút như mảng chưa sắp xếp."
+  - so: 29
+    slug: cay-lech-mat-diem-manh
+    title: "Cây lệch mất hết điểm mạnh"
+    teaches: [ds.tree-unbalanced]
+    requires: [ds.bst-search]
+    y_chinh: "Chèn dữ liệu đã SẴN SẮP XẾP vào một BST theo đúng luật bài 27 dựng ra một cái cây chỉ có nhánh phải — về hình dạng, nó chính là danh sách liên kết (cụm 3) đội lốt cây. 'Bỏ một nửa' của bài 28 không còn đúng nữa."
+  - so: 30
+    slug: duyet-cay-ba-cach
+    title: "Duyệt cây: ba thứ tự, ba câu chuyện khác nhau"
+    teaches: [ds.tree-traversal]
+    requires: [ds.bst]
+    y_chinh: "In hết một cây ra theo TRÁI-GỐC-PHẢI cho một danh sách đã sắp xếp (đúng luật bài 27); GỐC-TRÁI-PHẢI hay TRÁI-PHẢI-GỐC cho hai câu chuyện khác hẳn về cùng một cây. Viết bằng vòng lặp + một ngăn xếp tự quản (cụm 2) — không phải vì đệ quy chưa học (R1.T1.3 đã dạy `func.recursion`), mà để PHƠI RA chính cái ngăn xếp cuộc gọi hàm vẫn quản lý ngầm. T3.3 sẽ nối lại: cùng việc này viết bằng đệ quy trông thế nào."
+
+# ── Cụm 6 (bài 31–36): Đống & đồ thị — chuẩn bị cho thuật toán ────────────
+  - so: 31
+    slug: hang-doi-uu-tien-la-gi
+    title: "Hàng đợi ưu tiên: ra theo độ ưu tiên, không theo thứ tự vào"
+    teaches: [ds.priority-queue]
+    requires: [ds.queue]
+    y_chinh: "Phòng cấp cứu không gọi bệnh nhân theo thứ tự tới (bài 9) — ai nặng hơn ra trước. Hàng đợi ưu tiên nới đúng luật FIFO của bài 9 theo hướng đó."
+  - so: 32
+    slug: dong-la-cay-nhi-phan-dac-biet
+    title: "Đống: cây nhị phân luôn giữ đúng một luật"
+    teaches: [ds.heap]
+    requires: [ds.binary-tree, ds.priority-queue]
+    y_chinh: "Khác luật BST (trái nhỏ, phải lớn) — đống chỉ đòi ĐÚNG một điều: mỗi nút nhỏ hơn (hoặc lớn hơn) cả hai con của nó, không quan tâm trái/phải. Luật lỏng hơn BST, và chính vì lỏng hơn nên dựng nhanh hơn."
+  - so: 33
+    slug: dong-cai-trong-mot-mang
+    title: "Đống cài được gọn trong một MẢNG, không cần con trỏ"
+    teaches: [ds.heap-array-layout]
+    requires: [ds.heap, ds.array-index-address]
+    y_chinh: "Cú lật ngược của cả cụm 3–5: cây (vốn cần tham chiếu, bài 25) hoá ra cài vừa khít vào MẢNG (cụm 1) nhờ luật hình dạng chặt của đống — con của ô `i` luôn nằm ở ô `2i+1` và `2i+2`, tính thẳng bằng công thức, không cần trường `tiep` nào cả."
+  - so: 34
+    slug: do-thi-la-gi
+    title: "Đồ thị: đỉnh và cạnh, tổng quát hơn cây"
+    teaches: [ds.graph]
+    requires: [ds.tree]
+    y_chinh: "Cây (bài 25) cấm một luật ngầm: một nút chỉ có ĐÚNG MỘT cha, và không được nối vòng lại chính mình. Đồ thị bỏ cả hai giới hạn đó — bản đồ đường đi, mạng bạn bè, đều là đồ thị chứ không phải cây."
+  - so: 35
+    slug: bieu-dien-do-thi-hai-cach
+    title: "Biểu diễn đồ thị: bảng kề hay ma trận kề"
+    teaches: [ds.graph-representation]
+    requires: [ds.graph, ds.dict-is-hash-table, core.nested-list-dict]
+    y_chinh: "Bảng kề — một dict/list mà mỗi đỉnh trỏ tới danh sách hàng xóm — rẻ bộ nhớ khi ít cạnh (dùng đúng bảng băm cụm 4). Ma trận kề — một mảng vuông (list lồng list) đánh dấu MỌI cặp đỉnh có nối hay không — tra một cạnh tức thời nhưng tốn ô với đồ thị thưa."
+  - so: 36
+    slug: boss-chon-dung-cau-truc
+    title: "BOSS — Chọn đúng cấu trúc cho đúng việc"
+    teaches: [ds.choose-structure]
+    requires: [ds.graph-representation, ds.dict-is-hash-table, ds.tree-traversal, ds.array-vs-linked-tradeoff, ds.stack-vs-queue-choice]
+    y_chinh: "Người học nhận một loạt tình huống thật (danh bạ tra nhanh, hàng chờ máy in, thư mục lồng nhau, mạng bạn bè, undo trình soạn thảo) và phải GHÉP đúng cấu trúc cho từng cái, kèm một câu giải thích 'sai thì hỏng ở đâu'. Không dạy khái niệm mới — tổng kết bảy hộp đen track vừa mở, làm cầu nối trực tiếp sang T3.3 (Thuật toán & độ phức tạp), nơi mấy chữ 'nhanh hơn', 'chậm hơn' ở đây sẽ có tên chính thức: Big-O."
