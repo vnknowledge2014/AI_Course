@@ -1,0 +1,226 @@
+# Xương sống R3.T3.4 — Máy chạy thế nào (28 bài)
+#
+# Track này mở nắp hộp đen cuối cùng T3.1-T3.3 chưa chạm tới: khi bạn gõ
+# `python bai.py`, CHUYỆN GÌ thật sự xảy ra bên trong máy? T3.1 dạy bit/byte/
+# địa chỉ; T3.2 dạy cấu trúc dữ liệu; T3.3 dạy thuật toán và đệ quy CHÍNH LÀ
+# một ngăn xếp. Track này nối cả ba lại: mã nguồn Python biến thành LỆNH MÁY
+# (bytecode), một vòng lặp fetch-decode-execute chạy từng lệnh đó, và những
+# ngăn xếp/đống T3.2-T3.3 nói tới hoá ra có phiên bản THẬT trong bộ nhớ tiến
+# trình — trùng tên, khác vai trò.
+#
+# Nguồn tham khảo: `fp/Python_Books/part_0_cs_foundations/chapter_03c_hardware_leetgpu.md`
+# (MASTERPLAN §9.1 liệt "Ch3C" vào nguồn tái dùng cho cả chuỗi T3.1-T3.5).
+# Đã đọc: chương đó nhắm người học Advanced/AI-engineering (CUDA, Triton,
+# Tensor Core) — QUÁ CAO so với người học track này (mới đi hết T3.1-T3.3,
+# vẫn "chậm mà chắc"). CHỈ tái dùng đúng phần "phân cấp bộ nhớ" (§3C.2) và
+# "cache locality" (đáp án bài tập §Checkpoint câu 3) ở mức đơn giản hoá tới
+# gốc — không nhắc CUDA/GPU/Triton/Tensor Core, những khái niệm đó thuộc về
+# R8 (AI/RAG) sau này, không phải R3.
+#
+# Ràng buộc đã kiểm trước khi viết (đo thật, xem
+# docs/decisions/R3-T34-may-chay-the-nao.md):
+#   - `dis.dis()` chạy được thật trên Pyodide, cho bytecode CPython 3.13 THẬT
+#     — có lệnh GỘP (`LOAD_FAST_LOAD_FAST`) mà sách cũ không có. Đừng ghim số
+#     lệnh theo sách, ghim theo `dis.dis()` chạy thật trên chính runtime này.
+#   - KHÔNG dạy hiện tượng "chuyên biệt hoá thích ứng" (adaptive
+#     specialization, PEP 659) — đã đo: không lộ ra qua `dis.dis()` mặc định,
+#     không cần và không nên dạy.
+#   - `sys.platform == 'emscripten'`, `sys.maxsize == 2147483647` (32-bit,
+#     khớp T3.1 đã đo qua getsizeof).
+#   - Quyết định sư phạm CỐT LÕI: "ngăn xếp"/"đống" ở T3.2 là CẤU TRÚC DỮ
+#     LIỆU (một `list` tự quản); ở track NÀY là VÙNG BỘ NHỚ tiến trình (do
+#     interpreter/bộ quản lý bộ nhớ tự quản). Cùng tên, khác vai trò — phải
+#     nói thẳng ra ở cụm cuối, không lờ đi.
+#   - `func.recursion`/`func.call-stack` (R1.T1.3), `alg.recursion-is-stack`
+#     (T3.3 bài 1) đã dạy đủ nền cho cụm 3.
+#   - KHÔNG dùng `class`, KHÔNG cần đệ quy làm công cụ CHÍNH (có thể NHẮC
+#     lại đệ quy như ví dụ, không giới thiệu công cụ mới).
+#
+# Ngôn ngữ chủ: Python (dùng `dis` làm cửa sổ nhìn vào lệnh máy — không có
+# ngôn ngữ assembly thật nào trong track, `dis` output CHÍNH LÀ "lệnh máy"
+# của track này). Namespace skill: `may.*`.
+
+track: may-chay-the-nao
+realm: khoa-hoc-may-tinh
+ten: "T3.4 — Máy chạy thế nào"
+so_bai: 28
+ngon_ngu_chu: python
+
+# ── Cụm 1 (bài 1–5): Mã nguồn thành lệnh máy ──────────────────────────────
+bai:
+  - so: 1
+    slug: nguon-thanh-lenh-may
+    title: "Mã nguồn Python biến thành lệnh máy trước khi chạy"
+    teaches: [may.bytecode]
+    requires: [core.function-def]
+    y_chinh: "`dis.dis(ham)` cho xem chuỗi LỆNH MÁY thật mà một hàm Python biến thành — không phải phép màu, một bước có thể xem tận mắt. Đây là câu trả lời cho câu hỏi 'máy tính có ĐỌC được tiếng Việt/Python không' — nó không đọc, nó dịch trước."
+  - so: 2
+    slug: moi-lenh-lam-dung-mot-viec-nho
+    title: "Mỗi lệnh chỉ làm ĐÚNG một việc nhỏ"
+    teaches: [may.instruction-atomic]
+    requires: [may.bytecode]
+    y_chinh: "`LOAD_FAST` chỉ lấy một giá trị ra; `BINARY_OP` chỉ làm một phép tính; `RETURN_VALUE` chỉ trả một kết quả. Một dòng Python `return a + b` tách thành ba việc nhỏ nối tiếp — máy không hiểu được một câu phức tạp cùng lúc."
+  - so: 3
+    slug: may-tinh-bang-ngan-xep
+    title: "Máy tính bằng một ngăn xếp riêng, không phải bằng biến"
+    teaches: [may.eval-stack]
+    requires: [may.instruction-atomic, ds.stack]
+    y_chinh: "`LOAD_FAST` ĐẨY giá trị vào một ngăn xếp tạm (không phải biến `a`, `b` bạn đặt tên); `BINARY_OP` LẤY hai giá trị đỉnh ra, tính, rồi đẩy kết quả lại. Đúng kỷ luật vào-sau-ra-trước T3.2 đã dạy — chỉ khác đây là ngăn xếp CỦA MÁY, không phải của người học."
+  - so: 4
+    slug: vong-lap-la-nhay-lui
+    title: "Vòng lặp là một lệnh NHẢY LÙI"
+    teaches: [may.loop-is-jump]
+    requires: [may.eval-stack]
+    y_chinh: "`dis.dis()` một vòng `for` cho thấy `JUMP_BACKWARD` quay lại đúng nhãn đầu vòng. 'Lặp lại' không phải một khái niệm ma thuật của ngôn ngữ — nó CHÍNH LÀ máy nhảy ngược lại một chỗ đã đi qua."
+  - so: 5
+    slug: re-nhanh-la-nhay-co-dieu-kien
+    title: "Rẽ nhánh if là một lệnh nhảy CÓ ĐIỀU KIỆN"
+    teaches: [may.branch-is-jump]
+    requires: [may.loop-is-jump]
+    y_chinh: "Đối xứng với bài 4: `if` dịch thành một lệnh nhảy CÓ ĐIỀU KIỆN — nhảy tới nhánh else nếu sai, đi tiếp nếu đúng. 'Rẽ nhánh' và 'lặp lại' hoá ra cùng một công cụ (nhảy), chỉ khác điều kiện và hướng."
+
+# ── Cụm 2 (bài 6–10): Vòng lặp fetch-decode-execute ───────────────────────
+  - so: 6
+    slug: may-co-vong-lap-rieng
+    title: "Máy có MỘT vòng lặp riêng: lấy lệnh, hiểu lệnh, làm lệnh"
+    teaches: [may.fetch-decode-execute]
+    requires: [may.branch-is-jump]
+    y_chinh: "Danh sách lệnh của bài 1-5 không tự chạy — có một vòng lặp KHÁC, ở tầng thấp hơn, cứ lấy một lệnh, hiểu nó là lệnh gì, làm nó, rồi lấy lệnh tiếp theo. Đây là 'chu trình lấy-hiểu-làm' (fetch-decode-execute), trái tim của mọi máy tính."
+  - so: 7
+    slug: con-tro-lenh
+    title: "Con trỏ lệnh: máy luôn biết đang đứng ở đâu"
+    teaches: [may.instruction-pointer]
+    requires: [may.fetch-decode-execute]
+    y_chinh: "Vòng lặp bài 6 cần nhớ ĐANG Ở LỆNH NÀO — một con số gọi là con trỏ lệnh, tăng lên sau mỗi lệnh thường, nhảy tới chỗ khác khi gặp `JUMP_BACKWARD`/nhảy có điều kiện (bài 4-5)."
+  - so: 8
+    slug: trinh-thong-dich-la-mot-chuong-trinh
+    title: "Trình thông dịch chính nó cũng là một chương trình"
+    teaches: [may.interpreter-is-program]
+    requires: [may.instruction-pointer]
+    y_chinh: "Cái vòng lặp lấy-hiểu-làm ở bài 6 KHÔNG tự nhiên có — nó là CPython, một chương trình viết bằng C, tự nó cũng được biên dịch thành lệnh máy của CPU thật và chạy. 'Máy chạy Python' hoá ra là 'một chương trình chạy một chương trình khác'."
+  - so: 9
+    slug: bien-dich-roi-thong-dich
+    title: "Python vừa BIÊN DỊCH vừa THÔNG DỊCH — không phải chỉ một"
+    teaches: [may.compile-then-interpret]
+    requires: [may.interpreter-is-program]
+    y_chinh: "'Python là ngôn ngữ thông dịch' chỉ đúng một nửa: bài 1 đã cho thấy có một bước BIÊN DỊCH (nguồn → bytecode) xảy ra trước, rồi CPython (bài 8) mới THÔNG DỊCH bytecode đó. Không phải hai phe đối lập — hai bước nối tiếp."
+  - so: 10
+    slug: chon-thong-dich-hay-bien-dich-thang
+    title: "Chọn thông dịch hay biên dịch thẳng — đánh đổi gì"
+    teaches: [may.interpret-vs-compile-tradeoff]
+    requires: [may.compile-then-interpret]
+    y_chinh: "Bài chốt cụm: một ngôn ngữ biên dịch thẳng ra lệnh máy CPU thật (không qua bước thông dịch bytecode) chạy nhanh hơn nhưng phải biên dịch lại cho từng loại máy; Python đổi tốc độ lấy sự tiện — một bản bytecode chạy được ở bất cứ đâu có CPython."
+
+# ── Cụm 3 (bài 11–15): Lệnh gọi hàm ở tầng máy ────────────────────────────
+  - so: 11
+    slug: goi-ham-cung-la-mot-lenh
+    title: "Gọi hàm cũng chỉ là một lệnh: CALL"
+    teaches: [may.call-instruction]
+    requires: [may.interpret-vs-compile-tradeoff, alg.recursion-is-stack]
+    y_chinh: "T3.3 bài 1 đã nói ngăn xếp cuộc gọi hàm là một NGĂN XẾP. Giờ nhìn xuống một tầng nữa: gọi hàm chính là một LỆNH — `CALL` — nằm ngay trong bytecode, y hệt các lệnh bài 1-5, không phải cơ chế riêng biệt nào cả."
+  - so: 12
+    slug: moi-loi-goi-mo-mot-khung
+    title: "Mỗi lời gọi mở một khung mới"
+    teaches: [may.call-frame]
+    requires: [may.call-instruction, func.call-stack]
+    y_chinh: "R1.T1.3 gọi nó 'tờ phiếu'. Giờ nói tên chính thức: một KHUNG (frame) — chứa con trỏ lệnh riêng (bài 7) của lời gọi đó, biến cục bộ riêng, và biết phải quay về đâu khi xong."
+  - so: 13
+    slug: return-dong-khung
+    title: "RETURN_VALUE đóng khung, trả kết quả về"
+    teaches: [may.return-closes-frame]
+    requires: [may.call-frame]
+    y_chinh: "Đối xứng với `CALL` mở khung (bài 11): `RETURN_VALUE` lấy giá trị đỉnh ngăn xếp tính toán (bài 3) của khung hiện tại, đóng khung đó lại, và đẩy giá trị ấy vào ngăn xếp của khung VỪA GỌI nó."
+  - so: 14
+    slug: dem-lenh-goi-bang-dis
+    title: "Đếm lệnh CALL thật bằng dis, không đoán"
+    teaches: [may.count-calls-via-dis]
+    requires: [may.return-closes-frame, alg.count-recursive-calls]
+    y_chinh: "T3.3 bài 6 đếm số lần MỘT HÀM ĐƯỢC GỌI bằng một biến đếm chèn tay. Giờ đếm số LỆNH CALL xuất hiện trong CHÍNH MÃ NGUỒN bằng `dis.dis()` — một con số khác hẳn (số lần gọi lúc CHẠY, so với số lệnh gọi lúc VIẾT), và bài này buộc phân biệt hai con số đó."
+  - so: 15
+    slug: dich-tay-doi-chieu-dis
+    title: "Dịch tay một hàm nhỏ, đối chiếu với dis thật"
+    teaches: [may.hand-translate]
+    requires: [may.count-calls-via-dis]
+    y_chinh: "Bài chốt cụm: cho một hàm ba dòng, tự viết ra dự đoán chuỗi lệnh (dùng đúng vốn từ bài 1-14: LOAD/BINARY_OP/CALL/RETURN_VALUE/nhảy), rồi chạy `dis.dis()` thật để đối chiếu — không đoán suông, tự kiểm bằng máy thật."
+
+# ── Cụm 4 (bài 16–21): Bộ nhớ có tầng, không phẳng ────────────────────────
+  - so: 16
+    slug: thanh-ghi
+    title: "Thanh ghi: kho nhỏ nhất, nhanh nhất, ngay trong CPU"
+    teaches: [may.registers]
+    requires: [mem.address]
+    y_chinh: "T3.1 dạy bộ nhớ là dãy ô có địa chỉ (mem.address) — nhưng CPU còn có một nhúm ô KHÔNG có địa chỉ kiểu đó, nằm NGAY TRONG chip, nhanh hơn cả bước-một-địa-chỉ của RAM. Đây là nơi phép tính của bài 3 (ngăn xếp tính toán) thực sự diễn ra ở tầng phần cứng."
+  - so: 17
+    slug: bo-nho-dem
+    title: "Bộ nhớ đệm: trạm trung chuyển giữa CPU và RAM"
+    teaches: [may.cache]
+    requires: [may.registers]
+    y_chinh: "Thanh ghi (bài 16) quá nhỏ để chứa cả chương trình. Bộ nhớ đệm (cache) là trạm giữa — lớn hơn thanh ghi, nhỏ hơn RAM, và giữ SẴN những gì CPU vừa dùng hoặc sắp dùng, đoán trước để đỡ phải đợi RAM."
+  - so: 18
+    slug: ram-cham-hon-bo-nho-dem-hang-tram-lan
+    title: "RAM chậm hơn bộ nhớ đệm hàng trăm lần"
+    teaches: [may.ram-vs-cache-speed]
+    requires: [may.cache]
+    y_chinh: "Không phải phóng đại — khoảng cách tốc độ thật giữa cache và RAM lớn cỡ khoảng cách giữa một cái liếc mắt và một chuyến đi bộ. Con số này là lý do CẢ CỤM này tồn tại: khoảng cách quá lớn để bỏ qua khi viết chương trình thật."
+  - so: 19
+    slug: vi-sao-mang-lien-ke-nhanh-hon-that
+    title: "Vì sao mảng liền kề nhanh hơn — THẬT, không chỉ lý thuyết"
+    teaches: [may.cache-locality]
+    requires: [may.ram-vs-cache-speed, ds.array-vs-linked-tradeoff]
+    y_chinh: "T3.2 bài 17 so mảng với danh sách liên kết bằng LÝ THUYẾT (số bước). Bài này trả lời PHẦN CỨNG: đọc ô kề bên trong mảng thường ĐÃ NẰM SẴN trong bộ nhớ đệm (bài 17) vì máy tải cả một dải liền kề một lượt; đuổi theo con trỏ trong danh sách liên kết thường buộc phải chờ RAM (bài 18) MỖI bước — cùng độ phức tạp lý thuyết, khác hẳn tốc độ thật."
+  - so: 20
+    slug: dia-la-tang-cham-nhat
+    title: "Đĩa là tầng chậm nhất — vì sao mở file luôn chậm hơn đọc biến"
+    teaches: [may.disk-slowest]
+    requires: [may.cache-locality]
+    y_chinh: "R1.T1.5 đã cho mở file, đọc/ghi — nhưng chưa nói vì sao nó CHẬM HƠN HẲN so với đọc một biến đã có trong bộ nhớ. Đĩa (SSD/HDD) là tầng ngoài cùng, xa CPU nhất, và mọi phép đọc/ghi file đều phải đi qua toàn bộ chặng đường từ đĩa lên RAM rồi mới tới CPU."
+  - so: 21
+    slug: xep-nam-tang-theo-toc-do
+    title: "Xếp năm tầng bộ nhớ theo tốc độ"
+    teaches: [may.memory-hierarchy]
+    requires: [may.disk-slowest]
+    y_chinh: "Bài chốt cụm: thanh ghi (bài 16) → bộ nhớ đệm (bài 17) → RAM (bài 18) → đĩa (bài 20), mỗi tầng lớn hơn và chậm hơn tầng trước một bậc. Người học tự xếp thứ tự và giải thích TẠI SAO — không học thuộc bảng."
+
+# ── Cụm 5 (bài 22–28): Ngăn xếp và Đống — hai vùng bộ nhớ, không phải hai cấu trúc dữ liệu ──
+  - so: 22
+    slug: bon-vung-bo-nho-mot-tien-trinh
+    title: "Bộ nhớ một tiến trình chia thành nhiều vùng"
+    teaches: [may.process-memory-layout]
+    requires: [may.memory-hierarchy]
+    y_chinh: "RAM (bài 18-21) không phải một khối trơn cho một chương trình đang chạy dùng tuỳ ý — nó chia thành các vùng có việc riêng: một vùng giữ chính đoạn mã lệnh (bài 1), một vùng cho lời gọi hàm, một vùng cho dữ liệu cấp phát khi chạy."
+  - so: 23
+    slug: ngan-xep-goi-ham-khac-ngan-xep-cau-truc
+    title: "'Ngăn xếp gọi hàm' khác 'ngăn xếp cấu trúc dữ liệu' ở chỗ nào"
+    teaches: [may.call-stack-vs-ds-stack]
+    requires: [may.process-memory-layout, may.call-frame, ds.stack]
+    y_chinh: "BẢN LỀ của cụm: T3.2 dạy 'ngăn xếp' là một `list` BẠN TỰ đẩy/lấy bằng `.append`/`.pop`. Vùng bộ nhớ giữ các khung gọi hàm (bài 12) CŨNG được gọi là 'ngăn xếp' — cùng kỷ luật vào-sau-ra-trước, nhưng interpreter tự quản, không phải bạn gõ lệnh đẩy/lấy. Trùng tên, không trùng vai trò — nói thẳng ra, đừng để người học tự đoán."
+  - so: 24
+    slug: dong-cap-phat-khac-dong-cau-truc
+    title: "'Đống cấp phát' khác 'đống cấu trúc dữ liệu' ở chỗ nào"
+    teaches: [may.heap-memory-vs-ds-heap]
+    requires: [may.call-stack-vs-ds-stack, ds.heap]
+    y_chinh: "Cùng lớp bài 23. T3.2 bài 32 dạy 'đống' là một cây nhị phân đặc biệt bạn cài trong mảng. Vùng bộ nhớ chứa MỌI giá trị Python đang sống (list, dict, object bất kỳ) CŨNG gọi là 'đống' — không có gì giống cây nhị phân, tên gọi mượn ở tinh thần 'cấp phát không theo thứ tự cố định', không phải hình dạng."
+  - so: 25
+    slug: gia-tri-python-nam-o-dau
+    title: "Giá trị Python nằm ở đâu — ngăn xếp hay đống"
+    teaches: [may.value-location]
+    requires: [may.heap-memory-vs-ds-heap, mem.name-is-reference]
+    y_chinh: "Trả lời trực tiếp bằng khái niệm bài 23-24: MỌI đối tượng Python (list, dict, chuỗi, kể cả số nguyên) sống trên ĐỐNG cấp phát (bài 24); cái TÊN biến chỉ là một ô nhỏ trên khung của ngăn xếp gọi hàm (bài 23), giữ ĐỊA CHỈ trỏ sang đống — đúng hệt T3.1 bài 20 đã dạy (mem.name-is-reference), giờ biết chính xác cái tên ấy VẬT LÝ nằm ở vùng nào."
+  - so: 26
+    slug: vi-sao-ngan-xep-co-tran-con-dong-thi-khong
+    title: "Vì sao ngăn xếp có TRẦN mà đống thì không"
+    teaches: [may.stack-limit-vs-heap]
+    requires: [may.value-location, alg.recursion-limit]
+    y_chinh: "T3.3 bài 3 đo `sys.getrecursionlimit()` — giờ giải thích VÌ SAO có trần đó: ngăn xếp gọi hàm (bài 23) được cấp một vùng CỐ ĐỊNH, cỡ nhỏ, khi hết chỗ là `RecursionError`. Đống (bài 24) lớn hơn nhiều và LỚN DẦN theo nhu cầu — chỉ dừng khi hết RAM thật, không phải một con số cấu hình sẵn."
+  - so: 27
+    slug: do-tong-hop-truoc-boss
+    title: "Đo tổng hợp: đếm lệnh, xem bytecode, ước lượng thời gian"
+    teaches: [may.combined-measurement]
+    requires: [may.stack-limit-vs-heap]
+    y_chinh: "Ghép ba công cụ đo đã học rời rạc: `dis.dis()` (bài 1, đếm lệnh), đếm bước tự viết (T3.3 cụm 2), và `time.perf_counter()` (đo thời gian thật) — trên CÙNG một đoạn mã, đối chiếu ba con số với nhau."
+  - so: 28
+    slug: boss-ke-mot-dong-lenh
+    title: "BOSS — Kể chuyện một dòng lệnh, từ gõ phím tới CPU thực thi"
+    teaches: [may.instruction-story]
+    requires: [may.combined-measurement, may.stack-limit-vs-heap, may.cache-locality, may.compile-then-interpret]
+    y_chinh: "Người học viết một chương trình tự thuật lại: một dòng mã nguồn (bài 1) → bytecode (bài 1-5) → vòng lấy-hiểu-làm (bài 6-10) → nếu có gọi hàm thì mở khung trên ngăn xếp (bài 11-15) → mọi giá trị thật sự nằm trên đống, tên chỉ giữ địa chỉ (bài 22-26) → tốc độ phụ thuộc tầng bộ nhớ nào bị chạm tới (bài 16-21). Khép cả track, mở cửa sang T3.5 (Ngôn ngữ & máy trừu tượng — nơi 'trình thông dịch' của bài 8 sẽ được TỰ TAY xây một bản, không chỉ quan sát bản có sẵn)."

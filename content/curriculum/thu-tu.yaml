@@ -59,3 +59,9 @@ realm:
       # `ds.graph-representation`, `ds.tree-traversal` của T3.2 cho BFS/DFS —
       # đứng ngay sau T3.2, không song song.
       - thuat-toan-va-do-phuc-tap
+      # T3.4 dùng thẳng `ds.stack`/`ds.heap` (T3.2) và `alg.recursion-is-stack`/
+      # `alg.recursion-limit`/`alg.count-recursive-calls` (T3.3) để mở nắp
+      # tầng dưới: bytecode, fetch-decode-execute, và phân biệt "ngăn xếp/
+      # đống CẤU TRÚC DỮ LIỆU" (T3.2) với "ngăn xếp/đống VÙNG BỘ NHỚ" (track
+      # này) — đứng ngay sau T3.3, không song song.
+      - may-chay-the-nao
