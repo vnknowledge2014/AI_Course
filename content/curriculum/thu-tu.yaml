@@ -87,3 +87,9 @@ realm:
       # sau T4.0a vì đây là track kế tiếp theo đúng thứ tự M8 (không mượn
       # gì từ T4.0a, chỉ xếp sau vì T4.0a vừa xong).
       - cong-rust
+      # T4.1 là track FP THẬT đầu tiên (T4.0a/T4.0b chỉ là cổng ngôn ngữ).
+      # Mượn `mem.aliasing-explained`/`mem.mutability`/`mem.shallow-copy`
+      # thẳng từ T3.1 — bài 1 dựng lại đúng vấn đề T3.1 đã nêu (nhiều tên
+      # cùng trỏ một giá trị) rồi dạy KỶ LUẬT đối phó (không sửa tại chỗ).
+      # Không mượn gì từ T4.0a/T4.0b, chỉ xếp sau vì đúng thứ tự M8.
+      - bat-bien-thuan-khiet

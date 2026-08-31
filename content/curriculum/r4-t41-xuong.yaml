@@ -1,0 +1,207 @@
+# Xương sống R4.T4.1 — Bất biến & thuần khiết (24 bài)
+#
+# Track FP THẬT ĐẦU TIÊN của Realm 4 (T4.0a/T4.0b chỉ là CỔNG ngôn ngữ,
+# chưa dạy khái niệm FP nào). Dùng lại Python — không phải ngôn ngữ mới,
+# không cần "đo năng lực engine" như T4.0a/T4.0b, nhưng CẦN vá hạ tầng
+# trước: sáu AST-kind Realm 4 (`frozen-dataclass`, `no-mutation`, `no-global`,
+# `uses-generator`, `recursion`, `pure-fn`) đã cài trong
+# `packages/exec-python/src/kiem-ast.ts` (commit ngay trước xương này) —
+# ĐỌC comment trong file đó để biết chính xác mỗi kind bắt được gì và KHÔNG
+# bắt được gì trước khi dùng `tier: static` với chúng.
+#
+# Ý XUYÊN SUỐT: không sửa dữ liệu TẠI CHỖ — luôn TẠO MỚI; một hàm không có
+# side-effect luôn cho CÙNG input ra CÙNG output. Đây là hệ quả tự nhiên của
+# chính vấn đề T3.1 đã dựng: mem.name-is-reference + mem.aliasing-explained
+# dạy "nhiều tên có thể cùng trỏ một giá trị" — track này dạy KỶ LUẬT đối
+# phó với hệ quả đó (một hàm sửa giá trị tại chỗ làm MỌI tên đang trỏ tới nó
+# đều thấy thay đổi, kể cả những tên không ngờ tới).
+#
+# NGUỒN THAM KHẢO (chỉ đọc, KHÔNG sửa):
+# `fp/Python_Books/part_2_thinking_functionally/chapter_11_immutability_purity.md`
+# — bốn kỹ thuật bất biến (`frozen=True`, `tuple`, `Final`, `MappingProxyType`),
+# pure function, dependency injection, state machine bất biến. Xương dưới
+# đây MỞ RỘNG một chương thành 24 bài có nhịp byte/explain/example/predict/
+# code/reflect — KHÔNG chép nguyên văn, chỉ mượn Ý và ví dụ gốc (bài tập
+# "refactor hàm impure" ở cuối chương gốc → bài 22 dưới đây).
+#
+# `Final` (typing) KHÔNG xuất hiện trong track này: đó là tín hiệu cho công
+# cụ kiểm kiểu TĨNH (mypy) — Pyodide/kiem_ma_bai_hoc.mjs không chạy mypy,
+# và Python KHÔNG tự chặn gán lại một biến `Final` lúc chạy (đã đo thật:
+# gán lại một tên có annotate `Final` chạy trót lọt, không lỗi). Dạy nó như
+# một cơ chế "chặn được" ở đây sẽ là dạy sai — nói thẳng trong bài nếu nhắc
+# tới, đừng bịa một khối code "chặn Final" không chạy thật.
+#
+# Bốn cơ chế CÒN LẠI ĐÃ ĐO THẬT qua Pyodide (packages/exec-python), khớp
+# đúng CPython — dùng được cho code chấm điểm sống:
+#   - `@dataclass(frozen=True)`: sửa field → `dataclasses.FrozenInstanceError`
+#   - `tuple`: `.append()` → `AttributeError` (không có phương thức đó)
+#   - `frozenset`: `.add()` → `AttributeError`
+#   - `types.MappingProxyType`: gán vào ô → `TypeError`
+#   - BẪY đã đo: `@dataclass(frozen=True)` chỉ chặn GÁN LẠI field, KHÔNG
+#     chặn sửa một đối tượng MUTABLE nằm BÊN TRONG field đó
+#     (`b.items.append(4)` với `items: list` chạy trót lọt, không lỗi) —
+#     bài 15 dạy đúng bẫy này.
+#
+# Namespace skill: `fp.*`. Thư mục nội dung:
+# `content/lap-trinh-ham/02-bat-bien-thuan-khiet/` (số `02`, tiếp sau
+# `01-cong-rust` — track này KHÔNG phải "T4.2", vẫn là T4.1 theo MASTERPLAN,
+# số thư mục chỉ là thứ tự, không phải số hiệu track).
+
+track: bat-bien-thuan-khiet
+realm: lap-trinh-ham
+ten: "T4.1 — Bất biến & thuần khiết"
+so_bai: 24
+ngon_ngu_chu: python
+
+# ── Cụm 1 (bài 1–6): Vì sao mutable state là nguồn bug — công cụ bất biến ──
+bai:
+  - so: 1
+    slug: sua-tai-cho-lam-nguoi-goi-bat-ngo
+    title: "Sửa dữ liệu tại chỗ làm người gọi hàm bất ngờ"
+    teaches: [fp.mutation-surprise]
+    requires: [mem.aliasing-explained, mem.mutability, core.function-def]
+    y_chinh: "Nối thẳng T3.1: một hàm nhận `list` làm tham số rồi SỬA NÓ TẠI CHỖ (ví dụ `for i in range(len(gia)): gia[i] *= 1.1`) — người gọi hàm không ngờ `list` gốc của họ đã đổi, vì mem.aliasing-explained đã dạy tham số VÀ đối số CÙNG TRỎ một `list`. Bài thuần explain/predict (dự đoán giá trị `list` gốc SAU khi gọi hàm) — dựng vấn đề trước khi đưa ra công cụ giải quyết."
+  - so: 2
+    slug: tra-ve-du-lieu-moi-khong-dung-goc
+    title: "Trả về dữ liệu MỚI, không đụng vào dữ liệu gốc"
+    teaches: [fp.return-new-data]
+    requires: [fp.mutation-surprise]
+    y_chinh: "Viết lại hàm bài 1 bằng list comprehension (`return [g * 1.1 for g in gia]`) — TẠO list MỚI, không sửa `gia` gốc. Code có chấm điểm sống: test xác nhận CẢ HAI — list gốc KHÔNG đổi sau khi gọi hàm, VÀ list trả về đúng giá trị mong đợi. Đây là khuôn mẫu sẽ lặp lại suốt track: không hỏi 'hàm có đúng không', mà hỏi 'hàm có đúng VÀ có để yên input không'."
+  - so: 3
+    slug: tuple-khi-khong-can-sua
+    title: "`tuple` khi bạn không cần sửa — Python tự chặn giúp"
+    teaches: [fp.tuple-immutable]
+    requires: [fp.return-new-data]
+    y_chinh: "`items: tuple = (...)`, gọi `.append(...)` — `AttributeError: 'tuple' object has no attribute 'append'` (đã đo thật). Khác `list`: không phải Python 'khuyên' bạn đừng sửa `tuple`, mà `tuple` THẬT SỰ KHÔNG CÓ phương thức sửa tại chỗ nào — đây là công cụ đầu tiên có CHẶN THẬT, không chỉ là quy ước. Code: solution dùng `tuple` cho một danh sách không cần thay đổi; test xác nhận gọi `.append()` trên nó ném đúng lỗi."
+  - so: 4
+    slug: dataclass-nhom-du-lieu-van-sua-duoc
+    title: "`@dataclass` nhóm dữ liệu lại — nhưng field vẫn sửa được"
+    teaches: [fp.dataclass-still-mutable]
+    requires: [fp.tuple-immutable, core.dict]
+    y_chinh: "Giới thiệu `@dataclass` LẦN ĐẦU: `@dataclass\\nclass Diem: x: int; y: int` — thay cho `dict` lỏng lẻo (không có tên trường cố định), một cách nhóm dữ liệu có cấu trúc. Đã đo thật: `@dataclass` TRẦN (không tham số) vẫn cho sửa field bình thường (`p.x = 99` chạy trót lọt) — đúng vấn đề bài 1-2 nêu ra, giờ ở cấp OBJECT thay vì list. Bài đặt câu hỏi mở sang bài 5: có cách nào chặn được không?"
+  - so: 5
+    slug: frozen-true-chan-sua-field-that
+    title: "`frozen=True` — chặn sửa field THẬT SỰ, không chỉ quy ước"
+    teaches: [fp.frozen-dataclass]
+    requires: [fp.dataclass-still-mutable]
+    y_chinh: "`@dataclass(frozen=True)` — sửa field ném `dataclasses.FrozenInstanceError` (đã đo thật, chẩn đoán rõ ràng). Đối lập trực tiếp bài 4: cùng cú pháp định nghĩa field, chỉ thêm `frozen=True`, và Python giờ THẬT SỰ chặn — không phải kiểm tra bằng convention hay code review, mà bằng một exception có thể `assert` được. Code chấm điểm sống dùng `tier: static` với `frozen-dataclass` để đòi solution khai đúng `frozen=True` (không chỉ khai `@dataclass` trần rồi hi vọng test bắt được)."
+  - so: 6
+    slug: replace-tao-ban-sao-da-doi
+    title: "`dataclasses.replace()` — 'sửa' bằng cách tạo bản sao đã đổi"
+    teaches: [fp.dataclasses-replace]
+    requires: [fp.frozen-dataclass]
+    y_chinh: "`cfg2 = replace(cfg, port=3000)` — không sửa `cfg`, tạo một đối tượng MỚI với field `port` đã đổi, mọi field khác giữ nguyên copy từ `cfg`. Đây là cách 'sửa' đúng tinh thần bất biến: không có động từ SỬA nào chạm vào `cfg` — chỉ có TẠO MỚI. Code: test xác nhận `cfg` gốc không đổi VÀ `cfg2` có giá trị mới đúng."
+
+# ── Cụm 2 (bài 7–12): Pure function — trái tim của kỷ luật FP ─────────────
+  - so: 7
+    slug: ham-thuan-cung-input-cung-output
+    title: "Hàm thuần: CÙNG input, CÙNG output, không side-effect"
+    teaches: [fp.pure-fn-def]
+    requires: [fp.dataclasses-replace]
+    y_chinh: "Định nghĩa: một hàm THUẦN (pure) luôn trả về CÙNG kết quả với CÙNG đối số, và không làm gì khác ngoài TÍNH TOÁN (không in, không ghi file, không đổi biến ngoài). `def cong(a, b): return a + b` — thuần. Bài explain/predict: cho vài hàm, hỏi hàm nào thuần — nối thẳng bất biến (cụm 1) với một Ý RỘNG HƠN: bất biến là MỘT CÁCH để giữ hàm thuần (không sửa input), nhưng thuần khiết còn đòi hỏi hơn thế."
+  - so: 8
+    slug: phu-thuoc-ben-ngoai-lam-mat-thuan
+    title: "Phụ thuộc vào cái gì đó BÊN NGOÀI làm hàm mất thuần"
+    teaches: [fp.nondeterministic-impure]
+    requires: [fp.pure-fn-def]
+    y_chinh: "`random.randint(1,100)`, `datetime.now()` — gọi hai lần, hai kết quả khác nhau, dù KHÔNG truyền đối số nào khác. Bài predict: chạy `random.randint(1,10)` hai lần trong đầu, hỏi kết quả có chắc giống nhau không (không, không thể dự đoán) — đối lập bài 7's `cong(2,3)` luôn ra `5`. Hệ quả thực tế: hàm không thuần RẤT KHÓ TEST (không thể `assert f() == giá_trị_cố_định`)."
+  - so: 9
+    slug: in-ra-cung-la-side-effect
+    title: "`print()`/ghi file cũng là side-effect — không chỉ đổi biến ngoài"
+    teaches: [fp.io-is-side-effect]
+    requires: [fp.nondeterministic-impure]
+    y_chinh: "Side-effect không chỉ là 'sửa dữ liệu tại chỗ' (cụm 1) — bất kỳ TÁC ĐỘNG NÀO ra thế giới bên ngoài lời gọi hàm (in ra màn hình, ghi file, gọi mạng) đều là side-effect, kể cả khi hàm KHÔNG sửa list/dict nào cả. `def chao(ten): print(f'Chào {ten}')` — không sửa gì, vẫn không thuần, vì gọi hai lần với CÙNG `ten` gây ra HAI LẦN in (một tác động lặp lại không mong muốn nếu gọi nhầm hai lần). Bài predict: phân biệt 'không sửa dữ liệu' với 'không thuần' — hai điều khác nhau."
+  - so: 10
+    slug: tiem-phu-thuoc-de-giu-thuan
+    title: "Tiêm phụ thuộc (dependency injection) để giữ hàm thuần"
+    teaches: [fp.dependency-injection]
+    requires: [fp.io-is-side-effect]
+    y_chinh: "Thay vì hàm TỰ GỌI `random`/`datetime.now()` bên trong, TRUYỀN chúng vào như THAM SỐ: `def chao(ten, gio=lambda: 'sáng'): return f'Chào {gio()}, {ten}!'` — hàm giờ THUẦN theo đúng nghĩa: với CÙNG `ten` và CÙNG hàm `gio`, luôn CÙNG kết quả. 'Không tất định' bị đẩy RA NGOÀI, không biến mất — ai gọi hàm quyết định dùng giờ thật hay giờ giả (test dùng giờ giả, sản phẩm dùng giờ thật). Code chấm điểm sống."
+  - so: 11
+    slug: kiem-thuan-khiet-bang-goi-hai-lan
+    title: "Kiểm một hàm có thuần không: gọi HAI LẦN, so kết quả"
+    teaches: [fp.test-purity]
+    requires: [fp.dependency-injection]
+    y_chinh: "`assert f(2, 3) == f(2, 3)` — không chứng minh được TUYỆT ĐỐI (một hàm có thể tình cờ ra cùng kết quả hai lần mà vẫn không thuần), nhưng là phép kiểm THỰC TẾ nhanh nhất. Code chấm điểm sống dùng `tier: static` với `pure-fn` (đã đo thật: bắt global/nonlocal, gọi IO, gọi random/datetime.now, sửa dữ liệu tại chỗ TRONG THÂN hàm — KHÔNG chứng minh được purity qua hàm gọi gián tiếp, nói rõ giới hạn này nếu bài nhắc tới) KẾT HỢP với test gọi hai lần — hai lớp bổ sung nhau, không lớp nào một mình đủ."
+  - so: 12
+    slug: do-tong-hop-bat-bien-va-thuan
+    title: "Đo tổng hợp: bất biến + thuần khiết trong một hàm"
+    teaches: [fp.review-immutable-pure]
+    requires: [fp.test-purity]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: viết một hàm nhận `@dataclass(frozen=True)` làm tham số, trả về MỘT ĐỐI TƯỢNG MỚI (dùng `replace()`), không side-effect, không phụ thuộc nguồn không tất định — ghép đủ bài 5-11 thành một hàm hoàn chỉnh. Không giới thiệu khái niệm mới."
+
+# ── Cụm 3 (bài 13–18): Bất biến ở cấu trúc dữ liệu lớn hơn ────────────────
+  - so: 13
+    slug: mappingproxytype-dict-chi-doc
+    title: "`MappingProxyType` — một `dict` CHỈ ĐỌC thật sự"
+    teaches: [fp.mappingproxy]
+    requires: [fp.review-immutable-pure]
+    y_chinh: "`from types import MappingProxyType; d = MappingProxyType({'a': 1})` — gán `d['a'] = 2` ném `TypeError: 'mappingproxy' object does not support item assignment` (đã đo thật). Khác `frozen=True` (chặn GÁN LẠI FIELD của một object) — đây chặn SỬA MỘT Ô của một dict. Đọc (`d['a']`) vẫn hoạt động bình thường — chỉ chặn GHI. Code có chấm điểm sống."
+  - so: 14
+    slug: frozenset-set-bat-bien
+    title: "`frozenset` — một `set` không sửa được"
+    teaches: [fp.frozenset]
+    requires: [fp.mappingproxy]
+    y_chinh: "`fs = frozenset([1,2,3])` — gọi `.add(4)` ném `AttributeError` (đã đo thật, cùng cơ chế như `tuple` bài 3: không phải bị chặn, mà THẬT SỰ KHÔNG CÓ phương thức đó). Đủ bốn công cụ bất biến đã đo thật của track: `tuple`, `frozenset`, `frozen=True`, `MappingProxyType` — mỗi cái ứng với một kiểu dữ liệu khác nhau (dãy có thứ tự, tập hợp, object có tên trường, ánh xạ)."
+  - so: 15
+    slug: bay-truong-mutable-ben-trong-frozen
+    title: "Bẫy: field bên trong `frozen=True` vẫn MUTABLE thì vẫn sửa được"
+    teaches: [fp.nested-mutable-trap]
+    requires: [fp.frozenset]
+    y_chinh: "Đã đo thật, bẫy CÓ THẬT: `@dataclass(frozen=True) class Box: items: list` — `b.items.append(4)` CHẠY TRÓT LỌT, không lỗi gì, vì `frozen=True` chỉ chặn GÁN LẠI field `items` (`b.items = [...]`), không chặn sửa CÁI BÊN TRONG field đó. Bài predict (chương trình có `frozen=True` với field `list`, hỏi dòng nào chặn được/không chặn được) + code: sửa `Box` để field dùng `tuple` thay `list`, xác nhận `.append()` giờ mới thật sự bị chặn."
+  - so: 16
+    slug: deepcopy-va-copy-nong
+    title: "`copy.deepcopy` và `copy.copy` — sao chép SÂU khác sao chép NÔNG"
+    teaches: [fp.deepcopy-vs-copy]
+    requires: [fp.nested-mutable-trap, mem.shallow-copy]
+    y_chinh: "Nối thẳng T3.1 mem.shallow-copy (Python nói chung): `copy.copy(a)` (nông) — sửa một phần tử LỒNG NHAU bên trong bản sao VẪN làm bản gốc đổi theo (đã đo thật); `copy.deepcopy(a)` (sâu) — sao chép TOÀN BỘ, kể cả các lớp lồng nhau, bản gốc không đổi. Đây là công cụ THỰC TẾ để giải quyết bẫy bài 15 khi không muốn đổi kiểu dữ liệu (dùng deepcopy để lấy một bản độc lập thay vì đổi list→tuple). Code chấm điểm sống."
+  - so: 17
+    slug: ghep-du-lieu-bat-bien-thanh-mot-ham
+    title: "Ghép một hàm nhận và trả về dữ liệu bất biến nhiều tầng"
+    teaches: [fp.compose-immutable]
+    requires: [fp.deepcopy-vs-copy]
+    y_chinh: "Bài code có chấm điểm sống: một `@dataclass(frozen=True)` có field kiểu `tuple` (không `list`, tránh bẫy bài 15) chứa các `@dataclass(frozen=True)` khác — viết một hàm nhận đối tượng này, trả về bản MỚI với một phần dữ liệu lồng nhau đã đổi (dùng `replace()` ở NHIỀU TẦNG). Không khái niệm mới — ghép bài 5,6,14,15,16."
+  - so: 18
+    slug: do-tong-hop-cau-truc-du-lieu
+    title: "Đo tổng hợp trước khi sang trạng thái"
+    teaches: [fp.review-data-structures]
+    requires: [fp.compose-immutable]
+    y_chinh: "Bài chốt cụm 3, code có chấm điểm sống: tự chọn công cụ bất biến đúng (tuple/frozenset/frozen dataclass/MappingProxyType) cho một bài toán cho trước dữ liệu cụ thể (ví dụ: một danh sách tên KHÔNG đổi + một bảng tra cứu KHÔNG đổi + một cấu hình KHÔNG đổi) — đo khả năng CHỌN công cụ, không chỉ dùng đúng MỘT công cụ đã chỉ định sẵn."
+
+# ── Cụm 4 (bài 19–24): Trạng thái bất biến + chốt track ───────────────────
+  - so: 19
+    slug: trang-thai-la-du-lieu
+    title: "Trạng thái LÀ dữ liệu — chuyển trạng thái LÀ một hàm"
+    teaches: [fp.state-as-data]
+    requires: [fp.review-data-structures]
+    y_chinh: "`Draft`, `Published`, `Archived` — ba `@dataclass(frozen=True)` riêng biệt, đại diện BA TRẠNG THÁI của một 'bài viết'. Một hàm `publish(bai: Draft) -> Published` NHẬN trạng thái cũ, TRẢ VỀ trạng thái mới — không có 'object bài viết TỰ ĐỔI trạng thái'. Đối lập với lối viết hướng đối tượng quen thuộc (một `self.trang_thai = 'published'` sửa tại chỗ) — bài explain/predict, dựng khái niệm trước khi viết code."
+  - so: 20
+    slug: match-tren-trang-thai-chuyen-hop-le
+    title: "`match` trên trạng thái — chỉ chuyển được từ đúng trạng thái nguồn"
+    teaches: [fp.state-transition-match]
+    requires: [fp.state-as-data]
+    y_chinh: "`match bai: case Draft(...): return Published(...); case _: raise ValueError(...)` (đã đo thật, `match` hoạt động đúng với `@dataclass(frozen=True)`) — gọi `publish()` trên một `Published` (không phải `Draft`) ném lỗi rõ ràng, KHÔNG âm thầm chuyển sai. Code chấm điểm sống: viết `archive()` (chỉ nhận `Published`, trả `Archived`), test cả đường ĐÚNG lẫn gọi SAI thứ tự."
+  - so: 21
+    slug: ghep-nhieu-buoc-chuyen-trang-thai
+    title: "Ghép nhiều bước chuyển — trạng thái CŨ không đổi sau mỗi bước"
+    teaches: [fp.state-machine-compose]
+    requires: [fp.state-transition-match]
+    y_chinh: "Gọi `publish(draft)` rồi `archive(pub)` liên tiếp — test PHẢI xác nhận: sau khi gọi `archive(pub)`, biến `pub` ban đầu VẪN LÀ `Published` (không tự đổi thành `Archived`) — đây chính là điểm khác biệt cốt lõi với state machine hướng đối tượng thông thường. Code có chấm điểm sống, dùng `tier: static` với `no-mutation` để chặn học viên lách bằng cách sửa field tại chỗ thay vì trả về trạng thái mới."
+  - so: 22
+    slug: refactor-ham-khong-thuan-thanh-thuan
+    title: "Refactor một hàm KHÔNG thuần thành THUẦN hoàn toàn"
+    teaches: [fp.refactor-to-pure]
+    requires: [fp.state-machine-compose]
+    y_chinh: "Bài tập gốc từ sách tham khảo (fp/Python_Books chapter 11): cho một hàm dùng `global total_orders` + `print()` để đếm và ghi log đơn hàng — viết lại thành một `@dataclass(frozen=True)` giữ trạng thái (`count`, `log: tuple`) và một hàm THUẦN nhận trạng thái cũ, trả về trạng thái mới (không `global`, không `print`). Code chấm điểm sống, dùng `tier: static` với `no-global` VÀ `pure-fn` — bài đo được TRỰC TIẾP điều nó dạy, không chỉ đoán qua output."
+  - so: 23
+    slug: do-tong-hop-truoc-boss
+    title: "Đo tổng hợp trước BOSS"
+    teaches: [fp.gate-review]
+    requires: [fp.refactor-to-pure]
+    y_chinh: "Bài code có chấm điểm sống, ghép NHIỀU Ý đã học: một state machine bất biến nhỏ (ít nhất hai trạng thái, một hàm chuyển hợp lệ dùng `match`), dữ liệu bên trong dùng công cụ bất biến đúng (tuple/frozen dataclass), không side-effect. Không giới thiệu khái niệm mới."
+  - so: 24
+    slug: boss-bat-bien-thuan-khiet
+    title: "BOSS — Khép track Bất biến & thuần khiết"
+    teaches: [fp.gate-boss]
+    requires: [fp.gate-review]
+    y_chinh: "Người học viết một chương trình nhỏ dùng ĐỦ: `frozen=True` + `replace()` (cụm 1), hàm thuần + dependency injection (cụm 2), công cụ bất biến đúng chỗ (tuple/frozenset/MappingProxyType, cụm 3), state machine bất biến dùng `match` (cụm 4). Khép track — không dạy khái niệm mới, chỉ đòi ghép lại. Track sau (T4.2, HOF & composition) người học đã MANG THEO một thói quen: hàm không sửa input, luôn trả về giá trị mới — nền tảng bắt buộc để compose nhiều hàm lại mà không sợ hàm sau phá dữ liệu hàm trước."
