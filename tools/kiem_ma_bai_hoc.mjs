@@ -20,7 +20,6 @@ import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 
 const THU_MUC = process.argv[2] ?? 'dist/content';
-const HET_HAN_MS = 10_000;
 
 // `pyodide` là phụ thuộc của `packages/exec-python`, không của thư mục gốc —
 // nên phải phân giải qua đó thay vì import trần.
@@ -40,6 +39,34 @@ const py = await loadPyodide();
  */
 const TRAN_DONG = 5000;
 
+// TRAN_DONG chỉ chặn vòng lặp CÓ IN. T3.2 bài `mang-vs-lien-ket-danh-doi-gi`
+// lộ ra lớp còn lại: chỗ trống là nguyên thân một `while so_buoc < k:`, điền
+// bừa `1` (luật #5 dưới) làm thân vòng thành no-op — `so_buoc` không bao giờ
+// tăng, vòng lặp không dừng, và KHÔNG IN GÌ CẢ nên `TRAN_DONG` không chạm
+// tới. `HET_HAN_MS` từng khai báo ở đây định làm việc này nhưng chưa bao giờ
+// được nối vào đâu — một hạn mức không thật, giống hệt lớp lỗi AST-kind-giả
+// đã sửa ở `kiem-ast.ts`. `py.runPython` không nhận timeout (đồng bộ, một
+// luồng), nên cách duy nhất chặn được là để CHÍNH PYTHON đếm bước và tự ném,
+// đúng mẫu `chay_co_han` đã dùng ở `kiem_dot_bien.mjs`.
+const TRAN_BUOC = 300_000;
+py.runPython(`
+import sys
+
+def _chay_co_han(ma, tran):
+    dem = [0]
+    def theo_doi(frame, su_kien, gt):
+        dem[0] += 1
+        if dem[0] > tran:
+            raise RuntimeError('vượt hạn mức bước — vòng lặp không dừng')
+        return theo_doi
+    sys.settrace(theo_doi)
+    try:
+        exec(ma, {'__name__': '__main__'})
+    finally:
+        sys.settrace(None)
+`);
+const chay_co_han = py.globals.get('_chay_co_han');
+
 /** Chạy một đoạn Python, trả về {ok, xuat, loi}. */
 function chay(ma) {
   const dong = [];
@@ -57,7 +84,7 @@ function chay(ma) {
   const loi_goc = console.error;
   console.error = () => {};
   try {
-    py.runPython(ma);
+    chay_co_han(ma, TRAN_BUOC);
     return { ok: true, xuat: dong.join('\n'), loi: null };
   } catch (e) {
     return { ok: false, xuat: dong.join('\n'), loi: e instanceof Error ? e.message : String(e) };
