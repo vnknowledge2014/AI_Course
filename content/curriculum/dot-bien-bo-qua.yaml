@@ -188,3 +188,36 @@
 # (cùng track, cùng tác giả gốc, cùng lý do).
 - 'khoa-hoc-may-tinh.bit-byte-va-bo-nho.hai-so-float-bang-nhau-khong · viet-ham-gan-bang · đổi MỌI dấu < thành <= (1 chỗ)'
 
+# THAM SỐ PHỤ KHÔNG ẢNH HƯỞNG KẾT QUẢ. `muc_tieu=5` chỉ là đối số thứ hai
+# truyền vào dem_buoc_hai_vong — so_buoc đếm MỌI lượt của hai vòng lồng
+# nhau, không phụ thuộc điều kiện `if mang[i]+mang[j]==muc_tieu`. Đổi 5
+# thành 6 không đổi một bước đếm nào, ở bất kỳ cỡ dữ liệu nào — TƯƠNG ĐƯƠNG
+# THẬT, chính bài đã nói rõ điều này trong hint ("giá trị nào cũng được").
+- 'khoa-hoc-may-tinh.thuat-toan-va-do-phuc-tap.gap-doi-du-lieu-buoc-tang-the-nao · do-bon-co · đổi MỌI hằng số 5 thành 6 (1 chỗ)'
+
+# TƯƠNG ĐƯƠNG THẬT do chính cặp thuật toán được chọn: cách B (O(n)) thắng
+# cách A (O(n²)) ở CẢ HAI cỡ dữ liệu bài dùng (n=10: 10<45; n=100: 100<4950)
+# — không có cỡ nào khiến A thắng, nên nhánh "A" của biểu thức ba ngôi
+# không bao giờ được chọn: đổi chuỗi 'A' thành 'B' không đổi giá trị cuối
+# cùng vì nhánh đó chết theo đúng thiết kế bài (bài chỉ hỏi "ai thắng ở dữ
+# liệu LỚN", không cam kết có cỡ nào A thắng). Cùng lý do, khoảng cách hai
+# số bước đo được (100 với 4950) không bao giờ hẹp tới mức chạm biên </<=.
+- 'khoa-hoc-may-tinh.thuat-toan-va-do-phuc-tap.so-sanh-hai-thuat-toan-bang-big-o · ai-thang-o-du-lieu-lon · đổi MỌI dấu < thành <= (1 chỗ)'
+- "khoa-hoc-may-tinh.thuat-toan-va-do-phuc-tap.so-sanh-hai-thuat-toan-bang-big-o · ai-thang-o-du-lieu-lon · đổi MỌI chuỗi 'A' thành 'B' (1 chỗ)"
+
+# TƯƠNG ĐƯƠNG THẬT VỀ LOGIC, không phải do thiếu dữ liệu test: nhánh elif
+# `danh_sach[giua] < can_tim` chỉ chạy SAU KHI nhánh `if` ngay trên đã loại
+# trừ trường hợp bằng nhau (`danh_sach[giua] == can_tim`) — tới được elif
+# nghĩa là hai giá trị CHẮC CHẮN khác nhau, nên `<` và `<=` luôn cho đúng
+# cùng kết quả tại đây, với MỌI dữ liệu, không riêng ca bài này dựng. Đây
+# là hệ quả tất yếu của cấu trúc if/elif hai bài dạy, không phải lỗ thật.
+- 'khoa-hoc-may-tinh.thuat-toan-va-do-phuc-tap.tim-nhi-phan · viet-vong-lap-nhi-phan · đổi MỌI dấu < thành <= (1 chỗ)'
+- 'khoa-hoc-may-tinh.thuat-toan-va-do-phuc-tap.tim-nhi-phan-bang-de-quy · viet-de-quy-nhi-phan · đổi MỌI dấu < thành <= (1 chỗ)'
+
+# THAM SỐ PHỤ KHÔNG ẢNH HƯỞNG KẾT QUẢ, cùng lớp `do-bon-co` ở trên. `100`
+# chỉ cần là MỘT GIÁ TRỊ KHÔNG CÓ MẶT trong mang_tam=[7,2,9,4,1,8,3,6] —
+# hint của chính bài xác nhận "hoặc bất kỳ số nào khác không xuất hiện".
+# Đổi 100 thành 101 (cũng không có mặt) cho ra hệt cùng số bước (8) và vị
+# trí (-1) — TƯƠNG ĐƯƠNG THẬT.
+- 'khoa-hoc-may-tinh.thuat-toan-va-do-phuc-tap.truong-hop-xau-nhat · do-hai-ca-cung-mot-danh-sach · đổi MỌI hằng số 100 thành 101 (1 chỗ)'
+
