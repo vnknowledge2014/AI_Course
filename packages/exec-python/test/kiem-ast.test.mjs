@@ -68,3 +68,65 @@ test('mã sai cú pháp báo riêng, không nhầm thành sai hình dạng', () 
   assert.ok(r.loi_cu_phap, 'phải nói rõ là lỗi cú pháp — tầng `run` báo nó dễ hiểu hơn');
   assert.equal(r.thieu.length, 0, 'không kết luận thiếu hình dạng khi chưa parse nổi');
 });
+
+// ── Sáu kind cho Realm 4 (FP) — cài lúc soạn T4.1 ──────────────────────────
+
+test('frozen-dataclass đòi tường minh frozen=True, @dataclass trần không tính', () => {
+  const co = `
+from dataclasses import dataclass
+@dataclass(frozen=True)
+class Cfg:
+    port: int
+`;
+  const khong = `
+from dataclasses import dataclass
+@dataclass
+class Cfg:
+    port: int
+`;
+  assert.equal(kiem(co, [q('frozen-dataclass', 'Cfg')]).dat, true);
+  assert.equal(kiem(khong, [q('frozen-dataclass', 'Cfg')]).dat, false, '@dataclass trần mặc định frozen=False, không tính');
+});
+
+test('no-mutation bắt cả ba dạng: gọi phương thức sửa tại chỗ, gán vào ô/trường, del', () => {
+  assert.equal(kiem('x = [1,2]\nx.append(3)', [q('no-mutation')]).dat, false);
+  assert.equal(kiem('x = [1,2]\nx[0] = 9', [q('no-mutation')]).dat, false);
+  assert.equal(kiem('cfg.port = 9', [q('no-mutation')]).dat, false);
+  assert.equal(kiem('x = {1:2}\ndel x[1]', [q('no-mutation')]).dat, false);
+  assert.equal(kiem('x = [1,2]\ny = x + [3]', [q('no-mutation')]).dat, true, 'tạo list MỚI không phải sửa tại chỗ');
+  assert.equal(kiem('x = 1\nx = 2', [q('no-mutation')]).dat, true, 'gán lại một TÊN không phải sửa dữ liệu, chỉ đổi tên trỏ đi đâu');
+});
+
+test('no-global đảo chiều: có global/nonlocal là hỏng', () => {
+  assert.equal(kiem('x = 1', [q('no-global')]).dat, true);
+  assert.equal(kiem('def f():\n    global x\n    x = 1', [q('no-global')]).dat, false);
+});
+
+test('uses-generator chỉ đếm def có yield, không đếm generator expression', () => {
+  const coYield = 'def dem():\n    yield 1\n    yield 2';
+  const genExp = 'x = (i for i in range(3))';
+  assert.equal(kiem(coYield, [q('uses-generator')]).dat, true);
+  assert.equal(kiem(genExp, [q('uses-generator')]).dat, false, 'generator expression là comprehension, không phải uses-generator');
+});
+
+test('recursion đếm lời gọi tự thân, không đếm định nghĩa hàm hay gọi hàm khác', () => {
+  const deQuy = 'def giai(n):\n    if n <= 1:\n        return 1\n    return n * giai(n - 1)';
+  const khongDeQuy = 'def giai(n):\n    return n * 2\ndef goi():\n    return giai(3)';
+  assert.equal(kiem(deQuy, [q('recursion', 'giai')]).dat, true);
+  assert.equal(kiem(khongDeQuy, [q('recursion', 'giai')]).dat, false);
+});
+
+test('pure-fn (phủ định) bắt bốn dấu hiệu không thuần trong THÂN hàm, không xa hơn', () => {
+  const thuan = 'def cong(a, b):\n    return a + b';
+  const coGlobal = 'def f(x):\n    global y\n    return x + y';
+  const coPrint = 'def f(x):\n    print(x)\n    return x';
+  const coRandom = 'import random\ndef f():\n    return random.randint(1, 10)';
+  const coSuaTaiCho = 'def f(x):\n    x.append(1)\n    return x';
+  const hamKhac = 'def randint(a, b):\n    return a\ndef f():\n    return randint(1, 10)'; // trùng TÊN nhưng KHÔNG phải random.randint thật
+  assert.equal(kiem(thuan, [q('pure-fn', 'cong')]).dat, true);
+  assert.equal(kiem(coGlobal, [q('pure-fn', 'f')]).dat, false);
+  assert.equal(kiem(coPrint, [q('pure-fn', 'f')]).dat, false);
+  assert.equal(kiem(coRandom, [q('pure-fn', 'f')]).dat, false);
+  assert.equal(kiem(coSuaTaiCho, [q('pure-fn', 'f')]).dat, false);
+  assert.equal(kiem(hamKhac, [q('pure-fn', 'f')]).dat, true, 'gọi hàm tự viết trùng tên randint KHÔNG phải random.randint — không bắt oan');
+});

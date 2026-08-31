@@ -151,13 +151,125 @@ def _dem(nguon, cac_truy_van):
             elif kind == "no-import":
                 if isinstance(nut, (ast.Import, ast.ImportFrom)):
                     n += 1
+            elif kind == "frozen-dataclass":
+                # \`@dataclass\` KHÔNG đủ — mặc định \`frozen=False\`. Bài T4.1
+                # dạy đúng chỗ khác nhau giữa hai cái đó, nên luật này chỉ
+                # đếm khi thấy tường minh \`frozen=True\` trong lời gọi decorator.
+                if isinstance(nut, ast.ClassDef) and (tg is None or nut.name == tg):
+                    for dec in nut.decorator_list:
+                        if isinstance(dec, ast.Call) and getattr(dec.func, "id", None) == "dataclass":
+                            for kw in dec.keywords:
+                                if (kw.arg == "frozen" and isinstance(kw.value, ast.Constant)
+                                        and kw.value.value is True):
+                                    n += 1
+            elif kind == "no-mutation":
+                n += _dem_mutation(nut)
+            elif kind == "no-global":
+                if isinstance(nut, (ast.Global, ast.Nonlocal)):
+                    n += 1
+            elif kind == "uses-generator":
+                # CỐ Ý tách khỏi \`comprehension\`: \`comprehension\` đã đếm
+                # \`(x for x in ...)\` (GeneratorExp) cùng list/set/dict comp.
+                # \`uses-generator\` đếm HÀM SINH THẬT (\`def\` có \`yield\`) —
+                # khác kiểu lười hoá, không phải cùng một Ý.
+                if isinstance(nut, (ast.Yield, ast.YieldFrom)):
+                    n += 1
+            elif kind == "recursion":
+                # Đếm LỜI GỌI ĐỆ QUY thật (hàm tự gọi lại tên chính nó trong
+                # thân nó) — không đếm việc "có định nghĩa hàm" hay "có gọi
+                # hàm nào đó". \`tg\` là tên hàm cần soi; không cho thì soi mọi
+                # hàm trong bài (dùng khi bài chỉ có một hàm).
+                if isinstance(nut, ast.FunctionDef) and (tg is None or nut.name == tg):
+                    for con in ast.walk(nut):
+                        if isinstance(con, ast.Call) and getattr(con.func, "id", None) == nut.name:
+                            n += 1
+            elif kind == "pure-fn":
+                # KHÔNG PHẢI một phép CHỨNG MINH độ thuần khiết — không thể
+                # chứng minh được bằng AST (một hàm gọi một hàm khác thì phải
+                # biết hàm kia thuần hay không, việc đó cần phân tích toàn bộ
+                # chương trình). Đây là một PHÉP DÒ HẸP, trung thực về giới
+                # hạn của nó: bắt bốn dấu hiệu KHÔNG THUẦN lộ ra ngay trong
+                # THÂN của chính hàm \`tg\` — \`global\`/\`nonlocal\`, gọi hàm IO
+                # (print/input/open/exec/eval), gọi nguồn không tất định
+                # (random.*/time.time/datetime.now.../uuid.uuid4), và sửa dữ
+                # liệu tại chỗ (dùng lại \`_dem_mutation\`). Bỏ sót một hàm phụ
+                # KHÔNG thuần được gọi gián tiếp là giới hạn CỐ Ý, không phải
+                # lỗ hổng — đúng tinh thần "thà báo hẹp còn hơn báo sai" đã
+                # đặt ra cho move-check của Rust (ADR-002).
+                if isinstance(nut, ast.FunctionDef) and (tg is None or nut.name == tg):
+                    for con in ast.walk(nut):
+                        if con is nut:
+                            continue
+                        if isinstance(con, (ast.Global, ast.Nonlocal)):
+                            n += 1
+                        elif isinstance(con, ast.Call):
+                            ten = getattr(con.func, "id", None)
+                            if ten in _GOI_IO or _la_goi_ngoai_y(con):
+                                n += 1
+                            else:
+                                n += _dem_mutation(con)
+                        elif isinstance(con, (ast.Assign, ast.AugAssign, ast.Delete)):
+                            n += _dem_mutation(con)
         ra.append(n)
     return ra
+
+# Tên phương thức SỬA TẠI CHỖ của list/dict/set — nhìn theo TÊN, không theo
+# kiểu thật (AST không có kiểu). Cùng mức trung thực với \`uses-call\`: bắt
+# theo tên phương thức, không xác minh đối tượng thật sự là list/dict/set.
+_HAM_SUA_TAI_CHO = {
+    "append", "extend", "insert", "remove", "pop", "clear", "sort", "reverse",
+    "update", "add", "discard", "popitem", "setdefault",
+}
+_GOI_IO = {"print", "input", "open", "exec", "eval"}
+
+def _dem_mutation(nut):
+    """Một NÚT có phải một chỗ SỬA DỮ LIỆU TẠI CHỖ không.
+
+    Ba dạng: gọi phương thức sửa tại chỗ (\`x.append(1)\`), gán vào một Ô hoặc
+    một TRƯỜNG của vật đã có sẵn (\`x[0] = 1\`, \`cfg.port = 3000\` — khác gán
+    một TÊN MỚI, \`x = 1\`, cái đó không sửa gì cả, chỉ đổi tên đang trỏ tới
+    đâu), và \`del\`.
+    """
+    if isinstance(nut, ast.Call):
+        if isinstance(nut.func, ast.Attribute) and nut.func.attr in _HAM_SUA_TAI_CHO:
+            return 1
+        return 0
+    if isinstance(nut, (ast.Assign, ast.AugAssign)):
+        dich = nut.targets if isinstance(nut, ast.Assign) else [nut.target]
+        for d in dich:
+            if isinstance(d, (ast.Subscript, ast.Attribute)):
+                return 1
+        return 0
+    if isinstance(nut, ast.Delete):
+        return 1
+    return 0
+
+def _la_goi_ngoai_y(con):
+    """Lời gọi tới một NGUỒN KHÔNG TẤT ĐỊNH đã biết — random/time/datetime/uuid.
+
+    Nhìn theo TÊN MODULE + TÊN HÀM (\`random.randint\`, không chỉ \`randint\`) để
+    tránh bắt oan một hàm tự viết trùng tên phương thức.
+    """
+    if not isinstance(con, ast.Call) or not isinstance(con.func, ast.Attribute):
+        return False
+    mod = getattr(con.func.value, "id", None)
+    ten_ham = con.func.attr
+    if mod == "random":
+        return True
+    if mod == "time" and ten_ham == "time":
+        return True
+    if mod == "datetime" and ten_ham in ("now", "today"):
+        return True
+    if mod == "uuid" and ten_ham == "uuid4":
+        return True
+    return False
 
 _KIND_HOP_LE = {
     "uses-call", "uses-operator", "uses-fstring", "uses-name", "gan-ten",
     "subscript-assign", "has-literal", "nesting", "comprehension", "lambda",
     "match-stmt", "no-import",
+    "frozen-dataclass", "no-mutation", "no-global", "uses-generator",
+    "recursion", "pure-fn",
 }
 
 _TOAN_TU = {
@@ -237,20 +349,20 @@ def _khop_long(nut, tg):
 `;
 
 /** Những kind mang nghĩa PHỦ ĐỊNH: xuất hiện là hỏng, dù nằm ở `requireAst`. */
-// Đúng 12 truy vấn CÓ nhánh xử lý thật trong `DEM`. Giữ khớp với `_KIND_HOP_LE`.
+// Đúng 18 truy vấn CÓ nhánh xử lý thật trong `DEM`. Giữ khớp với `_KIND_HOP_LE`.
 //
-// `PyAstKind` trong content-schema còn khai sáu tên nữa cho Realm 4 —
-// `recursion`, `frozen-dataclass`, `no-mutation`, `pure-fn`, `no-global`,
-// `uses-generator` — mà không tên nào có nhánh xử lý. Trước đây viết một
-// trong sáu tên ấy ra thì nó đếm được 0 và không ai biết. Nay nó ném; ai
-// soạn bài FP đầu tiên sẽ phải cài nó trước khi dùng, đúng thứ tự.
+// Sáu tên cuối (`frozen-dataclass`…`pure-fn`) từng khai trong `PyAstKind` của
+// content-schema cho Realm 4 mà KHÔNG có nhánh xử lý — cài lúc soạn T4.1
+// (Bất biến & thuần khiết), đúng thứ tự đã ghi ở đây từ trước.
 const KIND_HOP_LE = new Set<string>([
   'uses-call', 'uses-operator', 'uses-fstring', 'uses-name', 'gan-ten',
   'subscript-assign', 'has-literal', 'nesting', 'comprehension', 'lambda',
   'match-stmt', 'no-import',
+  'frozen-dataclass', 'no-mutation', 'no-global', 'uses-generator',
+  'recursion', 'pure-fn',
 ]);
 
-const KIND_PHU_DINH = new Set(['no-import', 'no-mutation', 'no-global']);
+const KIND_PHU_DINH = new Set(['no-import', 'no-mutation', 'no-global', 'pure-fn']);
 
 export function kiemAst(
   py: Pyodide,
