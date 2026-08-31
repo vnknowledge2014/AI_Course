@@ -1,0 +1,165 @@
+# Xương sống R4.T4.0a — Cổng TypeScript (18 bài)
+#
+# Track ĐẦU TIÊN của M8 dùng TypeScript. Toàn bộ R0-R3 (452 bài) dùng đúng
+# một ngôn ngữ: Python — động về kiểu, lỗi kiểu lộ ra LÚC CHẠY (TypeError).
+# Track này là một CỔNG (gate), không phải một track FP — việc của nó là
+# đúng MỘT Ý: kiểu có thể được KIỂM TRƯỚC KHI CHẠY, không phải lúc chạy.
+# Mọi khái niệm khác (biến, hàm, mảng, rẽ nhánh) người học đã biết TỪ Ý,
+# chỉ cần cú pháp mới — track này không dạy lại chúng.
+#
+# QUY ƯỚC ĐẶT TÊN REALM: `khoa-hoc-may-tinh` (R3) đã dùng slug TIẾNG VIỆT,
+# khớp `onboarding`/`nen-tang`/`toan` — không phải `fp-core` như một ví dụ
+# minh hoạ schema sớm trong MASTERPLAN §6 (đó chỉ là ví dụ hình dạng file,
+# không phải tên đã triển khai thật). Theo đúng quy ước ĐÃ XÂY: R4 dùng
+# `lap-trinh-ham` (Lập trình hàm = Functional Programming).
+#
+# Ràng buộc đã kiểm trước khi viết (đo thật qua
+# packages/exec-typescript/dist/kiem-kieu.js, TypeScript 5.x compiler API):
+#   - `strict: true`, `noUncheckedIndexedAccess: true` đã bật — mọi bài có
+#     thể dựa vào việc TSC nghiêm khắc thật, không phải giả lập nhẹ tay.
+#   - Suy luận kiểu THẬT: `let x = 5` suy ra `number` dù không viết tường
+#     minh, và gán sai kiểu SAU ĐÓ vẫn bị chặn y hệt như khai báo tường
+#     minh — đã đo, không phải giả định.
+#   - Bảy mã lỗi ĐÃ CÓ bản dịch "vì sao"/"cách sửa" tiếng Việt (đọc hàm
+#     `giaiThich()` trong `packages/exec-typescript/src/kiem-kieu.ts`):
+#     TS2322 (gán sai kiểu), TS2345 (đối số sai kiểu), TS2531/TS18047
+#     (có thể null), TS2532/TS18048 (có thể undefined), TS2304 (tên không
+#     tồn tại), TS2554 (sai số đối số), TS7006 (tham số ngầm any). BÀI HỌC
+#     TRONG TRACK NÀY ƯU TIÊN kích hoạt đúng bảy mã này — người học được
+#     thấy tầng giải thích đầy đủ, không chỉ thông báo gốc của `tsc`.
+#     Mã KHÁC (ví dụ TS2339, TS2741 — đã đo, chưa có bản dịch) vẫn dùng
+#     được nhưng chỉ hiện thông báo gốc + mã lỗi, không có "vì sao".
+#   - Mã type-sai KHÔNG BAO GIỜ được đưa xuống worker chạy (`r.js === null`
+#     khi có lỗi kiểu) — đã đo, xác nhận qua test
+#     `packages/exec-typescript/test/kiem-kieu.test.mjs`. Track có thể nói
+#     thẳng với người học: "TypeScript từ chối chạy, không phải chạy rồi
+#     mới báo lỗi."
+#   - Worker TypeScript ĐÃ có bảo vệ vòng lặp vô hạn (test có sẵn "VÒNG LẶP
+#     VÔ HẠN bị cắt, không treo tiến trình") — không cần tự thêm cảnh báo
+#     hạ tầng riêng như các track Python (T3.2's while-loop trap) vốn
+#     phải tự phát hiện.
+#
+# Namespace skill: `ts.*`.
+
+track: cong-typescript
+realm: lap-trinh-ham
+ten: "T4.0a — Cổng TypeScript"
+so_bai: 18
+ngon_ngu_chu: typescript
+
+# ── Cụm 1 (bài 1–5): Kiểu là một lời hứa được kiểm LÚC BIÊN DỊCH ──────────
+bai:
+  - so: 1
+    slug: cung-mot-chuong-trinh-hai-ngon-ngu
+    title: "Cùng một chương trình, hai ngôn ngữ khác nhau"
+    teaches: [ts.syntax-bridge]
+    requires: [core.variable, core.function-def]
+    y_chinh: "Chuyển đúng một chương trình Python nhỏ (biến, hàm, in ra) sang TypeScript — `let`/`const` thay vì gán trần, dấu `;` cuối dòng, dấu ngoặc nhọn thay thụt lề. Cú pháp khác, Ý giống hệt — người học không học lại TƯ DUY, chỉ học lại CÁCH GÕ."
+  - so: 2
+    slug: kieu-gan-voi-ten-ngay-luc-khai-bao
+    title: "Kiểu gắn liền với cái tên NGAY LÚC khai báo"
+    teaches: [ts.type-annotation]
+    requires: [ts.syntax-bridge]
+    y_chinh: "`let n: number = 5` — dấu hai chấm sau tên là một LỜI HỨA: biến này SẼ LUÔN là số. Python không có lời hứa này (một biến giữ bất cứ kiểu gì, bất cứ lúc nào) — đây là khái niệm THẬT SỰ mới, không phải chỉ đổi cú pháp."
+  - so: 3
+    slug: sai-kieu-bi-chan-truoc-khi-chay
+    title: "Sai kiểu bị CHẶN TRƯỚC KHI CHẠY, không phải lúc chạy"
+    teaches: [ts.compile-time-check]
+    requires: [ts.type-annotation]
+    y_chinh: "`let n: number = \"ba\"` — TypeScript TỪ CHỐI biên dịch (mã lỗi TS2322), và mã JavaScript KHÔNG ĐƯỢC SINH RA — không có dòng nào chạy cả. Khác hẳn Python: một `TypeError` chỉ lộ ra LÚC DÒNG ĐÓ THỰC SỰ CHẠY, có khi rất lâu sau khi chương trình bắt đầu."
+  - so: 4
+    slug: khong-can-viet-kieu-may-tu-suy-luan
+    title: "Không cần viết kiểu — máy tự suy luận được"
+    teaches: [ts.type-inference]
+    requires: [ts.compile-time-check]
+    y_chinh: "`let x = 5` (không có `: number`) — TypeScript vẫn TỰ SUY RA kiểu `number` từ giá trị khởi tạo, và `x = \"chuoi\"` ở dòng sau VẪN bị chặn y hệt như khai tường minh (đã đo thật). Suy luận kiểu không lỏng hơn khai báo tường minh — chỉ đỡ phải gõ."
+  - so: 5
+    slug: du-doan-dong-nao-bi-chan-truoc-khi-chay
+    title: "Dự đoán dòng nào bị chặn TRƯỚC KHI CHẠY"
+    teaches: [ts.predict-compile-error]
+    requires: [ts.type-inference]
+    y_chinh: "Bài chốt cụm: cho vài dòng khai báo (có dòng đúng, có dòng sai kiểu), người học dự đoán dòng nào TSC từ chối và VÌ SAO — không chạy thử trước, chỉ đọc kiểu."
+
+# ── Cụm 2 (bài 6–10): Hàm có chữ ký — lời hứa hai chiều ───────────────────
+  - so: 6
+    slug: tham-so-ham-cung-can-kieu
+    title: "Tham số hàm cũng cần kiểu"
+    teaches: [ts.param-type]
+    requires: [ts.predict-compile-error, core.function-parameter]
+    y_chinh: "`function gapDoi(x: number): number` — tham số `x` giờ có một lời hứa riêng, giống biến ở cụm 1. R1.T1.3 dạy tham số bằng TÊN; giờ mỗi tên còn mang thêm một KIỂU."
+  - so: 7
+    slug: kieu-tra-ve-la-mot-loi-hua-nua
+    title: "Kiểu trả về là một lời hứa nữa"
+    teaches: [ts.return-type]
+    requires: [ts.param-type]
+    y_chinh: "Dấu hai chấm SAU dấu ngoặc tham số (`: number`) hứa về GIÁ TRỊ HÀM TRẢ VỀ — một lời hứa khác, tách biệt với lời hứa về tham số. Hàm giờ có HAI lời hứa, không phải một."
+  - so: 8
+    slug: goi-ham-sai-kieu-doi-so-bi-chan
+    title: "Gọi hàm sai kiểu đối số bị chặn trước khi chạy"
+    teaches: [ts.arg-type-check]
+    requires: [ts.return-type]
+    y_chinh: "`gapDoi(\"ba\")` — TSC từ chối (TS2345) NGAY LÚC BIÊN DỊCH, trước khi có cơ hội chạy `x * 2` và nhận một kết quả vô nghĩa như Python từng cho (nối chuỗi hay lỗi runtime tuỳ ngữ cảnh). Lời hứa của bài 6 được KIỂM ở phía gọi, không chỉ phía định nghĩa."
+  - so: 9
+    slug: goi-thieu-thua-doi-so-cung-bi-chan
+    title: "Gọi thiếu hoặc thừa đối số cũng bị chặn"
+    teaches: [ts.arg-count-check]
+    requires: [ts.arg-type-check]
+    y_chinh: "Không chỉ kiểu — SỐ LƯỢNG đối số cũng là một phần lời hứa. Gọi `gapDoi()` (thiếu) hay `gapDoi(1, 2)` (thừa) đều bị TSC từ chối (TS2554), khác hẳn Python nơi thiếu tham số chỉ lộ ra lúc CHẠY TỚI DÒNG ĐÓ."
+  - so: 10
+    slug: viet-mot-ham-co-chu-ky-day-du
+    title: "Viết một hàm có chữ ký đầy đủ"
+    teaches: [ts.full-signature]
+    requires: [ts.arg-count-check]
+    y_chinh: "Bài chốt cụm: viết một hàm có đủ kiểu tham số VÀ kiểu trả về, rồi tự gọi nó cả đúng lẫn sai để THẤY TSC chặn ở đâu — không chỉ đọc lý thuyết, tự tạo ra lỗi và tự đọc thông báo."
+
+# ── Cụm 3 (bài 11–14): undefined/null — nơi TypeScript nghiêm khắc nhất ───
+  - so: 11
+    slug: undefined-khong-tu-nhien-bien-mat
+    title: "undefined không tự nhiên biến mất chỉ vì bạn không viết ra"
+    teaches: [ts.possibly-undefined]
+    requires: [ts.full-signature]
+    y_chinh: "`const v: number[] = [1, 2]; const a: number = v[0];` — TSC TỪ CHỐI (đã đo thật, `noUncheckedIndexedAccess`), vì `v[0]` CÓ THỂ không tồn tại nếu mảng rỗng lúc chạy. Python không bao giờ cảnh báo trước — chỉ ném `IndexError` lúc động tới ô đó."
+  - so: 12
+    slug: kiem-tra-truoc-khi-dung
+    title: "TypeScript bắt bạn phải kiểm tra trước khi dùng"
+    teaches: [ts.narrowing-check]
+    requires: [ts.possibly-undefined]
+    y_chinh: "Thêm `if (v[0] !== undefined)` trước khi dùng — TSC giờ CHO PHÉP, vì đã thấy bạn kiểm tra. Đây gọi là THU HẸP KIỂU (narrowing): trong nhánh `if`, TSC tự biết kiểu đã bớt khả năng."
+  - so: 13
+    slug: null-va-undefined-la-hai-thu-khac-nhau
+    title: "null và undefined là hai điều khác nhau"
+    teaches: [ts.null-vs-undefined]
+    requires: [ts.narrowing-check]
+    y_chinh: "`undefined` (bài 11) là 'chưa từng có giá trị'; `null` là 'CỐ Ý đặt là không có gì' — TypeScript phân biệt rạch ròi hai mã lỗi khác nhau (TS18048 với TS18047), dù cả hai đều cần kiểm tra trước khi dùng."
+  - so: 14
+    slug: xu-ly-mang-co-the-rong-khong-bi-chan
+    title: "Xử lý mảng có thể rỗng, không bị TS chặn"
+    teaches: [ts.handle-optional-safely]
+    requires: [ts.null-vs-undefined]
+    y_chinh: "Bài chốt cụm: viết một hàm nhận một mảng CÓ THỂ RỖNG, kiểm tra đúng cách trước khi đọc phần tử, để TSC không chặn — ghép đúng bài 11-13 thành một chương trình chạy được."
+
+# ── Cụm 4 (bài 15–18): Nhiều kiểu cùng lúc — union & interface ────────────
+  - so: 15
+    slug: mot-gia-tri-co-the-la-mot-trong-nhieu-kieu
+    title: "Một giá trị có thể là MỘT TRONG NHIỀU kiểu"
+    teaches: [ts.union-type]
+    requires: [ts.handle-optional-safely]
+    y_chinh: "`x: string | number` — dấu `|` nói 'x là string HOẶC number, không biết trước cái nào'. Không có gì tương ứng trực tiếp trong Python (mọi biến vốn đã 'có thể là bất cứ kiểu gì'); ở đây phải NÊU RÕ tập kiểu khả dĩ, không phải bỏ ngỏ."
+  - so: 16
+    slug: dung-union-phai-kiem-tra-kieu-nao-truoc
+    title: "Dùng union type phải KIỂM TRA kiểu nào trước khi dùng phương thức riêng"
+    teaches: [ts.union-narrowing]
+    requires: [ts.union-type]
+    y_chinh: "`function f(x: string | number) { return x.toUpperCase(); }` bị TSC từ chối (TS2339, đã đo thật) — `.toUpperCase()` chỉ tồn tại trên `string`, không tồn tại trên `number`. Phải kiểm `typeof x === 'string'` trước — đúng kiểu thu hẹp bài 12 đã học, áp lên union."
+  - so: 17
+    slug: interface-dat-ten-cho-mot-hinh-dang
+    title: "Interface: đặt tên cho một HÌNH DẠNG dữ liệu"
+    teaches: [ts.interface]
+    requires: [ts.union-narrowing]
+    y_chinh: "`interface Nguoi { ten: string; tuoi: number }` — đặt tên cho một HÌNH DẠNG object, để dùng lại nhiều nơi thay vì viết lại từng trường mỗi lần. Thiếu một trường khi tạo giá trị kiểu này bị TSC từ chối (đã đo thật: TS2741)."
+  - so: 18
+    slug: boss-cong-typescript
+    title: "BOSS — Khép cổng TypeScript"
+    teaches: [ts.gate-boss]
+    requires: [ts.interface]
+    y_chinh: "Người học viết một chương trình nhỏ dùng ĐỦ những gì cổng này dạy: kiểu tường minh (bài 2), hàm có chữ ký đầy đủ (bài 10), xử lý an toàn giá trị có thể vắng mặt (bài 14), union type + interface (bài 15-17). Khép cổng — không dạy khái niệm mới, chỉ đòi ghép lại. Track sau (T4.1, quay lại Python) người học đã MANG THEO một câu hỏi mới: 'kiểu này có được kiểm trước khi chạy không?' — câu hỏi Python không bao giờ tự trả lời được."

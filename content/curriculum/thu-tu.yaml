@@ -71,3 +71,14 @@ realm:
       # trình thông dịch nhỏ từ token tới cây tới đánh giá — đứng ngay sau
       # T3.4, không song song.
       - ngon-ngu-va-may-truu-tuong
+
+  # Realm 4 mở màn M8 phần Functional Programming. T4.0a là CỔNG — 18 bài
+  # dạy đúng một Ý (kiểu được kiểm TRƯỚC KHI CHẠY) bằng TypeScript, ngôn
+  # ngữ ĐẦU TIÊN trong khoá ngoài Python. Đứng sau toàn bộ Realm 3 vì mượn
+  # core.variable/core.function-def/core.function-parameter từ R1 — không
+  # mượn gì từ R3, chỉ xếp sau R3 vì R3 vừa xong và đây là track kế tiếp
+  # theo đúng thứ tự M8 (không có ràng buộc tiền đề bắt buộc phải sau R3).
+  - id: lap-trinh-ham
+    ten: "Realm 4 — Lập trình hàm"
+    track:
+      - cong-typescript
