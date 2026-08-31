@@ -1,0 +1,206 @@
+# Xương sống R3.T3.5 — Ngôn ngữ & máy trừu tượng (24 bài)
+#
+# Track CHỐT của Realm 3. T3.4 bài 28 (BOSS) đã hứa: "trình thông dịch của
+# bài 8 sẽ được TỰ TAY xây một bản, không chỉ quan sát bản có sẵn." Track
+# này trả đúng lời hứa đó — đi từ chữ thô (mã nguồn) tới một MÁY TÍNH NHỎ
+# biết đọc-hiểu-tính một ngôn ngữ do chính người học định nghĩa luật.
+#
+# MASTERPLAN §9.1: "khoá liên thông tới parser (R4.T6) và SQL (R6.T3)" —
+# nên track dạy KHÁI NIỆM tổng quát (văn phạm, token, cây cú pháp, đánh
+# giá cây) chứ không dạy chi tiết cài đặt riêng của Python; Python chỉ là
+# PHƯƠNG TIỆN minh hoạ, khái niệm phải chuyển được sang bất kỳ ngôn ngữ nào
+# học ở R4 (TypeScript parser combinator) hay R6 (SQL).
+#
+# QUYẾT ĐỊNH THIẾT KẾ: dùng `ast.parse()`/`tokenize` CÓ SẴN của Python làm
+# tầng token hoá + dựng cây — KHÔNG bắt người học tự viết một bộ tách chữ từ
+# đầu (đó là việc của một khoá biên dịch riêng, quá nặng cho track nhập
+# môn). Trọng tâm track dồn vào phần có giá trị sư phạm cao nhất: ĐỌC HIỂU
+# một cây cú pháp, và tự tay viết bộ ĐÁNH GIÁ (evaluator) đi bộ trên cây đó
+# — đây là phần T3.2 (ds.tree-traversal) và T3.3 (alg.recursion-is-stack)
+# đã chuẩn bị sẵn công cụ, giờ mới dùng thật.
+#
+# Ràng buộc đã kiểm trước khi viết (đo thật trên Pyodide 0.29.4/CPython
+# 3.13.2):
+#   - `ast.parse('2 + 3 * 4', mode='eval')` + `ast.dump(tree, indent=2)`
+#     chạy được, cho cây lồng nhau đúng độ ưu tiên: `BinOp(2, Add,
+#     BinOp(3, Mult, 4))` — 3*4 nằm SÂU HƠN, đúng ý "nhân trước cộng sau"
+#     thể hiện bằng HÌNH DẠNG cây, không phải một luật ghi nhớ riêng.
+#   - `tokenize.generate_tokens()` chạy được, cho luồng token thật:
+#     NUMBER/OP/NEWLINE/ENDMARKER — dùng được làm ví dụ token hoá thật,
+#     không cần tự viết bộ tách chữ.
+#   - Một bộ đánh giá tay (đệ quy, khớp mẫu `isinstance` trên
+#     `ast.Constant`/`ast.BinOp`/`ast.Add`/`ast.Mult`) tính đúng
+#     `2 + 3 * 4 == 14` — xác nhận cách dạy "đệ quy đi bộ trên cây do
+#     Python tự dựng" hoạt động thật, không phải lý thuyết suông.
+#   - KHÔNG dùng `eval()` làm đối chiếu — dạy `eval()` là công cụ nguy
+#     hiểm (chạy mã tuỳ ý) đi ngược tinh thần "tự viết bộ đánh giá của
+#     riêng bạn" mà cả track hướng tới. Đối chiếu bằng phép tính Python
+#     trực tiếp trong assert.
+#
+# Namespace skill: `ngu.*` (ngôn ngữ). KHÔNG dùng `class` (giữ nhất quán
+# T3.2-T3.4 — bộ đánh giá viết bằng hàm đệ quy nhận `ast.AST` làm tham số,
+# không định nghĩa lớp Visitor).
+#
+# Ngôn ngữ chủ: Python (dùng `ast`/`tokenize` làm cửa sổ nhìn vào một trình
+# phân tích thật, không phải tự dựng bộ phân tích giả).
+
+track: ngon-ngu-va-may-truu-tuong
+realm: khoa-hoc-may-tinh
+ten: "T3.5 — Ngôn ngữ & máy trừu tượng"
+so_bai: 24
+ngon_ngu_chu: python
+
+# ── Cụm 1 (bài 1–5): Ngôn ngữ có luật — token hoá ─────────────────────────
+bai:
+  - so: 1
+    slug: cau-hop-le-va-khong-hop-le
+    title: "Câu hợp lệ và câu không hợp lệ — luật chơi của một ngôn ngữ"
+    teaches: [ngu.grammar-exists]
+    requires: [err.syntax-error]
+    y_chinh: "R1 đã cho gặp `SyntaxError` nhiều lần — giờ gọi tên đúng cái luật bị vi phạm: một VĂN PHẠM (grammar), tập luật nói CÂU NÀO hợp lệ. `2 + + 3` sai không phải vì máy 'khó tính' — nó vi phạm một luật cụ thể, viết ra được."
+  - so: 2
+    slug: cat-mot-dong-chu-thanh-tung-mieng
+    title: "Cắt một dòng chữ thành từng miếng nhỏ — token hoá"
+    teaches: [ngu.tokenize]
+    requires: [ngu.grammar-exists]
+    y_chinh: "Trước khi hiểu Ý của `2 + 3 * 4`, máy phải cắt chuỗi ký tự thô đó thành các MIẾNG có nghĩa: `2`, `+`, `3`, `*`, `4` — module `tokenize` của Python làm đúng việc này, xem được thật bằng `tokenize.generate_tokens()`."
+  - so: 3
+    slug: moi-token-co-mot-loai
+    title: "Mỗi token có một LOẠI"
+    teaches: [ngu.token-type]
+    requires: [ngu.tokenize]
+    y_chinh: "`2` không chỉ là một miếng chữ — nó có LOẠI `NUMBER`; `+` có loại `OP`. Cùng miếng chữ khác loại thì nghĩa khác hẳn (`'+'` là toán tử cộng, không phải một ký tự trong chuỗi)."
+  - so: 4
+    slug: thu-tu-token-khong-tuy-tien
+    title: "Thứ tự token không tuỳ tiện"
+    teaches: [ngu.token-order-rule]
+    requires: [ngu.token-type]
+    y_chinh: "`NUMBER OP NUMBER` (như `2 + 3`) hợp lệ; `OP OP NUMBER` (như `+ + 3`) thì không — văn phạm bài 1 nói được LOẠI TOKEN nào được phép đứng sau loại nào. Token hoá xong (bài 2-3) chỉ là bước đầu; còn phải đúng THỨ TỰ."
+  - so: 5
+    slug: tokenize-tay-doi-chieu-that
+    title: "Tokenize tay một biểu thức, đối chiếu với máy thật"
+    teaches: [ngu.hand-tokenize]
+    requires: [ngu.token-order-rule]
+    y_chinh: "Bài chốt cụm: cho một biểu thức nhỏ, tự liệt kê danh sách token dự đoán (loại + nội dung), rồi chạy `tokenize.generate_tokens()` thật để đối chiếu — không đoán suông."
+
+# ── Cụm 2 (bài 6–10): Từ token dựng CÂY — cú pháp ─────────────────────────
+  - so: 6
+    slug: token-khong-du-can-biet-long-nhau-the-nao
+    title: "Token không đủ — cần biết chúng LỒNG NHAU thế nào"
+    teaches: [ngu.tokens-need-structure]
+    requires: [ngu.hand-tokenize]
+    y_chinh: "Danh sách token của `2 + 3 * 4` và của `(2 + 3) * 4` gần giống hệt nhau (chỉ thêm hai dấu ngoặc) — nhưng NGHĨA khác hẳn (14 với 20). Một dãy PHẲNG các token không đủ để nói máy phải tính cái gì trước."
+  - so: 7
+    slug: cay-cu-phap
+    title: "Cây cú pháp: mỗi nút là một mảnh ý nghĩa"
+    teaches: [ngu.ast]
+    requires: [ngu.tokens-need-structure, ds.tree]
+    y_chinh: "`ast.parse('2 + 3 * 4', mode='eval')` dựng ra một CÂY (đúng cấu trúc T3.2 đã dạy: nút cha, nút con) — không còn là dãy token phẳng. Đây là CÂY CÚ PHÁP TRỪU TƯỢNG (AST) — đúng công cụ mà `kiemAst()` của chính dự án này dùng để chấm bài bạn."
+  - so: 8
+    slug: do-uu-tien-nam-o-hinh-dang-cay
+    title: "Độ ưu tiên phép toán nằm ở HÌNH DẠNG cây"
+    teaches: [ngu.precedence-is-tree-shape]
+    requires: [ngu.ast]
+    y_chinh: "`ast.dump()` cho `2 + 3 * 4` lộ ra: `BinOp(2, Add, BinOp(3, Mult, 4))` — phép nhân nằm SÂU HƠN, tính TRƯỚC vì cây phải đánh giá từ lá lên. 'Nhân trước cộng sau' không phải luật máy nhớ riêng — nó LÀ hình dạng cây."
+  - so: 9
+    slug: ngoac-doi-hinh-dang-cay
+    title: "Ngoặc thay đổi hình dạng cây, không đổi token"
+    teaches: [ngu.parens-change-tree]
+    requires: [ngu.precedence-is-tree-shape]
+    y_chinh: "`(2 + 3) * 4` và `2 + 3 * 4` cùng bốn token số/toán tử, khác đúng cặp ngoặc — nhưng cây khác hẳn: phép cộng giờ nằm SÂU HƠN, tính trước. Ngoặc không phải một token 'có nghĩa' riêng — nó là chỉ dẫn CHO NGƯỜI DỰNG CÂY biết gộp nhóm nào."
+  - so: 10
+    slug: ve-tay-cay-doi-chieu-ast-that
+    title: "Vẽ tay một cây, đối chiếu với ast.dump() thật"
+    teaches: [ngu.hand-draw-tree]
+    requires: [ngu.parens-change-tree]
+    y_chinh: "Bài chốt cụm: cho một biểu thức có ngoặc, tự vẽ (hoặc mô tả) cây dự đoán, rồi chạy `ast.dump()` thật để đối chiếu."
+
+# ── Cụm 3 (bài 11–15): Đi bộ trên cây — bộ đánh giá ───────────────────────
+  - so: 11
+    slug: danh-gia-mot-cay-la-di-bo-de-quy
+    title: "Đánh giá một cây là ĐI BỘ qua nó, đệ quy"
+    teaches: [ngu.tree-walk-eval]
+    requires: [ds.tree-traversal, alg.recursion-is-stack]
+    y_chinh: "T3.2 bài 30 duyệt cây bằng vòng lặp+ngăn xếp tự quản; T3.3 bài 2 viết lại bằng đệ quy. Giờ dùng ĐÚNG kỹ năng đó cho một việc thật: TÍNH giá trị của cây cú pháp bài 7 dựng — đệ quy xuống từng nhánh, gộp kết quả con lại."
+  - so: 12
+    slug: nut-la-tra-ve-ngay-nut-trong-phai-hoi-con
+    title: "Nút lá trả về ngay, nút trong phải hỏi con trước"
+    teaches: [ngu.leaf-vs-internal]
+    requires: [ngu.tree-walk-eval]
+    y_chinh: "`ast.Constant` (một con số) là CA DỪNG — trả về ngay, không hỏi ai. `ast.BinOp` là ca đệ quy — phải tính xong CẢ HAI nhánh con rồi mới gộp. Đúng cặp ca-dừng/ca-đệ-quy mà R1.T1.3 đã dạy, giờ áp lên một cây thật."
+  - so: 13
+    slug: bo-danh-gia-chi-hieu-loai-nut-no-biet
+    title: "Một bộ đánh giá chỉ hiểu được các LOẠI NÚT nó biết"
+    teaches: [ngu.evaluator-limited]
+    requires: [ngu.leaf-vs-internal]
+    y_chinh: "Bộ đánh giá bài 11-12 mới xử lý `Constant`/`BinOp` với `Add`/`Mult` — gặp `Sub` (phép trừ) hay một loại nút lạ, nó phải BÁO LỖI RÕ RÀNG, không được âm thầm trả về sai hoặc treo."
+  - so: 14
+    slug: them-mot-phep-toan-la-them-mot-nhanh-if
+    title: "Thêm một phép toán mới = thêm một nhánh if"
+    teaches: [ngu.extend-evaluator]
+    requires: [ngu.evaluator-limited]
+    y_chinh: "Mở rộng bộ đánh giá bài 13 để hiểu thêm `ast.Sub` (trừ) — không viết lại từ đầu, chỉ thêm một nhánh `if isinstance(node.op, ast.Sub)`. Bộ đánh giá LỚN DẦN từng khái niệm một, đúng nhịp track này đã đi từ đầu."
+  - so: 15
+    slug: bo-danh-gia-day-du-doi-chieu-tinh-truc-tiep
+    title: "Bộ đánh giá đầy đủ +,-,*,/ và ngoặc — đối chiếu tính trực tiếp"
+    teaches: [ngu.full-evaluator]
+    requires: [ngu.extend-evaluator]
+    y_chinh: "Bài chốt cụm: hoàn thiện bộ đánh giá hiểu cả bốn phép `+ - * /`, chạy trên nhiều biểu thức có ngoặc, đối chiếu với kết quả TÍNH TRỰC TIẾP bằng Python (không dùng `eval()` — track này dạy TỰ VIẾT bộ đánh giá, không dựa vào công cụ có sẵn nguy hiểm)."
+
+# ── Cụm 4 (bài 16–20): Máy trừu tượng — mô hình đơn giản của tính toán ────
+  - so: 16
+    slug: may-truu-tuong-la-mo-hinh-don-gian-hoa
+    title: "Máy trừu tượng: một mô hình ĐƠN GIẢN HOÁ của máy thật"
+    teaches: [ngu.abstract-machine]
+    requires: [ngu.full-evaluator, may.fetch-decode-execute]
+    y_chinh: "T3.4 bài 6 tả máy THẬT: lấy-hiểu-làm trên bytecode CPython. Bộ đánh giá bài 15 CŨNG là một cái máy — chỉ đơn giản hơn (không có thanh ghi, không có hệ điều hành) nhưng cùng ý tưởng: nhận một cấu trúc mô tả phép tính, chạy ra kết quả."
+  - so: 17
+    slug: trang-thai-may-bo-nho-nho-cay-dang-danh-gia
+    title: "Trạng thái máy: một bộ nhớ nhỏ, một cây đang đánh giá"
+    teaches: [ngu.machine-state]
+    requires: [ngu.abstract-machine]
+    y_chinh: "Máy trừu tượng bài 16 cần NHỚ nó đang ở đâu trong cây (giống con trỏ lệnh T3.4 bài 7) — với đánh giá đệ quy, 'đang ở đâu' chính là ngăn xếp cuộc gọi hàm (T3.3 bài 1, T3.4 bài 23) của chính lời gọi hàm đánh giá."
+  - so: 18
+    slug: tu-cay-sang-danh-sach-lenh-phang
+    title: "Từ cây sang danh sách lệnh phẳng — biên dịch xuống máy ngăn xếp"
+    teaches: [ngu.compile-tree-to-stack-instructions]
+    requires: [ngu.machine-state, may.eval-stack]
+    y_chinh: "T3.4 bài 3 tả máy tính THẬT bằng một ngăn xếp (LOAD đẩy vào, BINARY_OP lấy ra tính). Đi CÙNG HƯỚNG với CPython thật: biến cây bài 7 thành một DANH SÁCH LỆNH PHẲNG (PUSH 2, PUSH 3, PUSH 4, MUL, ADD) — đây chính là một bước BIÊN DỊCH, thu nhỏ."
+  - so: 19
+    slug: may-ngan-xep-chay-khong-can-de-quy
+    title: "Máy ngăn xếp chạy danh sách lệnh phẳng — không cần đệ quy nữa"
+    teaches: [ngu.stack-machine-no-recursion]
+    requires: [ngu.compile-tree-to-stack-instructions]
+    y_chinh: "Bộ đánh giá bài 11-15 ĐỆ QUY xuống cây. Máy ngăn xếp bài 18 chỉ cần một VÒNG LẶP đi qua danh sách lệnh phẳng, đẩy/lấy ngăn xếp — không hàm nào gọi hàm nào. Hai cách đánh giá CÙNG một biểu thức, khác hẳn cơ chế."
+  - so: 20
+    slug: so-sanh-hai-cach-danh-gia
+    title: "So sánh hai cách đánh giá: đệ quy trên cây và máy ngăn xếp"
+    teaches: [ngu.compare-eval-strategies]
+    requires: [ngu.stack-machine-no-recursion, ngu.tree-walk-eval]
+    y_chinh: "Bài chốt cụm: chạy CÙNG một biểu thức qua cả hai bộ đánh giá (bài 15 và bài 19), xác nhận cùng kết quả, rồi nói ra đánh đổi: cây đệ quy dễ đọc/dễ viết hơn, máy ngăn xếp không đụng trần đệ quy (T3.4 bài 26) vì không có lời gọi hàm lồng nhau."
+
+# ── Cụm 5 (bài 21–24): BOSS — máy tính bỏ túi nhỏ của Byte ────────────────
+  - so: 21
+    slug: them-bien-vao-ngon-ngu-nho
+    title: "Thêm biến (tên) vào ngôn ngữ nhỏ"
+    teaches: [ngu.add-variables]
+    requires: [ngu.compare-eval-strategies, mem.name-is-reference]
+    y_chinh: "Tới giờ ngôn ngữ nhỏ chỉ có số. Thêm TÊN (như `x`) cần một MÔI TRƯỜNG — một `dict` ánh xạ tên sang giá trị — đúng ý T3.1 bài 20 (mem.name-is-reference) đã dạy: cái tên không giữ giá trị, nó CHỈ TỚI một chỗ giữ giá trị."
+  - so: 22
+    slug: bao-loi-co-nghia
+    title: "Báo lỗi có nghĩa — nói đúng chỗ sai"
+    teaches: [ngu.meaningful-errors]
+    requires: [ngu.add-variables, err.name-error]
+    y_chinh: "Đúng như R1 dạy `NameError` khi dùng tên chưa gán (err.name-error), ngôn ngữ nhỏ của bạn cũng phải báo RÕ khi gặp tên lạ trong môi trường — không phải trả về `None` âm thầm hay treo máy."
+  - so: 23
+    slug: do-tong-hop-truoc-boss
+    title: "Đo tổng hợp trước BOSS: token hoá + dựng cây + đánh giá"
+    teaches: [ngu.combined-pipeline]
+    requires: [ngu.meaningful-errors]
+    y_chinh: "Ghép cả ba bước đã học rời rạc thành MỘT hàm duy nhất: nhận một chuỗi, tokenize (cụm 1) → dựng cây bằng `ast.parse` (cụm 2) → đánh giá (cụm 3-4), trên vài biểu thức có biến, đối chiếu kết quả với tính tay."
+  - so: 24
+    slug: boss-ngon-ngu-nho-cua-byte
+    title: "BOSS — Ngôn ngữ nhỏ của Byte"
+    teaches: [ngu.mini-language]
+    requires: [ngu.combined-pipeline]
+    y_chinh: "Khép cả track, khép cả Realm 3: người học ráp một 'máy tính bỏ túi' hoàn chỉnh — đọc một dòng chữ, tokenize, dựng cây, gán biến, đánh giá, báo lỗi rõ ràng khi sai. Đúng lời hứa T3.4 bài 28 để lại: KHÔNG CÒN chỉ quan sát trình thông dịch có sẵn — người học vừa TỰ TAY xây một bản, dù nhỏ."

@@ -65,3 +65,9 @@ realm:
       # đống CẤU TRÚC DỮ LIỆU" (T3.2) với "ngăn xếp/đống VÙNG BỘ NHỚ" (track
       # này) — đứng ngay sau T3.3, không song song.
       - may-chay-the-nao
+      # T3.5 (track cuối Realm 3) dùng thẳng `ds.tree`/`ds.tree-traversal`
+      # (T3.2), `alg.recursion-is-stack` (T3.3), `may.fetch-decode-execute`/
+      # `may.eval-stack` (T3.4), và `mem.name-is-reference` (T3.1) để xây một
+      # trình thông dịch nhỏ từ token tới cây tới đánh giá — đứng ngay sau
+      # T3.4, không song song.
+      - ngon-ngu-va-may-truu-tuong
