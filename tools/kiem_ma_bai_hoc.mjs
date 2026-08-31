@@ -77,6 +77,60 @@ async function chay_ts(ma, ma_kiem_tra) {
   };
 }
 
+// ── Rust: cùng nguyên tắc, engine THỨ BA ──────────────────────────────────
+//
+// Đơn giản hơn TypeScript: module WASM (`byte_rust.wasm`) tự nó có ngân sách
+// nhiên liệu và giới hạn độ sâu BÊN TRONG (xem ADR-001) — không cần Worker
+// để chặn vòng lặp vô hạn, vì Rust không nhường quyền cho host.
+//
+// BẪY VỪA GẶP THẬT lúc vá: `byte_rust.wasm` là mã đã BIÊN DỊCH SẴN, y hệt
+// `dist/content` — sửa `crates/byte-rust/src/*.rs` mà không `pnpm run wasm`
+// lại thì cổng này chấm bằng một trình thông dịch Rust CŨ, đúng lớp lỗi
+// "bản dịch cũ hơn nguồn" đã có sẵn cảnh báo cho `dist/content` ở dưới —
+// giờ thêm một bản kiểm tương tự cho wasm.
+const WASM_RUST = join(process.cwd(), 'apps/byte/public/wasm/byte_rust.wasm');
+{
+  const wasm_cu = (() => {
+    try {
+      return statSync(WASM_RUST).mtimeMs;
+    } catch {
+      return 0;
+    }
+  })();
+  const rust_moi_nhat = (() => {
+    let t = 0;
+    const di = (d) => {
+      for (const e of readdirSync(d, { withFileTypes: true })) {
+        const p = join(d, e.name);
+        if (e.isDirectory()) di(p);
+        else if (e.name.endsWith('.rs')) t = Math.max(t, statSync(p).mtimeMs);
+      }
+    };
+    di('crates/byte-rust/src');
+    return t;
+  })();
+  if (rust_moi_nhat > wasm_cu) {
+    console.error(
+      `❌ ${WASM_RUST} cũ hơn crates/byte-rust/src — cổng này sẽ chấm bằng một\n`
+        + '   trình thông dịch Rust không còn khớp mã nguồn.\n'
+        + '   Biên dịch lại trước: cd apps/byte && pnpm run wasm',
+    );
+    process.exit(1);
+  }
+}
+const { BoThucThiRust } = await import(new URL('../packages/exec-rust/dist/index.js', import.meta.url).href);
+const rust_engine = new BoThucThiRust(async () => readFileSync(WASM_RUST));
+
+/** Chạy một đoạn Rust, trả về {ok, xuat, loi} — cùng hình dạng chay(). */
+async function chay_rust(ma, ma_kiem_tra) {
+  const r = await rust_engine.chay(ma, ma_kiem_tra ? { maKiemTra: ma_kiem_tra } : {});
+  return {
+    ok: r.ok,
+    xuat: r.xuat,
+    loi: r.chanDoan[0]?.vanBan ?? (r.ok ? null : 'lỗi không rõ'),
+  };
+}
+
 /** Trần số dòng in ra cho MỘT lần chạy.
  *
  *  Cần thật, không phải phòng xa: luật #5 điền `1` vào chỗ trống, và
@@ -217,40 +271,67 @@ for (const f of tep) {
     if (!c) continue;
     const la_py = c.lang === 'python';
     const la_ts = c.lang === 'typescript';
-    // Rust chưa có hạ tầng ở cổng này — xem T4.0b khi đó phải vá tương tự,
-    // đúng kỷ luật ĐO TRƯỚC KHI VIẾT, không phải bịa cách lách.
-    if (!la_py && !la_ts) continue;
+    const la_rust = c.lang === 'rust';
+    if (!la_py && !la_ts && !la_rust) continue;
 
     // Chạy một đoạn mã ĐÚNG NGÔN NGỮ của bước này, {ok, xuat, loi}.
     //
-    // CỐ Ý không gộp thành một hàm `async` dùng chung: `chay()` (Python) là
-    // đồng bộ, một luồng, không có điểm nhường nào cho vòng lặp sự kiện.
-    // Bọc nó trong `async`/`await` — dù chỉ để gọi `chay_ts` khi cần — VẪN
-    // tạo ra một điểm nhường microtask, và một lần chạy thật đã lộ ra hậu
-    // quả: một dòng in dở của bài TRƯỚC (chưa kịp xả hết qua callback
-    // `batched` của Pyodide) trôi sang `dong` của bài SAU, vì `py.setStdout`
-    // đã được gán lại nhưng Pyodide xả nốt phần còn treo vào đúng lúc vòng
-    // lặp nhường quyền ở `await`. Route Python PHẢI giữ nguyên 100% đồng bộ,
-    // không một chữ `await` nào chạm vào nó — đúng hành vi bản gốc trước khi
-    // TypeScript được thêm vào.
+    // Route Python (`chay_py`) giữ nguyên 100% đồng bộ, không một chữ
+    // `await` nào chạm vào nó — mọi lời gọi dùng ternary tường minh
+    // (`la_py ? chay_py(...) : await ...`), KHÔNG gộp qua một hàm `async`
+    // dùng chung. Đây từng là nghi phạm sai của một lỗi có thật: một lần
+    // chạy full-corpus lộ ra output của bài TRƯỚC trôi sang bài SAU, và ban
+    // đầu bị đổ oan cho điểm nhường microtask của `await`. Gỡ hết `await`
+    // khỏi route Python KHÔNG sửa được lỗi đó — cô lập bằng debug log mới
+    // tìm ra thủ phạm thật: `TRAN_DONG` (xem `chay()` ở trên) từng NÉM một
+    // `Error` từ TRONG callback `batched`, cắt ngang đúng lúc Pyodide xả
+    // `write()` ở tầng WASM, làm kẹt lại một dòng in dở trôi sang lần gọi
+    // KẾ TIẾP — bất kể `await` có mặt hay không. Đã vá tại gốc (`batched`
+    // không còn ném). Ternary tường minh ở đây giờ chỉ còn là phòng thủ
+    // theo chiều sâu, không phải điều kiện đủ để tránh lỗi đó.
     const chay_py = (ma, ma_test) => chay(ma_test ? `${ma}\n${ma_test}` : ma);
+    // Rust và TypeScript đều async (Worker/WASM); gộp chung một nhánh cho
+    // hai cái đó là an toàn — chỉ Python mới cần tách riêng như trên.
+    const chay_khac_py = (ma, ma_test) => (la_ts ? chay_ts(ma, ma_test) : chay_rust(ma, ma_test));
 
     // 1. Lời giải tham chiếu phải chạy được.
+    //
+    // RUST LÀ TRƯỜNG HỢP RIÊNG, đã đo thật: Rust không cho lệnh trần ở
+    // ngoài cùng chương trình (BR0103 "chỉ được khai báo ở ngoài cùng") —
+    // nên idiom ĐÚNG cho bài Rust có `test` là để `solution` CHỈ chứa
+    // `fn`/`struct` (không `fn main`), và `test` cung cấp `fn main` gọi vào
+    // đó kèm `assert_eq!`. Với idiom này, "chạy solution MỘT MÌNH" không áp
+    // dụng được — nó THẬT SỰ không có cách chạy độc lập, không phải một
+    // lỗi. Khi `la_rust && c.test`, gộp bước 1 và bước 2 làm một: chạy
+    // solution+test cùng lúc, và ĐÓ là phép kiểm "chạy được".
     let r_solution = null;
     if (c.solution) {
       da_chay++;
-      r_solution = la_py ? chay_py(c.solution) : await chay_ts(c.solution);
-      if (!r_solution.ok) {
-        hong.push({ bai: bai.id, buoc: b.id, loai: 'lời giải không chạy được', chi_tiet: r_solution.loi });
-        continue;
-      }
-      // 2. Khối test phải ĐẠT khi chạy trên lời giải. Nếu không thì hoặc test
-      //    sai, hoặc lời giải sai — cách nào cũng khiến người học không bao
-      //    giờ qua được bài.
-      if (c.test) {
-        const rt = la_py ? chay_py(c.solution, c.test) : await chay_ts(c.solution, c.test);
-        if (!rt.ok) {
-          hong.push({ bai: bai.id, buoc: b.id, loai: 'test TRƯỢT trên chính lời giải', chi_tiet: rt.loi });
+      if (la_rust && c.test) {
+        r_solution = await chay_khac_py(c.solution, c.test);
+        if (!r_solution.ok) {
+          hong.push({
+            bai: bai.id,
+            buoc: b.id,
+            loai: 'lời giải (ghép cùng test cung cấp fn main) không chạy được',
+            chi_tiet: r_solution.loi,
+          });
+          continue;
+        }
+      } else {
+        r_solution = la_py ? chay_py(c.solution) : await chay_khac_py(c.solution);
+        if (!r_solution.ok) {
+          hong.push({ bai: bai.id, buoc: b.id, loai: 'lời giải không chạy được', chi_tiet: r_solution.loi });
+          continue;
+        }
+        // 2. Khối test phải ĐẠT khi chạy trên lời giải. Nếu không thì hoặc
+        //    test sai, hoặc lời giải sai — cách nào cũng khiến người học
+        //    không bao giờ qua được bài.
+        if (c.test) {
+          const rt = la_py ? chay_py(c.solution, c.test) : await chay_khac_py(c.solution, c.test);
+          if (!rt.ok) {
+            hong.push({ bai: bai.id, buoc: b.id, loai: 'test TRƯỢT trên chính lời giải', chi_tiet: rt.loi });
+          }
         }
       }
     }
@@ -305,16 +386,18 @@ for (const f of tep) {
     const qua_static = (ma) =>
       !la_py || luat_static_som.every((r) => kiemAst(py, ma, r.requireAst ?? [], r.forbidAst ?? []).dat);
 
-    // Bừa Python dùng literal Python (True/1/0); bừa TypeScript dùng literal
-    // JS/TS hợp cú pháp ở HẦU HẾT vị trí biểu thức (0/'x'/true) — KHÔNG phủ
-    // được vị trí chú thích KIỂU (`: ___`), vì đó không phải một biểu thức.
-    // Bài có chỗ trống nằm ở vị trí kiểu phải tự kiểm thêm bằng tay lúc viết.
+    // Bừa Python dùng literal Python (True/1/0); bừa TypeScript VÀ Rust dùng
+    // chung một bộ literal hợp cú pháp ở HẦU HẾT vị trí biểu thức của cả hai
+    // (0/'x'/true — `'x'` là char literal hợp lệ trong CẢ HAI ngôn ngữ) —
+    // KHÔNG phủ được vị trí chú thích KIỂU (`: ___`), vì đó không phải một
+    // biểu thức. Bài có chỗ trống nằm ở vị trí kiểu phải tự kiểm thêm bằng
+    // tay lúc viết.
     const cac_bua = la_py ? ['True', '1', '0'] : ['0', "'x'", 'true'];
 
     if (b.kind === 'code' && c.starter?.includes('___') && (luat_out || c.test)) {
       for (const bua of cac_bua) {
         const thu = c.starter.replaceAll('___', bua);
-        const r = la_py ? chay_py(thu, c.test) : await chay_ts(thu, c.test);
+        const r = la_py ? chay_py(thu, c.test) : await chay_khac_py(thu, c.test);
         const qua = r.ok && (luat_out ? khop_het(r.xuat) : true) && qua_static(thu);
         if (qua) {
           hong.push({
@@ -334,19 +417,23 @@ for (const f of tep) {
     // giải thì bài không thể qua được. Kiểm cả hai chiều là cách duy nhất biết
     // luật ấy có thật sự phân biệt hay không.
     //
-    // CHỈ ÁP DỤNG CHO PYTHON. `TsAstKind` đã khai trong content-schema
-    // (discriminated-union, no-any, …) nhưng KHÔNG file nào trong
-    // `packages/exec-typescript` cài nhánh xử lý cho nó — một bài TypeScript
+    // CHỈ ÁP DỤNG CHO PYTHON. Cả `TsAstKind` lẫn `RsAstKind` đã khai trong
+    // content-schema (discriminated-union, no-any, … / borrow-move,
+    // exhaustive-match, …) nhưng KHÔNG file nào trong `packages/exec-typescript`
+    // hay `packages/exec-rust` cài nhánh xử lý cho chúng — một bài TS/Rust
     // khai `tier: static` sẽ không có cách nào được kiểm, và IM LẶNG bỏ qua
     // nó đúng là chế độ hỏng đã fix cho `kind` Python lạ (ném lỗi, không trả
     // 0 câm). Ở đây fix tương đương: NÉM LỖI ngay khi gặp, đừng chờ người
     // viết tự phát hiện lúc đọc kỹ.
     const luat_static = (b.validation?.rules ?? []).filter((r) => r.tier === 'static');
-    if (la_ts && luat_static.length > 0) {
+    if ((la_ts || la_rust) && luat_static.length > 0) {
+      const goi_y = la_ts
+        ? 'TsAstKind chưa cài trong packages/exec-typescript'
+        : 'RsAstKind chưa cài trong packages/exec-rust (borrow-check của byte-rust rất hẹp, xem ADR-002)';
       console.error(
-        `❌ ${bai.id} · bước ${b.id}: khai \`tier: static\` cho bước TypeScript, nhưng `
-          + 'chưa có hạ tầng kiểm (TsAstKind chưa cài trong packages/exec-typescript). '
-          + 'Xoá luật static này, hoặc cài kiemAst cho TypeScript trước.',
+        `❌ ${bai.id} · bước ${b.id}: khai \`tier: static\` cho bước ${c.lang}, nhưng `
+          + `chưa có hạ tầng kiểm (${goi_y}). `
+          + `Xoá luật static này, hoặc cài kiemAst cho ${c.lang} trước.`,
       );
       process.exit(1);
     }
@@ -402,9 +489,12 @@ for (const f of tep) {
     // không in gì ra màn hình (bài dạy gán lại một cái tên, ở chỗ người học
     // còn chưa được biết `print` một biến) không có đường nào hợp lệ để chấm.
     if (b.kind === 'code' && c.solution) {
-      // `throw` cho TypeScript, `assert`/`raise` cho Python — cùng vai trò:
-      // khối test tự nổ khi sai.
-      const co_assert = c.test ? /\bassert\b|\braise\b|\bthrow\b/.test(c.test) : false;
+      // `throw` cho TypeScript, `assert`/`raise` cho Python, `assert!`/
+      // `assert_eq!`/`assert_ne!`/`panic!` cho Rust — cùng vai trò: khối
+      // test tự nổ khi sai. `\bassert` (không có `\b` sau) khớp cả
+      // `assert_eq!`/`assert_ne!`, vì `_` là ký tự "chữ" nên `\bassert\b`
+      // không khớp qua dấu gạch dưới.
+      const co_assert = c.test ? /\bassert|\braise\b|\bthrow\b|\bpanic!/.test(c.test) : false;
       const co_output = luat_out && String(luat_out.expected ?? '').trim() !== '';
       if (!co_assert && !co_output && !static_phan_biet) {
         hong.push({
@@ -421,11 +511,16 @@ for (const f of tep) {
     // 4. Mã `starter` KHÔNG được vô tình đã đạt sẵn — nếu đạt thì bài không
     //    yêu cầu người học làm gì cả.
     if (c.starter && c.solution && !c.starter.includes('___')) {
-      const rs = la_py ? chay_py(c.starter) : await chay_ts(c.starter);
+      // Rust + có test: cùng lý do ở mục 1 — `starter` một mình (không
+      // `fn main`) không chạy được, nên phải ghép với `test` NGAY TỪ ĐẦU,
+      // không chạy "một mình" trước rồi mới ghép sau.
+      const rs = la_rust && c.test
+        ? await chay_khac_py(c.starter, c.test)
+        : la_py ? chay_py(c.starter) : await chay_khac_py(c.starter);
       const dat_san = luat_out
         ? rs.ok && khop_het(rs.xuat)
         : c.test
-          ? (la_py ? chay_py(c.starter, c.test) : await chay_ts(c.starter, c.test)).ok
+          ? (la_rust ? rs : la_py ? chay_py(c.starter, c.test) : await chay_khac_py(c.starter, c.test)).ok
           : false;
       if (dat_san) {
         hong.push({
