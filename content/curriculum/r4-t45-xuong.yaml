@@ -1,0 +1,418 @@
+# Xương sống R4.T4.5 — Đại số của chương trình (54 bài)
+#
+# Track LỚN NHẤT Realm 4. T4.4 (Generics/Traits, Rust) bị HOÃN — xem
+# `docs/decisions/R4-T44-generics-traits-do-duoc.md` (trait bound không parse
+# được trong byte-rust, cần ~5.000 dòng hạ tầng chưa đầu tư). Track này quay
+# lại TypeScript, tiếp nối T4.3 (ADT & Pattern Matching) — KHÔNG phụ thuộc
+# byte-rust, không bị chặn bởi quyết định hoãn đó.
+#
+# MASTERPLAN §1272 ghi đúng một dòng cho track này: "Đại số của chương trình
+# (54) [TS] ← Monoid→Functor→Applicative→Monad→Traverse→Cata". Sáu khái niệm
+# đó là ĐẠI SỐ TRỪU TƯỢNG — tồn tại độc lập với TypeScript (có ở Haskell,
+# Scala, Rust, mọi ngôn ngữ FP) — track này DẠY chúng BẰNG TypeScript, không
+# dạy "TypeScript's Monoid API" (không có API nào như vậy có sẵn). Namespace
+# skill dùng `alg.*` (không phải `ts.*`) — phân biệt RÕ với T4.0a/T4.3 (những
+# track dạy CƠ CHẾ TypeScript cụ thể: kiểu, union, narrowing), vì đây là khái
+# niệm PORTABLE, TypeScript chỉ là NGÔN NGỮ DIỄN ĐẠT.
+#
+# QUYẾT ĐỊNH KHÔNG DÙNG THƯ VIỆN (giống quyết định "không dùng toolz" ở T4.2,
+# "không dùng zod/io-ts" ở T4.3): `fp/TypeScript_Books/part_5_fp_patterns/`
+# (chương 25-30c, nguồn tham khảo) viết BẰNG `fp-ts`/`Effect-TS` — đã đo
+# `packages/exec-typescript/package.json`: CHỈ có `typescript` + `sucrase`,
+# KHÔNG có `fp-ts`/`effect`/bất kỳ thư viện FP nào. Track này TỰ VIẾT TAY mọi
+# khái niệm (Option/Result/Monoid/map/chain/traverse/fold) bằng TypeScript
+# thuần, không import gì ngoài chuẩn ngôn ngữ — đúng tinh thần "hiểu THẬT nó
+# làm gì, không chỉ nhớ tên API thư viện" đã xuyên suốt track T4.1-T4.3.
+#
+# Ràng buộc đã đo trước khi viết (đo thật qua tsprobe.mjs, TypeScript 5.9,
+# `strict: true` — KHÁC byte-rust, generic TypeScript THẬT hoạt động đầy đủ,
+# không có bất đối xứng/lỗi unify nào như đã đo ở byte-rust cho T4.4):
+#   - Option<T>/Result<T,E> tự viết (discriminated union, kiểu T4.3 đã dạy)
+#     với hàm `mapOption<T,U>`/`chainOption<T,U>` GENERIC unify đúng — đã đo.
+#   - Monoid (`{ ketHop: (a,b)=>T; rong: T }`) + `concatAll` bằng
+#     `ds.reduce(m.ketHop, m.rong)` (nối T4.2's reduce) chạy đúng cho số,
+#     chuỗi, mảng rỗng — đã đo.
+#   - Applicative `map2` — CẢ hai chiến lược đã đo: fail-fast (dừng ở lỗi
+#     ĐẦU) và collect-all (gom HẾT lỗi vào một mảng) đều chạy đúng, khác
+#     nhau THẬT ở cách viết (không chỉ lý thuyết).
+#   - Monad `chainOption`/`chainResult` (flatMap) làm PHẲNG kết quả lồng —
+#     đã đo, phân biệt được với `map` (map để lại Option<Option<T>> nếu hàm
+#     áp dụng CHÍNH NÓ trả Option; chain thì không).
+#   - Traverse: `Array<Option<T>>` → `Option<Array<T>>` bằng vòng lặp có
+#     short-circuit — đã đo (mảng có MỘT phần tử "khong" thì cả kết quả là
+#     "khong", không phải mảng thiếu một chỗ).
+#   - Catamorphism: `foldExpr<R>(e, boXuLy: BoXuLyExpr<R>): R` tách phần ĐỆ
+#     QUY ra khỏi phần TÍNH TOÁN — đã đo dùng LẠI CÙNG một `foldExpr` cho
+#     HAI việc khác nhau (tính giá trị, đếm số node) trên CÙNG một `Expr`
+#     (tái dùng chính xác `Expr` đã dạy ở T4.3 cụm 6).
+#   - **`tier: static` KHÔNG dùng được cho TypeScript** (giống T4.3) —
+#     TsAstKind chưa cài, gate tự `throw`. Mọi bài `code` chỉ dùng
+#     `run`/`tests`/`output`.
+#   - Hai bẫy gate đã gặp thật ở T4.3 (xem
+#     `docs/../HANDOFF` phiên trước / commit `9a59d85`): (1) chỗ trống nằm
+#     trong nhánh KHÔNG bị test nào chạm tới — PHẢI có test ép chạy nhánh đó;
+#     (2) đáp án đúng trùng với một trong ba literal "điền bừa" gate tự thử
+#     (`0`/`'x'`/`true`) — PHẢI mở rộng phạm vi chỗ trống ra một biểu thức
+#     LỚN HƠN bao trùm literal đó, không để một mình literal đơn độc làm chỗ
+#     trống nếu nó trùng khả năng cao với `0`/`'x'`/`true`.
+#
+# NGUỒN THAM KHẢO (chỉ đọc Ý, KHÔNG chép code — chương gốc dùng fp-ts/Effect,
+# track này viết lại HOÀN TOÀN bằng TypeScript thuần):
+# `fp/TypeScript_Books/part_5_fp_patterns/chapter_26_functors_map.md`,
+# `chapter_27_monads_bind.md`, `chapter_28_applicative_validation.md`,
+# `chapter_29_monoids_algebra.md`, `chapter_30_traverse_sequence.md`,
+# `chapter_30c_recursive_types_folds.md`.
+#
+# Ý XUYÊN SUỐT: nhiều "khuôn mẫu code" trông có vẻ khác nhau (cộng số, nối
+# chuỗi, gộp mảng lỗi validate, làm phẳng Option lồng, lật Array<Option>) THẬT
+# RA là MỘT khuôn hình học được LẶP LẠI — đại số cho phép ĐẶT TÊN khuôn đó
+# MỘT LẦN, nhận ra nó ở khắp nơi, thay vì học lại từng trường hợp riêng lẻ.
+#
+# Namespace skill: `alg.*` — đã quét chéo KHÔNG trùng `teaches` toàn project.
+
+track: dai-so-cua-chuong-trinh
+realm: lap-trinh-ham
+ten: "T4.5 — Đại số của chương trình"
+so_bai: 54
+ngon_ngu_chu: typescript
+
+# ── Cụm 1 (bài 1–7): Monoid — kết hợp hai giá trị CÙNG LOẠI ───────────────
+bai:
+  - so: 1
+    slug: nhieu-phep-cong-mot-khuon-chung
+    title: "Cộng số, nối chuỗi, gộp mảng — MỘT khuôn chung ẩn bên dưới"
+    teaches: [alg.spot-the-pattern]
+    requires: [fp.reduce-basics]
+    y_chinh: "`1 + 2`, `\"a\" + \"b\"`, `[1,2].concat([3,4])` — ba phép toán TRÔNG khác hẳn nhau (số, chuỗi, mảng), nhưng CÙNG hình dạng: nhận HAI giá trị CÙNG KIỂU, trả về MỘT giá trị CÙNG KIỂU ĐÓ. Bài dựng vấn đề bằng cách xếp ba ví dụ cạnh nhau — chưa đặt tên khái niệm, chỉ cho THẤY khuôn lặp lại."
+  - so: 2
+    slug: gia-tri-trung-tinh-khong-doi-gi-ca
+    title: "Giá trị TRUNG TÍNH — kết hợp với nó, không đổi gì cả"
+    teaches: [alg.identity-element]
+    requires: [alg.spot-the-pattern]
+    y_chinh: "`5 + 0 === 5`, `\"chao\" + \"\" === \"chao\"`, `[1,2].concat([]) `giữ nguyên `[1,2]`` — mỗi phép kết hợp ở bài 1 có MỘT giá trị ĐẶC BIỆT: kết hợp với nó (dù bên trái hay bên phải) không đổi gì. `0` cho cộng, `\"\"` cho nối chuỗi, `[]` cho gộp mảng — BA giá trị khác nhau, CÙNG một vai trò: 'trung tính', không phải trùng hợp."
+  - so: 3
+    slug: dinh-nghia-monoid-ket-hop-va-trung-tinh
+    title: "Định nghĩa `Monoid` — một cặp: cách KẾT HỢP, và giá trị TRUNG TÍNH"
+    teaches: [alg.monoid-interface]
+    requires: [alg.identity-element]
+    y_chinh: "`interface Monoid<T> { ketHop: (a: T, b: T) => T; rong: T }` — một object TypeScript ghi lại ĐÚNG hai thứ bài 1-2 đã thấy: hàm kết hợp, và giá trị trung tính. `const monoidCong: Monoid<number> = { ketHop: (a,b) => a+b, rong: 0 }` — ĐÃ ĐO THẬT. Không phải khái niệm mới — chỉ ĐẶT TÊN HÌNH THỨC cho khuôn bài 1-2 đã lặp lại."
+  - so: 4
+    slug: gop-mot-mang-bang-monoid-va-reduce
+    title: "Gộp MỘT MẢNG giá trị bằng Monoid — nối thẳng `reduce`"
+    teaches: [alg.concat-all-via-reduce]
+    requires: [alg.monoid-interface]
+    y_chinh: "`function gopTatCa<T>(m: Monoid<T>, ds: T[]): T { return ds.reduce(m.ketHop, m.rong); }` — ĐÃ ĐO THẬT, dùng CHUNG một hàm `gopTatCa` cho `monoidCong` (`[1,2,3,4]` → `10`) VÀ `monoidNoiChuoi` (`[\"a\",\"b\",\"c\"]` → `\"abc\"`). Nối thẳng T4.2's `reduce` (bài 9-10) — `m.rong` CHÍNH LÀ `khoi_dau`, `m.ketHop` CHÍNH LÀ hàm gộp. Đại số không thay thế `reduce` — nó cho `reduce` một BỘ THAM SỐ có tên, tái dùng được."
+  - so: 5
+    slug: mang-rong-van-ra-dung-gia-tri-trung-tinh
+    title: "Mảng RỖNG vẫn ra đúng — nhờ giá trị trung tính"
+    teaches: [alg.empty-array-needs-identity]
+    requires: [alg.concat-all-via-reduce]
+    y_chinh: "`gopTatCa(monoidCong, [])` phải ra `0`, không phải lỗi hay `undefined` — ĐÃ ĐO THẬT. Đây là LÝ DO `rong` phải có mặt trong `Monoid` (không chỉ `ketHop`): `reduce` với mảng rỗng KHÔNG có phần tử nào để gộp, phải bắt đầu từ ĐÂU ĐÓ — `rong` là điểm bắt đầu ĐÚNG, không làm lệch kết quả dù mảng rỗng hay không."
+  - so: 6
+    slug: tu-viet-mot-monoid-moi
+    title: "Tự viết một `Monoid` MỚI"
+    teaches: [alg.write-monoid]
+    requires: [alg.empty-array-needs-identity]
+    y_chinh: "Bài code có chấm điểm sống: viết `monoidNhan: Monoid<number>` (kết hợp bằng phép NHÂN, không phải cộng) — điểm khó: giá trị `rong` phải là `1` (KHÔNG phải `0` — nhân với `0` sẽ luôn ra `0`, phá mọi phép nhân), đúng bài học 'giá trị trung tính phải ĐÚNG với phép kết hợp cụ thể', không có công thức chung cho mọi Monoid."
+  - so: 7
+    slug: do-tong-hop-monoid
+    title: "Đo tổng hợp: Monoid"
+    teaches: [alg.review-monoid]
+    requires: [alg.write-monoid]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: viết MỘT `Monoid` MỚI (khác cộng/nhân/nối chuỗi đã dùng — ví dụ `Monoid<boolean>` kết hợp bằng `&&`, `rong = true`) VÀ dùng `gopTatCa` với nó. Không khái niệm mới — đo khả năng tự NHẬN RA một phép kết hợp có phải Monoid không, và tìm ĐÚNG giá trị trung tính của nó."
+
+# ── Cụm 2 (bài 8–13): Option & Result tự viết — vật liệu cho các cụm sau ──
+  - so: 8
+    slug: gia-tri-co-the-vang-mat-khong-dung-null
+    title: "Giá trị CÓ THỂ VẮNG MẶT — không dùng `null`/`undefined`"
+    teaches: [alg.avoid-null-motivation]
+    requires: [ts.adt-gate-boss]
+    y_chinh: "Nhớ lại T4.0a's `ts.possibly-undefined`: `undefined` LẶN vào bất kỳ đâu, dễ quên kiểm. T4.3 đã dạy discriminated union mô hình hoá 'nhiều hình dạng' rõ ràng — bài này áp dụng ĐÚNG kỹ năng đó cho một vấn đề CŨ: 'giá trị có thể có, có thể không' KHÔNG cần `null`, dùng một ADT tường minh thay thế."
+  - so: 9
+    slug: tu-viet-option-co-hoac-khong
+    title: "Tự viết `Option<T>` — `\"co\"` hoặc `\"khong\"`"
+    teaches: [alg.option-type]
+    requires: [alg.avoid-null-motivation]
+    y_chinh: "`type Option<T> = { kind: \"co\"; giaTri: T } | { kind: \"khong\" }` cùng hai hàm dựng `co<T>(giaTri: T): Option<T>` và `khong<T>(): Option<T>` — ĐÃ ĐO THẬT, generic unify đúng (khác byte-rust — TypeScript thật không có bất đối xứng đó). Đây CHÍNH LÀ discriminated union T4.3 đã dạy, không khái niệm hạ tầng mới — chỉ một CÁCH DÙNG mới: thay `null`."
+  - so: 10
+    slug: pattern-match-tren-option
+    title: "`switch` trên `Option` — đúng kỷ luật exhaustiveness đã học"
+    teaches: [alg.pattern-match-option]
+    requires: [alg.option-type]
+    y_chinh: "`switch (o.kind) { case \"co\": ...o.giaTri...; case \"khong\": ... }` — nối thẳng T4.3's cụm 2 (exhaustiveness). Bài predict: quên nhánh `\"khong\"` không có `default`/`assertNever` thì TypeScript có báo lỗi không (không — đúng lỗi bài 7 T4.3 đã dạy, `switch` không tự đòi xử lý đủ nếu không có assertNever)."
+  - so: 11
+    slug: tu-viet-result-thanh-cong-hoac-loi
+    title: "Tự viết `Result<T, E>` — thành công hoặc lỗi CÓ LÝ DO"
+    teaches: [alg.result-type]
+    requires: [alg.pattern-match-option]
+    y_chinh: "`type Result<T, E> = { kind: \"ok\"; giaTri: T } | { kind: \"loi\"; loi: E }` cùng `ok<T,E>`/`loi<T,E>` — ĐÃ ĐO THẬT. Khác `Option` (chỉ nói 'có/không', không giải thích TẠI SAO không có), `Result` MANG THEO lý do lỗi trong biến thể `\"loi\"` — chọn `Option` hay `Result` tuỳ: có cần GIẢI THÍCH lý do vắng mặt hay không."
+  - so: 12
+    slug: khi-nao-dung-option-khi-nao-dung-result
+    title: "Khi nào dùng `Option`, khi nào dùng `Result`"
+    teaches: [alg.option-vs-result]
+    requires: [alg.result-type]
+    y_chinh: "Bài LÝ THUYẾT: tìm một phần tử trong mảng theo điều kiện → `Option` (không tìm thấy không cần LÝ DO, chỉ cần biết 'không có'). Chuyển chuỗi thành số → `Result` (chuyển thất bại thì NGƯỜI DÙNG cần biết TẠI SAO — chuỗi rỗng? ký tự không phải số?). Không có câu trả lời máy móc — phụ thuộc: lỗi có cần GIẢI THÍCH được cho người dùng không."
+  - so: 13
+    slug: do-tong-hop-option-result
+    title: "Đo tổng hợp: `Option` & `Result` tự viết"
+    teaches: [alg.review-option-result]
+    requires: [alg.option-vs-result]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: viết một hàm dùng `Option` (tìm số CHẴN đầu tiên trong mảng, không có LÝ DO cụ thể khi không tìm thấy) VÀ một hàm dùng `Result` (chuyển chuỗi thành số nguyên, LỖI ghi rõ chuỗi gốc). Không khái niệm mới — đo khả năng CHỌN ĐÚNG kiểu ADT theo ngữ cảnh."
+
+# ── Cụm 3 (bài 14–20): Functor — `.map()` tổng quát hoá ───────────────────
+  - so: 14
+    slug: viet-map-rieng-cho-option
+    title: "Viết `map` RIÊNG cho `Option`"
+    teaches: [alg.map-option-handwritten]
+    requires: [alg.review-option-result]
+    y_chinh: "`function mapOption<T,U>(o: Option<T>, f: (x: T) => U): Option<U> { switch (o.kind) { case \"co\": return co(f(o.giaTri)); case \"khong\": return khong(); } }` — ĐÃ ĐO THẬT. Nếu `Option` 'có', áp dụng `f` lên giá trị BÊN TRONG, giữ nguyên vỏ `Option`; nếu 'không', giữ nguyên 'không', KHÔNG gọi `f`."
+  - so: 15
+    slug: viet-map-rieng-cho-result
+    title: "Viết `map` RIÊNG cho `Result` — CÙNG khuôn"
+    teaches: [alg.map-result-handwritten]
+    requires: [alg.map-option-handwritten]
+    y_chinh: "`function mapResult<T,U,E>(r: Result<T,E>, f: (x: T) => U): Result<U,E> { ... }` — ĐÃ ĐO THẬT. So `mapOption` với `mapResult` cạnh nhau: CÙNG cấu trúc hệt nhau (nếu 'thành công', áp dụng f bên trong, giữ vỏ; nếu 'lỗi', giữ nguyên lỗi) — chỉ khác TÊN biến thể (`co`/`khong` vs `ok`/`loi`)."
+  - so: 16
+    slug: array-map-cung-la-cung-khuon
+    title: "`Array.prototype.map` CŨNG là cùng khuôn — bạn đã dùng nó từ T4.2"
+    teaches: [alg.array-map-same-pattern]
+    requires: [alg.map-result-handwritten]
+    y_chinh: "`[1,2,3].map(x => x * 2)` — ĐÃ ĐO THẬT, nhìn lại với con mắt mới: nếu mảng CÓ phần tử, áp dụng `f` lên TỪNG phần tử, giữ nguyên 'vỏ' (vẫn là một mảng, cùng số lượng); mảng RỖNG map ra mảng RỖNG (giữ nguyên vỏ, không gọi f lần nào). CÙNG khuôn `mapOption`/`mapResult` — track T4.2 đã dùng khuôn này SUỐT mà chưa đặt tên."
+  - so: 17
+    slug: dat-ten-functor-bat-ky-hop-chua-co-map-dung-luat
+    title: "Đặt tên: `Functor` — bất kỳ 'hộp chứa' có `map` đúng luật"
+    teaches: [alg.functor-definition]
+    requires: [alg.array-map-same-pattern]
+    y_chinh: "`Option`, `Result`, `Array` — BA kiểu dữ liệu khác hẳn nhau, CÙNG có một hàm `map` cùng hình dạng: 'áp dụng f lên giá trị bên trong, giữ nguyên hình dạng bên ngoài'. Bất kỳ kiểu nào có `map` như vậy được gọi là một **Functor**. Không phải một kiểu dữ liệu CỤ THỂ — một TÍNH CHẤT mà nhiều kiểu dữ liệu khác nhau CÙNG có."
+  - so: 18
+    slug: luat-functor-mot-map-id-khong-doi-gi
+    title: "Luật Functor 1: `map(id)` không đổi gì cả"
+    teaches: [alg.functor-law-identity]
+    requires: [alg.functor-definition]
+    y_chinh: "`mapOption(co(5), x => x)` phải ra ĐÚNG `co(5)` — ĐÃ ĐO THẬT. `x => x` (hàm 'giữ nguyên', gọi là `id`) áp dụng qua `map` thì KHÔNG được đổi gì — nếu một hàm `map` tự chế phá luật này (ví dụ âm thầm nhân đôi giá trị), nó KHÔNG PHẢI một Functor hợp lệ, dù cú pháp trông giống. Bài predict: một `map` VIẾT SAI (cố ý có side effect) có tuân luật này không."
+  - so: 19
+    slug: luat-functor-hai-ghep-hai-map-bang-mot-map-ghep
+    title: "Luật Functor 2: ghép hai `map` bằng MỘT `map` đã ghép hàm"
+    teaches: [alg.functor-law-composition]
+    requires: [alg.functor-law-identity]
+    y_chinh: "`mapOption(mapOption(o, f), g)` phải ra CÙNG kết quả với `mapOption(o, compose(g, f))` — ĐÃ ĐO THẬT. Nối thẳng T4.2's `compose` (bài 19): gọi `map` hai lần liên tiếp TƯƠNG ĐƯƠNG gọi `map` MỘT lần với hai hàm đã GHÉP LẠI trước. Luật này đảm bảo `map` 'đáng tin' — không có hiệu ứng lạ khi ghép nhiều lần."
+  - so: 20
+    slug: do-tong-hop-functor
+    title: "Đo tổng hợp: Functor"
+    teaches: [alg.review-functor]
+    requires: [alg.functor-law-composition]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: viết `mapResult` từ đầu (chưa cho sẵn khung), rồi TỰ kiểm nó tuân luật identity (bằng test, không phải chứng minh hình thức). Không khái niệm mới — đo khả năng tự dựng một Functor ĐÚNG luật, không chỉ đúng kiểu."
+
+# ── Cụm 4 (bài 21–27): Applicative — kết hợp NHIỀU giá trị ĐỘC LẬP ────────
+  - so: 21
+    slug: ba-ket-qua-doc-lap-muon-gop-cung-luc
+    title: "Ba `Result` ĐỘC LẬP — muốn kiểm tra CẢ BA cùng lúc"
+    teaches: [alg.independent-values-motivation]
+    requires: [alg.review-functor]
+    y_chinh: "Kiểm tra một form đăng ký: `tenHopLe: Result<string,string>`, `tuoiHopLe: Result<number,string>`, `emailHopLe: Result<string,string>` — BA phép kiểm KHÔNG phụ thuộc lẫn nhau (kiểm tuổi không cần biết tên đã hợp lệ chưa). `map`/`mapResult` (cụm 3) chỉ xử lý MỘT `Result`, không đủ để GHÉP ba `Result` ĐỘC LẬP thành một kết quả."
+  - so: 22
+    slug: map2-ghep-hai-result-doc-lap-bang-mot-ham
+    title: "`map2` — ghép HAI `Result` độc lập bằng một hàm"
+    teaches: [alg.map2-handwritten]
+    requires: [alg.independent-values-motivation]
+    y_chinh: "`function map2<A,B,C,E>(ra: Result<A,E>, rb: Result<B,E>, f: (a:A,b:B)=>C): Result<C,E> { if (ra.kind===\"loi\") return loi(ra.loi); if (rb.kind===\"loi\") return loi(rb.loi); return ok(f(ra.giaTri, rb.giaTri)); }` — ĐÃ ĐO THẬT. Đây là kiểu FAIL-FAST: kiểm `ra` trước, nếu lỗi TRẢ NGAY, không cần xem `rb`."
+  - so: 23
+    slug: fail-fast-dung-o-loi-dau-tien
+    title: "Fail-fast — dừng Ở LỖI ĐẦU TIÊN, không xem tiếp"
+    teaches: [alg.fail-fast-semantics]
+    requires: [alg.map2-handwritten]
+    y_chinh: "`map2(loi(\"lỗi a\"), ok(4), (a,b)=>a+b)` phải ra `loi(\"lỗi a\")` — ĐÃ ĐO THẬT. `rb` (có giá trị `ok(4)` hợp lệ) KHÔNG hề được đọc tới trong nhánh này — hàm `f` KHÔNG BAO GIỜ được gọi nếu `ra` lỗi. Bài predict: nếu CẢ HAI `ra` và `rb` đều lỗi, `map2` fail-fast báo lỗi CỦA AI (chỉ `ra`, mất thông tin lỗi của `rb`)."
+  - so: 24
+    slug: collect-all-gom-het-loi-khong-dung-som
+    title: "Collect-all — gom HẾT lỗi, không dừng sớm"
+    teaches: [alg.collect-all-semantics]
+    requires: [alg.fail-fast-semantics]
+    y_chinh: "`function map2GomLoi<A,B,C,E>(...): Result<C, E[]>` — biến thể `\"loi\"` MANG một MẢNG lỗi, không phải một lỗi đơn — ĐÃ ĐO THẬT: `map2GomLoi(loiMot(\"thiếu tên\"), loiMot(\"thiếu tuổi\"), f)` ra `{ kind: \"loi\", loi: [\"thiếu tên\", \"thiếu tuổi\"] }` — CẢ HAI lỗi, không mất cái nào. Đây là điểm KHÁC BIỆT CỐT LÕI applicative có mà `chain`/monad (cụm sau) KHÔNG có — vì `chain` (theo bản chất phụ thuộc tuần tự) BẮT BUỘC dừng ở lỗi đầu."
+  - so: 25
+    slug: tu-viet-map2-gom-loi
+    title: "Tự viết `map2GomLoi`"
+    teaches: [alg.write-map2-collect]
+    requires: [alg.collect-all-semantics]
+    y_chinh: "Bài code có chấm điểm sống: viết `map2GomLoi` — bốn trường hợp (cả hai `ok`, `ra` lỗi, `rb` lỗi, CẢ HAI lỗi) đều phải đúng, test kiểm riêng từng trường hợp, đặc biệt trường hợp 'cả hai lỗi' phải gom ĐỦ cả hai vào một mảng, không mất cái nào."
+  - so: 26
+    slug: ap-dung-validate-mot-form-nhieu-truong
+    title: "Áp dụng: validate một form NHIỀU trường, gom hết lỗi"
+    teaches: [alg.apply-form-validation]
+    requires: [alg.write-map2-collect]
+    y_chinh: "Ví dụ ĐẦY ĐỦ: `kiemTen`, `kiemTuoi`, `kiemEmail` (ba hàm validate ĐỘC LẬP) ghép qua `map2GomLoi` lồng hai lần (`map2GomLoi(map2GomLoi(kiemTen(...), kiemTuoi(...), gop), kiemEmail(...), gop)`), form SAI CẢ BA trường phải báo ĐỦ BA lỗi trong MỘT lần chạy — không phải sửa lỗi 1, chạy lại, thấy lỗi 2, sửa, chạy lại thấy lỗi 3 (trải nghiệm THẬT tệ của fail-fast khi validate form)."
+  - so: 27
+    slug: do-tong-hop-applicative
+    title: "Đo tổng hợp: Applicative"
+    teaches: [alg.review-applicative]
+    requires: [alg.apply-form-validation]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: viết `map3GomLoi` (ba `Result` độc lập, không phải hai) và dùng nó validate một form BA trường MỚI (khác form bài 26). Không khái niệm mới — đo khả năng mở rộng khuôn `map2` lên nhiều đối số hơn."
+
+# ── Cụm 5 (bài 28–34): Monad — chuỗi phép tính PHỤ THUỘC nhau ─────────────
+  - so: 28
+    slug: khi-map-khong-du-ham-tra-ve-chinh-option
+    title: "Khi `map` KHÔNG ĐỦ — hàm áp dụng CHÍNH NÓ trả về `Option`"
+    teaches: [alg.map-insufficient-nested]
+    requires: [alg.review-applicative]
+    y_chinh: "`const chia = (a: number, b: number): Option<number> => b === 0 ? khong() : co(a/b);` rồi `mapOption(co(10), x => chia(x, 2))` — ĐÃ ĐO THẬT, kết quả là `Option<Option<number>>` (một `Option` LỒNG bên trong `Option`, `co(co(5))`), không phải `Option<number>` phẳng như mong muốn. Vì `chia` TỰ NÓ đã trả `Option`, `map` (chỉ 'gói lại' kết quả của f) tạo ra hai lớp vỏ lồng nhau."
+  - so: 29
+    slug: chain-lam-phang-ket-qua-long
+    title: "`chain` — LÀM PHẲNG kết quả lồng"
+    teaches: [alg.chain-flattens]
+    requires: [alg.map-insufficient-nested]
+    y_chinh: "`function chainOption<T,U>(o: Option<T>, f: (x:T) => Option<U>): Option<U> { switch(o.kind) { case \"co\": return f(o.giaTri); case \"khong\": return khong(); } }` — ĐÃ ĐO THẬT. Khác `map` (bọc kết quả của `f` vào MỘT lớp `co` MỚI), `chain` TRẢ THẲNG kết quả của `f` (đã LÀ một `Option` rồi) — không có lớp lồng nào cả. `chainOption(co(10), x => chia(x, 2))` ra ĐÚNG `co(5)`, phẳng."
+  - so: 30
+    slug: viet-chain-cho-result
+    title: "Viết `chain` cho `Result` — CÙNG khuôn"
+    teaches: [alg.chain-result-handwritten]
+    requires: [alg.chain-flattens]
+    y_chinh: "`function chainResult<T,U,E>(r: Result<T,E>, f: (x:T) => Result<U,E>): Result<U,E> { ... }` — ĐÃ ĐO THẬT, CÙNG khuôn `chainOption`, chỉ đổi tên biến thể. Bất kỳ kiểu có `chain` đúng luật (giống Functor có `map` đúng luật) được gọi là một **Monad** — `Option`/`Result` VỪA là Functor VỪA là Monad."
+  - so: 31
+    slug: chuoi-nhieu-buoc-qua-chain
+    title: "Chuỗi NHIỀU bước qua `chain` — mỗi bước phụ thuộc bước trước"
+    teaches: [alg.chain-sequential-steps]
+    requires: [alg.chain-result-handwritten]
+    y_chinh: "`chainResult(chainResult(chuyenSo(vb), x => chia(100, x)), y => canBac2(y))` — ba bước, MỖI bước NHẬN kết quả bước TRƯỚC làm đầu vào (khác cụm 4's Applicative — các giá trị ở đó ĐỘC LẬP, không nhận nhau làm đầu vào). Bất kỳ bước NÀO lỗi, TOÀN CHUỖI dừng ở đó, trả lỗi đó — chain BẮT BUỘC fail-fast, vì bước SAU cần GIÁ TRỊ THẬT của bước trước để chạy, không có cách nào 'chạy song song rồi gom lỗi' như Applicative."
+  - so: 32
+    slug: doi-chieu-map-va-chain
+    title: "Đối chiếu `map` và `chain` — khi nào dùng cái nào"
+    teaches: [alg.map-vs-chain]
+    requires: [alg.chain-sequential-steps]
+    y_chinh: "Bài LÝ THUYẾT: dùng `map` khi hàm áp dụng LUÔN trả một giá trị TRẦN (không tự bọc `Option`/`Result`) — ví dụ `x => x * 2`. Dùng `chain` khi hàm áp dụng TỰ NÓ trả một `Option`/`Result` — ví dụ `chia` (có thể lỗi). Nhầm `map` khi cần `chain` tạo ra kết quả LỒNG (bài 28); nhầm `chain` khi cần `map` thì TypeScript THƯỜNG báo lỗi kiểu ngay (vì hàm trả giá trị trần, không phải `Option`, không khớp chữ ký `chain` đòi)."
+  - so: 33
+    slug: chuoi-that-chuyen-so-chia-can
+    title: "Một chuỗi THẬT: chuyển chuỗi → chia → căn bậc hai, mỗi bước có thể lỗi"
+    teaches: [alg.real-chain-example]
+    requires: [alg.map-vs-chain]
+    y_chinh: "Bài code có chấm điểm sống: viết `tinhToanChuoi(vb: string): Result<number, string>` — chuyển `vb` thành số (lỗi nếu không phải số), chia `100` cho số đó (lỗi nếu số đó là `0`), lấy căn bậc hai kết quả (lỗi nếu kết quả âm), ghép BA bước qua `chainResult`. Test: input hợp lệ chạy hết, input gây lỗi Ở TỪNG bước dừng ĐÚNG chỗ (nối thẳng T4.2's pipeline error-handling, bài 28)."
+  - so: 34
+    slug: do-tong-hop-monad
+    title: "Đo tổng hợp: Monad"
+    teaches: [alg.review-monad]
+    requires: [alg.real-chain-example]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: viết một chuỗi BA bước KHÁC (không lặp lại bài 33) qua `chainOption` (không phải `chainResult`), MỖI bước phụ thuộc bước trước. Không khái niệm mới — đo khả năng tự nhận diện lúc nào cần `chain` thay vì `map`."
+
+# ── Cụm 6 (bài 35–40): Traverse — lật MỘT mảng chứa Option/Result ────────
+  - so: 35
+    slug: mang-cac-option-muon-lat-thanh-option-cua-mang
+    title: "`Array<Option<T>>` — muốn LẬT thành `Option<Array<T>>`"
+    teaches: [alg.traverse-motivation]
+    requires: [alg.review-monad]
+    y_chinh: "Có `chuyenSo: (s: string) => Option<number>`, áp `.map(chuyenSo)` lên `[\"1\",\"2\",\"3\"]` ra `Option<number>[]` (một MẢNG các `Option`, MỖI phần tử có thể 'có' hoặc 'không' RIÊNG) — ĐÃ ĐO THẬT. Nhưng thường muốn NGƯỢC LẠI: MỘT `Option<number[]>` — 'có TOÀN BỘ mảng số' NẾU mọi phần tử chuyển được, 'không có gì' NẾU dù chỉ MỘT phần tử thất bại. Đây là bài toán LẬT TRONG-NGOÀI (`Array<Option<_>>` → `Option<Array<_>>`)."
+  - so: 36
+    slug: viet-traverse-bang-vong-lap-co-short-circuit
+    title: "Viết `traverse` bằng vòng lặp — DỪNG NGAY khi gặp `\"khong\"`"
+    teaches: [alg.traverse-handwritten]
+    requires: [alg.traverse-motivation]
+    y_chinh: "`function traverse<T,U>(ds: T[], f: (x:T) => Option<U>): Option<U[]> { const kq: U[] = []; for (const x of ds) { const o = f(x); if (o.kind===\"khong\") return khong(); kq.push(o.giaTri); } return co(kq); }` — ĐÃ ĐO THẬT: `traverse([\"1\",\"2\",\"3\"], chuyenSo)` ra `co([1,2,3])`; `traverse([\"1\",\"abc\",\"3\"], chuyenSo)` ra `khong()` NGAY (không cần biết phần tử thứ ba, dừng SỚM tại phần tử thứ hai)."
+  - so: 37
+    slug: doan-truoc-traverse-dung-som
+    title: "Dự đoán: `traverse` có XỬ LÝ HẾT mảng trước khi báo `\"khong\"` không?"
+    teaches: [alg.predict-traverse-shortcircuit]
+    requires: [alg.traverse-handwritten]
+    y_chinh: "Bài predict thuần: cho `traverse` với một hàm `f` có `console.log` để LỘ RÕ nó được gọi bao nhiêu lần, chạy trên mảng có phần tử LỖI Ở GIỮA — hỏi có bao nhiêu dòng log (đáp án: DỪNG NGAY tại phần tử lỗi, các phần tử SAU không hề được `f` gọi tới — đúng cơ chế short-circuit của vòng lặp `for` có `return` sớm)."
+  - so: 38
+    slug: viet-lai-traverse-bang-reduce
+    title: "Viết lại `traverse` bằng `reduce` — nối thẳng cụm 1's `gopTatCa`"
+    teaches: [alg.traverse-via-reduce]
+    requires: [alg.predict-traverse-shortcircuit]
+    y_chinh: "`traverse` viết bằng vòng lặp (bài 36) và bằng `reduce` cho CÙNG kết quả — nối thẳng T4.2's phát hiện 'reduce là vòng lặp đóng gói' (bài 10). Bài code: viết `traverse` phiên bản `reduce`, dùng `chainOption` bên trong mỗi bước gộp (mỗi bước: `acc.chain(o => o thêm vào mảng)`) — ghép CẢ `chain` (cụm 5) LẪN `reduce` (T4.2) trong một hàm."
+  - so: 39
+    slug: ung-dung-parse-mot-mang-chuoi-thanh-mang-so
+    title: "Ứng dụng: parse MỘT MẢNG chuỗi thành mảng số, thất bại nếu MỘT phần tử sai"
+    teaches: [alg.apply-parse-array]
+    requires: [alg.traverse-via-reduce]
+    y_chinh: "Bài code có chấm điểm sống: viết `parseMangSo(ds: string[]): Result<number[], string>` (dùng `Result`, không phải `Option` — LỖI phải ghi rõ CHUỖI NÀO gây lỗi, đúng bài học cụm 2 'Result mang lý do') dùng `traverse` kiểu `Result`. Test: mảng toàn số hợp lệ chạy hết; mảng có MỘT phần tử không phải số phải báo lỗi ghi rõ chuỗi đó."
+  - so: 40
+    slug: do-tong-hop-traverse
+    title: "Đo tổng hợp: Traverse"
+    teaches: [alg.review-traverse]
+    requires: [alg.apply-parse-array]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: viết `traverseOption` (biến thể `Option`, không phải `Result` như bài 39) cho một tình huống MỚI. Không khái niệm mới — đo khả năng nhận diện 'lật Array<Container<_>> thành Container<Array<_>>' là ĐÚNG bài toán cần giải."
+
+# ── Cụm 7 (bài 41–47): Catamorphism — tách phần ĐỆ QUY khỏi phần TÍNH TOÁN ─
+  - so: 41
+    slug: on-lai-expr-de-quy-tu-t43
+    title: "Ôn lại `Expr` đệ quy từ T4.3 — nhiều hàm, CÙNG khuôn đệ quy"
+    teaches: [alg.recall-recursive-expr]
+    requires: [alg.review-traverse]
+    y_chinh: "Nhắc lại T4.3's `Expr = { kind:\"so\";... } | { kind:\"cong\";trai:Expr;phai:Expr } | { kind:\"nhan\";... }` và `tinh(e: Expr): number` (đệ quy trên `trai`/`phai`). Bài này viết THÊM một hàm đệ quy KHÁC trên CÙNG `Expr` — `demNode(e: Expr): number` (đếm số node trong cây) — và cho THẤY: cấu trúc đệ quy của `demNode` GẦN Y HỆT `tinh`, chỉ khác PHÉP TÍNH ở từng biến thể."
+  - so: 42
+    slug: phan-de-quy-lap-lai-o-moi-ham
+    title: "Phần ĐỆ QUY lặp lại ở MỌI hàm trên `Expr` — chỉ phép tính là khác"
+    teaches: [alg.recursion-pattern-repeats]
+    requires: [alg.recall-recursive-expr]
+    y_chinh: "Đặt `tinh` và `demNode` cạnh nhau: CẢ HAI đều `switch (e.kind)`, CẢ HAI đều GỌI LẠI chính nó trên `e.trai`/`e.phai` ở nhánh `\"cong\"`/`\"nhan\"` — chỉ khác PHÉP TÍNH áp dụng SAU khi có kết quả đệ quy (`t + p` với `tinh`, `t + p + 1` với `demNode`). Viết một hàm đệ quy MỚI trên `Expr` LUÔN phải viết LẠI phần đệ quy giống hệt — có cách nào tách phần đó RA, viết MỘT LẦN không?"
+  - so: 43
+    slug: bo-xu-ly-goi-lai-tung-bien-the-lam-gi
+    title: "`BoXuLy` — một object nói TỪNG biến thể LÀM GÌ, không TỰ đệ quy"
+    teaches: [alg.handler-object-per-variant]
+    requires: [alg.recursion-pattern-repeats]
+    y_chinh: "`interface BoXuLyExpr<R> { so: (giaTri: number) => R; cong: (trai: R, phai: R) => R; nhan: (trai: R, phai: R) => R; }` — ĐÃ ĐO THẬT. Chú ý: `cong`/`nhan` nhận `trai: R`/`phai: R` — KẾT QUẢ ĐÃ TÍNH của nhánh con, không phải `Expr` thô. `BoXuLy` KHÔNG tự gọi đệ quy — nó chỉ mô tả 'với giá trị SỐ, làm gì; với kết quả HAI nhánh con ĐÃ tính, gộp thế nào'."
+  - so: 44
+    slug: viet-foldexpr-tach-dot-de-quy-ra-rieng
+    title: "Viết `foldExpr` — TÁCH phần đệ quy RA RIÊNG, chạy MỘT LẦN cho mọi `BoXuLy`"
+    teaches: [alg.write-fold-expr]
+    requires: [alg.handler-object-per-variant]
+    y_chinh: "`function foldExpr<R>(e: Expr, bx: BoXuLyExpr<R>): R { switch(e.kind) { case \"so\": return bx.so(e.giaTri); case \"cong\": return bx.cong(foldExpr(e.trai,bx), foldExpr(e.phai,bx)); case \"nhan\": return bx.nhan(foldExpr(e.trai,bx), foldExpr(e.phai,bx)); } }` — ĐÃ ĐO THẬT. Đây gọi là **catamorphism** ('gấp' một cấu trúc đệ quy thành một giá trị) — `foldExpr` CHỨA phần đệ quy, viết ĐÚNG MỘT LẦN, dùng LẠI cho BẤT KỲ `BoXuLy` nào."
+  - so: 45
+    slug: dung-foldexpr-viet-lai-tinh-khong-tu-de-quy
+    title: "Dùng `foldExpr` viết LẠI `tinh` — KHÔNG tự viết đệ quy nữa"
+    teaches: [alg.reimplement-eval-via-fold]
+    requires: [alg.write-fold-expr]
+    y_chinh: "`const tinh = (e: Expr) => foldExpr(e, { so: g => g, cong: (t,p) => t+p, nhan: (t,p) => t*p });` — ĐÃ ĐO THẬT, ra ĐÚNG kết quả `tinh` bài 41 (viết tay đệ quy) từng ra. `tinh` MỚI không có `switch`, không tự gọi lại chính nó — TOÀN BỘ phần đệ quy đã nằm trong `foldExpr`, `tinh` chỉ còn khai 'với từng biến thể, TÍNH gì'."
+  - so: 46
+    slug: dung-lai-foldexpr-viet-them-demnode
+    title: "DÙNG LẠI CHÍNH `foldExpr` — viết `demNode` không cần đệ quy tay lần nữa"
+    teaches: [alg.write-count-nodes-via-fold]
+    requires: [alg.reimplement-eval-via-fold]
+    y_chinh: "Bài code có chấm điểm sống: viết `demNode` (đếm số node trong `Expr`) bằng `foldExpr` — CHỈ cần khai `BoXuLyExpr<number>` khác (`so: () => 1, cong: (t,p) => t+p+1, nhan: (t,p) => t+p+1`), KHÔNG viết `switch`/đệ quy nào. Đây là LỢI ÍCH THẬT của catamorphism: thêm một hàm MỚI trên `Expr` chỉ cần MỘT object mô tả, không viết lại cấu trúc đệ quy."
+  - so: 47
+    slug: do-tong-hop-catamorphism
+    title: "Đo tổng hợp: Catamorphism"
+    teaches: [alg.review-catamorphism]
+    requires: [alg.write-count-nodes-via-fold]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: viết MỘT hàm MỚI trên `Expr` bằng `foldExpr` (ví dụ `inBieuThuc: (e: Expr) => string`, in biểu thức ra dạng chuỗi có ngoặc, ví dụ `\"(3 + 4)\"`) — không khái niệm mới, đo khả năng khai ĐÚNG `BoXuLyExpr<string>` cho một việc CHƯA từng làm."
+
+# ── Cụm 8 (bài 48–54): Ghép toàn bộ đại số + BOSS ─────────────────────────
+  - so: 48
+    slug: sau-khai-niem-mot-ho-hinh-dang
+    title: "Sáu khái niệm — MỘT họ hình dạng, không phải sáu thứ rời rạc"
+    teaches: [alg.six-concepts-one-family]
+    requires: [alg.review-catamorphism]
+    y_chinh: "Bài LÝ THUYẾT, tổng kết: Monoid (kết hợp HAI giá trị CÙNG kiểu), Functor (`map` — biến đổi BÊN TRONG, giữ vỏ), Applicative (`map2`/`map3` — kết hợp NHIỀU giá trị ĐỘC LẬP, có thể gom lỗi), Monad (`chain` — chuỗi PHỤ THUỘC, làm phẳng lồng), Traverse (lật `Array<Container<_>>` thành `Container<Array<_>>`), Catamorphism (tách đệ quy khỏi tính toán). Tất cả đều là CÙNG một câu hỏi: 'có một khuôn lặp lại — đặt tên nó, viết MỘT LẦN, dùng lại thay vì chép tay mỗi lần'."
+  - so: 49
+    slug: ghep-monoid-va-functor-tong-cac-gia-tri-da-bien-doi
+    title: "Ghép Monoid + Functor: tổng các giá trị ĐÃ biến đổi"
+    teaches: [alg.combine-monoid-functor]
+    requires: [alg.six-concepts-one-family]
+    y_chinh: "Bài code có chấm điểm sống: viết `tongSauKhiNhanDoi(ds: number[]): number` — dùng `.map()` (Functor, nhân đôi TỪNG phần tử) RỒI `gopTatCa(monoidCong, ...)` (Monoid, cộng dồn) — ghép cụm 3 với cụm 1, đúng khuôn `pipe` T4.2 đã dạy (map rồi reduce, một chuỗi hai bước)."
+  - so: 50
+    slug: ghep-applicative-va-monad-form-nhieu-buoc
+    title: "Ghép Applicative + Monad: form có bước ĐỘC LẬP VÀ bước PHỤ THUỘC"
+    teaches: [alg.combine-applicative-monad]
+    requires: [alg.combine-monoid-functor]
+    y_chinh: "Bài code có chấm điểm sống: validate `tuoi` VÀ `email` ĐỘC LẬP (Applicative, `map2GomLoi`, gom cả hai lỗi), rồi NẾU CẢ HAI hợp lệ, dùng `chainResult` (Monad) để tính một bước PHỤ THUỘC kết quả đó (ví dụ: tính 'tuổi hợp lệ + độ dài email' — chỉ tính được SAU khi CẢ HAI đã có). Một chương trình THẬT thường cần CẢ hai kiểu ghép, không chỉ một."
+  - so: 51
+    slug: ghep-traverse-va-catamorphism-mang-cay-bieu-thuc
+    title: "Ghép Traverse + Catamorphism: một MẢNG cây biểu thức, tính TOÀN BỘ hoặc báo lỗi"
+    teaches: [alg.combine-traverse-catamorphism]
+    requires: [alg.combine-applicative-monad]
+    y_chinh: "Bài code có chấm điểm sống: có MỘT MẢNG `Expr[]` (nhiều cây biểu thức), muốn tính TOÀN BỘ thành `number[]` — dùng `foldExpr` (Catamorphism, tính TỪNG cây) đưa vào `.map()` — không cần `traverse` thật (không có lỗi tiềm tàng ở đây, `tinh` không bao giờ thất bại) NHƯNG bài so sánh: nếu `tinh` CÓ THỂ lỗi (ví dụ chia cho 0 trả `Result`), sẽ cần `traverse` (cụm 6) thay vì `.map()` thường."
+  - so: 52
+    slug: doi-chieu-python-lai-typescript-cung-y-khac-cong-cu
+    title: "Đối chiếu: bạn đã THẤY những khuôn này ở Python (T4.1-T4.2), giờ có TÊN"
+    teaches: [alg.recall-python-tracks]
+    requires: [alg.combine-traverse-catamorphism]
+    y_chinh: "Bài LÝ THUYẾT, nối NGƯỢC hai track Python: T4.2's `reduce(f, xs, khoi_dau)` CHÍNH LÀ 'gopTatCa' của một Monoid tự chọn (`f`=`ketHop`, `khoi_dau`=`rong`) — không phải trùng hợp, `reduce` VỐN LÀ công cụ tổng quát nhất để dùng Monoid. T4.2's `compose`/`pipe` là 'Functor law 2' ở dạng thực hành. Track này KHÔNG dạy khái niệm mới so với T4.1-T4.2 về BẢN CHẤT — nó dạy TÊN GỌI và HÌNH THỨC HOÁ cho những khuôn đã DÙNG."
+  - so: 53
+    slug: do-tong-hop-truoc-boss
+    title: "Đo tổng hợp trước BOSS"
+    teaches: [alg.gate-review]
+    requires: [alg.recall-python-tracks]
+    y_chinh: "Bài code có chấm điểm sống, ghép NHIỀU Ý đã học: một chương trình nhỏ dùng ÍT NHẤT bốn trong sáu khái niệm (Monoid/Functor/Applicative/Monad/Traverse/Catamorphism). Không giới thiệu khái niệm mới."
+  - so: 54
+    slug: boss-dai-so-cua-chuong-trinh
+    title: "BOSS — Khép track Đại số của chương trình"
+    teaches: [alg.gate-boss]
+    requires: [alg.gate-review]
+    y_chinh: "Người học viết một chương trình nhỏ dùng ĐỦ sáu khái niệm: Monoid (gộp một danh sách), Functor (`map` biến đổi bên trong), Applicative (kết hợp nhiều giá trị độc lập, gom lỗi), Monad (chuỗi phụ thuộc qua `chain`), Traverse (lật `Array<Option/Result<_>>`), Catamorphism (`foldExpr` trên một ADT đệ quy tự thiết kế). Khép track — không dạy khái niệm mới, chỉ đòi ghép lại. Track sau (T4.6, Parser combinators, Rust) hỏi tiếp: nếu MỘT parser cũng là một 'hộp chứa' có thể `map`/`chain` được (Parser<T> — một hàm nhận chuỗi, trả về T HOẶC lỗi, CÒN chuỗi chưa đọc), những khuôn đại số vừa học có áp dụng được lên NÓ không?"

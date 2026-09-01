@@ -103,3 +103,13 @@ realm:
       # union), không mượn gì từ T4.1/T4.2 (Python). Đứng sau T4.2 vì đúng
       # thứ tự M8, không vì ràng buộc tiền đề bắt buộc phải liền sau nó.
       - adt-pattern-matching
+      # T4.4 (Generics · Traits · Type classes, Rust) BỊ HOÃN — đo thật qua
+      # rustprobe.mjs xác nhận trait bound (<T: Trait>) và dyn Trait KHÔNG
+      # parse được trong byte-rust, generic function top-level không unify
+      # đúng — thành phần CỐT LÕI của track không dùng được, không có tập
+      # con để né như T4.0b từng làm với move-check. Xem
+      # docs/decisions/R4-T44-generics-traits-do-duoc.md. T4.5 xếp NGAY sau
+      # T4.3, bỏ qua T4.4 — không mượn gì từ T4.4 (chưa tồn tại) hay T4.0b,
+      # chỉ mượn THẲNG `ts.adt-gate-boss` từ T4.3 (bài 8 cần discriminated
+      # union đã dạy làm nền cho Option/Result tự viết).
+      - dai-so-cua-chuong-trinh
