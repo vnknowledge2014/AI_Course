@@ -98,3 +98,8 @@ realm:
       # dạy cho hàm; bài 26 nói composability đòi hỏi từng mắt xích thuần)
       # — đứng ngay sau T4.1, không song song.
       - ham-bac-cao-hop-thanh
+      # T4.3 QUAY LẠI TypeScript — mượn THẲNG `ts.interface` từ T4.0a (bài 1
+      # cần đúng cú pháp `interface` đó làm điểm xuất phát cho discriminated
+      # union), không mượn gì từ T4.1/T4.2 (Python). Đứng sau T4.2 vì đúng
+      # thứ tự M8, không vì ràng buộc tiền đề bắt buộc phải liền sau nó.
+      - adt-pattern-matching

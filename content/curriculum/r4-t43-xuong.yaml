@@ -1,0 +1,304 @@
+# Xương sống R4.T4.3 — ADT & pattern matching (36 bài)
+#
+# Quay lại TypeScript sau hai track FP-thật bằng Python (T4.1, T4.2). Track
+# này KHÔNG dạy lại cú pháp TS cơ bản — T4.0a (Cổng TypeScript) đã dạy đủ
+# `ts.union-type`, `ts.union-narrowing`, `ts.interface`, bảy mã lỗi có bản
+# dịch tiếng Việt (TS2322/TS2345/TS2531+TS18047/TS2532+TS18048/TS2304/
+# TS2554/TS7006). Bài 1 dưới đây MƯỢN THẲNG `ts.interface` từ T4.0a — không
+# xếp sau vì "tới lượt", mà vì genuinely cần cú pháp đó làm điểm xuất phát.
+#
+# Ràng buộc đã đo trước khi viết (đo thật qua tsprobe.mjs — worker Node.js
+# gọi thẳng `packages/exec-typescript/dist/index.js`, TypeScript 5.9
+# compiler thật, `strict: true`):
+#   - Discriminated union + `switch` trên field literal-type (`kind: "a" |
+#     "b"`) tự động NARROW từng nhánh — đã đo, không phải giả định.
+#   - Mẫu `assertNever` (`function chuaXuLy(x: never): never { throw ... }`)
+#     rồi gọi `chuaXuLy(h)` ở nhánh `default` — nếu union được MỞ RỘNG thêm
+#     một biến thể mới mà `switch` CHƯA xử lý, TypeScript tự báo TS2345
+#     ("not assignable to parameter of type 'never'") — ĐÃ ĐO THẬT, đúng
+#     ngay lúc biên dịch, không cần chạy chương trình. TS2345 ĐÃ có bản
+#     dịch tiếng Việt từ T4.0a — track này DÙNG LẠI bản dịch đó trong một
+#     NGỮ CẢNH cao cấp hơn (exhaustiveness), không dạy lại nghĩa mã lỗi.
+#   - Branded type (`type Email = string & { readonly __brand: "Email" }`)
+#     bị XOÁ HOÀN TOÀN lúc chạy — đã đo: `typeof e === "string"` (không có
+#     wrapper object nào, brand chỉ tồn tại lúc biên dịch) — NHƯNG truyền
+#     một `string` thường vào chỗ đòi `Email` vẫn bị TS2345 chặn lúc biên
+#     dịch. Đây là ví dụ predict tốt: "kiểu tồn tại lúc biên dịch, biến mất
+#     lúc chạy" — khác hẳn trực giác OOP quen (class thật CÓ mặt lúc chạy).
+#   - ADT đệ quy (kiểu tự tham chiếu chính nó, ví dụ cây biểu thức
+#     `Expr = Num | Cong(Expr,Expr) | Nhan(Expr,Expr)`) biên dịch và chạy
+#     đúng — đã đo qua một cây ba tầng, `switch` đệ quy tính đúng kết quả.
+#   - "Illegal states unrepresentable" — đã đo cụ thể: một `interface` với
+#     nhiều field boolean/optional rời rạc (`dangTai: boolean; loi: string
+#     | null; duLieu: string | null`) BIÊN DỊCH ĐƯỢC một tổ hợp VÔ NGHĨA
+#     (`dangTai: true` VÀ `loi` VÀ `duLieu` đều có giá trị cùng lúc) — không
+#     lỗi gì. Thay bằng MỘT discriminated union duy nhất, tổ hợp vô nghĩa
+#     đó KHÔNG VIẾT RA ĐƯỢC nữa (mỗi biến thể chỉ có field của riêng nó) —
+#     lỗi bị đẩy từ "phát hiện lúc chạy/không phát hiện" sang "không thể
+#     tồn tại trong không gian kiểu".
+#   - **`tier: static` KHÔNG dùng được cho TypeScript** — `TsAstKind` chưa
+#     cài trong `packages/exec-typescript` (`tools/kiem_ma_bai_hoc.mjs` tự
+#     `throw` nếu một bài khai `tier: static` với `languages: [typescript]`).
+#     MỌI bài `code` trong track này CHỈ dùng ba tầng `run`/`tests`/`output`
+#     — không có lớp phòng vệ AST như các track Python. Test block phải
+#     RIGOROUS hơn để bù (nhiều case, kể cả case biên) vì không có tầng
+#     static bắt đáp án điền bừa/lách luật.
+#   - KHÔNG có `zod`/`io-ts`/`fp-ts` trong `packages/exec-typescript`
+#     (`package.json` chỉ có `typescript` + `sucrase`) — track KHÔNG dạy
+#     "parse, don't validate" bằng thư viện (khác chapter_14 gốc dùng Zod);
+#     "smart constructor" ở cụm 5 là hàm validate TỰ VIẾT tay, không import
+#     gì ngoài chuẩn TS.
+#
+# NGUỒN THAM KHẢO (chỉ đọc, KHÔNG sửa):
+# `fp/TypeScript_Books/part_1_fundamentals/chapter_06_control_flow_narrowing.md`
+# (narrowing, discriminated union + switch, exhaustive never) và
+# `fp/TypeScript_Books/part_2_thinking_functionally/chapter_13_adts_in_typescript.md`
+# (discriminated unions, branded types). Xương dưới đây MỞ RỘNG hai chương
+# thành 36 bài nhịp byte/explain/example/predict/code/reflect — không chép
+# nguyên văn, chỉ mượn Ý và một phần ví dụ gốc. `chapter_14_smart_constructors_
+# validation.md` (Zod/io-ts) KHÔNG dùng — track viết smart constructor tay,
+# lý do đã ghi ở trên.
+#
+# Ý XUYÊN SUỐT: một kiểu dữ liệu có thể mang NHIỀU HÌNH DẠNG khác nhau — và
+# trình biên dịch, nếu được cho biết ĐỦ hình dạng, tự tìm ra chỗ code CHƯA
+# xử lý hết. Đây là hệ quả trực tiếp câu hỏi T4.2 để lại: "nếu dữ liệu THẬT
+# có nhiều hình dạng (đơn hàng đang chờ/đã giao/đã huỷ), mô hình hoá thế nào
+# để trình biên dịch bắt được chỗ quên xử lý?"
+#
+# Namespace skill: `ts.*` (tiếp tục namespace T4.0a, KHÔNG trùng tên — đã
+# quét chéo `teaches` của T4.0a trước khi đặt tên bên dưới).
+
+track: adt-pattern-matching
+realm: lap-trinh-ham
+ten: "T4.3 — ADT & Pattern Matching"
+so_bai: 36
+ngon_ngu_chu: typescript
+
+# ── Cụm 1 (bài 1–6): Discriminated union — kiểu có THẺ nhận diện ──────────
+bai:
+  - so: 1
+    slug: mot-union-nhieu-hinh-dang-kho-phan-biet
+    title: "Một union nhiều hình dạng — khó phân biệt LÚC CHẠY"
+    teaches: [ts.union-ambiguity]
+    requires: [ts.interface]
+    y_chinh: "`interface Vuong { canh: number } interface Tron { banKinh: number } type Hinh = Vuong | Tron` — có một `Hinh`, làm sao BIẾT nó là `Vuong` hay `Tron`? `'canh' in h` chạy được (T4.0a's `ts.union-narrowing` đã dạy `in`), nhưng cồng kềnh khi union có NHIỀU hơn hai biến thể, và không có gì NGĂN một object thiếu cả hai field. Bài dựng đúng vấn đề, chưa giải quyết."
+  - so: 2
+    slug: them-mot-truong-nhan-dien-discriminant
+    title: "Thêm MỘT trường nhận diện — `kind: \"vuong\" | \"tron\"`"
+    teaches: [ts.discriminant-field]
+    requires: [ts.union-ambiguity]
+    y_chinh: "`interface Vuong { kind: \"vuong\"; canh: number } interface Tron { kind: \"tron\"; banKinh: number }` — thêm một field `kind` với KIỂU LITERAL (không phải `string` chung chung) vào MỖI biến thể. Field này không mang thông tin nghiệp vụ gì — nó CHỈ là một cái NHÃN, để sau này TypeScript tự soi được đang cầm biến thể nào."
+  - so: 3
+    slug: narrow-bang-if-tren-discriminant
+    title: "Thu hẹp kiểu bằng `if` trên trường nhận diện"
+    teaches: [ts.discriminant-if-narrowing]
+    requires: [ts.discriminant-field]
+    y_chinh: "`if (h.kind === \"vuong\") { h.canh }` — bên TRONG nhánh `if`, TypeScript đã biết `h` CHẮC CHẮN là `Vuong`, cho phép truy cập `h.canh` mà không báo lỗi (dù `Hinh` là union). Đây là kết quả TRỰC TIẾP của field `kind` có KIỂU LITERAL, không phải phép màu — so sánh giá trị NARROW được kiểu, TypeScript đã đo thật."
+  - so: 4
+    slug: narrow-bang-switch-tren-discriminant
+    title: "Thu hẹp kiểu bằng `switch` — gọn hơn NHIỀU biến thể"
+    teaches: [ts.discriminant-switch-narrowing]
+    requires: [ts.discriminant-if-narrowing]
+    y_chinh: "`switch (h.kind) { case \"vuong\": ...h.canh...; case \"tron\": ...h.banKinh... }` — mỗi `case` NARROW kiểu y hệt `if`, nhưng đọc gọn hơn khi có BA biến thể trở lên (chuỗi `if/else if` dài dần rất khó đọc). Đây CHÍNH LÀ 'pattern matching' của TypeScript — không có từ khoá `match` như Rust, nhưng `switch` trên discriminant làm ĐÚNG việc đó."
+  - so: 5
+    slug: doan-truoc-nhanh-nao-duoc-narrow
+    title: "Dự đoán nhánh nào được thu hẹp kiểu"
+    teaches: [ts.predict-narrowing]
+    requires: [ts.discriminant-switch-narrowing]
+    y_chinh: "Bài predict thuần, không code step: cho một `switch` ba nhánh trên `Hinh` (`vuong`/`tron`/`tamGiac`), hỏi truy cập field nào ở nhánh nào là HỢP LỆ (biên dịch được) và field nào KHÔNG (ví dụ gọi `h.canh` trong nhánh `case \"tron\"` — TypeScript từ chối, vì trong nhánh đó `h` đã được narrow thành `Tron`, không còn `canh`)."
+  - so: 6
+    slug: do-tong-hop-discriminated-union
+    title: "Đo tổng hợp: discriminated union cơ bản"
+    teaches: [ts.review-discriminated-union]
+    requires: [ts.predict-narrowing]
+    y_chinh: "Bài code có chấm điểm sống: định nghĩa MỘT discriminated union ba biến thể (`kind` literal), viết một hàm `switch` trên `kind`, mỗi nhánh trả về một chuỗi mô tả. KHÔNG khái niệm mới — đo khả năng tự tay dựng discriminant + narrow, không chỉ đọc hiểu ví dụ có sẵn."
+
+# ── Cụm 2 (bài 7–13): Pattern matching triệt để — exhaustiveness ─────────
+  - so: 7
+    slug: mot-nhanh-bi-bo-sot-loi-am-tham
+    title: "Quên một nhánh trong `switch` — lỗi ÂM THẦM lúc chạy"
+    teaches: [ts.missing-case-silent-bug]
+    requires: [ts.review-discriminated-union]
+    y_chinh: "Một `switch` trên `Hinh` (ba biến thể) CHỈ xử lý `vuong`/`tron`, quên `tamGiac`, KHÔNG có `default` — TypeScript BIÊN DỊCH ĐƯỢC (không lỗi!), nhưng gọi hàm với một `tamGiac` thật thì hàm TRẢ VỀ `undefined` lúc chạy, không ném lỗi rõ ràng nào. Đây LÀ khoảng trống mà track này lấp: `switch` không TỰ ĐỘNG đòi bạn xử lý hết mọi biến thể."
+  - so: 8
+    slug: assertnever-buoc-trinh-bien-dich-kiem
+    title: "`assertNever` — buộc TRÌNH BIÊN DỊCH tự kiểm đủ nhánh"
+    teaches: [ts.assert-never-pattern]
+    requires: [ts.missing-case-silent-bug]
+    y_chinh: "`function chuaXuLy(x: never): never { throw new Error(...) }` rồi gọi `chuaXuLy(h)` ở nhánh `default` của `switch` — NẾU mọi biến thể của `Hinh` ĐÃ được xử lý ở các `case` trước, kiểu của `h` tại `default` bị TypeScript thu hẹp còn `never` (kiểu 'không còn khả năng nào'), và lời gọi `chuaXuLy(h)` biên dịch được. ĐÃ ĐO THẬT."
+  - so: 9
+    slug: them-bien-the-moi-loi-hien-ra-ngay
+    title: "Thêm một biến thể MỚI — lỗi hiện ra NGAY LÚC BIÊN DỊCH"
+    teaches: [ts.exhaustiveness-catches-new-variant]
+    requires: [ts.assert-never-pattern]
+    y_chinh: "Thêm `TamGiac` vào union `Hinh` (đã có `assertNever` bảo vệ), nhưng CHƯA thêm `case \"tamGiac\"` — TypeScript báo NGAY mã TS2345 tại dòng `chuaXuLy(h)`: `'{ kind: \"tamGiac\"; ... }' is not assignable to parameter of type 'never'`. ĐÃ ĐO THẬT (tsprobe.mjs xác nhận). Đây là 'siêu năng lực' cốt lõi của ADT: mở rộng union, trình biên dịch TỰ TÌM chỗ code cũ chưa theo kịp — không cần grep tay, không cần nhớ 'tôi đã sửa hết switch chưa'. Nối thẳng mã lỗi TS2345 đã học ở T4.0a, ngữ cảnh cao cấp hơn."
+  - so: 10
+    slug: doan-truoc-loi-exhaustiveness
+    title: "Dự đoán: thêm biến thể có làm lộ lỗi cũ không?"
+    teaches: [ts.predict-exhaustiveness]
+    requires: [ts.exhaustiveness-catches-new-variant]
+    y_chinh: "Bài predict thuần: cho một `switch` có `assertNever` ĐÃ xử lý đủ hai biến thể, rồi thêm MỘT biến thể thứ ba vào union NHƯNG bài chỉ hỏi 'thêm biến thể này có làm dòng chuaXuLy(h) báo lỗi biên dịch không' — đáp án đúng: CÓ (đúng cơ chế bài 9), bẫy sai phổ biến: nghĩ rằng chỉ báo lỗi khi CHẠY hàm với biến thể mới, không phải ngay lúc biên dịch."
+  - so: 11
+    slug: default-khong-co-assertnever-che-giau-loi
+    title: "`default` KHÔNG có `assertNever` — che giấu lỗi, không bắt nó"
+    teaches: [ts.default-without-assertnever-hides-bugs]
+    requires: [ts.predict-exhaustiveness]
+    y_chinh: "`default: return 0;` (không gọi `chuaXuLy`) VẪN biên dịch được khi thêm biến thể mới — nhưng giờ hàm ÂM THẦM trả `0` cho biến thể chưa xử lý, đúng lỗi bài 7 đã nêu, chỉ khác chỗ có `default` khiến người đọc TƯỞNG NHẦM là đã xử lý đủ. `assertNever` không phải cú pháp bắt buộc của `switch` — nó là một KỶ LUẬT tự áp đặt, và chỉ có tác dụng nếu gọi ĐÚNG vào nhánh `default`."
+  - so: 12
+    slug: viet-ham-pattern-match-co-assertnever
+    title: "Viết một hàm pattern-match ĐẦY ĐỦ, có `assertNever` bảo vệ"
+    teaches: [ts.write-exhaustive-match]
+    requires: [ts.default-without-assertnever-hides-bugs]
+    y_chinh: "Bài code có chấm điểm sống: cho sẵn một discriminated union ba biến thể VÀ hàm `chuaXuLy`, viết một hàm `switch` xử lý ĐỦ cả ba, gọi `chuaXuLy` ở `default`. Test không chỉ kiểm kết quả đúng — còn thử tính với TỪNG biến thể để đảm bảo không nhánh nào bị bỏ sót."
+  - so: 13
+    slug: do-tong-hop-exhaustiveness
+    title: "Đo tổng hợp: exhaustiveness checking"
+    teaches: [ts.review-exhaustiveness]
+    requires: [ts.write-exhaustive-match]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: cho một union BỐN biến thể, viết hàm `switch` đầy đủ có `assertNever`, rồi (trong phần test, không phải phần code người học viết) minh hoạ việc thêm biến thể thứ năm sẽ làm lộ lỗi biên dịch nếu quên cập nhật — không khái niệm mới, đo khả năng tự dựng kỷ luật exhaustiveness từ đầu."
+
+# ── Cụm 3 (bài 14–19): Sum type & Product type — từ vựng ADT ─────────────
+  - so: 14
+    slug: product-type-ket-hop-nhieu-truong-cung-luc
+    title: "Product type — kết hợp NHIỀU trường CÙNG LÚC"
+    teaches: [ts.product-type-concept]
+    requires: [ts.review-exhaustiveness]
+    y_chinh: "`interface NguoiDung { ten: string; tuoi: number; email: string }` — một GIÁ TRỊ thuộc kiểu này PHẢI có CẢ BA trường CÙNG LÚC. Gọi là 'product type' (kiểu TÍCH) vì không gian mọi giá trị có thể có là TÍCH của không gian từng trường (mọi `ten` khả dĩ × mọi `tuoi` khả dĩ × mọi `email` khả dĩ). `interface`/object literal type mà track đã dùng từ đầu ĐỀU là product type — bài này chỉ ĐẶT TÊN HÌNH THỨC cho khái niệm đã quen."
+  - so: 15
+    slug: sum-type-mot-trong-nhieu-kha-nang
+    title: "Sum type — MỘT trong NHIỀU khả năng"
+    teaches: [ts.sum-type-concept]
+    requires: [ts.product-type-concept]
+    y_chinh: "Discriminated union (`Hinh = Vuong | Tron | TamGiac`) là 'sum type' (kiểu TỔNG) — một giá trị CHỈ thuộc ĐÚNG MỘT trong các biến thể tại một thời điểm, không bao giờ 'vừa Vuong vừa Tron'. Đối lập trực tiếp product type (bài 14): product ĐÒI đủ mọi trường CÙNG LÚC, sum CHỈ CHO đúng MỘT biến thể tại một thời điểm."
+  - so: 16
+    slug: dem-so-trang-thai-tich-va-tong
+    title: "Đếm số trạng thái có thể có: TÍCH và TỔNG"
+    teaches: [ts.counting-states-product-sum]
+    requires: [ts.sum-type-concept]
+    y_chinh: "`interface { a: boolean; b: boolean }` có `2 × 2 = 4` giá trị khả dĩ (product — TÍCH số lựa chọn từng trường). `type X = A | B | C` với `A`/`B`/`C` mỗi cái có `1` hình dạng có `1 + 1 + 1 = 3` giá trị khả dĩ (sum — TỔNG số biến thể). Một khoảnh khắc toán học nhỏ (liên hệ R2's tổ hợp): TÊN GỌI 'sum'/'product' không phải ẩn dụ — chúng đúng nghĩa CỘNG/NHÂN số lượng trạng thái có thể có."
+  - so: 17
+    slug: adt-long-nhau-product-trong-sum
+    title: "ADT lồng nhau — product BÊN TRONG sum"
+    teaches: [ts.nested-adt]
+    requires: [ts.counting-states-product-sum]
+    y_chinh: "`type DonHang = { kind: \"choXuLy\"; ma: string } | { kind: \"daGiao\"; ma: string; ngayGiao: string; nguoiNhan: string }` — MỖI biến thể của sum type (`DonHang`) LÀ một product type riêng (có field `kind` + các field khác nhau tuỳ biến thể). Đây là hình dạng THẬT SỰ của ADT trong mã sản xuất — không phải sum 'thuần' hay product 'thuần', mà LỒNG NHAU: sum-of-products."
+  - so: 18
+    slug: viet-mot-adt-long-nhau
+    title: "Thiết kế một ADT lồng nhau + hàm xử lý"
+    teaches: [ts.write-nested-adt]
+    requires: [ts.nested-adt]
+    y_chinh: "Bài code có chấm điểm sống: viết một discriminated union hai biến thể, MỖI biến thể có field RIÊNG (không chỉ `kind`), rồi một hàm `switch` truy cập ĐÚNG field của TỪNG biến thể (không lẫn field biến thể này sang biến thể khác — TypeScript tự chặn nếu làm sai, do narrowing)."
+  - so: 19
+    slug: do-tong-hop-sum-product
+    title: "Đo tổng hợp: sum type & product type"
+    teaches: [ts.review-sum-product]
+    requires: [ts.write-nested-adt]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: ghép sum-of-products cho một tình huống MỚI (không lặp lại `DonHang`/`Hinh` đã dùng), viết hàm xử lý đầy đủ. Không khái niệm mới — đo khả năng tự thiết kế ADT từ một mô tả nghiệp vụ, không chỉ điền vào khung có sẵn."
+
+# ── Cụm 4 (bài 20–25): Mô hình hoá trạng thái thật — illegal states ──────
+  - so: 20
+    slug: co-boolean-rai-rac-cho-phep-trang-thai-vo-nghia
+    title: "Cờ boolean/optional rời rạc — cho phép trạng thái VÔ NGHĨA"
+    teaches: [ts.boolean-flags-allow-illegal-states]
+    requires: [ts.review-sum-product]
+    y_chinh: "`interface TrangThai { dangTai: boolean; loi: string | null; duLieu: string | null }` — TypeScript biên dịch được `{ dangTai: true, loi: \"lỗi\", duLieu: \"có dữ liệu\" }`, dù tổ hợp đó VÔ NGHĨA về nghiệp vụ (không thể VỪA đang tải VỪA có lỗi VỪA có dữ liệu). ĐÃ ĐO THẬT — không lỗi biên dịch nào ngăn tổ hợp phi lý này."
+  - so: 21
+    slug: gop-thanh-mot-union-trang-thai-vo-nghia-khong-viet-duoc
+    title: "Gộp thành MỘT union — trạng thái vô nghĩa KHÔNG VIẾT RA ĐƯỢC nữa"
+    teaches: [ts.union-makes-illegal-states-unrepresentable]
+    requires: [ts.boolean-flags-allow-illegal-states]
+    y_chinh: "Thay `TrangThai` (bài 20) bằng `type TrangThai = { kind: \"dangTai\" } | { kind: \"loi\"; thongDiep: string } | { kind: \"thanhCong\"; duLieu: string }` — giờ 'vừa đang tải vừa có lỗi' KHÔNG CÒN VIẾT RA ĐƯỢC nữa (biến thể `dangTai` không có field `thongDiep`/`duLieu` để gán). Lỗi bị đẩy từ 'phải NHỚ kiểm tra lúc chạy' sang 'không có KHÔNG GIAN kiểu nào để viết ra nó' — đây là 'making illegal states unrepresentable', Ý cốt lõi ADT mang lại mà booleans/optionals không có."
+  - so: 22
+    slug: refactor-mot-vi-du-that-loading-ui
+    title: "Refactor một ví dụ thật: trạng thái tải dữ liệu UI"
+    teaches: [ts.refactor-real-loading-state]
+    requires: [ts.union-makes-illegal-states-unrepresentable]
+    y_chinh: "Ví dụ ĐẦY ĐỦ: một hàm `hienThi(t: TrangThai): string` xử lý cả ba biến thể, so sánh TRỰC TIẾP với phiên bản cũ dùng cờ boolean phải viết `if (dangTai) ... else if (loi !== null) ... else if (duLieu !== null) ... else` (dài, dễ quên nhánh, không được TypeScript kiểm tính đủ nhánh vì không phải discriminated union). Không dạy khái niệm mới — đối chiếu TRỰC TIẾP hai cách viết trên CÙNG một bài toán."
+  - so: 23
+    slug: tu-refactor-mot-tap-co-thanh-adt
+    title: "Tự refactor một tập cờ rời rạc thành ADT"
+    teaches: [ts.write-refactored-adt]
+    requires: [ts.refactor-real-loading-state]
+    y_chinh: "Bài code có chấm điểm sống: cho sẵn một `interface` dùng cờ boolean/optional (mô tả trạng thái đơn hàng: `daThanhToan`, `daHuy`, `maGiam`), viết một discriminated union THAY THẾ nó (không dùng cờ nữa), rồi một hàm xử lý đủ biến thể."
+  - so: 24
+    slug: doi-chieu-python-dataclass-match-va-ts-union-switch
+    title: "Đối chiếu: Python's `@dataclass`+`match` (T4.1) và TS's union+`switch`"
+    teaches: [ts.compare-python-dataclass-vs-ts-union]
+    requires: [ts.write-refactored-adt]
+    y_chinh: "Bài LÝ THUYẾT, nối thẳng T4.1 (`fp.state-machine-frozen`): Python's state machine dùng NHIỀU `@dataclass(frozen=True)` riêng + `match`/`case` để phân biệt; TypeScript dùng MỘT discriminated union + `switch` trên field `kind`. CÙNG Ý (mỗi trạng thái một hình dạng RIÊNG, hàm chuyển trạng thái kiểm ĐỦ mọi hình dạng), khác NGÔN NGỮ và khác CƠ CHẾ (Python's `match` khớp theo KIỂU CLASS lúc chạy; TS's `switch` khớp theo GIÁ TRỊ field `kind`, kiểm lúc BIÊN DỊCH — khác biệt cốt lõi giữa kiểm kiểu ĐỘNG và TĨNH mà T4.0a's bài 3 đã dạy)."
+  - so: 25
+    slug: do-tong-hop-illegal-states
+    title: "Đo tổng hợp: illegal states unrepresentable"
+    teaches: [ts.review-illegal-states]
+    requires: [ts.compare-python-dataclass-vs-ts-union]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: cho một mô tả nghiệp vụ MỚI có nhiều cờ rời rạc, tự thiết kế discriminated union thay thế VÀ hàm xử lý đủ biến thể. Không khái niệm mới — đo khả năng NHẬN RA khi nào cờ boolean/optional đang che giấu một sum type."
+
+# ── Cụm 5 (bài 26–31): Branded types & smart constructors ────────────────
+  - so: 26
+    slug: string-cho-moi-thu-de-truyen-nham
+    title: "`string` cho MỌI THỨ — dễ truyền NHẦM tham số"
+    teaches: [ts.string-everything-swap-risk]
+    requires: [ts.review-illegal-states]
+    y_chinh: "`function guiEmail(email: string, tenNguoiDung: string)` — cả hai tham số ĐỀU là `string`. Gọi `guiEmail(tenNguoiDung, email)` (đảo thứ tự NHẦM) biên dịch được BÌNH THƯỜNG, TypeScript không hề phát hiện — vì với trình biên dịch, `string` LÀ `string`, không phân biệt 'string này LÀ MỘT email' hay 'string kia LÀ MỘT tên'. ĐÃ ĐO THẬT (không lỗi khi đảo thứ tự)."
+  - so: 27
+    slug: branded-type-loi-hua-chi-ton-tai-luc-bien-dich
+    title: "Branded type — lời hứa CHỈ TỒN TẠI lúc biên dịch"
+    teaches: [ts.branded-type-basics]
+    requires: [ts.string-everything-swap-risk]
+    y_chinh: "`type Email = string & { readonly __brand: \"Email\" }` — một kiểu `string` GẮN THÊM một 'nhãn' chỉ tồn tại trong THẾ GIỚI KIỂU, không có field `__brand` nào thật sự trong bộ nhớ. ĐÃ ĐO THẬT hai điều đối lập: (1) `typeof email === \"string\"` lúc chạy — nhãn KHÔNG tồn tại runtime; (2) truyền một `string` thường vào chỗ đòi `Email` bị TS2345 chặn lúc biên dịch — nhãn CÓ hiệu lực compile-time. Kiểu học ở đây không phải một 'vật' — nó là một RÀNG BUỘC trình biên dịch theo dõi, không sinh ra mã máy nào."
+  - so: 28
+    slug: doan-truoc-brand-bien-mat-luc-chay
+    title: "Dự đoán: brand có 'sống sót' lúc chạy không?"
+    teaches: [ts.predict-brand-erasure]
+    requires: [ts.branded-type-basics]
+    y_chinh: "Bài predict thuần: cho một biến kiểu `Email`, hỏi `typeof bienDo === ?` VÀ `JSON.stringify(bienDo) === ?` lúc chạy — đáp án đúng: `\"string\"` và y hệt một chuỗi thường (không có field `__brand` nào xuất hiện, vì nó KHÔNG BAO GIỜ tồn tại thật, chỉ là một chú thích kiểu bị XOÁ khi biên dịch ra JavaScript)."
+  - so: 29
+    slug: smart-constructor-ham-validate-tra-ve-brand
+    title: "Smart constructor — hàm validate, TRẢ VỀ kiểu đã gắn nhãn"
+    teaches: [ts.smart-constructor-pattern]
+    requires: [ts.predict-brand-erasure]
+    y_chinh: "`function taoEmail(s: string): Email | null { if (!s.includes(\"@\")) return null; return s as Email; }` — ĐÂY LÀ CÁCH DUY NHẤT để có một giá trị kiểu `Email`: gọi qua `taoEmail()`, hàm TỰ KIỂM `s` có hợp lệ không, chỉ TRẢ VỀ brand nếu đúng. `as Email` (ép kiểu) CHỈ được viết ở ĐÚNG MỘT chỗ này trong cả chương trình — mọi nơi khác chỉ NHẬN `Email` từ kết quả `taoEmail()`, không tự ép kiểu tuỳ tiện."
+  - so: 30
+    slug: viet-mot-smart-constructor
+    title: "Tự viết một smart constructor"
+    teaches: [ts.write-smart-constructor]
+    requires: [ts.smart-constructor-pattern]
+    y_chinh: "Bài code có chấm điểm sống: viết `taoTuoiHopLe(n: number): TuoiHopLe | null` — một branded type cho số tuổi hợp lệ (`0 <= n <= 150`), trả `null` nếu ngoài khoảng. Test gọi với cả giá trị hợp lệ VÀ không hợp lệ, kiểm cả hai nhánh."
+  - so: 31
+    slug: do-tong-hop-branded-smart-constructor
+    title: "Đo tổng hợp: branded type & smart constructor"
+    teaches: [ts.review-branded-smart-constructor]
+    requires: [ts.write-smart-constructor]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: viết MỘT branded type MỚI (khác các bài trước) VÀ smart constructor của nó, dùng kết quả trong một hàm khác đòi ĐÚNG kiểu đã brand. Không khái niệm mới — đo khả năng tự thiết kế cặp brand+constructor từ đầu, không chỉ điền khung có sẵn."
+
+# ── Cụm 6 (bài 32–36): ADT đệ quy + Review + BOSS ─────────────────────────
+  - so: 32
+    slug: adt-de-quy-mot-cay-bieu-thuc
+    title: "ADT đệ quy — một kiểu TỰ THAM CHIẾU chính nó"
+    teaches: [ts.recursive-adt]
+    requires: [ts.review-branded-smart-constructor]
+    y_chinh: "`type Expr = { kind: \"so\"; giaTri: number } | { kind: \"cong\"; trai: Expr; phai: Expr } | { kind: \"nhan\"; trai: Expr; phai: Expr }` — hai biến thể `cong`/`nhan` có field kiểu CHÍNH `Expr` (kiểu TỰ THAM CHIẾU nó) — biểu diễn một CÂY biểu thức số học lồng bao nhiêu tầng cũng được (`3 + (4 * 5)`). ĐÃ ĐO THẬT: TypeScript biên dịch và chạy đúng một cây ba tầng."
+  - so: 33
+    slug: viet-ham-tinh-de-quy-tren-adt
+    title: "Viết hàm `tinh()` ĐỆ QUY, pattern-match trên ADT đệ quy"
+    teaches: [ts.write-recursive-eval]
+    requires: [ts.recursive-adt]
+    y_chinh: "Bài code có chấm điểm sống: viết `tinh(e: Expr): number` — `switch` trên `e.kind`, biến thể `so` trả `giaTri`, biến thể `cong`/`nhan` GỌI LẠI `tinh()` đệ quy trên `trai`/`phai` rồi cộng/nhân kết quả. Cấu trúc hàm PHẢN ÁNH ĐÚNG cấu trúc kiểu — kiểu đệ quy, hàm xử lý nó cũng đệ quy."
+  - so: 34
+    slug: mo-rong-expr-tru-loi-hien-ra-dung-cho
+    title: "Mở rộng `Expr` thêm `tru` — lỗi hiện ra ĐÚNG CHỖ nhờ exhaustiveness"
+    teaches: [ts.extend-recursive-adt-exhaustive]
+    requires: [ts.write-recursive-eval]
+    y_chinh: "Thêm biến thể `{ kind: \"tru\"; trai: Expr; phai: Expr }` vào `Expr` — nếu `tinh()` (bài 33) có `assertNever` bảo vệ, TypeScript báo NGAY chỗ `switch` cũ CHƯA xử lý `tru` (đúng cơ chế bài 9, giờ áp dụng lên một ADT ĐỆ QUY thật, khép vòng Ý xuyên suốt track). Bài code: thêm biến thể, sửa `tinh()` cho đủ, test cả bốn biến thể."
+  - so: 35
+    slug: do-tong-hop-truoc-boss
+    title: "Đo tổng hợp trước BOSS"
+    teaches: [ts.adt-gate-review]
+    requires: [ts.extend-recursive-adt-exhaustive]
+    y_chinh: "Bài code có chấm điểm sống, ghép NHIỀU Ý đã học: một ADT đệ quy nhỏ (không lặp lại `Expr` — một hình dạng MỚI, ví dụ danh sách lồng nhau), hàm xử lý đệ quy có `assertNever`. Không giới thiệu khái niệm mới."
+  - so: 36
+    slug: boss-adt-pattern-matching
+    title: "BOSS — Khép track ADT & Pattern Matching"
+    teaches: [ts.adt-gate-boss]
+    requires: [ts.adt-gate-review]
+    y_chinh: "Người học viết một chương trình nhỏ dùng ĐỦ: discriminated union với discriminant field (cụm 1), `switch` + `assertNever` exhaustiveness (cụm 2), sum-of-products lồng nhau (cụm 3), thiết kế thay thế cờ boolean bằng union để illegal states unrepresentable (cụm 4), branded type + smart constructor (cụm 5), một ADT đệ quy nhỏ (cụm 6). Khép track — không dạy khái niệm mới, chỉ đòi ghép lại. Track sau (T4.4, Generics/Traits, quay lại Rust) hỏi tiếp: nếu kiểu dữ liệu cần THAM SỐ HOÁ theo một kiểu KHÁC (một `Hop<T>` chứa MỘT giá trị kiểu `T` bất kỳ), viết thế nào — và Rust's trait/generic khác gì TypeScript's generic đã dùng xuyên suốt track này?"
