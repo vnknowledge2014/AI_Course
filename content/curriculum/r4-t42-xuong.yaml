@@ -1,0 +1,228 @@
+# Xương sống R4.T4.2 — HOF & Composition (30 bài)
+#
+# Track FP thứ hai của Realm 4, dùng lại Python (như T4.1). Ý XUYÊN SUỐT:
+# hàm LÀ MỘT GIÁ TRỊ — gán được, truyền được, trả về được, GHÉP được — và
+# việc GHÉP nhiều hàm nhỏ, đã kiểm riêng lẻ, thành một hàm lớn chỉ AN TOÀN
+# khi từng mắt xích THUẦN (nối thẳng T4.1: một hàm impure trong một chuỗi
+# ghép làm cả chuỗi mất khả năng dự đoán).
+#
+# NGUỒN THAM KHẢO (chỉ đọc, KHÔNG sửa):
+# `fp/Python_Books/part_1_fundamentals/chapter_07_functions_closures.md`
+# (hàm là giá trị, map/filter/reduce, closure, functools.partial) và
+# `fp/Python_Books/part_2_thinking_functionally/chapter_12_composition_pipelines.md`
+# (compose/pipe, method chaining). Mượn Ý và ví dụ gốc, KHÔNG chép nguyên
+# văn — xương dưới mở rộng hai chương thành 30 bài.
+#
+# QUYẾT ĐỊNH HẠ TẦNG ĐÃ ĐO: chương 12 gốc dùng thư viện `toolz`
+# (`toolz.curry`, `toolz.pipe`, `compose_left`) — ĐÃ ĐO THẬT: `import
+# toolz` trên Pyodide của khoá NÉM LỖI ("You can install it by calling
+# await micropip.install(...)" — `kiem_ma_bai_hoc.mjs` không làm việc đó,
+# gọi đồng bộ `py.runPython()`). TRACK NÀY KHÔNG DÙNG `toolz` Ở BẤT CỨ
+# ĐÂU — mọi `compose`/`pipe`/`curry` đều TỰ VIẾT bằng Python thuần (đã đo
+# thật, chạy sạch). Đây không phải một thoả hiệp hạ tầng — nó ĐÚNG tinh
+# thần dự án: hiểu compose/pipe bằng cách TỰ VIẾT, không phải học API của
+# một thư viện.
+#
+# `map()`/`filter()` trả về ITERATOR (không phải `list`) — đã đo thật,
+# cần `list(...)` để ép ra hoặc lặp trực tiếp. Bài dạy map/filter PHẢI nói
+# rõ điều này, đừng ngầm định chúng trả list.
+#
+# Namespace skill: `fp.*` (tiếp tục namespace T4.1, cùng track FP). Thư
+# mục nội dung: `content/lap-trinh-ham/03-ham-bac-cao-hop-thanh/`.
+
+track: ham-bac-cao-hop-thanh
+realm: lap-trinh-ham
+ten: "T4.2 — HOF & Composition"
+so_bai: 30
+ngon_ngu_chu: python
+
+# ── Cụm 1 (bài 1–5): Hàm LÀ một giá trị ───────────────────────────────────
+bai:
+  - so: 1
+    slug: ham-gan-duoc-vao-ten
+    title: "Hàm gán được vào một tên, giữ được trong list/dict"
+    teaches: [fp.function-is-value]
+    requires: [core.function-def, core.variable, core.dict]
+    y_chinh: "`gap_doi = lambda x: x * 2` rồi `gap_doi(5)` — một hàm không khác gì một số hay một chuỗi: gán được vào tên, đặt được vào `list`/`dict`. `phep_toan = {'+': lambda a,b: a+b, '-': lambda a,b: a-b}` rồi gọi `phep_toan['+'](3,4)`. Đã đo thật, chạy sạch. Bài explain/code — chấm bằng gọi thử một hàm lấy ra từ dict."
+  - so: 2
+    slug: ham-truyen-lam-tham-so
+    title: "Hàm truyền được làm THAM SỐ cho hàm khác"
+    teaches: [fp.function-as-parameter]
+    requires: [fp.function-is-value]
+    y_chinh: "`def ap_dung(xs, f): return [f(x) for x in xs]` rồi `ap_dung([1,2,3], lambda x: x**2)` — một hàm NHẬN một hàm khác làm đối số, gọi nó BÊN TRONG. Đây là nền tảng của mọi Higher-Order Function (HOF) sắp học ở cụm 2. Code chấm điểm sống."
+  - so: 3
+    slug: ham-tra-ve-tu-ham-khac
+    title: "Một hàm TRẢ VỀ một hàm khác"
+    teaches: [fp.function-as-return]
+    requires: [fp.function-as-parameter]
+    y_chinh: "`def nhan_voi(k): return lambda x: x * k` rồi `gap_ba = nhan_voi(3); gap_ba(5) == 15` — hàm ngoài TRẢ VỀ một hàm mới, đã 'nhớ' `k`. Đã đo thật. Bài explain/predict — dự đoán kết quả gọi hàm được trả về, chưa cần hiểu closure sâu (dành cụm 3), chỉ cần thấy 'hàm trả về hàm' là hợp lệ."
+  - so: 4
+    slug: lambda-bieu-thuc-khong-ten
+    title: "`lambda` — một hàm không tên, đúng MỘT biểu thức"
+    teaches: [fp.lambda-basics]
+    requires: [fp.function-as-return]
+    y_chinh: "`lambda x, y: x + y` — không `def`, không tên, không `return` (giá trị biểu thức TỰ LÀ kết quả), và CHỈ được đúng MỘT biểu thức (không `if`/`for` dạng câu lệnh, không nhiều dòng). Đã đo thật: `lambda x: (a := x + 1)` kiểu lách bằng walrus KHÔNG cần dạy — bài chỉ dạy dạng đơn giản, đúng phạm vi người mới cần. Code: viết một `lambda` thay cho một hàm `def` một dòng."
+  - so: 5
+    slug: do-tong-hop-ham-la-gia-tri
+    title: "Đo tổng hợp: hàm là giá trị"
+    teaches: [fp.review-first-class]
+    requires: [fp.lambda-basics]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: ghép cả bốn Ý — một `dict` ánh xạ tên sang hàm (`lambda`), một hàm nhận hàm làm đối số, gọi nó, trả về kết quả. Không khái niệm mới."
+
+# ── Cụm 2 (bài 6–11): map/filter/reduce — ba HOF nền tảng ─────────────────
+  - so: 6
+    slug: map-ap-len-moi-phan-tu
+    title: "`map()` — áp MỘT hàm lên MỌI phần tử"
+    teaches: [fp.map-basics]
+    requires: [fp.review-first-class]
+    y_chinh: "`map(lambda x: x*2, [1,2,3])` — TRẢ VỀ MỘT ITERATOR, không phải `list` (đã đo thật) — cần `list(map(...))` để ép ra hoặc lặp trực tiếp bằng `for`. Bài phải nói rõ bẫy này: `map(...)  == [2,4,6]` LUÔN `False`, dù giá trị bên trong đúng. Code chấm điểm sống, test ép `list()` trước khi so sánh."
+  - so: 7
+    slug: filter-giu-lai-thoa-dieu-kien
+    title: "`filter()` — giữ lại phần tử THOẢ điều kiện"
+    teaches: [fp.filter-basics]
+    requires: [fp.map-basics]
+    y_chinh: "`filter(lambda x: x % 2 == 0, [1,2,3,4,5])` — cùng bẫy iterator như `map()` (đã đo thật, cần `list()`). Hàm truyền vào PHẢI trả `True`/`False` (hay giá trị coi được là đúng/sai) cho MỖI phần tử — khác `map()` (biến đổi giá trị), `filter()` chỉ QUYẾT ĐỊNH giữ hay bỏ, không đổi giá trị phần tử được giữ. Code chấm điểm sống."
+  - so: 8
+    slug: map-filter-doi-chieu-comprehension
+    title: "`map`/`filter` so với list comprehension — cùng Ý, khác cú pháp"
+    teaches: [fp.map-filter-vs-comprehension]
+    requires: [fp.filter-basics]
+    y_chinh: "`[x*2 for x in xs]` và `list(map(lambda x: x*2, xs))` cho CÙNG kết quả — R1.T1.4 đã dạy comprehension, Python thường ƯU TIÊN nó (đọc tự nhiên hơn). Track này vẫn dạy `map`/`filter` vì `reduce` (bài 9) không có dạng comprehension tương đương, và cụm 4 (compose/pipe) cần hàm ở DẠNG GIÁ TRỊ truyền được — một comprehension không phải một giá trị truyền được, một lời gọi `map` thì có thể. Bài predict: so hai cách viết, xác nhận CÙNG kết quả."
+  - so: 9
+    slug: reduce-gop-mot-day-thanh-mot-gia-tri
+    title: "`reduce()` — gộp một dãy thành MỘT giá trị"
+    teaches: [fp.reduce-basics]
+    requires: [fp.map-filter-vs-comprehension]
+    y_chinh: "`from functools import reduce; reduce(lambda acc, x: acc + x, [1,2,3,4,5], 0)` — ĐÃ ĐO THẬT, chạy sạch, kết quả `15`. `acc` (bộ tích luỹ) mang giá trị TỪ BƯỚC TRƯỚC sang bước sau; `0` là giá trị KHỞI ĐẦU. Khác `map`/`filter` (một-đầu-vào-một-đầu-ra), `reduce` gộp NHIỀU thành MỘT. Code chấm điểm sống."
+  - so: 10
+    slug: cai-dat-lai-reduce-bang-vong-lap
+    title: "`reduce` chỉ là một vòng lặp tích luỹ, viết gọn lại"
+    teaches: [fp.reduce-from-scratch]
+    requires: [fp.reduce-basics]
+    y_chinh: "Viết một hàm `reduce_tu_viet(f, xs, khoi_dau)` bằng `for` thường — chứng minh `reduce` không phải phép màu, chỉ là mẫu hình `acc = khoi_dau; for x in xs: acc = f(acc, x); return acc` được đóng gói lại. So kết quả với `functools.reduce` trên CÙNG dữ liệu, phải khớp. Code chấm điểm sống."
+  - so: 11
+    slug: do-tong-hop-hof-nen-tang
+    title: "Đo tổng hợp: ba HOF nền tảng"
+    teaches: [fp.review-hof]
+    requires: [fp.reduce-from-scratch]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: một chuỗi xử lý ba bước dùng CẢ BA — `filter()` lọc, `map()` biến đổi, `reduce()` gộp — trên cùng một tập dữ liệu (ví dụ: lọc số chẵn, bình phương, cộng dồn). Không khái niệm mới."
+
+# ── Cụm 3 (bài 12–18): Closures — hàm "nhớ" môi trường ────────────────────
+  - so: 12
+    slug: closure-ham-nho-moi-truong
+    title: "Closure — hàm bên trong VẪN THẤY biến của hàm ngoài, sau khi hàm ngoài đã return"
+    teaches: [fp.closure-basics]
+    requires: [fp.review-hof]
+    y_chinh: "`def lam_bang(k): return lambda x: x * k` rồi `nhan3 = lam_bang(3)` — sau khi `lam_bang(3)` ĐÃ RETURN XONG, hàm được trả về VẪN nhớ `k=3` khi gọi `nhan3(5)`. Đây gọi là **closure** — hàm 'đóng gói' (close over) môi trường nó được tạo ra, mang theo dù môi trường đó (lời gọi `lam_bang`) đã kết thúc. Bài explain/predict, dựng khái niệm trước code."
+  - so: 13
+    slug: closure-thuan-chi-doc
+    title: "Closure THUẦN — chỉ ĐỌC biến ngoài, không sửa"
+    teaches: [fp.closure-pure]
+    requires: [fp.closure-basics]
+    y_chinh: "`def lam_cong(n): return lambda x: x + n` — `n` bị 'bắt' (captured) nhưng KHÔNG BAO GIỜ bị sửa bên trong closure, chỉ được ĐỌC. Gọi `cong5 = lam_cong(5)` nhiều lần với CÙNG `x` luôn ra CÙNG kết quả — closure này THUẦN theo đúng nghĩa T4.1 đã dạy (`fp.pure-fn-def`). Code chấm điểm sống, dùng lại `pure-fn` (target đúng tên hàm closure)."
+  - so: 14
+    slug: closure-khong-thuan-nonlocal
+    title: "Closure KHÔNG THUẦN — `nonlocal` sửa biến ngoài mỗi lần gọi"
+    teaches: [fp.closure-impure]
+    requires: [fp.closure-pure, fp.nondeterministic-impure]
+    y_chinh: "`def lam_dem(bat_dau=0): dem = bat_dau; def tang(): nonlocal dem; dem += 1; return dem; return tang` — `dem += 1` SỬA biến `dem` của hàm NGOÀI, mỗi lần gọi cho một kết quả KHÁC nhau. Nối thẳng T4.1's `fp.nondeterministic-impure`: đây CHÍNH LÀ 'phụ thuộc trạng thái bên ngoài tham số', chỉ khác chỗ trạng thái đó nằm trong CHÍNH closure, không phải một biến toàn cục. Đã đo thật. Bài predict: gọi hàm đếm hai lần, đoán hai kết quả (khác nhau, không phải bằng nhau như bài 13)."
+  - so: 15
+    slug: nhan-biet-closure-khong-thuan
+    title: "Dùng closure không thuần có CHỦ ĐÍCH, không phải vô tình"
+    teaches: [fp.closure-impure-aware]
+    requires: [fp.closure-impure]
+    y_chinh: "Một bộ đếm (`fp.closure-impure`) hữu ích THẬT — nhưng phải BIẾT nó không thuần, không được `assert dem() == dem()` (sẽ luôn `False`, KHÁC closure thuần bài 13 luôn `True`). Bài code: viết một hàm dùng closure thuần cho một việc, closure KHÔNG thuần cho việc khác trong CÙNG chương trình, test phân biệt đúng hành vi từng loại — không dạy 'closure không thuần là sai', dạy 'phải biết nó thuộc loại nào để test đúng cách'."
+  - so: 16
+    slug: functools-partial-chot-san-doi-so
+    title: "`functools.partial` — chốt sẵn MỘT PHẦN đối số, tạo hàm mới"
+    teaches: [fp.functools-partial]
+    requires: [fp.closure-impure-aware]
+    y_chinh: "`from functools import partial; def luy_thua(co_so, so_mu): return co_so ** so_mu; binh_phuong = partial(luy_thua, so_mu=2)` rồi `binh_phuong(5) == 25` — ĐÃ ĐO THẬT. `partial` không phải cú pháp lạ — nó là một CÁCH KHÁC để làm việc closure bài 12-13 đã làm (tạo một hàm 'nhớ sẵn' một phần dữ liệu), chỉ khác công cụ: `partial` dùng thư viện có sẵn, không tự viết `lambda`/`def` lồng nhau."
+  - so: 17
+    slug: tu-viet-curry-hai-tham-so
+    title: "Tự viết `curry` — biến `f(a, b)` thành `f(a)(b)`"
+    teaches: [fp.curry-handwritten]
+    requires: [fp.functools-partial]
+    y_chinh: "`def curry2(f): return lambda a: lambda b: f(a, b)` rồi `cong = curry2(lambda a,b: a+b); cong(3)(4) == 7` — ĐÃ ĐO THẬT. `curry2` TRẢ VỀ một closure (bài 12) mà closure đó LẠI trả về một closure khác — currying là 'partial application TỰ ĐỘNG', viết được từ đúng những mảnh track đã dạy, không phải một phép màu của thư viện `toolz` (track này KHÔNG dùng `toolz` — đã đo thật nó không nạp được, xem đầu file xương)."
+  - so: 18
+    slug: do-tong-hop-closures
+    title: "Đo tổng hợp: closures & partial application"
+    teaches: [fp.review-closures]
+    requires: [fp.curry-handwritten]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: ghép closure thuần + `partial` + `curry2` trong một chương trình nhỏ — ví dụ dùng `curry2` để tạo ra vài hàm 'đã chốt sẵn' một tham số, dùng chúng qua `map()` (nối cụm 2). Không khái niệm mới."
+
+# ── Cụm 4 (bài 19–24): Composition — ghép hàm nhỏ thành hàm lớn ───────────
+  - so: 19
+    slug: compose-ghep-hai-ham-phai-sang-trai
+    title: "`compose(f, g)` — ghép hai hàm, chạy PHẢI-SANG-TRÁI"
+    teaches: [fp.compose-basics]
+    requires: [fp.review-closures]
+    y_chinh: "`def compose(f, g): return lambda x: f(g(x))` rồi `compose(str, lambda x: x*2)(4) == '8'` (chạy `x*2` TRƯỚC, `str` SAU — đọc từ PHẢI sang TRÁI, ngược thứ tự viết) — ĐÃ ĐO THẬT. `compose` trả về một closure (bài 12) — track này không giới thiệu khái niệm hạ tầng mới, chỉ GHÉP những gì đã học (hàm là giá trị, hàm trả hàm) theo một CÁCH DÙNG mới."
+  - so: 20
+    slug: compose-long-nhau-doc-nguoc
+    title: "Ghép NHIỀU `compose` lồng nhau — thứ tự đọc ngược trực giác"
+    teaches: [fp.compose-nested]
+    requires: [fp.compose-basics]
+    y_chinh: "`compose(str, compose(nhan_doi, cong_mot))` — chạy `cong_mot` → `nhan_doi` → `str`, nhưng ĐỌC TỪ TRÁI SANG PHẢI trong mã lại thấy `str` trước. Bài predict: cho một `compose` lồng ba tầng, đoán THỨ TỰ THỰC THI (không phải thứ tự viết) — đây CHÍNH LÀ vấn đề bài 21 sẽ giải quyết."
+  - so: 21
+    slug: pipe-ghep-trai-sang-phai
+    title: "`pipe(value, *fns)` — ghép TRÁI-SANG-PHẢI, đọc xuôi tự nhiên"
+    teaches: [fp.pipe-basics]
+    requires: [fp.compose-nested]
+    y_chinh: "`def pipe(value, *ham): ... ; pipe(3, lambda x: x+1, lambda x: x*2, str) == '8'` — CHẠY và ĐỌC cùng một chiều (trái sang phải), giải quyết đúng vấn đề đọc-ngược của `compose` (bài 20). ĐÃ ĐO THẬT. Code chấm điểm sống: viết `pipe`, test trên một chuỗi 3+ hàm."
+  - so: 22
+    slug: pipe-dung-reduce-ben-trong
+    title: "`pipe` dùng `reduce` bên trong — reduce không chỉ gộp SỐ"
+    teaches: [fp.pipe-uses-reduce]
+    requires: [fp.pipe-basics]
+    y_chinh: "`def pipe(value, *ham): return reduce(lambda acc, f: f(acc), ham, value)` — ĐÃ ĐO THẬT. Nối thẳng cụm 2: `reduce` (bài 9-10) gộp một DÃY SỐ thành MỘT SỐ; ở đây nó gộp một DÃY HÀM, áp dụng LẦN LƯỢT lên MỘT GIÁ TRỊ — cùng khuôn `acc = f(acc, phan_tu)`, khác kiểu dữ liệu đi qua nó. `reduce` tổng quát hơn 'cộng dồn số' rất nhiều."
+  - so: 23
+    slug: method-chaining-pipe-kieu-oop
+    title: "Method chaining — `pipe` kiểu hướng đối tượng"
+    teaches: [fp.method-chaining]
+    requires: [fp.pipe-uses-reduce]
+    y_chinh: "Nối thẳng T4.1 (`fp.dataclasses-replace`): một `@dataclass(frozen=True)` có method TRẢ VỀ MỘT BẢN SAO MỚI (dùng `replace()`) thay vì `self` bị sửa — cho phép viết `TruyVan('users').loc('tuoi>18').gioi_han(10)`, đọc như một chuỗi bước, nhưng MỖI bước tạo một object MỚI, không sửa tại chỗ. Đây là `pipe` (bài 21) khoác áo OOP — cùng Ý, khác cú pháp gọi (`.method()` thay vì truyền hàm)."
+  - so: 24
+    slug: do-tong-hop-composition
+    title: "Đo tổng hợp: composition"
+    teaches: [fp.review-composition]
+    requires: [fp.method-chaining]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: viết một `pipe` xử lý dữ liệu qua ít nhất bốn bước (kết hợp map/filter/reduce từ cụm 2 làm các hàm trong chuỗi `pipe`). Không khái niệm mới — đo khả năng GHÉP LẠI mọi cụm trước."
+
+# ── Cụm 5 (bài 25–30): Pipeline dữ liệu thật + BOSS ───────────────────────
+  - so: 25
+    slug: pipeline-xu-ly-du-lieu-that
+    title: "Một pipeline xử lý dữ liệu thật: chuẩn hoá → lọc → biến đổi → tổng hợp"
+    teaches: [fp.real-pipeline]
+    requires: [fp.review-composition]
+    y_chinh: "Bài code có chấm điểm sống: xử lý một chuỗi văn bản qua `pipe()` — chuẩn hoá (`.strip().lower()`), tách từ (`.split()`), lọc từ ngắn, đếm số từ còn lại — mỗi bước một hàm THUẦN riêng, ghép bằng `pipe`. Ví dụ thực tế, không phải bài tập trừu tượng — mô phỏng đúng cách `pipe`/`compose` được dùng trong mã thật."
+  - so: 26
+    slug: ghep-doi-hoi-tung-mat-xich-thuan
+    title: "Ghép được AN TOÀN đòi hỏi MỖI mắt xích phải thuần"
+    teaches: [fp.composability-needs-purity]
+    requires: [fp.real-pipeline, fp.pure-fn-def]
+    y_chinh: "Bài LÝ THUYẾT, nối thẳng T4.1: nếu MỘT hàm trong chuỗi `pipe` không thuần (ví dụ gọi `random.random()` giữa chừng), cả PIPELINE mất khả năng dự đoán — `pipe(x, f, g, h)` không còn cho cùng kết quả với cùng `x`, dù `f`, `h` đều thuần. Bài predict: cho một pipeline có MỘT hàm giữa chừng không thuần, hỏi gọi hai lần có ra cùng kết quả không (không — dù đầu và cuối chuỗi đều thuần, MỘT mắt xích hỏng là đủ để phá cả chuỗi)."
+  - so: 27
+    slug: debug-bang-ham-tap
+    title: "Debug một pipeline bằng hàm `tap` — soi giá trị giữa chừng, không đổi kết quả"
+    teaches: [fp.debug-with-tap]
+    requires: [fp.composability-needs-purity]
+    y_chinh: "`def tap(nhan): return lambda x: (print(f'{nhan}: {x}'), x)[1]` — chèn `tap('sau loc')` vào GIỮA một chuỗi `pipe` để IN ra giá trị tại đúng bước đó, rồi TRẢ LẠI giá trị y hệt (không đổi luồng dữ liệu). Đây là công cụ THỰC TẾ: một `pipe` dài nhiều bước rất khó biết bước nào ra sai, `tap` cho nhìn vào GIỮA chuỗi mà không phải tách nó ra viết lại. Code chấm điểm sống."
+  - so: 28
+    slug: mot-mat-xich-nem-loi-dung-cho
+    title: "Một mắt xích NÉM LỖI — pipeline dừng ĐÚNG CHỖ, không lặng lẽ tiếp tục"
+    teaches: [fp.pipeline-error-handling]
+    requires: [fp.debug-with-tap]
+    y_chinh: "Nếu một hàm giữa chuỗi `pipe` (ví dụ `int('abc')`) ném `ValueError`, TOÀN BỘ `pipe` dừng ngay tại đó — các hàm SAU không chạy, lỗi lộ ra với traceback trỏ ĐÚNG bước gây lỗi (nhờ `reduce` bên dưới chạy tuần tự, không có bước nào 'nuốt' lỗi âm thầm). Code chấm điểm sống: test một pipeline với input hợp lệ (chạy hết) và input gây lỗi giữa chừng (dừng đúng chỗ, `try/except` bắt đúng loại lỗi)."
+  - so: 29
+    slug: do-tong-hop-truoc-boss
+    title: "Đo tổng hợp trước BOSS"
+    teaches: [fp.hof-gate-review]
+    requires: [fp.pipeline-error-handling]
+    y_chinh: "Bài code có chấm điểm sống, ghép NHIỀU Ý đã học: một `pipe` xử lý dữ liệu thật (map/filter/reduce làm các bước), có `tap` để debug, mọi hàm thành phần đều THUẦN. Không giới thiệu khái niệm mới."
+  - so: 30
+    slug: boss-hof-composition
+    title: "BOSS — Khép track HOF & Composition"
+    teaches: [fp.hof-gate-boss]
+    requires: [fp.hof-gate-review]
+    y_chinh: "Người học viết một chương trình nhỏ dùng ĐỦ: hàm là giá trị (cụm 1), map/filter/reduce (cụm 2), closure thuần + partial/curry (cụm 3), compose/pipe/method-chaining (cụm 4), một pipeline thật có xử lý lỗi (cụm 5). Khép track — không dạy khái niệm mới, chỉ đòi ghép lại. Track sau (T4.3, ADT & pattern matching, quay lại TypeScript) người học đã MANG THEO khả năng NHÌN một chương trình như một CHUỖI phép biến đổi dữ liệu, không phải một chuỗi lệnh SỬA trạng thái."

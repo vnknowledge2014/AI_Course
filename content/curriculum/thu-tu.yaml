@@ -93,3 +93,8 @@ realm:
       # cùng trỏ một giá trị) rồi dạy KỶ LUẬT đối phó (không sửa tại chỗ).
       # Không mượn gì từ T4.0a/T4.0b, chỉ xếp sau vì đúng thứ tự M8.
       - bat-bien-thuan-khiet
+      # T4.2 mượn `fp.pure-fn-def`/`fp.nondeterministic-impure` THẲNG từ
+      # T4.1 (bài 14 dạy closure không thuần bằng đúng khái niệm T4.1 đã
+      # dạy cho hàm; bài 26 nói composability đòi hỏi từng mắt xích thuần)
+      # — đứng ngay sau T4.1, không song song.
+      - ham-bac-cao-hop-thanh
