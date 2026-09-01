@@ -18,9 +18,10 @@
 // công bằng: người học không gõ được vào đó, nên nó không phải lỗ chấm điểm.
 
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
+import { Worker } from 'node:worker_threads';
 
 const THU_MUC = process.argv[2] ?? 'dist/content';
 const MIEN_TRU = 'content/curriculum/dot-bien-bo-qua.yaml';
@@ -29,6 +30,51 @@ const { kiemAst } = await import(new URL('../packages/exec-python/dist/kiem-ast.
 const require = createRequire(new URL('../packages/exec-python/package.json', import.meta.url));
 const { loadPyodide } = await import(pathToFileURL(require.resolve('pyodide/pyodide.mjs')).href);
 const py = await loadPyodide();
+
+// ── TypeScript: cùng nguyên tắc "đột biến theo Ý", engine khác ────────────
+//
+// Trước bản vá này, cổng đột biến CHỈ chạy trên Python (`c.lang !== 'python'`
+// → bỏ qua) — nghĩa là T4.0a (18 bài TypeScript) chưa từng được kiểm đột
+// biến, dù `kiem_ma_bai_hoc.mjs` đã chạy được TypeScript từ lâu. Đúng lớp lỗ
+// hổng "một cổng không đo GÌ CẢ cho cả một ngôn ngữ" đã vá cho
+// `kiem_ma_bai_hoc.mjs` — giờ vá tương đương ở đây.
+//
+// Bộ sinh đột biến TypeScript dùng THẲNG TypeScript compiler API thật
+// (`ts.createSourceFile` → duyệt/sửa cây → `ts.createPrinter().printFile`)
+// — không phải quét chuỗi. Cùng lý do bản Python không thay chuỗi: một `+`
+// trong một chuỗi ký tự cũng bị sửa nếu regex không hiểu ngữ cảnh.
+const { BoThucThiTypeScript, kiemKieu } = await import(new URL('../packages/exec-typescript/dist/index.js', import.meta.url).href);
+const require_ts = createRequire(new URL('../packages/exec-typescript/package.json', import.meta.url));
+const TS = require_ts('typescript');
+const TS_LIB_DIR = dirname(require_ts.resolve('typescript'));
+const doc_lib_ts = (ten) => {
+  try {
+    return readFileSync(join(TS_LIB_DIR, ten), 'utf-8');
+  } catch {
+    return undefined;
+  }
+};
+const kiem_kieu_truoc = (ma) => kiemKieu(TS, ma, doc_lib_ts);
+
+const TS_WORKER_URL = new URL('../packages/exec-typescript/node-worker.mjs', import.meta.url);
+function tao_cong_ts() {
+  const w = new Worker(TS_WORKER_URL);
+  let handler = null;
+  w.on('message', (m) => handler?.(m));
+  w.on('error', () => {});
+  return {
+    gui: (tin) => w.postMessage(tin),
+    khiNhan: (f) => { handler = f; },
+    giet: () => { w.terminate(); },
+  };
+}
+const ts_engine = new BoThucThiTypeScript(tao_cong_ts, kiem_kieu_truoc);
+
+/** Chạy một đoạn TypeScript, trả về {ok, xuat} — cùng hình dạng chay(). */
+async function chay_ts(ma, ma_kiem_tra) {
+  const r = await ts_engine.chay(ma, ma_kiem_tra ? { maKiemTra: ma_kiem_tra } : {});
+  return { ok: r.ok, xuat: r.xuat };
+}
 
 const TRAN_DONG = 5000;
 
@@ -331,6 +377,218 @@ def sinh_dot_bien(ma, dong_duoc_sua, tran=6):
 `);
 const sinh = py.globals.get('sinh_dot_bien');
 
+// ── Bộ sinh đột biến TypeScript — mirror triết lý của bản Python ở trên ───
+//
+// Không cài lại bằng py.runPython: TypeScript compiler API là JS thật, gọi
+// thẳng từ đây rẻ hơn và không phải đi vòng qua Pyodide.
+const { factory: TS_F } = TS;
+
+// Ba bảng toán tử — TÁCH RIÊNG số học/so sánh vì TypeScript biểu diễn CẢ HAI
+// bằng cùng một loại nút (`BinaryExpression`), chỉ khác `operatorToken.kind`.
+// Python không cần tách vì `ast.BinOp` (số học) và `ast.Compare` (so sánh)
+// vốn đã là hai loại nút khác nhau.
+const TOAN_TU_SO = new Map([
+  [TS.SyntaxKind.PlusToken, TS.SyntaxKind.MinusToken],
+  [TS.SyntaxKind.MinusToken, TS.SyntaxKind.PlusToken],
+  [TS.SyntaxKind.AsteriskToken, TS.SyntaxKind.PlusToken],
+  [TS.SyntaxKind.SlashToken, TS.SyntaxKind.AsteriskToken],
+]);
+const TOAN_TU_SS = new Map([
+  [TS.SyntaxKind.EqualsEqualsToken, TS.SyntaxKind.ExclamationEqualsToken],
+  [TS.SyntaxKind.ExclamationEqualsToken, TS.SyntaxKind.EqualsEqualsToken],
+  [TS.SyntaxKind.EqualsEqualsEqualsToken, TS.SyntaxKind.ExclamationEqualsEqualsToken],
+  [TS.SyntaxKind.ExclamationEqualsEqualsToken, TS.SyntaxKind.EqualsEqualsEqualsToken],
+  [TS.SyntaxKind.LessThanToken, TS.SyntaxKind.LessThanEqualsToken],
+  [TS.SyntaxKind.LessThanEqualsToken, TS.SyntaxKind.LessThanToken],
+  [TS.SyntaxKind.GreaterThanToken, TS.SyntaxKind.GreaterThanEqualsToken],
+  [TS.SyntaxKind.GreaterThanEqualsToken, TS.SyntaxKind.GreaterThanToken],
+]);
+const TEN_TOAN_TU = new Map([
+  [TS.SyntaxKind.PlusToken, 'cộng'], [TS.SyntaxKind.MinusToken, 'trừ'],
+  [TS.SyntaxKind.AsteriskToken, 'nhân'], [TS.SyntaxKind.SlashToken, 'chia'],
+  [TS.SyntaxKind.EqualsEqualsToken, '=='], [TS.SyntaxKind.ExclamationEqualsToken, '!='],
+  [TS.SyntaxKind.EqualsEqualsEqualsToken, '==='], [TS.SyntaxKind.ExclamationEqualsEqualsToken, '!=='],
+  [TS.SyntaxKind.LessThanToken, '<'], [TS.SyntaxKind.LessThanEqualsToken, '<='],
+  [TS.SyntaxKind.GreaterThanToken, '>'], [TS.SyntaxKind.GreaterThanEqualsToken, '>='],
+]);
+
+// Không gom vào rổ thay thế — cùng vai trò `_DUNG_SAN` bên Python: đổi một
+// tên thành `console`/`Math` không phải lỗi người học nào viết ra, chỉ là
+// nhiễu.
+const DUNG_SAN_TS = new Set([
+  'console', 'Math', 'JSON', 'Object', 'Array', 'String', 'Number', 'Boolean',
+  'parseInt', 'parseFloat', 'isNaN', 'undefined',
+]);
+
+/** Một Identifier có đang ở VỊ TRÍ ĐỌC không — đối lập VỊ TRÍ KHAI BÁO/GÁN.
+ *
+ *  Python phân biệt việc này thẳng bằng `ast.Load` vs `ast.Store`. TypeScript
+ *  không có cờ tương đương trên chính node — phải tự suy từ NODE CHA. Bỏ sót
+ *  một trường hợp ở đây nghĩa là đột biến có thể sửa nhầm một TÊN ĐANG ĐƯỢC
+ *  KHAI BÁO (`let x = ...`) thay vì một tên đang được ĐỌC — sinh ra mã không
+ *  còn parse được, hoặc parse được nhưng không còn là "cùng lỗi, khác vị
+ *  trí" như đột biến phải là.
+ */
+function la_vi_tri_doc_ts(node) {
+  const p = node.parent;
+  if (!p) return true;
+  if (TS.isVariableDeclaration(p) && p.name === node) return false;
+  if (TS.isParameter(p) && p.name === node) return false;
+  if (TS.isBindingElement(p) && p.name === node) return false;
+  if ((TS.isFunctionDeclaration(p) || TS.isFunctionExpression(p) || TS.isClassDeclaration(p)
+    || TS.isInterfaceDeclaration(p) || TS.isTypeAliasDeclaration(p) || TS.isEnumDeclaration(p))
+    && p.name === node) return false;
+  if ((TS.isPropertyAssignment(p) || TS.isShorthandPropertyAssignment(p)) && p.name === node) return false;
+  if ((TS.isPropertySignature(p) || TS.isMethodSignature(p) || TS.isPropertyDeclaration(p)
+    || TS.isMethodDeclaration(p)) && p.name === node) return false;
+  // `.thuoc_tinh` — đây là loại 'thuoc_tinh' riêng, không phải 'ten'.
+  if (TS.isPropertyAccessExpression(p) && p.name === node) return false;
+  if (TS.isBinaryExpression(p) && p.operatorToken.kind === TS.SyntaxKind.EqualsToken && p.left === node) return false;
+  if (TS.isImportSpecifier(p) || TS.isExportSpecifier(p)) return false;
+  if (TS.isLabeledStatement(p) && p.label === node) return false;
+  return true;
+}
+
+/** Sinh mọi đột biến TypeScript có thể trên các DÒNG người học phải điền.
+ *
+ *  Trả về `[[mo_ta, ma_moi], ...]` — cùng hình dạng `JSON.parse(sinh(...))`
+ *  bên Python, để vòng lặp chính dùng chung một đường xử lý.
+ */
+function sinh_dot_bien_ts(ma, dong_duoc_sua, tran = 6) {
+  const dong = new Set(dong_duoc_sua);
+  let goc;
+  try {
+    goc = TS.createSourceFile('loi_giai.ts', ma, TS.ScriptTarget.Latest, true);
+  } catch {
+    return [];
+  }
+  const printer = TS.createPrinter({ newLine: TS.NewLineKind.LineFeed });
+  const goc_txt = printer.printFile(goc).trim();
+  const line_cua = (node) => goc.getLineAndCharacterOfPosition(node.getStart(goc)).line + 1;
+
+  // Gom rổ giá trị thay thế — CÙNG giá trị đang có mặt trong chính lời giải,
+  // không bịa giá trị mới, đúng nguyên tắc bản Python.
+  const chuoi = [];
+  const ten = [];
+  const thuoc_tinh = [];
+  (function gom(node) {
+    if (dong.has(line_cua(node))) {
+      if (TS.isStringLiteral(node)) {
+        if (!chuoi.includes(node.text)) chuoi.push(node.text);
+      } else if (TS.isIdentifier(node) && la_vi_tri_doc_ts(node) && !DUNG_SAN_TS.has(node.text)) {
+        if (!ten.includes(node.text)) ten.push(node.text);
+      } else if (TS.isPropertyAccessExpression(node)) {
+        if (!thuoc_tinh.includes(node.name.text)) thuoc_tinh.push(node.name.text);
+      }
+    }
+    TS.forEachChild(node, gom);
+  })(goc);
+
+  // Gom các Ý sửa được, theo thứ tự gặp, không trùng.
+  const y = [];
+  const y_da_thay = new Set();
+  (function gomY(node) {
+    if (dong.has(line_cua(node))) {
+      let k = null;
+      if (TS.isBinaryExpression(node) && TOAN_TU_SO.has(node.operatorToken.kind)) {
+        k = ['phep', node.operatorToken.kind, null];
+      } else if (TS.isBinaryExpression(node) && TOAN_TU_SS.has(node.operatorToken.kind)) {
+        k = ['sosanh', node.operatorToken.kind, null];
+      } else if (TS.isNumericLiteral(node)) {
+        k = ['hang', node.text, null];
+      } else if (TS.isStringLiteral(node) && chuoi.length > 1) {
+        const khac = chuoi.find((c) => c !== node.text);
+        if (khac !== undefined) k = ['chuoi', node.text, khac];
+      } else if (TS.isIdentifier(node) && la_vi_tri_doc_ts(node) && !DUNG_SAN_TS.has(node.text) && ten.length > 1) {
+        const khac = ten.find((t) => t !== node.text);
+        if (khac !== undefined) k = ['ten', node.text, khac];
+      } else if (TS.isPropertyAccessExpression(node) && thuoc_tinh.length > 1) {
+        const khac = thuoc_tinh.find((t) => t !== node.name.text);
+        if (khac !== undefined) k = ['thuoc_tinh', node.name.text, khac];
+      } else if (TS.isBinaryExpression(node) && (node.operatorToken.kind === TS.SyntaxKind.AmpersandAmpersandToken
+        || node.operatorToken.kind === TS.SyntaxKind.BarBarToken)) {
+        k = ['boolop', node.operatorToken.kind, null];
+      } else if (TS.isPrefixUnaryExpression(node) && node.operator === TS.SyntaxKind.ExclamationToken) {
+        k = ['bo_not', null, null];
+      }
+      if (k) {
+        const kStr = JSON.stringify(k);
+        if (!y_da_thay.has(kStr)) { y_da_thay.add(kStr); y.push(k); }
+      }
+    }
+    TS.forEachChild(node, gomY);
+  })(goc);
+
+  const ra = [];
+  for (const [loai, khoa, thay] of y.slice(0, tran)) {
+    let dinh = 0;
+    function tham(node) {
+      const con_moi = TS.visitEachChild(node, tham, undefined);
+      const n = con_moi || node;
+      if (!dong.has(line_cua(node))) return n;
+      if (loai === 'phep' && TS.isBinaryExpression(n) && n.operatorToken.kind === khoa) {
+        dinh++;
+        return TS_F.updateBinaryExpression(n, n.left, TS_F.createToken(TOAN_TU_SO.get(khoa)), n.right);
+      }
+      if (loai === 'sosanh' && TS.isBinaryExpression(n) && n.operatorToken.kind === khoa) {
+        dinh++;
+        return TS_F.updateBinaryExpression(n, n.left, TS_F.createToken(TOAN_TU_SS.get(khoa)), n.right);
+      }
+      if (loai === 'hang' && TS.isNumericLiteral(n) && n.text === khoa) {
+        dinh++;
+        return TS_F.createNumericLiteral(String(Number(khoa) + 1));
+      }
+      if (loai === 'chuoi' && TS.isStringLiteral(n) && n.text === khoa) {
+        dinh++;
+        return TS_F.createStringLiteral(thay);
+      }
+      if (loai === 'ten' && TS.isIdentifier(n) && la_vi_tri_doc_ts(n) && n.text === khoa) {
+        dinh++;
+        return TS_F.createIdentifier(thay);
+      }
+      if (loai === 'thuoc_tinh' && TS.isPropertyAccessExpression(n) && n.name.text === khoa) {
+        dinh++;
+        return TS_F.updatePropertyAccessExpression(n, n.expression, TS_F.createIdentifier(thay));
+      }
+      if (loai === 'boolop' && TS.isBinaryExpression(n) && n.operatorToken.kind === khoa) {
+        dinh++;
+        const moi_kind = khoa === TS.SyntaxKind.AmpersandAmpersandToken
+          ? TS.SyntaxKind.BarBarToken : TS.SyntaxKind.AmpersandAmpersandToken;
+        return TS_F.updateBinaryExpression(n, n.left, TS_F.createToken(moi_kind), n.right);
+      }
+      if (loai === 'bo_not' && TS.isPrefixUnaryExpression(n) && n.operator === TS.SyntaxKind.ExclamationToken) {
+        dinh++;
+        return n.operand;
+      }
+      return n;
+    }
+    const cay_moi = tham(goc);
+    if (!dinh) continue;
+    let moi;
+    try {
+      moi = printer.printFile(cay_moi).trim();
+    } catch {
+      continue;
+    }
+    if (moi === goc_txt) continue;
+
+    let mo_ta;
+    if (loai === 'hang') mo_ta = `đổi MỌI hằng số ${khoa} thành ${Number(khoa) + 1} (${dinh} chỗ)`;
+    else if (loai === 'phep') mo_ta = `đổi MỌI phép ${TEN_TOAN_TU.get(khoa)} thành ${TEN_TOAN_TU.get(TOAN_TU_SO.get(khoa))} (${dinh} chỗ)`;
+    else if (loai === 'sosanh') mo_ta = `đổi MỌI dấu ${TEN_TOAN_TU.get(khoa)} thành ${TEN_TOAN_TU.get(TOAN_TU_SS.get(khoa))} (${dinh} chỗ)`;
+    else if (loai === 'chuoi') mo_ta = `đổi MỌI chuỗi ${JSON.stringify(khoa)} thành ${JSON.stringify(thay)} (${dinh} chỗ)`;
+    else if (loai === 'ten') mo_ta = `đổi MỌI chỗ đọc tên ${khoa} thành ${thay} (${dinh} chỗ)`;
+    else if (loai === 'thuoc_tinh') mo_ta = `đổi MỌI .${khoa} thành .${thay} (${dinh} chỗ)`;
+    else if (loai === 'boolop') {
+      const [cu, moi_] = khoa === TS.SyntaxKind.AmpersandAmpersandToken ? ['&&', '||'] : ['||', '&&'];
+      mo_ta = `đổi MỌI ${cu} thành ${moi_} (${dinh} chỗ)`;
+    } else mo_ta = `BỎ mọi dấu ! (${dinh} chỗ)`;
+
+    ra.push([mo_ta, moi]);
+  }
+  return ra;
+}
+
 /** Dòng nào của lời giải ứng với một dòng có `___` ở mã khởi đầu. */
 function dong_nguoi_hoc_dien(starter, solution) {
   const a = starter.split('\n');
@@ -379,6 +637,11 @@ const khong_voi_toi = [];
 // Bước bị bỏ qua vì số dòng `starter` khác `solution`, nên không gióng được
 // chỗ trống. Cũng là vùng mù, cũng phải đếm.
 let lech_dong = 0;
+// Rust CHƯA có hạ tầng sinh đột biến — `byte-rust` không lộ AST ra ngoài
+// WASM (chỉ có `chay()`), khác TypeScript (npm package `typescript` là AST
+// đầy đủ, gọi thẳng được từ Node). Đếm và NÓI RA, đúng kỷ luật minh bạch
+// phạm vi của cổng này — không được lặng lẽ coi Rust "đã kiểm".
+let rust_bo_qua = 0;
 
 let da_doc = 0;
 for (const f of tep) {
@@ -386,12 +649,21 @@ for (const f of tep) {
   if (++da_doc % 20 === 0) process.stderr.write(`  … ${da_doc}/${tep.length} bài, ${da_thu} đột biến, ${ho.length} lỗ\n`);
   for (const b of bai.steps) {
     const c = b.code;
-    if (!c?.solution || c.lang !== 'python') continue;
+    if (!c?.solution) continue;
+    const la_py = c.lang === 'python';
+    const la_ts = c.lang === 'typescript';
+    if (!la_py && !la_ts) {
+      if (c.lang === 'rust' && c.starter?.includes('___')) rust_bo_qua++;
+      continue;
+    }
     if (!c.starter?.includes('___')) continue;
     // MỌI luật output — xem chú thích cùng chỗ ở `kiem_ma_bai_hoc.mjs`.
     const luat_out_ds = (b.validation?.rules ?? []).filter((r) => r.tier === 'output');
     const luat_out = luat_out_ds[0];
-    const luat_static = (b.validation?.rules ?? []).filter((r) => r.tier === 'static');
+    // `tier: static` cho TypeScript bị `kiem_ma_bai_hoc.mjs` chặn cứng từ
+    // trước (TsAstKind chưa cài) — nếu nội dung đã qua được cổng đó thì
+    // KHÔNG bài TS nào còn luật static để soi ở đây. Chỉ Python có static.
+    const luat_static = la_py ? (b.validation?.rules ?? []).filter((r) => r.tier === 'static') : [];
     if (!luat_out && !c.test) continue;
 
     const dong = dong_nguoi_hoc_dien(c.starter, c.solution);
@@ -399,7 +671,11 @@ for (const f of tep) {
     da_kiem++;
 
     let ds;
-    try { ds = JSON.parse(sinh(c.solution, dong)); } catch { ds = []; }
+    if (la_py) {
+      try { ds = JSON.parse(sinh(c.solution, dong)); } catch { ds = []; }
+    } else {
+      try { ds = sinh_dot_bien_ts(c.solution, dong); } catch { ds = []; }
+    }
     if (ds.length === 0) khong_voi_toi.push(`${bai.id} · ${b.id}`);
 
     for (const [mo_ta, ma] of ds) {
@@ -414,9 +690,15 @@ for (const f of tep) {
         // Chạy mã trần một lần: lấy được CẢ output lẫn "có nổ không". Rồi chỉ
         // khi cần mới chạy thêm khối test. Bản đầu chạy hai lượt cho cùng một
         // câu trả lời và cổng chậm tới mức không ai chạy nổi.
-        const r = chay(ma);
+        //
+        // CỐ Ý không gộp py/ts qua một hàm async dùng chung — route Python
+        // (`chay`) giữ nguyên đồng bộ, không một chữ `await` nào chạm vào,
+        // đúng kỷ luật đã đặt ra khi vá lỗi tương tự ở `kiem_ma_bai_hoc.mjs`.
+        const r = la_py ? chay(ma) : await chay_ts(ma);
         qua = r.ok && luat_out_ds.every((lo) => khop(r.xuat, lo));
-        if (qua && c.test) qua = chay(`${ma}\n${c.test}`).ok;
+        if (qua && c.test) {
+          qua = la_py ? chay(`${ma}\n${c.test}`).ok : (await chay_ts(ma, c.test)).ok;
+        }
       }
       if (qua) {
         const khoa = `${bai.id} · ${b.id} · ${mo_ta}`;
@@ -436,11 +718,12 @@ for (const f of tep) {
 console.log(`Đã thử ${da_thu} đột biến trên ${da_kiem} bước \`code\` có chỗ trống, trong ${tep.length} bài.`);
 
 // PHẠM VI, in ra trước phán quyết. Xanh trên một phạm vi hẹp vẫn là xanh hẹp.
-if (khong_voi_toi.length || lech_dong) {
+if (khong_voi_toi.length || lech_dong || rust_bo_qua) {
   const n = khong_voi_toi.length;
   console.log(
     `\n⚠️  PHẠM VI: ${n}/${da_kiem} bước không sinh nổi đột biến nào` +
-      (lech_dong ? `, và ${lech_dong} bước bị bỏ qua vì số dòng starter khác solution` : '') +
+      (lech_dong ? `, ${lech_dong} bước bị bỏ qua vì số dòng starter khác solution` : '') +
+      (rust_bo_qua ? `, ${rust_bo_qua} bước Rust CHƯA có hạ tầng sinh đột biến (byte-rust không lộ AST ra WASM)` : '') +
       `.\n   Cổng KHÔNG nói gì về mấy bước ấy — đừng đọc màu xanh dưới đây như thể nó có.`,
   );
   for (const k of khong_voi_toi.slice(0, 12)) console.log(`     · ${k}`);
@@ -449,7 +732,7 @@ if (khong_voi_toi.length || lech_dong) {
 
 if (ho.length === 0) {
   console.log(
-    khong_voi_toi.length || lech_dong
+    khong_voi_toi.length || lech_dong || rust_bo_qua
       ? `\n✅ Trong ${da_kiem - khong_voi_toi.length} bước cổng VỚI TỚI ĐƯỢC: không cách chấm nào cho lọt đáp án sai.`
       : '\n✅ Không cách chấm nào cho lọt đáp án sai.',
   );
