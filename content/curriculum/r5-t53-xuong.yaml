@@ -61,6 +61,41 @@
 # kiểu trả về object/generic (không phải primitive trần) hoặc có test giá trị
 # khác các literal điền bừa.
 #
+# PHÁT HIỆN QUAN TRỌNG lúc viết bài 8 (2026-09-02), đo qua tsprobe.mjs: engine
+# `exec-typescript` (`packages/exec-typescript/src/worker-body.ts`, hàm
+# `chayTrongWorker`) chạy `f()` HOÀN TOÀN ĐỒNG BỘ rồi TRẢ VỀ NGAY
+# `dong.join('\n')` — KHÔNG chờ vi-tác-vụ (microtask) nào chạy trước khi trả
+# kết quả. Hệ quả: `console.log` bên trong `.then()`, sau `await`, hay
+# `async function` callback KHÔNG BAO GIỜ được ghi nhận — `Promise.resolve(5)
+# .then(x => console.log(x))` ra CHUỖI RỖNG, đo thật xác nhận. `setTimeout`
+# thậm chí không tồn tại trong khai báo kiểu của sandbox (`TS2304`). Top-level
+# `await` cũng không dùng được — Sucrase chỉ bóc kiểu (`transforms:
+# ['typescript']`), không transform module, `export {}` để biến file thành
+# module gây LỖI CÚ PHÁP NGAY (script chạy qua `new Function()`, không phải
+# ES module).
+#
+# QUYẾT ĐỊNH: TOÀN BỘ track này THIẾT KẾ ĐỒNG BỘ — không `async`/`await`/
+# `Promise`/`.then()`/`setTimeout` ở BẤT KỲ đâu, kể cả những bài mà sách
+# nguồn (chương 21, 22, 24) dùng async/Promise cho REALISM (I/O thật). Vì
+# MỌI "database"/"API" trong track này VỐN DĨ đã là mô phỏng trong bộ nhớ
+# (`Map`, mảng object — không I/O thật), bỏ `Promise` không mất tính đúng
+# đắn sư phạm, chỉ bỏ một lớp vỏ REALISM không cần thiết. Hai bài BỊ THAY
+# CHỦ ĐỀ hoàn toàn (chủ đề gốc của sách nguồn KHÔNG THỂ dạy được trong
+# sandbox này):
+#   - Bài 22 (cụm 4): sách nguồn dạy "Async Pipeline — pipeAsync()/.then()
+#     chain" → ĐỔI thành "Tap/Peek trong Pipeline" (`tap(f)`: chạy side-effect
+#     TRÊN giá trị, TRẢ giá trị NGUYÊN VẸN — công cụ debug/log phổ biến,
+#     ĐỒNG BỘ, vẫn thuộc đúng chủ đề "công cụ ghép pipeline").
+#   - Bài 29 (cụm 5): sách nguồn dạy "ResultAsync & andThenAsync" → ĐỔI
+#     thành "combine — gộp NHIỀU Result ĐỘC LẬP" (khôi phục ý đã cân nhắc
+#     rồi bỏ lúc thiết kế ban đầu vì tưởng trùng `map2GomLoi` — thật ra
+#     KHÁC: `combine` fail-fast ở lỗi ĐẦU TIÊN trên N Result, `map2GomLoi`
+#     gom HẾT lỗi — hai combinator khác nhau thật, không hề trùng).
+# Các bài KHÁC có nhắc `Promise` trong bản nháp gốc (bài 8, 12, 37-42 —
+# Repository pattern) ĐÃ SỬA signature thành ĐỒNG BỘ (`timTheoId(id): T |
+# undefined` thay vì `Promise<T | undefined>`) — GIỮ NGUYÊN chủ đề, chỉ bỏ
+# `Promise` wrapper không cần thiết.
+#
 # Namespace skill: `ddd.*` — đã quét toàn cục KHÔNG trùng `teaches` nào khác.
 
 track: ddd
@@ -120,7 +155,7 @@ bai:
     title: "Functional Core / Imperative Shell ở quy mô ứng dụng — Sandwich Pattern"
     teaches: [ddd.fc-is-at-scale]
     requires: [ddd.layered-architecture]
-    y_chinh: "FC/IS ở quy mô LỚN (mở rộng khái niệm pure/impure đã biết): Domain layer = Functional Core (pure) TOÀN BỘ; Application layer = Imperative Shell — orchestrate tuần tự (đọc DB → gọi core → ghi DB), KHÔNG chứa business rule. Shell GỌI core, core KHÔNG BAO GIỜ gọi ngược lại shell. Test core KHÔNG cần mock (chỉ input→output). Sandwich Pattern (cụ thể hoá FC/IS ở cấp MỘT hàm): Read (IO) → Process (Pure) → Write (IO) — ví dụ `xuLyDonHangShell`: `db.timDonHang` (IO) → `xuLyDonHangThuan` (Pure) → `db.capNhatThue`/`guiThongBao` (IO). Anti-pattern đối lập: IO rải rác trộn lẫn business logic trong CÙNG một hàm."
+    y_chinh: "FC/IS ở quy mô LỚN (mở rộng khái niệm pure/impure đã biết): Domain layer = Functional Core (pure) TOÀN BỘ; Application layer = Imperative Shell — orchestrate tuần tự (đọc DB → gọi core → ghi DB), KHÔNG chứa business rule. Shell GỌI core, core KHÔNG BAO GIỜ gọi ngược lại shell. Test core KHÔNG cần mock (chỉ input→output). Sandwich Pattern (cụ thể hoá FC/IS ở cấp MỘT hàm): Read (IO) → Process (Pure) → Write (IO) — ví dụ `xuLyDonHangShell`: `timDonHang` (IO — mô phỏng ĐỒNG BỘ bằng Map, không `Promise`) → `xuLyDonHangThuan` (Pure) → `capNhatThue` (IO). Anti-pattern đối lập: IO rải rác trộn lẫn business logic trong CÙNG một hàm."
   - so: 9
     slug: ranh-gioi-module-va-barrel-export
     title: "Module Boundaries & Barrel Exports — index.ts là cổng công khai"
@@ -144,7 +179,7 @@ bai:
     title: "Capstone: lắp ráp kiến trúc FP hoàn chỉnh"
     teaches: [ddd.architecture-capstone]
     requires: [ddd.reader-pattern]
-    y_chinh: "Bài chốt cụm, code có chấm điểm sống: kết hợp TẤT CẢ — Domain (pure + branded type + Result) → Infra interfaces (bài 10-11) → Application use case (Sandwich, bài 8) → Test (fake deps, không mock lib). Viết `xacNhanDonHangUseCase(deps, maDonHang): Promise<Result<DonHang, string>>` — validate thuần, gọi `deps.khoDonHang.timTheoId` (IO), áp business rule, gọi `deps.khoDonHang.luu` (IO). Test bằng fake `khoDonHang`/`dichVuThongBao` (object literal, không mock library)."
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: kết hợp TẤT CẢ — Domain (pure + branded type + Result) → Infra interfaces (bài 10-11) → Application use case (Sandwich, bài 8) → Test (fake deps, không mock lib). Viết `xacNhanDonHangUseCase(deps, maDonHang): Result<DonHang, string>` (ĐỒNG BỘ — mô phỏng IO bằng Map trong bộ nhớ, không `Promise`) — validate thuần, gọi `deps.khoDonHang.timTheoId` (IO), áp business rule, gọi `deps.khoDonHang.luu` (IO). Test bằng fake `khoDonHang`/`dichVuThongBao` (object literal, không mock library)."
 
 # ── Cụm 3 (bài 13-18): Domain Modeling bằng Discriminated Union — ch20 ────
   - so: 13
@@ -204,16 +239,16 @@ bai:
     requires: [ddd.pipe]
     y_chinh: "`flow(f, g, h)` KHÔNG nhận giá trị ngay — trả về MỘT HÀM MỚI `(x) => h(g(f(x)))`, gọi SAU, dùng lại NHIỀU lần. `const xuLySanPham = flow(lamSach, boSung, dinhDangHienThi)` rồi gọi `xuLySanPham(dienThoai)` và `xuLySanPham(chuot)` — \"build now, run later\". Bảng so sánh `pipe` (run now) vs `flow` (build reusable) chốt bài."
   - so: 22
-    slug: async-pipeline-pipeasync
-    title: "Async Pipeline — pipeAsync() và .then() chain"
-    teaches: [ddd.pipe-async]
+    slug: tap-quan-sat-giua-pipeline
+    title: "tap() — quan sát MỘT bước giữa pipeline, không đổi giá trị"
+    teaches: [ddd.tap]
     requires: [ddd.flow]
-    y_chinh: "Một số bước cần I/O (DB, API) trả `Promise`; `pipeAsync(input, buoc1, buoc2, buoc3)` cho phép `await` TỪNG bước tuần tự, trộn được bước sync lẫn async, cài bằng vòng `for...of` + `await` trong thân hàm async. Cách viết thay thế: `.then()` chain có sẵn của `Promise` — `Promise.resolve(donHangTho).then(xacThuc).then(tinhGia)` — đọc top-down giống `pipe()`."
+    y_chinh: "`tap<T>(f: (x: T) => void): (x: T) => T` — nhận một hàm side-effect (thường là `console.log` để debug), TRẢ VỀ giá trị NGUYÊN VẸN không đổi — chèn được vào GIỮA một `pipe()`/`flow()` để \"nhìn trộm\" giá trị tại một bước mà KHÔNG phá vỡ chuỗi biến đổi. `pipe(5, nhanDoi, tap(x => console.log(\\`sau nhân đôi: ${x}\\`)), congMuoi)` — dòng log xuất hiện GIỮA chừng, kết quả CUỐI vẫn đúng như không có `tap` ở đó. Đối lập `map`/`flow` (ĐỔI giá trị): `tap` CHỈ quan sát, không đổi gì — công cụ debug/log phổ biến trong pipeline thật."
   - so: 23
     slug: rop-andthen-map-ap-dung-domain
     title: "ROP áp dụng vào domain — andThen chính là chainResult đã học"
     teaches: [ddd.rop-domain-application]
-    requires: [ddd.pipe-async]
+    requires: [ddd.tap]
     y_chinh: "Railway-Oriented Programming: ẩn dụ đường ray — track chính (ok) và track lỗi (loi) chạy song song, khi một trạm phát hiện lỗi, các trạm CÒN LẠI bị SKIP tự động. Cái tên `andThen` (sách nguồn) chính là `chainResult` ĐÃ HỌC ở T4.5 (bài 30) — cùng khuôn, không dạy lại lý thuyết. Áp dụng vào domain: `chainResult(chainResult(validateDonHang(raw), kiemKho), tinhGiaCuoi)` — test rõ: lỗi ở bước đầu, bước sau \"KHÔNG BAO GIỜ được gọi\" (nối T4.5 bài 31's short-circuit). Lỗi mô hình hoá bằng DU giàu ngữ cảnh (`{tag:\"loi_ton_kho\"; maSanPham; conLai; canMua}`), không phải string đơn."
   - so: 24
     slug: capstone-compose-workflow-day-du
@@ -248,16 +283,16 @@ bai:
     requires: [ddd.match-result]
     y_chinh: "Khi phải tương tác với code CÓ SẴN mà throw (ví dụ `JSON.parse`), bọc nó bằng `fromThrowable<T>(f: () => T): Result<T, string>` — `try/catch` chỉ xuất hiện MỘT LẦN DUY NHẤT, ở biên, không lan ra khắp domain. `fromThrowable(() => JSON.parse(vanBan))` ra `ok(...)` hoặc `loi(\"...\")` tuỳ `vanBan` hợp lệ hay không."
   - so: 29
-    slug: resultasync-cho-bat-dong-bo
-    title: "ResultAsync & andThenAsync — Result cho thao tác bất đồng bộ"
-    teaches: [ddd.result-async]
+    slug: combine-gop-nhieu-result-doc-lap
+    title: "combine — gộp NHIỀU Result ĐỘC LẬP, báo lỗi ĐẦU TIÊN tìm thấy"
+    teaches: [ddd.combine]
     requires: [ddd.from-throwable]
-    y_chinh: "`ResultAsync<T,E>` = alias của `Promise<Result<T,E>>` (không phải class riêng, chỉ là type alias). `andThenAsync<T,U,E>(ra: ResultAsync<T,E>, f: (x:T) => ResultAsync<U,E>): ResultAsync<U,E>` — CÙNG hình dạng `chainResult` (bài 23) nhưng có `await`. Test: pipeline `timDonHang → xuLyThanhToan → guiXacNhan`, khi `timDonHang` báo \"không tìm thấy\", `xuLyThanhToan` KHÔNG BAO GIỜ được gọi (short-circuit ngay cả khi có I/O xen giữa)."
+    y_chinh: "`combine<T,E>(ds: Result<T,E>[]): Result<T[],E>` — nhận MẢNG các `Result` ĐÃ có sẵn (không phải hàm để gọi tuần tự như `chainResult`), trả `ok(mảng giá trị)` NẾU tất cả đều `ok`, hoặc `loi(...)` của phần tử LỖI ĐẦU TIÊN quét thấy trong mảng. Test đối chiếu trực tiếp `map2GomLoi` (T4.5, bài 25): mảng có HAI phần tử LỖI (`\"lỗi thứ nhất\"`, `\"lỗi thứ hai\"`) — `combine` CHỈ báo `\"lỗi thứ nhất\"` (KHÔNG gom cả hai, khác `map2GomLoi`'s collect-all) — hai combinator PHỤC VỤ hai nhu cầu khác nhau dù cùng \"gộp nhiều Result\": `combine` khi chỉ cần biết CÓ lỗi hay không (đủ một lý do), `map2GomLoi` khi cần liệt kê HẾT lỗi (form validation, bài 30)."
   - so: 30
     slug: validate-form-gom-loi-khong-dung-som
     title: "Ứng dụng: validate form nhiều trường — gom HẾT lỗi, không dừng sớm"
     teaches: [ddd.form-validation-accumulate]
-    requires: [ddd.result-async]
+    requires: [ddd.combine]
     y_chinh: "Bài chốt cụm, code có chấm điểm sống: ÁP DỤNG LẠI `map2GomLoi` (T4.5 bài 25, KHÔNG dạy lý thuyết applicative lần nữa) vào validate MỘT form nhiều trường thật (`tenKhachHang`, `email`, `soLuong`). Viết `validateFormDatHang(raw): Result<FormHopLe, string[]>` — form sai CẢ BA trường phải trả ĐỦ BA lỗi trong MỘT lần, không dừng ở lỗi đầu. Ôn quy tắc chọn fail-fast (`chainResult`, bước SAU phụ thuộc bước TRƯỚC) vs collect-all (`map2GomLoi`, field ĐỘC LẬP) — đã học ở T4.5 bài 23-24, giờ áp dụng vào tình huống DDD thật."
 
 # ── Cụm 6 (bài 31-36): Serialization & DTOs — nguồn chương 23 ─────────────
@@ -334,4 +369,4 @@ bai:
     title: "BOSS — Full Application Wiring: gom TẤT CẢ dependency vào AppDeps"
     teaches: [ddd.gate-boss]
     requires: [ddd.unit-of-work]
-    y_chinh: "Bài BOSS của track: hiện thực hoá ĐẦY ĐỦ FP DI (bài 10-11) — MỘT use case function nhận MỘT object `deps: AppDeps` chứa NHIỀU repository (bài 37-41) + service khác (thông báo) + helper thuần (sinhId, gioHienTai); use case orchestrate XEN KẼ bước thuần (validate, bài 33) và bước IO (tìm/lưu qua repo, gửi thông báo) — Sandwich Pattern (bài 8) ở QUY MÔ ứng dụng đầy đủ. Viết `dangKyKhachHang(deps, ten, emailTho): Promise<Result<KhachHang, string[]>>` — validate (thuần, gom lỗi qua `map2GomLoi`), kiểm trùng email (IO), tạo Entity (bài 4), lưu (IO), gửi email chào mừng (IO). Test TOÀN BỘ luồng bằng `testDeps` — in-memory repo (bài 38) + fake notification (mảng ghi lại email đã \"gửi\"), KHÔNG mock library nào, kể cả side-effect."
+    y_chinh: "Bài BOSS của track: hiện thực hoá ĐẦY ĐỦ FP DI (bài 10-11) — MỘT use case function nhận MỘT object `deps: AppDeps` chứa NHIỀU repository (bài 37-41) + service khác (thông báo) + helper thuần (sinhId, gioHienTai); use case orchestrate XEN KẼ bước thuần (validate, bài 33) và bước IO (tìm/lưu qua repo, gửi thông báo) — Sandwich Pattern (bài 8) ở QUY MÔ ứng dụng đầy đủ. Viết `dangKyKhachHang(deps, ten, emailTho): Result<KhachHang, string[]>` (ĐỒNG BỘ — mô phỏng IO bằng Map trong bộ nhớ, không `Promise`) — validate (thuần, gom lỗi qua `map2GomLoi`), kiểm trùng email (IO), tạo Entity (bài 4), lưu (IO), gửi email chào mừng (IO). Test TOÀN BỘ luồng bằng `testDeps` — in-memory repo (bài 38) + fake notification (mảng ghi lại email đã \"gửi\"), KHÔNG mock library nào, kể cả side-effect."
