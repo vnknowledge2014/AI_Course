@@ -1,0 +1,231 @@
+# Xương sống R5.T5.4 — Mẫu thiết kế & Tái cấu trúc (24 bài) — TypeScript
+#
+# Track THỨ TƯ của Realm 5 (Kỹ nghệ phần mềm), sau T5.3 (DDD, 42/42), T5.6
+# (Bảo mật ứng dụng, 26/26), T5.2 (TDD→Property→Mutation, 34/34). T5.4 được
+# chọn TIẾP THEO đúng thứ tự liệt kê MASTERPLAN — có NGUỒN THAM KHẢO trực
+# tiếp trong `fp/TypeScript_Books/part_3_design_patterns/`:
+#   - chapter_16_gof_fp_translation.md (~900 dòng) — 6 mẫu GoF "biến mất"
+#     trong FP: Strategy, Observer, Command, Visitor, Decorator, Middleware
+#   - chapter_17_cqrs_event_sourcing.md (~1130 dòng) — CQRS, Event Sourcing,
+#     Projections, Snapshots
+# Cả hai đã đọc TOÀN BỘ (headers + đoạn mở đầu) trước khi thiết kế xương này
+# (2026-09-02).
+#
+# ĐÃ KIỂM TRA TRÙNG LẶP với các track R4/R5 đã xong trước khi nhận nguồn:
+#   - `part_5_fp_patterns/` (chapter_25..30c: Functor/Applicative/Monad/
+#     Monoid/Traverse/Cata) ĐÃ được T4.5 "Đại số của chương trình" hấp thụ
+#     (thư mục `content/lap-trinh-ham/05-dai-so-cua-chuong-trinh` đã tồn
+#     tại) — KHÔNG dùng lại cho T5.4.
+#   - `chapter_33_architecture_patterns.md` (Hexagonal/Functional Core-
+#     Imperative Shell/module boundaries) ĐÃ được T5.3 DDD hấp thụ (bài
+#     07-09: "kiến trúc bốn tầng", "functional core imperative shell",
+#     "ranh giới module") — KHÔNG dùng lại.
+#   - CQRS/Event Sourcing (chapter_17) CHƯA xuất hiện ở BẤT KỲ track nào đã
+#     xong (đã grep toàn bộ `content/ky-nghe-phan-mem/` — 0 kết quả) — an
+#     toàn để dùng cho cụm 6 track này.
+#   - 6 mẫu GoF (Strategy/Observer/Command/Visitor/Decorator/Middleware)
+#     CHƯA xuất hiện ở bất kỳ track nào (đã grep — 0 kết quả).
+#
+# QUYẾT ĐỊNH KHÔNG DÙNG THƯ VIỆN (giống T4.3/T4.5/T5.2/T5.3/T5.6): chương
+# nguồn dùng `EventEmitter` (Node built-in), `import assert from
+# "node:assert/strict"` — cả hai KHÔNG có trong sandbox. EventEmitter/
+# EventBus TỰ VIẾT (Map<string, Function[]>, không kế thừa lớp Node nào).
+# assertEqual/assertDeepEqual TÁI DÙNG THẲNG kỹ thuật đã dạy ở T5.2 bài 2
+# (không dạy lại — track này GIẢ ĐỊNH học viên đã học T5.2, dùng luôn dạng
+# hàm THUẦN ném lỗi khi sai).
+#
+# BẪY SANDBOX ĐÃ BIẾT, ÁP DỤNG LẠI: KHÔNG async/await/Promise/setTimeout/
+# setInterval. Chương 16's ví dụ Observer theo dõi giá CỔ PHIẾU (polling
+# định kỳ) → chuyển thành ĐẨY sự kiện THỦ CÔNG (gọi hàm `phatSuKien` trực
+# tiếp trong test, không polling THẬT). Chương 17's ví dụ CQRS/ES dùng
+# repository ASYNC (trả Promise) → chuyển ĐỒNG BỘ (event store là mảng
+# trong bộ nhớ, đọc/ghi TRỰC TIẾP), giống quyết định đã áp dụng ở T5.2.
+#
+# TÁI DÙNG THẲNG (không dạy lại):
+#   - Result<T,E> từ T4.5 — mọi hàm domain trả lỗi dùng shape ĐÃ CÓ
+#     {kind:"ok"|"loi", giaTri, loi}.
+#   - Discriminated Union + exhaustive switch từ T4.3 (`ts.adt-gate-boss`)
+#     — nền tảng CHO CẢ Command (bài 9-12) LẪN Visitor (bài 13-14).
+#   - assertEqual/assertDeepEqual từ T5.2 bài 2.
+#   - pipe/compose từ T4.2 (composition) — nền tảng cho Middleware (bài 17).
+#
+# world: blueprint-board (sum type hở → bug BÒ RA — MASTERPLAN §R5)
+# skill namespace: mau.* (Mẫu — pattern) — namespace MỚI, không trùng
+# ddd.*/bmud.*/kt.*/ts.*/alg.*/fp.*/func.* đã dùng ở R4/T5.2/T5.3/T5.6.
+
+cum:
+  - so: 1
+    ten: "Vì sao Patterns biến mất — Strategy"
+    tom_tat: "Bảng ánh xạ OOP→FP (thiếu gì sinh ra pattern nào), Strategy = higher-order function, ranh giới khi vẫn cần interface, capstone tái cấu trúc class hierarchy → hàm."
+  - so: 2
+    ten: "Observer = EventEmitter"
+    tom_tat: "Subject/Observer OOP hierarchy, EventBus tự viết thay thế, hủy đăng ký tránh rò rỉ bộ nhớ, capstone theo dõi giá cổ phiếu qua EventBus."
+  - so: 3
+    ten: "Command = Discriminated Union"
+    tom_tat: "Command pattern OOP (mỗi hành động một class), Command = dữ liệu + exhaustive switch, ngăn xếp undo bất biến, capstone undo/redo ứng dụng ghi chú."
+  - so: 4
+    ten: "Visitor & Decorator"
+    tom_tat: "Visitor OOP (double dispatch phức tạp) = exhaustive switch trên ADT, Decorator = function wrapper không sửa gốc, capstone kết hợp cả hai."
+  - so: 5
+    ten: "Middleware & Tái cấu trúc"
+    tom_tat: "Middleware = composition pipeline, Extract Function, Replace Conditional with Pattern Matching, capstone refactor pipeline xử lý request."
+  - so: 6
+    ten: "CQRS & Event Sourcing"
+    tom_tat: "Tách Read/Write model, lưu sự kiện thay vì trạng thái, nhiều projection từ một event stream, BOSS ghép CQRS+ES+Projection thành hệ thống nhỏ."
+
+bai:
+# ── Cụm 1 (bài 1-4): Vì sao Patterns biến mất — Strategy — nguồn ch.16.1-16.2
+  - so: 1
+    slug: vi-sao-patterns-bien-mat
+    title: "Vì sao GoF Patterns \"biến mất\" trong FP"
+    teaches: [mau.why-patterns-vanish]
+    requires: [ts.adt-gate-boss]
+    y_chinh: "Design Patterns (GoF, 1994) giải quyết vấn đề THẬT — nhưng bằng infrastructure phức tạp (interface, abstract class, kế thừa) vì C++/Smalltalk THIẾU first-class function, closure, sum type. TypeScript CÓ đủ những thứ này — nhiều pattern KHÔNG BIẾN MẤT (vấn đề vẫn còn) mà ĐƠN GIẢN HOÁ THÀNH một khái niệm FP có sẵn: thiếu first-class function → sinh Strategy/Command; thiếu sum type → sinh Visitor/State; thiếu closure → sinh Factory. Nhận diện được BẢNG ánh xạ này LÀ nền tảng của CẢ track — mỗi bài sau LÀ một dòng trong bảng, đào sâu."
+  - so: 2
+    slug: strategy-la-ham-bac-cao
+    title: "Strategy = Higher-Order Function — đổi thuật toán bằng cách TRUYỀN hàm"
+    teaches: [mau.strategy-as-hof]
+    requires: [mau.why-patterns-vanish]
+    y_chinh: "OOP Strategy: `interface SortStrategy { sort(...) }`, MỖI thuật toán MỘT class implement, `Sorter` giữ THAM CHIẾU tới strategy. FP: thuật toán CHÍNH LÀ một GIÁ TRỊ hàm (`type SortFn = (data) => data`), \"đổi chiến lược\" = TRUYỀN hàm KHÁC làm tham số — KHÔNG cần interface, KHÔNG cần class, KHÔNG cần constructor injection. Ví dụ: `tinhGia(gia, ápDụngGiảmGiá: (gia:number)=>number)` — `ápDụngGiảmGiá` LÀ strategy, truyền `giamGia10Phantram`/`khongGiamGia` tuỳ ngữ cảnh."
+  - so: 3
+    slug: khi-nao-van-can-interface
+    title: "Khi nào VẪN cần interface — ranh giới thật giữa FP và OOP"
+    teaches: [mau.when-interface-still-needed]
+    requires: [mau.strategy-as-hof]
+    y_chinh: "FP KHÔNG PHẢI câu trả lời cho MỌI trường hợp: khi một \"chiến lược\" cần NHIỀU hơn một hành vi liên kết CHẶT với nhau (ví dụ: `ket_noi()` + `doc()` + `dong()` PHẢI đi CÙNG NHAU, chia sẻ state nội bộ), một OBJECT (hoặc interface) VẪN là mô hình tự nhiên hơn MỘT hàm đơn lẻ. Bài học THÀNH THẬT: không cực đoan hoá \"FP luôn thắng\" — chọn hàm đơn khi hành vi ĐƠN, chọn object/interface khi hành vi ĐÓNG GÓI nhiều thao tác liên quan tới CÙNG một state."
+  - so: 4
+    slug: capstone-refactor-class-hierarchy
+    title: "Capstone: Tái cấu trúc class hierarchy Strategy → hàm"
+    teaches: [mau.gate-boss-strategy]
+    requires: [mau.when-interface-still-needed]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: cho MỘT class hierarchy OOP thu nhỏ (`interface PhiVanChuyen { tinh(khoiLuong): number }`, hai class implement `PhiVanChuyenTieuChuan`/`PhiVanChuyenNhanh`) DIỄN GIẢI bằng LỜI (chương nguồn), học viên viết LẠI thành `type CongThucPhi = (khoiLuong:number)=>number` + hai hàm giá trị, VÀ một hàm `tinhTongPhi(khoiLuong, congThuc)` NHẬN strategy làm tham số — hành vi PHẢI giữ NGUYÊN (test SO SÁNH kết quả hai cách tính trên cùng input), CHỈ cấu trúc đổi."
+
+# ── Cụm 2 (bài 5-8): Observer = EventEmitter — nguồn chương 16.3 ──────────
+  - so: 5
+    slug: observer-la-gi
+    title: "Observer pattern OOP — Subject giữ danh sách Observer"
+    teaches: [mau.observer-oop-shape]
+    requires: [mau.gate-boss-strategy]
+    y_chinh: "OOP Observer: `Subject` giữ MẢNG `Observer[]` (mỗi Observer là MỘT object có method `update()`), khi state đổi, Subject GỌI `update()` trên TỪNG Observer đã đăng ký. Cấu trúc NÀY cần: interface `Observer`, method `dangKy`/`huyDangKy`/`thongBao` trên Subject — NHIỀU boilerplate CHỈ để làm một việc: \"khi X xảy ra, gọi các hàm ĐÃ đăng ký\"."
+  - so: 6
+    slug: eventbus-tu-viet
+    title: "EventBus tự viết — Map<string, Function[]> thay Observer hierarchy"
+    teaches: [mau.event-bus-implementation]
+    requires: [mau.observer-oop-shape]
+    y_chinh: "FP: \"đăng ký quan tâm\" = ĐẨY một HÀM vào mảng, \"thông báo\" = GỌI TỪNG hàm trong mảng với dữ liệu sự kiện. `taoEventBus<T>(): {onEvent, phatSuKien}` — `onEvent(fn)` đẩy `fn` vào mảng nội bộ (closure, KHÔNG field class), `phatSuKien(giaTri)` LẶP qua mảng gọi TỪNG hàm. KHÔNG kế thừa `EventEmitter` của Node (không có trong sandbox) — TỰ VIẾT bằng closure + mảng."
+  - so: 7
+    slug: huy-dang-ky-tranh-ro-ri
+    title: "Hủy đăng ký — tránh rò rỉ bộ nhớ khi Observer không còn cần"
+    teaches: [mau.unsubscribe-cleanup]
+    requires: [mau.event-bus-implementation]
+    y_chinh: "MỘT EventBus KHÔNG có cách hủy đăng ký LÀ rò rỉ bộ nhớ tiềm ẩn (hàm ĐÃ đăng ký giữ tham chiếu TỚI closure của nó, KHÔNG BAO GIỜ được giải phóng nếu KHÔNG hủy). `onEvent(fn)` trả về một hàm `huyDangKy: () => void` (đóng gói việc XOÁ `fn` khỏi mảng nội bộ, ví dụ `filter` loại BỎ đúng phần tử) — gọi `huyDangKy()` khi Observer KHÔNG còn cần lắng nghe nữa."
+  - so: 8
+    slug: capstone-theo-doi-gia-co-phieu
+    title: "Capstone: Theo dõi giá cổ phiếu qua EventBus"
+    teaches: [mau.gate-boss-observer]
+    requires: [mau.unsubscribe-cleanup]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: xây `taoEventBus<{maCoPhieu:string, giaMoi:number}>()`, đăng ký HAI \"observer\" (một tính TỔNG giá trị danh mục, một GHI LOG lịch sử thay đổi vào mảng), gọi `phatSuKien` NHIỀU lần với dữ liệu giá KHÁC NHAU — kiểm CẢ HAI observer nhận ĐÚNG dữ liệu, VÀ sau khi `huyDangKy` một observer, nó KHÔNG còn nhận sự kiện TIẾP THEO (ghép trọn cụm: EventBus + đăng ký nhiều bên + hủy đăng ký)."
+
+# ── Cụm 3 (bài 9-12): Command = Discriminated Union — nguồn chương 16.4 ──
+  - so: 9
+    slug: command-pattern-oop
+    title: "Command pattern OOP — mỗi hành động một class có execute()/undo()"
+    teaches: [mau.command-oop-shape]
+    requires: [mau.gate-boss-observer]
+    y_chinh: "OOP Command: MỖI hành động (thêm chữ, xoá chữ, đổi màu) LÀ một class RIÊNG implement `interface Command { execute(); undo() }` — undo/redo LÀ một STACK các object Command. Nhược điểm: MỘT class MỚI cho MỖI hành động MỚI, logic execute/undo TÁCH RỜI khỏi \"dữ liệu\" mô tả hành động đó."
+  - so: 10
+    slug: command-la-du-lieu
+    title: "Command = DỮ LIỆU — Discriminated Union thay vì class"
+    teaches: [mau.command-as-du]
+    requires: [mau.command-oop-shape]
+    y_chinh: "FP: một \"lệnh\" CHỈ LÀ dữ liệu MÔ TẢ ý định — `type Lenh = {tag:\"them\", vanBan:string} | {tag:\"xoa\", soKyTu:number} | {tag:\"doiMau\", mau:string}` (ADT, đã học T4.3). `apDungLenh(state, lenh): State` LÀ MỘT hàm THUẦN, exhaustive switch trên `lenh.tag` — tách LOGIC (hàm apDungLenh) khỏi Ý ĐỊNH (giá trị `Lenh`), không cần class RIÊNG cho MỖI loại lệnh MỚI."
+  - so: 11
+    slug: ngan-xep-undo-bat-bien
+    title: "Ngăn xếp undo BẤT BIẾN — mảng snapshot, không mutate ngược"
+    teaches: [mau.immutable-undo-stack]
+    requires: [mau.command-as-du]
+    y_chinh: "Undo THẬT trong FP KHÔNG cần hàm `undo()` NGƯỢC cho mỗi lệnh (như OOP) — chỉ cần GIỮ một MẢNG các state TRƯỚC MỖI lệnh (`lichSu: State[]`), \"undo\" = LẤY state Ở VỊ TRÍ TRƯỚC ĐÓ trong mảng. `apDungLenhCoLichSu(lichSu, lenh): State[]` ĐẨY state MỚI vào CUỐI mảng (KHÔNG xoá mảng cũ), `undo(lichSu): State[]` CẮT phần tử CUỐI — bất biến HOÀN TOÀN, không con trỏ ngược nào cần quản lý."
+  - so: 12
+    slug: capstone-undo-redo-ghi-chu
+    title: "Capstone: Undo/Redo cho ứng dụng ghi chú"
+    teaches: [mau.gate-boss-command]
+    requires: [mau.immutable-undo-stack]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: `Lenh = {tag:\"gopChu\",text} | {tag:\"xoaKyTuCuoi\"} | {tag:\"lamMoi\"}` áp dụng lên MỘT chuỗi ghi chú, DUY TRÌ `lichSu: string[]` qua NHIỀU lệnh liên tiếp, `undo`/`redo` di chuyển CON TRỎ trong lịch sử (KHÔNG xoá phần đã redo được nếu chưa lệnh MỚI nào ghi đè) — ghép TRỌN cụm: Command=DU, apDụng thuần, lịch sử bất biến."
+
+# ── Cụm 4 (bài 13-16): Visitor & Decorator — nguồn chương 16.5-16.6 ──────
+  - so: 13
+    slug: visitor-la-exhaustive-switch
+    title: "Visitor = Exhaustive Switch — duyệt ADT không cần double dispatch"
+    teaches: [mau.visitor-as-switch]
+    requires: [mau.gate-boss-command]
+    y_chinh: "OOP Visitor: XỬ LÝ một cây cú pháp KHÔNG đồng nhất (nhiều loại node) cần \"double dispatch\" — MỖI node class có `accept(visitor)`, MỖI thao tác MỚI (in cây, tính giá trị, tối ưu) cần SỬA MỌI class node để thêm method `accept` mới. FP: cây LÀ một ADT đệ quy (`type BieuThuc = {tag:\"so\",giaTri} | {tag:\"cong\",trai,phai} | {tag:\"nhan\",trai,phai}`), \"visitor\" CHỈ LÀ một HÀM đệ quy với exhaustive switch — thao tác MỚI = HÀM MỚI, KHÔNG sửa định nghĩa ADT gốc."
+  - so: 14
+    slug: them-thao-tac-khong-sua-adt
+    title: "Thêm thao tác MỚI mà KHÔNG sửa định nghĩa ADT gốc"
+    teaches: [mau.add-operation-no-touch-adt]
+    requires: [mau.visitor-as-switch]
+    y_chinh: "Điểm mạnh THẬT của \"Visitor=switch\": cho `BieuThuc` (bài 13), viết `tinhGiaTri(bt): number` (đệ quy tính kết quả) VÀ `inBieuThuc(bt): string` (đệ quy in dạng chữ) — HAI HÀM HOÀN TOÀN ĐỘC LẬP, CÙNG hoạt động trên MỘT ADT KHÔNG đổi. Đối lập trực tiếp với OOP: thêm thao tác MỚI trong OOP Visitor cần sửa TỪNG class node để thêm `accept`; ở đây CHỈ cần viết MỘT hàm MỚI."
+  - so: 15
+    slug: decorator-la-function-wrapper
+    title: "Decorator = Function Wrapper — bọc hành vi, không sửa hàm gốc"
+    teaches: [mau.decorator-as-wrapper]
+    requires: [mau.add-operation-no-touch-adt]
+    y_chinh: "OOP Decorator: MỘT class BỌC một object khác, implement CÙNG interface, THÊM hành vi TRƯỚC/SAU khi gọi object gốc (ví dụ: `LoggingDecorator` bọc `RealService`). FP: \"bọc\" MỘT hàm CHỈ LÀ viết một hàm MỚI GỌI hàm gốc Ở BÊN TRONG — `voiGhiLog<A,B>(f: (a:A)=>B): (a:A)=>B` trả về hàm MỚI: log TRƯỚC gọi `f`, log SAU khi có kết quả, TRẢ NGUYÊN kết quả — hàm GỐC KHÔNG đổi MỘT dòng."
+  - so: 16
+    slug: capstone-visitor-va-decorator
+    title: "Capstone: Kết hợp Visitor (duyệt cây) + Decorator (log/cache)"
+    teaches: [mau.gate-boss-visitor-decorator]
+    requires: [mau.decorator-as-wrapper]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: dùng `BieuThuc` (bài 13) VÀ `tinhGiaTri` (bài 14), BỌC `tinhGiaTri` bằng MỘT decorator `voiDemLuotGoi` (đếm SỐ LẦN hàm được gọi qua closure) — kiểm CẢ kết quả tính TOÁN ĐÚNG (visitor) LẪN số đếm TĂNG đúng SAU mỗi lời gọi (decorator), CHỨNG MINH hai kỹ thuật KẾT HỢP được TỰ NHIÊN vì cả hai đều LÀ \"chỉ là hàm\"."
+
+# ── Cụm 5 (bài 17-20): Middleware & Tái cấu trúc — nguồn chương 16.7 ─────
+  - so: 17
+    slug: middleware-la-composition-pipeline
+    title: "Middleware = Composition Pipeline — Express middleware THỰC CHẤT là gì"
+    teaches: [mau.middleware-as-pipeline]
+    requires: [mau.gate-boss-visitor-decorator]
+    y_chinh: "\"Middleware\" (Express và tương tự) THỰC CHẤT LÀ composition hàm: MỖI middleware LÀ MỘT hàm NHẬN request/state VÀ trả request/state ĐÃ biến đổi (hoặc dừng chuỗi) — CHẠY chuỗi middleware CHÍNH LÀ `pipe(mw1, mw2, mw3)` (đã học composition Ở T4.2). `taoPipeline<T>(...cacBuoc: Array<(t:T)=>T>): (t:T)=>T` TỰ VIẾT (không dùng Express THẬT) — mỗi \"middleware\" LÀ một phần tử trong mảng, chạy TUẦN TỰ."
+  - so: 18
+    slug: tai-cau-truc-extract-function
+    title: "Tái cấu trúc: Extract Function — cắt hàm DÀI thành các hàm NHỎ, ĐẶT TÊN"
+    teaches: [mau.refactor-extract-function]
+    requires: [mau.middleware-as-pipeline]
+    y_chinh: "Kỹ thuật refactoring PHỔ BIẾN NHẤT: một hàm DÀI làm NHIỀU việc (validate → tính toán → định dạng) được CẮT thành NHIỀU hàm NHỎ, MỖI hàm MỘT trách nhiệm, ĐẶT TÊN theo Ý ĐỊNH (không phải \"buoc1\"/\"buoc2\"). Cho MỘT hàm `xuLyDonHang` DÀI (validate + tính tổng + áp giảm giá TRỘN LẪN trong MỘT khối), tách thành `validateDonHang`/`tinhTongTien`/`apDungGiamGia` RIÊNG — hành vi TỔNG THỂ giữ NGUYÊN (test so kết quả TRƯỚC/SAU refactor), CHỈ cấu trúc đổi — nối TRỰC TIẾP \"Tinh gọn\" đã học T5.2 bài 5."
+  - so: 19
+    slug: tai-cau-truc-thay-if-bang-pattern-matching
+    title: "Tái cấu trúc: Replace Conditional with Pattern Matching"
+    teaches: [mau.refactor-conditional-to-pattern-match]
+    requires: [mau.refactor-extract-function]
+    y_chinh: "Chuỗi `if/else if` DÀI kiểm tra MỘT biến CHUỖI/SỐ (`if (loai === \"A\") ... else if (loai === \"B\") ...`) LÀ dấu hiệu nên chuyển sang Discriminated Union + exhaustive switch (đã học T4.3) — trình biên dịch CẢNH BÁO khi THIẾU một nhánh (exhaustiveness check), if/else KHÔNG cảnh báo được điều đó. Bài tập: cho MỘT hàm dùng chuỗi if/else theo `loaiThanhVien: string`, tái cấu trúc thành switch trên UNION KIỂU CHUỖI HẸP (`\"thuong\"|\"vip\"|\"vip_vang\"`), giữ NGUYÊN kết quả."
+  - so: 20
+    slug: capstone-refactor-pipeline-request
+    title: "Capstone: Refactor pipeline xử lý request — lồng nhau → compose"
+    teaches: [mau.gate-boss-middleware-refactor]
+    requires: [mau.refactor-conditional-to-pattern-match]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: cho MỘT hàm `xuLyYeuCau(req)` LỒNG NHAU sâu (validate BÊN TRONG if, rồi authenticate BÊN TRONG if ĐÓ, rồi log BÊN TRONG NỮA — \"pyramid of doom\"), tái cấu trúc thành `taoPipeline(validate, authenticate, log, xuLy)` (bài 17) VỚI từng bước LÀ một hàm TÁCH RIÊNG (Extract Function, bài 18) — kết quả CUỐI CÙNG giống HỆT bản gốc lồng nhau (test so sánh), CHỈ đọc DỄ HƠN NHIỀU."
+
+# ── Cụm 6 (bài 21-24): CQRS & Event Sourcing — nguồn chương 17.1-17.5 ────
+  - so: 21
+    slug: cqrs-tach-read-va-write
+    title: "CQRS — Tách mô hình ĐỌC khỏi mô hình GHI"
+    teaches: [mau.cqrs-read-write-split]
+    requires: [mau.gate-boss-middleware-refactor]
+    y_chinh: "CQRS (Command Query Responsibility Segregation): thay vì MỘT model DÙNG CHUNG cho cả ghi VÀ đọc (thường phải thoả hiệp — model TỐT cho ghi (validate chặt, ít trường) LẠI KHÔNG tối ưu cho đọc (cần nhiều view khác nhau)), TÁCH thành HAI: \"Write model\" (nhận Command, validate, SINH sự kiện) VÀ \"Read model\" (denormalized, tối ưu cho TRUY VẤN cụ thể). Ví dụ: `xuLyLenhTaoDonHang(cmd): SuKien[]` (write) HOÀN TOÀN TÁCH RỜI khỏi `xemDanhSachDonHang(): DonHangView[]` (read) — HAI HÀM, HAI SHAPE dữ liệu, KHÔNG cần giống nhau."
+  - so: 22
+    slug: event-sourcing-luu-su-kien
+    title: "Event Sourcing — lưu SỰ KIỆN thay vì lưu TRẠNG THÁI"
+    teaches: [mau.event-sourcing-basics]
+    requires: [mau.cqrs-read-write-split]
+    y_chinh: "Thay vì lưu \"số dư tài khoản HIỆN TẠI = 500\" (ghi ĐÈ mỗi lần đổi, MẤT lịch sử), Event Sourcing lưu TOÀN BỘ chuỗi sự kiện ĐÃ xảy ra (`{tag:\"daNap\",soTien:300}`, `{tag:\"daRut\",soTien:100}`, ...) — trạng thái HIỆN TẠI được TÍNH RA bằng cách `reduce` qua TOÀN BỘ chuỗi sự kiện (giống chuẩn giao sổ kế toán: KHÔNG xoá giao dịch cũ, CHỈ CỘNG THÊM giao dịch mới). `tinhSoDu(cacSuKien: SuKien[]): number` LÀ MỘT `reduce` thuần trên mảng sự kiện — 'trạng thái' KHÔNG PHẢI dữ liệu LƯU TRỰC TIẾP, mà LÀ KẾT QUẢ của một PHÉP TÍNH."
+  - so: 23
+    slug: projections-nhieu-view-tu-mot-event-stream
+    title: "Projections — NHIỀU view khác nhau từ CÙNG MỘT chuỗi sự kiện"
+    teaches: [mau.projections-multiple-views]
+    requires: [mau.event-sourcing-basics]
+    y_chinh: "Vì sự kiện LÀ nguồn SỰ THẬT DUY NHẤT (single source of truth), có thể \"chiếu\" (project) CHÚNG thành NHIỀU read model KHÁC NHAU CÙNG LÚC, MỖI model phục vụ MỘT mục đích — TẤT CẢ đều CHỈ LÀ `reduce` với hàm gộp KHÁC NHAU trên CÙNG một mảng sự kiện. Ví dụ: TỪ CÙNG một `cacSuKien: SuKienDonHang[]`, `chieuTongChiTieuTheoKhachHang` (Map khách→tổng tiền) VÀ `chieuSoDonTheoTrangThai` (Map trạng thái→số lượng) LÀ HAI hàm reduce ĐỘC LẬP — không phải hai bảng database ĐỒNG BỘ THỦ CÔNG, mà HAI PHÉP TÍNH từ cùng dữ liệu gốc."
+  - so: 24
+    slug: boss-cqrs-event-sourcing-projection
+    title: "BOSS — Ghép CQRS + Event Sourcing + Projection thành một hệ nhỏ"
+    teaches: [mau.gate-boss-cqrs-es]
+    requires: [mau.projections-multiple-views]
+    y_chinh: "Bài BOSS của track: xây một \"kho hàng nhỏ\" HOÀN CHỈNH theo CQRS+ES — `type SuKienKho = {tag:\"daNhapKho\",maSp,soLuong} | {tag:\"daXuatKho\",maSp,soLuong}`; WRITE side: `xuLyLenh(lenh, cacSuKienCu): Result<SuKienKho, LoiKho>` (validate KHÔNG cho xuất QUÁ tồn kho HIỆN TẠI — tồn kho được TÍNH LẠI từ `cacSuKienCu` mỗi lần, không lưu số riêng); READ side: HAI projection ĐỘC LẬP (`chieuTonKhoTheoSanPham` VÀ `chieuLichSuGiaoDich`) TỪ CÙNG một mảng sự kiện — ghép TRỌN VẸN track (Strategy/Observer/Command/Visitor/Decorator/Middleware ĐÃ dùng ngầm suốt track qua hàm thuần + composition, VÀ CQRS/ES/Projection của cụm này) vào MỘT bài tập THỰC HÀNH cuối cùng."
