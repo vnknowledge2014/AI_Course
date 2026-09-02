@@ -240,3 +240,27 @@
 # đổi KHÔNG hợp lệ phải bị từ chối, không dạy nội dung nhãn mô tả.
 - 'ky-nghe-phan-mem.kiem-thu.test-chuyen-trang-thai-tu-choi · viet_test_chuyen_tu_choi · đổi MỌI chuỗi "nhap khong the nhay thang toi giao_hang" thành "nhap" (1 chỗ)'
 
+# THAM SỐ PHỤ KHÔNG ẢNH HƯỞNG KẾT QUẢ — cùng lớp hai ca ngay trên. "nen tra
+# ve loi khi email thieu @" là tham số THỨ BA của assertDeepEqual (label,
+# chỉ dùng để IN thông điệp lỗi khi assertion thất bại) — KHÔNG tham gia
+# phép so sánh actual/expected. Blank học viên điền (giá trị Result mong
+# đợi) hoàn toàn độc lập với nội dung nhãn. Bài dạy cấu trúc Arrange-Act-
+# Assert và đặt tên, không dạy nội dung nhãn mô tả.
+- 'ky-nghe-phan-mem.kiem-thu.arrange-act-assert-va-dat-ten · viet_test_aaa · đổi MỌI chuỗi "nen tra ve loi khi email thieu @" thành "email_khong_hop_le" (1 chỗ)'
+
+# TƯƠNG ĐƯƠNG THẬT. Bài này khai CẢ HAI assertEqual (so sánh ===) lẫn
+# assertDeepEqual (so sánh qua JSON.stringify) trong cùng phạm vi — vì
+# blank1 CẦN assertDeepEqual (Result là object, so === sẽ luôn false do
+# khác tham chiếu) còn blank2 dùng assertEqual (so một con số). MỌI lời
+# gọi assertEqual trong bài (daLuu.length, ketQuaRieng.kind, ketQuaRieng.loi)
+# đều so sánh giá trị NGUYÊN THUỶ (number/string) — với kiểu dữ liệu này,
+# JSON.stringify(a) === JSON.stringify(b) và a === b luôn cho ra CÙNG một
+# kết quả true/false (không có object/mảng nào lọt vào so sánh qua
+# assertEqual ở bài này). Đổi tên hàm gọi từ assertEqual sang assertDeepEqual
+# do đó không đổi PASS/FAIL của bất kỳ assertion nào — không có test nào
+# tách bạch được hai hàm khi cả hai chỉ nhận nguyên thuỷ. Sửa thật đòi hỏi
+# đổi hẳn khái niệm bài (ép một blank nhận object qua assertEqual) — lệch
+# khỏi ý bài (Arrange-Act-Assert + đặt tên, không phải phân biệt hai hàm
+# assert).
+- 'ky-nghe-phan-mem.kiem-thu.arrange-act-assert-va-dat-ten · viet_test_aaa · đổi MỌI chỗ đọc tên assertEqual thành assertDeepEqual (1 chỗ)'
+
