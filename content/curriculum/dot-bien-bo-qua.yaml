@@ -221,3 +221,13 @@
 # trí (-1) — TƯƠNG ĐƯƠNG THẬT.
 - 'khoa-hoc-may-tinh.thuat-toan-va-do-phuc-tap.truong-hop-xau-nhat · do-hai-ca-cung-mot-danh-sach · đổi MỌI hằng số 100 thành 101 (1 chỗ)'
 
+# THAM SỐ PHỤ KHÔNG ẢNH HƯỞNG KẾT QUẢ — cùng lớp `do-bon-co`/`do-hai-ca-cung-
+# mot-danh-sach` ở trên. "zero la gia tri hop le" là tham số THỨ BA của
+# assertEqual (label, chỉ dùng để IN thông điệp lỗi khi assertion thất bại)
+# — KHÔNG tham gia phép so sánh actual/expected nào cả. Ba blank học viên
+# điền (0/null/100.01, giá trị MONG ĐỢI) hoàn toàn độc lập với nội dung
+# nhãn — đổi nhãn thành "0" không đổi PASS/FAIL của bất kỳ assertion nào.
+# Bài dạy liệt kê trường hợp biên (giá trị mong đợi), không dạy nội dung
+# nhãn mô tả.
+- 'ky-nghe-phan-mem.kiem-thu.truong-hop-bien-co-y-thuc · viet_them_bien_parseprice · đổi MỌI chuỗi "zero la gia tri hop le" thành "0" (1 chỗ)'
+

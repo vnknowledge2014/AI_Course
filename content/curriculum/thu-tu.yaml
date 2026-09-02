@@ -140,8 +140,18 @@ realm:
   # `ts.adt-gate-boss` (T4.3, bài 1) và `alg.gate-boss` (T4.5, bài 13) —
   # KHÔNG phụ thuộc T5.3 (hai track song song trong Realm 5, không thứ tự
   # bắt buộc giữa chúng).
+  #
+  # T5.2 (TDD→Property→Mutation, 34 bài) là track THỨ BA — 2/3 nguồn có sẵn
+  # (`fp/TypeScript_Books/part_6_testing_fullstack/chapter_31_tdd_typescript.md`
+  # + `chapter_32_property_based_testing.md`), 1/3 (Mutation, cụm 6, bài
+  # 27-34) TỰ THIẾT KẾ vì KHÔNG chương sách nào trong `fp/*_Books/` nhắc
+  # mutation testing — dựa TRỰC TIẾP trên kỷ luật `tools/kiem_dot_bien.mjs`
+  # dự án đã dùng THẬT xuyên suốt T5.3+T5.6. Xem `content/curriculum/
+  # r5-t52-xuong.yaml`. T5.2 mượn `ts.adt-gate-boss` (T4.3, bài 1) —
+  # KHÔNG phụ thuộc T5.3/T5.6 (ba track song song trong Realm 5).
   - id: ky-nghe-phan-mem
     ten: "Realm 5 — Kỹ nghệ phần mềm"
     track:
       - ddd
       - bao-mat-ung-dung
+      - kiem-thu

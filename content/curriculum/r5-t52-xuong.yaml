@@ -1,0 +1,277 @@
+# Xương sống R5.T5.2 — TDD→Property→Mutation (34 bài) — TypeScript
+#
+# Track THỨ BA của Realm 5 (Kỹ nghệ phần mềm), sau T5.3 (DDD, 42/42) và T5.6
+# (Bảo mật ứng dụng, 26/26). T5.2 được chọn TIẾP THEO vì HAI PHẦN BA có nguồn
+# tham khảo trực tiếp trong `fp/TypeScript_Books/part_6_testing_fullstack/`:
+#   - chapter_31_tdd_typescript.md (600 dòng) — TDD cycle, domain logic, FP DI
+#   - chapter_32_property_based_testing.md (355 dòng) — Property-based testing
+# Cả hai đã đọc TOÀN BỘ qua 2 agent phân tích song song (2026-09-02).
+#
+# PHẦN BA "Mutation" KHÔNG CÓ nguồn sách (đã grep TOÀN BỘ fp/TypeScript_Books,
+# fp/Python_Books, fp/Rust_Books — không chương nào nhắc "mutation testing"/
+# "stryker") — cụm 6 (bài 27-34) là nội dung TỰ THIẾT KẾ, dựa TRỰC TIẾP trên
+# kỷ luật mutation-testing DỰ ÁN NÀY đã dùng THẬT xuyên suốt T5.3+T5.6 (công
+# cụ `tools/kiem_dot_bien.mjs`, TÁM họ bẫy đã phát hiện thật, ghi trong
+# HANDOFF) — nguồn tư liệu THẬT, không phải hư cấu, chỉ là KHÔNG phải một
+# chương sách có sẵn để "đọc và chuyển thể".
+#
+# QUYẾT ĐỊNH KHÔNG DÙNG THƯ VIỆN (giống T4.3/T4.5/T5.3/T5.6): CẢ HAI chương
+# nguồn dùng `import assert from "node:assert/strict"` (module Node, không
+# có trong sandbox) — thay bằng hàm TỰ VIẾT `assertEqual`/`assertDeepEqual`
+# (dạy Ở BÀI 2, dùng lại XUYÊN SUỐT track). Chương 31's `Vitest` (cài đặt,
+# `describe`/`it`) và chương 32's `fast-check` (`fc.assert`, `fc.property`)
+# CHỈ xuất hiện dưới dạng comment/pseudocode trong CHÍNH sách nguồn (tác giả
+# đã viết sao cho code THỰC THI luôn tự đủ, không phụ thuộc thư viện ngoài)
+# — giữ NGUYÊN tinh thần đó, KHÔNG BAO GIỜ import thật.
+#
+# BẪY SANDBOX ĐÃ BIẾT, ÁP DỤNG LẠI: KHÔNG async/await/Promise/.then()/
+# setTimeout. Chương 31's `registerUser`/bài tập `transfer` VỐN DĨ async
+# (repository trả `Promise`) — ĐÃ CHUYỂN sang ĐỒNG BỘ (repo trả giá trị
+# TRỰC TIẾP, không `Promise`) khi thiết kế xương NÀY, không đổi Ý NGHĨA
+# nghiệp vụ. Chương 32's `Buffer.from(...).toString("base64")` (Node global)
+# → thay bằng cipher Caesar-shift TỰ VIẾT (`charCodeAt`/`fromCharCode`).
+#
+# TÁI DÙNG THẲNG Result<T,E> TỪ T4.5 (giống T5.3/T5.6): mọi ví dụ test hàm
+# trả lỗi dùng shape ĐÃ CÓ `{kind:"ok"|"loi", giaTri, loi}` — KHÔNG dạy lại
+# composition theory.
+#
+# world: blueprint-board (sum type hở → bug BÒ RA — MASTERPLAN §R5)
+# skill namespace: kt.* (Kiểm Thử) — namespace MỚI, không trùng
+# ddd.*/bmud.*/ts.*/alg.* đã dùng ở R4/T5.3/T5.6.
+
+cum:
+  - so: 1
+    ten: "Chu trình TDD — Nền tảng"
+    tom_tat: "Red-Green-Refactor, tự viết assert (không thư viện), Red rồi Green trên hàm thuần, biên có ý thức, capstone tinh gọn không đổi hành vi."
+  - so: 2
+    ten: "Test Domain Logic"
+    tom_tat: "Test hàm trả Result, chuyển trạng thái hợp lệ/bị từ chối, toàn bộ luồng sự kiện, capstone xây máy trạng thái mới từ đặc tả."
+  - so: 3
+    ten: "FP DI & Test Craft"
+    tom_tat: "Dependency injection kiểu FP, fake object thuần, nhà máy tạo fake cấu hình được, Arrange-Act-Assert + đặt tên, capstone chuyển tiền dùng fake."
+  - so: 4
+    ten: "Property-Based Testing — Nền tảng"
+    tom_tat: "Ví dụ vs tính chất, tự viết vòng lặp kiểm tính chất, kiểu Bộ Sinh tự chế, bộ sinh mảng tổng quát, hàm kiểm tra tổng quát, capstone kiểm ba tính chất của đảo ngược."
+  - so: 5
+    ten: "Mẫu tính chất & Shrinking"
+    tom_tat: "Bốn mẫu tính chất phổ biến (bất biến, idempotent, đi-về, oracle), tự thu nhỏ đầu vào lỗi, capstone kiểm tính chất trả về Result."
+  - so: 6
+    ten: "Kiểm thử đột biến"
+    tom_tat: "Đột biến là gì, độ phủ vs điểm đột biến, các loại đột biến (ranh giới, số học, logic, hoán đổi giá trị), đột biến tương đương, BOSS săn đột biến thật."
+
+bai:
+# ── Cụm 1 (bài 1-5): Chu trình TDD — Nền tảng — nguồn chương 31.1-31.2 ────
+  - so: 1
+    slug: tdd-la-gi-do-xanh-tinh-gon
+    title: "TDD là gì — Đỏ, Xanh, Tinh gọn"
+    teaches: [kt.tdd-cycle]
+    requires: [ts.adt-gate-boss]
+    y_chinh: "Test-Driven Development: viết \"kịch bản\" (test) TRƯỚC \"buổi diễn\" (code) — Đỏ (viết test CHO hành vi CHƯA tồn tại, test THẤT BẠI, chứng minh test THẬT SỰ kiểm được điều gì đó) → Xanh (viết CODE TỐI THIỂU để test qua, KHÔNG hơn) → Tinh gọn (cải thiện cấu trúc, test LÀM lưới an toàn). TDD là PHƯƠNG PHÁP THIẾT KẾ, không phải \"viết test sau cho có\" — code VIẾT SAU luôn có xu hướng chỉ PHẢN ÁNH cách nó ĐÃ được viết, code VIẾT TRƯỚC buộc suy nghĩ về HÀNH VI mong muốn trước khi bận tâm CÀI ĐẶT."
+  - so: 2
+    slug: tu-viet-assert
+    title: "Tự viết assertEqual/assertDeepEqual — không có thư viện test nào"
+    teaches: [kt.hand-rolled-assert]
+    requires: [kt.tdd-cycle]
+    y_chinh: "Sandbox KHÔNG có `node:assert`/jest/vitest — một \"test\" đơn giản LÀ một lời gọi hàm NÉM lỗi khi SAI, in PASS khi ĐÚNG. `assertEqual<T>(actual, expected, label)` so sánh `===`; `assertDeepEqual<T>` so sánh qua `JSON.stringify` (đủ dùng cho object/mảng phẳng trong track này). HAI hàm này ĐƯỢC DÙNG LẠI xuyên suốt CẢ track — dạy MỘT LẦN, áp dụng MỌI bài sau."
+  - so: 3
+    slug: do-truoc-xanh-sau
+    title: "Đỏ trước, Xanh sau — viết assertion trước, code tối thiểu sau"
+    teaches: [kt.red-then-green]
+    requires: [kt.hand-rolled-assert]
+    y_chinh: "Viết assertion CHO hành vi MONG MUỐN của `parsePrice` (chuỗi giá tiền → số, hoặc `null` nếu không hợp lệ) TRƯỚC KHI cài đặt (Đỏ — assertion sẽ THẤT BẠI vì hàm CHƯA tồn tại/CHƯA đúng), RỒI viết code TỐI THIỂU khiến assertion ĐÓ qua (Xanh). Học viên cài `parsePrice(input): number | null` cho tới khi các assertion ĐÃ VIẾT SẴN đều PASS — trải nghiệm TRỰC TIẾP nhịp Đỏ→Xanh, không chỉ đọc VỀ nó."
+  - so: 4
+    slug: truong-hop-bien-co-y-thuc
+    title: "Trường hợp biên có Ý THỨC — liệt kê TRƯỚC khi viết code"
+    teaches: [kt.edge-cases-first]
+    requires: [kt.red-then-green]
+    y_chinh: "TDD BUỘC liệt kê rỗng/âm/không/biên TRƯỚC KHI viết code (không phải nghĩ thêm SAU) — mở rộng `parsePrice` (bài 3) với `\"0\"` (hợp lệ), `\"\"` (null), `\"-5\"` (null), `\"12.345\"` (làm tròn 2 chữ số). MỖI trường hợp biên là MỘT assertion RIÊNG, viết TRƯỚC, rồi ĐIỀU CHỈNH cài đặt cho tới khi ĐỦ qua HẾT — nối trực tiếp kỷ luật \"đo trước khi viết\" ĐÃ dùng xuyên suốt dự án."
+  - so: 5
+    slug: tinh-gon-khong-doi-hanh-vi
+    title: "Capstone: Tinh gọn — đổi CÁCH LÀM, giữ NGUYÊN test"
+    teaches: [kt.refactor-safety-net]
+    requires: [kt.edge-cases-first]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: viết `parsePriceV2` (cài đặt KHÁC HẲN — dùng regex thay vì `Number()` trực tiếp) cho `parsePrice` (bài 3-4), CHẠY LẠI **Y NGUYÊN** bộ assertion ĐÃ VIẾT (không sửa MỘT assertion nào) — CẢ HAI cài đặt PHẢI qua HẾT. Đây LÀ Ý NGHĨA của \"Tinh gọn\" (Refactor): đổi **CÁCH** làm (HOW), giữ NGUYÊN **CÁI** làm ra (WHAT) — test là LƯỚI AN TOÀN, KHÔNG PHẢI thứ phải viết LẠI mỗi lần đổi cài đặt."
+
+# ── Cụm 2 (bài 6-10): Test Domain Logic — nguồn chương 31.3 ───────────────
+  - so: 6
+    slug: test-ham-tra-ve-result
+    title: "Test hàm trả về Result — cả nhánh THÀNH CÔNG lẫn nhánh LỖI"
+    teaches: [kt.test-result-branches]
+    requires: [kt.refactor-safety-net]
+    y_chinh: "Hàm trả `Result<T,E>` (ĐÃ học T4.5) cần test **CẢ HAI PHÍA**: nhánh `ok` (giá trị ĐÚNG) VÀ **TỪNG** nhánh `loi` (MỖI mã lỗi RIÊNG, không CHỈ một trường hợp lỗi ĐẠI DIỆN). `xacThucEmail(input): Result<string, LoiEmail>` (`LoiEmail = \"rong\"|\"thieu_at\"|\"thieu_domain\"`) — viết assertion CHO CẢ BỐN khả năng (một `ok`, ba `loi` KHÁC NHAU) TRƯỚC, rồi cài đặt. `assertDeepEqual` (bài 2) dùng để so `Result` OBJECT toàn bộ, không CHỈ field `kind`."
+  - so: 7
+    slug: test-chuyen-trang-thai-hop-le
+    title: "Test chuyển trạng thái HỢP LỆ — máy trạng thái là hàm thuần"
+    teaches: [kt.test-valid-transitions]
+    requires: [kt.test-result-branches]
+    y_chinh: "`transition(trangThaiHienTai, suKien): KetQuaChuyen` (DU `{tag:\"ok\", trangThaiMoi} | {tag:\"loi\"}`) — MỘT hàm THUẦN, test GIỐNG HỆT mọi hàm thuần khác: input CỤ THỂ, output MONG ĐỢI, MỘT assertion mỗi cặp (trạng thái, sự kiện). Ví dụ đơn hàng: `\"nhap\"` + sự kiện `\"xac_nhan\"` → `\"cho_thanh_toan\"`. MỖI đường chuyển HỢP LỆ trong sơ đồ trạng thái LÀ MỘT assertion riêng, viết ĐỦ TRƯỚC khi tin cài đặt ĐÚNG."
+  - so: 8
+    slug: test-chuyen-trang-thai-tu-choi
+    title: "Test chuyển trạng thái BỊ TỪ CHỐI — bao gồm trạng thái CUỐI"
+    teaches: [kt.test-invalid-transitions]
+    requires: [kt.test-valid-transitions]
+    y_chinh: "QUAN TRỌNG NGANG bài trước: test các chuyển đổi KHÔNG hợp lệ PHẢI bị TỪ CHỐI (`tag: \"loi\"`) — ví dụ `\"nhap\"` KHÔNG thể nhảy THẲNG sang `\"da_giao\"` (bỏ qua các bước TRUNG GIAN). Trạng thái CUỐI (`\"da_huy\"`, `\"da_nhan\"`) PHẢI từ chối **MỌI** sự kiện — test riêng ĐIỀU đó, không GIẢ ĐỊNH \"không test lỗi thì chắc ổn\"."
+  - so: 9
+    slug: test-toan-bo-luong-su-kien
+    title: "Test toàn bộ LUỒNG — phát lại một chuỗi sự kiện, kiểm trạng thái CUỐI"
+    teaches: [kt.test-full-workflow]
+    requires: [kt.test-invalid-transitions]
+    y_chinh: "NGOÀI test TỪNG bước RIÊNG (bài 7-8), phát lại MỘT **CHUỖI** sự kiện qua `transition` (vòng lặp/`reduce`), kiểm trạng thái CUỐI CÙNG — \"integration test\" thu nhỏ nhưng VẪN thuần túy, VẪN đồng bộ. Ví dụ: `[\"xac_nhan\", \"thanh_toan\", \"giao_hang\", \"nhan_hang\"]` áp LÊN `\"nhap\"` phải kết thúc Ở `\"da_nhan\"`. Nếu MỘT sự kiện GIỮA chuỗi bị từ chối, chuỗi DỪNG Ở trạng thái TRƯỚC ĐÓ — kiểm cả case NÀY."
+  - so: 10
+    slug: tdd-may-trang-thai-tu-dau
+    title: "Capstone: TDD một máy trạng thái MỚI từ đặc tả THUẦN VĂN BẢN"
+    teaches: [kt.tdd-new-state-machine]
+    requires: [kt.test-full-workflow]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: CHỈ với đặc tả THUẦN VĂN BẢN (đèn giao thông: `\"do\"` → `\"xanh\"` → `\"vang\"` → `\"do\"`, MỌI chuyển khác BỊ từ chối), học viên viết assertion (Đỏ) TRƯỚC, RỒI hàm `chuyenDen(trangThaiHienTai): Result<TrangThaiDen, \"khong_hop_le\">` (Xanh) — ghép TRỌN chu trình TDD (bài 1-9: Đỏ→Xanh, test nhánh hợp lệ+từ chối, test toàn bộ chu kỳ MỘT VÒNG) vào MỘT bài toán MỚI, chưa từng thấy."
+
+# ── Cụm 3 (bài 11-14): FP DI & Test Craft — nguồn chương 31.4-31.5 ────────
+  - so: 11
+    slug: fp-di-fake-doi-tuong-thuan
+    title: "FP DI: dependency là THAM SỐ, fake là OBJECT THUẦN"
+    teaches: [kt.fp-di-fakes]
+    requires: [kt.tdd-new-state-machine]
+    y_chinh: "Thay vì thư viện MOCK, truyền dependency (`Deps`) NHƯ MỘT THAM SỐ object thường (FP DI, đã học T4.5's Reader-tương-tự) — \"fake\" phục vụ test CHỈ LÀ MỘT object literal THỰC HIỆN cùng interface, side-effect được GHI vào MỘT mảng THƯỜNG (đóng vai spy). `dangKyNguoiDung(deps, ten, email): Result<...>` với `deps: {timTheoEmail, luu}` — fake `timTheoEmail` trả CỨNG một giá trị GIẢ LẬP, `luu` chỉ `push` vào mảng `daLuu: [...]`, KHÔNG database THẬT nào."
+  - so: 12
+    slug: nha-may-tao-fake-cau-hinh-duoc
+    title: "Nhà máy tạo fake CẤU HÌNH ĐƯỢC — mỗi test một bộ dữ liệu RIÊNG"
+    teaches: [kt.fake-factory]
+    requires: [kt.fp-di-fakes]
+    y_chinh: "`taoFakeDeps(emailDaTonTai: string[] = []): Deps` — NHÀ MÁY tạo fake MỚI, CẤU HÌNH ĐƯỢC theo TỪNG kịch bản test (ví dụ: \"email NÀY đã tồn tại\" cho test trùng lặp, mảng RỖNG cho test đăng ký MỚI THÀNH CÔNG) — tránh CHIA SẺ state ĐỘT BIẾN giữa các test case (mỗi lời gọi `taoFakeDeps` TẠO Map/mảng RIÊNG, KHÔNG dùng LẠI của test TRƯỚC)."
+  - so: 13
+    slug: arrange-act-assert-va-dat-ten
+    title: "Arrange-Act-Assert & đặt tên \"nên X khi Y\""
+    teaches: [kt.aaa-naming]
+    requires: [kt.fake-factory]
+    y_chinh: "CẤU TRÚC MỖI test thành BA phần THẤY RÕ (Arrange — dựng dữ liệu/fake; Act — GỌI hàm CẦN test; Assert — kiểm kết quả) VÀ đặt tên MỖI assertion theo mẫu \"nên [kết quả] khi [điều kiện]\" — thất bại TỰ GIẢI THÍCH được, không cần đọc code MỚI hiểu ý định. Đối lập test \"vỡ mỗi lần refactor\" (kiểm CÁCH LÀM, ví dụ \"gọi ĐÚNG 3 hàm nội bộ theo thứ tự\") với test TỐT (kiểm KẾT QUẢ, sống sót QUA refactor — nối bài 5's bài học)."
+  - so: 14
+    slug: tdd-chuyen-tien-du-lieu-gia
+    title: "Capstone: TDD chuyển tiền — FP DI + fake + AAA hợp lại"
+    teaches: [kt.gate-boss-fp-di]
+    requires: [kt.aaa-naming]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: `chuyenTien(kho, tuId, denId, soTien): Result<..., LoiChuyenTien>` (`LoiChuyenTien = \"khong_tim_thay_nguoi_gui\"|\"khong_tim_thay_nguoi_nhan\"|\"khong_du_so_du\"`) — dùng `Map` LÀM kho fake ĐỒNG BỘ (đã CHUYỂN từ async sang sync so với bản gốc sách — repository ĐỌC/GHI TRỰC TIẾP, không `Promise`), cấu trúc THEO Arrange-Act-Assert, MỌI assertion đặt tên \"nên X khi Y\", PHỦ đủ đường THÀNH CÔNG + BA nhánh lỗi — ghép TRỌN cụm 3 (FP DI, nhà máy fake, AAA/đặt tên) vào MỘT use case THẬT."
+
+# ── Cụm 4 (bài 15-20): Property-Based Testing — Nền tảng — ch.32.1-32.2 ───
+  - so: 15
+    slug: vi-du-vs-tinh-chat
+    title: "Test VÍ DỤ vs test TÍNH CHẤT — đoán input hay khẳng định bất biến"
+    teaches: [kt.example-vs-property]
+    requires: [kt.gate-boss-fp-di]
+    y_chinh: "Test VÍ DỤ (đã làm xuyên suốt cụm 1-3): khẳng định MỘT cặp input→output CỤ THỂ — chỉ TỐT bằng SỰ SÁNG SUỐT của người chọn ví dụ. Test TÍNH CHẤT (Property-Based Testing): khẳng định MỘT BẤT BIẾN phải ĐÚNG với **RẤT NHIỀU** input NGẪU NHIÊN — bắt được edge case KHÔNG ai nghĩ tới liệt kê thủ công. Minh hoạ: `sapXep(mang)` — vài ví dụ TRÔNG ổn, NHƯNG chạy tính chất \"kết quả PHẢI có thứ tự tăng dần\" trên 50 mảng NGẪU NHIÊN mới THỰC SỰ tự tin."
+  - so: 16
+    slug: tu-viet-vong-lap-kiem-tinh-chat
+    title: "Tự viết vòng lặp \"sinh rồi kiểm\" — cốt lõi của MỌI công cụ PBT"
+    teaches: [kt.property-check-loop]
+    requires: [kt.example-vs-property]
+    y_chinh: "MỌI công cụ property-based testing (kể cả `fast-check` THẬT, không dùng được trong sandbox) quy VỀ ĐÚNG MỘT vòng lặp: SINH input ngẫu nhiên → KIỂM tính chất → BÁO lỗi Ở LẦN ĐẦU thất bại. `chayThuTinhChat(sinhInput, tinhChat, soLan)` — TỰ VIẾT vòng lặp ĐÓ TRƯỚC KHI đặt tên hoa mỹ gì cả, để THẤY nó ĐƠN GIẢN tới mức nào."
+  - so: 17
+    slug: kieu-bo-sinh-tu-che
+    title: "Kiểu BoSinh<T> — bộ sinh dữ liệu ngẫu nhiên tự chế"
+    teaches: [kt.arbitrary-type]
+    requires: [kt.property-check-loop]
+    y_chinh: "MỘT \"bộ sinh\" CHỈ LÀ `{generate: () => T}` — interface tối giản NÀY CHÍNH LÀ khái niệm \"Arbitrary\" của `fast-check`, tái tạo được TRONG MỘT DÒNG cho TỪNG kiểu. `soNguyen(min, max): BoSinh<number>` — `generate` dùng `Math.random()` + `Math.floor` để sinh số nguyên NGẪU NHIÊN TRONG khoảng."
+  - so: 18
+    slug: bo-sinh-mang-tong-quat
+    title: "Bộ sinh MẢNG tổng quát — kết hợp bộ sinh CÓ SẴN"
+    teaches: [kt.array-generator-composition]
+    requires: [kt.arbitrary-type]
+    y_chinh: "Bộ sinh KẾT HỢP được — `mang<A>(bs: BoSinh<A>, doDaiToiDa): BoSinh<A[]>` xây dựng TỪ BẤT KỲ `BoSinh<A>` nào, KHÔNG cần biết `A` LÀ gì (generic thật, dùng lại kỹ thuật TypeScript generics đã học T4.4-tương-đương). `mang(soNguyen(-50, 50))` sinh mảng số NGUYÊN ngẫu nhiên, ĐỘ DÀI NGẪU NHIÊN."
+  - so: 19
+    slug: ham-kiem-tra-tinh-chat-tong-quat
+    title: "Hàm kiemTraTinhChat<A> tổng quát — thay thế fc.assert(fc.property(...))"
+    teaches: [kt.generic-property-runner]
+    requires: [kt.array-generator-composition]
+    y_chinh: "Ghép BỘ SINH (bài 17-18) VÀ vòng lặp (bài 16) thành MỘT hàm generic DUY NHẤT — CHÍNH LÀ thứ thay thế `fc.assert(fc.property(arb, predicate))` của `fast-check` THẬT (không dùng được trong sandbox). `kiemTraTinhChat<A>(bs: BoSinh<A>, tinhChat: (a:A)=>boolean, soLan=100): void` — công cụ TRUNG TÂM, dùng LẠI cho MỌI bài property test SAU."
+  - so: 20
+    slug: kiem-tinh-chat-cho-dao-nguoc
+    title: "Capstone: Kiểm BA tính chất của hàm đảo ngược mảng"
+    teaches: [kt.gate-boss-pbt-foundations]
+    requires: [kt.generic-property-runner]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: LẮP RÁP `BoSinh`/`mang`/`kiemTraTinhChat` (bài 17-19) để chứng minh `daoNguoc<A>(mang): readonly A[]` thoả BA tính chất ĐỘC LẬP: (1) đảo NGƯỢC HAI LẦN = mảng GỐC (đi-về), (2) độ DÀI GIỮ NGUYÊN, (3) mảng MỘT phần tử KHÔNG đổi. MỖI tính chất CHẠY qua `kiemTraTinhChat` TRÊN hàng chục mảng NGẪU NHIÊN — không phải MỘT ví dụ tay."
+
+# ── Cụm 5 (bài 21-26): Mẫu tính chất & Shrinking — nguồn chương 32.3 ──────
+  - so: 21
+    slug: mau-bat-bien
+    title: "Mẫu Bất Biến — điều PHẢI đúng, VÔ ĐIỀU KIỆN, với MỌI input"
+    teaches: [kt.pattern-invariant]
+    requires: [kt.gate-boss-pbt-foundations]
+    y_chinh: "Mẫu tính chất THỨ NHẤT (trong bốn mẫu phổ biến): BẤT BIẾN — điều LUÔN LUÔN đúng, KHÔNG phụ thuộc input CỤ THỂ. Ví dụ: `Math.abs(n) >= 0` với MỌI `n`; `Math.abs(n) === Math.abs(-n)`. Ứng dụng: kiểm MỘT hàm `dieuChinhKhoangGiaTri` (clamp) LUÔN trả kết quả NẰM TRONG khoảng cho phép, BẤT KỂ input."
+  - so: 22
+    slug: mau-idempotent
+    title: "Mẫu Idempotent — áp dụng HAI LẦN không khác áp dụng MỘT LẦN"
+    teaches: [kt.pattern-idempotent]
+    requires: [kt.pattern-invariant]
+    y_chinh: "Mẫu THỨ HAI: `f(f(x)) === f(x)` — áp dụng hàm HAI LẦN KHÔNG làm gì THÊM so với áp dụng MỘT LẦN. Kinh điển cho hàm CHUẨN HOÁ (`chuanHoa`: trim + lowercase + gộp khoảng trắng) — chuẩn hoá dữ liệu ĐÃ chuẩn hoá PHẢI ra CHÍNH NÓ, KHÔNG BAO GIỜ đổi THÊM."
+  - so: 23
+    slug: mau-di-ve
+    title: "Mẫu Đi-Về (Round-trip) — giải mã(mã hoá(x)) = x"
+    teaches: [kt.pattern-round-trip]
+    requires: [kt.pattern-idempotent]
+    y_chinh: "Mẫu THỨ BA: `giaiMa(maHoa(x)) === x` — MÃ HOÁ rồi GIẢI MÃ phải TRẢ VỀ ĐÚNG dữ liệu GỐC. Minh hoạ bằng cipher Caesar-shift TỰ VIẾT (thay `Buffer`/base64, module Node không có trong sandbox) — `maHoa(chuoi, k)`/`giaiMa(chuoi, k)` qua `charCodeAt`/`fromCharCode`. Kiểm tính chất ĐI-VỀ trên hàng chục chuỗi NGẪU NHIÊN."
+  - so: 24
+    slug: mau-oracle
+    title: "Mẫu Oracle — so sánh với cài đặt ĐÃ TIN CẬY"
+    teaches: [kt.pattern-oracle]
+    requires: [kt.pattern-round-trip]
+    y_chinh: "Mẫu THỨ TƯ: so sánh cài đặt MỚI với MỘT \"oracle\" (nguồn ĐÃ tin cậy, ví dụ hàm CÓ SẴN của ngôn ngữ) THAY VÌ chọn GIÁ TRỊ kỳ vọng TAY. Ví dụ: TỰ VIẾT `canBacHaiCuaToi(n)` (Newton's method, vòng lặp xấp xỉ), SO SÁNH với `Math.sqrt(n)` (oracle) trên hàng chục số NGẪU NHIÊN, làm TRÒN để so sánh chấp nhận sai số nhỏ."
+  - so: 25
+    slug: tu-thu-nho-dau-vao-loi
+    title: "Tự thu nhỏ đầu vào LỖI — shrinking, tìm ca THẤT BẠI TỐI GIẢN"
+    teaches: [kt.hand-rolled-shrinking]
+    requires: [kt.pattern-oracle]
+    y_chinh: "Khi tính chất THẤT BẠI Ở một input NGẪU NHIÊN LỚN/PHỨC TẠP (ví dụ số `733`), THU NHỎ dần về giá trị NHỎ NHẤT/ĐƠN GIẢN NHẤT VẪN còn thất bại — debug DỄ HƠN NHIỀU với ca lỗi TỐI GIẢN thay vì số ngẫu nhiên bất kỳ. TỰ VIẾT `thuNhoSoNguyen(batDau, tinhChat)` — tìm kiếm nhị phân THU HẸP dần khoảng [đúng, sai] về TỐI GIẢN. Đây LÀ nội dung KHÔNG có trong sách nguồn (chỉ mô tả bằng LỜI) — TỰ THIẾT KẾ."
+  - so: 26
+    slug: kiem-tinh-chat-tra-ve-result
+    title: "Capstone: Bộ kiểm tính chất TRẢ VỀ Result thay vì throw"
+    teaches: [kt.gate-boss-pbt-patterns]
+    requires: [kt.hand-rolled-shrinking]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: viết LẠI `kiemTraTinhChat` (bài 19) để TRẢ `Result<{soLanDung}, {input, viTri}>` THAY VÌ `console.log`/throw (nối phong cách track — Result ĐÃ HỌC, T4.5) — áp dụng vào tính chất ĐI-VỀ (bài 23) cho MỘT cặp `serialize`/`parse` số nguyên (`` `N:${n}` `` ↔ `Number(...)`). Ghép BỐN mẫu tính chất (bài 21-24) + Result-returning runner thành MỘT công cụ THỰC DỤNG, tái sử dụng được."
+
+# ── Cụm 6 (bài 27-34): Kiểm thử đột biến — TỰ THIẾT KẾ, không nguồn sách ──
+  - so: 27
+    slug: dot-bien-la-gi
+    title: "Đột biến là gì — cố ý gieo LỖI NHỎ, xem test có BẮT được không"
+    teaches: [kt.mutation-testing-intro]
+    requires: [kt.gate-boss-pbt-patterns]
+    y_chinh: "Mutation testing: CỐ Ý sửa MỘT CHỖ NHỎ trong lời giải ĐÚNG (\"đột biến\" — mutant, ví dụ đổi `>` thành `>=`) rồi CHẠY LẠI bộ test HIỆN CÓ trên PHIÊN BẢN đột biến ĐÓ. Đột biến \"BỊ GIẾT\" nếu MỘT test THẤT BẠI (tốt — test THẬT SỰ phát hiện được sai khác); đột biến \"SỐNG SÓT\" nếu MỌI test VẪN qua (XẤU — bộ test KHÔNG THẬT SỰ kiểm điều ĐÓ, dù trông \"đủ\"). Minh hoạ: `laSoDuong(n) { return n > 0; }` với test CHỈ thử `n=5`/`n=-5` — đột biến đổi `>` thành `>=` (đổi Ý NGHĨA thành \"không âm\") VẪN QUA CẢ HAI test — bộ test trông \"ổn\" nhưng THỰC RA KHÔNG kiểm được ranh giới `n=0`."
+  - so: 28
+    slug: do-phu-vs-diem-dot-bien
+    title: "Độ phủ dòng lệnh KHÁC điểm đột biến — CHẠY qua khác KIỂM ĐÚNG"
+    teaches: [kt.coverage-vs-mutation-score]
+    requires: [kt.mutation-testing-intro]
+    y_chinh: "Độ phủ (code coverage): DÒNG code đó có ĐƯỢC CHẠY QUA hay không lúc test — 100% độ phủ CHỈ nghĩa là MỌI dòng CHẠY ÍT NHẤT một lần, KHÔNG nghĩa là KẾT QUẢ được KIỂM ĐÚNG. Điểm đột biến (mutation score): TỈ LỆ đột biến BỊ GIẾT trên TỔNG số đột biến thử — đo XEM test có THẬT SỰ kiểm đúng HÀNH VI hay không. Minh hoạ: MỘT test gọi `laSoDuong(5)` KHÔNG kiểm gì cả (`laSoDuong(5); // không assert`) — độ phủ dòng ĐẦY ĐỦ (dòng `return n > 0` ĐÃ chạy), NHƯNG MỌI đột biến ĐỀU sống sót (không assertion nào để BẮT sai khác) — điểm đột biến LÀ `0%`."
+  - so: 29
+    slug: dot-bien-ranh-gioi
+    title: "Đột biến RANH GIỚI — < thành <=, > thành >=, off-by-one"
+    teaches: [kt.mutation-boundary]
+    requires: [kt.coverage-vs-mutation-score]
+    y_chinh: "Loại đột biến PHỔ BIẾN VÀ QUAN TRỌNG NHẤT: đổi toán tử so sánh SÁT NGHĨA (`<`↔`<=`, `>`↔`>=`, `===`↔`!==`). CHỈ có test Ở ĐÚNG NGƯỠNG (giá trị BẰNG ranh giới) VÀ ngưỡng±1 mới GIẾT được loại đột biến NÀY — DÂY LÀ chính xác kỷ luật \"test ca biên\" ĐÃ ÁP DỤNG XUYÊN SUỐT dự án (được PHÁT HIỆN THẬT lúc viết T5.3/T5.6, ghi lại trong \"họ bẫy\" số 3). Bài tập: cho hàm `trongPham vi(n, min, max)` VÀ bộ test THIẾU ca biên, học viên THÊM test ĐỂ giết đột biến `<=`↔`<`."
+  - so: 30
+    slug: dot-bien-so-hoc
+    title: "Đột biến SỐ HỌC — cộng thành trừ, nhân thành chia"
+    teaches: [kt.mutation-arithmetic]
+    requires: [kt.mutation-boundary]
+    y_chinh: "Đổi toán tử số học (`+`↔`-`, `*`↔`/`) — NGUY HIỂM vì với GIÁ TRỊ NHỎ, kết quả đột biến ĐÔI KHI \"tình cờ\" giống kết quả ĐÚNG (PHÁT HIỆN THẬT tại T5.6 bài 22: `gioHienTai - t` đổi thành `gioHienTai + t` VẪN qua NẾU test CHỈ dùng timestamp NHỎ). GIẾT loại đột biến NÀY cần test dùng GIÁ TRỊ TUYỆT ĐỐI LỚN với HIỆU SỐ NHỎ (`-` cho kết quả NHỎ đúng, `+` cho kết quả LỚN sai lệch HẲN) — bài tập ÁP DỤNG TRỰC TIẾP kỹ thuật NÀY vào MỘT hàm tính \"tuổi\" (`gioHienTai - ngaySinh`)."
+  - so: 31
+    slug: dot-bien-logic
+    title: "Đột biến LOGIC — && thành ||, phủ định bị XOÁ"
+    teaches: [kt.mutation-logical]
+    requires: [kt.mutation-arithmetic]
+    y_chinh: "Đổi toán tử logic (`&&`↔`||`) hoặc XOÁ MỘT phủ định (`!dieuKien` → `dieuKien`) — GIẾT được CHỈ khi có test cho TỪNG TỔ HỢP giá trị boolean CỦA từng điều kiện con (đúng-đúng, đúng-sai, sai-đúng, sai-sai cho `&&`/`||` HAI điều kiện). Bài tập: hàm `duocPhepMua(coTien, duTuoi)` (`return coTien && duTuoi`) — bộ test CHỈ thử (true,true)/(false,false) BỎ SÓT hai tổ hợp CÒN LẠI, không giết được đột biến `&&`→`||`."
+  - so: 32
+    slug: dot-bien-hoan-doi-gia-tri
+    title: "Đột biến HOÁN ĐỔI giá trị — field/hằng số cùng kiểu bị đổi chỗ"
+    teaches: [kt.mutation-value-swap]
+    requires: [kt.mutation-logical]
+    y_chinh: "Đột biến hoán đổi HAI giá trị CÙNG KIỂU (hai field cùng string, hai chuỗi hardcode giữa hai hàm khác nhau) — PHÁT HIỆN THẬT hai lần: T5.3 bài 34 (mapper hai chiều hoán đổi `ma`↔`ten`, test chỉ kiểm MỘT field), T5.6 bài 16 (hai hàm build-query hoán đổi chuỗi SQL hardcode, test chỉ kiểm `params` không kiểm `sql`). GIẾT loại NÀY cần test kiểm GIÁ TRỊ RIÊNG của MỖI field/hằng số bằng DỮ LIỆU PHÂN BIỆT RÕ (không dùng giá trị GIỐNG NHAU cho hai vị trí lẽ ra PHẢI khác biệt được)."
+  - so: 33
+    slug: dot-bien-tuong-duong
+    title: "Đột biến TƯƠNG ĐƯƠNG — thay đổi CÚ PHÁP, KHÔNG đổi HÀNH VI"
+    teaches: [kt.equivalent-mutants]
+    requires: [kt.mutation-value-swap]
+    y_chinh: "GIỚI HẠN THÀNH THẬT của mutation testing: MỘT SỐ đột biến thay đổi CÚ PHÁP nhưng KHÔNG đổi HÀNH VI THẬT — gọi LÀ \"đột biến tương đương\" (equivalent mutant). Ví dụ: `n * 2` đổi thành `n + n` — về mặt TOÁN HỌC, GIỐNG HỆT NHAU với MỌI `n`, KHÔNG test NÀO (dù viết TỐT tới đâu) GIẾT được nó, VÀ ĐÓ HOÀN TOÀN KHÔNG PHẢI lỗi của bộ test. Nhận diện được đột biến TƯƠNG ĐƯƠNG (thay vì cố viết test VÔ VỌNG để giết nó) LÀ một kỹ năng THỰC TẾ — công cụ mutation testing THẬT (kể cả `tools/kiem_dot_bien.mjs` của DỰ ÁN NÀY) đều có \"danh sách miễn trừ\" cho trường hợp NÀY (`content/curriculum/dot-bien-bo-qua.yaml`)."
+  - so: 34
+    slug: san-dot-bien-that
+    title: "BOSS — Săn đột biến THẬT: thêm test cho tới khi giết HẾT"
+    teaches: [kt.gate-boss]
+    requires: [kt.equivalent-mutants]
+    y_chinh: "Bài BOSS của track: cho MỘT hàm `phanLoaiTuoi(tuoi): \"tre_em\"|\"thieu_nien\"|\"nguoi_lon\"` (ranh giới `<13`, `<18`, còn lại) VÀ một bộ test BAN ĐẦU CHỈ có BA ví dụ RÕ RÀNG (`5`→trẻ em, `15`→thiếu niên, `30`→người lớn) — hoàn toàn TRÔNG như \"đủ\" nhưng THỰC RA CHỨA NHIỀU đột biến SỐNG SÓT (ranh giới `13`/`18` chưa test, `<` có thể đổi `<=` mà không bị PHÁT HIỆN). Học viên PHẢI THÊM đủ test CA BIÊN (bài 29's kỹ thuật) để GIẾT HẾT đột biến ranh giới CÒN SỐNG — ghép TRỌN VẸN kỷ luật CẢ track (Đỏ-Xanh-Tinh gọn, test hàm thuần, property patterns, VÀ mutation testing) vào MỘT bài tập THỰC HÀNH cuối cùng, đúng NGUYÊN kỷ luật \"chấm trượt được đáp án sai\" ĐÃ DÙNG XUYÊN SUỐT DỰ ÁN NÀY."
