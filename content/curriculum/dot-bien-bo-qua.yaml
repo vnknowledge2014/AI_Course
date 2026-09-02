@@ -231,3 +231,12 @@
 # nhãn mô tả.
 - 'ky-nghe-phan-mem.kiem-thu.truong-hop-bien-co-y-thuc · viet_them_bien_parseprice · đổi MỌI chuỗi "zero la gia tri hop le" thành "0" (1 chỗ)'
 
+# THAM SỐ PHỤ KHÔNG ẢNH HƯỞNG KẾT QUẢ — cùng lớp ca ngay trên. "nhap khong
+# the nhay thang toi giao_hang" là tham số THỨ BA của assertDeepEqual
+# (label, chỉ dùng để IN thông điệp lỗi khi assertion thất bại) — KHÔNG
+# tham gia phép so sánh actual/expected nào cả. Blank học viên điền (giá
+# trị của field `tag`, "loi") hoàn toàn độc lập với nội dung nhãn — đổi
+# nhãn thành "nhap" không đổi PASS/FAIL của assertion. Bài dạy các chuyển
+# đổi KHÔNG hợp lệ phải bị từ chối, không dạy nội dung nhãn mô tả.
+- 'ky-nghe-phan-mem.kiem-thu.test-chuyen-trang-thai-tu-choi · viet_test_chuyen_tu_choi · đổi MỌI chuỗi "nhap khong the nhay thang toi giao_hang" thành "nhap" (1 chỗ)'
+
