@@ -149,9 +149,16 @@ realm:
   # dự án đã dùng THẬT xuyên suốt T5.3+T5.6. Xem `content/curriculum/
   # r5-t52-xuong.yaml`. T5.2 mượn `ts.adt-gate-boss` (T4.3, bài 1) —
   # KHÔNG phụ thuộc T5.3/T5.6 (ba track song song trong Realm 5).
+  #
+  # T5.4 (Mẫu thiết kế & Tái cấu trúc, 24 bài) là track THỨ TƯ — nguồn
+  # `fp/TypeScript_Books/part_3_design_patterns/chapter_16_gof_fp_translation.md`
+  # + `chapter_17_cqrs_event_sourcing.md`. Xem `content/curriculum/
+  # r5-t54-xuong.yaml`. T5.4 mượn `ts.adt-gate-boss` (T4.3, bài 1) —
+  # KHÔNG phụ thuộc T5.2/T5.3/T5.6 (bốn track song song trong Realm 5).
   - id: ky-nghe-phan-mem
     ten: "Realm 5 — Kỹ nghệ phần mềm"
     track:
       - ddd
       - bao-mat-ung-dung
       - kiem-thu
+      - mau-tai-cau-truc
