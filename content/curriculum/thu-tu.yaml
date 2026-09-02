@@ -122,3 +122,16 @@ realm:
       # docs/decisions/R4-T46-parser-combinator-do-duoc.md. Với CẢ T4.4 và
       # T4.6 hoãn, Realm 4 dừng ở 6/8 track (186/260 bài) cho tới khi có
       # đầu tư hạ tầng byte-rust riêng.
+
+  # Realm 5 (Software Engineering) mở màn bằng T5.3 (DDD), KHÔNG theo thứ tự
+  # số T5.1→T5.6 — T5.1 ("Git, MỚI, git mô phỏng WASM offline") đòi một
+  # ENGINE MỚI HOÀN TOÀN, không tồn tại trong `packages/`, ngoài phạm vi một
+  # phiên viết nội dung. T5.3 có nguồn tham khảo RÕ NHẤT (7 chương trọn vẹn,
+  # `fp/TypeScript_Books/part_4_ddd/`) và chỉ cần engine exec-typescript đã
+  # chứng minh ổn định. Xem `content/curriculum/r5-t53-xuong.yaml` cho chi
+  # tiết quyết định. T5.3 mượn `ts.adt-gate-boss` (T4.3) và `alg.gate-boss`
+  # (T4.5) — đứng sau TOÀN BỘ Realm 4 vì cần cả hai.
+  - id: ky-nghe-phan-mem
+    ten: "Realm 5 — Kỹ nghệ phần mềm"
+    track:
+      - ddd

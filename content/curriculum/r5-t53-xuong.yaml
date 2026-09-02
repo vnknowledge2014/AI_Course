@@ -1,0 +1,337 @@
+# Xương sống R5.T5.3 — DDD (42 bài) — TypeScript
+#
+# Realm 5 (Software Engineering) mở màn bằng track NÀY, không phải T5.1 theo
+# thứ tự số — T5.1 ("Git, MỚI, git mô phỏng WASM offline") đòi một ENGINE MỚI
+# HOÀN TOÀN (không tồn tại trong `packages/`, xây cỡ tương đương `byte-rust`
+# từ đầu) — ngoài phạm vi một phiên viết nội dung. T5.3 có NGUỒN RÕ NHẤT,
+# ĐẦY ĐỦ NHẤT trong 6 track R5 (7 chương trọn vẹn, khớp trực tiếp MASTERPLAN's
+# ghi chú "khối TÁI DÙNG lớn nhất: 24 chương FP Patterns + 22 chương DDD"),
+# và chỉ cần engine exec-typescript ĐÃ CHỨNG MINH ổn định qua T4.0a/T4.3/T4.5.
+#
+# NGUỒN THAM KHẢO (chỉ đọc Ý, KHÔNG chép code — xem quyết định thư viện dưới
+# đây): `fp/TypeScript_Books/part_4_ddd/chapter_18_introduction_to_ddd.md`
+# tới `chapter_24_persistence_repository.md` (7 chương, 7914 dòng — đã đọc
+# TOÀN BỘ qua 7 agent phân tích song song, mỗi agent một chương, tổng hợp
+# 2026-09-02). Đối chiếu SONG SONG với `fp/Python_Books/part_4_ddd/` và
+# `fp/Rust_Books/part_4_ddd_with_rust/` khi viết bước Rosetta (2-4 step cuối
+# mỗi bài, nói độ lệch 2 ngôn ngữ kia — cơ chế #2 trong "Sáu cơ chế chống
+# nhàm chán" MASTERPLAN).
+#
+# QUYẾT ĐỊNH KHÔNG DÙNG THƯ VIỆN (giống T4.3/T4.5): đã đo
+# `packages/exec-typescript/package.json` — CHỈ có `typescript` + `sucrase`.
+# Chương nguồn 22 (Error Handling) nhắc `neverthrow`, chương 23 nhắc `zod` —
+# NHƯNG cả hai đều chỉ xuất hiện trong COMMENT (`// import {...} from
+# "neverthrow"`), code THỰC THI trong cả 7 chương đã TỰ VIẾT TAY 100% bằng TS
+# thuần (đã xác nhận qua cả 7 báo cáo phân tích, không sót import nào chạy
+# thật ngoài `node:assert/strict` — module built-in Node, chỉ dùng cho phần
+# "Test" minh hoạ trong sách, KHÔNG dùng trong lesson ở đây vì dự án đã có
+# cơ chế `:::validate`/`tier: tests` riêng, không cần `assert` import).
+#
+# TÁI DÙNG THẲNG Result<T,E> TỪ T4.5 (quyết định quan trọng nhất của track
+# này): chương 22 dùng shape `{tag:"ok"|"err", value, error}`, nhưng T4.5 ĐÃ
+# viết `Result<T,E>` với shape `{kind:"ok"|"loi", giaTri, loi}` + `mapResult`/
+# `chainResult`/`map2GomLoi` — HAI shape không tương thích field-name. Track
+# này CHỌN tái dùng NGUYÊN shape T4.5 (không giới thiệu shape mới) — vì T4.5
+# đã dạy kỹ functor/monad LAWS trên đúng type đó, tái dùng giữ tính liền mạch
+# toàn khoá. Hệ quả: `andThen` (Ch22) DẠY LẠI dưới tên `chainResult` (đã có),
+# `map`/`mapErr` dạy lại dưới tên `mapResult` (đã có), error-accumulation
+# (Ch22 C16-C17) ÁP DỤNG LẠI `map2GomLoi` (đã có, T4.5 bài 25) vào form
+# validation — KHÔNG dạy lý thuyết functor/monad/applicative LẦN NỮA, chỉ áp
+# dụng công cụ đã có vào miền dữ liệu DDD MỚI. Track T5.3 vì vậy KHÔNG có cụm
+# "ôn Result cơ bản" — cụm 5 (bài 25-30) chỉ dạy các combinator T4.5 CHƯA
+# dạy: `unwrapOr`, `match`, `fromThrowable`, `ResultAsync`/`andThenAsync`.
+#
+# Mượn skill CHÉO REALM: bài 1 mượn THẲNG `ts.adt-gate-boss` (T4.3, bài 36 —
+# discriminated union + exhaustive switch, cần ngay cho ví dụ Ubiquitous
+# Language dùng DU `Discount`). Bài 4 (Entity vs Value Object) mượn THẲNG
+# `alg.gate-boss` (T4.5, bài 54 — smart constructor cho Value Object trả về
+# CHÍNH `Result<T,E>` đã học, không phải `| undefined` như sách nguồn — nhất
+# quán với toàn khoá).
+#
+# VÍ DỤ XUYÊN SUỐT: `DonHang` (Order) — CHÍNH domain sách nguồn dùng nhất
+# quán ở CẢ 7 chương (UL refactor ở Ch18, kiến trúc ở Ch19, state machine ở
+# Ch20, workflow ở Ch21, error pipeline ở Ch22, DTO ở Ch23, repository ở
+# Ch24) — giữ NGUYÊN miền đó xuyên suốt track, đặt tên tiếng Việt nhất quán
+# quy ước dự án (`DonHang`, `MaDonHang`, `TienVND`, `Email`, `KhachHang`).
+#
+# `tier: static` KHÔNG dùng cho TypeScript (giống T4.3/T4.5) — mọi bài `code`
+# chỉ dùng `run`/`tests`/`output`. Hai bẫy gate đã gặp thật ở T4.3/T4.5 (nhánh
+# chết không test chạm tới; đáp án trùng literal điền bừa `0`/`'x'`/`true`) —
+# áp dụng phòng thủ y hệt: mọi nhánh switch có test ép chạy, mọi chỗ trống có
+# kiểu trả về object/generic (không phải primitive trần) hoặc có test giá trị
+# khác các literal điền bừa.
+#
+# Namespace skill: `ddd.*` — đã quét toàn cục KHÔNG trùng `teaches` nào khác.
+
+track: ddd
+realm: ky-nghe-phan-mem
+ten: "T5.3 — DDD"
+so_bai: 42
+ngon_ngu_chu: typescript
+
+# ── Cụm 1 (bài 1-6): Nhập môn DDD — nguồn chương 18 ───────────────────────
+bai:
+  - so: 1
+    slug: ddd-la-gi-vi-sao-can
+    title: "DDD là gì — code nói ngôn ngữ nghiệp vụ, không phải ngôn ngữ máy"
+    teaches: [ddd.what-and-why]
+    requires: [ts.adt-gate-boss]
+    y_chinh: "DDD (Domain-Driven Design) là cách viết code sao cho nó PHẢN ÁNH đúng cách domain expert nói về nghiệp vụ, thay vì dùng tên/số kỹ thuật vô nghĩa. Ví dụ mở đầu: `data.s = 1; data.p = data.p * 0.9` (không ai hiểu `s`, `p` là gì) refactor thành `type TrangThaiDonHang = \"nhap\" | \"da_xac_nhan\" | ...`, hàm `apDungGiamGiaXacNhan(donHang): DonHang`. Ba trụ cột (chỉ giới thiệu tên, mỗi trụ cột một bài riêng sau): Ubiquitous Language, Bounded Context, Domain Model. Ví dụ Ubiquitous Language sớm: `type GiamGia = {tag:\"phan_tram\";...} | {tag:\"tien_co_dinh\";...}` — dùng luôn DU đã học ở T4.3 (`ts.adt-gate-boss`) để mã hoá MỘT khái niệm nghiệp vụ."
+  - so: 2
+    slug: ubiquitous-language-types-la-tu-dien
+    title: "Ubiquitous Language — Types là từ điển domain"
+    teaches: [ddd.ubiquitous-language]
+    requires: [ddd.what-and-why]
+    y_chinh: "Đặt tên type/field bằng ĐÚNG từ domain expert dùng biến type definition thành một cuốn từ điển sống. Litmus test: nếu Product Owner đọc type mà nói \"đúng, đây là cách nghiệp vụ hoạt động\" thì đạt. Đối chiếu: `type Hang = 0 | 1 | 2 | 3` (fail — số vô nghĩa) vs `type HangKhachHang = \"thuong\" | \"bac\" | \"vang\" | \"kim_cuong\"` (pass — từ business thật). Bài tập: viết lại MỘT type kỹ thuật (`Record`, `data.f`) thành business term."
+  - so: 3
+    slug: bounded-context-va-lop-dich-acl
+    title: "Bounded Context & Anti-Corruption Layer — một từ, nhiều nghĩa, ranh giới rõ"
+    teaches: [ddd.bounded-context-acl]
+    requires: [ddd.ubiquitous-language]
+    y_chinh: "Bounded Context: ranh giới nơi MỘT từ có MỘT nghĩa nhất quán — CÙNG tên `SanPham` nhưng BA nghĩa khác nhau ở BA \"quận\": `BanHang.SanPham` (giá, có_giam_gia), `KhoVan.SanPham` (ma_kho, trong_luong, vi_tri), `VanChuyen.SanPham` (trong_luong, de_vo, can_lanh) — dùng TÊN TYPE khác nhau (`SanPhamBanHang`/`SanPhamKhoVan`/`SanPhamVanChuyen`), KHÔNG dùng `namespace` (né rủi ro tooling một-file-một-bài của dự án). Anti-Corruption Layer (ACL): hàm dịch giữa hai bounded context, ví dụ `sangDanhSachLayHang(donHang: DonHangBanHang, ...): DanhSachLayHangKho` — BanHang không cần biết `vi_tri`, KhoVan không cần biết `gia`. Module structure = Bounded Context: `src/ban-hang/`, `src/kho-van/`, mỗi context có `index.ts` làm cổng public (barrel export), phần còn lại private."
+  - so: 4
+    slug: entity-vs-value-object
+    title: "Entity vs Value Object — so sánh bằng ID hay bằng giá trị"
+    teaches: [ddd.entity-vs-value-object]
+    requires: [alg.gate-boss]
+    y_chinh: "Entity: có identity (ID) định danh — hai instance CÙNG ID vẫn là \"cùng thực thể\" dù field đổi; hai instance CÙNG field nhưng KHÁC ID vẫn là hai thực thể khác nhau. Value Object: KHÔNG có identity riêng — hai instance CÙNG giá trị LÀ bằng nhau, immutable, operations luôn trả object MỚI. Smart constructor cho VO trả THẲNG `Result<T,E>` đã học ở T4.5 (KHÔNG phải `| undefined` như sách nguồn): `function Email(vb: string): Result<Email, string> { return vb.includes(\"@\") ? ok(vb as Email) : loi(\"thiếu @\"); }`. Ví dụ: `KhachHang` (Entity, có `maKhachHang`), `TienVND` (Value Object, `soSanhTien(a,b) = a.soTien === b.soTien`)."
+  - so: 5
+    slug: domain-event
+    title: "Domain Event — sự kiện nghiệp vụ, luôn ở thì QUÁ KHỨ"
+    teaches: [ddd.domain-event]
+    requires: [ddd.entity-vs-value-object]
+    y_chinh: "Domain Event đặt tên bằng thuật ngữ domain expert quan tâm, LUÔN thì quá khứ (đã xảy ra, không đổi được), KHÔNG dùng ngôn ngữ kỹ thuật/CRUD. Ví dụ: `type SuKienDonHang = {tag:\"DaDatDonHang\";...} | {tag:\"DaNhanThanhToan\";...} | {tag:\"DaGiaoHang\";...}` — đối lập \"DaChenBangDuLieu\" (technical event, KHÔNG phải domain event). Event handler: `type BoXuLySuKien<E> = (event: E) => void`. Event chain: một hàm thuần nhận MỘT event, trả về MẢNG event kế tiếp — `luongDonHang(sk): SuKienDonHang[]`, `DaDatDonHang → [DaNhanThanhToan]`, `DaNhanThanhToan → [DaGiuHang]`, terminal → `[]`."
+  - so: 6
+    slug: event-storming
+    title: "Event Storming — khám phá domain cùng cả đội"
+    teaches: [ddd.event-storming]
+    requires: [ddd.domain-event]
+    y_chinh: "Event Storming: kỹ thuật workshop (Alberto Brandolini) — cả team (dev + PO + domain expert) cùng khám phá domain bằng sticky-note trên tường, theo timeline trái→phải, thay vì dev tự đoán. Năm thành phần & ánh xạ sang TypeScript đã học: 🟧 Events (quá khứ) → DU variant (bài 5); 🟦 Commands (mệnh lệnh, đứng TRƯỚC event) → DU variant khác; 🟨 Aggregates (nhóm event+command liên quan) → ứng viên module/bounded-context (bài 3); 🟪 Policies (\"nếu X thì Y\") → event-handler function (bài 5); 🟩 Read Models → để dành (không dạy sâu track này). Bài tập tổng hợp cụm 1: cho một mô tả nghiệp vụ ngắn, liệt kê Event/Command/Aggregate/Policy rồi viết type tương ứng."
+
+# ── Cụm 2 (bài 7-12): Kiến trúc hàm ở quy mô ứng dụng — nguồn chương 19 ───
+  - so: 7
+    slug: kien-truc-bon-tang-va-luat-phu-thuoc
+    title: "Kiến trúc bốn tầng & Dependency Rule — mũi tên chỉ vào trong"
+    teaches: [ddd.layered-architecture]
+    requires: [ddd.event-storming]
+    y_chinh: "Ứng dụng chia bốn tầng lồng nhau: Presentation → Application → Domain → Infrastructure. Dependency Rule: tầng TRONG không bao giờ import tầng NGOÀI; tầng ngoài phụ thuộc/implement tầng trong. Domain = pure (chỉ type + hàm thuần, không side-effect); Infrastructure = impure (I/O thật: DB, HTTP). Đối chiếu ❌ (`import { database } from \"../infra\"` trong domain) vs ✅ (`validateDonHangMoi` thuần, không import gì ngoài domain types)."
+  - so: 8
+    slug: functional-core-imperative-shell-quy-mo-ung-dung
+    title: "Functional Core / Imperative Shell ở quy mô ứng dụng — Sandwich Pattern"
+    teaches: [ddd.fc-is-at-scale]
+    requires: [ddd.layered-architecture]
+    y_chinh: "FC/IS ở quy mô LỚN (mở rộng khái niệm pure/impure đã biết): Domain layer = Functional Core (pure) TOÀN BỘ; Application layer = Imperative Shell — orchestrate tuần tự (đọc DB → gọi core → ghi DB), KHÔNG chứa business rule. Shell GỌI core, core KHÔNG BAO GIỜ gọi ngược lại shell. Test core KHÔNG cần mock (chỉ input→output). Sandwich Pattern (cụ thể hoá FC/IS ở cấp MỘT hàm): Read (IO) → Process (Pure) → Write (IO) — ví dụ `xuLyDonHangShell`: `db.timDonHang` (IO) → `xuLyDonHangThuan` (Pure) → `db.capNhatThue`/`guiThongBao` (IO). Anti-pattern đối lập: IO rải rác trộn lẫn business logic trong CÙNG một hàm."
+  - so: 9
+    slug: ranh-gioi-module-va-barrel-export
+    title: "Module Boundaries & Barrel Exports — index.ts là cổng công khai"
+    teaches: [ddd.module-boundaries]
+    requires: [ddd.fc-is-at-scale]
+    y_chinh: "`index.ts` = public API của một module — chỉ export những gì module MUỐN lộ ra, phần còn lại (internal helper) PRIVATE. Module = Bounded Context (nối bài 3): mỗi module (`don-hang/`, `thanh-toan/`, `van-chuyen/`) một cấu trúc thống nhất (`types.ts`, `domain.ts`, `index.ts`). Quy tắc import cụ thể hoá Dependency Rule (bài 7) ở cấp module: Presentation→Application→Domain OK, Infra→Domain OK (implement); Domain→bất kỳ tầng ngoài = CẤM; import từ barrel (`index.ts`), KHÔNG từ internal path."
+  - so: 10
+    slug: fp-dependency-injection-tham-so-thay-class
+    title: "FP Dependency Injection — tham số hàm thay vì class + DI container"
+    teaches: [ddd.fp-dependency-injection]
+    requires: [ddd.module-boundaries]
+    y_chinh: "Thay vì class + constructor + DI container, truyền dependencies (đồng hồ, sinh ID, logger...) làm THAM SỐ hàm (thường tham số cuối). `taoHoaDon(maKhachHang, soTien, dongHo, sinhId)`. Test double: nhờ TypeScript's structural typing, MỘT object literal thoả interface làm được fake dependency — KHÔNG cần thư viện mock nào (`dongHoGia = () => new Date(\"2024-01-01\")`)."
+  - so: 11
+    slug: reader-pattern-dong-goi-dependencies
+    title: "Reader Pattern — factory nhận dependencies MỘT LẦN, dùng lại nhiều hàm"
+    teaches: [ddd.reader-pattern]
+    requires: [ddd.fp-dependency-injection]
+    y_chinh: "Thay vì truyền LẠI dependencies ở MỖI lời gọi hàm (bài 10), một factory function nhận deps MỘT LẦN, trả về TẬP hàm đã \"khoá\" deps trong closure. `taoDichVuGiaCa(deps)` trả về `{tinhTong, layPhiVanChuyen, tinhGiaCuoi}` — cả ba dùng chung `deps` mà không cần truyền lại. Interface định nghĩa Ở Domain, implement Ở Infra: domain khai `type KhoDonHang = {timTheoId, luu}` (shape nó CẦN), infra viết implementation thật — domain phụ thuộc ABSTRACTION, không phụ thuộc implementation."
+  - so: 12
+    slug: capstone-kien-truc-hoan-chinh
+    title: "Capstone: lắp ráp kiến trúc FP hoàn chỉnh"
+    teaches: [ddd.architecture-capstone]
+    requires: [ddd.reader-pattern]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: kết hợp TẤT CẢ — Domain (pure + branded type + Result) → Infra interfaces (bài 10-11) → Application use case (Sandwich, bài 8) → Test (fake deps, không mock lib). Viết `xacNhanDonHangUseCase(deps, maDonHang): Promise<Result<DonHang, string>>` — validate thuần, gọi `deps.khoDonHang.timTheoId` (IO), áp business rule, gọi `deps.khoDonHang.luu` (IO). Test bằng fake `khoDonHang`/`dichVuThongBao` (object literal, không mock library)."
+
+# ── Cụm 3 (bài 13-18): Domain Modeling bằng Discriminated Union — ch20 ────
+  - so: 13
+    slug: value-object-va-composite
+    title: "Value Object — khuôn đúc chỉ nhận giá trị hợp lệ, kể cả nhiều trường"
+    teaches: [ddd.value-object-handwritten]
+    requires: [ddd.architecture-capstone]
+    y_chinh: "Ôn VO (bài 4) sâu hơn: `Email(vb): Result<Email,string>` (trim + lowercase + regex), `TienVND(soTien): Result<TienVND,string>` (không âm) — operations trả VỀ VO để giữ type-safety xuyên chuỗi (`congTien(a: TienVND, b: TienVND): TienVND`). Composite Value Object: VO nhiều trường VẪN không có identity, so sánh bằng giá trị (deep compare) — `DiaChi` (tinh/huyen/xa/duong) với `sameDiaChi()`, `KhoangThoiGian` (start/end) với `giaoNhau()`, `soNgay()`."
+  - so: 14
+    slug: boolean-flags-vs-discriminated-union
+    title: "Vấn đề của boolean flags — illegal states are representable"
+    teaches: [ddd.boolean-flags-vs-du]
+    requires: [ddd.value-object-handwritten]
+    y_chinh: "N boolean flags tạo 2ⁿ tổ hợp, đa số BẤT HỢP LỆ. Ví dụ: `DonHangTe` với 4 boolean (`daThanhToan/daGiao/daNhan/daHuy`) → 16 tổ hợp, chỉ 5 hợp lệ — nghịch lý \"đã giao nhưng CHƯA thanh toán\" biểu diễn được dù vô lý. Giải pháp (đặt vấn đề, giải pháp đầy đủ ở bài 15): DU state machine — mỗi variant = MỘT trạng thái hợp lệ, mang ĐÚNG data cần cho trạng thái đó (không optional)."
+  - so: 15
+    slug: transition-functions-ep-dung-thu-tu
+    title: "Transition Functions — compiler ép gọi ĐÚNG thứ tự, không cần check runtime"
+    teaches: [ddd.transition-functions]
+    requires: [ddd.boolean-flags-vs-du]
+    y_chinh: "`TrangThaiDonHang` = 6 variant (`nhap/cho_thanh_toan/da_thanh_toan/da_giao/da_nhan/da_huy`), MỖI variant field bắt buộc RIÊNG (`da_giao` PHẢI có `maVanDon`, không optional). Transition function nhận state CỤ THỂ qua intersection type: `xacNhanThanhToan(dh: TrangThaiDonHang & {tag:\"cho_thanh_toan\"}): TrangThaiDonHang & {tag:\"da_thanh_toan\"}` — gọi SAI thứ tự = lỗi COMPILE-TIME, không cần if/switch runtime kiểm tra."
+  - so: 16
+    slug: optional-field-la-ke-ho
+    title: "Optional field = kẽ hở sinh trạng thái phi lý — tách thành DU riêng"
+    teaches: [ddd.optional-field-to-du]
+    requires: [ddd.transition-functions]
+    y_chinh: "Optional field kèm boolean tạo kẽ hở — `NguoiDungTe`: `daXacThuc: boolean; ngayXacThuc?: Date` cho phép `daXacThuc=false` mà VẪN có `ngayXacThuc` (nghịch lý). Quy tắc \"khi nghi ngờ, biến field điều-kiện thành MỘT DU riêng\": tách `NguoiDung` thành BA DU độc lập theo TỪNG khía cạnh — `PhuongThucXacThuc` (mat_khau/google/github), `TrangThaiXacMinh` (chua_xac_minh/da_xac_minh), `LichSuDangNhap` (chua_tung/da_tung) — mỗi DU tự khử optional riêng."
+  - so: 17
+    slug: domain-hierarchy-nhieu-cap
+    title: "Domain Hierarchy nhiều cấp — DU lồng DU lồng DU"
+    teaches: [ddd.domain-hierarchy]
+    requires: [ddd.optional-field-to-du]
+    y_chinh: "DU chứa DU chứa DU mô hình hoá domain phức tạp thành \"cây kiểu\". `SanPham` (vat_ly/so/dang_ky) → mỗi loại lại có sub-DU RIÊNG: `TinhTrangKho` (4 variant, chỉ `vat_ly`), `LoaiGiayPhep` (3 variant, chỉ `dang_ky`), `TrangThaiDungThu` (4 variant, chỉ `dang_ky`). Exhaustive switch điều hướng CẢ cây: thêm MỘT variant mới ở BẤT KỲ cấp nào → compiler báo lỗi TẤT CẢ switch thiếu case — đúng nguyên lý đã học ở T4.3 (`ts.missing-case-silent-bug`), giờ áp dụng lên cây NHIỀU tầng."
+  - so: 18
+    slug: aggregate-root
+    title: "Aggregate Root — tổng hợp VO, state machine, validate MỌI bước"
+    teaches: [ddd.aggregate-root]
+    requires: [ddd.domain-hierarchy]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: Aggregate Root gộp VO (bài 13, cho field con) + DU state machine (bài 15) + smart-constructor validation Ở MỌI bước transition thành MỘT entity chịu trách nhiệm toàn vẹn dữ liệu. Viết `DonHang` aggregate (5 state), `taoNhap` (validate danh sách hàng không rỗng), `xacNhanGiao` (validate mã vận đơn), business rule KHÁC NHAU tuỳ state khi huỷ (`huyoNhap` → hoàn 0đ, `huyDaXacNhan` → hoàn toàn bộ)."
+
+# ── Cụm 4 (bài 19-24): Workflow như Pipeline — nguồn chương 21 ────────────
+  - so: 19
+    slug: vi-sao-workflow-nen-la-pipeline
+    title: "Vì sao workflow nên là Pipeline — đối lập imperative dài dòng"
+    teaches: [ddd.why-pipeline]
+    requires: [ddd.aggregate-root]
+    y_chinh: "Đối lập MỘT hàm workflow dài (if/else lồng nhau, side-effect rải rác, khó test vì phải mock TẤT CẢ cùng lúc — `xuLyDonHang_imperative`, 30+ dòng) với ý tưởng PIPELINE: mỗi bước MỘT hàm thuần, dữ liệu \"chảy\" qua từng trạm, test RIÊNG từng trạm không cần mock (`validateDonHang` + `tinhGia`, mỗi hàm test độc lập bằng throw-based assertion)."
+  - so: 20
+    slug: pipe-chuoi-bien-doi-tuan-tu
+    title: "pipe() — chuỗi biến đổi tuần tự, chạy NGAY"
+    teaches: [ddd.pipe]
+    requires: [ddd.why-pipeline]
+    y_chinh: "`pipe(giaTri, f, g, h)` nhận giá trị NGAY, chạy tuần tự qua các hàm, trả kết quả cuối. Cài đặt bằng function overloading (vài chữ ký arity nhỏ) + `reduce` bên trong. Ví dụ: `pipe(sanPhamTho, lamSach, boSung, dinhDangHienThi)` — \"run now\", biến đổi MỘT giá trị cụ thể."
+  - so: 21
+    slug: flow-dung-pipeline-tai-su-dung
+    title: "flow() — dựng pipeline TÁI SỬ DỤNG, chạy SAU"
+    teaches: [ddd.flow]
+    requires: [ddd.pipe]
+    y_chinh: "`flow(f, g, h)` KHÔNG nhận giá trị ngay — trả về MỘT HÀM MỚI `(x) => h(g(f(x)))`, gọi SAU, dùng lại NHIỀU lần. `const xuLySanPham = flow(lamSach, boSung, dinhDangHienThi)` rồi gọi `xuLySanPham(dienThoai)` và `xuLySanPham(chuot)` — \"build now, run later\". Bảng so sánh `pipe` (run now) vs `flow` (build reusable) chốt bài."
+  - so: 22
+    slug: async-pipeline-pipeasync
+    title: "Async Pipeline — pipeAsync() và .then() chain"
+    teaches: [ddd.pipe-async]
+    requires: [ddd.flow]
+    y_chinh: "Một số bước cần I/O (DB, API) trả `Promise`; `pipeAsync(input, buoc1, buoc2, buoc3)` cho phép `await` TỪNG bước tuần tự, trộn được bước sync lẫn async, cài bằng vòng `for...of` + `await` trong thân hàm async. Cách viết thay thế: `.then()` chain có sẵn của `Promise` — `Promise.resolve(donHangTho).then(xacThuc).then(tinhGia)` — đọc top-down giống `pipe()`."
+  - so: 23
+    slug: rop-andthen-map-ap-dung-domain
+    title: "ROP áp dụng vào domain — andThen chính là chainResult đã học"
+    teaches: [ddd.rop-domain-application]
+    requires: [ddd.pipe-async]
+    y_chinh: "Railway-Oriented Programming: ẩn dụ đường ray — track chính (ok) và track lỗi (loi) chạy song song, khi một trạm phát hiện lỗi, các trạm CÒN LẠI bị SKIP tự động. Cái tên `andThen` (sách nguồn) chính là `chainResult` ĐÃ HỌC ở T4.5 (bài 30) — cùng khuôn, không dạy lại lý thuyết. Áp dụng vào domain: `chainResult(chainResult(validateDonHang(raw), kiemKho), tinhGiaCuoi)` — test rõ: lỗi ở bước đầu, bước sau \"KHÔNG BAO GIỜ được gọi\" (nối T4.5 bài 31's short-circuit). Lỗi mô hình hoá bằng DU giàu ngữ cảnh (`{tag:\"loi_ton_kho\"; maSanPham; conLai; canMua}`), không phải string đơn."
+  - so: 24
+    slug: capstone-compose-workflow-day-du
+    title: "Capstone: Compose Domain Workflow hoàn chỉnh"
+    teaches: [ddd.workflow-capstone]
+    requires: [ddd.rop-domain-application]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: kết hợp mọi kỹ thuật cụm 4 — nhiều bước thuần (`kiemTraKhachHang`, `kiemTraMatHang`, `dungDonHangDaKiem`, `tinhGia`, `sinhMaDonHang`) nối bằng `chainResult`/`mapResult`, đọc như quy trình nghiệp vụ thật. Viết `xuLyDonHangWorkflow(khachHang, matHang, gioHienTai): Result<DonHang, LoiWorkflow[]>` với test \"khách hàng hạng vàng\" (giảm 10%) và test lỗi \"email không hợp lệ\"."
+
+# ── Cụm 5 (bài 25-30): Error Handling sâu hơn — nguồn chương 22 ───────────
+  - so: 25
+    slug: vi-sao-throw-giau-loi
+    title: "Vì sao throw giấu khả năng lỗi khỏi kiểu — throw là goto hiện đại"
+    teaches: [ddd.throw-hides-errors]
+    requires: [ddd.workflow-capstone]
+    y_chinh: "`chia(a: number, b: number): number` KHÔNG nói gì về khả năng throw \"chia cho 0\" trong chữ ký — TypeScript không cảnh báo, caller quên `try/catch` = crash runtime. `catch(e)` có kiểu `unknown` — không biết `e` là gì, phải `instanceof`/cast thủ công. `try/catch` PHÁ VỠ composition — không `pipe()`/`flow()` được một hàm có `throw`. Bảng so sánh throw/catch vs `Result` (đã học) chốt bài — nối thẳng động lực đã có từ T4.2's error-handling."
+  - so: 26
+    slug: unwrap-or-trich-gia-tri-an-toan
+    title: "unwrapOr — trích giá trị an toàn với mặc định"
+    teaches: [ddd.unwrap-or]
+    requires: [ddd.throw-hides-errors]
+    y_chinh: "Combinator MỚI (T4.5 chưa dạy): `unwrapOr<T,E>(r: Result<T,E>, macDinh: T): T` — trả giá trị THẬT nếu `ok`, trả `macDinh` nếu `loi`. `unwrapOr(chuyenSo(\"abc\"), 0)` ra `0`. Dùng khi caller CHỈ cần một giá trị số cụ thể, không cần biết lý do lỗi."
+  - so: 27
+    slug: match-so-khop-tuong-minh
+    title: "match — so khớp tường minh, bắt buộc xử lý CẢ HAI nhánh"
+    teaches: [ddd.match-result]
+    requires: [ddd.unwrap-or]
+    y_chinh: "Combinator MỚI: `match<T,E,R>(r: Result<T,E>, xuLy: {ok: (x:T)=>R; loi: (e:E)=>R}): R` — thay `switch(r.kind)` thủ công bằng object bắt buộc xử lý CẢ HAI nhánh (TypeScript báo lỗi nếu thiếu một trong hai field). `match(ketQua, {ok: (dh) => \`Đã tạo ${dh.ma}\`, loi: (msg) => \`Lỗi: ${msg}\`})`."
+  - so: 28
+    slug: fromthrowable-cau-noi-code-cu
+    title: "fromThrowable — bọc hàm throw có sẵn thành Result, chỉ MỘT chỗ"
+    teaches: [ddd.from-throwable]
+    requires: [ddd.match-result]
+    y_chinh: "Khi phải tương tác với code CÓ SẴN mà throw (ví dụ `JSON.parse`), bọc nó bằng `fromThrowable<T>(f: () => T): Result<T, string>` — `try/catch` chỉ xuất hiện MỘT LẦN DUY NHẤT, ở biên, không lan ra khắp domain. `fromThrowable(() => JSON.parse(vanBan))` ra `ok(...)` hoặc `loi(\"...\")` tuỳ `vanBan` hợp lệ hay không."
+  - so: 29
+    slug: resultasync-cho-bat-dong-bo
+    title: "ResultAsync & andThenAsync — Result cho thao tác bất đồng bộ"
+    teaches: [ddd.result-async]
+    requires: [ddd.from-throwable]
+    y_chinh: "`ResultAsync<T,E>` = alias của `Promise<Result<T,E>>` (không phải class riêng, chỉ là type alias). `andThenAsync<T,U,E>(ra: ResultAsync<T,E>, f: (x:T) => ResultAsync<U,E>): ResultAsync<U,E>` — CÙNG hình dạng `chainResult` (bài 23) nhưng có `await`. Test: pipeline `timDonHang → xuLyThanhToan → guiXacNhan`, khi `timDonHang` báo \"không tìm thấy\", `xuLyThanhToan` KHÔNG BAO GIỜ được gọi (short-circuit ngay cả khi có I/O xen giữa)."
+  - so: 30
+    slug: validate-form-gom-loi-khong-dung-som
+    title: "Ứng dụng: validate form nhiều trường — gom HẾT lỗi, không dừng sớm"
+    teaches: [ddd.form-validation-accumulate]
+    requires: [ddd.result-async]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: ÁP DỤNG LẠI `map2GomLoi` (T4.5 bài 25, KHÔNG dạy lý thuyết applicative lần nữa) vào validate MỘT form nhiều trường thật (`tenKhachHang`, `email`, `soLuong`). Viết `validateFormDatHang(raw): Result<FormHopLe, string[]>` — form sai CẢ BA trường phải trả ĐỦ BA lỗi trong MỘT lần, không dừng ở lỗi đầu. Ôn quy tắc chọn fail-fast (`chainResult`, bước SAU phụ thuộc bước TRƯỚC) vs collect-all (`map2GomLoi`, field ĐỘC LẬP) — đã học ở T4.5 bài 23-24, giờ áp dụng vào tình huống DDD thật."
+
+# ── Cụm 6 (bài 31-36): Serialization & DTOs — nguồn chương 23 ─────────────
+  - so: 31
+    slug: tach-type-theo-layer-va-mapping
+    title: "Vấn đề \"một type cho mọi layer\" — tách Domain/DB/API + mapping"
+    teaches: [ddd.layer-type-split]
+    requires: [ddd.form-validation-accumulate]
+    y_chinh: "Dùng CHUNG một type `NguoiDung` vừa làm DB row, vừa API response, vừa domain object → rò rỉ dữ liệu nhạy cảm (field `matKhauMaHoa` lỡ trả về API), trộn lẫn concern (DB lưu `0/1`, domain cần `boolean`). Giải pháp: tách BA type độc lập — `NguoiDungMien` (domain, branded type + `Date`), `HangDbNguoiDung` (snake_case, số thô), `PhanHoiApiNguoiDung` (không có field nhạy cảm). Mapping function thuần nối chúng: `dbSangMien`, `mienSangApi`. Hệ quả (layer isolation): DB schema đổi → chỉ sửa `dbSangMien`; API format đổi → chỉ sửa `mienSangApi`; domain logic KHÔNG đổi."
+  - so: 32
+    slug: dto-doi-tuong-du-lieu-thuan
+    title: "DTO — đối tượng dữ liệu thuần, JSON-serializable"
+    teaches: [ddd.dto]
+    requires: [ddd.layer-type-split]
+    y_chinh: "DTO (Data Transfer Object) = \"bưu kiện\" chỉ chứa data, KHÔNG method, KHÔNG branded type, KHÔNG business logic. Bảng quy tắc chuyển đổi Domain↔DTO: brand (`MaDonHang`, `TienVND`) → primitive (`string`, `number`); `Date` object → chuỗi ISO; union literal → string thường; method/business logic → KHÔNG có trong DTO. JSON-serializability là LÝ DO DTO tồn tại: `JSON.stringify(dto)` rồi `JSON.parse` lại vẫn giữ ĐÚNG field — domain object (chứa `Date`, branded type) không có đảm bảo đó."
+  - so: 33
+    slug: vi-sao-can-validate-luc-chay
+    title: "Vì sao cần validate dữ liệu lúc chạy — kiểu TypeScript biến mất"
+    teaches: [ddd.runtime-validation]
+    requires: [ddd.dto]
+    y_chinh: "TypeScript type BIẾN MẤT lúc runtime — `JSON.parse()` trả về `any`, dữ liệu từ API request/DB/file là \"không đáng tin\", compiler KHÔNG bảo vệ được. Viết TAY một hàm parse nhận `unknown`, trả `{thanhCong:true, duLieu:T}` hoặc `{thanhCong:false, loi:string[]}` — GOM HẾT lỗi tìm được (nối bài 30) thay vì dừng ở lỗi đầu. `parseTaoDonHang(input: unknown)` kiểm `typeof`, độ dài chuỗi, mảng rỗng — TỰ VIẾT, không import gì (đúng tinh thần T4.3's smart constructor, KHÔNG dùng zod)."
+  - so: 34
+    slug: mapping-hai-chieu-inbound-outbound
+    title: "Mapping hai chiều: Inbound VALIDATE, Outbound chỉ TRANSFORM"
+    teaches: [ddd.inbound-outbound-mapping]
+    requires: [ddd.runtime-validation]
+    y_chinh: "Chiều NHẬP (DTO→Domain): dữ liệu CHƯA CHẮC hợp lệ, validate (bài 33) RỒI mới dựng domain object, trả `Result<Mien, string[]>`. Chiều XUẤT (Domain→DTO): domain object ĐÃ hợp lệ by construction (smart constructor đã kiểm ở bài 13), mapping CHỈ format lại (bỏ brand, `Date→chuỗi ISO`) — KHÔNG cần `Result`, KHÔNG THỂ fail. `dtoSangMienSanPham` (có thể lỗi) đối lập `mienSangDtoSanPham` (luôn thành công)."
+  - so: 35
+    slug: api-contract-va-loi-nhat-quan
+    title: "API Contract & định dạng lỗi nhất quán"
+    teaches: [ddd.api-contract]
+    requires: [ddd.inbound-outbound-mapping]
+    y_chinh: "Định nghĩa RÕ RÀNG ba type cho MỖI endpoint như một \"hợp đồng\": `YeuCauTaoDonHang` (client gửi gì), `PhanHoiTaoDonHang` (server trả gì), `LoiApi` (khi fail trả gì). MỌI lỗi API theo CÙNG một cấu trúc `{loi: {ma, thongDiep, chiTiet?}}` — handler theo mạch \"validate → process → respond\" dùng `Result` xuyên suốt, KHÔNG try/catch. `LoiApi` là DU (`validation | khong_tim_thay | khong_duoc_phep | noi_bo`) map sang HTTP status code tương ứng (422/404/401/500)."
+  - so: 36
+    slug: versioning-dto
+    title: "Versioning DTO — thêm field & nhận diện version cũ"
+    teaches: [ddd.dto-versioning]
+    requires: [ddd.api-contract]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: thêm field MỚI dưới dạng optional để client CŨ vẫn hoạt động (`TaoNguoiDungDtoV1` {ten,email} → V2 thêm `soDienThoai?`). Khi buộc phải đổi CẤU TRÚC (breaking change, ví dụ `ten` tách thành `ho`+`ten`), viết parser TỰ NHẬN DIỆN version qua field HIỆN DIỆN (`\"ho\" in obj && \"ten\" in obj` → V3, fallback `\"ten\" in obj` → V1/V2 tự tách), chuẩn hoá TẤT CẢ về CÙNG một domain type. Nguyên tắc: domain type KHÔNG BAO GIỜ version — chỉ DTO version."
+
+# ── Cụm 7 (bài 37-42): Persistence & Repository — nguồn chương 24 ─────────
+  - so: 37
+    slug: repository-pattern-va-dip
+    title: "Repository Pattern — Domain định nghĩa interface, Infrastructure implement"
+    teaches: [ddd.repository-pattern]
+    requires: [ddd.dto-versioning]
+    y_chinh: "Repository = lớp trung gian giữa domain và nơi lưu trữ, ẩn dụ \"thủ thư\": domain hỏi \"tìm đơn hàng DH-001\", repository đi vào \"kho\" tìm và trả domain object — domain KHÔNG biết dữ liệu nằm ở đâu. Dependency Inversion Principle: domain TỰ định nghĩa interface nó cần (`type KhoDonHang = {timTheoId, timTheoKhachHang, luu, xoa}`) NGAY TRONG domain layer, KHÔNG import infrastructure; infra SAU ĐÓ implement khế ước đó. FP DI (nối bài 10): domain function nhận `kho: KhoDonHang` làm THAM SỐ đầu tiên, không tự khởi tạo."
+  - so: 38
+    slug: in-memory-repo-va-test-bang-fake
+    title: "In-Memory Repository & Test bằng Fake — không cần mock library"
+    teaches: [ddd.in-memory-repo-test]
+    requires: [ddd.repository-pattern]
+    y_chinh: "Triển khai ĐẦU TIÊN của interface: `taoKhoDonHangBoNho()` dùng `Map<MaDonHang, DonHang>` trong closure — KHÔNG cần database thật. Vì repository CHỈ là object literal thực hiện interface, viết \"fake\" implementation phục vụ test KHÔNG cần thư viện mocking — test chạy NHANH (<1ms, không I/O). Swappability (hệ quả quan trọng, nhấn mạnh xuyên suốt cụm): vì domain CHỈ code chống lại interface, đổi từ in-memory sang implementation THẬT không cần sửa MỘT DÒNG domain code."
+  - so: 39
+    slug: data-mapper-dich-du-lieu
+    title: "Data Mapper — dịch dữ liệu giữa định dạng lưu trữ và định dạng domain"
+    teaches: [ddd.data-mapper]
+    requires: [ddd.in-memory-repo-test]
+    y_chinh: "Khi \"kho\" thật dùng shape KHÁC domain (snake_case, kiểu thô — mô phỏng bằng một mảng \"hàng thô\" trong bộ nhớ, KHÔNG dùng Prisma/ORM thật để tránh học viên ngộ nhận API giả là API thật), cần cặp hàm mapper hai chiều để CÔ LẬP domain khỏi cấu trúc lưu trữ — nối thẳng bài 31's mapping. `hangThoSangMien`/`mienSangHangTho` — viết một repository THỨ HAI (khác in-memory ở bài 38) dùng client giả lập bên ngoài + mapper này."
+  - so: 40
+    slug: generic-repository
+    title: "Nhiều \"thủ thư\" cùng một Interface & Generic Repository"
+    teaches: [ddd.generic-repository]
+    requires: [ddd.data-mapper]
+    y_chinh: "Sau khi thấy HAI repository cụ thể (bài 38, 39) cùng implement MỘT interface, trừu tượng hoá thành `Repository<Id, ThucThe>` GENERIC dùng chung cho MỌI entity, thay vì viết lại interface cho từng entity. `taoKhoBoNho<Id extends string, ThucThe extends {id: Id}>(): Repository<Id, ThucThe>` — domain-specific repo (ví dụ `KhoDonHang`) có thể MỞ RỘNG thêm method riêng (`timTheoKhachHang`) trên nền generic đó."
+  - so: 41
+    slug: unit-of-work
+    title: "Unit of Work — transaction boundary cho nhiều repo cùng lúc"
+    teaches: [ddd.unit-of-work]
+    requires: [ddd.generic-repository]
+    y_chinh: "Khi cần đổi NHIỀU \"kệ sách\" cùng lúc (ví dụ: đơn hàng VÀ tồn kho), gom các repository liên quan vào MỘT object `{donHang, sanPham, commit, rollback}` để đảm bảo TẤT CẢ thay đổi cùng THÀNH CÔNG hoặc cùng THẤT BẠI (all-or-nothing). Cơ chế \"pending Map\" vs \"committed Map\": mọi `save()` ghi vào pending trước, chỉ CHUYỂN sang committed khi `commit()` được gọi. Test case \"không đủ tồn kho\": `placeOrder` fail giữa chừng KHÔNG làm hỏng state đã commit TRƯỚC ĐÓ."
+  - so: 42
+    slug: boss-full-application-wiring
+    title: "BOSS — Full Application Wiring: gom TẤT CẢ dependency vào AppDeps"
+    teaches: [ddd.gate-boss]
+    requires: [ddd.unit-of-work]
+    y_chinh: "Bài BOSS của track: hiện thực hoá ĐẦY ĐỦ FP DI (bài 10-11) — MỘT use case function nhận MỘT object `deps: AppDeps` chứa NHIỀU repository (bài 37-41) + service khác (thông báo) + helper thuần (sinhId, gioHienTai); use case orchestrate XEN KẼ bước thuần (validate, bài 33) và bước IO (tìm/lưu qua repo, gửi thông báo) — Sandwich Pattern (bài 8) ở QUY MÔ ứng dụng đầy đủ. Viết `dangKyKhachHang(deps, ten, emailTho): Promise<Result<KhachHang, string[]>>` — validate (thuần, gom lỗi qua `map2GomLoi`), kiểm trùng email (IO), tạo Entity (bài 4), lưu (IO), gửi email chào mừng (IO). Test TOÀN BỘ luồng bằng `testDeps` — in-memory repo (bài 38) + fake notification (mảng ghi lại email đã \"gửi\"), KHÔNG mock library nào, kể cả side-effect."
