@@ -573,6 +573,36 @@ tương đương, `all`/`any`, chứng minh). T2.3 CỐ Ý chưa dùng `∈`, `{
 hay tổ hợp — biên đó dành đúng cho track này (xem "Ranh giới track" ở mục D
 phía trên).
 
+**QUAN TRỌNG — kiểm KỸ trước khi viết bài 1: R1.T1.4 ĐÃ dạy phần MÁY của
+tập hợp rồi, track này KHÔNG được dạy lại.** Rà `content/nen-tang/
+04-list-dict-set-tuple/`:
+
+| Đã dạy ở R1 | Bài | Nội dung |
+|---|---|---|
+| `core.set` | 26 `ro-khong-chua-hai-lan` | `{...}` là một rổ; bỏ vào thứ đã có thì không đổi gì; `set(danh_sach)` lọc trùng |
+| `core.set-unordered`, `core.set-membership` | 27 `ro-khong-xep-hang` | rổ không có chỗ đứng (`ro[0]` là `TypeError`); `in` trên rổ |
+| `core.set-intersection` | 28 `phan-chung-cua-hai-ro` | `&` |
+| `core.set-difference` | 29 `phan-rieng-cua-mot-ben` | `-` (và: đổi chỗ hai rổ là đổi hẳn câu trả lời) |
+| `core.set-union`, `core.choose-container` | 33 `chon-dung-cho-chua` | `\|` |
+
+Nghĩa là: **thứ tự, trùng lặp, `in`, `\|`/`&`/`-` ĐỀU đã là kiến thức CŨ**
+khi người học bước vào T2.4. Việc của track này KHÔNG PHẢI dạy lại cách
+GÕ các phép đó — đó là việc track này BUỘC PHẢI TRÁNH, giống hệt lỗi A2 mà
+T2.3 tự bắt được ở chính nó (mục D phía trên: "viết lại cột khái niệm bài
+3 và bài 5 để hết dạy lại R0.30 / T1.2.5"). Việc CỦA track này là dạy lớp
+**Ý NGHĨA TOÁN HỌC** đặt trên nền máy đã có: ký hiệu (`∈`, `⊆`, `∪`, `∩`,
+`−`, `∅`, `×`), CÁCH CHỨNG MINH (hai tập bằng nhau qua `⊆` hai chiều), và
+NHỮNG THỨ R1 CHƯA HỀ CÓ (tập con `⊆`, phần bù, đếm bù trừ, tích Descartes,
+quan hệ, phản xạ/đối xứng/bắc cầu, tương đương/phân hoạch, ánh xạ/đơn ánh/
+toàn ánh/song ánh/hợp thành — không dòng Python nào ở R1 chạm tới bất kỳ
+cái nào trong nhóm sau).
+
+Vì phần "máy" đã xong, 12 bài đầu (tập hợp cơ bản) đi NHANH hơn nhịp
+thường của R2 — mỗi bài vẫn đúng MỘT khái niệm mới, nhưng khái niệm đó
+thường chỉ là MỘT KÝ HIỆU gắn vào một thao tác Python đã quen tay, không
+phải một thao tác Python mới toanh. 16 bài sau (cặp/quan hệ/ánh xạ) mới là
+lãnh thổ hoàn toàn mới, và đi với nhịp đầy đủ như T2.1-T2.3.
+
 **Hiện vật xuyên suốt:** Vườn của Byte (T2.1) giờ **lớn hơn** — không còn
 một luống mà nhiều luống, không còn một mình Byte làm mà có thêm mấy người
 làm vườn phụ (Lan, Minh, Tú), và mỗi luống trồng nhiều LOẠI rau khác nhau
@@ -589,104 +619,105 @@ và chúng CHÍNH LÀ ba phần của track:
 Ba câu hỏi ấy dùng lại đúng MỘT hiện vật, không hiện vật mới nào chen vào
 giữa track — giữ luật đã áp dụng suốt R2.
 
-**Python trong track này không bao giờ là lời giải, CHỈ để KIỂM.** `set`
-kiểm loại bỏ trùng, phép `|`/`&`/`-` kiểm hợp/giao/hiệu, `all()`/`any()`
-(đã học T2.3) kiểm phản xạ/đối xứng/bắc cầu trên MỌI cặp, và một `dict`
-kiểm một ánh xạ có thật là "mỗi luống đúng một người" hay không.
+**Python trong track này không bao giờ là lời giải, CHỈ để KIỂM** — và ở
+12 bài đầu, nó là công cụ NGƯỜI HỌC ĐÃ BIẾT DÙNG (`set`, `in`, `\|`/`&`/
+`-`, R1.T1.4), giờ gắn thêm ký hiệu toán. `all()`/`any()` (T2.3) kiểm
+phản xạ/đối xứng/bắc cầu trên MỌI cặp; một `dict` kiểm một ánh xạ có thật
+là "mỗi luống đúng một người" hay không.
 
 | # | slug | Tiêu đề | Khái niệm mới (đúng một) | `reflect` cuối bài | Dựa trên |
 |---|---|---|---|---|---|
-| 1 | `mot-nhom-khong-theo-thu-tu` | Một nhóm không đếm theo thứ tự | **Tập hợp** — một nhóm chỉ cần biết CÓ những gì trong đó, không cần biết kể theo thứ tự nào; "luống 1 trồng cà chua, xà lách, cà rốt" và "luống 1 trồng cà rốt, cà chua, xà lách" là CÙNG một câu trả lời | Byte liệt kê luống 2: "xà lách, xà lách, cải bó xôi". Ba tiếng, nhưng luống ấy có ba LOẠI rau không, hay chỉ hai? | T2.1 `dem-la-ghep-doi-mot-mot`, T1.4 `list` |
-| 2 | `phan-tu-cua-mot-tap-hop` | Phần tử của một tập hợp | **Phần tử VÀ ký hiệu `∈`** — một vật CÓ MẶT trong tập hợp gọi là phần tử của nó; `cà chua ∈ luống_1` là một câu hỏi phân xử được (đúng/sai, nối thẳng T2.3 bài 1) | "Khoai tây `∈` luống_1" — Byte tra thấy sai. Có ký hiệu nào nói thẳng "không có mặt", khỏi phải viết `not (... ∈ ...)` dài dòng không? | 1, T2.3 `cau-nao-phan-xu-duoc` |
-| 3 | `khong-thuoc-ve` | Không thuộc về | **Ký hiệu `∉`** — viết tắt của `not (x ∈ A)`; hai ký hiệu `∈`/`∉` phủ định nhau đúng như `P`/`không P` (T2.3 bài 3) | Byte viết `luong_1 = {"cà chua", "cà chua", "xà lách"}` trong Python. Chạy thử — máy có giữ hai chữ "cà chua" hay tự động bỏ bớt? | 2, T2.3 `noi-nguoc-lai-mot-cau` |
-| 4 | `python-tu-bo-trung` | Python tự bỏ trùng | **`set` trong Python là hiện thân của tập hợp** — kiểu `set` tự động loại phần tử trùng, đúng khớp bài 1: "trồng ba lần cà chua" và "trồng cà chua" là MỘT tập giống hệt | Byte gõ `luong_1 = {"cà chua", "xà lách"}` và cả `luong_1 = {"xà lách", "cà chua"}`. So `luong_1 == luong_1` sau hai lần gõ ấy — Python có coi chúng bằng nhau không, dù thứ tự viết ra khác nhau? | 3 |
-| 5 | `liet-ke-hay-mo-ta` | Liệt kê hay mô tả | **Hai cách dựng một tập hợp**: liệt kê từng phần tử (`{"cà chua", "xà lách"}`) HOẶC mô tả một điều kiện phần tử phải thoả (VD: "mọi luống có trồng cà chua") — cùng một tập, hai cách nói | Byte có bảy luống. "Tập hợp những luống có trồng cà chua" — liệt kê tay được, nhưng nếu vườn có bảy TRĂM luống thì sao? Viết mô tả có lợi gì hơn liệt kê? | 4 |
-| 6 | `tap-hop-rong` | Tập hợp rỗng | **`∅` (hoặc `set()` trong Python)** — tập hợp không có phần tử nào VẪN là một tập hợp hợp lệ, không phải "lỗi" hay "chưa có gì"; luống chưa gieo hạt nào có một tập loại-rau đúng là `∅` | Luống 5 chưa gieo gì — tập của nó là `∅`. Luống 6 trồng đúng "bí đỏ". Tập nào "nhỏ hơn" tập kia — và "nhỏ hơn" ở đây nghĩa là gì cho tập hợp, khi tập hợp không phải một CON SỐ? | 5, T2.1 `so-khong-can-nhay` |
-| 7 | `tap-con` | Tập con | **`⊆`** — A là tập con của B khi MỌI phần tử của A đều có mặt trong B; `∅ ⊆` MỌI tập hợp (không có phần tử nào để phản chứng — chân lý rỗng, T2.3 bài 11) | "Luống rau lá xanh" = {xà lách, cải bó xôi} ⊆ "luống 2" = {xà lách, cải bó xôi, cà rốt}. Đảo lại — luống 2 có phải tập con của luống rau lá xanh không? Nếu KHÔNG cả hai chiều, hai tập ấy quan hệ gì? | 6, T2.3 `khi-ve-truoc-khong-xay-ra` |
-| 8 | `hai-tap-bang-nhau` | Hai tập hợp bằng nhau | **A = B ⟺ (A ⊆ B) và (B ⊆ A)** — chứng minh hai tập bằng nhau bằng cách chứng minh HAI chiều tập con, đúng kỹ thuật "khi và chỉ khi" (T2.3 bài 15) áp dụng vào tập hợp | Byte có `{"cà chua", "xà lách"}` viết bằng Python, và `{"xà lách", "cà chua", "cà chua"}` viết kiểu khác. Không cần đếm ký tự — có cách nào NHỜ MÁY xác nhận `⊆` cả hai chiều tự động không? | 7, T2.3 `khi-va-chi-khi` |
-| 9 | `hop-hai-tap` | Hợp của hai tập hợp | **`∪`** — A ∪ B gồm mọi phần tử thuộc A HOẶC thuộc B (hoặc cả hai — đúng nghĩa "hoặc" của T2.3 bài 5, không phải "một trong hai nhưng không cả hai") | Luống 1 trồng {cà chua, xà lách}, luống 3 trồng {xà lách, cà rốt}. `luong_1 ∪ luong_3` — xà lách xuất hiện ở CẢ HAI luống, vậy nó có bị đếm hai lần trong tập hợp con kết quả không? | 8, T2.3 `hoac-gom-ca-hai` |
-| 10 | `giao-hai-tap` | Giao của hai tập hợp | **`∩`** — A ∩ B gồm những phần tử thuộc CẢ HAI, đúng nghĩa "và" của T2.3 bài 4; đây chính là "rau trồng chung" giữa hai luống | `luong_1 ∩ luong_3` = {xà lách} — đúng loại rau ở CẢ hai luống. Có cặp luống nào mà phép giao ra `∅` không — và nếu có, hai luống ấy quan hệ gì với nhau? | 9 |
-| 11 | `hai-tap-roi-nhau` | Hai tập hợp rời nhau | **A ∩ B = ∅** — hai tập KHÔNG chung phần tử nào gọi là rời nhau; luống 4 trồng {bí đỏ} và luống 6 trồng {khoai lang} là một cặp rời nhau | Byte muốn biết luống nào trồng cà chua mà KHÔNG trồng xà lách. `∪` gộp lại, `∩` giữ chung — phép nào lấy đúng "có cái này, không có cái kia"? | 10 |
-| 12 | `hieu-hai-tap` | Hiệu của hai tập hợp | **`−` (hoặc `\`)** — A − B gồm những phần tử thuộc A NHƯNG không thuộc B; khác `∩` ở chỗ không đối xứng: `A − B` và `B − A` thường là hai tập KHÁC nhau | `luong_1 − luong_3` = {cà chua}. Đảo lại `luong_3 − luong_1` = {cà rốt}. Hai kết quả khác nhau — phép `−` có "đối xứng" như `∪`/`∩` không? | 11 |
-| 13 | `tap-vu-tru-va-phan-bu` | Tập vũ trụ và phần bù | **Tập vũ trụ `U`** (mọi loại rau CÓ TRONG toàn vườn) **và phần bù `Aᶜ = U − A`** — phần bù chỉ có nghĩa KHI đã chốt vũ trụ đang xét, khác `−` (không cần vũ trụ) | Cả vườn Byte trồng đúng bảy loại rau. "Phần bù của luống 1" là những loại rau CẢ VƯỜN có mà luống 1 không trồng. Đổi "vũ trụ" từ "cả vườn Byte" sang "cả vườn của Lan" — phần bù của luống 1 có đổi theo không? | 12, T2.1 `so-khong-can-nhay` |
-| 14 | `dem-bang-bu-tru` | Đếm bằng bù trừ | **`|A ∪ B| = |A| + |B| − |A ∩ B|`** — cộng thẳng `|A|+|B|` thì đếm phần chung HAI LẦN, nên phải TRỪ lại đúng một lần; đây là bài đếm đầu tiên của track, và nó ĐẾM phần tử của tập hợp, không đếm chính tập hợp | Luống 1 có 2 loại, luống 3 có 2 loại, giao nhau 1 loại → hợp có `2+2−1=3` loại, khớp {cà chua, xà lách, cà rốt}. Vậy BA luống cùng lúc — công thức bù trừ cho hai tập còn đúng không, hay phải cộng trừ thêm gì nữa? *(để ngỏ — không giải trong track này, chỉ đặt câu hỏi mở sang T2.5 tổ hợp)* | 13, 9, 10 |
-| 15 | `cap-co-thu-tu` | Cặp có thứ tự | **`(a, b)` — thứ tự CÓ nghĩa**, khác hẳn tập hợp bài 1: `(luống_1, thứ Hai) ≠ (thứ Hai, luống_1)`, và `(a,b)=(c,d)` chỉ khi `a=c` VÀ `b=d` cả hai vị trí | "Luống 1 tưới thứ Hai" viết thành cặp `(luống_1, "Hai")`. Byte có bảy luống, tuần có bảy ngày. Liệt kê TẤT CẢ cặp (luống, ngày) CÓ THỂ có — kể cả cặp không tưới thật — thì được bao nhiêu cặp? | 14, T2.1 `mang-chu-nhat-xoay-mot-goc` |
-| 16 | `tich-descartes` | Tích Descartes | **`A × B`** — tập hợp MỌI cặp có thứ tự `(a,b)` với `a ∈ A`, `b ∈ B`; bảy luống × bảy ngày cho `7×7=49` cặp (đúng phép nhân mảng chữ nhật, T2.1 bài 20) — TOÀN BỘ khả năng, chưa nói cái nào THẬT xảy ra | 49 cặp là mọi khả năng. Nhưng luống 1 CHỈ tưới thứ Hai và thứ Năm thật sự — hai cặp trong số 49. Cái tập con "chỉ những cặp thật" ấy gọi là gì? | 15, T2.1 `mang-chu-nhat-xoay-mot-goc` |
-| 17 | `quan-he-la-mot-tap-con` | Quan hệ là một tập con | **Quan hệ = một tập con của `A × B`** — không phải một khái niệm mới tách rời, mà CHÍNH LÀ một tập hợp (bài 1-14) gồm những cặp (bài 15-16) THẬT xảy ra; "luống nào tưới ngày nào" là một quan hệ giữa Luống và Ngày | Quan hệ tưới nước viết ra là một ĐỐNG cặp rời rạc: `{(luống_1,"Hai"), (luống_1,"Năm"), (luống_2,"Ba"), ...}`. Nhìn đống đó có DỄ thấy "luống nào tưới NHIỀU ngày nhất" không, hay cần một cách trình bày khác? | 16, 1 |
-| 18 | `bang-cua-mot-quan-he` | Bảng của một quan hệ | **Biểu diễn quan hệ bằng bảng 0/1** — hàng là luống, cột là ngày, ô đánh dấu nếu cặp đó thuộc quan hệ; MỘT quan hệ, HAI cách nhìn (đống cặp / bảng), đúng khớp bài 5 (mô tả tập hợp bằng hai cách) | Đọc theo HÀNG của luống 1: hai ô đánh dấu. Đọc theo CỘT của thứ Hai: mấy ô đánh dấu — và cột đó nói lên điều gì mà hàng không nói được? | 17, 5 |
-| 19 | `mien-xac-dinh-mien-gia-tri` | Miền xác định và miền giá trị | **Miền xác định** (mọi luống XUẤT HIỆN Ở VỊ TRÍ ĐẦU trong ít nhất một cặp) và **miền giá trị** (mọi ngày XUẤT HIỆN Ở VỊ TRÍ SAU); có thể KHÁC hẳn `A` và `B` gốc nếu vài luống chưa tưới lần nào | Luống 7 chưa từng được tưới — nó có mặt trong `A` (tập bảy luống) nhưng KHÔNG có mặt trong miền xác định. Điều đó nói gì về luống 7, so với luống 1 (đã tưới ít nhất một lần)? | 18, 7 |
-| 20 | `phan-xa` | Phản xạ | **Quan hệ phản xạ** — MỌI phần tử quan hệ với CHÍNH NÓ; xét quan hệ MỚI "cùng khu vườn với" trên tập bảy luống: luống nào cũng cùng khu vườn với chính nó → phản xạ | "Luống A trồng nhiều loại HƠN luống B" — luống nào có nhiều loại hơn CHÍNH NÓ không? Quan hệ này có phản xạ không — và nếu không, nó thiếu đúng cái gì so với phản xạ? | 19, T2.3 `dung-sai-do-su-viec` |
-| 21 | `doi-xung` | Đối xứng | **Quan hệ đối xứng** — nếu A quan hệ với B thì B CŨNG quan hệ với A; "cùng khu vườn với" đối xứng (Lan cùng vườn Byte thì Byte cùng vườn Lan), còn "tưới TRƯỚC" (luống 1 tưới trước luống 3) thì KHÔNG | "Luống A trồng chung ít nhất một loại rau với luống B" (dùng lại `∩` bài 10, khác `∅`) — quan hệ này đối xứng không? Thử với luống 1 và luống 3 xem. | 20, 10 |
-| 22 | `bac-cau` | Bắc cầu | **Quan hệ bắc cầu** — nếu A quan hệ B, và B quan hệ C, thì A PHẢI quan hệ C; "cùng khu vườn với" bắc cầu, còn "trồng chung ít nhất một loại" (bài 21) thì KHÔNG (luống 1 chung xà lách với luống 3, luống 3 chung cà rốt với luống 6, nhưng luống 1 và 6 có thể chẳng chung gì) | Ba tính chất vừa học — phản xạ, đối xứng, bắc cầu — quan hệ "cùng khu vườn với" có ĐỦ CẢ BA. Một quan hệ có đủ cả ba tên riêng là gì? | 21, 20 |
-| 23 | `quan-he-tuong-duong` | Quan hệ tương đương | **Quan hệ tương đương = phản xạ + đối xứng + bắc cầu, đủ cả ba** — "cùng lịch tưới nước" (hai luống tưới ĐÚNG cùng những ngày) là một quan hệ tương đương THẬT trên bảy luống, kiểm được bằng `all()`/`any()` (T2.3) trên mọi cặp | Luống 1 và luống 5 cùng lịch tưới Hai-Năm. Luống 2 tưới riêng một mình ngày Ba. Gom MỌI luống theo "ai cùng lịch với ai" — mỗi luống rơi vào ĐÚNG MẤY nhóm? | 22, 20, 21, T2.3 `xet-du-moi-truong-hop` |
-| 24 | `lop-tuong-duong-va-phan-hoach` | Lớp tương đương và phân hoạch | **Lớp tương đương** — nhóm mọi luống tương đương với nhau thành MỘT lớp; các lớp này KHÔNG chồng lấn (do đối xứng+bắc cầu) và GỘP LẠI vừa khít cả bảy luống (do phản xạ) — gọi là một **phân hoạch** | Bảy luống chia thành đúng ba lớp lịch-tưới. Đếm số luống mỗi lớp rồi CỘNG LẠI — kết quả có đúng bằng bảy không? Đó có phải trùng hợp, hay quan hệ tương đương LUÔN bảo đảm điều đó? | 23, 9 |
-| 25 | `anh-xa-la-quan-he-dac-biet` | Ánh xạ là quan hệ đặc biệt | **Ánh xạ (hàm số theo nghĩa tập hợp)** — một quan hệ từ A sang B mà MỖI phần tử của A xuất hiện Ở VỊ TRÍ ĐẦU của ĐÚNG MỘT cặp (không thiếu, không thừa); "luống nào ai phụ trách" là một ánh xạ NẾU mỗi luống có đúng một người | Bảng phân công: luống 1→Lan, luống 2→Minh, luống 3→Lan, luống 4→(chưa ai nhận). Đây có phải một ánh xạ từ tập bảy luống sang tập người làm vườn không — và nếu không, THIẾU đúng chỗ nào so với định nghĩa? | 24, 17, T2.2 `chu-cai-la-ten-cua-o-trong` |
-| 26 | `don-anh` | Đơn ánh | **Đơn ánh (một-một)** — hai luống KHÁC nhau không bao giờ cùng chung một người phụ trách; kiểm bằng cách: số người xuất hiện trong bảng phân công phải bằng ĐÚNG số luống | Phân công đủ bảy luống, không luống nào bỏ trống, NHƯNG Lan phụ trách cả luống 1 và luống 3. Đây có phải đơn ánh không? Nó có còn là một ánh xạ hợp lệ (bài 25) không? | 25 |
-| 27 | `toan-anh` | Toàn ánh | **Toàn ánh (phủ hết miền giá trị)** — MỌI người làm vườn trong danh sách đều có ÍT NHẤT một luống, không ai đứng ngoài; một ánh xạ có thể đơn ánh mà KHÔNG toàn ánh, toàn ánh mà KHÔNG đơn ánh, hoặc CẢ HAI | Byte có đúng bốn người làm vườn và đúng bốn luống, và phân công vừa đơn ánh vừa toàn ánh. Đổi chỗ hai luống trong bảng phân công cho hai người khác nhau — nó còn giữ CẢ HAI tính chất không? | 26 |
-| 28 | `boss-song-anh-va-hop-thanh` | BOSS — Song ánh và hợp thành | *(không khái niệm mới — bài tổng hợp)* **Song ánh** = vừa đơn ánh vừa toàn ánh, và CHỈ khi đó ánh xạ mới ĐẢO NGƯỢC được (từ người làm vườn suy ra ĐÚNG MỘT luống); **hợp thành** hai ánh xạ (luống→người, người→làng) nối tiếp thành một ánh xạ luống→làng; bài chấm bằng `assert` trên tập hợp, quan hệ, VÀ ánh xạ của cùng một khu vườn bốn luống | Mọi luống giờ đã có: một TẬP các loại rau (bài 1-14), một chỗ trong quan hệ tưới nước (bài 15-24), và một người phụ trách qua ánh xạ song ánh (bài 25-28). Nhưng "mấy CÂY mỗi loại", "mấy KILÔGAM thu hoạch" — những câu hỏi ĐẾM ấy, tập hợp không trả lời được (bài 1 đã bỏ hẳn số lượng). Track sau đếm được không, và đếm bằng cách nào? *(dẫn sang T2.5 — Tổ hợp, xác suất, thống kê)* | 1–27 |
+| 1 | `tu-ro-sang-tap-hop` | Từ cái rổ sang tập hợp | **Tập hợp là TÊN TOÁN của cái rổ đã quen** (T1.4): "luống 1 trồng cà chua, xà lách, cà rốt" viết bằng Python đã biết, giờ đọc lại bằng tiếng toán — một nhóm chỉ cần biết CÓ gì, không cần thứ tự, không đếm trùng, ĐÚNG những gì bài 26-27 T1.4 đã chứng minh trên máy | Byte viết `cà chua ∈ luống_1` bằng CHỮ. Máy đọc được câu ấy không, hay phải dịch nó sang một dòng Python trước? | T1.4 `ro-khong-chua-hai-lan`, `ro-khong-xep-hang` |
+| 2 | `ky-hieu-thuoc-ve` | Ký hiệu "thuộc về" | **`∈`** — ký hiệu toán của phép `in` đã biết; `cà chua ∈ luống_1` VÀ `"cà chua" in luong_1` nói CÙNG một câu, một bằng chữ Hy Lạp, một bằng Python | "Khoai tây `∈` luống_1" — Byte tra thấy sai. Có ký hiệu nào nói thẳng "không có mặt", khỏi viết `not (... ∈ ...)` dài dòng? | 1, T2.3 `cau-nao-phan-xu-duoc` |
+| 3 | `khong-thuoc-ve` | Không thuộc về | **`∉`** — viết tắt của `not (x ∈ A)`, ứng đúng `x not in A` của Python; hai ký hiệu `∈`/`∉` phủ định nhau như `P`/`không P` (T2.3 bài 3) | Byte có bảy luống, và muốn nói "tập hợp những luống có trồng cà chua" mà KHÔNG liệt kê tay từng luống. Có cách viết nào khác `{luống_1, luống_3, ...}` không? | 2, T2.3 `noi-nguoc-lai-mot-cau` |
+| 4 | `liet-ke-hay-mo-ta` | Liệt kê hay mô tả | **Hai cách dựng một tập hợp**: liệt kê từng phần tử (`{cà chua, xà lách}`) HOẶC mô tả một điều kiện phần tử phải thoả (`{luống \| luống có trồng cà chua}`) — cùng một tập, hai cách nói, ký hiệu `{x \| P(x)}` là MỚI (khác cú pháp comprehension T1.4 bài 30, dù cùng ý) | Byte có bảy luống. Nếu vườn có bảy TRĂM luống, liệt kê tay còn làm nổi không? Mô tả bằng điều kiện có cần biết CON SỐ bảy trăm đó không? | 3 |
+| 5 | `tap-hop-rong` | Tập hợp rỗng | **`∅`** (ứng `set()` — KHÔNG PHẢI `{}`, vì `{}` là `dict` rỗng, một bẫy Python thật) — tập hợp không phần tử VẪN là một tập hợp hợp lệ, không phải "lỗi"; luống chưa gieo có tập loại-rau đúng là `∅` | Luống 5 chưa gieo gì — tập của nó là `∅`. Luống 6 trồng đúng "bí đỏ". Tập nào "nhỏ hơn" — và "nhỏ hơn" nghĩa là gì cho tập hợp, khi nó không phải một CON SỐ? | 4, T2.1 `so-khong-can-nhay` |
+| 6 | `tap-con` | Tập con | **`⊆`** — A là tập con của B khi MỌI phần tử của A đều có mặt trong B; `∅ ⊆` MỌI tập hợp (không phần tử nào để phản chứng — chân lý rỗng, T2.3 bài 11); MỚI hoàn toàn, R1 không có phép này | "Luống rau lá xanh" = {xà lách, cải bó xôi} ⊆ "luống 2" = {xà lách, cải bó xôi, cà rốt}. Đảo lại — luống 2 có phải tập con của "rau lá xanh" không? Nếu KHÔNG cả hai chiều, hai tập ấy quan hệ gì? | 5, T2.3 `khi-ve-truoc-khong-xay-ra` |
+| 7 | `hai-tap-bang-nhau` | Hai tập hợp bằng nhau | **A = B ⟺ (A ⊆ B) và (B ⊆ A)** — chứng minh hai tập bằng nhau bằng cách chứng minh HAI chiều tập con, đúng kỹ thuật "khi và chỉ khi" (T2.3 bài 15) áp dụng vào tập hợp; Python `==` đã trả lời được câu này (T1.4), bài này dạy CÁCH CHỨNG MINH nó, không phải cách gõ | `luong_1 = {"cà chua", "xà lách"}` và `luong_1_ban_2 = {"xà lách", "cà chua", "cà chua"}`. `luong_1 == luong_1_ban_2` cho `True` ngay — nhưng CHỨNG MINH bằng tay (không gõ `==`) thì phải chỉ ra ĐIỀU GÌ? | 6, T2.3 `khi-va-chi-khi` |
+| 8 | `hop-hai-tap` | Hợp của hai tập hợp | **`∪`** — ký hiệu toán của `\|` đã biết (T1.4 bài 33); A ∪ B gồm phần tử thuộc A HOẶC B (hoặc cả hai — đúng nghĩa "hoặc" T2.3 bài 5) | `luong_1 ∪ luong_3` gồm cả cà chua, xà lách, cà rốt — xà lách chung CẢ HAI luống. Nó có bị "đếm hai lần" trong TẬP hợp kết quả không, hay tập hợp không có khái niệm "đếm mấy lần"? | 7, T2.3 `hoac-gom-ca-hai` |
+| 9 | `giao-hai-tap` | Giao của hai tập hợp | **`∩`** — ký hiệu toán của `&` đã biết (T1.4 bài 28); A ∩ B gồm phần tử thuộc CẢ HAI, đúng nghĩa "và" T2.3 bài 4 | Có cặp luống nào mà `∩` ra `∅` không? Nếu có, hai luống ấy quan hệ gì với nhau — và tên riêng cho quan hệ "không chung gì" đó là gì? | 8 |
+| 10 | `hai-tap-roi-nhau` | Hai tập hợp rời nhau | **A ∩ B = ∅** — hai tập KHÔNG chung phần tử gọi là rời nhau; luống 4 trồng {bí đỏ}, luống 6 trồng {khoai lang} là một cặp rời nhau; MỚI (một cái TÊN cho một tình huống, R1 chỉ có phép `&`, không có tên riêng cho kết quả rỗng của nó) | Byte muốn biết luống nào trồng cà chua mà KHÔNG trồng xà lách. `∪` gộp, `∩` giữ chung — phép NÀO lấy đúng "có cái này, không cái kia"? | 9 |
+| 11 | `hieu-hai-tap` | Hiệu của hai tập hợp | **`−`** — ký hiệu toán của `-` đã biết (T1.4 bài 29); A − B gồm phần tử thuộc A mà không thuộc B; T1.4 đã dạy `A - B ≠ B - A` bằng máy, bài này đặt TÊN toán cho điều đó (không đối xứng) | `luong_1 − luong_3` = {cà chua}, `luong_3 − luong_1` = {cà rốt} — hai tập khác nhau. `∪` và `∩` có tính chất "đổi chỗ vẫn ra y hệt" (giao hoán, T2.1 bài 20) không, hay chỉ `−` mới thiếu nó? | 10 |
+| 12 | `tap-vu-tru-va-phan-bu` | Tập vũ trụ và phần bù | **Tập vũ trụ `U`** (mọi loại rau CÓ trong toàn vườn) **và phần bù `Aᶜ = U − A`** — MỚI hoàn toàn: phần bù chỉ có nghĩa KHI đã chốt vũ trụ, khác `−` (không cần vũ trụ, R1 không có khái niệm này) | Cả vườn Byte trồng đúng bảy loại rau. Đổi "vũ trụ" từ "vườn Byte" sang "vườn của Lan" (nhiều loại rau hơn) — phần bù của luống 1 có đổi theo không, dù luống 1 không đổi gì? | 11, T2.1 `so-khong-can-nhay` |
+| 13 | `dem-bang-bu-tru` | Đếm bằng bù trừ | **`\|A ∪ B\| = \|A\| + \|B\| − \|A ∩ B\|`** — cộng thẳng `\|A\|+\|B\|` đếm phần chung HAI LẦN, phải TRỪ lại một lần; bài đếm đầu tiên của track — đếm PHẦN TỬ của tập hợp (một con số), không đếm chính tập hợp | Luống 1 có 2 loại, luống 3 có 2 loại, giao nhau 1 loại → hợp `2+2−1=3`, khớp {cà chua, xà lách, cà rốt}. Vậy BA luống cùng lúc — công thức này còn đúng, hay phải cộng trừ thêm? *(để ngỏ — dành T2.5 tổ hợp)* | 12, 8, 9 |
+| 14 | `cap-co-thu-tu` | Cặp có thứ tự | **`(a, b)` — thứ tự CÓ nghĩa**, tương phản THẲNG với bài 1 (tập hợp: thứ tự KHÔNG nghĩa): `(luống_1, "Hai") ≠ ("Hai", luống_1)`, và `(a,b)=(c,d)` chỉ khi `a=c` VÀ `b=d`; Python `tuple` (R1) đã có, đây là lớp Ý NGHĨA toán trên nó | "Luống 1 tưới thứ Hai" viết `(luống_1, "Hai")`. Byte có bảy luống, tuần bảy ngày. Liệt kê TẤT CẢ cặp (luống, ngày) CÓ THỂ có — kể cả cặp không tưới thật — được bao nhiêu cặp? | 13, T2.1 `mang-chu-nhat-xoay-mot-goc` |
+| 15 | `tich-descartes` | Tích Descartes | **`A × B`** — tập hợp MỌI cặp có thứ tự `(a,b)` với `a ∈ A`, `b ∈ B`; bảy luống × bảy ngày cho `7×7=49` cặp (đúng phép nhân mảng chữ nhật, T2.1 bài 20) — TOÀN BỘ khả năng, chưa nói cái nào THẬT xảy ra | 49 cặp là mọi khả năng. Nhưng luống 1 CHỈ tưới thứ Hai và thứ Năm thật sự — hai cặp trong 49. Tập con "chỉ những cặp thật" ấy gọi là gì? | 14, T2.1 `mang-chu-nhat-xoay-mot-goc` |
+| 16 | `quan-he-la-mot-tap-con` | Quan hệ là một tập con | **Quan hệ = một tập con của `A × B`** — không phải khái niệm tách rời, mà CHÍNH LÀ một tập hợp (bài 1-13) gồm những cặp (bài 14-15) THẬT xảy ra; "luống nào tưới ngày nào" là một quan hệ giữa Luống và Ngày | Quan hệ tưới nước viết ra là một ĐỐNG cặp rời rạc. Nhìn đống đó có DỄ thấy "luống nào tưới NHIỀU ngày nhất" không, hay cần cách trình bày khác? | 15, 1 |
+| 17 | `bang-cua-mot-quan-he` | Bảng của một quan hệ | **Biểu diễn quan hệ bằng bảng 0/1** — hàng là luống, cột là ngày, ô đánh dấu nếu cặp thuộc quan hệ; MỘT quan hệ, HAI cách nhìn (đống cặp / bảng), đúng khớp bài 4 (mô tả tập hợp hai cách) | Đọc theo HÀNG luống 1: hai ô đánh dấu. Đọc theo CỘT thứ Hai: mấy ô — cột đó nói gì mà hàng không nói được? | 16, 4 |
+| 18 | `mien-xac-dinh-mien-gia-tri` | Miền xác định và miền giá trị | **Miền xác định** (mọi luống XUẤT HIỆN Ở VỊ TRÍ ĐẦU ít nhất một cặp) và **miền giá trị** (mọi ngày Ở VỊ TRÍ SAU); có thể KHÁC `A`/`B` gốc nếu vài luống chưa tưới lần nào | Luống 7 chưa từng tưới — có mặt trong `A` (tập bảy luống) nhưng KHÔNG trong miền xác định. Điều đó nói gì về luống 7, so với luống 1 (đã tưới ít nhất một lần)? | 17, 6 |
+| 19 | `phan-xa` | Phản xạ | **Quan hệ phản xạ** — MỌI phần tử quan hệ với CHÍNH NÓ; quan hệ MỚI "cùng khu vườn với" trên bảy luống: luống nào cũng cùng vườn với chính nó → phản xạ | "Luống A trồng nhiều loại HƠN luống B" — luống nào có nhiều loại hơn CHÍNH NÓ không? Quan hệ này có phản xạ không, và thiếu đúng cái gì so với phản xạ? | 18, T2.3 `dung-sai-do-su-viec` |
+| 20 | `doi-xung` | Đối xứng | **Quan hệ đối xứng** — nếu A quan hệ B thì B CŨNG quan hệ A; "cùng khu vườn với" đối xứng, còn "tưới TRƯỚC" (luống 1 trước luống 3) thì KHÔNG | "Luống A trồng chung ít nhất một loại với luống B" (dùng lại `∩` bài 9, khác `∅`) — đối xứng không? Thử luống 1 và luống 3. | 19, 9 |
+| 21 | `bac-cau` | Bắc cầu | **Quan hệ bắc cầu** — nếu A quan hệ B, B quan hệ C, thì A PHẢI quan hệ C; "cùng khu vườn với" bắc cầu, còn "trồng chung ít nhất một loại" (bài 20) thì KHÔNG (1 chung xà lách với 3, 3 chung cà rốt với 6, nhưng 1 và 6 có thể chẳng chung gì) | Ba tính chất vừa học — phản xạ, đối xứng, bắc cầu — "cùng khu vườn với" có ĐỦ CẢ BA. Một quan hệ đủ cả ba có tên riêng là gì? | 20, 19 |
+| 22 | `quan-he-tuong-duong` | Quan hệ tương đương | **Quan hệ tương đương = phản xạ + đối xứng + bắc cầu, đủ cả ba** — "cùng lịch tưới nước" (hai luống tưới ĐÚNG cùng ngày) là một quan hệ tương đương THẬT trên bảy luống, kiểm bằng `all()`/`any()` (T2.3) trên mọi cặp | Luống 1 và 5 cùng lịch Hai-Năm. Luống 2 tưới riêng một mình ngày Ba. Gom MỌI luống theo "ai cùng lịch với ai" — mỗi luống rơi ĐÚNG MẤY nhóm? | 21, 19, 20, T2.3 `xet-du-moi-truong-hop` |
+| 23 | `lop-tuong-duong-va-phan-hoach` | Lớp tương đương và phân hoạch | **Lớp tương đương** — nhóm mọi luống tương đương nhau thành MỘT lớp; các lớp KHÔNG chồng lấn (đối xứng+bắc cầu) và GỘP LẠI vừa khít cả bảy luống (phản xạ) — gọi là một **phân hoạch** | Bảy luống chia đúng ba lớp lịch-tưới. Đếm luống mỗi lớp rồi CỘNG — có đúng bằng bảy? Trùng hợp, hay quan hệ tương đương LUÔN bảo đảm điều đó? | 22, 8 |
+| 24 | `anh-xa-la-quan-he-dac-biet` | Ánh xạ là quan hệ đặc biệt | **Ánh xạ** — một quan hệ từ A sang B mà MỖI phần tử A xuất hiện Ở VỊ TRÍ ĐẦU của ĐÚNG MỘT cặp (không thiếu, không thừa); "luống nào ai phụ trách" là ánh xạ NẾU mỗi luống có đúng một người | Phân công: luống 1→Lan, luống 2→Minh, luống 3→Lan, luống 4→(chưa ai nhận). Đây có phải ánh xạ từ tập bảy luống sang tập người làm vườn? Nếu không, THIẾU đúng chỗ nào? | 23, 16, T2.2 `chu-cai-la-ten-cua-o-trong` |
+| 25 | `don-anh` | Đơn ánh | **Đơn ánh (một-một)** — hai luống KHÁC nhau không bao giờ chung một người phụ trách; kiểm bằng: số người xuất hiện trong bảng phân công phải bằng ĐÚNG số luống | Phân công đủ bảy luống, không luống nào trống, NHƯNG Lan phụ trách cả luống 1 và 3. Đây có đơn ánh không? Còn là ánh xạ hợp lệ (bài 24) không? | 24 |
+| 26 | `toan-anh` | Toàn ánh | **Toàn ánh (phủ hết miền giá trị)** — MỌI người làm vườn có ÍT NHẤT một luống, không ai đứng ngoài; một ánh xạ có thể đơn ánh mà KHÔNG toàn ánh, toàn ánh mà KHÔNG đơn ánh, hoặc CẢ HAI | Byte có đúng bốn người làm vườn, bốn luống, phân công vừa đơn ánh vừa toàn ánh. Một ánh xạ có CẢ HAI tính chất ấy có tên riêng không — và nó "đảo ngược" được không? | 25 |
+| 27 | `song-anh-va-hop-thanh` | Song ánh và hợp thành | **Song ánh** = đơn ánh + toàn ánh, và CHỈ khi đó ánh xạ mới ĐẢO NGƯỢC được (từ người làm vườn suy ra ĐÚNG MỘT luống); **hợp thành** — nối hai ánh xạ (luống→người, người→làng) thành một ánh xạ luống→làng | Mọi luống có: một TẬP loại rau (bài 1-13), một chỗ trong quan hệ tưới (bài 14-23), một người phụ trách qua song ánh (bài 24-27). Ghép cả ba lại thành MỘT bài toán vườn trọn vẹn trông như thế nào? | 26, 25 |
+| 28 | `boss-khu-vuon-day-du` | BOSS — Khu vườn đầy đủ | *(không khái niệm mới — bài tổng hợp)* ghép tập hợp (bài 1-13) + quan hệ (bài 14-23) + ánh xạ song ánh/hợp thành (bài 24-27) trên MỘT khu vườn bốn luống: kiểm `⊆`/`∪`/`∩` bằng `assert`, kiểm quan hệ tương đương bằng `all()`, VÀ kiểm một ánh xạ có song ánh hay không | Mọi luống giờ có tập rau, quan hệ tưới, người phụ trách — NHƯNG "mấy CÂY mỗi loại", "mấy KILÔGAM thu hoạch" thì tập hợp không trả lời được (bài 1 đã bỏ hẳn số lượng). Track sau đếm được không, và đếm bằng cách nào? *(dẫn sang T2.5 — Tổ hợp, xác suất, thống kê)* | 1–27 |
 
 **Vì sao thứ tự này đúng**
 
-**1. Vì sao `∈`/`∉` (bài 2-3) tách thành hai bài, không gộp một.** Cùng lý do
-T2.3 tách "mệnh đề" (bài 1) khỏi "phủ định" (bài 3): người học phải cầm
-được MỘT ký hiệu vững trước khi ký hiệu thứ hai xuất hiện như một PHÉP
-VIẾT TẮT của "không" ghép với ký hiệu cũ, không phải một ký hiệu độc lập
-phải học thuộc riêng.
+**1. Vì sao track KHÔNG mở bằng "đây là kiểu `set` trong Python" (như một
+người mới sẽ mong đợi), mà mở bằng "đây là TÊN TOÁN của cái bạn đã biết".**
+R1.T1.4 (bài 26-29, 33) đã dạy TOÀN BỘ phần máy: `set`, `in`, `\|`, `&`,
+`-`, không thứ tự, không trùng. Dạy lại bất kỳ phần nào trong đó là vi
+phạm trực tiếp luật #1 của R2 ("mỗi bài đúng một khái niệm MỚI") — và
+đúng loại lỗi mà T2.3 tự bắt được ở A2 (dạy lại R0.30/T1.2.5). Bài 1 do
+đó không dạy "tập hợp là gì" từ đầu; nó dạy phép DỊCH: đọc lại một thứ
+ĐÃ CÓ bằng một NGÔN NGỮ khác (ký hiệu toán).
 
-**2. Vì sao "Python tự bỏ trùng" (bài 4) đứng NGAY sau `∈`/`∉`, trước cả
-tập rỗng.** Đây là chỗ công cụ (kiểu `set`) LẦN ĐẦU xuất hiện trong track,
-và luật thứ ba của mạch R2 nói công cụ chỉ xuất hiện SAU sự bất tiện —
-bài 1 đã gieo đúng sự bất tiện đó ("ba lần cà chua có phải ba loại
-không?"), bài 4 mới giải quyết bằng cách CHO MÁY làm chứng thay vì bắt
-người học tự đếm bằng mắt.
+**2. Vì sao `∈`/`∉` (bài 2-3) tách hai bài dù cả hai đều chỉ là "ký hiệu
+của thứ đã biết".** Cùng lý do T2.3 tách "mệnh đề" (bài 1) khỏi "phủ định"
+(bài 3): một ký hiệu vững trước, ký hiệu thứ hai xuất hiện như PHÉP VIẾT
+TẮT của "không" ghép ký hiệu cũ — không phải hai thứ độc lập học riêng.
 
-**3. Vì sao tập con (bài 7) đứng trước hợp/giao/hiệu (bài 9-12), ngược với
+**3. Vì sao tập con (bài 6) đứng trước hợp/giao/hiệu (bài 8-11), ngược
 nhiều sách xếp phép toán trước quan hệ bao hàm.** Chân lý rỗng của
-`∅ ⊆ A` cần bài 11 T2.3 ("khi vế trước không xảy ra") làm nền — đặt sớm
-để dùng lại ngay công cụ vừa học, và vì bài 8 (hai tập bằng nhau qua
-`⊆` hai chiều) cần bài 7 đứng trước nó một bài, giống hệt cách T2.3 đặt
-kéo theo (bài 10) ngay trước tương đương hai chiều (bài 15).
+`∅ ⊆ A` cần bài 11 T2.3 làm nền — đặt sớm để dùng ngay công cụ vừa học;
+và bài 7 (hai tập bằng nhau qua `⊆` hai chiều) cần bài 6 đứng ngay trước
+nó, giống T2.3 đặt kéo theo (bài 10) ngay trước tương đương hai chiều
+(bài 15).
 
-**4. Vì sao cặp có thứ tự (bài 15) đứng NGAY sau phần đếm bù trừ (bài 14),
-tạo một khúc ngoặt rõ trong track.** Đây là chỗ track CỐ Ý nhắc lại bài 1
-bằng một tương phản: tập hợp thì thứ tự KHÔNG quan trọng, cặp thì thứ tự
-QUAN TRỌNG — đặt cạnh nhau (13 bài tập hợp xong mới qua cặp) để sự tương
-phản còn tươi, không nhạt qua nhiều bài xen giữa.
+**4. Vì sao "tập vũ trụ và phần bù" (bài 12) — khái niệm MỚI đầu tiên
+không có sẵn phép Python tương ứng trong 12 bài đầu — đứng SAU CẢ BỐN
+phép cơ bản (∪/∩/rời nhau/−), không đứng xen giữa.** Phần bù LÀ MỘT
+TRƯỜNG HỢP của hiệu (`Aᶜ = U − A`), nên nó cần bài 11 (hiệu) đứng trước
+làm nền — đặt sớm hơn thì phải giải thích `−` hai lần.
 
-**5. Vì sao quan hệ (bài 17) được định nghĩa THẲNG là "một tập con của
-tích Descartes", không phải một khái niệm hoàn toàn mới.** Đây là bản lề
-sư phạm quan trọng nhất track: nếu người học tin quan hệ là một thứ tách
-biệt tập hợp, họ sẽ học phản xạ/đối xứng/bắc cầu như luật thuộc lòng.
-Định nghĩa lại thành "vẫn là tập hợp, chỉ khác phần tử của nó là CẶP" thì
-MỌI kỹ thuật tập hợp (bài 1-14: kiểm phần tử, so hai tập bằng `⊆` hai
-chiều, `set` tự bỏ trùng) áp dụng NGUYÊN VẸN lên quan hệ, không cần học
-lại.
+**5. Vì sao cặp có thứ tự (bài 14) đứng NGAY sau đếm bù trừ (bài 13), tạo
+khúc ngoặt rõ trong track.** Track CỐ Ý nhắc lại bài 1 bằng tương phản:
+tập hợp thì thứ tự KHÔNG quan trọng, cặp thì thứ tự QUAN TRỌNG — đặt cạnh
+nhau (13 bài tập hợp xong mới qua cặp) để tương phản còn tươi.
 
-**6. Vì sao ba tính chất (phản xạ/đối xứng/bắc cầu, bài 20-22) đi TRƯỚC
-"quan hệ tương đương" (bài 23) đúng ba bài liền, không gộp thẳng vào một
-định nghĩa.** Mỗi tính chất cần MỘT phản ví dụ riêng để thấy nó THẬT SỰ
-là một ràng buộc có thể vi phạm ("trồng chung ít nhất một loại" đối xứng
-mà KHÔNG bắc cầu) — gộp cả ba vào một bài thì người học nhớ được cái TÊN
-"quan hệ tương đương" mà không cầm được lý do vì sao BA điều kiện ấy,
-không phải hai hay bốn.
+**6. Vì sao quan hệ (bài 16) được định nghĩa THẲNG là "một tập con của
+tích Descartes", không phải khái niệm hoàn toàn mới.** Bản lề sư phạm
+quan trọng nhất track: định nghĩa lại thành "vẫn là tập hợp, chỉ khác
+phần tử của nó là CẶP" thì MỌI kỹ thuật tập hợp (bài 1-13) áp dụng
+NGUYÊN VẸN lên quan hệ, không học lại.
 
-**7. Vì sao ánh xạ (bài 25) được định nghĩa là "quan hệ mà mỗi phần tử A
-xuất hiện đúng MỘT lần ở vị trí đầu", không phải "một cái máy nhận đầu
-vào trả đầu ra".** Cùng lý do ở mục 5: định nghĩa ánh xạ QUA quan hệ (thay
-vì như một khái niệm riêng "hàm số") khiến TOÀN BỘ 24 bài trước (tập hợp,
-`⊆`, quan hệ, miền xác định) áp dụng thẳng lên ánh xạ mà không cần một bộ
-khái niệm song song. Đơn ánh/toàn ánh khi đó chỉ là hai câu hỏi ĐẾM khác
-nhau trên đúng một bảng phân công, không phải hai định nghĩa tách rời.
+**7. Vì sao ba tính chất (phản xạ/đối xứng/bắc cầu, bài 19-21) đi TRƯỚC
+"quan hệ tương đương" (bài 22) đúng ba bài liền, không gộp một định
+nghĩa.** Mỗi tính chất cần MỘT phản ví dụ riêng để thấy nó THẬT là một
+ràng buộc có thể vi phạm — gộp cả ba thì người học nhớ TÊN mà không cầm
+được lý do vì sao BA điều kiện, không phải hai hay bốn.
 
-**8. Vì sao song ánh VÀ hợp thành gộp chung một bài BOSS (bài 28), không
-tách hai bài.** Cả hai đều là hệ QUẢ trực tiếp của 27 bài trước (song
-ánh = đơn ánh + toàn ánh đã học; hợp thành = nối hai ánh xạ, mỗi ánh xạ
-đã hiểu rõ từ bài 25), nên BOSS đúng vai trò của nó trong toàn Realm 2:
-không dạy khái niệm mới, chỉ ghép những gì đã có thành một bài toán vườn
-trọn vẹn — đúng khớp cách T2.1 bài 44 và T2.3 bài 32 đã làm.
+**8. Vì sao ánh xạ (bài 24) được định nghĩa QUA quan hệ, không phải "một
+cái máy nhận đầu vào trả đầu ra".** Cùng lý do mục 6: TOÀN BỘ 23 bài
+trước áp dụng thẳng lên ánh xạ. Đơn ánh/toàn ánh khi đó chỉ là hai câu
+hỏi ĐẾM khác nhau trên đúng một bảng phân công.
 
-**Ranh giới track:** không bài nào cần đếm số phần tử của MỘT tập hợp
-theo kiểu tổ hợp (chọn k trong n, hoán vị) — bài 14 cố ý để ngỏ câu hỏi
-"ba tập cùng lúc thì sao", dành cho T2.5. Không bài nào cần ma trận hay
-đồ thị có hướng thật sự — bài 18 chỉ dùng bảng 0/1 như một cách TRÌNH BÀY,
-không đi sâu vào lý thuyết ma trận (dành cho T2.6/T2.7).
+**9. Vì sao song ánh và hợp thành gộp một bài (27), rồi BOSS (28) KHÔNG
+dạy khái niệm mới mà vẫn tách riêng khỏi bài 27.** Song ánh + hợp thành
+là hệ QUẢ trực tiếp của bài 24-26, hợp lý đứng chung một bài dạy — nhưng
+BOSS cần đứng RIÊNG vì nó ghép LẠI cả ba mảng lớn (tập hợp + quan hệ +
+ánh xạ) trên một khu vườn DUY NHẤT, đúng vai trò BOSS trong R2 (T2.1 bài
+44, T2.3 bài 32): không dạy, chỉ ghép.
+
+**Ranh giới track:** không bài nào cần đếm số phần tử kiểu tổ hợp (chọn k
+trong n, hoán vị) — bài 13 cố ý để ngỏ câu hỏi "ba tập cùng lúc thì sao",
+dành T2.5. Không bài nào cần ma trận hay đồ thị có hướng thật — bài 17
+chỉ dùng bảng 0/1 như cách TRÌNH BÀY, không đi sâu lý thuyết ma trận
+(dành T2.6/T2.7). Và — biên quan trọng nhất — **không bài nào dạy LẠI
+cách gõ `set`/`in`/`\|`/`&`/`-` trong Python; toàn bộ phần đó đã đóng ở
+R1.T1.4.**
