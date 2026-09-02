@@ -1,0 +1,231 @@
+# Xương sống R5.T5.5 — CI/CD & Observability (24 bài) — TypeScript
+#
+# Track THỨ NĂM của Realm 5, sau T5.3 (DDD, 42/42), T5.6 (Bảo mật, 26/26),
+# T5.2 (TDD→Property→Mutation, 34/34), T5.4 (Mẫu & Tái cấu trúc, 24/24).
+# T5.5 chọn TIẾP THEO đúng thứ tự MASTERPLAN — track ÁP CHÓT của Realm 5
+# (chỉ còn T5.1 Git, hoãn vì cần hạ tầng WASM mới).
+#
+# NGUỒN: `fp/TypeScript_Books/part_7_production/chapter_43_capstone_
+# production.md` — CHỈ HAI mục con (§43.4 "CI/CD Pipeline", §43.5
+# "Observability: Logging, Metrics, Tracing", ~120 dòng TỔNG CỘNG, phần
+# NHỎ của một chương capstone LỚN HƠN nhiều — phần LỚN HƠN của track NÀY
+# LÀ TỰ THIẾT KẾ, giống chính XÁC quyết định đã áp dụng CHO T5.2 cụm 6
+# (mutation testing, KHÔNG nguồn sách) — dựa TRỰC TIẾP trên kiến thức
+# THẬT về CI/CD/observability (pipeline gate, structured logging, metrics,
+# tracing, health check, alerting — kiến thức NGÀNH đã CHUẨN HOÁ, không
+# hư cấu).
+#
+# QUYẾT ĐỊNH KHÔNG DÙNG — ĐÃ KIỂM TRA TRÙNG LẶP TRƯỚC KHI NHẬN NGUỒN:
+#   - `chapter_41_distributed_systems.md` (CAP Theorem, Message Queues,
+#     Circuit Breaker & Retry, Saga Pattern) — tên chương KHỚP GẦN NHƯ
+#     TUYỆT ĐỐI với `T7.1 Nền tảng phân tán` (Realm 7, System Design,
+#     MASTERPLAN §R7) — ĐỂ DÀNH cho track ĐÓ, KHÔNG dùng ở đây. T5.5 CHỈ
+#     lấy phần "vận hành MỘT service" (CI/CD + observability), KHÔNG lấy
+#     phần "lý thuyết hệ phân tán" (CAP/consensus/saga).
+#   - `chapter_42_system_design.md` (Capacity Estimation, Caching,
+#     REST/GraphQL/gRPC, Microservices) — thuộc PHẠM VI System Design
+#     (Realm 7, `T7.2`/`T7.4`), KHÔNG dùng ở đây.
+#   - `chapter_38_advanced_data_patterns.md`, `chapter_37_database_
+#     fundamentals.md` — thuộc phạm vi cơ sở dữ liệu, KHÔNG liên quan.
+#
+# QUYẾT ĐỊNH KHÔNG DÙNG THƯ VIỆN (giống T4.3/T4.5/T5.2/T5.3/T5.4/T5.6):
+# nguồn dùng `import assert from "node:assert/strict"` (Node module,
+# không có trong sandbox) → assertEqual TỰ VIẾT (T5.2 bài 2's kỹ thuật,
+# TÁI DÙNG). `crypto.randomUUID()`/`Date.now()`/`new Date().toISOString()`
+# (KHÔNG deterministic, VÀ bị chặn trong sandbox theo quy ước dự án) →
+# thay bằng ID/thời gian được TRUYỀN VÀO qua tham số (đã học nhất quán
+# xuyên suốt dự án: "injected clock/id" pattern).
+#
+# BẪY SANDBOX ĐÃ BIẾT, ÁP DỤNG LẠI: KHÔNG async/await/Promise/setTimeout
+# (nguồn's `retryWithBackoff`/circuit breaker dùng `Promise` — KHÔNG dùng
+# ở track NÀY, vì thuộc phạm vi T7.1 đã loại BỎ Ở TRÊN, không phải vì
+# giới hạn sandbox riêng).
+#
+# TÁI DÙNG THẲNG (không dạy lại): Result<T,E> (T4.5), Discriminated
+# Union + exhaustive switch (T4.3), assertEqual (T5.2 bài 2),
+# taoPipeline/composition hàm (T4.2, T5.4 bài 17 — pipeline CI LÀ MỘT
+# ỨNG DỤNG TRỰC TIẾP của kỹ thuật ĐÃ HỌC, với một điểm khác: CI pipeline
+# cần DỪNG NGAY ở bước ĐẦU TIÊN thất bại — "fail-fast", KHÁC
+# `taoPipeline` (luôn chạy HẾT mọi bước) — bài 2 dạy SỰ KHÁC BIỆT NÀY).
+#
+# world: blueprint-board (sum type hở → bug BÒ RA — MASTERPLAN §R5)
+# skill namespace: vh.* (Vận Hành — operations) — namespace MỚI, không
+# trùng ddd.*/bmud.*/kt.*/mau.*/ts.*/alg.*/fp.*/func.* đã dùng ở
+# R4/T5.2/T5.3/T5.4/T5.6.
+
+cum:
+  - so: 1
+    ten: "CI Pipeline — Nền tảng"
+    tom_tat: "CI là gì (tự động hoá, con người quên máy không quên), pipeline = chuỗi bước có GATE, fail-fast dừng ở bước đầu thất bại, capstone mô phỏng pipeline typecheck→lint→test→build."
+  - so: 2
+    ten: "CD & Deploy Gate"
+    tom_tat: "Deploy CÓ ĐIỀU KIỆN (chỉ khi pipeline qua VÀ đúng nhánh), môi trường staging/production, rollback về phiên bản trước, capstone hệ deploy có gate + rollback."
+  - so: 3
+    ten: "Structured Logging"
+    tom_tat: "console.log không đủ cho production, log có CẤU TRÚC (field rõ ràng), log level lọc theo mức độ, request ID correlation, capstone logger đầy đủ."
+  - so: 4
+    ten: "Metrics"
+    tom_tat: "Counter đếm sự kiện, tỉ lệ lỗi (error rate) và ngưỡng, histogram/latency và percentile đơn giản, capstone bộ metrics cho một service giả lập."
+  - so: 5
+    ten: "Tracing & Health Checks"
+    tom_tat: "Trace theo dõi một request qua nhiều bước (span, duration), health check kiểm tra còn sống + dependency, capstone trace + health check."
+  - so: 6
+    ten: "Alerting & Vận hành — BOSS"
+    tom_tat: "Alerting khi metric vượt ngưỡng, SLI/SLO và error budget cơ bản, runbook (alert→hành động có cấu trúc), BOSS ghép CI/CD+logging+metrics+tracing+health+alerting thành một hệ vận hành nhỏ."
+
+bai:
+# ── Cụm 1 (bài 1-4): CI Pipeline — Nền tảng — nguồn ch.43 §43.4 ──────────
+  - so: 1
+    slug: ci-la-gi-tu-dong-hoa-kiem-tra
+    title: "CI là gì — tự động hoá kiểm tra, con người QUÊN máy KHÔNG quên"
+    teaches: [vh.what-is-ci]
+    requires: [mau.gate-boss-cqrs-es]
+    y_chinh: "Continuous Integration (CI): MỖI lần đẩy code LÊN, MÁY tự động chạy MỘT chuỗi kiểm tra (typecheck, lint, test, build) — KHÔNG đợi người NHỚ chạy TAY. Lý do CI quan trọng: con người LÀM cùng NĂM bước NÀY hàng chục lần MỘT ngày — BỎ SÓT MỘT lần LÀ bug BÒ RA production (nối TRỰC TIẾP thế giới blueprint-board của MASTERPLAN §R5). CI KHÔNG PHẢI \"chạy test\" — nó LÀ \"chạy test TỰ ĐỘNG, KHÔNG PHỤ THUỘC người CÓ NHỚ hay không\"."
+  - so: 2
+    slug: pipeline-la-chuoi-buoc-co-gate
+    title: "Pipeline = chuỗi bước có GATE — fail-fast, dừng Ở bước đầu tiên hỏng"
+    teaches: [vh.pipeline-fail-fast]
+    requires: [vh.what-is-ci]
+    y_chinh: "`taoPipeline` (T5.4 bài 17) LUÔN chạy HẾT MỌI bước — CI pipeline KHÁC: PHẢI dừng NGAY Ở bước ĐẦU TIÊN thất bại (\"fail-fast\", KHÔNG lãng phí thời gian chạy `test`/`build` nếu `typecheck` ĐÃ hỏng). `chayPipelineCI<T>(giaTri, ...cacBuoc: Array<{ten:string, kiemTra:(t:T)=>boolean}>): {qua:boolean, buocHong:string|null}` — LẶP qua TỪNG bước, TRẢ VỀ NGAY khi GẶP bước `kiemTra` trả `false`, KHÔNG chạy TIẾP các bước SAU."
+  - so: 3
+    slug: thu-tu-buoc-re-truoc-dat-sau
+    title: "Thứ tự bước: RẺ trước, ĐẮT sau — tối ưu thời gian phát hiện lỗi"
+    teaches: [vh.step-ordering-cheap-first]
+    requires: [vh.pipeline-fail-fast]
+    y_chinh: "Vì fail-fast dừng NGAY khi GẶP bước hỏng, THỨ TỰ các bước quyết định TỐC ĐỘ phát hiện lỗi — đặt bước RẺ (typecheck, VÀI GIÂY) TRƯỚC bước ĐẮT (build production, VÀI PHÚT): nếu code CÓ lỗi kiểu, pipeline dừng SAU vài GIÂY (typecheck fail), KHÔNG lãng phí VÀI PHÚT chờ build fail VÌ CÙNG lý do ĐÓ. Bài tập: cho HAI thứ tự bước KHÁC nhau TRÊN CÙNG một đầu vào lỗi, so sánh SỐ bước THẬT SỰ chạy TRƯỚC khi dừng."
+  - so: 4
+    slug: capstone-pipeline-typecheck-lint-test-build
+    title: "Capstone: Pipeline typecheck → lint → test → build"
+    teaches: [vh.gate-boss-ci-pipeline]
+    requires: [vh.step-ordering-cheap-first]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: mô phỏng ĐẦY ĐỦ bốn bước CI THẬT (`typecheck`, `lint`, `test`, `build`, MỖI bước LÀ một hàm kiểm tra MỘT khía cạnh của MỘT object `MaNguon` giả lập — ví dụ `{coLoiKieu, coLoiLint, testQua, buildQua}`) qua `chayPipelineCI` (bài 2) — kiểm CẢ trường hợp MỌI bước QUA (`qua:true`) LẪN trường hợp MỘT bước GIỮA CHỪNG hỏng (`buocHong` đúng TÊN bước ĐÓ, CÁC bước SAU KHÔNG chạy)."
+
+# ── Cụm 2 (bài 5-8): CD & Deploy Gate — TỰ THIẾT KẾ ──────────────────────
+  - so: 5
+    slug: deploy-co-dieu-kien
+    title: "Deploy CÓ ĐIỀU KIỆN — chỉ khi pipeline QUA VÀ đúng nhánh"
+    teaches: [vh.conditional-deploy-gate]
+    requires: [vh.gate-boss-ci-pipeline]
+    y_chinh: "Deploy KHÔNG xảy ra chỉ VÌ code ĐÃ đẩy LÊN — nó CẦN HAI điều kiện CÙNG đúng: (1) pipeline CI ĐÃ qua HẾT (`chayPipelineCI` trả `qua:true`, bài 2-4), (2) nhánh ĐÚNG LÀ nhánh triển khai (thường LÀ `\"main\"`). `xetDuyetDeploy(ketQuaPipeline, tenNhanh): boolean` — MỘT hàm THUẦN kết hợp HAI điều kiện `&&`, tái hiện chuỗi PHÁN QUYẾT `needs: test` + `if: github.ref == 'refs/heads/main'` (đã thấy Ở nguồn chương 43, dạng comment YAML)."
+  - so: 6
+    slug: moi-truong-staging-production
+    title: "Môi trường: CÙNG pipeline, KHÁC đích deploy"
+    teaches: [vh.environment-staging-prod]
+    requires: [vh.conditional-deploy-gate]
+    y_chinh: "MỘT pipeline (bài 2-4) chạy GIỐNG HỆT cho MỌI nhánh — NHƯNG đích DEPLOY khác NHAU theo TÊN nhánh: nhánh `\"develop\"` → môi trường `\"staging\"` (thử NGHIỆM, rủi ro THẤP), nhánh `\"main\"` → `\"production\"` (người DÙNG THẬT). `xacDinhMoiTruong(tenNhanh): \"staging\" | \"production\" | \"khong_deploy\"` — Discriminated Union HẸP (đã học T4.3), exhaustive switch, KHÔNG if/else chuỗi (nối TRỰC TIẾP T5.4 bài 19's kỷ luật)."
+  - so: 7
+    slug: rollback-quay-lai-phien-ban-truoc
+    title: "Rollback — quay LẠI phiên bản TRƯỚC khi bản MỚI lỗi"
+    teaches: [vh.rollback-previous-version]
+    requires: [vh.environment-staging-prod]
+    y_chinh: "Deploy MỘT phiên bản MỚI CÓ THỂ lỗi (dù pipeline ĐÃ qua — test KHÔNG bắt được MỌI thứ). Rollback = quay VỀ phiên bản NGAY TRƯỚC ĐÓ — CHÍNH XÁC LÀ kỹ thuật `undo` ĐÃ học Ở T5.4 bài 11 (lưu SNAPSHOT lịch sử deploy, KHÔNG cần \"tính nghịch đảo\" của một lần deploy). `lichSuDeploy: string[]` (mảng PHIÊN BẢN ĐÃ deploy THÀNH CÔNG), `rollback(lichSu): string[]` cắt PHẦN TỬ cuối — TÁI SỬ DỤNG NGUYÊN kỹ thuật, ÁP DỤNG vào bối cảnh MỚI."
+  - so: 8
+    slug: capstone-deploy-gate-va-rollback
+    title: "Capstone: Hệ deploy có GATE + Rollback"
+    teaches: [vh.gate-boss-deploy-rollback]
+    requires: [vh.rollback-previous-version]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: ghép `xetDuyetDeploy` (bài 5) + `xacDinhMoiTruong` (bài 6) + `lichSuDeploy`/`rollback` (bài 7) thành MỘT quy trình: thử deploy MỘT phiên bản (bị TỪ CHỐI nếu pipeline KHÔNG qua/SAI nhánh), deploy THÀNH CÔNG ghi VÀO lịch sử, VÀ rollback đưa lịch sử VỀ phiên bản TRƯỚC — kiểm ĐỦ ba tình huống (từ chối, deploy thành công, rollback)."
+
+# ── Cụm 3 (bài 9-12): Structured Logging — nguồn ch.43 §43.5 ────────────
+  - so: 9
+    slug: console-log-khong-du-cho-production
+    title: "console.log KHÔNG đủ cho production — log CÓ CẤU TRÚC"
+    teaches: [vh.structured-logging-intro]
+    requires: [vh.gate-boss-deploy-rollback]
+    y_chinh: "`console.log(\"loi roi\")` VÔ DỤNG khi CẦN tìm MỘT sự kiện CỤ THỂ giữa HÀNG TRIỆU dòng log production — Production CẦN **structured logging**: MỖI dòng log LÀ một OBJECT có TRƯỜNG rõ ràng (`level`, `msg`, các field NGỮ CẢNH), KHÔNG PHẢI một CHUỖI tự do. `type NhatKy = {level, msg, [truong: string]: unknown}` — `taoNhatKy(): {ghi, layNhatKy}` (nhà máy, giống `taoEventBus` T5.4 bài 6) đóng gói mảng log NỘI BỘ."
+  - so: 10
+    slug: log-level-loc-theo-muc-do
+    title: "Log level — info/warn/error/debug, LỌC theo mức độ nghiêm trọng"
+    teaches: [vh.log-levels-filtering]
+    requires: [vh.structured-logging-intro]
+    y_chinh: "MỖI dòng log CÓ một `level` (`\"info\" | \"warn\" | \"error\" | \"debug\"`, Discriminated Union HẸP) — cho PHÉP LỌC (production THƯỜNG CHỈ hiện `warn`+`error`, ẨN `debug` VÌ quá NHIỀU). `locTheoLevel(cacLog: NhatKy[], cacLevelMuon: LogLevel[]): NhatKy[]` — `filter` giữ LẠI đúng NHỮNG dòng có `level` NẰM TRONG danh sách MONG MUỐN."
+  - so: 11
+    slug: request-id-correlation
+    title: "Request ID correlation — theo dõi MỘT request qua NHIỀU dòng log"
+    teaches: [vh.request-id-correlation]
+    requires: [vh.log-levels-filtering]
+    y_chinh: "MỖI request VÀO hệ thống ĐƯỢC gán MỘT `requestId` (ĐƯỢC TRUYỀN VÀO — KHÔNG dùng `crypto.randomUUID()`, quy ước injected-id CỦA dự án) — MỌI dòng log LIÊN QUAN request ĐÓ MANG THEO CÙNG `requestId`. `locTheoRequestId(cacLog, id): NhatKy[]` — TÌM lại TOÀN BỘ \"câu chuyện\" của MỘT request CỤ THỂ giữa hàng NGÀN dòng log KHÁC, GIỐNG cách `grep requestId` hoạt động trong THỰC TẾ (đã NHẮC Ở nguồn chương 43)."
+  - so: 12
+    slug: capstone-logger-day-du
+    title: "Capstone: Logger đầy đủ — cấu trúc + level + correlation"
+    teaches: [vh.gate-boss-structured-logging]
+    requires: [vh.request-id-correlation]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: ghép `taoNhatKy` (bài 9) + `locTheoLevel` (bài 10) + `locTheoRequestId` (bài 11) — mô phỏng MỘT request THẬT ghi NHIỀU dòng log (bắt đầu, lỗi, kết thúc) CÙNG `requestId`, XEN LẪN VỚI log của request KHÁC — kiểm LỌC ĐÚNG theo level VÀ theo request, KHÔNG lẫn LỘN giữa hai request."
+
+# ── Cụm 4 (bài 13-16): Metrics — nguồn ch.43 §43.5 ───────────────────────
+  - so: 13
+    slug: counter-dem-su-kien
+    title: "Counter — đếm sự kiện (số request, số lỗi)"
+    teaches: [vh.metrics-counter]
+    requires: [vh.gate-boss-structured-logging]
+    y_chinh: "Metric ĐƠN GIẢN NHẤT: Counter — MỘT con số CHỈ TĂNG (KHÔNG BAO GIỜ giảm), đếm \"BAO NHIÊU LẦN X xảy ra\" (request, lỗi, đăng ký MỚI). `taoCounter(ten): {gia_tri, tang}` — closure GIỮ số đếm NỘI BỘ (TÁI DÙNG kỹ thuật `taoBoDem` T5.4 bài 3), MỖI counter ĐỘC LẬP."
+  - so: 14
+    slug: ty-le-loi-va-nguong
+    title: "Tỉ lệ lỗi (error rate) — tính TỪ hai counter, so VỚI ngưỡng"
+    teaches: [vh.error-rate-threshold]
+    requires: [vh.metrics-counter]
+    y_chinh: "Tỉ lệ lỗi = SỐ lỗi CHIA cho TỔNG số request (`errorCounter.gia_tri / requestCounter.gia_tri`) — MỘT con số ĐƠN, DỄ so sánh VỚI ngưỡng CHẤP NHẬN được (ví dụ `< 0.05` = dưới 5%, đã thấy Ở nguồn chương 43). `tinhTyLeLoi(soLoi, soRequest): number` — hàm THUẦN, cẩn thận trường hợp `soRequest === 0` (chia CHO không — trả `0` khi CHƯA có request NÀO, KHÔNG `NaN`)."
+  - so: 15
+    slug: histogram-latency-percentile
+    title: "Histogram/Latency — phân phối thời gian phản hồi, percentile ĐƠN GIẢN"
+    teaches: [vh.histogram-latency-percentile]
+    requires: [vh.error-rate-threshold]
+    y_chinh: "Counter CHỈ đếm \"BAO NHIÊU\" — Histogram đo \"PHÂN PHỐI\" (thời gian phản hồi TỪNG request, KHÔNG PHẢI chỉ TRUNG BÌNH — trung bình BỊ LỆCH bởi vài request CHẬM BẤT THƯỜNG). `tinhPercentile(cacGiaTri: number[], phanTram: number): number` — SẮP XẾP TĂNG DẦN, LẤY giá trị Ở VỊ TRÍ tương ứng (`p50` = trung vị, `p95` = 95% request NHANH HƠN giá trị NÀY) — TỰ VIẾT (KHÔNG thư viện thống kê)."
+  - so: 16
+    slug: capstone-bo-metrics-day-du
+    title: "Capstone: Bộ metrics đầy đủ cho MỘT service giả lập"
+    teaches: [vh.gate-boss-metrics]
+    requires: [vh.histogram-latency-percentile]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: ghép `taoCounter` (bài 13) + `tinhTyLeLoi` (bài 14) + `tinhPercentile` (bài 15) — mô phỏng MỘT LOẠT request (MỘT SỐ thành công, MỘT SỐ lỗi, thời gian phản hồi KHÁC nhau), TÍNH đủ BA chỉ số (tổng request, tỉ lệ lỗi, p95 latency) TỪ CÙNG dữ liệu đầu VÀO."
+
+# ── Cụm 5 (bài 17-20): Tracing & Health Checks — TỰ THIẾT KẾ ────────────
+  - so: 17
+    slug: trace-theo-doi-request-qua-nhieu-buoc
+    title: "Trace — theo dõi MỘT request qua NHIỀU bước xử lý"
+    teaches: [vh.tracing-spans]
+    requires: [vh.gate-boss-metrics]
+    y_chinh: "MỘT request THẬT ĐI qua NHIỀU bước (validate → truy vấn dữ liệu → tính toán → trả về) — Trace GHI LẠI THỜI GIAN BẮT ĐẦU/KẾT THÚC của TỪNG bước (gọi LÀ MỘT \"span\"), giúp THẤY bước NÀO CHẬM NHẤT. `type Span = {tenBuoc, batDau, ketThuc}` (thời gian ĐƯỢC TRUYỀN VÀO — injected, KHÔNG `Date.now()`), `tinhThoiGian(span): number` = `ketThuc - batDau`. `timBuocChamNhat(cacSpan: Span[]): string` — TÌM `tenBuoc` có thời GIAN LỚN NHẤT."
+  - so: 18
+    slug: health-check-con-song-hay-khong
+    title: "Health check — endpoint kiểm tra \"CÒN SỐNG\" hay không"
+    teaches: [vh.health-check-dependencies]
+    requires: [vh.tracing-spans]
+    y_chinh: "Health check: MỘT hàm TRẢ VỀ `\"khoe\" | \"om\"` cho BIẾT service CÒN hoạt động ĐƯỢC hay không — thường KIỂM tất cả DEPENDENCY QUAN TRỌNG (database, cache) CÙNG lúc. `kiemTraSucKhoe(cacDependency: {ten, khoe: boolean}[]): \"khoe\" | \"om\"` — service CHỈ \"khoe\" khi **MỌI** dependency ĐỀU `khoe` (`.every`, đã học T5.4 bài 18) — MỘT dependency HỎNG LÀ ĐỦ để BÁO \"om\", DÙ các dependency KHÁC vẫn ỔN."
+  - so: 19
+    slug: alerting-vuot-nguong-sinh-canh-bao
+    title: "Alerting — khi metric VƯỢT ngưỡng, sinh CẢNH BÁO"
+    teaches: [vh.alerting-threshold]
+    requires: [vh.health-check-dependencies]
+    y_chinh: "Alerting = SO SÁNH metric (bài 13-16) VỚI ngưỡng ĐÃ định TRƯỚC, sinh MỘT cảnh báo NẾU vượt. `kiemTraCanhBao(tyLeLoi: number, nguong: number): {canhBao: boolean, thongDiep: string}` — RANH GIỚI: vượt QUÁ ngưỡng (`>`, KHÔNG `>=`) mới cảnh báo (nối TRỰC TIẾP kỷ luật \"ranh giới CHÍNH XÁC\" ĐÃ dùng T5.4 bài 24 cho tồn kho)."
+  - so: 20
+    slug: capstone-trace-health-check
+    title: "Capstone: Trace + Health Check kết hợp"
+    teaches: [vh.gate-boss-tracing-health]
+    requires: [vh.alerting-threshold]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: ghép `Span`/`timBuocChamNhat` (bài 17) VỚI `kiemTraSucKhoe` (bài 18) — mô phỏng MỘT request ĐI qua BA bước (MỘT bước CHẬM BẤT THƯỜNG) ĐỒNG THỜI kiểm tra SỨC KHOẺ của HAI dependency (MỘT `khoe`, MỘT `om`) — kiểm CẢ việc tìm ĐÚNG bước chậm NHẤT LẪN việc BÁO \"om\" khi CÓ dependency hỏng."
+
+# ── Cụm 6 (bài 21-24): Alerting & Vận hành — BOSS — TỰ THIẾT KẾ ─────────
+  - so: 21
+    slug: sli-slo-va-error-budget
+    title: "SLI/SLO — chỉ số ĐO ĐƯỢC vs mục tiêu CAM KẾT, error budget"
+    teaches: [vh.sli-slo-error-budget]
+    requires: [vh.gate-boss-tracing-health]
+    y_chinh: "SLI (Service Level Indicator) = con số ĐO ĐƯỢC THẬT (ví dụ: tỉ lệ request THÀNH CÔNG). SLO (Service Level Objective) = mục tiêu CAM KẾT cho SLI ĐÓ (ví dụ: \"99% request THÀNH CÔNG\"). Error budget = \"NGÂN SÁCH lỗi\" CÒN LẠI trước khi VI PHẠM SLO — `tinhErrorBudget(sliHienTai: number, slo: number): number` = `sliHienTai - slo` (DƯƠNG nghĩa LÀ CÒN DƯ, ÂM nghĩa LÀ ĐÃ VI PHẠM)."
+  - so: 22
+    slug: runbook-alert-den-hanh-dong
+    title: "Runbook — khi cảnh báo kích hoạt, PHẢN ỨNG có CẤU TRÚC"
+    teaches: [vh.runbook-alert-to-action]
+    requires: [vh.sli-slo-error-budget]
+    y_chinh: "MỘT cảnh báo (bài 19) KHÔNG TỰ nó GIẢI QUYẾT gì — cần MỘT \"runbook\" (ÁNH XẠ từ LOẠI cảnh báo SANG hành động CỤ THỂ, KHÔNG PHẢI hoảng loạn TUỲ HỨNG). `LoaiCanhBao = \"ty_le_loi_cao\" | \"dependency_hong\" | \"do_tre_cao\"` (Discriminated Union), `layHanhDong(loai: LoaiCanhBao): string` — exhaustive `switch`, MỖI loại CẢNH BÁO ÁNH XẠ MỘT hành động RÕ RÀNG."
+  - so: 23
+    slug: tong-hop-mot-vong-vong-vong-quan-sat
+    title: "Tổng hợp một VÒNG quan sát — từ metric ĐẾN quyết định"
+    teaches: [vh.observability-feedback-loop]
+    requires: [vh.runbook-alert-to-action]
+    y_chinh: "VÒNG quan sát ĐẦY ĐỦ: metric (bài 13-16) → SO ngưỡng (bài 19) → NẾU vượt, tra LOẠI cảnh báo → runbook (bài 22) TRẢ hành động — MỘT chuỗi HÀM THUẦN nối TIẾP, GIỐNG pipeline (T5.4 bài 17) NHƯNG cho DỮ LIỆU vận hành THAY VÌ code. `vongQuanSat(tyLeLoi, nguong): string` ghép TOÀN BỘ chuỗi ĐÓ thành MỘT hàm."
+  - so: 24
+    slug: boss-trung-tam-van-hanh
+    title: "BOSS — Trung tâm vận hành: CI/CD + Logging + Metrics + Tracing + Alerting"
+    teaches: [vh.gate-boss-observability]
+    requires: [vh.observability-feedback-loop]
+    y_chinh: "Bài BOSS của track: MỘT \"trung tâm vận hành\" nhỏ HOÀN CHỈNH — GHÉP TOÀN BỘ SÁU cụm vào MỘT kịch bản: (1) `chayPipelineCI` (cụm 1) QUYẾT ĐỊNH deploy ĐƯỢC hay KHÔNG; (2) deploy THÀNH CÔNG GHI log CÓ CẤU TRÚC (cụm 3); (3) MỘT loạt request SAU deploy sinh metrics (cụm 4); (4) `vongQuanSat` (bài 23) ĐỌC metrics, sinh CẢNH BÁO nếu CẦN, tra RUNBOOK (cụm 6) — MỘT bài THỰC HÀNH ghép TRỌN VẸN kỷ luật \"đo trước khi viết\" ĐÃ DÙNG XUYÊN SUỐT DỰ ÁN NÀY vào MỘT hệ vận hành GIẢ LẬP, mastery=0.85 (BOSS track — reflect LÀ tổng kết, KHÔNG PHẢI câu hỏi bắc cầu)."
