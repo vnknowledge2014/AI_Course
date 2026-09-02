@@ -113,3 +113,12 @@ realm:
       # chỉ mượn THẲNG `ts.adt-gate-boss` từ T4.3 (bài 8 cần discriminated
       # union đã dạy làm nền cho Option/Result tự viết).
       - dai-so-cua-chuong-trinh
+      # T4.6 (Parser combinators & interpreter, Rust) CŨNG BỊ HOÃN — đo
+      # thật qua rustprobe.mjs xác nhận HAI lỗ hổng độc lập: closure gán
+      # biến rồi gọi qua tên biến không hoạt động (không có cú pháp kiểu
+      # nào cho tham số hàm là closure), VÀ bộ kiểm mượn/di chuyển từ chối
+      # "chưa hỗ trợ" bất kỳ biến non-Copy nào bị chạm ở ≥2 nhánh if/else —
+      # khuôn bắt buộc có ở mọi recursive-descent parser thật. Xem
+      # docs/decisions/R4-T46-parser-combinator-do-duoc.md. Với CẢ T4.4 và
+      # T4.6 hoãn, Realm 4 dừng ở 6/8 track (186/260 bài) cho tới khi có
+      # đầu tư hạ tầng byte-rust riêng.
