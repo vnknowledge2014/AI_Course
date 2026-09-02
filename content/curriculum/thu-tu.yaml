@@ -37,6 +37,11 @@ realm:
       - cam-nhan-so
       - dai-so-va-ham-so
       - logic-va-chung-minh
+      # T2.4 mượn `∈`/`{x|...}` lần đầu (T2.3 cố ý chưa dùng — xem "Ranh
+      # giới track" cuối mục T2.3 trong content/toan/MACH.md), và dùng lại
+      # `all()`/`any()` (T2.3) để kiểm phản xạ/đối xứng/bắc cầu trên mọi
+      # cặp. Đứng ngay sau logic-va-chung-minh, không song song.
+      - tap-hop-quan-he-anh-xa
 
   # Realm 3 mở màn M8. T3.1 đứng đầu vì MASTERPLAN §9.1 giao cho nó việc "dọn
   # đường cho ownership" — người học gặp Rust ở R4.T4.0b, và mọi chỗ khó của
