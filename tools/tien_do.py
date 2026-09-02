@@ -46,11 +46,25 @@ MACH = {
     "toan": NOI_DUNG / "toan" / "MACH.md",
 }
 
+# `MACH.md` của một realm có thể ghi TIẾP các track SAU v1.0 (VD: toan/MACH.md
+# thêm mục "## T2.4" trở đi cho phần roadmap, ngay dưới ba mục T2.1–T2.3 đã
+# đóng băng). Không cắt trước mốc này thì `dem_mach` đếm LUÔN bảng của những
+# track chưa đóng băng — đúng lỗi đã lộ ra khi T2.4 thêm 28 dòng bảng làm
+# "mạch" của R2.T1–T3 nhảy từ 112 lên 140. Mốc dưới đây PHẢI cập nhật nếu
+# thêm track roadmap MỚI vào cùng file (VD: T2.5 nối sau T2.4).
+GIOI_HAN_MACH = {
+    "toan": "## T2.4",
+}
 
-def dem_mach(t: pathlib.Path) -> int:
-    """Số dòng bài trong mọi bảng mạch của một file."""
+
+def dem_mach(t: pathlib.Path, dung_truoc: str | None = None) -> int:
+    """Số dòng bài trong mọi bảng mạch của một file, dừng trước `dung_truoc` nếu có."""
     if not t.is_file():
         return 0
+    if dung_truoc:
+        van_ban = t.read_text(encoding="utf-8")
+        moc = van_ban.find(dung_truoc)
+        return len(re.findall(r"^\|\s*\*{0,2}\d+\*{0,2}\s*\|\s*`", van_ban[:moc] if moc != -1 else van_ban, re.M))
     return len(re.findall(r"^\|\s*\*{0,2}\d+\*{0,2}\s*\|\s*`", t.read_text(encoding="utf-8"), re.M))
 
 
@@ -80,8 +94,12 @@ def main() -> int:
             "realm": realm,
             "ten": ten,
             "chi_tieu": chi_tieu,
-            "co_mach": dem_mach(MACH[realm]),
-            "da_viet": sum(viet.values()),
+            "co_mach": dem_mach(MACH[realm], GIOI_HAN_MACH.get(realm)),
+            # Chỉ cộng đúng những module NẰM TRONG `track` (whitelist phạm vi
+            # v1.0) — trước đây cộng `sum(viet.values())` gộp LUÔN module
+            # roadmap mới (VD: T2.4 `tap-hop-quan-he-anh-xa`) vào con số của
+            # phạm vi ĐÃ đóng băng, y hệt lỗi vừa sửa ở `dem_mach`.
+            "da_viet": sum(viet.get(k, 0) for k in track),
             "track": [{"id": k, "da_viet": viet.get(k, 0)} for k in track],
         })
 
