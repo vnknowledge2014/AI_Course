@@ -123,15 +123,25 @@ realm:
       # T4.6 hoãn, Realm 4 dừng ở 6/8 track (186/260 bài) cho tới khi có
       # đầu tư hạ tầng byte-rust riêng.
 
-  # Realm 5 (Software Engineering) mở màn bằng T5.3 (DDD), KHÔNG theo thứ tự
-  # số T5.1→T5.6 — T5.1 ("Git, MỚI, git mô phỏng WASM offline") đòi một
-  # ENGINE MỚI HOÀN TOÀN, không tồn tại trong `packages/`, ngoài phạm vi một
-  # phiên viết nội dung. T5.3 có nguồn tham khảo RÕ NHẤT (7 chương trọn vẹn,
-  # `fp/TypeScript_Books/part_4_ddd/`) và chỉ cần engine exec-typescript đã
-  # chứng minh ổn định. Xem `content/curriculum/r5-t53-xuong.yaml` cho chi
-  # tiết quyết định. T5.3 mượn `ts.adt-gate-boss` (T4.3) và `alg.gate-boss`
-  # (T4.5) — đứng sau TOÀN BỘ Realm 4 vì cần cả hai.
+  # Realm 5 (Software Engineering) mở màn bằng T5.3 (DDD, 42/42 XONG), KHÔNG
+  # theo thứ tự số T5.1→T5.6 — T5.1 ("Git, MỚI, git mô phỏng WASM offline")
+  # đòi một ENGINE MỚI HOÀN TOÀN, không tồn tại trong `packages/`, ngoài
+  # phạm vi một phiên viết nội dung. T5.3 có nguồn tham khảo RÕ NHẤT (7
+  # chương trọn vẹn, `fp/TypeScript_Books/part_4_ddd/`) và chỉ cần engine
+  # exec-typescript đã chứng minh ổn định. Xem `content/curriculum/
+  # r5-t53-xuong.yaml` cho chi tiết quyết định. T5.3 mượn `ts.adt-gate-boss`
+  # (T4.3) và `alg.gate-boss` (T4.5) — đứng sau TOÀN BỘ Realm 4 vì cần cả hai.
+  #
+  # T5.6 (Bảo mật ứng dụng, 26 bài) là track THỨ HAI — cùng lý do như T5.3:
+  # nguồn tham khảo RÕ NHẤT còn lại (2 chương trọn vẹn,
+  # `fp/TypeScript_Books/part_7_production/chapter_39_security_essentials.md`
+  # + `chapter_40_app_security_hardening.md`), engine exec-typescript ĐÃ ổn
+  # định. Xem `content/curriculum/r5-t56-xuong.yaml`. T5.6 mượn
+  # `ts.adt-gate-boss` (T4.3, bài 1) và `alg.gate-boss` (T4.5, bài 13) —
+  # KHÔNG phụ thuộc T5.3 (hai track song song trong Realm 5, không thứ tự
+  # bắt buộc giữa chúng).
   - id: ky-nghe-phan-mem
     ten: "Realm 5 — Kỹ nghệ phần mềm"
     track:
       - ddd
+      - bao-mat-ung-dung

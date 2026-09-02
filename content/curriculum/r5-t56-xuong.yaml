@@ -1,0 +1,225 @@
+# Xương sống R5.T5.6 — Bảo mật ứng dụng (26 bài) — TypeScript
+#
+# Track THỨ HAI của Realm 5 (Kỹ nghệ phần mềm), sau T5.3 (DDD, 42/42 xong).
+# T5.1 ("Git, MỚI") vẫn hoãn — cần engine WASM mới hoàn toàn. T5.6 được chọn
+# TIẾP THEO vì có NGUỒN THAM KHẢO trực tiếp, đầy đủ như T5.3: đúng HAI chương
+# trọn vẹn trong `fp/TypeScript_Books/part_7_production/`:
+#   - chapter_39_security_essentials.md (415 dòng) — Auth/AuthZ, JWT, RBAC/ABAC
+#   - chapter_40_app_security_hardening.md (392 dòng) — SQLi/XSS/CSRF, rate
+#     limiting, security headers, secrets management
+# Cả hai đã đọc TOÀN BỘ qua 2 agent phân tích song song (2026-09-02), tổng
+# hợp thành 13 bài/chương — khớp CHÍNH XÁC 26 bài MASTERPLAN ghi cho T5.6.
+#
+# QUYẾT ĐỊNH KHÔNG DÙNG THƯ VIỆN (giống T4.3/T4.5/T5.3): CẢ HAI chương chỉ
+# nhắc bcrypt/argon2/jose/passport/helmet/Prisma/Vault/AWS-Secrets-Manager
+# TRONG COMMENT — code THỰC THI trong cả hai chương đã tự viết tay 100% bằng
+# TS thuần. `import assert from "node:assert/strict"` xuất hiện ở MỌI khối
+# code (module Node built-in, KHÔNG dùng được trong sandbox, KHÔNG cần vì dự
+# án có `:::validate`/`tier: tests` riêng).
+#
+# BẪY SANDBOX ĐÃ BIẾT, ÁP DỤNG LẠI (xem quyết định T5.3 bài 8): KHÔNG
+# async/await/Promise/.then()/setTimeout — chương 39's OAuth 2.0 flow (§39.4)
+# VỐN DĨ đã chỉ là comment/pseudocode (redirect tới accounts.google.com, POST
+# đổi code — cần MẠNG THẬT, không giả lập được) → GIỮ NGUYÊN dạng tường
+# thuật/liệt kê bước, KHÔNG BAO GIỜ biến thành `code` step. `process.env`
+# (chương 40 §Secrets) → thay bằng object `env: Record<string, string |
+# undefined>` giả lập. `Buffer.from(...).toString("base64url")` (chương 39's
+# JWT signing) → Node API không có trong sandbox, thay bằng hàm checksum tự
+# viết (rõ ràng ghi "KHÔNG PHẢI mã hoá thật, chỉ minh hoạ HÌNH DẠNG kỹ
+# thuật" — same framing sách nguồn đã dùng cho `createSimpleHash`).
+#
+# TÁI DÙNG THẲNG Result<T,E> TỪ T4.5 (giống T5.3): chương 39's Bài tập 2 dùng
+# shape `{tag:"ok"|"err", value, error}` — track này ĐỔI sang shape ĐÃ CÓ
+# `{kind:"ok"|"loi", giaTri, loi}` + `chainResult`, KHÔNG dạy lại composition
+# theory, chỉ áp dụng vào miền auth pipeline MỚI (bài 13's capstone).
+#
+# QUYẾT ĐỊNH "CRYPTO GIẢ LẬP": không có `crypto`/hashing thật trong sandbox.
+# MỌI hàm "hash"/"chữ ký" trong track này là HÀM TỰ VIẾT rõ ràng gắn nhãn
+# "minh hoạ, KHÔNG PHẢI mã hoá thật" — đúng tinh thần sách nguồn đã làm với
+# `createSimpleHash`/`Math.random()`-based CSRF token. Bài học SỐNG CÒN
+# (tính chất one-way, salt phá rainbow table, ký/xác minh, gói không gói lại
+# được) vẫn dạy ĐÚNG qua hàm giả lập — chỉ tên gọi rõ ràng "đây không phải
+# sản phẩm dùng thật".
+#
+# world: blueprint-board (sum type hở → bug BÒ RA — MASTERPLAN §R5)
+# skill namespace: bmud.* (Bảo Mật ỨNg Dụng) — namespace MỚI, không trùng
+# ddd.*/ts.*/alg.* đã dùng ở R4/T5.3.
+
+cum:
+  - so: 1
+    ten: "Xác thực & Token"
+    tom_tat: "Authn vs authz, vì sao không lưu mật khẩu thô, salt, slow hash, JWT stateless, capstone ký+xác minh token."
+  - so: 2
+    ten: "Phân quyền & Auth thực tế"
+    tom_tat: "Access/refresh token, RBAC, authorize như hàm thuần trả DU, ABAC, RBAC vs ABAC, OAuth2 (tường thuật), capstone pipeline Result."
+  - so: 3
+    ten: "SQL Injection & tấn công phía client"
+    tom_tat: "Phòng thủ nhiều lớp, SQL injection, tham số hoá truy vấn, XSS/escape, CSP, CSRF/SameSite+token, capstone nhận diện lỗ hổng."
+  - so: 4
+    ten: "Runtime Hardening"
+    tom_tat: "Rate limiting (cửa sổ trượt + cài đặt), security headers, secrets qua env, git history không xoá được, BOSS ghép middleware."
+
+bai:
+# ── Cụm 1 (bài 1-6): Xác thực & Token — nguồn chương 39.1-39.2 ────────────
+  - so: 1
+    slug: xac-thuc-vs-phan-quyen
+    title: "Authentication vs Authorization — bạn LÀ ai, bạn ĐƯỢC làm gì"
+    teaches: [bmud.authn-vs-authz]
+    requires: [ts.adt-gate-boss]
+    y_chinh: "Authentication (xác thực — BẠN LÀ AI) và authorization (phân quyền — BẠN ĐƯỢC LÀM GÌ) là HAI kiểm tra TÁCH BIỆT, GHÉP được với nhau — ẩn dụ vé máy bay (xác thực danh tính ở an ninh) vs thẻ lên máy bay (phân quyền vào cổng CỤ THỂ). `xacThuc(token): KetQuaXacThuc` (DU `{daXacThuc:true, nguoiDung} | {daXacThuc:false}`) và `phanQuyen(vaiTro): KetQuaPhanQuyen` (DU tương tự) là HAI hàm ĐỘC LẬP — một hệ thống xác thực THÀNH CÔNG vẫn có thể phân quyền THẤT BẠI (đăng nhập được nhưng không đủ quyền xoá)."
+  - so: 2
+    slug: vi-sao-khong-luu-mat-khau-tho
+    title: "Vì sao không lưu mật khẩu thô — mã hoá 2 chiều vs băm 1 chiều"
+    teaches: [bmud.password-hashing-why]
+    requires: [bmud.authn-vs-authz]
+    y_chinh: "Câu chuyện THẬT: LinkedIn 2012 (SHA-1 KHÔNG salt, 6.5 triệu mật khẩu bị crack trong VÀI NGÀY), Adobe 2013 (mã hoá ĐỐI XỨNG — CÙNG khoá cho mọi user — hai user cùng mật khẩu ra CÙNG ciphertext, lộ pattern). Phân biệt mã hoá (encryption, HAI CHIỀU, giải mã được — SAI cho mật khẩu) vs băm (hashing, MỘT CHIỀU, KHÔNG đảo ngược được — ĐÚNG cho mật khẩu). Hàm băm giả lập TỰ VIẾT (rõ ràng gắn nhãn KHÔNG PHẢI thật) minh hoạ tính chất MỘT CHIỀU: cùng input luôn cùng output, nhưng KHÔNG suy ngược được input từ output."
+  - so: 3
+    slug: muoi-rieng-moi-nguoi-dung
+    title: "Salt — muối riêng mỗi người dùng, phá rainbow table"
+    teaches: [bmud.salt-per-user]
+    requires: [bmud.password-hashing-why]
+    y_chinh: "Rainbow table = bảng tra sẵn hash→mật khẩu phổ biến, tính TRƯỚC một lần, dùng lại cho MỌI nạn nhân — chỉ hiệu quả khi KHÔNG có salt. Salt (chuỗi NGẪU NHIÊN, RIÊNG mỗi user, lưu CẠNH hash) khiến CÙNG một mật khẩu (`\"matkhau123\"`) ra HAI hash KHÁC NHAU cho hai user khác nhau — kẻ tấn công phải tính rainbow table RIÊNG cho TỪNG salt, vô hiệu hoá tính \"dùng lại\" của bảng tra sẵn. Code: `bam(matKhau, muoi)` — verify bằng cách BĂM LẠI với ĐÚNG salt đã lưu, so sánh kết quả, KHÔNG BAO GIỜ so sánh mật khẩu thô."
+  - so: 4
+    slug: bam-cham-vs-bam-nhanh
+    title: "Băm CHẬM vs băm NHANH — vì sao SHA-256 sai cho mật khẩu"
+    teaches: [bmud.slow-hash-vs-fast]
+    requires: [bmud.salt-per-user]
+    y_chinh: "SHA-256/MD5 được thiết kế NHANH (checksum file, chữ ký số — tốc độ LÀ ưu điểm) — SAI HOÀN TOÀN cho mật khẩu, vì tốc độ nhanh giúp kẻ tấn công brute-force HÀNG TỈ tổ hợp mỗi giây trên GPU. bcrypt/argon2 CỐ Ý chậm (cost factor CẤU HÌNH được, tăng theo thời gian phần cứng mạnh lên) — so sánh số học: ước lượng thời gian brute-force `soToHop / hashMoiGiay` cho SHA-256 (~0.1 giây, GPU) vs bcrypt (~11.5 NGÀY) trên CÙNG một tập hợp tổ hợp — chênh lệch hàng triệu lần đến từ ĐÚNG MỘT lựa chọn thiết kế."
+  - so: 5
+    slug: jwt-token-khong-trang-thai
+    title: "JWT — token TỰ CHỨA thông tin, server không cần tra cứu"
+    teaches: [bmud.jwt-stateless]
+    requires: [bmud.slow-hash-vs-fast]
+    y_chinh: "Session truyền thống: server LƯU trạng thái đăng nhập (database/bộ nhớ), MỖI request phải TRA CỨU lại. JWT (JSON Web Token): server KHÔNG lưu gì — token TỰ CHỨA danh tính + hạn dùng (`ThongTinToken = {nguoiDung, vaiTro, hetHan}`), server CHỈ xác minh chữ ký, KHÔNG tra cứu database. Đánh đổi: JWT nhanh hơn (không round-trip database) NHƯNG khó thu hồi TRƯỚC hạn (đã phát hành thì server không \"xoá\" được nó khỏi ví người dùng) — vấn đề này dẫn tới bài sau."
+  - so: 6
+    slug: tao-va-xac-minh-token-co-chu-ky
+    title: "Capstone: Tạo và xác minh token có chữ ký, chống giả mạo & hết hạn"
+    teaches: [bmud.token-sign-verify]
+    requires: [bmud.jwt-stateless]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: ghép salt+hash (bài 2-4) và cấu trúc token (bài 5) thành một hệ thống ký/xác minh HOÀN CHỈNH. `ky(noiDung): string` — hàm checksum giả lập (TỰ VIẾT, gắn nhãn rõ KHÔNG PHẢI mã hoá thật — thay `Buffer`/crypto module không có trong sandbox), `taoToken(nguoiDung, vaiTro, ttlGiay): string` ghép `${noiDung}.${ky(noiDung)}`, `xacMinhToken(token): ThongTinToken | null` — TỪ CHỐI nếu chữ ký SAI (giả mạo, đổi 1 ký tự payload → hash lệch) HOẶC đã HẾT HẠN (`hetHan < gioHienTai`). Test: token GIẢ MẠO (thêm ký tự vào cuối) phải ra `null`; token HẾT HẠN phải ra `null`; token HỢP LỆ phải ra ĐÚNG payload gốc."
+
+# ── Cụm 2 (bài 7-13): Phân quyền & Auth thực tế — nguồn chương 39.3-39.4 ──
+  - so: 7
+    slug: access-token-va-refresh-token
+    title: "Access token ngắn hạn + Refresh token thu hồi được"
+    teaches: [bmud.refresh-token-revocation]
+    requires: [bmud.token-sign-verify]
+    y_chinh: "Vấn đề JWT stateless (bài 5): KHÔNG thu hồi được TRƯỚC hạn — user bấm \"đăng xuất\", token VẪN hợp lệ tới khi tự hết hạn. Giải pháp CHUẨN: access token SỐNG NGẮN (vài phút, stateless, nhanh), refresh token SỐNG DÀI nhưng LƯU Ở SERVER (`Map<string, string>`, tra cứu được, XOÁ được) — đăng xuất = `refreshConLai.delete(rt)`, access token cũ TỰ hết hạn trong vài phút SAU đó (không thu hồi ngay lập tức nhưng gần đủ). Đánh đổi tốc độ (access) và khả năng kiểm soát (refresh) ở HAI tầng KHÁC NHAU."
+  - so: 8
+    slug: rbac-vai-tro-toi-quyen
+    title: "RBAC — vai trò sở hữu quyền, kiểm tra là phép thuộc tập hợp"
+    teaches: [bmud.rbac]
+    requires: [bmud.refresh-token-revocation]
+    y_chinh: "Role-Based Access Control: quyền (permission) gán cho VAI TRÒ (role), KHÔNG gán trực tiếp cho TỪNG người dùng — bảng tra `quyenTheoVaiTro: Record<VaiTro, readonly Quyen[]>` (`admin`→[đọc,ghi,xoá,quản-lý], `bien-tap`→[đọc,ghi], `xem`→[đọc]). Kiểm tra quyền = phép `Array.includes` (thuộc tập hợp), KHÔNG if/else lồng nhau theo TỪNG user. Thêm user mới KHÔNG cần sửa logic phân quyền — chỉ gán vai trò CÓ SẴN."
+  - so: 9
+    slug: phan-quyen-la-ham-thuan-tra-ve-du
+    title: "authorize() như hàm thuần trả DU — không side-effect, test không cần mock"
+    teaches: [bmud.authorize-pure-du]
+    requires: [bmud.rbac]
+    y_chinh: "Bọc kết quả `coQuyen` (boolean, bài 8) thành DU giàu ngữ cảnh `KetQuaPhanQuyen = {duocPhep:true} | {duocPhep:false, lyDo:string}` — nối thẳng phong cách ROP (T5.3 bài 23): thay vì trả `false` trần trụi, trả LÝ DO CỤ THỂ (`\"vai trò 'bien-tap' thiếu quyền 'xoa'\"`) để log/hiển thị. `phanQuyen` là hàm THUẦN (không đọc database, không side-effect) — test được TRỰC TIẾP với input giả, KHÔNG cần mock bất kỳ thứ gì."
+  - so: 10
+    slug: abac-thuoc-tinh-quyet-dinh-truy-cap
+    title: "ABAC — khi RBAC quá THÔ, quyết định dựa trên THUỘC TÍNH"
+    teaches: [bmud.abac]
+    requires: [bmud.authorize-pure-du]
+    y_chinh: "Attribute-Based Access Control: khi RBAC không đủ TINH (ví dụ \"user CHỈ được sửa tài nguyên CỦA CHÍNH MÌNH\", \"user CÙNG phòng ban mới được đọc\") — quyết định dựa trên THUỘC TÍNH của user VÀ tài nguyên, không chỉ vai trò. `duocTruyCap(nguoiDung, taiNguyen, hanhDong): boolean` kiểm LẦN LƯỢT: admin luôn được; tài nguyên CÔNG KHAI + hành động ĐỌC luôn được; CHỦ SỞ HỮU luôn được; CÙNG phòng ban + ĐỌC được. Vẫn là hàm THUẦN, test bằng cách LIỆT KÊ tổ hợp (user, tài nguyên, hành động) và kỳ vọng boolean."
+  - so: 11
+    slug: rbac-vs-abac-danh-doi
+    title: "RBAC vs ABAC — đơn giản/thô đối lập linh hoạt/phức tạp"
+    teaches: [bmud.rbac-vs-abac]
+    requires: [bmud.abac]
+    y_chinh: "Chạy CÙNG một tình huống (user KHÔNG phải chủ sở hữu, CÙNG phòng ban, muốn ĐỌC tài nguyên riêng tư của đồng nghiệp) qua CẢ HAI hệ thống (bài 9's `phanQuyen` theo vai trò THUẦN TUÝ, bài 10's `duocTruyCap` theo thuộc tính) — RBAC KHÔNG phân biệt được (chỉ biết vai trò, không biết \"cùng phòng ban\"), ABAC PHÂN BIỆT được (kiểm thuộc tính `phongBan`). Kết luận: RBAC mặc định TỐT cho hệ thống ĐƠN GIẢN (ít luật, dễ audit), ABAC cần khi luật NGHIỆP VỤ tinh vi hơn vai trò có thể biểu diễn — hệ thống THẬT thường KẾT HỢP cả hai (vai trò làm khung, thuộc tính TINH CHỈNH thêm)."
+  - so: 12
+    slug: oauth2-dang-nhap-qua-ben-thu-ba
+    title: "OAuth 2.0 — đăng nhập qua Google/GitHub mà KHÔNG chia sẻ mật khẩu"
+    teaches: [bmud.oauth2-pkce]
+    requires: [bmud.rbac-vs-abac]
+    y_chinh: "Bài THUẦN TƯỜNG THUẬT (không có code chạy được — luồng THẬT cần redirect HTTP tới `accounts.google.com` và trao đổi mã qua mạng THẬT, không giả lập được trong sandbox đồng bộ). \"Login with Google\": app KHÔNG BAO GIỜ thấy mật khẩu Google của user — user đăng nhập TRÊN trang Google, Google trả về một MÃ (authorization code) cho app, app đổi mã đó lấy TOKEN truy cập giới hạn (chỉ email/tên, KHÔNG toàn quyền tài khoản Google). PKCE (Proof Key for Code Exchange): thêm một \"mật khẩu một lần\" TỰ SINH ở BƯỚC ĐẦU, chỉ ai giữ nó mới đổi được mã lấy token — chống kẻ tấn công CHẶN được authorization code (ví dụ qua log, malware) tự đổi lấy token."
+  - so: 13
+    slug: ghep-pipeline-xac-thuc-bang-result
+    title: "Capstone: Ghép pipeline xác thực bằng Result — trích token, xác minh, kiểm quyền"
+    teaches: [bmud.auth-pipeline-result]
+    requires: [alg.gate-boss, bmud.oauth2-pkce]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: dùng LẠI `Result<T,E>`/`chainResult` (T4.5, ĐÃ dạy — không dạy lại composition theory) áp dụng vào pipeline auth THẬT. `guardAuth(header, vaiTroCanCo): Result<ThongTin, LoiXacThuc>` ghép BA bước qua `chainResult` LỒNG: `layToken` (trích token từ header `\"Bearer ...\"`, lỗi `\"thieu_token\"`/`\"token_khong_hop_le\"`) → `xacMinh` (bài 6's kỹ thuật, lỗi `\"het_han\"`/`\"token_khong_hop_le\"`) → `kiemTraQuyen` (bài 9's kỹ thuật, lỗi `\"khong_du_quyen\"`) — MỘT lỗi ở BẤT KỲ bước nào short-circuit NGAY (nối T5.3 bài 23-24's ROP). Test: header thiếu → `loi(\"thieu_token\")`; token hết hạn → `loi(\"het_han\")`; đủ điều kiện → `ok(ThongTin)`."
+
+# ── Cụm 3 (bài 14-20): SQL Injection & tấn công phía client — nguồn ch.40.1-40.2
+  - so: 14
+    slug: owasp-mo-hinh-phong-thu-nhieu-lop
+    title: "Phòng thủ nhiều lớp — lỗ hổng THƯỜNG là bug code, không phải vận hành"
+    teaches: [bmud.defense-in-depth]
+    requires: [bmud.auth-pipeline-result]
+    y_chinh: "Ẩn dụ LÂU ĐÀI: một bức tường KHÔNG đủ — hào nước, tường thành, lính gác, cửa trong LÀ nhiều LỚP phòng thủ ĐỘC LẬP, một lớp thất bại thì lớp SAU vẫn chặn được. Bài học framing: track này dạy MỘT PHẦN đại diện của OWASP Top 10 (SQL Injection, XSS, CSRF + rate limiting/headers/secrets ở cụm 4) — KHÔNG phải toàn bộ 10 mục — nhưng đủ để thấy pattern CHUNG: PHẦN LỚN lỗ hổng bảo mật ứng dụng đến từ BUG TRONG CODE người viết (tin dữ liệu người dùng, quên escape, quên giới hạn) — KHÔNG PHẢI lỗi hạ tầng/vận hành."
+  - so: 15
+    slug: sql-injection-la-gi
+    title: "SQL Injection — khi input người dùng trở thành LỆNH thực thi"
+    teaches: [bmud.sql-injection-attack]
+    requires: [bmud.defense-in-depth]
+    y_chinh: "Nối chuỗi TRỰC TIẾP (`` `SELECT * FROM users WHERE email = '${email}'` ``) khiến database KHÔNG phân biệt được \"code\" và \"dữ liệu\" — input `\"'; DROP TABLE users; --\"` biến thành LỆNH SQL THẬT được thực thi. Minh hoạ bằng chuỗi (không database thật): `unsafeQuery.includes(\"DROP TABLE\")` xác nhận câu lệnh ĐỘC HẠI đã \"lọt\" vào chuỗi SQL cuối cùng — TypeScript KHÔNG cảnh báo gì (chuỗi vẫn LÀ chuỗi hợp lệ về mặt KIỂU), lỗ hổng nằm ở TẦNG Ý NGHĨA, không phải tầng cú pháp."
+  - so: 16
+    slug: tham-so-hoa-truy-van
+    title: "Tham số hoá truy vấn — tách LỆNH khỏi DỮ LIỆU"
+    teaches: [bmud.parameterized-queries]
+    requires: [bmud.sql-injection-attack]
+    y_chinh: "Giải pháp THẬT: KHÔNG nối chuỗi — tách RIÊNG câu lệnh SQL (cố định, chứa `$1`/`$2` là CHỖ GIỮ) khỏi DỮ LIỆU (mảng `params`, TRUYỀN riêng cho driver). `buildSafeQuery(email): {sql, params}` — `sql` KHÔNG BAO GIỜ chứa chuỗi người dùng, `params` LÀ dữ liệu THÔ, driver BINDS giá trị chứ KHÔNG re-parse như code. Test: input độc hại `\"'; DROP TABLE users; --\"` truyền qua `buildSafeQuery` → `sql` KHÔNG chứa `\"DROP TABLE\"` (chỉ nằm trong `params`, vô hại vì KHÔNG BAO GIỜ được diễn giải lại thành lệnh)."
+  - so: 17
+    slug: xss-thoat-du-lieu-dau-ra
+    title: "XSS — escape MỌI biên xuất ra HTML, kể cả vector không phải <script>"
+    teaches: [bmud.xss-escape-output]
+    requires: [bmud.parameterized-queries]
+    y_chinh: "Cross-Site Scripting: nội dung người dùng CHƯA escape render THẲNG thành HTML thực thi NHƯ CODE. `escapeHtml(unsafe): string` — chuỗi thay thế NĂM ký tự đặc biệt (`&`→`&amp;`, `<`→`&lt;`, `>`→`&gt;`, `\"`→`&quot;`, `'`→`&#039;`) THEO ĐÚNG THỨ TỰ (escape `&` TRƯỚC các ký tự khác, nếu không sẽ escape ĐÈ lên chính escape sequence vừa tạo). Vector KHÔNG PHẢI `<script>`: `<img src=x onerror=\"alert(1)\">` — escape đúng cả `\"`/`<`/`>` chặn được vector NÀY, không chỉ chặn thẻ `<script>` trực tiếp."
+  - so: 18
+    slug: csp-danh-sach-cho-phep
+    title: "CSP — chính sách khai báo NGUỒN nào được phép chạy"
+    teaches: [bmud.csp-allowlist]
+    requires: [bmud.xss-escape-output]
+    y_chinh: "Content Security Policy: HTTP header khai báo NGUỒN script được PHÉP chạy (`script-src 'self'` = chỉ script TỪ CHÍNH domain) — lớp phòng thủ THỨ HAI, hoạt động NGAY CẢ nếu escape (bài 17) bị bỏ sót ở đâu đó. **Mô hình hoá, KHÔNG PHẢI CSP thật** (CSP cần trình duyệt THẬT để thực thi, không giả lập được trong sandbox): `isScriptAllowed(src, policy): boolean` kiểm `policy.scriptSrc.includes(src)` — GIỮ Ý TƯỞNG allowlist (chỉ nguồn được LIỆT KÊ mới chạy), KHÔNG PHẢI cơ chế header/trình duyệt thật."
+  - so: 19
+    slug: csrf-samesite-va-token
+    title: "CSRF — trình duyệt tự gửi cookie, SameSite và token chặn giả mạo"
+    teaches: [bmud.csrf-samesite-token]
+    requires: [bmud.csp-allowlist]
+    y_chinh: "Cross-Site Request Forgery: trình duyệt TỰ ĐỘNG đính kèm cookie khi gửi request TỚI domain đã đăng nhập, KỂ CẢ khi request đó XUẤT PHÁT từ một trang WEB KHÁC (evil.com âm thầm gửi form TỚI bank.com, cookie bank.com VẪN được đính kèm). Phần TƯỜNG THUẬT (hành vi trình duyệt, KHÔNG giả lập được): `SameSite=Strict` chặn cookie đính kèm CROSS-SITE. Phần CODE ĐƯỢC (server-side): `generateCsrfToken()`/`validateCsrfToken(sent, expected)` — token ngẫu nhiên gắn vào FORM, request KHÔNG có token ĐÚNG bị TỪ CHỐI (giả mạo không đoán được token). Lưu ý: `Math.random()` KHÔNG PHẢI CSPRNG thật, chỉ minh hoạ HÌNH DẠNG kỹ thuật."
+  - so: 20
+    slug: nhan-dien-lo-hong
+    title: "Capstone: Nhận diện lỗ hổng — phân loại đoạn code SQLi/XSS/CSRF/rò rỉ bí mật"
+    teaches: [bmud.vulnerability-spotter]
+    requires: [bmud.csrf-samesite-token]
+    y_chinh: "Bài chốt cụm, code có chấm điểm sống: `classifyVulnerability(doanCode): LoaiLoHong` — DU (`\"sql_injection\" | \"xss\" | \"csrf\" | \"ro_ri_bi_mat\" | \"an_toan\"`) nhận diện BỐN dấu hiệu ĐẶC TRƯNG (nối bài 15-19): nối chuỗi TRỰC TIẾP vào SQL (regex tìm biến chèn thẳng vào template SQL); render `.innerHTML`/output KHÔNG qua `escapeHtml`; thiếu kiểm token trên request THAY ĐỔI trạng thái; secret hardcode TRỰC TIẾP trong chuỗi code (`\"sk_live_...\"`, `\"password123\"`). Test: bốn đoạn code MẪU, mỗi loại MỘT, phải phân loại ĐÚNG; đoạn code AN TOÀN (đã tham số hoá + escape) phải ra `\"an_toan\"`."
+
+# ── Cụm 4 (bài 21-26): Runtime Hardening — nguồn chương 40.3 ──────────────
+  - so: 21
+    slug: rate-limiting-cua-so-truot
+    title: "Rate Limiting — cửa sổ trượt đếm request theo THỜI GIAN"
+    teaches: [bmud.rate-limit-sliding-window]
+    requires: [bmud.vulnerability-spotter]
+    y_chinh: "Sliding window: LƯU dấu thời gian (timestamp) của MỖI request theo KHOÁ (thường là IP), LỌC BỎ những dấu CŨ HƠN cửa sổ (`now - t < windowMs`), rồi SO SÁNH số lượng CÒN LẠI với ngưỡng tối đa. Khác đếm THEO PHÚT CỐ ĐỊNH (reset đột ngột mỗi phút, dễ bị \"burst\" ngay lúc reset) — cửa sổ TRƯỢT LIÊN TỤC theo timestamp THỰC, không có điểm reset đột ngột nào để khai thác. Minh hoạ trước bằng TRACE tay: một mảng timestamp, lọc theo điều kiện, đếm kết quả — TRƯỚC KHI cài đặt đầy đủ ở bài sau."
+  - so: 22
+    slug: cai-dat-bo-gioi-han-toc-do
+    title: "Cài đặt bộ giới hạn tốc độ — Map trong closure, hoàn toàn đồng bộ"
+    teaches: [bmud.rate-limit-implement]
+    requires: [bmud.rate-limit-sliding-window]
+    y_chinh: "`createRateLimiter(maxRequests, windowMs): RateLimiter` — dùng `Map<string, number[]>` trong CLOSURE (nối kỹ thuật closure đã học xuyên suốt track T5.3), MỖI khoá (IP) giữ MẢNG timestamp RIÊNG. `check(ip): {allowed, retryAfterMs?}` — lọc timestamp CŨ, nếu ĐỦ ngưỡng thì TỪ CHỐI (kèm `retryAfterMs` tính từ timestamp CŨ NHẤT còn hiệu lực), nếu CHƯA đủ thì GHI THÊM timestamp mới, CHO PHÉP. Test: gọi ĐÚNG `maxRequests` lần liên tiếp PHẢI cho phép HẾT, lần THỨ `maxRequests+1` PHẢI bị từ chối, IP KHÁC PHẢI không bị ảnh hưởng (đếm RIÊNG theo khoá)."
+  - so: 23
+    slug: header-bao-mat-tong-quan
+    title: "Security Headers — mỗi header chặn MỘT loại tấn công cụ thể"
+    teaches: [bmud.security-headers]
+    requires: [bmud.rate-limit-implement]
+    y_chinh: "Bảng ánh xạ header→mối đe doạ: CSP (bài 18, chặn script LẠ), HSTS (ép HTTPS, chặn downgrade-attack), X-Frame-Options (chặn clickjacking — nhúng trang vào iframe ẩn), X-Content-Type-Options (chặn MIME-sniffing — trình duyệt \"đoán\" sai loại file). Thư viện `helmet` set CẢ BỘ header này CHỈ MỘT DÒNG (không dùng được trong sandbox — chỉ nhắc TÊN) — track này mô hình hoá bằng hàm THUẦN `addSecurityHeaders(headers): headers` trả object CÓ THÊM ba header literal, cùng Ý TƯỞNG nhưng KHÔNG PHẢI cơ chế HTTP thật (giống bài 18's CSP allowlist)."
+  - so: 24
+    slug: bien-moi-truong-va-that-bai-som
+    title: "Biến môi trường & thất bại SỚM — đừng hardcode bí mật"
+    teaches: [bmud.secrets-env-fail-fast]
+    requires: [bmud.security-headers]
+    y_chinh: "Bí mật (mật khẩu database, khoá API) KHÔNG BAO GIỜ hardcode trong code — đọc từ MÔI TRƯỜNG lúc chạy. `requireEnv(env, name): string` — kiểm NGAY lúc khởi động, THIẾU biến nào thì BÁO LỖI RÕ RÀNG NGAY (fail-fast), thay vì để lỗi \"undefined\" mập mờ xuất hiện GIỮA CHỪNG sau này. `process.env` (Node global, không có trong sandbox) thay bằng object `env: Record<string, string | undefined>` giả lập. Cân nhắc: viết `requireEnv` trả `Result<string, string>` (`ok`/`loi`, nối phong cách track) thay vì `throw`, phù hợp hơn với mọi combinator ĐÃ HỌC."
+  - so: 25
+    slug: lich-su-git-va-xoay-vong-bi-mat
+    title: "Lịch sử Git không xoá được — bí mật lộ phải XOAY VÒNG, không phải XOÁ"
+    teaches: [bmud.secrets-git-rotate]
+    requires: [bmud.secrets-env-fail-fast]
+    y_chinh: "Bài THUẦN TƯỜNG THUẬT (câu chuyện + quiz Đúng/Sai, không code chạy được): commit một bí mật rồi commit \"xoá\" nó Ở LẦN SAU KHÔNG làm nó biến mất — lịch sử git MẶC ĐỊNH bất biến, ai CLONE repo VẪN thấy bí mật ở COMMIT CŨ. Ca THẬT: rò rỉ Twitch 2021 sống sót lâu vì bí mật CHƯA TỪNG nằm trong code (nằm ở hạ tầng CI khác) — minh hoạ NGƯỢC LẠI: nếu bí mật ĐàTỪNG vào git, giải pháp DUY NHẤT đáng tin là XOAY VÒNG (tạo khoá MỚI, VÔ HIỆU khoá CŨ), KHÔNG PHẢI cố \"dọn\" lịch sử (BFG/`git filter-branch` chỉ giảm rủi ro, không đảm bảo tuyệt đối nếu đã từng push public)."
+  - so: 26
+    slug: ghep-middleware-bao-mat
+    title: "BOSS — Ghép middleware bảo mật: rate limit + headers + kiểm dữ liệu vào"
+    teaches: [bmud.gate-boss]
+    requires: [bmud.secrets-git-rotate]
+    y_chinh: "Bài BOSS của track: ghép TẤT CẢ kỹ thuật runtime (cụm 4) thành MỘT pipeline middleware ĐỒNG BỘ. `Middleware = (req: YeuCau, next: () => PhanHoi) => PhanHoi` — composeMiddlewares nối NHIỀU middleware: `taoRateLimitMiddleware` (bài 22, từ chối 429 nếu vượt ngưỡng), `taoSecurityHeadersMiddleware` (bài 23, thêm header vào MỌI phản hồi), `taoBodySizeLimitMiddleware` (MỚI — từ chối payload quá lớn, 413), `taoContentTypeMiddleware` (MỚI — từ chối Content-Type sai, 415). Test TOÀN BỘ pipeline bằng request giả lập: request HỢP LỆ đi qua HẾT tới handler cuối; request VƯỢT rate limit bị chặn TRƯỚC KHI chạm handler; request body QUÁ LỚN bị chặn Ở ĐÚNG middleware của nó — mỗi middleware CHỈ chịu trách nhiệm MỘT mối lo, ghép được với NHAU theo THỨ TỰ bất kỳ."
