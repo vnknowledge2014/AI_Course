@@ -264,3 +264,16 @@
 # assert).
 - 'ky-nghe-phan-mem.kiem-thu.arrange-act-assert-va-dat-ten · viet_test_aaa · đổi MỌI chỗ đọc tên assertEqual thành assertDeepEqual (1 chỗ)'
 
+# TƯƠNG ĐƯƠNG THẬT — cấu trúc riêng của HÀM CLAMP. dieuChinhKhoangGiaTri
+# trả "min" khi gia < min, và trả CHÍNH "gia" khi gia đã hợp lệ. Tại ĐÚNG
+# điểm biên gia === min, HAI nhánh cho ra CÙNG một GIÁ TRỊ SỐ (min và gia
+# lúc đó bằng nhau) — đổi `<` thành `<=` chỉ đổi NHÁNH nào được chọn tại
+# điểm biên, KHÔNG đổi kết quả trả về. Cùng lý do cho `>`/`>=` ở nhánh max
+# (gia === max cho cùng giá trị dù trả "max" hay trả "gia"). Bài đã có
+# test đúng tại biên (gia=min, gia=max) — đây CHÍNH LÀ ca kiểm được, và nó
+# xác nhận: không có input nào (kể cả đúng biên) phân biệt được hai toán
+# tử ở hàm clamp này. Cùng lớp `giu-lai-ky-luc`/`tim-nhi-phan` đã khai ở
+# trên — hệ quả tất yếu của cấu trúc thuật toán, không phải lỗ thật.
+- 'ky-nghe-phan-mem.kiem-thu.mau-bat-bien · viet_dieuchinhkhoanggiatri · đổi MỌI dấu < thành <= (1 chỗ)'
+- 'ky-nghe-phan-mem.kiem-thu.mau-bat-bien · viet_dieuchinhkhoanggiatri · đổi MỌI dấu > thành >= (1 chỗ)'
+
