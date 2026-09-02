@@ -277,3 +277,38 @@
 - 'ky-nghe-phan-mem.kiem-thu.mau-bat-bien · viet_dieuchinhkhoanggiatri · đổi MỌI dấu < thành <= (1 chỗ)'
 - 'ky-nghe-phan-mem.kiem-thu.mau-bat-bien · viet_dieuchinhkhoanggiatri · đổi MỌI dấu > thành >= (1 chỗ)'
 
+# THAM SỐ PHỤ KHÔNG ẢNH HƯỞNG KẾT QUẢ — cùng lớp các ca đã khai ở trên. Cả
+# hai blank của bài này đều đúng là "false" — hoán đổi NHÃN (label, tham số
+# thứ ba của assertEqual, chỉ dùng để IN thông điệp lỗi) giữa hai assertion
+# CÙNG giá trị mong đợi không đổi PASS/FAIL của bất kỳ assertion nào. Bài
+# dạy cần đủ BỐN tổ hợp boolean, không dạy nội dung nhãn mô tả từng tổ hợp.
+- 'ky-nghe-phan-mem.kiem-thu.dot-bien-logic · viet_test_dot_bien_logic · đổi MỌI chuỗi "co tien nhung CHUA du tuoi -> khong duoc mua" thành "du tuoi nhung KHONG co tien -> khong duoc mua" (1 chỗ)'
+- 'ky-nghe-phan-mem.kiem-thu.dot-bien-logic · viet_test_dot_bien_logic · đổi MỌI chuỗi "du tuoi nhung KHONG co tien -> khong duoc mua" thành "co tien nhung CHUA du tuoi -> khong duoc mua" (1 chỗ)'
+
+# THAM SỐ PHỤ KHÔNG ẢNH HƯỞNG KẾT QUẢ — nhãn (nội dung mô tả) đổi thành
+# đúng chuỗi giá trị field "SP001" — vẫn chỉ là tham số thứ ba của
+# assertEqual, không tham gia so sánh actual/expected.
+- 'ky-nghe-phan-mem.kiem-thu.dot-bien-hoan-doi-gia-tri · viet_test_hoan_doi · đổi MỌI chuỗi "ma phai giu dung ma, khong doi cho voi ten" thành "SP001" (1 chỗ)'
+
+# TƯƠNG ĐƯƠNG THẬT. trongPhamVi(n, min, max) KHÔNG có hằng số hardcode nào
+# trong thân hàm (min/max là THAM SỐ, không phải hằng số của SUT) — "10"/
+# "20" chỉ tồn tại trong CÁC LỜI GỌI test (dữ liệu test, không phải logic
+# SUT). Đổi ĐỀU "10"→"11" (hay "20"→"21") dịch chuyển ĐỒNG THỜI cả giá trị
+# n VÀ giá trị min/max được dùng trong MỌI lời gọi test hiện có — quan hệ
+# tương đối (n<min, n===min, n trong khoảng, n===max, n>max) được BẢO TOÀN
+# nguyên vẹn ở mọi lời gọi, nên SUT không hề bị mutate (vẫn đúng 100%),
+# chỉ là dữ liệu test bị dịch chuyển đồng bộ. Không thể phân biệt bằng bất
+# kỳ test nào dùng chung mẫu (n, min, max) với ràng buộc quan hệ tương đối
+# — đây là hệ quả tất yếu của việc SUT không hardcode ngưỡng, không phải
+# lỗ thật. Cùng lớp nhãn (label) hoán đổi giữa hai assertion đúng biên.
+- 'ky-nghe-phan-mem.kiem-thu.dot-bien-ranh-gioi · viet_test_ranh_gioi · đổi MỌI hằng số 10 thành 11 (3 chỗ)'
+- 'ky-nghe-phan-mem.kiem-thu.dot-bien-ranh-gioi · viet_test_ranh_gioi · đổi MỌI hằng số 20 thành 21 (3 chỗ)'
+- 'ky-nghe-phan-mem.kiem-thu.dot-bien-ranh-gioi · viet_test_ranh_gioi · đổi MỌI chuỗi "dung bang min phai trong pham vi" thành "dung bang max phai trong pham vi" (1 chỗ)'
+- 'ky-nghe-phan-mem.kiem-thu.dot-bien-ranh-gioi · viet_test_ranh_gioi · đổi MỌI chuỗi "dung bang max phai trong pham vi" thành "dung bang min phai trong pham vi" (1 chỗ)'
+
+# THAM SỐ PHỤ KHÔNG ẢNH HƯỞNG KẾT QUẢ — nhãn của assertion n=12 đổi thành
+# đúng chuỗi giá trị "tre_em" (giá trị mong đợi CỦA CHÍNH assertion đó,
+# trùng hợp cũng là một blank khác trong cùng bài) — vẫn chỉ là nhãn, tham
+# số thứ ba của assertEqual, không tham gia so sánh actual/expected.
+- 'ky-nghe-phan-mem.kiem-thu.san-dot-bien-that · san_dot_bien_boss · đổi MỌI chuỗi "12 tuoi (ngay duoi bien 13) van la tre em" thành "tre_em" (1 chỗ)'
+
