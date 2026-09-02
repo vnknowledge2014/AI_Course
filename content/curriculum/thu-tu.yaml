@@ -155,6 +155,13 @@ realm:
   # + `chapter_17_cqrs_event_sourcing.md`. Xem `content/curriculum/
   # r5-t54-xuong.yaml`. T5.4 mượn `ts.adt-gate-boss` (T4.3, bài 1) —
   # KHÔNG phụ thuộc T5.2/T5.3/T5.6 (bốn track song song trong Realm 5).
+  #
+  # T5.5 (CI/CD & Observability, 24 bài) là track THỨ NĂM — nguồn
+  # `fp/TypeScript_Books/part_7_production/chapter_43_capstone_production.md`
+  # §43.4-43.5 (chỉ ~120 dòng, phần LỚN track TỰ THIẾT KẾ). Xem
+  # `content/curriculum/r5-t55-xuong.yaml`. Bài 1 mượn `mau.gate-boss-cqrs-es`
+  # (T5.4, bài CUỐI) — VÌ T5.5 TÁI DÙNG kỹ thuật pipeline/composition ĐÃ học
+  # Ở T5.4, nên xếp SAU T5.4 thay vì song song.
   - id: ky-nghe-phan-mem
     ten: "Realm 5 — Kỹ nghệ phần mềm"
     track:
@@ -162,3 +169,4 @@ realm:
       - bao-mat-ung-dung
       - kiem-thu
       - mau-tai-cau-truc
+      - van-hanh
