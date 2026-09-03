@@ -1,0 +1,24 @@
+{
+  "name": "@byte/simdisk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Block device mô phỏng cho Realm 6 (Database) — read/write/fsync theo sector, không dùng open() thật. Xem MASTERPLAN.md §4 mục 'SimDisk'.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "@types/node": "^26.1.2"
+  }
+}
