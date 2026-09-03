@@ -1,0 +1,125 @@
+# Xương sống R6-2 q07 — "Ngôn ngữ của Byte" (12 bài)
+#
+# Quest MỞ ĐẦU R6-2 (MASTERPLAN §9.2): lexer + Pratt parser + AST cho một
+# mini-SurrealQL. Track ĐẦU TIÊN của R6-2 dùng Rust làm ngôn ngữ CHÍNH —
+# đúng "★ LÃNH THỔ RUST" mà thu-tu.yaml/MASTERPLAN đã khai cho R6 (xem
+# HANDOFF phiên làm việc: q01-q06 của R6-1 lệch sang Python là một quyết
+# định đã xảy ra và được chấp nhận hồi tố, KHÔNG sửa; nhưng TỪ q07 trở đi
+# theo đúng tài liệu — Rust cho mọi quest KHÔNG có tag [PY]/[TS] tường minh).
+#
+# TRƯỚC KHI VIẾT: đọc `docs/decisions/R4-T40b-su-that-do-duoc.md`, mục
+# "Cập nhật 2026-09-03" — danh sách CHÍNH XÁC những gì `byte-rust` (interpreter
+# Rust tự viết, KHÔNG dùng rustc thật) dùng được/KHÔNG dùng được, đo trực
+# tiếp qua `cargo run --example` trước khi viết bài nào của quest này.
+#
+# BA RÀNG BUỘC THIẾT KẾ BẮT BUỘC (hệ quả trực tiếp từ file trên):
+# 1. AST/cây dùng ARENA/INDEX (`struct Cay { nut: Vec<NoAst> }`, con trỏ LÀ
+#    `usize` chỉ vào `nut`) — KHÔNG `Box<Self>` (`Box::new` chưa cài).
+# 2. "Chuỗi" (tên định danh, text token) biểu diễn bằng `Vec<char>` xuyên
+#    suốt phần lexer — KHÔNG `String` (String chỉ đọc, không `.push`).
+# 3. Giá trị so sánh trong WHERE CHỈ LÀ SỐ NGUYÊN (không chuỗi trong dấu
+#    nháy) — CẮT PHẠM VI có chủ đích: literal chuỗi cần lexer đọc trong dấu
+#    nháy RỒI vẫn phải "xây" text đó thành một thứ so sánh được, đúng chỗ
+#    String-building bị chặn (mục 2). Ghi rõ quyết định NÀY trong lesson
+#    giới thiệu AST (bài 7) VÀ trong reflect bài BOSS (bài 12).
+#
+# Namespace skill: `db.*` (tiếp nối R6). Thư mục nội dung:
+# `content/co-so-du-lieu/07-ngon-ngu-cua-byte/`.
+# Ngôn ngữ: Rust (`languages: [rust]`, `defaultLanguage: rust`).
+# `validate:` CHỈ dùng `tier: run` + `tier: tests` + `tier: output` — KHÔNG
+# `tier: static`/requireAst (xác nhận từ trước: TsAstKind/RsAstKind chưa cài
+# nhánh xử lý nào trong `kiem_ma_bai_hoc.mjs`).
+#
+# Ngữ pháp mini-SurrealQL mục tiêu (đủ cho 12 bài, không hơn):
+#   SELECT <field>, <field>, ... FROM <table> [WHERE <bieu_thuc>]
+#   bieu_thuc := so_sanh (("AND" | "OR") so_sanh)*
+#   so_sanh   := <field> <op> <so>
+#   op        := "=" | ">" | "<"
+# Độ ưu tiên: AND bó chặt hơn OR (giống && / || hầu hết ngôn ngữ) — đúng
+# điểm cần Pratt/precedence-climbing thật, không chỉ là recursive descent
+# thẳng.
+
+track: ngon-ngu-cua-byte
+realm: co-so-du-lieu
+ten: "R6-2 q07 — Ngôn ngữ của Byte"
+so_bai: 12
+ngon_ngu_chu: rust
+
+# ── Cụm 1 (bài 1–6): LEXER — biến chuỗi ký tự thành danh sách Token ───────
+bai:
+  - so: 1
+    slug: token-so
+    title: "Token đầu tiên: đọc một số"
+    teaches: [db.lexer-token]
+    requires: [db.version-gc]
+    y_chinh: "enum Token { So(i64), KetThuc } — hàm doc_so(ky_tu: &Vec<char>, bat_dau: usize) -> (i64, usize) gộp các chữ số liên tiếp từ vị trí bat_dau thành MỘT số nguyên bằng tích luỹ (n = n*10 + chữ_số, KHÔNG dùng String::push — đã xác nhận không tồn tại), trả về (giá trị, vị trí kế tiếp). So sánh ký tự trực tiếp c >= '0' && c <= '9' (char không có is_ascii_digit). Đây là token ĐẦU TIÊN của lexer — chưa xử lý khoảng trắng/định danh/dấu, chỉ một chuỗi số thuần."
+  - so: 2
+    slug: bo-qua-khoang-trang
+    title: "Bỏ qua khoảng trắng giữa các token"
+    teaches: [db.lexer-whitespace]
+    requires: [db.lexer-token]
+    y_chinh: "Chuỗi nguồn thật có dấu cách giữa các token ('12 34' phải đọc thành HAI token số, không phải lỗi hay MỘT số dính liền). Hàm bo_qua_trang(ky_tu: &Vec<char>, vi_tri: usize) -> usize tăng vi_tri qua mọi ký tự == ' ' liên tiếp, trả về vị trí token TIẾP THEO thật sự bắt đầu. Gọi trước MỖI lần đọc token trong vòng lặp lexer chính (sẽ ráp ở bài 6)."
+  - so: 3
+    slug: doc-dinh-danh
+    title: "Đọc định danh: tên trường, tên bảng"
+    teaches: [db.lexer-identifier]
+    requires: [db.lexer-whitespace]
+    y_chinh: "Định danh (tên trường như 'tuoi', tên bảng như 'nguoi') bắt đầu bằng chữ/gạch dưới, tiếp tục bằng chữ/số/gạch dưới. So sánh trực tiếp (c>='a'&&c<='z')||(c>='A'&&c<='Z')||c=='_' (không is_alphabetic). Text định danh gom vào Vec<char> (KHÔNG String — không .push được) qua vòng lặp đẩy từng ký tự bằng .push của Vec (CÓ hỗ trợ, khác String). Trả về (Vec<char>, vi_tri_ke_tiep)."
+  - so: 4
+    slug: tu-khoa-vs-dinh-danh
+    title: "Từ khoá và định danh: cùng hình dạng, khác ý nghĩa"
+    teaches: [db.lexer-keyword]
+    requires: [db.lexer-identifier]
+    y_chinh: "SELECT/FROM/WHERE/AND/OR trông giống hệt một định danh lúc đọc ký tự (chữ+gạch dưới) — phân biệt bằng cách SO SÁNH Vec<char> vừa đọc được với các mẫu từ khoá đã biết (so sánh == giữa hai Vec<char> — đã xác nhận hoạt động đúng ngữ nghĩa so từng phần tử). enum Token thêm biến thể Chon, Tu, ODau (WHERE), Va (AND), Hoac (OR), DinhDanh(Vec<char>) — cùng MỘT hàm quét ký tự (bài 3) nhưng phân loại kết quả khác nhau."
+  - so: 5
+    slug: doc-dau
+    title: "Đọc dấu: phẩy, so sánh"
+    teaches: [db.lexer-symbol]
+    requires: [db.lexer-keyword]
+    y_chinh: "Bốn ký tự đơn còn lại của ngữ pháp: ',' '=' '>' '<'. Mỗi ký tự ứng đúng MỘT token (Token::Phay, Token::Bang, Token::LonHon, Token::NhoHon) — match trực tiếp trên ký tự tại vi_tri, không cần gộp nhiều ký tự (khác số/định danh). Bài NGẮN, củng cố match-trên-char trước khi ráp toàn bộ lexer ở bài 6."
+  - so: 6
+    slug: toan-bo-lexer
+    title: "Ráp lại: toàn bộ lexer"
+    teaches: [db.lexer-hoan-chinh]
+    requires: [db.lexer-symbol]
+    y_chinh: "fn lex(ky_tu: &Vec<char>) -> Vec<Token> — vòng lặp while chính: bỏ qua trắng (bài 2), rồi match ký tự hiện tại: số→bài 1, chữ/gạch dưới→bài 3+4, dấu→bài 5, hết chuỗi→đẩy Token::KetThuc rồi dừng. Chạy trên MỘT câu truy vấn đầy đủ ('SELECT tuoi FROM nguoi WHERE tuoi > 18'), in ra Vec<Token> kết quả (dùng {:?} — engine in được trên MỌI struct/enum không cần derive, đã xác nhận). Đây LÀ lexer hoàn chỉnh — nửa đầu quest khép lại."
+
+# ── Cụm 2 (bài 7–11): AST + PARSER — Token thành cây, dùng Pratt/precedence
+  - so: 7
+    slug: cay-cu-phap-la-gi
+    title: "Cây cú pháp là gì: arena thay vì Box"
+    teaches: [db.ast-arena]
+    requires: [db.lexer-hoan-chinh]
+    y_chinh: "Cây cú pháp trừu tượng (AST) biểu diễn CẤU TRÚC của câu truy vấn — 'tuoi > 18' là một node so sánh, hai NHÁNH con là định danh 'tuoi' và số 18. Cách quen thuộc dùng enum đệ quy với Box<Self> KHÔNG dùng được ở đây (Box::new chưa cài) — dùng ARENA: struct CayAst { nut: Vec<NoAst> }, mỗi NoAst chứa CHỈ SỐ (usize) trỏ tới nút con trong CHÍNH Vec đó, không con trỏ thật. Đây LÀ một kỹ thuật Rust thật (nhiều parser production dùng arena thay Box đệ quy để né vấn đề mượn/vòng đời) — không phải một sự giả vờ vì thiếu tính năng. Bài THUẦN explain/predict, dựng struct + cách thêm/đọc nút TRƯỚC khi parse thật."
+  - so: 8
+    slug: do-uu-tien-toan-tu
+    title: "Độ ưu tiên: AND bó chặt hơn OR"
+    teaches: [db.parser-precedence]
+    requires: [db.ast-arena]
+    y_chinh: "'a > 1 OR b > 2 AND c > 3' phải đọc thành 'a>1 OR (b>2 AND c>3)', không phải '(a>1 OR b>2) AND c>3' — AND có độ ưu tiên CAO hơn OR, giống && / || trong hầu hết ngôn ngữ. fn do_uu_tien(t: &Token) -> i64 trả về một con số (OR=1, AND=2, so_sanh=3) — số CÀNG lớn càng bó CHẶT hơn. Bài concept-only, minh hoạ độ ưu tiên bằng bảng số trước khi dùng nó điều khiển vòng lặp parse ở bài 10."
+  - so: 9
+    slug: parse-so-sanh
+    title: "Parse một phép so sánh"
+    teaches: [db.parser-so-sanh]
+    requires: [db.parser-precedence]
+    y_chinh: "fn parse_so_sanh(cay: &mut CayAst, tk: &Vec<Token>, vi_tri: usize) -> (usize, usize) đọc ĐÚNG BA token liên tiếp (định danh, dấu so sánh, số), thêm một NoAst::SoSanh{truong, toan_tu, so} vào arena, trả về (chỉ số nút vừa thêm, vị trí token kế tiếp). Đây LÀ đơn vị nhỏ nhất của bieu_thuc — 'nút lá' của cây so sánh, dùng lại ở bài 10/11."
+  - so: 10
+    slug: ket-hop-and-or
+    title: "Kết hợp bằng AND/OR theo đúng độ ưu tiên"
+    teaches: [db.parser-and-or]
+    requires: [db.parser-so-sanh]
+    y_chinh: "Lõi Pratt/precedence-climbing của quest: parse_bieu_thuc lặp — parse một so_sanh (bài 9), rồi NHÌN token tiếp theo: nếu là AND/OR, gộp nút vừa có với so_sanh KẾ TIẾP thành NoAst::Va/NoAst::Hoac, lặp lại. AND (độ ưu tiên 2) gộp NGAY khi gặp, OR (độ ưu tiên 1) chỉ gộp SAU khi mọi AND liền kề đã gộp xong — đúng thứ bậc bài 8 đã dựng. Đây LÀ bài khó nhất quest — cần đệ quy dùng &mut CayAst xuyên suốt (tránh pattern &mut+chỉ số bị chặn — dùng .push để thêm nút, KHÔNG gán qua chỉ số vào Vec đang mutate)."
+  - so: 11
+    slug: parse-cau-truy-van
+    title: "Parse trọn một câu SELECT"
+    teaches: [db.parser-cau-truy-van]
+    requires: [db.parser-and-or]
+    y_chinh: "fn parse(tk: &Vec<Token>) -> CayAst ráp TOÀN BỘ: khớp Token::Chon, đọc danh sách định danh cách nhau bởi Token::Phay (dùng vòng lặp, không đệ quy — danh sách trường không cần Pratt), khớp Token::Tu, đọc MỘT định danh (tên bảng), rồi NẾU token tiếp là Token::ODau thì parse_bieu_thuc (bài 10) cho phần WHERE. Trả về CayAst hoàn chỉnh biểu diễn CẢ câu truy vấn."
+  - so: 12
+    slug: boss-ngon-ngu-cua-byte
+    title: "BOSS — Ngôn ngữ của Byte"
+    teaches: []
+    requires: [db.parser-cau-truy-van]
+    concepts: [db.boss-q07]
+    mastery: 0.85
+    y_chinh: "Ghép TRỌN quest: lex('SELECT tuoi, ten FROM nguoi WHERE tuoi > 18 AND diem < 100') → parse thành CayAst → DUYỆT cây (đệ quy qua &CayAst, in cấu trúc: trường nào, bảng nào, cây điều kiện lồng ra sao). reflect ghi CẮT PHẠM VI có chủ đích: giá trị so sánh chỉ số nguyên (không chuỗi trong dấu nháy — String không mutate được để xây text động, xem docs/decisions/R4-T40b-su-that-do-duoc.md), và không có dấu ngoặc tường minh trong bieu_thuc (chỉ độ ưu tiên AND/OR tự nhiên, không '(...)' ghi đè). Bắc cầu sang q08 'Bộ não của truy vấn' — logical plan/executor dùng CHÍNH CayAst này làm đầu vào."
