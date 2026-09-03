@@ -208,6 +208,151 @@ xoá) khi kiểm tính khả thi của lexer/parser đệ quy — chủ đề q0
    gán qua chỉ số trong thiết kế bài — nếu q08/q09 (executor mutate cây)
    cần pattern này, điều tra/vá riêng lúc đó, đừng suy luận lại từ đầu.
 
+8. **Kiểu trả về hàm là tuple tường minh** (`fn f(...) -> (i64, usize) { ... }`)
+   — CÙNG lớp lỗi với mục "Annotate kiểu tuple tường minh" đã cấm ở trên
+   (BR0303/BR0302), chỉ khác VỊ TRÍ (kiểu trả về hàm, không phải `let`).
+   Xác nhận: thân hàm trả ĐÚNG `(i64, usize)`, thông báo lỗi ghi CẢ HAI vế
+   ĐỀU LÀ `(i64, usize)` — vẫn báo KHÔNG khớp. **KHÔNG BAO GIỜ dùng tuple
+   làm kiểu trả về hàm** — thay bằng STRUCT (named field), đã xác nhận
+   dùng được sạch 100% cho đúng use-case "trả về nhiều giá trị" (ví dụ
+   `struct KetQuaDoc { gia_tri: i64, vi_tri: usize }`).
+9. **Block dạng câu lệnh (`while`/`if`/`for`/`match`/`loop`) ở ĐẦU hàm,
+   KHÔNG có `;` sau dấu `}`, theo sau bởi một dòng bắt đầu bằng `(`** — bị
+   phân tích NHẦM thành một LỜI GỌI (block như thể là hàm, `(...)` như thể
+   là danh sách đối số), báo `BR0520` "không phải là hàm nên không gọi
+   được". Rust thật KHÔNG có nhập nhằng này (block ở vị trí câu lệnh luôn
+   tự kết thúc, dòng sau là biểu thức TÁCH riêng) — đây LÀ lỗi cài đặt
+   thật của parser, không phải giới hạn ADR-002. **Cách né, không phải
+   sửa gốc**: luôn đặt `;` tường minh sau dấu `}` đóng của MỌI
+   `while`/`if`/`for`/`match` đứng MỘT MÌNH ở vị trí câu lệnh (không phải
+   là biểu thức cuối cùng của block) khi dòng NGAY SAU nó bắt đầu bằng
+   `(` — an toàn dùng luôn thói quen này cho MỌI block câu lệnh trong
+   track R6, không cần nhớ chính xác khi nào mới cần.
+
+### Quy trình chấm — `tier: output` phải khớp OUTPUT CỦA KHỐI TEST, không phải solution
+
+`packages/exec-rust` nối `ma + "\n" + maKiemTra` rồi chạy MỘT lần (xem
+`src/index.ts`) — solution VÀ test đều khai `fn main()`, và `byte-rust`
+KHÔNG báo lỗi trùng tên hàm (khác `rustc` thật, sẽ từ chối biên dịch) —
+định nghĩa hàm SAU (từ khối `test`) ghi ĐÈ định nghĩa TRƯỚC trong bảng hàm
+nội bộ, nên **CHỈ `fn main()` của khối `test` thực sự chạy**, `fn main()`
+của khối `solution`/`starter` hoàn toàn KHÔNG được thực thi (nó tồn tại
+CHỈ để hiển thị cho người học đọc). Hệ quả: **`tier: output` phải khớp
+ĐÚNG những gì `println!` bên TRONG khối `test` in ra — không phải những gì
+phần demo trong khối `solution` sẽ in NẾU nó tự chạy riêng.** Muốn
+`tier: output` xác nhận một giá trị cụ thể, PHẢI tự `println!` giá trị đó
+ngay TRONG `fn main()` của khối `test` (thường ngay TRƯỚC dòng `assert_eq!`
+tương ứng) — quên bước này khiến `tier: output` LUÔN thấy dòng cuối cùng
+mà test in ra (ví dụ một dòng "tất cả test qua" chung chung), không phải
+giá trị bài muốn xác nhận. Đã xác nhận qua chấm THẬT (`kiem_ma_bai_hoc.mjs`)
+lúc viết q07 bài 1-4 — bốn bài ĐẦU đều mắc lỗi này TRƯỚC khi phát hiện.
+
+10. **`panic!(...)` làm nhánh `_` của một `match` trên `char`, khi `match`
+    đó LÀ biểu thức trả về của hàm** — báo nhầm `BR0310` "các nhánh match
+    lệch kiểu" dù mọi nhánh CÒN lại đều cùng kiểu (xác nhận: đổi nhánh `_`
+    thành một giá trị cụ thể cùng kiểu thì hết lỗi NGAY). Có thể là kiểu
+    "never" của `panic!` không hợp nhất đúng trong match-trên-char Ở VỊ TRÍ
+    trả về hàm (khác match-trên-enum Ở vị trí câu lệnh trong `fn main()`,
+    ĐÃ xác nhận dùng `panic!` bình thường Ở đó). TRÁNH `panic!` làm nhánh
+    match trả-về-hàm trên `char` — dùng một giá trị mặc định hợp lệ thay
+    thế nếu nhánh `_` thực chất không bao giờ xảy ra (caller đã đảm bảo).
+
+11. **Đọc HAI TRƯỜNG trở lên của CÙNG một struct (`kq.a` rồi `kq.b`) BÊN
+    TRONG một nhánh `if`/`match`/vòng lặp** — lần đọc trường THỨ HAI báo
+    nhầm `BR0531` y hệt move-trong-nhánh, dù cả hai trường đều LÀ kiểu
+    Copy (`i64`/`usize`). Nguyên nhân: `ghi_move` coi truy cập TRƯỜNG
+    (`.field`) LÀ "move một phần" CỦA biến gốc (`kq`), và move_check
+    KHÔNG hỗ trợ partial-move thật (theo dõi từng trường riêng) — chạm
+    trường nào cũng đánh dấu CẢ `kq` là "đã move trong nhánh". **Cách
+    né**: KHÔNG gán kết quả hàm trả struct vào một biến `let kq = ...;`
+    rồi đọc nhiều trường của nó BÊN TRONG nhánh — thay vào đó, GỌI LẠI
+    hàm (idempotent, giá cho phép ở quy mô bài học) cho MỖI trường cần
+    đọc: `ham(...).truong_a` VÀ RIÊNG `ham(...).truong_b`, không qua
+    biến trung gian nào — mỗi lần gọi LÀ một biểu thức tạm, không bị
+    theo dõi move.
+12. **Destructure struct bằng pattern** (`let Struct { a, b } = kq;`) —
+    tên bị RÀNG BUỘC SAI KIỂU trong bộ kiểm kiểu: cả `a` lẫn `b` bị suy
+    ra kiểu CỦA CẢ STRUCT (`Struct`), không phải kiểu THẬT của từng
+    trường — lỗi CHỈ lộ ra khi biến đó dùng ở một chỗ đòi kiểu CHÍNH
+    XÁC (như đối số một hàm), không lộ khi chỉ `println!` (định dạng
+    generic, không ép kiểu chặt). **KHÔNG BAO GIỜ destructure struct
+    bằng pattern trong track này** — luôn truy cập qua `.tên_trường`.
+13. **`let x = ham_tra_ve_gia_tri();` (biến khởi tạo TỪ kết quả một lời
+    gọi hàm, kiểu THẬT là số nguyên `usize`/`i64`) dùng LẠI làm đối số
+    một lời gọi hàm khác BÊN TRONG vòng lặp, trong khi `x` được khai
+    báo TRƯỚC vòng lặp** — báo nhầm `BR0532` (move ra khỏi vòng lặp).
+    Gốc: bộ suy Copy THUẦN cú pháp không nhận diện được "kết quả một
+    lời gọi hàm" LÀ Copy dù kiểu trả về THẬT là số nguyên (chỉ nhận
+    diện được hằng số/phép toán/mượn/range/ép kiểu — xem `co_the_khong_
+    copy` trong `move_check.rs`). **Cách né đã xác nhận**: thêm MỘT
+    lượt ép kiểu tường minh dư (nhưng vô hại) ngay sau lời gọi —
+    `let mut i = ham(...) as usize;` — `as` LÀ một dạng biểu thức được
+    bộ suy Copy công nhận LUÔN Copy, nên biến sau đó được miễn theo dõi
+    hoàn toàn. Áp dụng bất cứ khi nào một biến số nguyên khởi tạo từ
+    lời gọi hàm cần dùng lại nhiều lần trong vòng lặp/nhánh.
+
+14. **`bien + hang_so` (biến Ở VẾ TRÁI phép `+`) dùng LẠI sau đó** — báo
+    nhầm move y hệt lỗi thật (BR0530/BR0531 tuỳ ngữ cảnh), dù `bien` LÀ
+    kiểu số nguyên Copy (`usize`/`i64`). Gốc (đối chiếu `move_check.rs`
+    dòng ~374-381): với TOÁN TỬ `+`, code LUÔN gọi `ghi_move` trên VẾ
+    TRÁI — đúng cho `String + &str` thật (nhận `self` theo giá trị), NHƯNG
+    áp dụng ĐỒNG LOẠT cho MỌI phép `+`, không phân biệt được số nguyên
+    (không hề bị move khi cộng). Không sửa được bằng suy Copy (biến trần
+    LUÔN bị coi "có thể không-Copy", đúng CẢ hai trường hợp). **Cách né
+    xác nhận HOẠT ĐỘNG**: đổi thứ tự toán hạng — viết `hang_so + bien`
+    thay vì `bien + hang_so` (chỉ vế TRÁI bị `ghi_move`, đổi chỗ để biến
+    cần dùng lại rơi vào vế PHẢI). Ví dụ: `tk[1 + vi_tri]` thay vì
+    `tk[vi_tri + 1]`. Áp dụng CHO MỌI phép cộng chỉ số (offset) nơi biến
+    gốc còn cần dùng tiếp sau đó — quy ước chuẩn cho track NÀY từ giờ.
+
+### ĐÃ VÁ (lần 2 cùng ngày) — `&mut T` dùng LẠI làm đối số hàm nhiều lần
+
+Phát hiện lúc viết bài Pratt-parser (bài 10, q07): một biến/tham số kiểu
+`&mut T` ĐÃ CÓ SẴN (không phải `&mut bien` viết mới tại chỗ gọi), dùng làm
+đối số CHO một lời gọi hàm HAI lần trở lên — kể cả THẲNG HÀNG, không nhánh
+— LUÔN báo lỗi `BR0530` "đã bị chuyển quyền sở hữu" NGAY từ lần dùng THỨ
+HAI. Khác HẲN class lỗi "move trong nhánh" (đã vá lần 1) — đây LÀ lỗi CỨNG
+(`Loi`, không phải `ChuaHoTro`), và xảy ra Ở **HAI TẦNG ĐỘC LẬP**:
+
+1. **Tĩnh** (`move_check.rs`, `ghi_move` gọi từ vòng lặp đối số của
+   `GoiHam`/`GoiPhuongThuc`) — vá bằng thêm trường `tham_chieu_kha_bien:
+   HashSet<String>` trên `BoKiem`, ghi tên MỌI tham số `&mut T` lúc đăng ký
+   (giữ NGUYÊN việc `khai_bao` theo dõi bình thường — CHỈ thêm CỜ phụ), và
+   bỏ qua `ghi_move` cho đối số nào LÀ tên trần khớp bảng đó — CHỈ tại hai
+   điểm gọi hàm, KHÔNG đụng `Let`/`Gan`/struct-literal (những chỗ đó `&mut
+   T` vẫn PHẢI move thật khi gán sang biến khác — xác nhận riêng: `let c =
+   b; b.dung();` với `b: &mut T` VẪN bị bắt đúng SAU khi vá).
+2. **Động** (`interp.rs`, `tinh_va_chuyen` — bộ theo dõi move RIÊNG, chạy
+   LÚC THỰC THI, độc lập hoàn toàn với tầng tĩnh) — PHẢI vá CẢ hai tầng thì
+   pattern mới thật sự chạy được (vá tầng 1 mà bỏ tầng 2: tĩnh cho qua,
+   nhưng lúc chạy vẫn tự đánh dấu `GiaTri::DaChuyen` rồi tự báo lỗi CHÍNH
+   NÓ — xác nhận qua thực nghiệm, không phải suy đoán). Vá bằng thêm biến
+   thể `tinh_va_chuyen_nb(e, la_doi_so_ham: bool)` — khi cờ `true` (CHỈ
+   `tinh_doi_so`, hàm DUY NHẤT tính đối số cho MỌI lời gọi hàm VÀ phương
+   thức, dùng), giá trị runtime LÀ `GiaTri::ThamChieu{co_the_sua: true}`
+   thì KHÔNG đánh dấu `DaChuyen` — ba chỗ gọi CŨ (`let`/`gán`/trường struct)
+   vẫn dùng `tinh_va_chuyen` (cờ `false`), hành vi KHÔNG đổi.
+
+Xác nhận an toàn: `cargo test` 120/120 xanh (không đổi), **`byte-rust-
+conformance --im` NHẬN OAN = 0/58 VÀ 0/100 — GIỐNG HỆT baseline trước khi
+vá cả hai lần**, kể cả nhóm "Mượn, khả biến của tham chiếu, vòng đời"
+(11/12 đồng ý, 1 ChuaHoTro, KHÔNG đổi số liệu). Nhớ `pnpm run wasm` lại sau
+khi vá (interp.rs + move_check.rs ĐỀU nằm trong `crates/byte-rust/src`).
+
+**Hệ quả cho thiết kế nội dung**: `&mut CayAst`/`&mut Vec<T>` giờ dùng
+LẠI được BÌNH THƯỜNG như tham số xuyên suốt nhiều hàm gọi nhau (đúng kiểu
+recursive-descent parser cổ điển) — KHÔNG cần vòng qua trick "gọi hàm hai
+lần" hay chuyển sang `impl`/method nữa (dù cách ĐÓ VẪN dùng được, không
+sai — chỉ không còn BẮT BUỘC). Riêng phát hiện phụ lúc điều tra: gọi
+METHOD tự viết (`self.ham_khac(...)`) từ TRONG một method KHÁC của CÙNG
+`impl`, khi kết quả trả về ĐƯỢC DÙNG (gán `let`/làm biểu thức cuối) — vẫn
+`ChuaHoTro` `BR0310` ("chưa có trong bảng kiểu") RIÊNG, một lỗ hổng type-
+checker KHÁC (`tyck.rs`, chưa điều tra/vá) — method gọi FREE FUNCTION
+(truyền `self` LÀM đối số, dùng đúng cơ chế vừa vá) hoạt ĐỘNG tốt hơn hẳn
+method gọi method cùng `impl` khi cần dùng giá trị trả VỀ; free-function-
+gọi-free-function (không `impl` gì cả) LÀ lựa chọn AN TOÀN nhất, đã dùng
+xuyên suốt track này.
+
 ### Dùng được, xác nhận thêm (không có trong bảng gốc ở trên)
 
 `s.chars().collect()` → `Vec<char>` (dùng được, đã xác nhận cho lexer).

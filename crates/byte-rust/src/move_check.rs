@@ -92,6 +92,12 @@ struct BoKiem<'a> {
     da_bao: Vec<String>,
     /// Phương thức tự viết nhận `self` theo giá trị — gọi là nuốt bộ nhận.
     nuot_self: std::collections::HashSet<String>,
+    /// Tên các tham số kiểu `&mut T` của hàm đang kiểm. `&mut T` truyền làm
+    /// ĐỐI SỐ một lời gọi hàm khác luôn là "mượn lại" (reborrow) trong Rust
+    /// thật — KHÔNG di chuyển — nên dùng bảng này để bỏ qua `ghi_move` CHỈ
+    /// tại đúng hai điểm gọi hàm (không áp dụng cho `let`/gán, nơi `&mut T`
+    /// vẫn thật sự bị move nếu gán sang biến khác).
+    tham_chieu_kha_bien: std::collections::HashSet<String>,
 }
 
 impl<'a> BoKiem<'a> {
@@ -103,7 +109,22 @@ impl<'a> BoKiem<'a> {
             diags,
             da_bao: Vec::new(),
             nuot_self,
+            tham_chieu_kha_bien: std::collections::HashSet::new(),
         }
+    }
+
+    /// `ten` có phải một tham số `&mut T` của hàm đang kiểm không — nếu có,
+    /// dùng LẠI nó làm đối số một lời gọi hàm khác LÀ mượn lại, không phải
+    /// move (xem doc trên trường `tham_chieu_kha_bien`).
+    fn la_tham_chieu_kha_bien(&self, ten: &str) -> bool {
+        self.tham_chieu_kha_bien.contains(ten)
+    }
+
+    /// `bt` (một đối số đang truyền vào lời gọi hàm) có phải TÊN TRẦN của
+    /// một tham số `&mut T` không — nếu có, đây là mượn lại (reborrow), bỏ
+    /// qua `ghi_move` cho ĐÚNG một đối số này.
+    fn la_doi_so_muon_lai(&self, bt: &BieuThuc) -> bool {
+        matches!(bt, BieuThuc::DuongDan { doan, .. } if doan.len() == 1 && self.la_tham_chieu_kha_bien(&doan[0]))
     }
 
     fn vao(&mut self) {
@@ -323,7 +344,9 @@ impl<'a> BoKiem<'a> {
                 self.bieu_thuc(ham);
                 for a in doi_so {
                     self.bieu_thuc(a);
-                    self.ghi_move(a);
+                    if !self.la_doi_so_muon_lai(a) {
+                        self.ghi_move(a);
+                    }
                 }
             }
             BieuThuc::GoiPhuongThuc { doi_tuong, ten, doi_so, .. } => {
@@ -338,7 +361,9 @@ impl<'a> BoKiem<'a> {
                 }
                 for a in doi_so {
                     self.bieu_thuc(a);
-                    self.ghi_move(a);
+                    if !self.la_doi_so_muon_lai(a) {
+                        self.ghi_move(a);
+                    }
                 }
             }
             BieuThuc::KhoiTaoStruct { truong, con_lai, .. } => {
@@ -570,17 +595,24 @@ pub fn kiem_tra(ct: &ChuongTrinh, diags: &mut Diagnostics) {
             for ts in &h.tham_so {
                 // `&T` (tham chiếu BẤT BIẾN) luôn là `Copy` — biết ngay từ
                 // kiểu khai trong chữ ký hàm, không cần đoán theo cú pháp.
-                // `&mut T` thì KHÔNG Copy nên vẫn đi qua nhánh theo dõi bình
-                // thường bên dưới.
                 let la_tham_chieu_bat_bien =
                     matches!(&ts.kieu, Kieu::ThamChieu { co_the_sua: false, .. });
+                // `&mut T` KHÔNG phải Copy (đúng luật thật) — nhưng dùng LẠI
+                // nó làm đối số một lời gọi hàm khác vẫn AN TOÀN (mượn lại,
+                // xem doc `tham_chieu_kha_bien`); ghi tên vào bảng riêng để
+                // hai điểm gọi hàm bỏ qua `ghi_move` CHỈ trong tình huống đó.
+                let la_tham_chieu_kha_bien =
+                    matches!(&ts.kieu, Kieu::ThamChieu { co_the_sua: true, .. });
                 let mut ten = Vec::new();
                 ts.mau.ten_rang_buoc(&mut ten);
                 if la_tham_chieu_bat_bien && ten.len() == 1 {
                     bk.khai_bao_luon_song(&ten[0].0);
                 } else {
-                    for (t, _, _) in ten {
-                        bk.khai_bao(&t);
+                    for (t, _, _) in &ten {
+                        bk.khai_bao(t);
+                    }
+                    if la_tham_chieu_kha_bien && ten.len() == 1 {
+                        bk.tham_chieu_kha_bien.insert(ten[0].0.clone());
                     }
                 }
             }

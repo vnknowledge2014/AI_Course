@@ -912,8 +912,21 @@ impl MayChay {
     /// nơi thì bài học ownership sẽ đúng lúc này sai lúc khác — tệ hơn là không
     /// dạy gì cả, vì người học sẽ rút ra quy tắc sai.
     fn tinh_va_chuyen(&mut self, e: &BieuThuc) -> KQ<GiaTri> {
+        self.tinh_va_chuyen_nb(e, false)
+    }
+
+    /// Bản có thêm cờ `la_doi_so_ham`: khi TRUE (chỉ `tinh_doi_so` dùng),
+    /// một giá trị `&mut T` (tham chiếu KHẢ BIẾN) không bị đánh dấu `DaChuyen`
+    /// — vì truyền một `&mut T` ĐANG CÓ SẴN làm đối số một lời gọi hàm khác
+    /// LÀ mượn lại (reborrow) trong Rust thật, không phải move (đúng ĐỐI XỨNG
+    /// với quyết định tương ứng ở `move_check.rs`, `la_doi_so_muon_lai`).
+    /// `let b = a;`/`b = a;`/trường struct (cờ FALSE) vẫn move `&mut T` như
+    /// cũ — đúng luật thật, KHÔNG nới ở những chỗ đó.
+    fn tinh_va_chuyen_nb(&mut self, e: &BieuThuc, la_doi_so_ham: bool) -> KQ<GiaTri> {
         let v = self.tinh(e)?;
-        if !v.la_copy() {
+        let la_muon_lai_an_toan =
+            la_doi_so_ham && matches!(v, GiaTri::ThamChieu { co_the_sua: true, .. });
+        if !v.la_copy() && !la_muon_lai_an_toan {
             if let BieuThuc::DuongDan { doan, span } = e {
                 if doan.len() == 1 {
                     if let Some(o) = self.tim_o(&doan[0]) {
@@ -1402,7 +1415,7 @@ impl MayChay {
     fn tinh_doi_so(&mut self, doi_so: &[BieuThuc]) -> KQ<Vec<GiaTri>> {
         let mut ra = Vec::with_capacity(doi_so.len());
         for e in doi_so {
-            ra.push(self.tinh_va_chuyen(e)?);
+            ra.push(self.tinh_va_chuyen_nb(e, true)?);
         }
         Ok(ra)
     }
