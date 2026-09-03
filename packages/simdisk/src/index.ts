@@ -17,10 +17,21 @@
  * Gói này là NGUỒN SỰ THẬT để đối chiếu ngữ nghĩa lúc viết bài, và có bộ test
  * riêng để tự nó luôn đúng.
  *
- * v1 (đủ cho R6-1 q00 "Chiếc hộp giày của Byte"): read/write/fsync/crash cơ
- * bản, không có fault injection. Torn write / lost fsync / latent sector
- * error / misdirected write / crash tất định thứ N (cho q02, q18) sẽ thêm
- * khi viết tới các quest đó — không xây trước khi có bài cần dùng.
+ * v1 (R6-1 q00): read/write/fsync/crash cơ bản.
+ *
+ * v2 (R6-1 q02 "Khi điện mất"): thêm hai kiểu lỗi, CHỦ ĐỘNG kích hoạt (không
+ * random — bài học cần tái lập được y hệt mỗi lần chạy):
+ * - `boQuaFsyncKeTiep()` — "lost fsync": lần `fsync()` tiếp theo LÀ no-op
+ *   hoàn toàn (không đẩy cache xuống platter, KHÔNG báo lỗi) — mô phỏng
+ *   driver/OS "nói dối" đã flush. `read()` vẫn thấy đúng (cache còn nguyên,
+ *   chưa bị xoá) — lời nói dối CHỈ lộ ra khi `crash()` xoá cache.
+ * - `danhDauTornGhi(sector, soByteThanhCong)` — "torn write": lần `fsync()`
+ *   tiếp theo GHI THÀNH CÔNG chỉ `soByteThanhCong` byte ĐẦU của sector đó
+ *   xuống platter, phần CÒN LẠI giữ nguyên dữ liệu CŨ (hoặc số 0 nếu sector
+ *   chưa từng ghi) — mô phỏng mất điện giữa chừng một lần ghi vật lý.
+ *
+ * latent sector error / misdirected write / crash tất định thứ N (cho q18)
+ * CHƯA xây — thêm khi viết tới quest đó.
  */
 
 export const KICH_THUOC_SECTOR_MAC_DINH = 512;
@@ -48,6 +59,8 @@ export class SimDisk {
 
   private readonly platter = new Map<number, Uint8Array>();
   private readonly cache = new Map<number, Uint8Array>();
+  private matFsyncKeTiep = false;
+  private readonly tornSector = new Map<number, number>();
 
   constructor(tuyChon: TuyChonSimDisk = {}) {
     this.soLuongSector = tuyChon.soLuongSector ?? SO_LUONG_SECTOR_MAC_DINH;
@@ -82,7 +95,23 @@ export class SimDisk {
 
   /** Đẩy TOÀN BỘ cache xuống platter — sau lệnh này, mọi ghi đã bền. */
   fsync(): void {
-    for (const [sector, data] of this.cache) this.platter.set(sector, data);
+    if (this.matFsyncKeTiep) {
+      this.matFsyncKeTiep = false;
+      return; // "nói dối": không đẩy gì cả, cache vẫn còn nguyên — read() vẫn đúng, crash() sẽ lộ.
+    }
+    for (const [sector, data] of this.cache) {
+      const soByteThanhCong = this.tornSector.get(sector);
+      if (soByteThanhCong === undefined) {
+        this.platter.set(sector, data);
+        continue;
+      }
+      this.tornSector.delete(sector);
+      const cu = this.platter.get(sector) ?? new Uint8Array(this.kichThuocSector);
+      const ghiDuoc = new Uint8Array(this.kichThuocSector);
+      ghiDuoc.set(data.slice(0, soByteThanhCong), 0);
+      ghiDuoc.set(cu.slice(soByteThanhCong), soByteThanhCong);
+      this.platter.set(sector, ghiDuoc);
+    }
     this.cache.clear();
   }
 
@@ -94,5 +123,32 @@ export class SimDisk {
   /** Còn ghi nào chưa fsync không — dùng để bài học kiểm tra tình huống trước khi `crash()`. */
   coGhiChuaFsync(): boolean {
     return this.cache.size > 0;
+  }
+
+  /**
+   * Lần `fsync()` TIẾP THEO là no-op hoàn toàn — mô phỏng "lost fsync".
+   * Tự tắt sau khi dùng (chỉ ảnh hưởng ĐÚNG một lần gọi `fsync()`).
+   */
+  boQuaFsyncKeTiep(): void {
+    this.matFsyncKeTiep = true;
+  }
+
+  /**
+   * Đánh dấu `sector`: lần `fsync()` TIẾP THEO đụng tới sector này chỉ ghi
+   * thành công `soByteThanhCong` byte ĐẦU, phần còn lại giữ nguyên dữ liệu
+   * CŨ — mô phỏng "torn write". Tự xoá đánh dấu sau khi dùng.
+   */
+  danhDauTornGhi(sector: number, soByteThanhCong: number): void {
+    this.kiemTraSector(sector);
+    if (
+      !Number.isInteger(soByteThanhCong)
+      || soByteThanhCong < 0
+      || soByteThanhCong > this.kichThuocSector
+    ) {
+      throw new RangeError(
+        `soByteThanhCong ${soByteThanhCong} phải trong [0, ${this.kichThuocSector}]`,
+      );
+    }
+    this.tornSector.set(sector, soByteThanhCong);
   }
 }

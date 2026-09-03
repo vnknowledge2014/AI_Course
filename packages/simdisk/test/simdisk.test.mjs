@@ -66,3 +66,59 @@ test('nhiều sector độc lập nhau', () => {
   assert.deepEqual(d.read(1), new Uint8Array([0, 0]));
   assert.deepEqual(d.read(2), new Uint8Array([2, 2]));
 });
+
+test('boQuaFsyncKeTiep -- fsync ke tiep la no-op, read() van dung, crash() moi lo', () => {
+  const d = new SimDisk({ soLuongSector: 2, kichThuocSector: 2 });
+  d.write(0, new Uint8Array([9, 9]));
+  d.boQuaFsyncKeTiep();
+  d.fsync();
+  assert.deepEqual(d.read(0), new Uint8Array([9, 9]), 'read van thay du lieu (con trong cache)');
+  assert.equal(d.coGhiChuaFsync(), true, 'cache CHUA thuc su duoc day xuong platter');
+  d.crash();
+  assert.deepEqual(d.read(0), new Uint8Array([0, 0]), 'crash loi ra: du lieu mat that');
+});
+
+test('boQuaFsyncKeTiep chi anh huong DUNG mot lan fsync', () => {
+  const d = new SimDisk({ soLuongSector: 2, kichThuocSector: 2 });
+  d.write(0, new Uint8Array([9, 9]));
+  d.boQuaFsyncKeTiep();
+  d.fsync();
+  d.fsync();
+  d.crash();
+  assert.deepEqual(d.read(0), new Uint8Array([9, 9]), 'lan fsync thu hai da flush that');
+});
+
+test('danhDauTornGhi -- chi ghi thanh cong N byte dau, phan con lai giu du lieu cu', () => {
+  const d = new SimDisk({ soLuongSector: 2, kichThuocSector: 4 });
+  d.write(0, new Uint8Array([1, 1, 1, 1]));
+  d.fsync();
+  d.write(0, new Uint8Array([2, 2, 2, 2]));
+  d.danhDauTornGhi(0, 2);
+  d.fsync();
+  assert.deepEqual(d.read(0), new Uint8Array([2, 2, 1, 1]), 'hai byte dau moi, hai byte sau van cu');
+});
+
+test('danhDauTornGhi tren sector chua tung ghi -- phan con lai la so 0', () => {
+  const d = new SimDisk({ soLuongSector: 2, kichThuocSector: 4 });
+  d.write(0, new Uint8Array([9, 9, 9, 9]));
+  d.danhDauTornGhi(0, 1);
+  d.fsync();
+  assert.deepEqual(d.read(0), new Uint8Array([9, 0, 0, 0]));
+});
+
+test('danhDauTornGhi chi anh huong DUNG mot lan fsync tiep theo', () => {
+  const d = new SimDisk({ soLuongSector: 2, kichThuocSector: 2 });
+  d.write(0, new Uint8Array([1, 1]));
+  d.danhDauTornGhi(0, 0);
+  d.fsync();
+  assert.deepEqual(d.read(0), new Uint8Array([0, 0]), 'lan dau: torn, 0 byte thanh cong');
+  d.write(0, new Uint8Array([5, 5]));
+  d.fsync();
+  assert.deepEqual(d.read(0), new Uint8Array([5, 5]), 'lan hai: fsync binh thuong');
+});
+
+test('danhDauTornGhi bao loi khi soByteThanhCong ngoai pham vi', () => {
+  const d = new SimDisk({ soLuongSector: 2, kichThuocSector: 4 });
+  assert.throws(() => d.danhDauTornGhi(0, 5), RangeError);
+  assert.throws(() => d.danhDauTornGhi(0, -1), RangeError);
+});
