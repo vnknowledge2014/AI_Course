@@ -208,6 +208,23 @@ impl GiaTri {
             (KyTu(a), KyTu(b)) => Some(a.cmp(b)),
             (Chuoi(a), Chuoi(b)) => Some(a.cmp(b)),
             (DungSai(a), DungSai(b)) => Some(a.cmp(b)),
+            // `Vec<T>`/mảng so sánh TỪ điển — đúng `impl PartialOrd for Vec<T>`
+            // thật của Rust: so từng cặp phần tử, cặp đầu tiên LỆCH quyết định
+            // kết quả; nếu mọi phần tử chung đều bằng nhau, dãy NGẮN hơn nhỏ
+            // hơn. Thiếu nhánh này khiến MỌI khoá đã mã hoá (`Vec<u8>`) không
+            // so sánh khoảng được — chặn cả một lớp bài học key-encoding.
+            (Day(a), Day(b)) => {
+                let a = a.borrow();
+                let b = b.borrow();
+                let n = a.len().min(b.len());
+                for i in 0..n {
+                    match a[i].so_sanh(&b[i]) {
+                        Some(std::cmp::Ordering::Equal) => continue,
+                        khac => return khac,
+                    }
+                }
+                Some(a.len().cmp(&b.len()))
+            }
             _ => None,
         }
     }
@@ -294,5 +311,19 @@ mod tests {
     fn so_sanh_tra_none_khi_khong_cung_kieu() {
         assert!(GiaTri::SoNguyen(1).so_sanh(&GiaTri::Chuoi(Rc::new("a".into()))).is_none());
         assert!(GiaTri::SoNguyen(1).so_sanh(&GiaTri::SoNguyen(2)).is_some());
+    }
+
+    #[test]
+    fn so_sanh_vec_tu_dien() {
+        use std::cmp::Ordering::*;
+        let day = |v: Vec<i64>| GiaTri::Day(Rc::new(RefCell::new(v.into_iter().map(GiaTri::SoNguyen).collect())));
+        // Cặp đầu lệch quyết định — giống hệt so sánh byte trên khoá đã mã hoá.
+        assert_eq!(day(vec![0, 9]).so_sanh(&day(vec![0, 10])), Some(Less));
+        assert_eq!(day(vec![1, 44]).so_sanh(&day(vec![0, 5])), Some(Greater));
+        // Bằng nhau tuyệt đối.
+        assert_eq!(day(vec![5, 5]).so_sanh(&day(vec![5, 5])), Some(Equal));
+        // Mọi phần tử chung bằng nhau, dãy ngắn hơn thì nhỏ hơn (giống Vec<T> thật).
+        assert_eq!(day(vec![1]).so_sanh(&day(vec![1, 0])), Some(Less));
+        assert_eq!(day(vec![]).so_sanh(&day(vec![])), Some(Equal));
     }
 }

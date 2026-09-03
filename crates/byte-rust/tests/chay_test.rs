@@ -160,6 +160,110 @@ println!("{}", v.len());"#)),
 }
 
 #[test]
+fn so_sanh_thu_tu_tren_vec() {
+    // `Vec<T>: PartialOrd` — so từ điển, đúng như slice thật. Trước khi vá,
+    // `so_sanh` (value.rs) không có nhánh `Day`, nên MỌI so sánh `<`/`>` trên
+    // Vec đều bị từ chối (BR0520) — chặn cả lớp bài học key-encoding (R6-2 q09).
+    assert_eq!(xuat(&ct(r#"println!("{}", vec![0u8, 9] < vec![0u8, 10]);"#)), "true\n");
+    assert_eq!(xuat(&ct(r#"println!("{}", vec![1u8, 44] < vec![0u8, 5]);"#)), "false\n");
+    assert_eq!(xuat(&ct(r#"println!("{}", vec![1u8] < vec![1u8, 0]);"#)), "true\n");
+}
+
+#[test]
+fn ep_so_thanh_char() {
+    // `u8 as char` — CÁCH DUY NHẤT Rust thật cho phép `as` đổi số thành `char`.
+    // Trước khi vá, `Ep` (interp.rs) không có nhánh cho đích `char` từ số, nên
+    // giá trị giữ nguyên là số — `{:?}` in `57` thay vì `'9'`.
+    assert_eq!(
+        xuat(&ct(r#"
+let c: char = (('0' as u8) + (9 as u8)) as char;
+println!("{:?}", c);
+println!("{}", c);"#)),
+        "'9'\n9\n"
+    );
+    assert_eq!(
+        xuat(&ct(r#"println!("{:?}", 65 as u8 as char);"#)),
+        "'A'\n"
+    );
+}
+
+#[test]
+fn bien_vo_huong_khoi_tao_tu_tham_so_dung_lai_duoc_trong_vong_lap() {
+    // Trước khi vá, `let mut hien_tai = bat_dau;` (bat_dau: usize, một tham
+    // số VÔ HƯỚNG, không phải `&T`) bị coi nhầm là không-Copy — kéo theo
+    // MỌI vòng lặp đọc lại `hien_tai` báo oan `ChuaHoTro` "chuyển ra khỏi
+    // vòng lặp" (BR0532), dù `usize` không hề có khái niệm bị move.
+    assert_eq!(
+        xuat(r#"
+fn tim(bat_dau: usize, gioi_han: usize) -> usize {
+    let mut hien_tai = bat_dau;
+    loop {
+        if hien_tai >= gioi_han { return hien_tai; }
+        hien_tai = hien_tai + 1;
+    }
+}
+fn main() { println!("{}", tim(0, 3)); }
+"#),
+        "3\n"
+    );
+}
+
+#[test]
+fn chi_so_roi_truy_cap_truong_lam_doi_so_ham_khong_move_bien_goc() {
+    // `v[i].truong` (chỉ số RỒI truy cập trường, dùng làm đối số một lời gọi
+    // hàm khác BÊN TRONG vòng lặp) không được coi là move `v` — trước khi
+    // vá, `goc_cua` gộp `ChiSo` lồng dưới `TruyCapTruong` vào CÙNG nhánh
+    // "move một phần" của truy cập trường thuần tuý, nên `v` bị đánh dấu
+    // move ngay từ lần gọi ĐẦU (trước vòng lặp), rồi mọi lần đọc `v` SAU đó
+    // trong vòng lặp báo lỗi CỨNG "đã bị chuyển quyền sở hữu" (BR0530).
+    assert_eq!(
+        xuat(r#"
+struct Dinh { gia_tri: i64 }
+fn khoang_cach(a: i64, b: i64) -> i64 { if a > b { a - b } else { b - a } }
+fn main() {
+    let v: Vec<Dinh> = vec![Dinh{gia_tri:10}, Dinh{gia_tri:20}, Dinh{gia_tri:33}];
+    let mut tot_nhat = khoang_cach(v[0].gia_tri, 30);
+    let mut j = 0;
+    while j < v.len() {
+        let kc = khoang_cach(v[j].gia_tri, 30);
+        if kc < tot_nhat { tot_nhat = kc; }
+        j = j + 1;
+    }
+    println!("{}", tot_nhat);
+}
+"#),
+        "3\n"
+    );
+}
+
+#[test]
+fn bien_vo_huong_khoi_tao_tu_ket_qua_goi_ham_dung_lai_duoc_trong_vong_lap() {
+    // Cùng lớp lỗi, nhưng nguồn khởi tạo là một LỜI GỌI HÀM trả về kiểu vô
+    // hướng (`fn khoang_cach(...) -> i64`), không phải tên trần một tham số.
+    // `co_the_khong_copy` cần tra `kieu_tra_ve_ham` mới nhận ra được.
+    assert_eq!(
+        xuat(r#"
+fn khoang_cach(a: i64, b: i64) -> i64 { if a > b { a - b } else { b - a } }
+fn tim_gan_nhat(gia_tri: &Vec<i64>, dich: i64) -> i64 {
+    let mut tot_nhat = khoang_cach(gia_tri[0], dich);
+    let mut i = 0;
+    while i < gia_tri.len() {
+        let kc = khoang_cach(gia_tri[i], dich);
+        if kc < tot_nhat { tot_nhat = kc; }
+        i = i + 1;
+    }
+    tot_nhat
+}
+fn main() {
+    let v = vec![10, 20, 33, 50];
+    println!("{}", tim_gan_nhat(&v, 30));
+}
+"#),
+        "3\n"
+    );
+}
+
+#[test]
 fn closure_va_iterator() {
     assert_eq!(
         xuat(&ct(r#"

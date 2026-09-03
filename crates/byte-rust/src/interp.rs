@@ -874,6 +874,12 @@ impl MayChay {
                     (GiaTri::KyTu(c), t) if t.starts_with('u') || t.starts_with('i') => {
                         GiaTri::SoNguyen(*c as i64)
                     }
+                    // `u8 as char` — CÁCH DUY NHẤT Rust thật cho phép `as` đổi số
+                    // thành `char` (mọi bề rộng khác cần `char::from_u32`, không
+                    // phải `as`). Giá trị lúc chạy không phân biệt bề rộng, nên ta
+                    // luôn đi qua `u8` trước — đúng NGỮ nghĩa `(x as u8) as char`,
+                    // KHÔNG BAO GIỜ panic (0..=255 luôn là scalar hợp lệ).
+                    (GiaTri::SoNguyen(n), "char") => GiaTri::KyTu((*n as u8) as char),
                     _ => v,
                 })
             }

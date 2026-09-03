@@ -380,3 +380,129 @@ xuyên suốt track này.
 bằng `==` cho kết quả đúng (so từng phần tử, đúng ngữ nghĩa `PartialEq` thật
 của `Vec`). `enum` payload kiểu `usize` (dùng làm chỉ số arena) — dùng được
 y hệt các kiểu số khác đã xác nhận.
+
+## 2026-09-04 — q09 "Những lối tắt của Byte": BỐN lỗ hổng thật + MỘT sai lầm
+## phương pháp cần khắc cốt
+
+### ⚠️⚠️⚠️ SAI LẦM PHƯƠNG PHÁP quan trọng nhất — đọc TRƯỚC mọi thứ khác
+
+`cargo run --example <tên>` với một file `.rs` viết TAY (top-level `fn
+main() {...}`, không `use byte_rust::interp::chay`) biên dịch VÀ chạy bằng
+**`rustc` THẬT** — không hề đụng tới trình thông dịch `byte-rust`. Dùng
+cách này để "xác nhận qua thực nghiệm" hành vi của `byte-rust` LÀ SAI HOÀN
+TOÀN — nó chỉ xác nhận code đó LÀ Rust hợp lệ VÀ tính đúng GIÁ TRỊ (số học,
+logic), một bước CẦN nhưng KHÔNG đủ. Trong phiên NÀY, sai lầm này khiến MỘT
+"sự thật đã xác nhận" sai ("`Vec<u8> < Vec<u8>` hoạt động ĐÚNG") lọt vào
+brief giao cho fork agent, kéo theo TOÀN bộ thiết kế q09 (dựa trên so sánh
+byte trên khoá mã hoá) suýt sụp — chỉ được cứu vì `kiem_ma_bai_hoc.mjs`
+(cổng CUỐI, chạy qua interpreter THẬT) bắt được trước khi commit.
+
+**Cách kiểm ĐÚNG duy nhất**: gọi thẳng `byte_rust::interp::chay(src: &str)`
+— xem `crates/byte-rust/examples/demo_chay.rs` làm mẫu:
+```rust
+use byte_rust::interp::chay;
+use byte_rust::span::SourceMap;
+fn main() {
+    let src = r#"fn main() { println!("{}", vec![0u8,9] < vec![0u8,10]); }"#;
+    let (xuat, d) = chay(src);
+    println!("{xuat}");
+    if d.co_loi() { println!("{}", d.render(&SourceMap::new(src))); }
+}
+```
+Viết MỘT file tạm kiểu này (không phải file `fn main()` trần) cho MỌI
+snippet cần xác nhận, XOÁ sau khi verify — giống hệt quy ước cũ, chỉ khác
+NỘI DUNG file tạm phải gọi `chay()`, không phải LÀ chương trình Rust trần.
+`kiem_ma_bai_hoc.mjs` (chạy qua `packages/exec-rust`, tức interpreter
+THẬT) vẫn LÀ cổng cuối cùng bắt buộc — nhưng nó CHỈ chấm khối `code`
+(starter/solution/test), KHÔNG chạy khối `readonly`/`predict`/`example` —
+những khối ĐÓ phải tự xác nhận bằng `chay()` trước khi tin.
+
+### A. Bốn lỗ hổng thật (false-reject) tìm VÀ vá trong phiên này
+
+Cả bốn ĐÃ vá trong `crates/byte-rust/src/{value,interp,move_check}.rs`,
+xác nhận an toàn qua `cargo test` (49/49, không lùi) VÀ `byte-rust-
+conformance --im` (NHẬN OAN VẪN = 0/58 VÀ 0/100, GIỐNG HỆT baseline TRƯỚC
+khi vá, ở CẢ bốn lần vá) trước VÀ sau MỖI lần sửa.
+
+1. **`Vec<T>: PartialOrd` (so sánh `<`/`>`/`<=`/`>=`) hoàn toàn CHƯA cài** —
+   `GiaTri::so_sanh` (`value.rs`) không có nhánh cho `Day` (biểu diễn LÀ
+   `Vec`/mảng), rơi vào `_ => None`, báo lỗi cứng `BR0520` ("không so sánh
+   được") cho MỌI so sánh thứ tự trên `Vec<T>` — dù `==`/`!=` (dùng
+   `bang()`, có nhánh `Day` riêng) VẪN hoạt động bình thường. Đã VÁ: thêm
+   nhánh `(Day(a), Day(b))` so TỪ điển (so từng cặp phần tử bằng `so_sanh`
+   đệ quy, cặp đầu tiên lệch quyết định; hết phần tử chung mà vẫn bằng thì
+   dãy NGẮN hơn nhỏ hơn — đúng `impl PartialOrd for Vec<T>` thật). ẢNH
+   HƯỞNG: chặn TOÀN bộ lớp bài học key-encoding/so-sánh-byte (chính là
+   trọng tâm q09) — mọi `Vec<u8>`/`Vec<char>` dùng làm khoá đã mã hoá rồi
+   so `<`/`>` đều báo lỗi TRƯỚC khi vá.
+
+2. **`<số nguyên> as char` là NO-OP câm lặng** — `BieuThuc::Ep` (`interp.
+   rs`) không có nhánh đích `"char"` từ `SoNguyen`, rơi vào `_ => v` (giữ
+   NGUYÊN giá trị SỐ, không đổi thành `KyTu`) — KHÔNG báo lỗi, KHÔNG
+   `ChuaHoTro`, chỉ ÂM thầm trả sai: `(('0' as u8) + (9 as u8)) as char`
+   in ra `57` (số) thay vì `'9'` (ký tự). Đây LÀ dạng lỗi NGUY hiểm NHẤT —
+   sai lặng lẽ, không TỰ lộ qua một thông báo lỗi nào — chỉ phát hiện được
+   bằng cách SO output THẬT với output MONG đợi. Đã VÁ: thêm nhánh
+   `(SoNguyen(n), "char") => KyTu((*n as u8) as char)` — LUÔN đi qua `u8`
+   trước, đúng NGỮ nghĩa Rust thật (`as char` chỉ hợp lệ TỪ `u8`, mọi bề
+   rộng khác cần `char::from_u32`, không phải `as`), không BAO GIỜ panic.
+
+3. **`v[i]` (chỉ số) — Ở BẤT KỲ đâu trên đường dẫn, kể cả LỒNG dưới một
+   lượt truy cập trường sau đó (`v[i].truong`) — bị coi NHẦM là move CẢ
+   `v`** khi dùng làm đối số một lời gọi hàm bên TRONG vòng lặp (kể cả
+   lồng nhau: vòng NGOÀI đọc `v[i]`, gọi hàm trả VỀ `Vec`, vòng TRONG duyệt
+   kết quả đó). `move_check.rs`'s `goc_cua` gộp CHUNG `ChiSo` (chỉ số) VỚI
+   `TruyCapTruong` (truy cập trường) VÀO cùng MỘT nhánh "move một phần" —
+   đúng cho trường struct (Byte KHÔNG có partial-move thật, coi CẢ struct
+   bị move LÀ một xấp xỉ AN toàn), nhưng SAI cho chỉ số: đọc MỘT phần tử
+   qua `[i]` KHÔNG BAO GIỜ move container thật trong Rust — hoặc phần tử
+   LÀ `Copy` (không CÓ gì chuyển đi), hoặc không phải `Copy` thì `rustc`
+   thật từ chối bằng lỗi RIÊNG (E0507) mà Byte KHÔNG kiểm ở đây. Đã VÁ:
+   `goc_cua` giờ trả THÊM cờ `co_chi_so` (đường dẫn CÓ đi qua `[i]` Ở bất
+   kỳ đâu không) — `ghi_move` bỏ qua HOÀN toàn khi cờ NÀY bật, bất kể lồng
+   sâu BAO nhiêu lượt truy cập trường SAU chỉ số.
+
+4. **Tham số VÔ hướng nguyên thuỷ (`usize`/`i64`/`bool`/`char`/…, KHÔNG
+   phải `&T`) VÀ kết quả gọi HÀM trả về kiểu vô hướng đó bị coi NHẦM là
+   không-`Copy`** — trước khi vá, `kiem_tra` (đăng ký tham số) CHỈ đặc
+   cách `&T` (bất biến) thành `LuonSong` (không BAO giờ move); một tham số
+   NHƯ `bat_dau: usize` rơi vào nhánh MẶC định (`khai_bao`, theo dõi move
+   bình thường) — dù `usize` LUÔN LÀ `Copy` thật. Hậu quả DÂY chuyền: MỌI
+   biến cục bộ khởi tạo TỪ tham số đó (`let mut hien_tai = bat_dau;`)
+   CŨNG bị `co_the_khong_copy` (ước lượng cú pháp, KHÔNG suy luận kiểu)
+   coi LÀ không-Copy — MỌI vòng lặp (kể cả `loop{}` VÔ hạn) đọc/gán LẠI
+   biến ĐÓ báo `ChuaHoTro BR0532` ("chuyển ra khỏi vòng lặp"), dù `usize`
+   không hề CÓ khái niệm move. TƯƠNG tự cho `let mut x = ham(...);` khi
+   `ham` khai `-> i64` (hay bất kỳ kiểu vô hướng NÀO) tường minh trong chữ
+   ký. Đã VÁ HAI chỗ, PHỐI hợp: (a) `kiem_tra` giờ đặc cách CẢ tham số
+   kiểu vô hướng nguyên thuỷ (hàm MỚI `la_kieu_vo_huong_copy(&Kieu)`)
+   THÀNH `LuonSong`, y hệt `&T`; (b) `co_the_khong_copy` chuyển THÀNH
+   method (`&self`, không còn free function) — nhánh `DuongDan` tra
+   `self.tra(ten) == LuonSong` (LAN truyền tính Copy: biến khởi tạo TỪ một
+   biến ĐÃ biết Copy CŨNG Copy), nhánh `GoiHam` mới tra bảng `kieu_tra_ve_
+   ham: HashMap<String, Kieu>` (tính MỘT lần cho CẢ chương trình Ở
+   `nap_kieu_tra_ve_ham`, TRƯỚC khi kiểm từng hàm) — nếu hàm được GỌI khai
+   kiểu trả VỀ vô hướng nguyên thuỷ tường minh, coi kết QUẢ LÀ Copy.
+
+### B. Vị trí PHÁT hiện — bài học quy trình
+
+Cả bốn lỗ hổng CHỈ lộ ra SAU khi chạy `kiem_ma_bai_hoc.mjs` (khối `code`)
+VÀ tự tay chạy LẠI từng khối `readonly`/`predict`/`example` qua `chay()`
+(không phải `cargo run --example` trần) — KHÔNG lỗ hổng NÀO tự lộ qua đọc
+tay thiết kế, dù đã đọc kỹ VÀ đối chiếu facts doc TRƯỚC khi viết. Bài học:
+với BẤT KỲ track Rust nào dùng `<`/`>` trên `Vec`, `as char`, hay vòng lặp
+lồng ghép đọc/gọi hàm QUA chỉ số — LUÔN xác nhận qua `chay()` TRƯỚC khi
+tin bất KỲ tuyên bố "đã xác nhận" nào TỪ phiên trước, kể cả tuyên bố của
+chính facts doc NÀY nếu nó ghi trước ngày 2026-09-04 VÀ liên quan tới BỐN
+lớp hành vi Ở trên.
+
+### Dùng được, xác nhận thêm sau các bản vá này
+
+`Vec<u8> < Vec<u8>` / `Vec<char> < Vec<char>` (VÀ `>`/`<=`/`>=`) — so từ
+điển ĐÚNG ngữ nghĩa thật. `u8 as char` (VÀ mọi biểu thức thu gọn VỀ `u8`
+rồi `as char`, ví dụ `(('0' as u8) + (n as u8)) as char`). `v[i]` VÀ
+`v[i].truong` dùng làm đối số hàm BÊN TRONG vòng lặp (kể cả lồng nhau).
+Tham số hàm kiểu vô hướng nguyên thuỷ (`usize`/`i64`/…) VÀ biến cục bộ
+khởi tạo TỪ chúng (trực tiếp hay qua lời gọi hàm khác CŨNG trả kiểu vô
+hướng) dùng lại được xuyên suốt `loop{}`/`while` KHÔNG cần `.clone()` hay
+workaround NÀO.

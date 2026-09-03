@@ -48,33 +48,96 @@ enum TrangThai {
     DaMoveTrongNhanh(Span),
 }
 
-/// Biến này có thể là kiểu không-`Copy` không?
-///
-/// Không có suy luận kiểu, nên đây là ước lượng theo cú pháp. Nguyên tắc: khi
-/// không chắc thì coi là **không-`Copy`** — vì đoán sai theo hướng đó chỉ dẫn
-/// tới `ChuaHoTro` (vô hại), còn đoán sai theo hướng kia dẫn tới false accept.
-fn co_the_khong_copy(kh: Option<&BieuThuc>) -> bool {
-    match kh {
-        None => false,
-        Some(bt) => match bt {
-            // Hằng số vô hướng luôn là Copy.
-            BieuThuc::HangSo { gia_tri, .. } => !matches!(
-                gia_tri,
-                HangSo::SoNguyen(_) | HangSo::SoThuc(_) | HangSo::DungSai(_) | HangSo::KyTu(_)
-            ),
-            // Phép toán trên số cho ra số.
-            BieuThuc::HaiNgoi { trai, phai, .. } => {
-                co_the_khong_copy(Some(trai)) || co_the_khong_copy(Some(phai))
-            }
-            BieuThuc::MotNgoi { toan_hang, .. } => co_the_khong_copy(Some(toan_hang)),
-            // Mượn là Copy (với `&T`); `&mut T` thì không, nhưng nó cũng không
-            // bị "move" theo nghĩa ta đang xét.
-            BieuThuc::Muon { .. } => false,
-            BieuThuc::Dai { .. } => false,
-            BieuThuc::Ep { .. } => false,
-            // Còn lại: chuỗi, Vec, struct, enum, kết quả gọi hàm… coi là không-Copy.
-            _ => true,
-        },
+/// Tên kiểu vô hướng nguyên thuỷ — LUÔN `Copy` trong Rust thật, biết chắc
+/// ngay từ chữ ký (không cần suy luận). Dùng cho tham số hàm khai kiểu tường
+/// minh, ví dụ `bat_dau: usize` — SAI nếu coi ngang hàng với tham số kiểu
+/// `String`/`Vec<T>`/struct tự định nghĩa.
+fn la_ten_kieu_vo_huong_copy(ten: &str) -> bool {
+    matches!(
+        ten,
+        "i8" | "i16"
+            | "i32"
+            | "i64"
+            | "i128"
+            | "isize"
+            | "u8"
+            | "u16"
+            | "u32"
+            | "u64"
+            | "u128"
+            | "usize"
+            | "f32"
+            | "f64"
+            | "bool"
+            | "char"
+    )
+}
+
+/// Kiểu khai trong chữ ký hàm (`Kieu`, không phải biểu thức) có LUÔN là
+/// `Copy` không — chỉ đúng cho path một đoạn, không tham số kiểu, tên khớp
+/// một trong các kiểu vô hướng nguyên thuỷ (`Vec<i64>` cũng là `DuongDan`
+/// nhưng CÓ tham số kiểu, nên không khớp — đúng, `Vec<T>` không phải `Copy`).
+fn la_kieu_vo_huong_copy(kieu: &Kieu) -> bool {
+    matches!(kieu, Kieu::DuongDan { doan, tham_so, .. }
+        if doan.len() == 1 && tham_so.is_empty() && la_ten_kieu_vo_huong_copy(&doan[0]))
+}
+
+impl<'a> BoKiem<'a> {
+    /// Biến này có thể là kiểu không-`Copy` không?
+    ///
+    /// Không có suy luận kiểu đầy đủ, nên đây là ước lượng theo cú pháp CỘNG
+    /// trạng thái đã biết (tham số `&T`/vô hướng nguyên thuỷ đã đăng ký
+    /// `LuonSong` ở `kiem_tra`). Nguyên tắc: khi không chắc thì coi là
+    /// **không-`Copy`** — vì đoán sai theo hướng đó chỉ dẫn tới `ChuaHoTro`
+    /// (vô hại), còn đoán sai theo hướng kia dẫn tới false accept.
+    fn co_the_khong_copy(&self, kh: Option<&BieuThuc>) -> bool {
+        match kh {
+            None => false,
+            Some(bt) => match bt {
+                // Hằng số vô hướng luôn là Copy.
+                BieuThuc::HangSo { gia_tri, .. } => !matches!(
+                    gia_tri,
+                    HangSo::SoNguyen(_) | HangSo::SoThuc(_) | HangSo::DungSai(_) | HangSo::KyTu(_)
+                ),
+                // Phép toán trên số cho ra số.
+                BieuThuc::HaiNgoi { trai, phai, .. } => {
+                    self.co_the_khong_copy(Some(trai)) || self.co_the_khong_copy(Some(phai))
+                }
+                BieuThuc::MotNgoi { toan_hang, .. } => self.co_the_khong_copy(Some(toan_hang)),
+                // Mượn là Copy (với `&T`); `&mut T` thì không, nhưng nó cũng không
+                // bị "move" theo nghĩa ta đang xét.
+                BieuThuc::Muon { .. } => false,
+                BieuThuc::Dai { .. } => false,
+                BieuThuc::Ep { .. } => false,
+                // Tên trần: KHÔNG biết kiểu tại đây nói chung — TRỪ khi biến đó
+                // đã được đăng ký `LuonSong` (tham số `&T` hoặc vô hướng nguyên
+                // thuỷ, xem `kiem_tra`) — khi đó biết CHẮC là `Copy`, và tính
+                // Copy LAN truyền: `let y = x;` với `x` đã biết `Copy` thì `y`
+                // cũng `Copy`. Thiếu nhánh này khiến MỌI biến cục bộ khởi tạo
+                // từ một tham số vô hướng (`let mut hien_tai = bat_dau;` với
+                // `bat_dau: usize`) bị coi nhầm là không-Copy — báo oan
+                // "chuyển ra khỏi vòng lặp" cho bất kỳ vòng lặp nào đọc lại nó.
+                BieuThuc::DuongDan { doan, .. } if doan.len() == 1 => {
+                    self.tra(&doan[0]) != Some(TrangThai::LuonSong)
+                }
+                // Lời gọi hàm TRẢ VỀ kiểu vô hướng nguyên thuỷ đã khai rõ chữ
+                // ký (`fn khoang_cach(...) -> i64`) — biết CHẮC là `Copy`, tra
+                // trong `kieu_tra_ve_ham` (tính một lần cho cả chương trình).
+                // Đối số bên trong lời gọi vẫn cần duyệt ở `bieu_thuc` như
+                // bình thường — hàm này chỉ quyết định Copy hay không cho
+                // GIÁ TRỊ TRẢ VỀ, không ảnh hưởng move-check của đối số.
+                BieuThuc::GoiHam { ham, .. } => match ham.as_ref() {
+                    BieuThuc::DuongDan { doan, .. } if doan.len() == 1 => self
+                        .kieu_tra_ve_ham
+                        .get(&doan[0])
+                        .map(|kt| !la_kieu_vo_huong_copy(kt))
+                        .unwrap_or(true),
+                    _ => true,
+                },
+                // Còn lại: chuỗi, Vec, struct, enum… coi là không-Copy.
+                _ => true,
+            },
+        }
     }
 }
 
@@ -98,10 +161,21 @@ struct BoKiem<'a> {
     /// tại đúng hai điểm gọi hàm (không áp dụng cho `let`/gán, nơi `&mut T`
     /// vẫn thật sự bị move nếu gán sang biến khác).
     tham_chieu_kha_bien: std::collections::HashSet<String>,
+    /// Kiểu trả về của MỌI hàm cấp cao nhất trong chương trình, tính MỘT lần
+    /// trước khi kiểm từng hàm — cho phép `co_the_khong_copy` nhận ra
+    /// `ham_tra_ve_so(...)` (một lời GỌI, không phải tên trần) trả về kiểu
+    /// vô hướng nguyên thuỷ, ví dụ `khoang_cach(a, b) -> i64`. Thiếu bảng
+    /// này thì MỌI kết quả gọi hàm bị coi là không-Copy, kể cả khi kiểu trả
+    /// về khai rõ ràng là `i64`/`usize`/…
+    kieu_tra_ve_ham: &'a HashMap<String, Kieu>,
 }
 
 impl<'a> BoKiem<'a> {
-    fn moi(diags: &'a mut Diagnostics, nuot_self: std::collections::HashSet<String>) -> Self {
+    fn moi(
+        diags: &'a mut Diagnostics,
+        nuot_self: std::collections::HashSet<String>,
+        kieu_tra_ve_ham: &'a HashMap<String, Kieu>,
+    ) -> Self {
         Self {
             trang_thai: vec![HashMap::new()],
             do_sau_nhanh: 0,
@@ -110,6 +184,7 @@ impl<'a> BoKiem<'a> {
             da_bao: Vec::new(),
             nuot_self,
             tham_chieu_kha_bien: std::collections::HashSet::new(),
+            kieu_tra_ve_ham,
         }
     }
 
@@ -172,20 +247,25 @@ impl<'a> BoKiem<'a> {
         }
     }
 
-    /// Tên biến gốc của một đường dẫn nơi chốn.
+    /// Tên biến gốc của một đường dẫn nơi chốn, CỘNG có ĐI QUA một chỉ số
+    /// (`[i]`) Ở BẤT KỲ đâu trên đường không.
     ///
-    /// `p` -> `p` · `p.ten` -> `p` · `t.0` -> `t` · `v[0]` -> `v`
+    /// `p` -> `p` · `p.ten` -> `p` · `t.0` -> `t` · `v[0]` -> `v` ·
+    /// `v[0].truong` -> `v`, CÓ chỉ số.
     ///
     /// Bản trước chỉ nhận tên trần, nên mọi phép move qua đường dẫn thoát im
     /// lặng ngay dòng đầu — kể cả khi nhánh duyệt phía trên đã làm đúng phần
     /// của nó. Phải vá ở gốc, vá từng nhánh là chưa đủ.
-    fn goc_cua(bt: &BieuThuc) -> Option<(String, Span, bool)> {
+    fn goc_cua(bt: &BieuThuc) -> Option<(String, Span, bool, bool)> {
         match bt {
             BieuThuc::DuongDan { doan, span } if doan.len() == 1 => {
-                Some((doan[0].clone(), *span, false))
+                Some((doan[0].clone(), *span, false, false))
             }
-            BieuThuc::TruyCapTruong { doi_tuong, .. } | BieuThuc::ChiSo { doi_tuong, .. } => {
-                Self::goc_cua(doi_tuong).map(|(t, s, _)| (t, s, true))
+            BieuThuc::TruyCapTruong { doi_tuong, .. } => {
+                Self::goc_cua(doi_tuong).map(|(t, s, _, cs)| (t, s, true, cs))
+            }
+            BieuThuc::ChiSo { doi_tuong, .. } => {
+                Self::goc_cua(doi_tuong).map(|(t, s, _, _)| (t, s, true, true))
             }
             _ => None,
         }
@@ -193,7 +273,22 @@ impl<'a> BoKiem<'a> {
 
     /// Ghi nhận một phép move khỏi `bt`.
     fn ghi_move(&mut self, bt: &BieuThuc) {
-        let Some((ten, span, mot_phan)) = Self::goc_cua(bt) else { return };
+        let Some((ten, span, mot_phan, co_chi_so)) = Self::goc_cua(bt) else { return };
+        // `v[i]` (chỉ số) — Ở BẤT KỲ đâu trên đường dẫn, kể cả lồng dưới một
+        // lượt truy cập trường sau đó (`v[0].truong`) — KHÔNG BAO GIỜ chuyển
+        // quyền sở hữu của `v`: hoặc phần tử lấy ra là `Copy` (không có gì
+        // chuyển đi cả), hoặc không phải `Copy` thì `rustc` thật đã từ chối
+        // bằng một lỗi RIÊNG (E0507 "cannot move out of index of `Vec<T>`")
+        // mà Byte không kiểm ở đây. Trước bản vá này, đường dẫn CÓ chỉ số bị
+        // gộp chung với truy cập trường THUẦN tuý và coi LÀ "move một phần"
+        // của biến gốc — đúng cho trường struct (Byte không có partial-move
+        // thật), nhưng SAI cho chỉ số: báo oan MỌI vòng lặp lồng nhau dùng
+        // `v[i]` hay `v[i].truong` làm đối số một lời gọi hàm khác (ví dụ
+        // `ham(v[i])` hay `ham(v[i].gia_tri)` bên trong vòng lặp), dù `v`
+        // không hề bị chuyển đi.
+        if co_chi_so {
+            return;
+        }
         let span = bt.span().merge(span);
         let _ = mot_phan;
         let ten = &ten;
@@ -304,7 +399,7 @@ impl<'a> BoKiem<'a> {
                 }
                 let mut ten = Vec::new();
                 mau.ten_rang_buoc(&mut ten);
-                let khong_copy = co_the_khong_copy(gia_tri.as_ref());
+                let khong_copy = self.co_the_khong_copy(gia_tri.as_ref());
                 for (t, _, _) in ten {
                     if khong_copy {
                         self.khai_bao(&t);
@@ -581,8 +676,11 @@ fn nap_phuong_thuc_nuot(ct: &ChuongTrinh) -> std::collections::HashSet<String> {
     ra
 }
 
-pub fn kiem_tra(ct: &ChuongTrinh, diags: &mut Diagnostics) {
-    let nuot = nap_phuong_thuc_nuot(ct);
+/// Kiểu trả về khai trong chữ ký của MỌI hàm cấp cao nhất (kể cả trong
+/// `impl`) — tính MỘT lần cho cả chương trình, dùng bởi `co_the_khong_copy`
+/// để nhận ra lời gọi hàm trả về kiểu vô hướng nguyên thuỷ (xem doc ở đó).
+fn nap_kieu_tra_ve_ham(ct: &ChuongTrinh) -> HashMap<String, Kieu> {
+    let mut ra = HashMap::new();
     for m in &ct.muc {
         let ham = match m {
             Muc::Ham(h) => vec![h],
@@ -590,13 +688,38 @@ pub fn kiem_tra(ct: &ChuongTrinh, diags: &mut Diagnostics) {
             _ => continue,
         };
         for h in ham {
-            let mut bk = BoKiem::moi(diags, nuot.clone());
+            if let Some(kt) = &h.kieu_tra_ve {
+                ra.insert(h.ten.clone(), kt.clone());
+            }
+        }
+    }
+    ra
+}
+
+pub fn kiem_tra(ct: &ChuongTrinh, diags: &mut Diagnostics) {
+    let nuot = nap_phuong_thuc_nuot(ct);
+    let kieu_tra_ve_ham = nap_kieu_tra_ve_ham(ct);
+    for m in &ct.muc {
+        let ham = match m {
+            Muc::Ham(h) => vec![h],
+            Muc::Impl(i) => i.ham.iter().collect(),
+            _ => continue,
+        };
+        for h in ham {
+            let mut bk = BoKiem::moi(diags, nuot.clone(), &kieu_tra_ve_ham);
             bk.vao();
             for ts in &h.tham_so {
                 // `&T` (tham chiếu BẤT BIẾN) luôn là `Copy` — biết ngay từ
                 // kiểu khai trong chữ ký hàm, không cần đoán theo cú pháp.
+                // Kiểu vô hướng nguyên thuỷ (`usize`, `i64`, `bool`, `char`, …)
+                // CŨNG luôn `Copy` — CÙNG lý do, cùng cách xử lý. Thiếu vế này
+                // khiến MỌI tham số như `bat_dau: usize` bị coi nhầm là không-
+                // Copy, kéo theo mọi biến cục bộ khởi tạo TỪ nó (`let mut
+                // hien_tai = bat_dau;`) cũng bị coi nhầm — báo oan "chuyển ra
+                // khỏi vòng lặp" cho vòng lặp nào đọc lại chúng.
                 let la_tham_chieu_bat_bien =
                     matches!(&ts.kieu, Kieu::ThamChieu { co_the_sua: false, .. });
+                let la_vo_huong_copy = la_kieu_vo_huong_copy(&ts.kieu);
                 // `&mut T` KHÔNG phải Copy (đúng luật thật) — nhưng dùng LẠI
                 // nó làm đối số một lời gọi hàm khác vẫn AN TOÀN (mượn lại,
                 // xem doc `tham_chieu_kha_bien`); ghi tên vào bảng riêng để
@@ -605,7 +728,7 @@ pub fn kiem_tra(ct: &ChuongTrinh, diags: &mut Diagnostics) {
                     matches!(&ts.kieu, Kieu::ThamChieu { co_the_sua: true, .. });
                 let mut ten = Vec::new();
                 ts.mau.ten_rang_buoc(&mut ten);
-                if la_tham_chieu_bat_bien && ten.len() == 1 {
+                if (la_tham_chieu_bat_bien || la_vo_huong_copy) && ten.len() == 1 {
                     bk.khai_bao_luon_song(&ten[0].0);
                 } else {
                     for (t, _, _) in &ten {
