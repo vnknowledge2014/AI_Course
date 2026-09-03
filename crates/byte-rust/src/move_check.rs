@@ -38,6 +38,10 @@ use std::collections::HashMap;
 enum TrangThai {
     /// Còn giữ giá trị.
     Song,
+    /// Tham số kiểu tham chiếu bất biến (`&T`, khai từ chữ ký hàm) — `&T`
+    /// LUÔN là `Copy` trong Rust thật, không cần suy luận theo luồng điều
+    /// khiển để biết điều này. Không bao giờ chuyển sang trạng thái đã move.
+    LuonSong,
     /// Đã move trên chuỗi thẳng hàng — dùng lại là lỗi chắc chắn.
     DaMoveThang(Span),
     /// Đã move bên trong một nhánh/vòng lặp — ta không đủ cơ sở phán quyết.
@@ -112,6 +116,13 @@ impl<'a> BoKiem<'a> {
 
     fn khai_bao(&mut self, ten: &str) {
         self.trang_thai.last_mut().unwrap().insert(ten.to_string(), TrangThai::Song);
+    }
+
+    /// Khai báo một tham số biết chắc là tham chiếu bất biến (`&T`) — theo
+    /// KIỂU khai trong chữ ký hàm, không phải suy luận cú pháp. `&T` luôn là
+    /// `Copy`, nên biến này không bao giờ cần theo dõi move.
+    fn khai_bao_luon_song(&mut self, ten: &str) {
+        self.trang_thai.last_mut().unwrap().insert(ten.to_string(), TrangThai::LuonSong);
     }
 
     fn tra(&self, ten: &str) -> Option<TrangThai> {
@@ -557,10 +568,20 @@ pub fn kiem_tra(ct: &ChuongTrinh, diags: &mut Diagnostics) {
             let mut bk = BoKiem::moi(diags, nuot.clone());
             bk.vao();
             for ts in &h.tham_so {
+                // `&T` (tham chiếu BẤT BIẾN) luôn là `Copy` — biết ngay từ
+                // kiểu khai trong chữ ký hàm, không cần đoán theo cú pháp.
+                // `&mut T` thì KHÔNG Copy nên vẫn đi qua nhánh theo dõi bình
+                // thường bên dưới.
+                let la_tham_chieu_bat_bien =
+                    matches!(&ts.kieu, Kieu::ThamChieu { co_the_sua: false, .. });
                 let mut ten = Vec::new();
                 ts.mau.ten_rang_buoc(&mut ten);
-                for (t, _, _) in ten {
-                    bk.khai_bao(&t);
+                if la_tham_chieu_bat_bien && ten.len() == 1 {
+                    bk.khai_bao_luon_song(&ten[0].0);
+                } else {
+                    for (t, _, _) in ten {
+                        bk.khai_bao(&t);
+                    }
                 }
             }
             bk.khoi(&h.than);
