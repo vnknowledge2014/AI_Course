@@ -146,3 +146,73 @@ Danh sách CẤM ở trên áp dụng cho MỌI track dùng `byte-rust`, không 
 T4.0b — nếu một track sau cần `#[derive(...)]` hay closure đặt tên, đó là dấu
 hiệu cần vá `crates/byte-rust` trước, không phải viết bài né tránh thêm một
 lần nữa. Ghi vào đây thay vì để mỗi track tự khám phá lại từ đầu.
+
+## Cập nhật 2026-09-03 — điều tra trước R6-2 q07 "Ngôn ngữ của Byte"
+
+Đo trực tiếp qua `cargo run --example` (crates/byte-rust, tạo file tạm rồi
+xoá) khi kiểm tính khả thi của lexer/parser đệ quy — chủ đề q07-q09.
+
+### ĐÃ VÁ — không còn là false-reject
+
+- **`&T` (tham chiếu BẤT BIẾN) dùng ở nhiều nhánh trong hàm đệ quy** — trước
+  đây LUÔN báo nhầm `BR0531` dù không cần phân tích luồng điều khiển (xem
+  commit `fix(byte-rust): tham chiếu bất biến không còn bị move_check báo
+  nhầm trong nhánh`). Từ nay: hàm đệ quy nhận `&T`/`&self`/`&Vec<T>` và dùng
+  tham số đó ở CẢ nhánh cơ bản lẫn nhánh đệ quy — **dùng được bình thường**,
+  không cần workaround. `&mut T` KHÔNG đổi (đúng luật thật, không phải Copy).
+
+### CẤM/CHUA_HO_TRO mới phát hiện — dùng cho track R6 (lexer/parser/AST)
+
+1. **`Box::new(...)`** — CHƯA cài Ở `interp.rs` (không có nhánh dispatch cho
+   `("Box", "new")`, khác với `("Vec","new")`/`("String","new"/"from")` đã
+   có). Hệ quả: **kiểu cây đệ quy cổ điển `enum Node { ..., Con(Box<Node>) }`
+   KHÔNG dùng được.** Track R6 cần AST/cây PHẢI dùng **kiểu arena/index**:
+   `struct Cay { nut: Vec<NodeEnum> }`, con trỏ LÀ `usize` chỉ vào `nut`,
+   KHÔNG BAO GIỜ `Box`. Đây LÀ một lựa chọn thiết kế Rust thật hợp lệ (nhiều
+   parser thật, ví dụ rust-analyzer, cũng dùng arena thay Box đệ quy để né
+   đúng vấn đề mượn/vòng đời mà cây Box gây ra) — không phải một "giả vờ",
+   ghi rõ lý do này trong lesson giới thiệu AST của track.
+2. **`String` — CHỈ đọc, KHÔNG có phương thức mutate.** `.push`/`.push_str`
+   không tồn tại (`BR0552`, danh sách gợi ý của engine: `len, to_uppercase,
+   to_lowercase, trim, chars, split, contains`). Muốn "xây" một chuỗi từ ký
+   tự rời: dùng `Vec<char>` (CÓ `.push`, CÓ so sánh `==` TRỰC TIẾP giữa hai
+   `Vec<char>`, CÓ index + `.len()`) thay cho `String` xuyên suốt phần lexer
+   — chỉ chuyển sang `String` (qua `String::from(...)`) ở BIÊN NGOÀI khi cần
+   in kết quả.
+3. **`.iter().collect()` từ `Vec<char>` KHÔNG suy luận ra được kiểu `String`**
+   dù `let x: String = ...` khai tường minh — báo lỗi kiểu sai `BR0303`
+   ("giá trị là Vec<char>"). Không có "target-type-driven" overload cho
+   `collect()` — nó luôn suy `Vec<char>`. TRÁNH pattern này; dùng `Vec<char>`
+   trực tiếp làm biểu diễn "chuỗi" (xem mục 2).
+4. **Nối chuỗi bằng `+` và tự-gán lại BÊN TRONG một vòng lặp** (kiểu
+   accumulator: `s = s + &x;` trong `while`/`for`) — rơi vào `ChuaHoTro`
+   `BR0532` giống hệt move-trong-vòng-lặp thường, dù trong Rust thật đây LÀ
+   idiom hoàn toàn hợp lệ (NLL biết `s` "sống lại" ngay sau phép gán). Đây
+   LÀ giới hạn CFG đã biết (ADR-002), không phải lỗi cài đặt — dùng
+   `predict` nếu cần dạy khái niệm này, KHÔNG dùng `code` chấm điểm sống.
+5. **`char` hầu như không có method dựng sẵn** — chỉ `clone`, `to_string`.
+   KHÔNG có `is_ascii_digit`/`is_alphabetic`/... Thay bằng SO SÁNH ký tự trực
+   tiếp — **dùng được, sạch**: `c >= '0' && c <= '9'` (chữ số),
+   `(c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_'` (chữ/gạch
+   dưới). Xác nhận: char hỗ trợ đầy đủ `==`/`!=`/`>=`/`<=` so với char khác.
+6. **Slice bằng range trên `Vec`** (`v[1..4]`, kể cả chain `.iter().collect()`
+   sau đó) — `ChuaHoTro` `BR0310` Ở TẦNG KIỂU, và vì lỗi tĩnh chặn TOÀN BỘ
+   chương trình (không chỉ dòng đó) trước khi chạy dòng nào — **TRÁNH hoàn
+   toàn** trong `code` có chấm điểm sống. Duyệt range bằng vòng `while`/`for`
+   với chỉ số tường minh (`i` chạy từ `bat_dau` tới `ket_thuc`) thay thế.
+7. **`&mut T` + gán qua CHỈ SỐ** (`v[i] += 1` với `v: &mut Vec<T>` tham số)
+   — báo nhầm `BR0400` ("không gán lại được cho `v`") từ `mut_check.rs`,
+   dường như đòi tham số phải khai `mut v` dù đang mutate QUA tham chiếu
+   chứ không reassign chính `v`. **CHƯA điều tra/vá** (khác lỗ hổng move_
+   check đã vá ở trên — nằm ở file khác). TRÁNH pattern `&mut T` + đệ quy +
+   gán qua chỉ số trong thiết kế bài — nếu q08/q09 (executor mutate cây)
+   cần pattern này, điều tra/vá riêng lúc đó, đừng suy luận lại từ đầu.
+
+### Dùng được, xác nhận thêm (không có trong bảng gốc ở trên)
+
+`s.chars().collect()` → `Vec<char>` (dùng được, đã xác nhận cho lexer).
+`vec![a, b, c]` với phần tử `char`. In `Vec<char>` từng ký tự qua vòng lặp +
+`print!("{}", c)` (không cần `{:?}` trên cả Vec). So sánh hai `Vec<char>`
+bằng `==` cho kết quả đúng (so từng phần tử, đúng ngữ nghĩa `PartialEq` thật
+của `Vec`). `enum` payload kiểu `usize` (dùng làm chỉ số arena) — dùng được
+y hệt các kiểu số khác đã xác nhận.
