@@ -883,3 +883,140 @@ mẫu, ngoài phạm vi track nền tảng này). Không bài nào chạm ma tr�
 phương sai hay hồi quy (dành T2.7/R8). Và — biên quan trọng nhất — **không
 bài nào dạy lại cách gõ vòng lặp đếm, cộng dồn, hay `tong/dem` trong Python;
 toàn bộ phần đó đã đóng ở R1 (T1.2 bài 14, 15, 27).**
+## T2.6 — Đồ thị, modular, đại số trừu tượng (Realm 2 · Toán & Toán rời rạc · Python CHỈ để KIỂM · 28 bài)
+
+## Mạch T2.6 — Đồ thị, modular, đại số trừu tượng
+
+Người học vào track đã xong T2.1-T2.5 (số, biến, mệnh đề, tập hợp/quan
+hệ/ánh xạ, tổ hợp/xác suất/thống kê).
+
+**QUAN TRỌNG — kiểm KỸ trước khi viết bài 1: R3 "Khoa học máy tính"
+(module `cau-truc-du-lieu`, DẠY đồ thị/cây bằng CODE — bảng kề, duyệt
+DFS/BFS) đứng SAU toàn bộ realm `toan` trong `content/curriculum/thu-tu.
+yaml` (`tools/kiem_do_thi.py` xếp HẠNG tuyến tính theo ĐÚNG thứ tự các
+realm xuất hiện trong file đó — `toan` đứng TRƯỚC `khoa-hoc-may-tinh`).
+Nghĩa là track NÀY **KHÔNG ĐƯỢC** `requires:` bất kỳ skill nào của R3
+(`ds.graph`, `ds.graph-representation`, `ds.tree`,...) — cổng "Đồ thị
+tiền đề" sẽ báo LỖI vì R3 CHƯA "được dạy" theo thứ tự tuyến tính đó, dù
+đời thường R3 có thể học TRƯỚC hay SAU track này tuỳ người học.** Track
+NÀY do đó dựng đồ thị HOÀN TOÀN từ MÁY MÓC đã có Ở T2.4 (quan hệ = tập
+cặp, T2.4 bài 16) thay vì mượn CODE của R3 — **đồ thị vô hướng CHÍNH LÀ
+một quan hệ ĐỐI XỨNG (T2.4 bài 20) trên tập đỉnh**, không cần khái niệm
+"đồ thị" nào MỚI Ở tầng MÁY cả, chỉ cần ĐẶT TÊN toán học lên một quan hệ
+đã biết cách dựng VÀ kiểm.
+
+Việc CỦA track này LÀ dạy lớp **LÝ THUYẾT ĐỒ THỊ**: bậc của đỉnh, đường
+đi/chu trình như đối tượng TOÁN học, liên thông, đường đi Euler, tô màu
+— RỒI CHUYỂN sang một nhánh KHÁC hẳn của toán rời rạc, số học modular
+(đồng dư, GCD, nghịch đảo modular) — RỒI KẾT bằng đại số trừu tượng
+(nhóm), tái định vị "Ch1 Math Foundations" (lambda calculus nhẹ) LÀM
+ĐỈNH track thay vì mở đầu (MASTERPLAN §9.1).
+
+**Vì sao BA chủ đề (đồ thị, modular, đại số trừu tượng) đứng CHUNG một
+track, dù nghe không liên quan.** Chúng dùng CHUNG một Ý TƯỞNG cốt lõi:
+**cấu trúc LẶP LẠI/ĐÓNG dưới một phép toán** — đồ thị: bậc/liên thông là
+tính chất BẤT BIẾN dưới các phép biến đổi; modular: phép cộng/nhân "quay
+vòng" rồi ĐÓNG lại trong một tập hữu hạn; nhóm: bốn tiên đề mô tả CHÍNH
+XÁC khi nào một phép toán "đóng và quay vòng tốt". Bài 25 (nhóm) chỉ RA
+modular (bài 13-20) VÀ đồ thị đối xứng (bài 1-12) ĐỀU LÀ ví dụ CỤ THỂ của
+MỘT cấu trúc trừu tượng — track ĐÓNG bằng cách NHÌN LẠI hai phần đầu qua
+lăng kính THỨ BA.
+
+**Hiện vật xuyên suốt:** khu vườn của Byte (T2.1-T2.5) — giờ NHÌN như một
+**sơ đồ tưới nước**: các luống LÀ đỉnh, MỘT đường ống nối hai luống LÀ một
+cạnh. Lịch tưới LẶP theo chu kỳ (thứ Hai, Tư, Sáu, rồi QUAY lại thứ Hai)
+LÀ số học modular. Và "phép GHÉP hai lịch tưới" (hợp thành, T2.4 bài 27)
+LÀ một PHÉP TOÁN có thể xét dưới góc nhìn nhóm.
+
+**Python trong track này không bao giờ là lời giải, CHỈ để KIỂM** —
+`set` (T2.4) dựng đồ thị (tập cạnh) VÀ kiểm bậc/liên thông; `%` (R1, `core.
+modulo`) đã biết CÁCH GÕ, giờ gắn lớp Ý NGHĨA đồng dư/GCD/nghịch đảo.
+
+| # | slug | Tiêu đề | Khái niệm mới (đúng một) | `reflect` cuối bài | Dựa trên |
+|---|---|---|---|---|---|
+| 1 | `dinh-va-canh-la-mot-tap-hop` | Đỉnh và cạnh là một tập hợp | **`G = (V, E)`** — đồ thị VÔ HƯỚNG LÀ một tập đỉnh `V` (T2.4 bài 1) CÙNG một quan hệ ĐỐI XỨNG `E` trên `V` (T2.4 bài 16 quan hệ, bài 20 đối xứng) — MỖI "cạnh" LÀ một cặp `(a,b)` MÀ `(b,a)` CŨNG thuộc `E`, đúng nghĩa ống tưới nối HAI CHIỀU; KHÔNG khái niệm máy MỚI, CHỈ đặt TÊN "đồ thị" lên một quan hệ đối xứng đã biết dựng | `(luong_1, luong_2) ∈ E` — theo ĐỊNH nghĩa đối xứng (T2.4 bài 20), `(luong_2, luong_1)` CŨNG phải Ở TRONG `E`. Nếu Byte CHỈ ghi MỘT chiều (quên ghi chiều kia) — quan hệ ĐÓ còn LÀ đồ thị vô hướng HỢP LỆ không? | T2.4 `quan-he-la-mot-tap-con`, `doi-xung` |
+| 2 | `bac-cua-mot-dinh` | Bậc của một đỉnh | **Bậc `deg(v)`** — số cạnh KỀ một đỉnh (số ống tưới NỐI tới một luống); đếm bằng `sum(1 for e in E if v in e)` — quy tắc đếm (T2.5 bài 1) áp lên đồ thị | Luống 1 nối với luống 2 VÀ luống 3 — `deg(luong_1)=2`. Cộng THẲNG bậc của MỌI luống lại — con số ĐÓ có liên quan gì tới SỐ cạnh (số ống tưới) không? | 1, T2.5 `quy-tac-cong` |
+| 3 | `tong-bac-la-hai-lan-so-canh` | Tổng bậc là hai lần số cạnh | **Bổ đề bắt tay: `Σ deg(v) = 2\|E\|`** — MỖI cạnh có ĐÚNG hai đầu mút, nên nó ĐÓNG GÓP đúng `1` vào bậc của MỖI đầu — cộng dồn qua MỌI cạnh ra `2` lần số cạnh; định lý ĐẦU tiên của track (chứng minh bằng ĐẾM hai cách, T2.3 kỹ thuật CHỨNG MINH) | Tổng bậc CẢ vườn LUÔN LÀ số CHẴN (`2×` một số nguyên). Có đồ thị nào mà TỔNG bậc LẺ không — hay đây LÀ một quy luật KHÔNG THỂ vi phạm? | 2 |
+| 4 | `duong-di-va-chu-trinh` | Đường đi và chu trình | **Đường đi** — dãy đỉnh LIÊN TIẾP nối bằng cạnh, KHÔNG lặp đỉnh; **chu trình** — đường đi mà đỉnh ĐẦU trùng đỉnh CUỐI; hai khái niệm HÌNH THỨC hoá "đi từ luống này sang luống khác theo ống tưới" | Từ luống 1, có đường đi TỚI luống 4 không (qua luống 2 hoặc 3)? Nếu CÓ, và từ luống 4 CŨNG có đường quay VỀ luống 1 — cả VƯỜN có "nối liền" với nhau không? | 1, T2.4 `cap-co-thu-tu` |
+| 5 | `do-thi-lien-thong` | Đồ thị liên thông | **Liên thông** — CÓ đường đi giữa MỌI cặp đỉnh; một sơ đồ tưới liên thông nghĩa LÀ nước CÓ thể chảy (qua nhiều ống nối tiếp) TỚI bất kỳ luống nào TỪ bất kỳ luống nào khác | Byte có TÁM luống, NHƯNG hệ ống tưới chia thành HAI cụm TÁCH biệt (không ống nào nối hai cụm). Đồ thị NÀY có liên thông không — và nếu KHÔNG, "phần" nào của nó LÀ liên thông? | 4 |
+| 6 | `thanh-phan-lien-thong` | Thành phần liên thông | **Thành phần liên thông** — một NHÓM đỉnh TỐI ĐA mà MỌI cặp trong nhóm CÓ đường đi nối nhau; một đồ thị KHÔNG liên thông chia thành NHIỀU thành phần, các thành phần RỜI NHAU (T2.4 bài 10) VÀ gộp lại vừa khít TOÀN đồ thị — đúng CẤU TRÚC phân hoạch (T2.4 bài 23) | Hai cụm ống tưới TÁCH biệt LÀ hai thành phần liên thông. Nếu Byte nối THÊM đúng MỘT ống GIỮA hai cụm — số thành phần liên thông đổi THẾ NÀO? | 5, T2.4 `lop-tuong-duong-va-phan-hoach` |
+| 7 | `cay-la-do-thi-khong-chu-trinh` | Cây là đồ thị liên thông không chu trình | **Cây (lý thuyết đồ thị)** — đồ thị liên thông (bài 5) VÀ KHÔNG chứa chu trình nào (bài 4); một cây có `n` đỉnh LUÔN có ĐÚNG `n−1` cạnh (hệ quả TRỰC TIẾP bổ đề bắt tay, bài 3) — MỘT khái niệm HÌNH THỨC hoàn toàn mới, không liên quan cấu trúc dữ liệu "cây" (nhánh cha-con, PHÂN cấp) mà một track LẬP TRÌNH khác có thể dùng | Hệ ống tưới của Byte CÓ chu trình — luống 1→2→3→1, nước CÓ thể chảy VÒNG. Bớt đúng MỘT ống trong vòng đó — đồ thị còn liên thông không, và còn chu trình nào không? | 6, 3 |
+| 8 | `bac-vao-bac-ra` | Bậc vào, bậc ra | **Đồ thị CÓ HƯỚNG** — cạnh LÀ cặp CÓ thứ tự `(a,b)` (T2.4 bài 14, ống MỘT chiều: nước chảy TỪ `a` TỚI `b`); **bậc VÀO** (số cạnh TRỎ vào) VÀ **bậc RA** (số cạnh TRỎ ra) — hai con số TÁCH biệt, khác bậc thường (bài 2, đồ thị VÔ hướng) | Trạm bơm CHỈ đẩy nước MỘT chiều tới từng luống — bậc RA của trạm bơm LÀ 4 (bốn luống), bậc VÀO LÀ 0. Cộng bậc VÀO của TẤT CẢ đỉnh, rồi cộng bậc RA của TẤT CẢ đỉnh — hai tổng ĐÓ có bằng nhau không, và có bằng SỐ cạnh không? | 2, T2.4 `cap-co-thu-tu` |
+| 9 | `bai-toan-bay-cay-cau` | Bài toán bảy cây cầu | **Bài toán Königsberg** — đi qua ĐỦ bảy cây cầu, MỖI cầu ĐÚNG một lần, rồi VỀ điểm xuất phát — Euler (1736) chứng minh KHÔNG THỂ, khai sinh lý thuyết đồ thị; bài NÀY thuật lại CÂU CHUYỆN, chưa đưa CÔNG thức (bài 10 mới đưa) | Euler KHÔNG thử hết mọi đường đi (T2.3 bài 21: kiểm hữu hạn không phải chứng minh) — ông tìm ra một tính chất CHUNG khiến bài toán VÔ VỌNG. Tính chất ĐÓ liên quan gì tới BẬC của các đỉnh (bài 2)? | 2, T2.3 `kiem-nghin-lan-van-chua-du` |
+| 10 | `duong-di-euler` | Đường đi Euler | **Đường đi Euler** — đi qua MỌI cạnh của đồ thị ĐÚNG một lần (khác đường đi bài 4, vốn không lặp ĐỈNH; đường Euler không lặp CẠNH, đỉnh có thể ghé lại); **chu trình Euler** — đường Euler mà điểm đầu trùng điểm cuối | Sơ đồ tưới của Byte — Byte muốn đi bộ dọc THEO MỌI ống tưới ĐÚNG một lần để kiểm tra rò rỉ. Có luôn LÀM được không, hay tuỳ sơ đồ? | 4, 9 |
+| 11 | `dieu-kien-ton-tai-duong-di-euler` | Điều kiện tồn tại đường đi Euler | **Định lý Euler** — một đồ thị liên thông có chu trình Euler ⟺ MỌI đỉnh bậc CHẴN (bài 2); có đường đi Euler (không cần đóng vòng) ⟺ ĐÚNG 0 hoặc 2 đỉnh bậc LẺ — giải quyết TRỌN VẸN bài toán Königsberg (bốn đỉnh bậc lẻ, bài 9) | Sơ đồ Byte có ĐÚNG hai luống bậc lẻ (luống 1 và luống 4). Đường đi Euler CÓ tồn tại — nhưng PHẢI bắt đầu VÀ kết thúc Ở ĐÂU? | 10, 3 |
+| 12 | `to-mau-do-thi` | Tô màu đồ thị | **Tô màu đồ thị** — gán MỘT màu cho MỖI đỉnh sao cho HAI đỉnh KỀ nhau (có cạnh nối) KHÔNG cùng màu; **số màu tô** `χ(G)` — số màu ÍT NHẤT cần dùng; tưới hai luống KỀ nhau CÙNG lúc thì ÁP lực nước yếu, cần xếp LỊCH khác giờ = tô màu KHÁC | Bốn luống, mọi cặp ĐỀU kề nhau (đồ thị ĐẦY ĐỦ). Cần Ít NHẤT bao nhiêu "giờ tưới" (màu) khác nhau để KHÔNG hai luống kề nào tưới CÙNG giờ? | 2, T2.4 `to-hop-chon-k` |
+| 13 | `phep-chia-co-du` | Phép chia có dư | **`a = q·n + r`, `0 ≤ r < n`** — phép chia có dư (Ý NGHĨA toán của `%`, R1 `core.modulo` đã dạy CÁCH GÕ); MỌI số nguyên `a` VÀ MỘT số `n>0` xác định DUY NHẤT cặp `(q, r)` — nền cho ĐỒNG DƯ (bài 14) | Lịch tưới lặp mỗi BA ngày: `Hai, Tư, Bảy, Hai, Tư, Bảy,...`. Ngày thứ `10` (đếm từ `1`) LÀ ngày nào trong chu kỳ? Có cách nào tính KHÔNG cần đếm tay từng ngày? | R1 `phan-con-thua` |
+| 14 | `dong-du-modulo` | Đồng dư modulo n | **`a ≡ b (mod n)`** — `a` VÀ `b` CÙNG số dư khi chia cho `n` (bài 13); ĐÚNG mối quan hệ TƯƠNG ĐƯƠNG (T2.4 bài 22: phản xạ, đối xứng, bắc cầu — kiểm lại BẰNG chính công thức T2.4 đã viết) trên tập số nguyên | Ngày thứ `10` VÀ ngày thứ `13` (chu kỳ ba ngày, bài 13) — có ĐỒNG DƯ modulo `3` không? Nếu có, chúng có LUÔN rơi vào CÙNG một NGÀY trong chu kỳ không? | 13, T2.4 `quan-he-tuong-duong` |
+| 15 | `cong-nhan-modular` | Cộng, nhân modular | **`(a+b) mod n = ((a mod n)+(b mod n)) mod n`**, TƯƠNG TỰ cho nhân — CỘNG/NHÂN rồi LẤY dư CHO kết quả GIỐNG hệt lấy dư TRƯỚC rồi cộng/nhân; hữu ích khi SỐ quá LỚN (không cần tính số ĐẦY ĐỦ trước khi lấy dư) | Byte tính ngày thứ `1000` rơi vào NGÀY nào (chu kỳ ba ngày) — nhân TRỰC TIẾP một số LỚN có tiện bằng lấy dư TRƯỚC không? Kiểm lại bằng CẢ hai cách, có RA cùng kết quả không? | 14 |
+| 16 | `uoc-chung-lon-nhat` | Ước chung lớn nhất | **`gcd(a,b)`** — số LỚN NHẤT chia HẾT cả `a` LẪN `b`; **thuật toán Euclid**: `gcd(a,b) = gcd(b, a mod n)`, LẶP tới khi số DƯ LÀ `0` — MỖI bước THU NHỎ bài toán (T2.3 kỹ thuật quy nạp/thước đo dừng) | `gcd(48, 18)` — LẶP bằng tay VÀI bước theo công thức. Số LẦN lặp NHỎ hơn hẳn số LẦN kiểm TỪNG ước số một — VÌ SAO thuật toán NÀY nhanh hơn cách "thử từng số"? | 13, T2.3 `dieu-dung-lai-sau-moi-luot` |
+| 17 | `nghich-dao-modular` | Nghịch đảo modular | **`a⁻¹ mod n`** — số `x` sao cho `(a×x) mod n = 1`; TỒN TẠI ⟺ `gcd(a,n)=1` (`a` VÀ `n` NGUYÊN TỐ CÙNG NHAU, bài 16) — thay THẾ được PHÉP CHIA modular (phép chia THƯỜNG không có Ý nghĩa TRONG modular) | `3` có nghịch đảo modulo `7` không? Thử NHÂN `3` VỚI từng số TỪ `1` tới `6`, lấy dư CHO `7` — số NÀO cho kết quả `1`? | 16, 15 |
+| 18 | `dinh-ly-fermat-nho` | Định lý Fermat nhỏ | **`aᵖ⁻¹ ≡ 1 (mod p)`** khi `p` NGUYÊN TỐ VÀ `a` KHÔNG chia hết cho `p` — một CÔNG THỨC RÚT GỌN cho luỹ thừa modular LỚN, KHÔNG cần nhân LẶP hàng nghìn lần (T2.5 bài 17, quy tắc nhân CHO một dãy) | `2¹⁰⁰ mod 101` — nhân LẶP một trăm lần THÌ chậm. Fermat nói `2¹⁰⁰ ≡ 1 (mod 101)` NGAY LẬP TỨC (VÌ `101` nguyên tố). Kiểm bằng CÁCH tính vài LUỸ THỪA nhỏ trước, có THẤY chu kỳ LẶP LẠI không? | 17, T2.5 `quy-tac-nhan-cho-day-phep-thu` |
+| 19 | `ma-hoa-caesar` | Mã hoá Caesar | **Mã Caesar** — DỊCH mỗi chữ cái ĐI `k` VỊ TRÍ trong bảng chữ cái, LẶP VÒNG khi qua hết (đúng modular, bài 14): `(chu + k) mod 26`; GIẢI mã LÀ dịch NGƯỢC `−k` — ứng dụng THẬT đầu tiên của cả cụm modular | Mã hoá "A" dịch `3` vị trí RA "D". Mã hoá "Z" (chữ CUỐI bảng) dịch `3` vị trí RA chữ NÀO — có "chạy quá" bảng chữ cái không, hay MODULAR tự ĐƯA nó QUAY lại đầu? | 15, 14 |
+| 20 | `dong-ho-modular-tong-quat` | Đồng hồ modular tổng quát | **Modular LÀ một "đồng hồ" `n` giờ** — CỘNG/nhân rồi "QUAY VÒNG" khi vượt `n`; đồng hồ 12 giờ, lịch bảy NGÀY, mã Caesar (bài 19) ĐỀU LÀ cùng MỘT cấu trúc với `n` KHÁC nhau — tổng kết cụm, KHÔNG khái niệm TÍNH toán mới, chỉ NHÌN LẠI qua MỘT lăng kính chung | Đồng hồ 12 giờ, lịch tưới ba NGÀY, mã Caesar 26 chữ — CẢ BA đều "cộng RỒI quay vòng". Phép CỘNG modular NÀY có tính chất NÀO GIỐNG phép cộng số nguyên THƯỜNG (kết hợp? có đơn vị? có nghịch đảo?), và tính chất NÀO thì KHÔNG? | 19, 15, 17 |
+| 21 | `phep-toan-hai-ngoi` | Phép toán hai ngôi | **Phép toán hai ngôi `∗`** trên tập `S` — nhận HAI phần tử của `S`, TRẢ VỀ một phần tử CỦA `S` (TÍNH ĐÓNG — kết quả KHÔNG "thoát ra ngoài" `S`); `+` trên số nguyên ĐÓNG, NHƯNG `÷` trên số nguyên KHÔNG đóng (T2.1 CHIA không LUÔN ra số nguyên) | Modular cộng (bài 15) trên tập `{0,1,...,n−1}` — kết quả CÓ LUÔN nằm TRONG tập đó không (ĐÓNG), hay có thể "chạy RA ngoài"? | 20, T2.1 `so-khong-can-nhay` |
+| 22 | `tinh-ket-hop` | Tính kết hợp | **`(a∗b)∗c = a∗(b∗c)`** — nhóm NGOẶC KIỂU nào cũng ra CÙNG kết quả; `+` VÀ `×` số nguyên ĐỀU kết hợp, NHƯNG `−` THÌ KHÔNG (`(5−3)−1 ≠ 5−(3−1)`) — tính chất THỨ HAI của một phép toán "tốt" | Hợp thành ánh xạ (T2.4 bài 27, `f∘g`) — ghép BA ánh xạ liên tiếp theo hai CÁCH nhóm ngoặc khác nhau, có RA cùng kết quả không? | 21, T2.4 `song-anh-va-hop-thanh` |
+| 23 | `phan-tu-don-vi` | Phần tử đơn vị | **Phần tử đơn vị `e`** — `e∗a = a∗e = a` VỚI MỌI `a` (KHÔNG đổi gì khi ghép); `0` LÀ đơn vị của `+`, `1` LÀ đơn vị của `×` (T2.1 đã dùng, giờ đặt TÊN); modular cộng CÓ đơn vị LÀ `0` | Modular NHÂN (bài 15, trên `{0,...,n−1}`) — đơn vị của NÓ LÀ số NÀO? Kiểm LẠI: nhân số ĐÓ với BẤT KỲ phần tử nào, kết quả có GIỮ nguyên không? | 22, T2.1 `so-khong-can-nhay` |
+| 24 | `phan-tu-nghich-dao` | Phần tử nghịch đảo | **Nghịch đảo của `a`** — phần tử `a⁻¹` sao cho `a∗a⁻¹ = a⁻¹∗a = e` (bài 23); MỌI số nguyên có nghịch đảo CỘNG (`−a`), NHƯNG KHÔNG PHẢI mọi số có nghịch đảo NHÂN (chỉ `1`, `−1`) — modular nghịch đảo (bài 17) LÀ trường hợp RIÊNG của khái niệm NÀY | Modular cộng CÓ nghịch đảo cho MỌI phần tử không (thử `a` bất kỳ trong `{0,...,n−1}`, tìm `x` sao `(a+x) mod n = 0`)? So với modular NHÂN (bài 17, CHỈ có nghịch đảo khi `gcd=1`) thì SAO? | 23, 17 |
+| 25 | `nhom-la-gi` | Nhóm là gì | **Nhóm `(S, ∗)`** — MỘT tập `S` VỚI một phép toán `∗` thoả CẢ BỐN: đóng (bài 21), kết hợp (bài 22), có đơn vị (bài 23), MỌI phần tử có nghịch đảo (bài 24); GỘP bốn bài liền thành MỘT định nghĩa, đúng LỐI T2.4 gộp ba tính chất thành tương đương (bài 22, T2.4) | `(số nguyên, +)` LÀ một nhóm (đủ cả bốn). `(số nguyên, ×)` có LÀ nhóm không — thiếu ĐÚNG tiên đề NÀO? | 21, 22, 23, 24, T2.4 `quan-he-tuong-duong` |
+| 26 | `vi-du-nhom-modular` | Ví dụ nhóm: modular cộng | **`(ℤₙ, +mod n)` LUÔN LÀ một nhóm**, VỚI MỌI `n` — kiểm ĐỦ bốn tiên đề (bài 21-24) TRÊN modular cộng CỤ THỂ, bằng CHÍNH những hàm ĐÃ viết (bài 13-20); "đồng hồ modular" (bài 20) BÂY GIỜ có TÊN toán học CHÍNH XÁC: MỘT nhóm | Lịch tưới BA ngày (bài 13) VÀ đồng hồ mười HAI giờ ĐỀU LÀ nhóm modular, CHỈ khác `n`. Vườn của Byte (đồ thị, bài 1-12) có PHÉP toán nào ĐÓNG-kết hợp-đơn vị-nghịch đảo GIỐNG vậy KHÔNG, hay đồ thị KHÔNG có cấu trúc nhóm TỰ NHIÊN? | 25, 20 |
+| 27 | `ham-nhu-mot-gia-tri` | Hàm như một giá trị | **Hàm LÀ một GIÁ TRỊ** — có thể GÁN cho biến, TRUYỀN làm đối số, TRẢ VỀ từ hàm KHÁC (đã dùng nhiều Ở R4 FP, `def`/lambda Python — bài NÀY đặt TÊN toán học: LAMBDA CALCULUS, nền TOÁN của lập trình HÀM); hợp thành ánh xạ (T2.4 bài 27) LÀ MỘT phép toán HAI ngôi TRÊN tập các HÀM | Hợp thành ánh xạ (`f∘g`, T2.4 bài 27) — tập TẤT CẢ song ánh TỪ một tập HỮU hạn VÀO chính nó, VỚI phép hợp thành — có phải MỘT nhóm không (đóng, kết hợp, đơn vị, nghịch đảo)? Đơn vị LÀ ánh xạ NÀO? | 26, 22, T2.4 `song-anh-va-hop-thanh` |
+| 28 | `boss-tam-ban-do-vuon` | BOSS — Tấm bản đồ vườn | *(không khái niệm mới — bài tổng hợp)* ghép đồ thị (bậc, liên thông, bài 1-12) + modular (đồng dư, GCD, nghịch đảo, bài 13-20) + đại số trừu tượng (kiểm bốn tiên đề nhóm, bài 21-27) TRÊN MỘT sơ đồ tưới nước hoàn chỉnh của khu vườn | Track NÀY đóng bằng việc NHÌN lại đồ thị VÀ modular QUA lăng kính nhóm. NHƯNG "mấy CÂY", "mấy KILÔGAM" (T2.5) LÀ số RỜI RẠC — máy tính CÒN cần XỬ LÝ số LIÊN TỤC (đo đạc, dự đoán TRƠN) để LÀM được AI thật. Số liên tục VÀ phép TÍNH trên nó viết RA thành CÁI GÌ? *(dẫn sang T2.7 — ĐSTT & giải tích cho AI)* | 1–27 |
+
+**Vì sao thứ tự này đúng**
+
+**1. Vì sao track KHÔNG mở bằng "đồ thị là gì" (R3 ĐÃ dạy), mà mở bằng
+"đồ thị LÀ một cặp tập hợp".** Đúng luật lặp lại từ T2.4/T2.5: bài 1 KHÔNG
+dạy khái niệm hoàn toàn mới — nó dạy phép ĐỌC LẠI một cấu trúc R3 ĐÃ DỰNG
+bằng CODE (bảng kề) dưới NGÔN NGỮ tập hợp (T2.4), mở đường để MỌI kỹ
+thuật T2.4 (tập con, quan hệ, ánh xạ) áp DỤNG thẳng lên đồ thị.
+
+**2. Vì sao bổ đề bắt tay (bài 3) — định lý ĐẦU tiên của track — đứng
+NGAY sau khái niệm bậc (bài 2), TRƯỚC khi có đường đi/liên thông (bài
+4-6).** Đây LÀ định lý ĐƠN GIẢN nhất có thể chứng minh BẰNG kỹ thuật ĐÃ
+học (đếm hai cách, T2.5), dựng NIỀM TIN "đồ thị có ĐỊNH LÝ thật" sớm,
+trước khi track đi vào những khái niệm PHỨC tạp hơn.
+
+**3. Vì sao bài toán Königsberg (bài 9, kể CHUYỆN, KHÔNG công thức) tách
+RIÊNG khỏi định lý Euler (bài 11, CÓ công thức).** Cùng LỐI T2.3 (bài 1
+mở bằng câu hỏi, chưa công cụ): kể chuyện TRƯỚC để người học TỰ THẤY sự
+BẤT LỰC (thử mãi không ra), rồi CÔNG THỨC (bài 11) xuất hiện đúng LÚC nó
+GIẢI QUYẾT sự bất lực ĐÓ — không phải một định lý "từ TRÊN trời rơi
+xuống".
+
+**4. Vì sao modular (bài 13) mở bằng "phép chia có dư" — MỘT khái niệm R1
+ĐÃ DẠY (`core.modulo`) — thay vì mở thẳng bằng "đồng dư".** Cùng bản lề
+T2.4/T2.5: bài 13 KHÔNG dạy `%` (đã biết CÁCH gõ), nó dạy Ý NGHĨA `(q,r)`
+làm NỀN cho đồng dư (bài 14) đứng NGAY sau.
+
+**5. Vì sao GCD/Euclid (bài 16) đứng TRƯỚC nghịch đảo modular (bài 17),
+dù nghe như HAI chủ đề tách BIỆT.** Nghịch đảo modular CHỈ tồn tại khi
+`gcd(a,n)=1` — bài 16 PHẢI đứng trước để bài 17 có ĐIỀU KIỆN tồn tại RÕ
+ràng, không phải một QUY TẮC "từ trên trời".
+
+**6. Vì sao BỐN tiên đề nhóm (đóng, kết hợp, đơn vị, nghịch đảo — bài
+21-24) TÁCH bốn bài RIÊNG trước khi gộp (bài 25), thay vì định nghĩa nhóm
+NGAY từ đầu.** CÙNG lý do T2.4 tách BA tính chất tương đương (mục 7, T2.4)
+— mỗi tiên đề cần MỘT phản ví dụ RIÊNG (`−` không kết hợp, `×` không CÓ
+nghịch đảo cho MỌI số) để THẤY nó THẬT là một ràng buộc CÓ THỂ vi phạm.
+
+**7. Vì sao "hàm như một giá trị" (bài 27, lambda calculus) đứng CUỐI,
+NGAY trước BOSS, KHÔNG mở đầu track (khác MASTERPLAN cũ, ĐÃ sửa theo §9.1:
+"HẠ KHỎI vị trí mở đầu → tái định vị làm ĐỈNH T2.6").** Lambda calculus
+CHỈ có Ý NGHĨA sau khi người học ĐÃ thấy nhóm (bài 25) — hợp thành ánh xạ
+(T2.4 bài 27) LÀ một phép toán hai NGÔI trên tập HÀM, và CÂU HỎI "tập
+song ánh với hợp thành có LÀ nhóm không" chỉ ĐẶT RA được SAU khi đã có cả
+hai khái niệm (nhóm VÀ hợp thành) sẵn sàng.
+
+**Ranh giới track:** không bài nào dùng bảng kề kiểu `dict`-of-list hay
+duyệt DFS/BFS bằng CODE thuật toán (đó LÀ việc của R3, một track LẬP
+TRÌNH — track NÀY chỉ dùng `set` các cặp, đúng máy móc T2.4 sẵn có);
+không bài nào đi SÂU thuật toán đồ thị (đường đi ngắn nhất, cây khung
+nhỏ nhất — ngoài phạm vi TOÁN của track này); không bài nào chứng minh
+CHẶT chẽ định lý Euler (chỉ PHÁT BIỂU VÀ áp dụng, chứng minh ĐẦY ĐỦ CẦN
+quy nạp SÂU hơn phạm vi track); không bài nào ĐI SÂU đại số trừu tượng
+NGOÀI nhóm (vành, trường — dành CHO một track SAU nếu MASTERPLAN mở
+rộng); VÀ — biên quan trọng NHẤT — **track này KHÔNG `requires:` bất kỳ
+skill nào của R3 "Khoa học máy tính" (xem "QUAN TRỌNG" đầu mục T2.6):
+R3 đứng SAU `toan` trong `thu-tu.yaml`, nên mọi máy móc đồ thị Ở ĐÂY
+PHẢI tự đứng vững trên riêng T2.4, không mượn R3.**

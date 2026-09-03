@@ -48,6 +48,11 @@ realm:
       # KHÔNG dạy lại vòng lặp đếm/cộng dồn/tong-dem, đã đóng ở R1 (T1.2 bài
       # 14, 15, 27).
       - to-hop-xac-suat-thong-ke
+      # T2.6 định nghĩa đồ thị vô hướng QUA quan hệ đối xứng (T2.4 bài 16,
+      # 20) — KHÔNG mượn gì từ R3 (khoa-hoc-may-tinh đứng SAU toan trong
+      # chính file này, nên "Đồ thị tiền đề" sẽ không coi R3 là đã dạy tại
+      # điểm này — xem "QUAN TRỌNG" đầu mục T2.6 trong MACH.md).
+      - do-thi-modular-dai-so-truu-tuong
 
   # Realm 3 mở màn M8. T3.1 đứng đầu vì MASTERPLAN §9.1 giao cho nó việc "dọn
   # đường cho ownership" — người học gặp Rust ở R4.T4.0b, và mọi chỗ khó của
