@@ -353,6 +353,25 @@ method gọi method cùng `impl` khi cần dùng giá trị trả VỀ; free-fun
 gọi-free-function (không `impl` gì cả) LÀ lựa chọn AN TOÀN nhất, đã dùng
 xuyên suốt track này.
 
+15. **HAI enum KHÁC nhau cùng khai một biến thể TRÙNG TÊN** (ví dụ
+    `Token::Va` VÀ `NoAst::Va` — cả hai đều tên `Va`) — `match` trên biến
+    thể ĐÓ của MỘT enum bị chấm NHẦM là thuộc VỀ enum KIA, báo lỗi cứng
+    `BR0350` ("mẫu này khớp NoAst nhưng giá trị là Token") dù kiểu THẬT
+    hoàn toàn đúng. Có vẻ bảng tra biến-thể-theo-tên LÀ MỘT không gian tên
+    PHẲNG dùng chung CHO mọi enum trong file, không tách theo TỪNG enum
+    (`tyck.rs`, chưa điều tra sâu). **TRÁNH tuyệt đối đặt trùng tên biến
+    thể GIỮA hai enum khác nhau cùng dùng trong MỘT track** — kể cả khi
+    Ý NGHĨA hợp lý muốn trùng (token từ khoá `AND`/`OR` VÀ nút cây kết hợp
+    AND/OR "tự nhiên" đều muốn tên `Va`/`Hoac`). Quy ước q07: token giữ
+    tên `Va`/`Hoac`; nút cây arena đặt tên PHÂN biệt rõ, ví dụ
+    `VaNut`/`HoacNut` ("nút" = node, gợi ý đây LÀ một nút cây, không phải
+    token).
+
+16. **`Vec<Vec<char>>` (generic lồng nhau, hai dấu `>` liền nhau)** — lỗi
+    cú pháp cứng `BR0100` ("cần dấu `>`... nhưng gặp dấu `>>`") — lexer đọc
+    `>>` thành MỘT token dịch-phải, không tách thành hai `>` như `rustc`
+    thật. **Cách né**: thêm dấu cách trước dấu đóng CUỐI — `Vec<Vec<char> >`.
+
 ### Dùng được, xác nhận thêm (không có trong bảng gốc ở trên)
 
 `s.chars().collect()` → `Vec<char>` (dùng được, đã xác nhận cho lexer).
