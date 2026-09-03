@@ -721,3 +721,165 @@ chỉ dùng bảng 0/1 như cách TRÌNH BÀY, không đi sâu lý thuyết ma t
 (dành T2.6/T2.7). Và — biên quan trọng nhất — **không bài nào dạy LẠI
 cách gõ `set`/`in`/`\|`/`&`/`-` trong Python; toàn bộ phần đó đã đóng ở
 R1.T1.4.**
+## T2.5 — Tổ hợp, xác suất, thống kê (Realm 2 · Toán & Toán rời rạc · Python CHỈ để KIỂM · 34 bài)
+
+## Mạch T2.5 — Tổ hợp, xác suất, thống kê
+
+Người học vào track đã xong T2.1-T2.4: số/phép tính (T2.1), biến/biểu thức
+(T2.2), mệnh đề/`and`/`or`/`not`/chứng minh (T2.3), và **tập hợp/quan hệ/ánh
+xạ** (T2.4) — nền tảng track này DỰA THẲNG vào, không phải chỉ tiếp nối.
+T2.4 bài 13 (đếm bù trừ hai tập) và bài 28 (reflect đóng track: "mấy CÂY mỗi
+loại, mấy KILÔGAM thu hoạch — tập hợp không trả lời được — track sau đếm
+được không?") ĐỀU cố ý để ngỏ đúng cho track này trả lời.
+
+**QUAN TRỌNG — kiểm KỸ trước khi viết bài 1: R1 (T1.2 bài 27, T1.4) đã dạy
+phần MÁY của "đếm" và "trung bình" rồi, track này KHÔNG được dạy lại.** Rà:
+
+| Đã dạy ở R1 | Bài | Nội dung |
+|---|---|---|
+| `core.counter-if` | T1.2 bài 14 `dem-nhung-luot-dang-ke` | đếm bằng vòng lặp + biến cộng dồn khi thoả điều kiện |
+| `core.max-tracker` | T1.2 bài 15 `giu-lai-ky-luc` | giữ giá trị lớn nhất thấy được qua một lượt duyệt |
+| `core.multi-accumulator` | T1.2 bài 27 `mot-luot-nhieu-cau-tra-loi` | tính **trung bình** bằng `tong / dem` trong CÙNG một lượt duyệt |
+
+Nghĩa là: **vòng lặp đếm, cộng dồn, và phép chia `tong/dem` ra "trung bình"
+ĐỀU đã là kiến thức CŨ.** Việc của track này KHÔNG PHẢI dạy lại cách GÕ các
+phép đó (đúng luật đã lặp lại từ T2.3 tới T2.4). Việc CỦA track này là dạy
+lớp **Ý NGHĨA TOÁN HỌC**: đếm CÓ HỆ THỐNG không cần liệt kê tay (quy tắc
+cộng/nhân, hoán vị, tổ hợp), xác suất trên nền tập hợp đã có (T2.4), biến
+ngẫu nhiên như một ÁNH XẠ (T2.4 bài 24), và VÌ SAO `tong/dem` đo được cái nó
+đo (kỳ vọng, độ bền trước ngoại lệ) — không dòng Python nào ở R1 chạm tới bất
+kỳ cái nào trong nhóm này.
+
+**Hiện vật xuyên suốt:** vẫn khu vườn của Byte (T2.1-T2.4), giờ thêm ba lớp
+dữ liệu mới mà ba phần của track lần lượt mở ra:
+
+1. "Bốn luống, xếp thứ tự thu hoạch — có bao nhiêu cách?" — không liệt kê
+   tay nổi khi số luống lớn → **đếm có hệ thống**.
+2. "Túi hạt giống trộn lẫn, rút một hạt ngẫu nhiên — hạt nào ra?" — một tập
+   con của MỌI khả năng (T2.4 bài 6, tập con) → **xác suất**.
+3. "Sáu mùa vụ, mỗi mùa một con số kilôgam thu hoạch — con số nào ĐẠI DIỆN
+   cho cả sáu?" — trung bình đã biết cách TÍNH (R1), giờ học Ý NGHĨA và giới
+   hạn của nó → **thống kê**.
+
+Ba câu hỏi ấy dùng lại đúng MỘT hiện vật, không hiện vật mới nào chen vào
+giữa track — giữ luật đã áp dụng suốt R2.
+
+**Python trong track này không bao giờ là lời giải, CHỈ để KIỂM** — `for`,
+`if`, cộng dồn (R1) tính đếm/tần suất thật; `set`/`in`/`⊆` (T2.4) dựng không
+gian mẫu và biến cố; `tong/dem` (R1 bài 27) tính trung bình — track này KIỂM
+LẠI những con số ấy có khớp công thức tổ hợp/xác suất/thống kê vừa học hay
+không, không dạy lại cách gõ.
+
+| # | slug | Tiêu đề | Khái niệm mới (đúng một) | `reflect` cuối bài | Dựa trên |
+|---|---|---|---|---|---|
+| 1 | `quy-tac-cong` | Quy tắc cộng | **`\|A ∪ B\| = \|A\| + \|B\|`** khi `A ∩ B = ∅` (T2.4 bài 10) — trường hợp RIÊNG, không-chồng-lấn, của đếm bù trừ (T2.4 bài 13); ba túi hạt giống KHÔNG trộn (cà chua/xà lách/cà rốt) — tổng hạt là cộng thẳng ba số | Byte có MỘT túi hạt giống trộn LẪN — một hạt vừa mang nhãn "giống mới" vừa mang nhãn "chịu hạn" (hai nhãn CHỒNG trên CÙNG một hạt, không phải ba túi tách biệt). Cộng thẳng số hạt "giống mới" với số hạt "chịu hạn" có ra đúng tổng hạt mang ít nhất một nhãn không? | T2.4 `hai-tap-roi-nhau`, `dem-bang-bu-tru` |
+| 2 | `quy-tac-cong-ba-tap` | Quy tắc cộng tổng quát — ba tập chồng lấn | **`\|A∪B∪C\| = \|A\|+\|B\|+\|C\|−\|A∩B\|−\|A∩C\|−\|B∩C\|+\|A∩B∩C\|`** — mở rộng bù trừ hai tập (T2.4 bài 13) lên BA, trả lời đúng câu hỏi T2.4 bài 13 để ngỏ ("ba tập cùng lúc thì sao") | Đếm nhãn xong. Giờ Byte muốn biết có bao nhiêu cách XẾP THỨ TỰ thu hoạch bốn luống trong một buổi sáng — luống nào trước, luống nào sau. Quy tắc cộng có trả lời được câu "bao nhiêu cách xếp" không, hay đây là một câu hỏi khác hẳn? | 1, T2.4 `dem-bang-bu-tru` |
+| 3 | `quy-tac-nhan` | Quy tắc nhân | Khi một lựa chọn có `m` cách, lựa chọn TIẾP THEO (không phụ thuộc lựa chọn trước) có `n` cách, tổng số cách LÀ `m × n` — chính là `\|A × B\| = \|A\| · \|B\|` (T2.4 bài 15, tích Descartes) áp dụng lên NHIỀU bước liên tiếp, không chỉ hai tập | Bốn luống, MỖI luống chọn 1 trong 3 loại hạt giống, ĐỘC LẬP nhau (một luống dùng hạt nào không ảnh hưởng luống khác) → `3×3×3×3 = 81` cách. Nếu túi hạt CHỈ CÓ ĐÚNG MỘT hạt mỗi loại (dùng rồi thì hết, không dùng lại được) thì phép nhân trên còn đúng không? | 2, T2.4 `tich-descartes` |
+| 4 | `dem-co-lap-lai-hay-khong` | Đếm: lặp lại được phép hay không | Hai kiểu đếm KHÁC nhau tuỳ ĐIỀU KIỆN của bài toán: **có lặp** (mỗi bước vẫn đủ `n` lựa chọn, dùng rồi vẫn còn) cho `n × n × ... × n = nᵏ`; **không lặp** (mỗi bước bớt một lựa chọn đã dùng) cho `n × (n−1) × (n−2) × ...` — CÙNG quy tắc nhân (bài 3), khác ở SỐ LỰA CHỌN mỗi bước có giữ nguyên hay giảm | Túi CHỈ có đúng bốn hạt giống, KHÔNG lặp — Byte muốn gieo CẢ BỐN hạt vào bốn luống, mỗi luống một hạt, MỌI thứ tự gieo đều tính là một cách khác nhau. Nhân `4×3×2×1` được bao nhiêu — và con số CUỐI (nhân tới 1) này có phải lúc nào cũng vậy không? | 3 |
+| 5 | `giai-thua` | Giai thừa | **`n! = n × (n−1) × ... × 2 × 1`** — số cách sắp xếp TOÀN BỘ `n` phần tử không lặp (bài 4, trường hợp đếm HẾT); `0! = 1` (một cách sắp xếp "không có gì" — ĐÚNG một cách, không phải không cách nào, giống chân lý rỗng T2.3 bài 11) | Bốn luống, `4! = 24` cách xếp thứ tự thu hoạch TOÀN BỘ. Nhưng Byte chỉ có thời gian thu hoạch ĐÚNG hai luống sáng nay (không phải cả bốn) — xếp thứ tự cho HAI trong bốn luống được bao nhiêu cách, và `4!` còn dùng thẳng được không? | 4, T2.3 `khi-ve-truoc-khong-xay-ra` |
+| 6 | `hoan-vi-chon-k` | Hoán vị chọn k | **`P(n,k) = n! / (n−k)!`** — số cách sắp xếp CÓ THỨ TỰ `k` phần tử được chọn TỪ `n` (bài 5 là trường hợp riêng `k=n`, vì `(n−n)! = 0! = 1`); chọn 2 trong 4 luống ĐỂ THU HOẠCH TRƯỚC-SAU: `P(4,2) = 4!/2! = 12` | Byte lại chọn hai luống, NHƯNG lần này KHÔNG quan tâm thu hoạch luống nào trước — chỉ cần biết ĐÚNG hai luống nào được chọn hôm nay. `P(4,2) = 12` có còn là câu trả lời đúng không, hay đang ĐẾM DƯ một thứ mà câu hỏi mới không cần? | 5 |
+| 7 | `to-hop-chon-k` | Tổ hợp chọn k | **`C(n,k) = n! / (k! (n−k)!)`** — số cách chọn `k` phần tử từ `n`, KHÔNG quan tâm thứ tự; mỗi nhóm `k` phần tử bị `P(n,k)` (bài 6) đếm LẶP LẠI đúng `k!` lần (mọi cách sắp xếp lại CÙNG nhóm ấy), nên chia cho `k!` để đếm mỗi nhóm ĐÚNG một lần | Byte tính `C(4,2) = 6`, rồi tính tiếp `C(4,2)` theo cách chọn "hai luống KHÔNG được chọn" thay vì "hai luống ĐƯỢC chọn" — hai câu hỏi nghe khác hẳn nhau. Kết quả có trùng nhau không, và nếu có thì VÌ SAO? | 6, T2.4 `tu-ro-sang-tap-hop` |
+| 8 | `doi-xung-to-hop` | Đối xứng của tổ hợp | **`C(n,k) = C(n,n−k)`** — chọn `k` phần tử GIỮ LẠI cũng chính là chọn `n−k` phần tử BỎ RA, hai câu hỏi đếm CÙNG một tập kết quả nhìn từ hai phía; giải đáp trực tiếp câu hỏi bài 7 để ngỏ | `C(4,2)=6` đối xứng quanh `k=2`. Xếp `C(4,0), C(4,1), C(4,2), C(4,3), C(4,4)` thành một hàng — `1, 4, 6, 4, 1`. Có cách nào TÍNH hàng tiếp theo (`n=5`) từ hàng NÀY, không cần tính lại giai thừa từ đầu? | 7 |
+| 9 | `tam-giac-pascal` | Tam giác Pascal | **`C(n,k) = C(n−1,k−1) + C(n−1,k)`** — công thức truy hồi: một nhóm `k` phần tử từ `n` HOẶC chứa một phần tử cố định (chọn thêm `k−1` từ `n−1` còn lại) HOẶC không chứa nó (chọn đủ `k` từ `n−1` còn lại) — hai trường hợp RỜI NHAU (bài 1) cộng lại vừa khít | Cộng CẢ HÀNG `n=4`: `1+4+6+4+1 = 16 = 2⁴`. Trùng hợp, hay CỘNG một hàng Pascal LUÔN ra luỹ thừa của 2 — và nếu luôn đúng, nó đang ĐẾM cái gì? | 8 |
+| 10 | `tong-to-hop-la-luy-thua-hai` | Tổng mọi tổ hợp là luỹ thừa của 2 | **`C(n,0) + C(n,1) + ... + C(n,n) = 2ⁿ`** — cộng số cách chọn 0, 1, 2, ..., `n` phần tử chính LÀ đếm MỌI tập con có thể của một tập `n` phần tử (mỗi phần tử: có mặt hay không, hai lựa chọn — quy tắc nhân bài 3 áp `n` lần) — đóng vòng THẲNG về T2.4 (mọi tập hợp có `2ⁿ` tập con, không phát biểu ở đó) | Đếm CÁCH CHỌN xong — mười bài liền không có một "hạt" hay "luống" ngẫu nhiên nào cả, chỉ đếm KHẢ NĂNG. Byte rút MỘT hạt thật từ túi trộn — hạt nào ra là chuyện MAY RỦI, không còn đếm hết mọi khả năng nữa. Có cách nào NÓI VỀ sự may rủi ấy bằng con số không? | 9, T2.4 `tu-ro-sang-tap-hop`, `hai-tap-bang-nhau` |
+| 11 | `khong-gian-mau-va-bien-co` | Không gian mẫu và biến cố | **Không gian mẫu `Ω`** — tập hợp MỌI kết quả có thể (T2.4 bài 1, tập hợp); **biến cố `A`** — MỘT tập con của `Ω` (T2.4 bài 6, `⊆`), tức một NHÓM kết quả gộp lại vì cùng chung một điều kiện | Túi có 10 hạt: 5 cà chua, 3 xà lách, 2 cà rốt. `Ω` có 10 phần tử. Biến cố "rút được cà chua" có 5 phần tử. Hai con số ấy (5 và 10) nói được gì về ĐỘ MAY RỦI của việc rút trúng cà chua, so với rút trúng cà rốt? | T2.4 `tu-ro-sang-tap-hop`, `tap-con` |
+| 12 | `xac-suat-co-dien` | Xác suất cổ điển | **`P(A) = \|A\| / \|Ω\|`** khi MỌI kết quả trong `Ω` đều ĐỀU khả năng (mỗi hạt như nhau, không hạt nào "dễ rút hơn") — biến ĐỘ MAY RỦI thành một con số giữa 0 và 1; `P(cà chua) = 5/10 = 0.5` | `P(cà chua) = 0.5`, `P(xà lách) = 0.3`, `P(cà rốt) = 0.2`. Cộng ba con số lại — `1.0`. Trùng hợp, hay `P(A)` của MỌI kết quả CÓ THỂ trong `Ω` LUÔN cộng lại đúng 1, và VÌ SAO? | 11 |
+| 13 | `bien-co-phan-bu` | Biến cố phần bù | **`P(A') = 1 − P(A)`** — phần bù của biến cố (T2.4 bài 12, `Aᶜ = Ω − A`) có xác suất bằng phần CÒN LẠI của 1; "không rút được cà chua" và "rút được cà chua" CHIA HẾT xác suất 1.0, không thừa không thiếu | `P(\text{không cà chua}) = 1 − 0.5 = 0.5`. Kiểm lại bằng cách CỘNG THẲNG `P(xà lách) + P(cà rốt) = 0.3+0.2 = 0.5` — khớp. Hai cách tính RA CÙNG một số — cách nào dùng được khi biến cố "không cà chua" GỘP nhiều loại khác, cách nào NHANH hơn? | 12, T2.4 `tap-vu-tru-va-phan-bu` |
+| 14 | `hai-bien-co-roi-nhau` | Hai biến cố rời nhau | **`P(A∪B) = P(A) + P(B)`** khi `A ∩ B = ∅` (T2.4 bài 10) — "rút cà chua" và "rút xà lách" rời nhau (một hạt không thể vừa là cà chua vừa là xà lách), cộng thẳng xác suất được; ứng trực tiếp quy tắc cộng (bài 1) lên xác suất | `P(\text{cà chua hoặc xà lách}) = 0.5+0.3 = 0.8`. Giờ Byte hỏi khác: "rút được hạt GIỐNG MỚI" và "rút được hạt cà chua" — một hạt có thể VỪA là cà chua VỪA là giống mới cùng lúc. Cộng thẳng hai xác suất ấy còn đúng không? | 13, T2.4 `hai-tap-roi-nhau` |
+| 15 | `hop-hai-bien-co-tong-quat` | Hợp hai biến cố tổng quát | **`P(A∪B) = P(A) + P(B) − P(A∩B)`** — bù trừ (T2.4 bài 13, bài 2) áp lên xác suất khi `A`, `B` CHỒNG LẤN; trả lời đúng câu hỏi bài 14 để ngỏ, không đổi công thức nền, chỉ đổi thứ đang đếm (xác suất thay vì số phần tử) | Byte kiểm: nếu `A` và `B` rời nhau, `P(A∩B) = P(∅) = 0`, công thức bài này TỰ RÚT GỌN về công thức bài 14. Vậy bài 14 có còn cần dạy riêng không, hay nó luôn LÀ một trường hợp của bài này? *(để ngỏ có chủ đích — cả hai cùng hữu ích, mỗi cái nhanh hơn ở đúng tình huống của nó)* | 14, T2.4 `dem-bang-bu-tru` |
+| 16 | `bien-co-doc-lap` | Biến cố độc lập | **`P(A∩B) = P(A) · P(B)`** khi `A`, `B` ĐỘC LẬP (biết `A` xảy ra không đổi gì cơ hội `B` xảy ra) — ứng quy tắc nhân (bài 3) lên xác suất; rút MỘT hạt từ luống 1 VÀ một hạt khác từ luống 3 (hai túi TÁCH RIÊNG) là độc lập | Rút rồi KHÔNG bỏ lại (rút hạt 1 xong, rút tiếp hạt 2 từ CÙNG túi đã vơi một hạt) — "rút được cà chua lần 1" có làm đổi cơ hội "rút được cà chua lần 2" không? Công thức nhân bài này còn dùng thẳng được không? | 15, 3 |
+| 17 | `quy-tac-nhan-cho-day-phep-thu` | Quy tắc nhân cho một dãy phép thử | Mở rộng bài 16 lên `n` phép thử ĐỘC LẬP liên tiếp: **`P(A₁∩A₂∩...∩Aₙ) = P(A₁)·P(A₂)·...·P(Aₙ)`** — gieo bốn hạt, MỖI hạt độc lập nảy mầm với xác suất riêng, xác suất CẢ BỐN cùng nảy = tích bốn xác suất | Xác suất CẢ BỐN cùng nảy mầm đã tính được. Xác suất ÍT NHẤT MỘT hạt nảy mầm (không cần cả bốn) thì sao — cộng thẳng bốn xác suất riêng lẻ có ra đúng không, hay phải đi đường VÒNG qua phần bù (bài 13)? | 16, 3 |
+| 18 | `xac-suat-co-dieu-kien` | Xác suất có điều kiện | **`P(A\|B) = P(A∩B) / P(B)`** — xác suất của `A`, BIẾT TRƯỚC `B` đã xảy ra (thu hẹp `Ω` xuống còn đúng `B`); "xác suất rút được cà chua, BIẾT TRƯỚC hạt vừa rút là giống mới" — thu hẹp không gian mẫu xuống túi con "giống mới" | Byte tính `P(\text{cà chua} \| \text{giống mới})` VÀ `P(\text{giống mới} \| \text{cà chua})` — hai con số này bằng công thức na ná nhau (cùng chia cho `P(A∩B)` ở tử) nhưng mẫu số khác. Chúng có LUÔN bằng nhau không? | 17, T2.4 `mien-xac-dinh-mien-gia-tri` |
+| 19 | `kiem-tra-doc-lap-bang-dieu-kien` | Kiểm tra độc lập bằng điều kiện | **`A`, `B` độc lập ⟺ `P(A\|B) = P(A)`** — biết `B` xảy ra rồi mà cơ hội `A` KHÔNG đổi, đúng nghĩa "độc lập" (bài 16) phát biểu lại qua điều kiện (bài 18); hai định nghĩa, MỘT khái niệm, đúng kỹ thuật "khi và chỉ khi" (T2.3 bài 15) | `P(\text{cà chua}\|\text{giống mới}) = 0.5 = P(\text{cà chua})` — độc lập thật. Đổi túi: giống mới CHỈ có trong hai loại cà chua/xà lách (cà rốt không có giống mới nào) — kiểm lại, hai biến cố "cà rốt" và "giống mới" có còn độc lập không? | 18, 16, T2.3 `khi-va-chi-khi` |
+| 20 | `cong-thuc-bayes` | Công thức Bayes | **`P(A\|B) = P(B\|A)·P(A) / P(B)`** — đảo chiều điều kiện, suy `P(A\|B)` từ `P(B\|A)` đã biết (thay vì đếm lại từ đầu); rút RA từ chính công thức bài 18 viết theo hai chiều (`P(A∩B)=P(A\|B)P(B)=P(B\|A)P(A)`), không phải một công thức mới độc lập | Byte biết `P(\text{nảy mầm}\|\text{giống mới}) = 0.9` và `P(\text{nảy mầm}\|\text{giống cũ}) = 0.6`, cùng tỉ lệ giống mới/cũ trong túi. MỘT hạt đã nảy mầm — xác suất nó LÀ giống mới bao nhiêu? Bayes trả lời được, nhưng cần THÊM dữ kiện gì trước khi tính? | 18 |
+| 21 | `cay-xac-suat` | Cây xác suất | **Sơ đồ cây** — mỗi tầng một phép thử, mỗi nhánh một kết quả kèm xác suất RIÊNG (có điều kiện, bài 18); xác suất một ĐƯỜNG ĐI (từ gốc tới lá) là TÍCH các nhánh trên đường (quy tắc nhân, bài 17); cộng các đường cùng đích LÀ hợp (bài 14/15) — công cụ TRỰC QUAN ghép lại năm bài 14-20, không khái niệm số học mới | Chín bài liền (11-21) đều xoay quanh MỘT hạt hay MỘT lần thử. Byte giờ gieo BỐN MƯƠI hạt, mỗi hạt độc lập nảy mầm hay không — muốn hỏi "TRUNG BÌNH bao nhiêu hạt nảy mầm", không phải "hạt NÀY nảy mầm hay không". Câu hỏi mới cần công cụ gì? | 17, 15, 18, 20 |
+| 22 | `bien-ngau-nhien-la-anh-xa` | Biến ngẫu nhiên là một ánh xạ | **Biến ngẫu nhiên `X`** — một ÁNH XẠ (T2.4 bài 24) từ không gian mẫu `Ω` sang một tập SỐ; "số hạt nảy mầm trong 4 hạt gieo" là ánh xạ từ MỖI kết quả có thể (tổ hợp nảy/không nảy của 4 hạt) sang một số nguyên từ 0 đến 4 | `X` gán MỖI kết quả trong `Ω` một số. NHIỀU kết quả khác nhau trong `Ω` có thể cùng gán ra MỘT giá trị của `X` (ví dụ "hạt 1,2 nảy, 3,4 không" VÀ "hạt 3,4 nảy, 1,2 không" cùng cho `X=2`) — ánh xạ này có đơn ánh không (T2.4 bài 25)? Điều đó nói lên gì? | T2.4 `anh-xa-la-quan-he-dac-biet`, `don-anh` |
+| 23 | `phan-phoi-xac-suat` | Phân phối xác suất | **Bảng phân phối** của biến ngẫu nhiên rời rạc — liệt kê MỌI giá trị `X` có thể nhận, kèm `P(X=x)` cho MỖI giá trị (gộp MỌI kết quả trong `Ω` cho ra cùng giá trị đó, bài 22 để ngỏ); cột `P(X=x)` cộng lại LUÔN đúng 1 (bài 12 áp lên `X` thay vì lên `Ω` trực tiếp) | Bảng phân phối của "số hạt nảy trong 4" có năm dòng (`X=0` tới `X=4`). Byte muốn MỘT con số DUY NHẤT tóm tắt cả bảng — "trung bình bao nhiêu hạt nảy mầm MỖI LẦN gieo". Cộng thẳng năm giá trị `X` rồi chia 5 có đúng không, hay phải tính khác vì các dòng KHÔNG đều xác suất? | 22, 12 |
+| 24 | `ky-vong` | Kỳ vọng | **`E[X] = Σ x · P(X=x)`** — trung bình CÓ TRỌNG SỐ theo xác suất, không phải trung bình thường của các giá trị `x`; giá trị `x` càng có xác suất cao càng "kéo" `E[X]` về phía nó — trả lời đúng câu hỏi bài 23 để ngỏ | `E[X] = 3.6` hạt nảy mầm — một con số KHÔNG nguyên, dù `X` chỉ nhận giá trị nguyên (0 tới 4). Byte gieo đúng MỘT lần — có lần nào `X` thật sự bằng `3.6` không? Vậy `E[X]` đang nói về CÁI GÌ, nếu không phải kết quả một lần gieo cụ thể? | 23 |
+| 25 | `tuyen-tinh-cua-ky-vong` | Tuyến tính của kỳ vọng | **`E[X+Y] = E[X] + E[Y]`** — LUÔN đúng, kể cả khi `X`, `Y` KHÔNG độc lập (khác hẳn bài 16, nơi độc lập là ĐIỀU KIỆN bắt buộc); tổng kỳ vọng hai luống = kỳ vọng của tổng, cộng thẳng không cần biết `X`, `Y` có liên quan nhau hay không | Byte có bốn luống, MỖI luống một `Xᵢ` riêng (số hạt nảy mầm luống đó). `E[X₁+X₂+X₃+X₄]` cộng thẳng bốn kỳ vọng — nhanh hơn hẳn tính phân phối của TỔNG rồi mới lấy kỳ vọng. Kỳ vọng đo được TRUNG TÂM của `X`. Có con số nào đo được `X` "TẢN RA" xa trung tâm bao nhiêu không? | 24 |
+| 26 | `phuong-sai-va-do-lech-chuan` | Phương sai và độ lệch chuẩn | **`Var(X) = E[(X−E[X])²]`** — trung bình BÌNH PHƯƠNG khoảng cách tới kỳ vọng (bình phương để khoảng cách ÂM không triệt tiêu khoảng cách DƯƠNG); **`σ = √Var(X)`** — độ lệch chuẩn, cùng ĐƠN VỊ với `X` (phương sai thì đơn vị bị bình phương theo) | Track đếm (1-10), xác suất (11-21), biến ngẫu nhiên (22-26) đều là LÝ THUYẾT — tính TRƯỚC khi gieo hạt thật. Byte GIEO THẬT sáu mùa liền, GHI LẠI sáu con số kilôgam thu hoạch. `tong/dem` (R1 bài 27) đã biết tính trung bình SÁU con số ấy — nó có phải `E[X]` của bài 24 không, hay là một thứ khác? | 25 |
+| 27 | `trung-binh-du-lieu-that` | Trung bình của dữ liệu thật | **Trung bình mẫu `x̄ = (Σxᵢ)/n`** — TÍNH giống hệt `tong/dem` (R1 bài 27, đã biết CÁCH GÕ); nhưng khác `E[X]` (bài 24) Ở CHỖ: `x̄` tính từ dữ liệu ĐÃ XẢY RA (sáu mùa CÓ THẬT), `E[X]` tính từ xác suất DỰ ĐOÁN trước khi xảy ra — hai con số CÙNG công thức trọng số đều, khác NGUỒN gốc | Sáu mùa: `40, 42, 41, 39, 43, 5` (kg). Mùa cuối mất mùa nặng (sâu bệnh). `x̄ = 35`. Con số `35` có ĐẠI DIỆN đúng cho "một mùa BÌNH THƯỜNG" của Byte không, hay đang bị MỘT con số bất thường kéo lệch? | 26, 24 |
+| 28 | `trung-vi` | Trung vị | **Trung vị** — sắp dữ liệu THEO THỨ TỰ, lấy giá trị Ở GIỮA (hoặc trung bình hai giá trị giữa nếu `n` chẵn); KHÔNG cộng dồn như `x̄`, chỉ quan tâm VỊ TRÍ sau khi sắp — một mùa bất thường không kéo nó đi xa | Sáu mùa sắp lại: `5, 39, 40, 41, 42, 43`. Trung vị (trung bình hai số giữa `40`, `41`) là `40.5` — GẦN năm mùa bình thường hơn hẳn `x̄=35`. Đổi mùa mất mùa từ `5` xuống `0` (mất trắng) — trung vị có đổi theo không? So với `x̄` thì sao? | 27 |
+| 29 | `khi-nao-dung-trung-vi` | Khi nào dùng trung vị thay trung bình | **Trung vị BỀN trước ngoại lệ** (đổi một giá trị cực đoan gần như không đổi trung vị), **trung bình NHẠY** (mọi giá trị, kể cả cực đoan, đều góp phần trực tiếp vào tổng); chọn công cụ nào tuỳ CÂU HỎI — muốn biết "tổng cả năm" thì cần `x̄` (nhân lại ra tổng), muốn biết "mùa ĐIỂN HÌNH" thì trung vị đáng tin hơn | Sáu mùa của Byte không có mùa nào TRÙNG kilôgam với mùa khác. Lan (người làm vườn khác, T2.4) có SÁU mùa mà HAI mùa CÙNG cho đúng `40` kg — số nào xuất hiện NHIỀU LẦN nhất trong một tập dữ liệu, và nó khác trung vị Ở CHỖ nào? | 28, 27 |
+| 30 | `yeu-vi-mode` | Yếu vị (mode) | **Mode** — giá trị (hoặc CÁC giá trị, có thể có nhiều mode) xuất hiện NHIỀU LẦN nhất; KHÁC trung vị (vị trí giữa) VÀ trung bình (tổng chia đều) — đo "phổ biến nhất", không đo "trung tâm" hay "đại diện tổng" | Sáu mùa của Lan: `40, 40, 38, 41, 39, 42`. Mode là `40` (2 lần). Đổi một mùa `38` thành `40` — giờ `40` xuất hiện BA lần, còn các số khác vẫn mỗi số MỘT lần. `x̄` và trung vị đổi Ở MỨC nào so với mode? | 29 |
+| 31 | `phuong-sai-mau` | Phương sai mẫu và độ lệch chuẩn mẫu | **Phương sai mẫu `s² = (Σ(xᵢ−x̄)²)/n`** — CÙNG công thức Var(X) (bài 26) áp lên dữ liệu THẬT thay vì phân phối lý thuyết, dùng `x̄` (bài 27) thay `E[X]`; **độ lệch chuẩn mẫu `s = √s²`** — đo sáu mùa "TẢN RA" xa `x̄` bao nhiêu, cùng đơn vị kilôgam | Sáu mùa của Byte (có mùa mất trắng) và sáu mùa của Lan (đều đặn quanh 40) có THỂ cùng `x̄` gần bằng nhau (tuỳ số liệu), nhưng CHẮC CHẮN khác `s`. `s` lớn hơn nói lên điều gì về ĐỘ ĐÁNG TIN của việc dùng `x̄` để dự đoán mùa TỚI? | 26, 27 |
+| 32 | `tu-phan-vi` | Tứ phân vị | **Tứ phân vị** `Q1`, `Q2`, `Q3` — chia dữ liệu ĐÃ SẮP thành BỐN phần đều nhau về SỐ LƯỢNG điểm (`Q2` chính LÀ trung vị, bài 28); `Q1` là trung vị của NỬA dưới, `Q3` là trung vị của NỬA trên — mô tả HÌNH DÁNG phân bố chi tiết hơn một con số trung tâm | Với tám mùa (đủ chia bốn phần rõ): `Q1=38`, `Q3=44`. Khoảng cách `Q3−Q1 = 6` gọi là gì, và một mùa TỤT xuống `10` kg (rất xa so với khoảng `38-44` bình thường) có nằm trong khoảng đó không? | 28 |
+| 33 | `phat-hien-ngoai-le-iqr` | Phát hiện ngoại lệ bằng IQR | **`IQR = Q3 − Q1`**; một điểm dữ liệu LÀ ngoại lệ (outlier) nếu nó nằm NGOÀI khoảng `[Q1 − 1.5·IQR, Q3 + 1.5·IQR]` — một QUY TẮC cụ thể để trả lời câu hỏi bài 27 để ngỏ ("con số nào là bất thường"), không còn phải NHÌN bằng mắt | Mùa `5` kg của Byte (bài 27) — kiểm bằng IQR có thật sự là ngoại lệ, hay chỉ "trông có vẻ thấp"? Giờ track đã có: đếm (1-10), xác suất (11-21), biến ngẫu nhiên (22-26), thống kê mô tả (27-33). Ghép cả bốn phần lên MỘT vụ mùa trông như thế nào? | 32, 27 |
+| 34 | `boss-mot-vu-mua-hoan-chinh` | BOSS — Một vụ mùa hoàn chỉnh | *(không khái niệm mới — bài tổng hợp)* ghép đếm (chọn `k` luống thu hoạch bằng `C(n,k)`) + xác suất (rút hạt từ túi trộn, `P(A)`) + biến ngẫu nhiên/kỳ vọng (`E[X]` số hạt nảy mầm) + thống kê (`x̄`, trung vị, IQR trên sáu mùa thật) TRÊN MỘT vụ mùa của khu vườn | Bốn mươi bốn bài từ T2.1: số, biến, mệnh đề, tập hợp, quan hệ, ánh xạ, đếm, xác suất, thống kê — mỗi phần một CÁCH nhìn khu vườn của Byte. Phần nào còn thiếu để trả lời "LUỐNG NÀO nên trồng gì, KHI NÀO" — một câu hỏi cần nhìn xa hơn MỘT vụ, sang cấu trúc LẶP LẠI qua thời gian? *(dẫn sang T2.6 — Đồ thị, modular, đại số trừu tượng)* | 1–33 |
+
+**Vì sao thứ tự này đúng**
+
+**1. Vì sao track KHÔNG mở bằng "đây là công thức tổ hợp `C(n,k)`" (như một
+người mới sẽ mong đợi), mà mở bằng quy tắc cộng — trường hợp RIÊNG của một
+công thức T2.4 đã dạy (đếm bù trừ, bài 13).** Đúng luật lặp lại từ T2.4: bài
+1 không dạy khái niệm hoàn toàn mới, nó dạy phép ĐỌC LẠI một công thức ĐÃ CÓ
+dưới một cái TÊN mới ("quy tắc cộng"), rồi NGAY bài 2 mở rộng công thức đó
+lên ba tập — trả lời đúng câu hỏi T2.4 bài 13 cố ý để ngỏ.
+
+**2. Vì sao quy tắc nhân (bài 3) tách hẳn khỏi quy tắc cộng (bài 1-2), không
+gộp "hai quy tắc đếm cơ bản" thành một bài.** Cộng đếm khi các trường hợp
+RỜI NHAU (hoặc-loại-trừ); nhân đếm khi các LỰA CHỌN nối tiếp nhau (và-đồng-
+thời). Gộp hai thứ khác trục hoàn toàn (T2.3 bài 4-5: "và"/"hoặc" cũng tách
+hai bài đúng vì lý do này) sẽ khiến người học lẫn khi nào cộng, khi nào nhân
+— lỗi phổ biến nhất của người mới học tổ hợp.
+
+**3. Vì sao "đếm có lặp hay không" (bài 4) đứng GIỮA quy tắc nhân (bài 3) và
+giai thừa (bài 5), không gộp vào bài nào trong hai bài đó.** Giai thừa CHỈ
+có nghĩa trong trường hợp KHÔNG lặp (mỗi bước bớt một lựa chọn) — nếu gộp
+thẳng bài 3 sang bài 5, người học sẽ ngỡ MỌI phép đếm liên tiếp đều trừ dần,
+trong khi quy tắc nhân bài 3 (ví dụ hạt giống có thể dùng lại mỗi luống) lại
+KHÔNG trừ. Bài 4 dựng rõ ranh giới trước khi giai thừa xuất hiện như một
+TRƯỜNG HỢP của "không lặp".
+
+**4. Vì sao hoán vị (bài 6) đứng TRƯỚC tổ hợp (bài 7), dù nhiều người học sẽ
+gặp tổ hợp trước trong đời thường ("chọn nhóm" nghe tự nhiên hơn "xếp thứ
+tự").** Công thức tổ hợp (bài 7) ĐỊNH NGHĨA qua hoán vị — chia `P(n,k)` cho
+`k!` — nên hoán vị phải LÀ nền đứng trước, đúng lối track T2.4 xây quan hệ
+trên tập hợp, ánh xạ trên quan hệ (mỗi tầng định nghĩa QUA tầng trước).
+
+**5. Vì sao xác suất (bài 11 trở đi) mở bằng "không gian mẫu là một tập hợp,
+biến cố là một tập con", không mở bằng "xác suất là khả năng xảy ra".** Đây
+là bản lề sư phạm quan trọng nhất track, giống hệt cách T2.4 định nghĩa quan
+hệ QUA tập hợp (mục 6, T2.4): định nghĩa lại xác suất thành "một con số gắn
+lên tập con của một tập hợp" thì MỌI kỹ thuật tập hợp (T2.4, bài 1-13 của
+track này) áp dụng NGUYÊN VẸN — phần bù, hợp, giao, bù trừ đều đã có sẵn,
+không học lại dưới cái tên mới.
+
+**6. Vì sao "biến cố rời nhau" (bài 14) và "hợp tổng quát" (bài 15) TÁCH
+hai bài dù bài 15 LÀM MẤT bài 14 (đặt `P(A∩B)=0` là ra ngay bài 14).** Cùng
+lý do T2.4 bài 19-21 (ba tính chất tách ba bài): bài 14 cho một phản ví dụ
+GỌN để thấy công thức đơn giản hoạt động trước khi bài 15 làm nó PHỨC TẠP
+hơn — gộp thẳng sẽ khiến trường hợp rời-nhau (thường gặp nhất trong thực
+hành) không được khắc riêng vào trí nhớ.
+
+**7. Vì sao biến ngẫu nhiên (bài 22) được ĐỊNH NGHĨA là một ánh xạ, không
+phải "một đại lượng có thể đổi giá trị theo may rủi".** Cùng bản lề mục 5,
+áp lần hai: ánh xạ Ω→số ĐÃ có đầy đủ máy móc Ở T2.4 (bài 24-27: đơn ánh,
+toàn ánh, ảnh của một phần tử) — bài 22 chỉ CHỈ RA biến ngẫu nhiên LÀ trường
+hợp riêng của khái niệm đã học, không dạy lại "ánh xạ là gì" lần hai.
+
+**8. Vì sao thống kê mô tả (bài 27 trở đi) KHÔNG mở lại "đây là cách tính
+trung bình" bằng Python (R1 bài 27 đã dạy `tong/dem`), mà mở bằng "trung
+bình mẫu khác kỳ vọng Ở CHỖ NÀO".** Đúng luật lặp từ T2.4 (không dạy lại
+phần MÁY của R1) — bài 27 giả định người học ĐÃ gõ được `tong/dem` từ R1, và
+dạy lớp Ý NGHĨA: phân biệt dữ liệu THẬT (thống kê) với xác suất DỰ ĐOÁN
+(bài 22-26), một ranh giới khái niệm KHÔNG có trong bất kỳ dòng code R1 nào.
+
+**9. Vì sao trung vị (bài 28) đứng NGAY sau trung bình (bài 27), rồi một bài
+RIÊNG (bài 29) mới so sánh khi nào dùng cái nào — không gộp so sánh vào
+ngay bài 28.** Mỗi công cụ cần đứng MỘT MÌNH trước để người học cầm được nó
+mà không bị nhiễu bởi công cụ kia — đúng lối T2.4 tách ba tính chất (mục 7,
+T2.4) trước khi ghép thành tương đương.
+
+**10. Vì sao BOSS (bài 34) không dạy khái niệm mới nhưng vẫn đứng RIÊNG,
+đúng vai trò BOSS đã lặp lại xuyên suốt R2 (T2.1 bài 44, T2.3 bài 32, T2.4
+bài 28): không dạy, chỉ ghép BỐN mảng (đếm, xác suất, biến ngẫu nhiên,
+thống kê) trên một vụ mùa DUY NHẤT của khu vườn.**
+
+**Ranh giới track:** không bài nào chạm phân phối LIÊN TỤC (chuẩn, mũ —
+cần tích phân, dành T2.7 ĐSTT & giải tích cho AI). Không bài nào chạm suy
+diễn thống kê (kiểm định giả thuyết, khoảng tin cậy — cần phân phối lấy
+mẫu, ngoài phạm vi track nền tảng này). Không bài nào chạm ma trận hiệp
+phương sai hay hồi quy (dành T2.7/R8). Và — biên quan trọng nhất — **không
+bài nào dạy lại cách gõ vòng lặp đếm, cộng dồn, hay `tong/dem` trong Python;
+toàn bộ phần đó đã đóng ở R1 (T1.2 bài 14, 15, 27).**

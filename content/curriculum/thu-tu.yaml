@@ -42,6 +42,12 @@ realm:
       # `all()`/`any()` (T2.3) để kiểm phản xạ/đối xứng/bắc cầu trên mọi
       # cặp. Đứng ngay sau logic-va-chung-minh, không song song.
       - tap-hop-quan-he-anh-xa
+      # T2.5 định nghĩa xác suất QUA tập hợp/tập con (T2.4) và biến ngẫu
+      # nhiên QUA ánh xạ (T2.4 bài 24) — đứng ngay sau tap-hop-quan-he-anh-xa,
+      # không song song. Xem "QUAN TRỌNG" đầu mục T2.5 trong MACH.md: track
+      # KHÔNG dạy lại vòng lặp đếm/cộng dồn/tong-dem, đã đóng ở R1 (T1.2 bài
+      # 14, 15, 27).
+      - to-hop-xac-suat-thong-ke
 
   # Realm 3 mở màn M8. T3.1 đứng đầu vì MASTERPLAN §9.1 giao cho nó việc "dọn
   # đường cho ownership" — người học gặp Rust ở R4.T4.0b, và mọi chỗ khó của
