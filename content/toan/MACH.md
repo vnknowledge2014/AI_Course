@@ -1020,3 +1020,121 @@ rộng); VÀ — biên quan trọng NHẤT — **track này KHÔNG `requires:` b
 skill nào của R3 "Khoa học máy tính" (xem "QUAN TRỌNG" đầu mục T2.6):
 R3 đứng SAU `toan` trong `thu-tu.yaml`, nên mọi máy móc đồ thị Ở ĐÂY
 PHẢI tự đứng vững trên riêng T2.4, không mượn R3.**
+## T2.7 — ĐSTT & giải tích cho AI (Realm 2 · Toán & Toán rời rạc · Python CHỈ để KIỂM · 28 bài)
+
+## Mạch T2.7 — ĐSTT & giải tích cho AI
+
+Người học vào track đã xong T2.1-T2.6 (số, biến, mệnh đề, tập hợp/
+quan hệ/ánh xạ, tổ hợp/xác suất/thống kê, đồ thị/modular/đại số trừu
+tượng). Đây LÀ track CUỐI của R2, đóng TRỌN roadmap Toán.
+
+**Hiện vật xuyên suốt:** khu vườn của Byte, GIỜ đo bằng số LIÊN TỤC —
+chiều dài luống (mét), lượng nước (lít), giờ nắng (giờ) — thay VÌ chỉ
+đếm "mấy cây" (T2.5, số rời rạc). BOSS T2.6 ĐÃ hỏi thẳng: "làm sao đo
+một luống dài BAO NHIÊU MÉT, TRƠN VÀ liên tục?" — câu hỏi ĐÓ MỞ track
+này.
+
+**Vì sao ĐSTT (đại số tuyến tính) VÀ giải tích đứng CHUNG một track.**
+Cả hai LÀ ngôn ngữ TOÁN học của học máy: **vector** biểu diễn một luống
+bằng NHIỀU con số CÙNG lúc (dài, nước, nắng); **ma trận** biểu diễn CẢ
+vườn cùng lúc; **đạo hàm** đo TỐC ĐỘ thay đổi (cây LỚN nhanh cỡ nào);
+**gradient** LÀ "đạo hàm nhiều chiều", VÀ **gradient descent** — thuật
+toán ĐỨNG sau HẦU hết việc "học" của AI hiện đại — LÀ đích đến CUỐI
+của cả track: dùng đạo hàm để TÌM khẩu phần tưới TỐI ƯU.
+
+**Python trong track này không bao giờ là lời giải, CHỈ để KIỂM** —
+`list`/`tuple` (T1.4, R1) dựng vector VÀ ma trận; các PHÉP toán (`+`,
+`*`, `**`, `sum`) ĐÃ biết CÁCH gõ, GIỜ gắn lớp Ý NGHĨA hình học/giải
+tích. KHÔNG dùng thư viện số học (`numpy` KHÔNG xuất hiện) — MỌI vector/
+ma trận LÀ `list` số THUẦN, mọi phép toán VIẾT tay bằng comprehension,
+đúng LỐI "thấy được cỗ máy BÊN trong" xuyên suốt R2.
+
+**Đạo hàm dạy KIỂU nào.** Track KHÔNG chứng minh giới hạn (ε-δ) — quá
+sâu SO với phạm vi R2. Đạo hàm được giới thiệu QUA xấp xỉ SỐ (Δy/Δx
+với Δx CỰC nhỏ, tính bằng CODE) VÀ quy tắc đại số (lũy thừa, tổng,
+dây chuyền) cho các HÀM đa thức đơn giản — ĐỦ để hiểu gradient descent,
+KHÔNG đủ để làm giải tích HÌNH thức. Đây LÀ ranh giới rõ ràng, đúng
+tinh THẦN "giải tích cho AI", không phải "giải tích đại học".
+
+| # | slug | Tiêu đề | Khái niệm mới (đúng một) | `reflect` cuối bài | Dựa trên |
+|---|---|---|---|---|---|
+| 1 | `vector-la-gi` | Vector là gì | **Vector** — một `tuple` số CÓ THỨ TỰ, MỖI luống giờ LÀ một điểm nhiều chiều: `(dai, nuoc, nang)`; tổng quát hoá cặp có thứ tự (T2.4 bài 14) lên NHIỀU hơn hai thành phần | Luống 1: `(2.0, 5.0, 6.0)` (dài 2m, tưới 5L, nắng 6h). Luống 2: `(3.0, 4.0, 5.0)`. Gộp lượng nước CỦA cả hai luống LẠI — cộng TỪNG cặp con số tương ứng, được không? | T2.4 `cap-co-thu-tu` |
+| 2 | `cong-vector` | Cộng vector | **`u + v`** — cộng TỪNG thành phần TƯƠNG ỨNG: `(a1,a2)+(b1,b2)=(a1+b1,a2+b2)`; gộp hai đợt tưới LÀ cộng vector | Nhân MỖI thành phần của vector lên GẤP ĐÔI (tăng khẩu phần tưới gấp đôi) — có phải phép TOÁN khác cộng vector không? | 1 |
+| 3 | `nhan-vo-huong-vector` | Nhân vô hướng | **`k·v`** — nhân MỖI thành phần VỚI cùng một số `k`; tăng khẩu phần GẤP `k` lần LÀ nhân vô hướng, KHÔNG phải cộng | So sánh vector `(4.0, 6.0)` VÀ vector `(2.0, 3.0)` — CÓ "cùng HƯỚNG" không (một LÀ bản phóng to của cái kia)? Đo "độ LỚN" một vector — dùng con số nào? | 2 |
+| 4 | `do-dai-vector` | Độ dài vector | **`‖v‖ = √(v1²+v2²+...)`** — mở RỘNG định lý Pythagoras (T2.1) lên nhiều chiều; độ dài LÀ "khoảng cách TỪ gốc" | Hai luống Ở vị trí `(3.0, 4.0)` VÀ `(0.0, 0.0)` (gốc) — khoảng CÁCH giữa CHÚNG chính LÀ độ dài vector NÀO? | 3, T2.1 (Pythagoras) |
+| 5 | `khoang-cach-hai-vector` | Khoảng cách giữa hai vector | **`d(u,v) = ‖u−v‖`** — khoảng cách Euclid LÀ độ dài của vector HIỆU; "hai luống GIỐNG nhau bao nhiêu" đo bằng khoảng CÁCH hồ sơ của chúng | Hai luống hồ sơ GẦN NHAU (khoảng cách NHỎ) — điều ĐÓ nói lên gì VỀ chúng? Có cách nào đo "giống nhau" mà KHÔNG quan tâm ĐỘ LỚN tuyệt đối, chỉ quan tâm HƯỚNG? | 4 |
+| 6 | `tich-vo-huong` | Tích vô hướng | **`u·v = u1v1+u2v2+...`** — tổng CÁC tích từng cặp thành phần TƯƠNG ứng; MỘT con số DUY NHẤT tóm tắt "hai vector khớp NHAU bao nhiêu" | `u·v` VÀ `v·u` — có bằng NHAU không (giống hệt kiểm tra Ở T2.6, phép TOÁN nào giao hoán)? Con số `u·v` LỚN nghĩa LÀ gì VỀ mặt HÌNH học? | 5 |
+| 7 | `goc-giua-hai-vector` | Góc giữa hai vector | **`cos θ = (u·v)/(‖u‖‖v‖)`** — tích vô hướng CHIA cho tích hai độ dài RA cosin của GÓC giữa chúng; `cos θ = 0` nghĩa LÀ VUÔNG góc (KHÔNG liên quan gì nhau) | Hai luống hồ sơ VUÔNG góc (`cos θ = 0`) — chúng "khác nhau HOÀN TOÀN" theo nghĩa NÀO? Có cách NÀO dùng `cos θ` làm thước đo "GIỐNG nhau" chuẩn HOÁ, không phụ thuộc ĐỘ LỚN? | 6, 4 |
+| 8 | `do-tuong-dong-cosine` | Độ tương đồng cosine | **Độ tương đồng cosine** — CHÍNH LÀ `cos θ` (bài 7), đặt TÊN ứng dụng: so sánh "hồ SƠ" hai luống MÀ không quan tâm ĐỘ LỚN, chỉ quan tâm TỈ LỆ các thành phần — công cụ CHUẨN so sánh embedding trong AI hiện đại | Một VƯỜN CÓ nhiều luống — LÀM sao VIẾT gọn TOÀN bộ dữ liệu (nhiều vector) thành MỘT cấu trúc DUY nhất? | 7 |
+| 9 | `ma-tran-la-gi` | Ma trận là gì | **Ma trận** — một BẢNG số, `list` CÁC vector hàng; TOÀN bộ vườn (MỖI luống MỘT hàng, MỖI cột MỘT chỉ số đo) LÀ một ma trận DUY nhất | Cộng HAI ma trận (hai lần ĐO của cùng khu vườn) — cộng NHƯ thế nào, đúng lối cộng vector (bài 2) không? | 8, 1 |
+| 10 | `cong-ma-tran` | Cộng ma trận | **`A+B`** — cộng TỪNG phần tử Ở CÙNG vị trí hàng-cột; đúng lối cộng vector (bài 2), CHỈ thêm một CHIỀU | Nhân CẢ ma trận VỚI một số `k` (tăng đồng LOẠT mọi chỉ số đo LÊN `k` lần) — phép toán NÀY LÀ gì? | 9, 2 |
+| 11 | `nhan-vo-huong-ma-tran` | Nhân vô hướng ma trận | **`k·A`** — nhân MỖI phần tử VỚI `k`; đúng lối nhân vô hướng vector (bài 3) | Ma trận NHÂN VỚI một VECTOR (không phải MỘT số) — kết quả LÀ GÌ, VÀ tính THẾ nào? | 10, 3 |
+| 12 | `nhan-ma-tran-vector` | Nhân ma trận với vector | **`Av`** — MỖI thành phần của kết quả LÀ tích vô hướng (bài 6) của MỘT hàng ma trận VỚI `v`; đây LÀ **biến đổi TUYẾN TÍNH** — cách AI "biến" một vector đầu VÀO thành một vector ĐẦU ra | Nhân MA TRẬN vườn (nhiều luống) VỚI vector "trọng SỐ" `(1,1,1)` (cộng dồn cả BA chỉ số ĐO) — kết quả nói LÊN điều gì VỀ từng luống? | 11, 6 |
+| 13 | `nhan-hai-ma-tran` | Nhân hai ma trận | **`AB`** — MỖI phần tử của kết quả LÀ tích vô hướng của MỘT hàng `A` VỚI MỘT cột `B`; nhân ma trận-vector (bài 12) LÀ trường hợp RIÊNG khi `B` chỉ CÓ một cột | `AB` VÀ `BA` — CÓ luôn bằng nhau không (giống câu hỏi Ở T2.6 VỀ hợp thành ánh xạ, bài 27)? | 12 |
+| 14 | `ma-tran-don-vi` | Ma trận đơn vị | **Ma trận đơn vị `I`** — đường CHÉO toàn `1`, còn lại `0`; `AI = IA = A` VỚI MỌI `A` — đúng LỐI phần tử đơn vị (T2.6 bài 23), GIỜ trên ma trận | Ma trận `A` CÓ "nghịch đảo" `A⁻¹` sao `AA⁻¹=I` không — LUÔN có, hay CHỈ vài ma trận MỚI có (đúng LỐI T2.6 bài 24)? | 13, T2.6 `phan-tu-don-vi` |
+| 15 | `ma-tran-chuyen-vi` | Ma trận chuyển vị | **`Aᵀ`** — đổi HÀNG thành cột (`Aᵀ[i][j] = A[j][i]`); "xoay" bảng số MÀ không đổi giá trị — hữu ích khi cần đọc dữ liệu THEO chiều KHÁC | Vườn CỦA Byte đo được BAO NHIÊU (dài, nước, nắng) — nhưng CÁC con số ĐÓ đo theo THỜI GIAN thì SAO? Luống LỚN lên bao NHANH — đo TỐC ĐỘ thay đổi thế NÀO? | 9 |
+| 16 | `toc-do-thay-doi` | Tốc độ thay đổi | **Tốc độ thay đổi trung bình** — `Δy/Δx`, độ DỐC giữa hai thời điểm ĐO; luống dài `2m` NGÀY 1, `2.6m` ngày 4 — tốc độ LỚN trung bình LÀ `0.2m/ngày` | Đo tốc độ lớn GIỮA ngày 1 VÀ ngày 1.001 (khoảng CÁCH cực NHỎ) — con số CÓ ổn định LẠI một giá trị, hay cứ đổi MÃI khi khoảng cách càng NHỎ? | T2.1 (tỉ số) |
+| 17 | `gioi-han-truc-quan` | Giới hạn trực quan | **Giới hạn** — khi `Δx` CÀNG nhỏ, `Δy/Δx` CÀNG tiến GẦN một con số CỐ ĐỊNH (kiểm bằng CODE: thử `Δx=0.1, 0.01, 0.001`, thấy dãy SỐ hội tụ); KHÔNG chứng minh ε-δ, chỉ QUAN sát số | Con số "hội tụ" ĐÓ — CHÍNH LÀ tốc độ lớn TẠI đúng MỘT thời điểm (KHÔNG phải trung bình GIỮA hai mốc nữa). Nó CÓ tên riêng không? | 16 |
+| 18 | `dao-ham-la-gi` | Đạo hàm là gì | **Đạo hàm `f'(x)`** — độ dốc TỨC THỜI tại `x` (giới hạn của `Δy/Δx` khi `Δx→0`, bài 17); đo TỐC ĐỘ thay đổi CHÍNH XÁC tại một điểm, KHÔNG phải trung bình | `f(x)=x²` — tính `f'(x)` TẠI vài điểm bằng xấp xỉ SỐ (`Δx` nhỏ). Kết quả CÓ khớp công thức `2x` không? Có QUY tắc TỔNG quát nào cho `xⁿ` không? | 17 |
+| 19 | `dao-ham-ham-da-thuc` | Đạo hàm hàm đa thức | **Quy tắc luỹ thừa: `d/dx[xⁿ] = n·xⁿ⁻¹`** — công thức ĐẠI SỐ thay cho tính xấp xỉ SỐ (bài 18); kiểm LẠI bằng xấp xỉ SỐ để THẤY công thức khớp | Hàm `f(x) = x² + x³` (TỔNG hai luỹ thừa) — đạo hàm của TỔNG có phải TỔNG của hai đạo hàm không? | 18 |
+| 20 | `dao-ham-tong-hieu` | Đạo hàm tổng, hiệu | **`(f+g)' = f'+g'`, `(f−g)' = f'−g'`** — đạo hàm PHÂN PHỐI qua tổng/hiệu; TÍNH đạo hàm một hàm PHỨC bằng cách TÁCH thành TỪNG số hạng | Hàm HỢP `f(g(x))` (một hàm LỒNG trong hàm khác, T2.4 khái niệm hợp THÀNH) — đạo hàm của NÓ có ĐƠN giản là `f'(g'(x))` không, hay cần THÊM gì? | 19, T2.4 `song-anh-va-hop-thanh` |
+| 21 | `quy-tac-day-chuyen` | Quy tắc dây chuyền | **`(f∘g)'(x) = f'(g(x))·g'(x)`** — đạo hàm hàm HỢP LÀ tích của "đạo hàm NGOÀI tại điểm trong" VÀ "đạo hàm TRONG"; kiểm bằng xấp xỉ số CHO một ca cụ thể | Hàm `f(x) = (x²)²` CÓ đúng MỘT điểm mà đạo hàm BẰNG `0` — điểm ĐÓ có Ý nghĩa GÌ (lớn nhất? nhỏ nhất? không đổi?) | 20 |
+| 22 | `cuc-tri-dao-ham-bang-0` | Cực trị: đạo hàm bằng 0 | **Tại cực ĐẠI/cực tiểu, `f'(x)=0`** — độ dốc BẰNG không TẠI đỉnh/đáy (KHÔNG tăng cũng KHÔNG giảm); tìm GIÁ trị `x` tối ưu bằng cách GIẢI `f'(x)=0` | Hàm CHI PHÍ tưới nước CÓ NHIỀU biến (không chỉ MỘT `x`) — "độ dốc" theo TỪNG biến RIÊNG tính thế NÀO? | 21 |
+| 23 | `dao-ham-rieng` | Đạo hàm riêng | **Đạo hàm RIÊNG `∂f/∂x`** — đạo hàm THEO một biến, GIỮ các biến KHÁC cố định; hàm `f(x,y)=x²+y²` CÓ hai đạo hàm riêng, MỘT cho `x`, MỘT cho `y` | Gộp CẢ hai đạo hàm riêng (`∂f/∂x`, `∂f/∂y`) lại thành MỘT cấu trúc DUY nhất — cấu trúc ĐÓ giống thứ GÌ đã học Ở đầu track? | 22, 1 |
+| 24 | `vector-gradient` | Vector gradient | **`∇f = (∂f/∂x, ∂f/∂y)`** — VECTOR (bài 1) gồm TẤT CẢ đạo hàm riêng; `∇f` chỉ HƯỚNG mà `f` TĂNG nhanh NHẤT tại một điểm | Muốn hàm CHI PHÍ (bài 22) GIẢM nhanh NHẤT — nên đi THEO hướng gradient, hay hướng NGƯỢC LẠI? | 23 |
+| 25 | `gradient-nguoc-huong-giam` | Gradient ngược hướng giảm | **`−∇f`** chỉ hướng `f` GIẢM nhanh NHẤT — đi ngược GRADIENT LÀ cách nhanh nhất để TỚI cực tiểu; nền tảng của thuật TOÁN học máy quan trọng nhất | Đi một BƯỚC ngược gradient — bước ĐÓ nên DÀI bao nhiêu? Đi CẢ quãng MỘT lần có ổn không, hay CẦN đi từng bước NHỎ? | 24 |
+| 26 | `mot-buoc-gradient-descent` | Một bước gradient descent | **`x_mới = x − α·∇f(x)`** — `α` (tốc độ HỌC) LÀ một bước NHỎ theo hướng NGƯỢC gradient (bài 25); MỘT bước ĐƯA `x` TỚI gần cực tiểu hơn, chưa TỚI hẳn | LẶP LẠI một bước NHIỀU lần (bài 26) — kết quả CÓ hội tụ VỀ đúng điểm CỰC tiểu không? Thử `α` quá LỚN thì SAO? | 25, 16 |
+| 27 | `gradient-descent-lap-lai` | Gradient descent lặp lại | **Lặp LẠI `x ← x − α∇f(x)`** cho tới khi `∇f(x)` GẦN `0` (bài 22) — CHÍNH LÀ cách phần LỚN mô hình AI "học": LẶP hàng NGHÌN bước NHỎ để GIẢM một hàm chi phí | Track NÀY đóng bằng gradient descent — thuật toán CỐT LÕI của AI hiện đại. VECTOR, tích vô hướng, đạo hàm, gradient — TẤT CẢ GẶP nhau Ở đâu trên MỘT bài toán DUY nhất? | 26, T2.3 `dieu-dung-lai-sau-moi-luot` |
+| 28 | `boss-toi-uu-khau-phan-tuoi` | BOSS — Tối ưu khẩu phần tưới | *(không khái niệm mới — bài tổng hợp)* ghép vector (hồ sơ luống, bài 1-8) + ma trận (cả vườn, bài 9-15) + đạo hàm/gradient (bài 16-27): dùng gradient descent TÌM khẩu phần tưới TỐI ƯU giảm một hàm chi PHÍ đơn giản, VÀ dùng tích vô hướng SO sánh độ tương đồng hai luống | Track NÀY khép LẠI toàn bộ ROADMAP Toán (R2). Số rời rạc (đếm), logic (chứng minh), tập hợp (nhóm lại), tổ hợp/xác suất (đo bất ĐỊNH), đồ thị/modular/nhóm (cấu TRÚC lặp), VÀ giờ VECTOR/đạo hàm (đo LIÊN tục VÀ tối ưu) — sáu track, MỘT bộ CÔNG cụ. Byte sẵn SÀNG bước sang lập trình HÀM (R4) — CODE thật, KHÔNG chỉ Ý nghĩa toán. | 1-27 |
+
+**Vì sao thứ tự này đúng**
+
+**1. Vì sao vector (bài 1) mở bằng "tuple số có thứ tự", NGAY sau khi
+nhắc lại cặp có thứ tự (T2.4).** Cùng bản lề T2.4/T2.5/T2.6: KHÔNG dạy
+khái niệm hoàn toàn MỚI ngay bài 1 — vector LÀ sự TỔNG QUÁT hoá tự
+nhiên của cặp có thứ tự (hai thành phần) lên `n` thành PHẦN, người học
+ĐÃ có sẵn trực giác.
+
+**2. Vì sao cộng/nhân vô hướng vector (bài 2-3) đứng TRƯỚC độ dài/tích
+vô hướng (bài 4-6).** Phép toán ĐƠN giản (cộng từng thành PHẦN) trước,
+phép toán CẦN diễn giải HÌNH học (độ dài, góc) sau — đúng nhịp "thao
+tác trước, Ý nghĩa sau" đã DÙNG suốt R2.
+
+**3. Vì sao ma trận (bài 9-15) đứng SAU trọn cụm vector, KHÔNG xen kẽ.**
+Ma trận LÀ "nhiều vector gộp lại" — cần vector VỮNG trước khi GHÉP
+thành bảng; VÀ nhân ma trận-vector (bài 12) tái DÙNG trực tiếp tích vô
+hướng (bài 6), một phép TOÁN đã THÀNH thạo.
+
+**4. Vì sao giải tích (bài 16-22) mở bằng "tốc độ thay đổi TRUNG BÌNH"
+(bài 16) — một tỉ số ĐÃ quen (T2.1) — thay VÌ mở bằng "đạo hàm".** Đạo
+hàm (bài 18) LÀ TRƯỜNG hợp GIỚI HẠN của tỉ số Δy/Δx khi Δx→0 (bài 17)
+— dựng TỪ cái ĐÃ biết, không rơi từ TRÊN trời.
+
+**5. Vì sao đạo hàm được KIỂM bằng xấp xỉ SỐ (CODE, thử Δx nhỏ dần)
+TRƯỚC khi đưa công thức đại SỐ (bài 19, quy tắc luỹ THỪA).** Đúng
+tinh THẦN "đo trước khi viết" xuyên suốt project — công thức `n·xⁿ⁻¹`
+KHÔNG phải một QUY tắc phải NHỚ, mà LÀ điều CODE tự XÁC nhận.
+
+**6. Vì sao gradient (bài 23-24) đứng NGAY sau cực trị (bài 22, `f'(x)=
+0`), TRƯỚC gradient descent (bài 25-27).** Gradient LÀ "đạo hàm nhiều
+CHIỀU" — người học cần THẤY rõ đạo hàm MỘT biến (VÀ Ý nghĩa `f'=0` LÀ
+cực trị) TRƯỚC khi tổng QUÁT hoá lên nhiều biến; gradient descent (bài
+25-27) MỚI LÀ đích ĐẾN, ba bài CUỐI dựng dần: hướng GIẢM → một BƯỚC →
+lặp LẠI.
+
+**7. Vì sao track KHÔNG dạy ma trận nghịch đảo, định thức, hay trị
+riêng/vector riêng (eigenvalue/eigenvector).** NGOÀI phạm vi "giải
+tích CHO AI" — gradient descent (đích ĐẾN track) KHÔNG cần chúng; bài
+14 CHỈ nêu câu HỎI (nghịch đảo ma trận có LUÔN tồn tại không) làm
+MÓC nối khái niệm, KHÔNG giải quyết.
+
+**Ranh giới track:** không bài nào chứng MINH giới hạn bằng ε-δ (CHỈ
+quan sát SỐ, bài 17); không bài nào tính đạo hàm hàm LƯỢNG giác, mũ,
+LOG (chỉ đa thức, đủ CHO gradient descent CƠ bản); không bài nào DÙNG
+`numpy` hay thư VIỆN đại số tuyến tính (mọi vector/ma TRẬN LÀ `list`
+THUẦN, phép toán viết TAY); không bài nào GIẢI hệ phương trình tuyến
+tính, tính ĐỊNH thức, ma trận nghịch đảo, TRỊ riêng/vector riêng (NGOÀI
+phạm vi, dành CHO một track sâu HƠN nếu MASTERPLAN mở RỘNG); VÀ — biên
+quan trọng NHẤT — track chỉ dừng Ở gradient descent CHO hàm MỘT/hai
+biến ĐƠN giản, KHÔNG đụng tới backpropagation hay MẠNG nơ-ron (đó LÀ
+việc của R8 AI/GenAI, xây TRÊN nền track này).
