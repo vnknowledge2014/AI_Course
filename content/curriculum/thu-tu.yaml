@@ -191,3 +191,106 @@ realm:
       - kiem-thu
       - mau-tai-cau-truc
       - van-hanh
+
+  # Realm 6 (MASTERPLAN §9.2) — 22 quest, 3 mốc phát hành độc lập (R6-1/R6-2/
+  # R6-3), ★ LÃNH THỔ RUST (đa số quest học `cong-rust` T4.0b đã dạy). Mỗi
+  # quest = một track/module riêng (thư mục riêng), khác Realm 1-5 nơi mỗi
+  # track là một T-number lớn — quest ở đây nhỏ hơn (6-14 bài) nên ánh xạ
+  # 1 quest = 1 track/thư mục cho vừa quy mô.
+  #
+  # `tier: static` (requireAst) KHÔNG dùng được cho bước code Rust/TypeScript
+  # — `tools/kiem_ma_bai_hoc.mjs` ném lỗi cứng nếu khai (xác nhận bằng đọc mã
+  # nguồn, dòng ~420-435: TsAstKind/RsAstKind CHƯA cài nhánh xử lý nào). Mọi
+  # bài Rust/TS ở Realm 6 dựa HOÀN TOÀN vào tier `run`/`tests`/`output`, bù
+  # bằng test suite nhiều ca biên hơn. Chỉ bài Python (q00, có thể q04/q10
+  # nếu xác nhận là TS thì cũng áp dụng) mới dùng được `requireAst`.
+  #
+  # Mọi bài storage lập trình trên `packages/simdisk` (đã cài, xem README ở
+  # đó) — KHÔNG `open()` thật, vì Pyodide MEMFS không mô phỏng được
+  # crash/torn-write. Bài học chép phần SimDisk cần vào `readonly`, không
+  # import gói workspace (sandbox chấm không nạp được).
+  - id: co-so-du-lieu
+    ten: "Realm 6 — Database từ số 0"
+    track:
+      # R6-1 (68 bài) — nền lưu trữ một máy: byte/file → log → WAL/recovery →
+      # B+Tree → LSM → khoá/2PL → MVCC.
+      - chiec-hop-giay-cua-byte
+      # q01 mượn thẳng khái niệm "file record cố định" (q00) rồi đổi sang
+      # append-only + hash index (Bitcask) — đứng ngay sau q00.
+      - nhat-ky-khong-bao-gio-quen
+      # q02 dùng thẳng "append-only log" (q01) làm WAL, thêm fsync/torn
+      # write/CRC32/recovery — đứng ngay sau q01, cần packages/simdisk.
+      - khi-dien-mat
+      # q03 (B+Tree trên page 4KB) độc lập với log — nhưng đứng sau q02 vì
+      # cùng track R6-1, dùng lại kỷ luật fsync/recovery cho split/merge an
+      # toàn khi crash giữa chừng.
+      - cay-cua-nguoi-thu-thu
+      # q04 [TS] — LSM (skiplist, SSTable, bloom, compaction) đối chiếu với
+      # B+Tree (q03) vừa học — Bước Rosetta đầu tiên của Realm 6 (ngôn ngữ
+      # phụ). Đứng ngay sau q03 để so sánh trực tiếp còn nóng.
+      - thac-du-lieu
+      # q05 (lock table, 2PL, deadlock detection) cần một storage engine đã
+      # có (B+Tree q03 hoặc LSM q04) làm nơi khoá — đứng sau cả hai.
+      - bon-chu-cai-acid
+      # q06 (MVCC, snapshot isolation, SSI, ARIES-lite) mở rộng khoá q05
+      # thành "nhiều dòng thời gian" — đứng ngay sau q05, đóng R6-1.
+      - nhieu-dong-thoi-gian
+
+      # R6-2 (96 bài) — từ một máy lên "một hộp nhiều hình": ngôn ngữ truy
+      # vấn → executor → index nâng cao → SurrealDB thật → phân tán.
+      # q07 (lexer + Pratt parser + AST mini-SurrealQL) không phụ thuộc R6-1
+      # trực tiếp — nhưng đứng sau vì đây là quest kế tiếp theo đúng thứ tự
+      # M8/MASTERPLAN, và cần một storage engine (q03/q04) làm đích thực thi.
+      - ngon-ngu-cua-byte
+      # q08 (logical plan, pushdown, Volcano executor) dùng thẳng AST (q07)
+      # làm đầu vào — đứng ngay sau q07.
+      - bo-nao-cua-truy-van
+      # q09 (key-encoding có thứ tự, secondary index, graph edge, HNSW-lite)
+      # mở rộng executor (q08) với nhiều kiểu chỉ mục hơn — đứng ngay sau q08.
+      - nhung-loi-tat-cua-byte
+      # q10 (SurrealDB THẬT qua @surrealdb/wasm — nhiều khả năng [TS], xác
+      # nhận khi viết) đối chiếu mini-SurrealQL tự viết (q07-q09) với bản
+      # thật — đứng ngay sau q09, đóng vòng "một hộp nhiều hình".
+      - mot-hop-nhieu-hinh
+      # q11 (murmur3, consistent hashing, vnode) mở đầu nhánh phân tán —
+      # không phụ thuộc q07-q10 trực tiếp, đứng sau vì đúng thứ tự quest.
+      - vong-tron-quyen-luc
+      # q12 (shard-per-core, share-nothing) dùng thẳng vnode/hashing (q11)
+      # để chia dữ liệu theo lõi — đứng ngay sau q11.
+      - moi-loi-mot-vuong-quoc
+      # q13 (RF/CL quorum, hinted handoff, read repair, Merkle) cần dữ liệu
+      # đã phân tán (q11-q12) để có gì mà đồng bộ — đứng ngay sau q12.
+      - dem-phieu
+      # q14 (tombstone, gc_grace, STCS/LCS/TWCS) dọn dẹp cho đúng mô hình
+      # LSM (q04) + phân tán (q11-q13) — đứng ngay sau q13.
+      - bia-mo-va-nguoi-don-rac
+      # q15 (wide-column, partition key, hot partition) tổng kết mô hình hoá
+      # dữ liệu phân tán — đứng cuối R6-2, dùng mọi khái niệm q11-q14.
+      - mo-hinh-hoa-theo-cau-hoi
+
+      # R6-3 (63 bài) — "TigerBeetle nhỏ": ledger tất định, mô phỏng lỗi,
+      # đồng thuận, capstone.
+      # q16 (double-entry, 128B DataView, two-phase, linked) mở track mới,
+      # dùng thẳng B+Tree/WAL (R6-1) làm nơi lưu bút toán — đứng ngay sau
+      # R6-2 vì đúng thứ tự quest, không phụ thuộc trực tiếp R6-2.
+      - so-cai-khong-sai-mot-xu
+      # q17 (event loop tất định, xorshift128+, clock ảo) xây nền mô phỏng
+      # cho ledger (q16) chạy lặp lại được — đứng ngay sau q16.
+      - vu-tru-tat-dinh
+      # q18 (simulated network + SimDisk fault, mini-VOPR) tiêm lỗi vào nền
+      # tất định (q17) — đứng ngay sau q17, mở rộng packages/simdisk với
+      # fault injection (torn write, lost fsync, latent sector error,
+      # misdirected write, crash tất định thứ N).
+      - ke-pha-hoai-co-chu-dich
+      # q19 (VSR: prepare/prepare_ok/commit, view change) cần nền tất định
+      # + tiêm lỗi (q17-q18) để kiểm đồng thuận sống sót qua lỗi — đứng ngay
+      # sau q18.
+      - dong-thuan-kieu-vsr
+      # q20 "Phòng thí nghiệm thật" — ONLINE, desktop-only, NGOÀI mọi mốc bắt
+      # buộc (ghi rõ trong MASTERPLAN §9.2) — xếp vị trí này để giữ đúng thứ
+      # tự quest, nhưng có thể hoãn giống T4.4/T4.6 nếu hạ tầng desktop-only
+      # chưa sẵn sàng lúc viết tới đây.
+      - phong-thi-nghiem-that
+      # q21 ByteLedger Capstone ghép TRỌN R6-3 (double-entry + tất định +
+      # tiêm lỗi + VSR) — đứng cuối, đóng Realm 6.
+      - byteledger-capstone
