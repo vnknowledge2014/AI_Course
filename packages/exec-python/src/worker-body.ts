@@ -21,6 +21,9 @@ export interface Pyodide {
   setStdout(o: { batched: (s: string) => void }): void;
   setStderr(o: { batched: (s: string) => void }): void;
   globals: { get(ten: string): unknown; set(ten: string, v: unknown): void };
+  /** Nạp một gói Pyodide (vd 'numpy') — dùng để nạp numpy MỘT LẦN lúc khởi
+   * động worker, phục vụ nội dung Realm 8 (AI/numpy). */
+  loadPackage(tenGoiHoacUrl: string): Promise<unknown>;
 }
 
 /**

@@ -22,6 +22,7 @@ import { join, dirname } from 'node:path';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import { Worker } from 'node:worker_threads';
+import { napGoiPyodideCucBo } from './nap_goi_pyodide.mjs';
 
 const THU_MUC = process.argv[2] ?? 'dist/content';
 const MIEN_TRU = 'content/curriculum/dot-bien-bo-qua.yaml';
@@ -30,6 +31,9 @@ const { kiemAst } = await import(new URL('../packages/exec-python/dist/kiem-ast.
 const require = createRequire(new URL('../packages/exec-python/package.json', import.meta.url));
 const { loadPyodide } = await import(pathToFileURL(require.resolve('pyodide/pyodide.mjs')).href);
 const py = await loadPyodide();
+// Xem ghi chú trong tools/kiem_ma_bai_hoc.mjs — nạp numpy MỘT LẦN cho suốt
+// lượt đột biến, từ wheel vendor cục bộ, không phải nạp lại cho từng đột biến.
+await napGoiPyodideCucBo(py, 'numpy');
 
 // ── TypeScript: cùng nguyên tắc "đột biến theo Ý", engine khác ────────────
 //

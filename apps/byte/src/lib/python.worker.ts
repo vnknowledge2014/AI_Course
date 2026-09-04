@@ -19,6 +19,14 @@ async function khoi_dong(): Promise<void> {
     loadPyodide: (o: { indexURL: string }) => Promise<Pyodide>;
   };
   const py = await loadPyodide({ indexURL: GOC });
+  // R8 (AI/Generative AI/RAG) dạy machine learning/mạng nơ-ron/transformer
+  // bằng numpy THUẦN — nạp một lần lúc khởi động worker (cùng lúc với
+  // pyodide.asm.wasm/stdlib, một chi phí cố định trả MỘT LẦN cho cả phiên,
+  // không phải mỗi lần chạy code), qua tên gói trần: `indexURL` ở trên trỏ
+  // TỚI `public/pyodide/`, nơi `pnpm run numpy` đã đặt sẵn wheel CẠNH
+  // `pyodide-lock.json` — Pyodide tự tra lock file, tự tìm thấy wheel cục
+  // bộ, không cần mạng.
+  await py.loadPackage('numpy');
 
   gan(
     py,

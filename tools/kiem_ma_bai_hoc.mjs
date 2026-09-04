@@ -19,6 +19,7 @@ import { join, dirname } from 'node:path';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import { Worker } from 'node:worker_threads';
+import { napGoiPyodideCucBo } from './nap_goi_pyodide.mjs';
 
 const THU_MUC = process.argv[2] ?? 'dist/content';
 
@@ -28,6 +29,11 @@ const { kiemAst } = await import(new URL('../packages/exec-python/dist/kiem-ast.
 const require = createRequire(new URL('../packages/exec-python/package.json', import.meta.url));
 const { loadPyodide } = await import(pathToFileURL(require.resolve('pyodide/pyodide.mjs')).href);
 const py = await loadPyodide();
+// R8 (AI/numpy) dùng numpy trong bài Python — nạp MỘT LẦN ở đây cho suốt lượt
+// chấm, từ wheel đã vendor cục bộ (xem tools/nap_goi_pyodide.mjs). Không ảnh
+// hưởng lesson Python không dùng numpy: chỉ chậm thêm lúc khởi động module
+// này (một lần cho CẢ 1251+ bài), không chậm từng lời giải.
+await napGoiPyodideCucBo(py, 'numpy');
 
 // ── TypeScript: cùng nguyên tắc, engine khác ──────────────────────────────
 //
