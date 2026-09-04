@@ -52,7 +52,26 @@ bản ghi hỏng KHÔNG cần thay đổi gì ở `SimDisk` — đó là việc 
 bản ghi trong lesson (tính/so khớp checksum trên byte đọc được), không
 phải của block device.
 
-**CHƯA có**: latent sector error, misdirected write, crash tất định thứ N
-— thuộc q18 "Kẻ phá hoại có chủ đích". Xây khi viết tới quest đó, không
-xây trước (bài học từ AST-kind ở Realm 4: hạ tầng xây đúng lúc bài đầu
-tiên CẦN nó, không sớm hơn).
+## Phạm vi v3 (q18 "Kẻ phá hoại có chủ đích")
+
+Ba kiểu lỗi/công cụ nữa, TypeScript only (R6-3 không có bản Python song
+sinh — pillar "TigerBeetle = correctness" viết TypeScript xuyên suốt):
+
+- `danhDauLoiSectorAn(sector)` — "latent sector error": MỌI `read()` tiếp
+  theo trên sector đó ném lỗi, CHO TỚI KHI sector được ghi lại VÀ `fsync()`
+  thành công (reallocate-on-rewrite, đúng hành vi đĩa thật). KHÔNG tự tắt
+  theo số lần gọi như hai lỗi v2 — là một TRẠNG THÁI của sector, không phải
+  một bẫy một lần.
+- `danhDauGhiSaiDich(sectorDinhGhi, sectorThucTe)` — "misdirected write":
+  lần `fsync()` tiếp theo, dữ liệu định ghi cho `sectorDinhGhi` lại ghi vào
+  `sectorThucTe` — `sectorDinhGhi` giữ nguyên dữ liệu cũ, `sectorThucTe` bị
+  ghi đè nhầm. Nguy hiểm hơn torn write vì dữ liệu (và checksum của nó, nếu
+  có) đều "đúng" — chỉ SAI vị trí, checksum-trên-từng-sector không bắt được.
+- `datCrashSauThaoTacThuN(n)` — sau đúng `n` lần gọi `write()` kể từ lúc
+  gọi hàm này, `crash()` TỰ ĐỘNG kích hoạt — "crash tất định thứ N": thời
+  điểm crash do một con số quyết định (tính được từ seed một vũ trụ tất
+  định, xem `content/co-so-du-lieu/17-vu-tru-tat-dinh`), không phải một độ
+  trễ thời gian thật hay nguồn ngẫu nhiên nào.
+
+Test đầy đủ ở `test/simdisk.test.mjs` (chạy qua `pnpm test` ở đây, hoặc
+`pnpm -r --silent test` ở gốc repo — gate "Test JS" trong `tools/cong.sh`).
