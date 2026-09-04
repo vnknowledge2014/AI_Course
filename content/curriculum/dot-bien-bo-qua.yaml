@@ -312,3 +312,13 @@
 # số thứ ba của assertEqual, không tham gia so sánh actual/expected.
 - 'ky-nghe-phan-mem.kiem-thu.san-dot-bien-that · san_dot_bien_boss · đổi MỌI chuỗi "12 tuoi (ngay duoi bien 13) van la tre em" thành "tre_em" (1 chỗ)'
 
+# TƯƠNG ĐƯƠNG THẬT. `reDriveEntryChuaCommit` xây một ThongDiep 'PrepareOk'
+# rồi gọi thẳng `nhanPrepareOk` — hàm đó (q19 bài 6, dùng nguyên xi) CHỈ đọc
+# `td.opNumber` và `td.tu`, KHÔNG BAO GIỜ đọc `td.viewNumber`. Trường
+# `viewNumber` bắt buộc phải có mặt vì kiểu `ThongDiep` không optional nó,
+# nhưng trong ĐÚNG lời gọi này giá trị của nó không hề ảnh hưởng tới bất kỳ
+# nhánh rẽ, phép tính, hay trạng thái quan sát được nào — `backup.viewNumber`
+# và `backup.chiSo` cho kết quả giống hệt nhau ở mọi test có thể viết được
+# qua API công khai. Không có gì để phân biệt.
+- 'co-so-du-lieu.byteledger-capstone.view-change-duoi-tai · viet_re_drive_entry · đổi MỌI .viewNumber thành .chiSo (1 chỗ)'
+
