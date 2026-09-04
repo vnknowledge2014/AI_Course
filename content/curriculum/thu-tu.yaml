@@ -333,4 +333,36 @@ realm:
       # TỔNG HỢP đóng T7.1, ráp load balancing (q7.1a) + rate limiting
       # (q7.1b) vào MỘT dịch vụ nhỏ hoàn chỉnh.
       - url-rut-gon-va-thu-thap-web
-      # T7.2-T7.4 CHƯA thiết kế quest breakdown — xem HANDOFF khi viết tới.
+      # T7.2 "Thiết kế thực chiến" (34 bài, 4 quest) — MASTERPLAN chỉ nêu
+      # DANH SÁCH case study cấp track (notification, news feed, chat,
+      # search autocomplete, YouTube, Google Drive, proximity service,
+      # message queue, metrics/monitoring, hotel reservation, distributed
+      # email, S3-like storage, gaming leaderboard, payment, digital
+      # wallet, stock exchange — 16 hệ thống), KHÔNG có breakdown quest —
+      # TỰ nhóm theo chủ đề kỹ thuật chung (không theo thứ tự sách):
+      - noi-dung-va-kham-pha
+      # q7.2a — News Feed (fan-out on write/read), Search Autocomplete
+      # (trie/prefix + top-K), YouTube (transcode pipeline + CDN) — chủ đề
+      # chung: phục vụ NỘI DUNG lớn cho nhiều người đọc, đánh đổi
+      # write-time vs read-time.
+      - thoi-gian-thuc-va-vi-tri
+      # q7.2b — Chat System (WebSocket/presence/delivery), Notification
+      # System (multi-kênh + dedup), Proximity Service (geohash/quadtree),
+      # Gaming Leaderboard (sorted set thời gian thực) — chủ đề chung: độ
+      # trễ THẤP, cập nhật LIÊN tục, không phải batch.
+      - ha-tang-du-lieu-quy-mo-lon
+      # q7.2c — Distributed Message Queue (partition/offset/ack),
+      # Metrics Monitoring & Alerting (time-series aggregation), Google
+      # Drive (chunked upload/sync/conflict), S3-like Object Storage
+      # (durability/erasure coding), Distributed Email (mailbox
+      # storage+delivery queue) — chủ đề chung: HẠ TẦNG nền cho hệ thống
+      # khác dùng, không phải sản phẩm người dùng cuối trực tiếp thấy.
+      - giao-dich-va-tien
+      # q7.2d — Hotel Reservation (inventory + double-booking), Payment
+      # System (idempotency + ledger), Digital Wallet, Stock Exchange
+      # (matching engine + order book) — chủ đề chung: TÍNH đúng đắn giao
+      # dịch quan trọng HƠN tốc độ, dọn đường trực tiếp cho T7.3 (system
+      # design for functional — idempotency/exactly-once như tính chất
+      # đại số). Bốn quest × ~8-9 bài + BOSS ≈ 34 bài, viết TUẦN tự, xác
+      # minh độc lập từng quest TRƯỚC khi sang quest kế — xem HANDOFF.
+      # T7.3-T7.4 CHƯA thiết kế quest breakdown — xem HANDOFF khi viết tới.
