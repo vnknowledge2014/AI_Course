@@ -400,4 +400,48 @@ realm:
       # BOSS đóng T7.3 ráp: log bất biến + CRDT merge + streaming pipeline
       # thành một luồng ingest nhỏ hoàn chỉnh.
       #
-      # T7.4 CHƯA thiết kế quest breakdown — xem HANDOFF khi viết tới.
+      # T7.4 "Triển khai & vận hành" (26 bài) — MASTERPLAN chỉ cho SỐ LƯỢNG
+      # (26), KHÔNG có mô tả nội dung nào (khác T7.3 vốn có 5 khái niệm liệt
+      # kê sẵn) — TỰ thiết kế HOÀN TOÀN 3 quest theo đúng chủ đề chuẩn của
+      # mảng "deployment & operations" trong system design (điều những gì
+      # T7.1-T7.3 CHƯA chạm: launch AN TOÀN, QUAN SÁT hệ thống đang chạy,
+      # CHỐNG CHỊU lỗi hạ nguồn) — quay LẠI namespace `sd.*` (KHÔNG `sd.fp.*`,
+      # vì đây không phải một track "reframe theo FP" như T7.3, mà là track
+      # vận hành chung, viết theo lối OOP-mutation như T7.1/T7.2) — bài 1
+      # bắc cầu từ T7.3 bằng `requires: [sd.fp.boss-streaming-va-hieu-ung-o-
+      # bien]` (không thêm tiền tố `fp.` cho CHÍNH lesson này, giống hệt
+      # cách q7.3a bắc cầu ngược từ T7.2).
+      - trien-khai-an-toan
+      # q7.4a (9 bài) — LAUNCH an toàn: rolling/blue-green/canary deployment
+      # (đánh đổi downtime/rủi ro/tài nguyên), feature flag (bật/tắt tính
+      # năng độc lập với deploy, targeting theo segment), health/readiness
+      # probe (không route traffic tới instance chưa sẵn sàng), database
+      # migration an toàn (expand-contract, backward-compatible schema),
+      # load test trước khi launch, rollback TỰ ĐỘNG theo ngưỡng lỗi. BOSS
+      # ráp canary + feature flag + auto-rollback thành một pipeline triển
+      # khai hoàn chỉnh.
+      - quan-sat-va-canh-bao
+      # q7.4b (9 bài) — QUAN SÁT hệ thống đang chạy: ba trụ cột logs/
+      # metrics/traces (khi nào dùng cái nào), structured logging, đúng
+      # loại metric (counter/gauge/histogram) cho đúng câu hỏi, distributed
+      # tracing (span/trace ID xuyên nhiều service), SLI/SLO/error budget
+      # (định nghĩa "đủ tốt" VÀ ngân sách rủi ro được PHÉP tiêu), alert
+      # theo TRIỆU CHỨNG không theo NGUYÊN NHÂN (tránh alert fatigue),
+      # on-call + runbook, blameless postmortem. BOSS ráp toàn bộ
+      # observability stack cho một sự cố mô phỏng, từ phát hiện tới
+      # postmortem.
+      - chong-chiu-va-khoi-phuc
+      # q7.4c (8 bài, BOSS ĐÓNG R7) — CHỐNG CHỊU lỗi hạ nguồn: circuit
+      # breaker (mở mạch tránh cascading failure), retry+backoff+jitter
+      # (tránh thundering herd), bulkhead (cô lập tài nguyên), graceful
+      # degradation (giảm chất lượng có kiểm soát thay vì sập), rate
+      # limiting BẢO VỆ downstream (khác hướng với q7.1b's rate limit bảo
+      # vệ CHÍNH hệ thống), backup/restore (RPO/RTO, verify backup THẬT
+      # SỰ khôi phục được), disaster recovery/multi-region failover. BOSS
+      # ráp circuit breaker + retry + bulkhead + graceful degradation vào
+      # MỘT service mô phỏng chịu lỗi hạ nguồn, ĐÓNG R7 hoàn toàn
+      # (120/120) — có thể điểm lại (không viết lại) vài khái niệm xuyên
+      # suốt R7 nếu hợp ngữ cảnh tổng kết.
+      #
+      # 9+9+8 = 26, khớp đúng số MASTERPLAN. R7 sau T7.4: 120/120 — ĐÓNG
+      # HOÀN TOÀN Realm 7 "Thiết kế hệ thống".
