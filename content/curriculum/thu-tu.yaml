@@ -294,3 +294,43 @@ realm:
       # q21 ByteLedger Capstone ghép TRỌN R6-3 (double-entry + tất định +
       # tiêm lỗi + VSR) — đứng cuối, đóng Realm 6.
       - byteledger-capstone
+
+  # Realm 7 (System Design) — MASTERPLAN CHỈ có breakdown cấp TRACK (4 track,
+  # 120 bài: T7.1 Nền tảng phân tân 30, T7.2 Thiết kế thực chiến 34, T7.3
+  # System Design FOR Functional 30 [~70% MỚI, skill sd.fp.*], T7.4 Triển
+  # khai & vận hành 26) — KHÔNG có "Chi tiết §9.x" cấp quest như R6's §9.2.
+  # Thư mục `content/thiet-ke-he-thong/` (Vietnamese, theo ĐÚNG tiền lệ MỌI
+  # realm đã viết — `co-so-du-lieu`/`lap-trinh-ham`/`ky-nghe-phan-mem` — dù
+  # MASTERPLAN's cây thư mục §10 ghi tên gốc tiếng Anh CHƯA dịch
+  # `system-design/` từ lúc còn là roadmap stub).
+  #
+  # Nguồn tham khảo: `references/repos/system-design-notes/` (ghi chú 28
+  # chương sách System Design Interview — Alex Xu, Vol 1+2) — DÙNG làm bản
+  # đồ khái niệm/đánh đổi (concept map), KHÔNG sao chép văn xuôi — mọi bài
+  # viết THEO đúng khuôn `.lesson.md` mô phỏng-tương-tác của dự án (giống
+  # R6 dùng SimDisk/VSR, không phải văn xuôi diễn giải sách).
+  #
+  # T7.1 (Nền tảng phân tán, 30 bài, 3 quest ~10 bài/quest) mở màn Realm 7 —
+  # CỐ Ý TRÁNH lặp lại consistent hashing (q11, R6-2) VÀ RF/CL quorum+hinted
+  # handoff+read repair+Merkle (q13, R6-2) đã dạy SÂU — ba quest dưới ĐI vào
+  # đất MỚI hoàn toàn không chạm hai chủ đề đó.
+  - id: thiet-ke-he-thong
+    ten: "Realm 7 — Thiết kế hệ thống"
+    track:
+      # q7.1a (back-of-envelope estimation, horizontal/vertical scaling,
+      # load balancing — ĐỊNH TUYẾN yêu cầu, khác hẳn q11's ĐỊNH TUYẾN dữ
+      # liệu qua vòng băm —, CDN/cache-aside/write-through/LRU eviction) mở
+      # màn T7.1 — không phụ thuộc trực tiếp bài nào của R6, chỉ đứng sau
+      # R6 vì đúng thứ tự realm.
+      - do-truoc-khi-thiet-ke
+      # q7.1b (rate limiting: token/leaky bucket, fixed/sliding window log,
+      # sliding window counter; unique ID: Snowflake bit-packing) — đứng
+      # ngay sau q7.1a, tái dùng kỹ thuật ĐO/ước lượng (q7.1a) để chọn
+      # tham số rate limiter thực tế.
+      - dinh-danh-va-toc-do
+      # q7.1c (URL shortener: base62 encoding + va chạm; web crawler: BFS,
+      # politeness/robots.txt mô phỏng, dedup qua URL-frontier) — quest
+      # TỔNG HỢP đóng T7.1, ráp load balancing (q7.1a) + rate limiting
+      # (q7.1b) vào MỘT dịch vụ nhỏ hoàn chỉnh.
+      - url-rut-gon-va-thu-thap-web
+      # T7.2-T7.4 CHƯA thiết kế quest breakdown — xem HANDOFF khi viết tới.
