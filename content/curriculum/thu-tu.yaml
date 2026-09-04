@@ -364,5 +364,40 @@ realm:
       # dịch quan trọng HƠN tốc độ, dọn đường trực tiếp cho T7.3 (system
       # design for functional — idempotency/exactly-once như tính chất
       # đại số). Bốn quest × ~8-9 bài + BOSS ≈ 34 bài, viết TUẦN tự, xác
-      # minh độc lập từng quest TRƯỚC khi sang quest kế — xem HANDOFF.
-      # T7.3-T7.4 CHƯA thiết kế quest breakdown — xem HANDOFF khi viết tới.
+      # minh độc lập từng quest TRƯỚC khi sang quest kế — HOÀN TẤT.
+      #
+      # T7.3 "System Design for Functional" (30 bài, ~70% MỚI theo
+      # MASTERPLAN) — namespace RIÊNG `sd.fp.*` (KHÔNG dùng `sd.*` như
+      # T7.1/T7.2). MASTERPLAN cho khung khái niệm cấp TRACK (không có
+      # breakdown quest) — TỰ thiết kế 3 quest ~10 bài, phủ đủ 5 khái
+      # niệm MASTERPLAN liệt kê:
+      - nhat-ky-bat-bien-va-fold
+      # q7.3a — state = fold(events) trên một log bất biến (append-only,
+      # không sửa/xoá); snapshot để tránh fold lại từ đầu; idempotency
+      # VÀ exactly-once XÂY LẠI như tính chất ĐẠI SỐ (áp dụng event 2
+      # lần = áp dụng 1 lần, khác hẳn cách tiếp cận Map<khoá,kết quả>
+      # OOP của q7.2d bài3 — cùng Ý tưởng, khung hoàn toàn khác);
+      # functional core (hàm thuần quyết định/áp dụng) / imperative
+      # shell (I/O) Ở cấp DỊCH VỤ. Không phụ thuộc trực tiếp bài nào
+      # của T7.2, chỉ đứng sau vì đúng thứ tự track — bài 1
+      # `requires: [sd.boss-giao-dich-va-tien]`.
+      - crdt-va-hop-nhat
+      # q7.3b — CRDT = commutative monoid: hợp nhất (merge) từ NHIỀU
+      # bản sao PHẢI giao hoán + kết hợp + có phần tử trung hoà để hội
+      # tụ đúng bất kể thứ tự nhận — G-Counter, PN-Counter, G-Set/
+      # OR-Set, LWW-Register; verify CẢ ba tính chất đại số (idempotent/
+      # commutative/associative) bằng mini-test tự viết, không chỉ test
+      # happy-path. Tái dùng khái niệm monoid ĐàHỌC Ở R4 T4.5 (Đại số
+      # của chương trình) NHƯNG áp dụng Ở quy mô PHÂN TÁN, không phải
+      # trong một tiến trình.
+      - streaming-va-hieu-ung-o-bien
+      # q7.3c — streaming/backpressure/effect system CHỈ Ở BIÊN (đọc/
+      # ghi thật), LÕI vẫn thuần: windowing/batching qua fold thuần
+      # (tái khung ý tưởng gom-theo-khung-thời-gian của q7.2c bài3,
+      # NHƯNG viết lại độc lập theo lối functional core/imperative
+      # shell); backpressure như một phép quyết định thuần (buffer đầy
+      # → tín hiệu chậm lại) tách biệt khỏi cơ chế I/O thật thi hành nó.
+      # BOSS đóng T7.3 ráp: log bất biến + CRDT merge + streaming pipeline
+      # thành một luồng ingest nhỏ hoàn chỉnh.
+      #
+      # T7.4 CHƯA thiết kế quest breakdown — xem HANDOFF khi viết tới.
