@@ -322,3 +322,16 @@
 # qua API công khai. Không có gì để phân biệt.
 - 'co-so-du-lieu.byteledger-capstone.view-change-duoi-tai · viet_re_drive_entry · đổi MỌI .viewNumber thành .chiSo (1 chỗ)'
 
+# TƯƠNG ĐƯƠNG THẬT (chứng minh được bằng ngữ nghĩa JS, không phải "khó viết
+# test"). `donDepCuaSoTruotLog` dọn while (length > 0 && cacThoiDiem[0]! <=
+# nguong). Đổi thành `length >= 0` (LUÔN đúng, vì length không bao giờ âm)
+# chỉ có thể khác hành vi gốc khi mảng RỖNG (length===0) — nhưng khi ĐÓ,
+# `cacThoiDiem[0]` là `undefined` (dấu `!` chỉ là khẳng định kiểu lúc biên
+# dịch, không đổi giá trị runtime), và biểu thức `undefined <= nguong`
+# trong JS LUÔN cho `false` (so sánh với undefined ép về NaN, mọi phép so
+# sánh NaN đều false) — vòng while vẫn dừng đúng NGAY LẦN kiểm ĐẦU tiên,
+# không hề gọi shift() thêm, không hề vòng lặp vô hạn. Hai điều kiện cho
+# kết quả giống hệt nhau ở MỌI trạng thái mảng có thể có — không có input
+# nào phân biệt được, kể cả input cực đoan (mảng rỗng ngay từ đầu).
+- 'thiet-ke-he-thong.dinh-danh-va-toc-do.sliding-window-log · viet_don_dep_cua_so_truot_log · đổi MỌI dấu > thành >= (1 chỗ)'
+
