@@ -445,3 +445,90 @@ realm:
       #
       # 9+9+8 = 26, khớp đúng số MASTERPLAN. R7 sau T7.4: 120/120 — ĐÓNG
       # HOÀN TOÀN Realm 7 "Thiết kế hệ thống".
+
+  # Realm 8 (MASTERPLAN.md §9 "R8 AI · GENERATIVE AI · RAG", [roadmap], 6
+  # track · 190 lesson: T8.1 Máy học nền tảng 30, T8.2 Mạng nơ-ron từ số 0 32
+  # (autograd ~200 dòng), T8.3 Transformer từ số 0 40 (BPE tay → attention
+  # tính tay trên 4 token → micro-transformer 2 tầng numpy, corpus 5KB, chạy
+  # <2s; lab TUỲ CHỌN GPT-2 đầy đủ KHÔNG chấm), T8.4 Dùng LLM đúng cách 28,
+  # T8.5 RAG từ số 0 34 (HNSW tự cài, BM25 hybrid), T8.6 Hạ tầng & vận hành
+  # AI 26) — KHÔNG có "Chi tiết §9.x" cấp quest (giống T7.3/T7.4, khác R6's
+  # §9.2) — TỰ thiết kế quest breakdown TRONG từng track khi tới lượt, một
+  # track tại một thời điểm (giống cách R7 đã làm cho T7.3/T7.4).
+  #
+  # ★ LÃNH THỔ PYTHON — "numpy thuần trong Pyodide, KHÔNG torch" (MASTERPLAN
+  # §9.1). Hạ tầng vendor+nạp numpy (wheel WASM xác thực sha256, nạp một lần
+  # lúc khởi động Pyodide, cả app thật lẫn hai cổng chấm) ĐÃ xong VÀ verify
+  # thật TRƯỚC khi viết bài đầu tiên (đúng mẫu "T4.0b Cổng Rust" — hạ tầng
+  # trước nội dung) — xem commit riêng ngay trước entry này trong git log.
+  #
+  # Thư mục: `content/tri-tue-nhan-tao/` (Vietnamese, ĐÚNG tiền lệ mọi realm
+  # đã viết — MASTERPLAN's cây thư mục §10 ghi `ai-genai-rag/` CHỈ LÀ tên gốc
+  # tiếng Anh CHƯA dịch từ lúc còn LÀ roadmap stub, giống hệt tình huống
+  # `system-design/` → `thiet-ke-he-thong/` ở R7).
+  # `teaches`/`requires`/`concepts` namespace: `ai.<slug>` (MASTERPLAN §10
+  # liệt kê `ai.concepts.yaml` cạnh `fp.concepts.yaml`/`db.concepts.yaml` —
+  # xác nhận mỗi realm CÓ namespace riêng; `content/concepts/` bản thân
+  # KHÔNG tồn tại trên đĩa — cũng LÀ trang trí roadmap chưa build, giống
+  # `content/concepts/`/`content/skills/` nói chung — không cần đăng ký gì
+  # thêm ngoài field `teaches`/`requires`/`concepts` trong frontmatter mỗi
+  # bài, đúng cách R6/R7 đã làm).
+  #
+  # Nguồn tham khảo KHÁI NIỆM: `references/repos/ai-for-beginners/lessons/`
+  # (Microsoft "AI for Beginners", giấy phép mở) — CHỈ dùng LÀM bản đồ khái
+  # niệm/thứ tự sư phạm rộng, KHÔNG sao chép văn xuôi/ví dụ — mọi bài viết
+  # THEO khuôn mô phỏng-tương-tác riêng (giống R6/R7), số liệu VÍ DỤ tự nghĩ
+  # VÀ tự verify bằng `node`/Pyodide thật, không dùng lại ví dụ CỦA nguồn.
+  #
+  # T8.1 "Máy học nền tảng" (30 bài, 3 quest 10 bài/quest) mở màn Realm 8 —
+  # dạy ML kinh điển THUẦN numpy (không sklearn): hồi quy → phân loại/đánh
+  # giá → tổng quát hoá/hợp nhất mô hình. Bài 1 `requires: []` — mở đầu CẢ
+  # Realm 8 (không tiền đề, giống bài 1 của R6/R7).
+  - id: tri-tue-nhan-tao
+    ten: "Realm 8 — AI · Generative AI · RAG"
+    track:
+      - hoi-quy-va-gradient-descent
+      # q8.1a (10 bài) — hồi quy tuyến tính từ số 0 (dạng đóng least-squares
+      # ĐỐI CHIẾU gradient descent, không phải chỉ MỘT cách), hàm mất mát
+      # (MSE/MAE, vì sao bình phương chứ không trị tuyệt đối cho gradient
+      # trơn), cơ chế gradient descent (learning rate quá lớn phân kỳ/quá
+      # nhỏ hội tụ chậm — demo SỐ THẬT cả hai ca), đặc trưng đa thức (fit
+      # đường cong bằng hồi quy tuyến tính trên đặc trưng mở rộng),
+      # chuẩn hoá/standardize (VÌ SAO gradient descent cần — demo hội tụ
+      # chậm hẳn khi thiếu), overfitting (đa thức bậc cao khớp nhiễu),
+      # regularization L2/ridge (phạt trọng số lớn) VÀ L1/lasso (đẩy về
+      # 0 — sparsity), train/val/test split (vì sao cần tách ba, không
+      # phải hai), cross-validation (k-fold, ước lượng ổn định hơn one-
+      # shot split). BOSS ráp: chuẩn hoá → fit có regularization → chọn
+      # tham số qua validation → báo cáo metric trên test set CHƯA từng
+      # chạm.
+      - phan-loai-va-danh-gia
+      # q8.1b (10 bài) — logistic regression (sigmoid, binary cross-
+      # entropy, vì sao KHÔNG dùng MSE cho phân loại), ranh giới quyết
+      # định (decision boundary, trực quan 2D), đa lớp (softmax, one-vs-
+      # rest ĐỐI CHIẾU), confusion matrix (TP/FP/TN/FN — định nghĩa
+      # chính xác, không suy luận), precision/recall/F1 (khi accuracy
+      # NÓI DỐI — demo dữ liệu lệch lớp accuracy cao nhưng vô dụng), ROC/
+      # AUC (đánh đổi ngưỡng), k-NN (phân loại theo khoảng cách, KHÔNG
+      # có pha "huấn luyện"), decision tree đơn giản (entropy/information
+      # gain, một lần chia), k-means (vòng lặp gán-cụm/cập nhật-tâm,
+      # unsupervised — khác hẳn mọi bài trước ĐỀU supervised). BOSS ráp
+      # pipeline phân loại đầy đủ: huấn luyện 2 mô hình khác nhau, so
+      # sánh qua NHIỀU metric (không chỉ accuracy), chọn mô hình theo
+      # đúng câu hỏi bài toán đặt ra.
+      - tong-quat-hoa-va-hop-nhat
+      # q8.1c (10 bài, BOSS ĐÓNG T8.1) — bias-variance tradeoff (demo số
+      # thật: underfit/overfit/vừa-đủ trên CÙNG dữ liệu), bootstrap
+      # resampling, bagging (trung bình nhiều mô hình bootstrap — giảm
+      # variance, đo THẬT bằng số), boosting đơn giản (sửa lỗi tuần tự
+      # có trọng số, kiểu AdaBoost thu nhỏ), hyperparameter tuning (grid
+      # search nhỏ + validation curve), data leakage (lỗi kinh điển:
+      # chuẩn hoá TRƯỚC khi tách train/test — rò rỉ thông tin, demo số
+      # THẬT chênh lệch), xử lý lệch lớp (reweighting/oversampling), ỔN
+      # ĐỊNH SỐ HỌC (log(0), tràn số trong softmax, vì sao phải trừ max
+      # trước exp — lỗi THẬT ai code ML cũng gặp ít nhất một lần). BOSS
+      # ráp pipeline ML đầy đủ: dữ liệu thô → làm sạch/chuẩn hoá → tách
+      # tập → huấn luyện có regularization → tuning → đánh giá → ensemble
+      # — ĐÓNG T8.1 (30/30), bàn giao nền tảng số học cho T8.2 (backprop/
+      # autograd sẽ tái dùng CHÍNH khái niệm gradient descent đã học Ở
+      # đây, nhưng tính đạo hàm TỰ ĐỘNG thay vì công thức đóng viết tay).
