@@ -626,3 +626,90 @@ realm:
       # huấn luyện đầu-cuối trên dữ liệu phi tuyến, bàn giao ĐÚNG động cơ
       # autograd này cho T8.3 (Transformer từ số 0 sẽ mở rộng autograd lên
       # tensor/attention, KHÔNG viết lại từ đầu).
+      #
+      # T8.3 "Transformer từ số 0" (40 bài, 5 quest — MASTERPLAN chỉ cho một
+      # dòng mô tả "BPE tay → attention tính tay trên 4 token → micro-
+      # transformer 2 tầng numpy, corpus 5KB, chạy <2s [+ lab TUỲ CHỌN GPT-2
+      # đầy đủ, notebook, KHÔNG chấm]" — TỰ thiết kế breakdown cấp quest,
+      # tham khảo bản đồ khái niệm ở `references/repos/ai-for-beginners/
+      # lessons/5-NLP/18-Transformers/` (attention/positional encoding/multi-
+      # head, encoder-decoder) và `references/articles/www_k-a_in_pyt-
+      # miniGPT.qmd` (kiến trúc GPT tối giản: embed+pos → khối transformer →
+      # tầng tuyến tính cuối) — CHỈ lấy trình tự khái niệm, không sao chép
+      # văn xuôi/code. QUYẾT ĐỊNH THIẾT KẾ: mở rộng `Value` (vô hướng, T8.2)
+      # thành `Tensor` (mảng numpy) thay vì viết công thức đóng riêng cho
+      # từng phép toán — giữ ĐÚNG triết lý "một động cơ, tái dùng khắp track"
+      # đã chứng minh hiệu quả suốt T8.2, và tránh vòng lặp attention từng vô
+      # hướng (quá chậm cho corpus thật). Mọi phép toán MỚI của `Tensor`
+      # (matmul, softmax, layer-norm) đều PHẢI kiểm bằng finite-difference
+      # (đúng kỹ thuật `kiem-dao-ham-bang-so`, q8.2b) trước khi tin, không
+      # suy luận công thức đạo hàm ma trận bằng tay mà không verify.
+      - token-hoa-bpe
+      # q8.3a (8 bài) — vì sao cần token hoá (đánh đổi từ-nguyên-vẹn vs
+      # ký-tự-đơn, vấn đề từ ngoài từ vựng), token hoá theo ký tự (baseline
+      # đơn giản nhất, tự viết), đếm cặp ký tự liền kề (bước lõi của BPE —
+      # tần suất mọi cặp liền kề trong corpus), gộp cặp phổ biến nhất (một
+      # vòng merge BPE — thay MỌI lần xuất hiện cặp đó bằng một token mới),
+      # lặp merge tới kích thước từ vựng mục tiêu (vòng lặp BPE đầy đủ), mã
+      # hoá văn bản MỚI (áp danh sách merge đã học lên câu chưa từng thấy
+      # lúc huấn luyện BPE), giải mã ngược (token ID → văn bản). BOSS quý:
+      # BPE đầy đủ trên một corpus nhỏ tự nghĩ, tokenize rồi detokenize
+      # round-trip đúng nguyên văn.
+      - dong-co-tensor
+      # q8.3b (8 bài) — vì sao cần Tensor (không phải Value vô hướng —
+      # attention cần nhân MA TRẬN, lặp từng phần tử một quá chậm cho corpus
+      # thật), class Tensor cơ bản (bọc mảng numpy, `+`/`-` element-wise,
+      # TÁI DÙNG ý tưởng `_prev`/`_backward` của `Value`), nhân ma trận và
+      # đạo hàm của nó (matmul forward+backward, công thức đạo hàm ma trận,
+      # KIỂM bằng finite-difference trước khi tin), chuyển vị/định hình lại
+      # (transpose/reshape — cần để tách nhiều "đầu" attention sau này),
+      # softmax qua Tensor (tái dùng log-sum-exp ổn định số học của T8.1c,
+      # giờ áp trên cả một mảng), kiểm đạo hàm ma trận bằng số (mở rộng kỹ
+      # thuật của q8.2b sang Tensor, xác nhận matmul backward đúng), layer
+      # normalization (chuẩn hoá theo mỗi token — công thức+đạo hàm, kỹ
+      # thuật MỚI mà T8.2 chưa cần). BOSS quý: động cơ Tensor đầy đủ
+      # (matmul+softmax+layer-norm) qua gradient-check trên biểu thức phức
+      # hợp.
+      - co-che-attention
+      # q8.3c (9 bài) — embedding token (bảng tra cứu, mỗi token ID → một
+      # vector, MA TRẬN tham số học được), vị trí trong chuỗi (positional
+      # encoding — vì sao attention một mình không biết thứ tự, cộng thêm
+      # vector vị trí), Query/Key/Value (ba phép chiếu tuyến tính từ CÙNG
+      # một embedding), điểm attention (Q·Kᵀ — đo độ liên quan giữa MỌI cặp
+      # vị trí, TÍNH TAY trên đúng 4 token cụ thể — đúng yêu cầu MASTERPLAN),
+      # chia tỉ lệ+softmax (chia `√d_k` rồi softmax theo hàng, tổng mỗi hàng
+      # =1), tổng trọng số của Value (nhân trọng số attention với V — đầu ra
+      # MỘT đầu attention, TÍNH TAY tiếp trên 4 token), che tương lai
+      # (causal mask — vì sao mô hình sinh văn bản không được nhìn thấy
+      # token tương lai, che bằng `-inf` trước softmax), đa đầu attention
+      # (multi-head — nhiều attention song song trên không gian con khác
+      # nhau, ghép lại). BOSS quý: một tầng attention đầy đủ (multi-head +
+      # causal mask) chạy trên 4 token, đối chiếu byte-for-byte với số tính
+      # tay ở hai bài trước.
+      - khoi-transformer-va-huan-luyen
+      # q8.3d (9 bài) — kết nối tắt (residual connection — cộng đầu vào gốc
+      # vào đầu ra tầng con, bắc cầu từ vanishing gradient của T8.2), mạng
+      # truyền thẳng theo vị trí (feedforward hai tầng, áp ĐỘC LẬP cho mỗi
+      # vị trí), ráp MỘT khối Transformer (attention+residual+layer-norm+
+      # feedforward+residual+layer-norm, đúng thứ tự), xếp chồng hai khối
+      # (đúng "2 tầng" MASTERPLAN yêu cầu), từ Tensor cuối tới xác suất từ
+      # tiếp theo (tầng tuyến tính cuối + softmax trên từ vựng), hàm mất mát
+      # dự đoán từ tiếp theo (cross-entropy, tái dùng log-sum-exp), vòng lặp
+      # huấn luyện trên corpus nhỏ (forward→loss→backward→Adam, tái dùng
+      # `adam_step_l2` của T8.2, trên corpus THẬT ~5KB), sinh văn bản
+      # (autoregressive — dự đoán từng token, nối vào chuỗi, lặp lại). BOSS
+      # quý: huấn luyện transformer 2 tầng trên corpus nhỏ, đo loss giảm
+      # THẬT, sinh một đoạn văn bản mẫu.
+      - boss-transformer-tu-so-0
+      # q8.3e (6 bài, BOSS ĐÓNG T8.3) — vì sao attention không bị vanishing
+      # gradient (đối chiếu TRỰC TIẾP với `gradient-bien-mat-that` của
+      # T8.2 — đường tắt trực tiếp giữa MỌI cặp vị trí, không phải chuỗi
+      # tầng dài), so sánh MLP/kiến-trúc-cũ với Transformer trên một bài
+      # toán phụ thuộc XA (đo THẬT accuracy/loss), ráp pipeline đầy đủ (BPE
+      # + embedding + Transformer 2 tầng, từ văn bản thô tới sinh văn bản),
+      # huấn luyện trên corpus ~5KB THẬT + đo thời gian chạy (mục tiêu <2s
+      # theo MASTERPLAN), giới hạn của micro-transformer này (kích thước
+      # nhỏ, dễ overfit trên corpus nhỏ — nối lại bias-variance, KHÔNG phải
+      # GPT thật, chỉ mô hình MINH HOẠ nguyên lý). BOSS ĐÓNG T8.3 (40/40):
+      # tổng kết toàn track, bàn giao sang T8.4 "Dùng LLM đúng cách" (từ XÂY
+      # DỰNG mô hình sang SỬ DỤNG mô hình đã có sẵn).
