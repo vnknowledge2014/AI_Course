@@ -713,3 +713,83 @@ realm:
       # GPT thật, chỉ mô hình MINH HOẠ nguyên lý). BOSS ĐÓNG T8.3 (40/40):
       # tổng kết toàn track, bàn giao sang T8.4 "Dùng LLM đúng cách" (từ XÂY
       # DỰNG mô hình sang SỬ DỤNG mô hình đã có sẵn).
+      #
+      # T8.4 "Dùng LLM đúng cách" (28 bài, 5 quest — MASTERPLAN chỉ cho một
+      # dòng mô tả "Dùng LLM đúng cách" — TỰ thiết kế breakdown cấp quest,
+      # tham khảo references/articles/www_k-a_in_cot.qmd (chain-of-thought —
+      # chỉ trình tự khái niệm, không sao chép văn xuôi/code). QUYẾT ĐỊNH
+      # THIẾT KẾ bắt buộc (ràng buộc nền tảng của CẢ track): toàn bộ nền
+      # tảng này chạy Pyodide client-side, KHÔNG có mạng — không lời giải
+      # nào có thể gọi một LLM THẬT qua API, và mọi phép chấm điểm phải TẤT
+      # ĐỊNH (cùng input luôn cho cùng output, verify được qua kiemAst thật
+      # + so output). Giải quyết bằng CÁCH TÁCH: (a) các bài về CHIẾN LƯỢC
+      # GIẢI MÃ (quest 2) dùng THẬT `Tensor`/`khoi_transformer` đã xây ở
+      # T8.3 — phân phối xác suất đầu ra CÓ THẬT, thuật toán sampling áp lên
+      # đó là thứ được kiểm; (b) mọi bài còn lại (vai trò message, few-shot,
+      # function-calling, đánh giá, an toàn) dùng một "LLM MÔ PHỎNG" — một
+      # hàm Python THUẦN nhận vào prompt/message, tra theo BẢNG hoặc LUẬT cố
+      # định đã biết trước (không phải mạng nơ-ron nào), đóng vai trò "phản
+      # hồi API" để bài học có thứ CỤ THỂ mà tất định để phân tích/parse/
+      # validate — giữ đúng tinh thần "đo bằng số thật, không suy luận suông"
+      # của toàn khoá, chỉ khác đối tượng đo là HÀNH VI PARSE/CHIẾN LƯỢC,
+      # không phải "độ thông minh" của một mô hình giả lập.
+      - prompt-engineering-nen-tang
+      # q8.4a (6 bài) — vai trò system/user/assistant trong một cuộc gọi
+      # (cấu trúc message, không phải văn xuôi liền mạch), zero-shot vs
+      # few-shot (đo được bằng số qua LLM mô phỏng — bao nhiêu ví dụ mẫu
+      # đổi hành vi ra sao), ràng buộc rõ ràng chống mơ hồ (một chỉ thị mơ
+      # hồ cho ra nhiều cách hiểu, một chỉ thị rõ ràng thu hẹp về một),
+      # prompt template có tham số (chuỗi khuôn mẫu điền biến, tái dùng
+      # được), đo thực nghiệm A/B ảnh hưởng của prompt (so 2 phiên bản
+      # prompt trên CÙNG LLM mô phỏng, đo chênh lệch bằng số), prompt suy
+      # luận từng bước (chain-of-thought — vì sao yêu cầu "suy nghĩ từng
+      # bước" đổi được đầu ra trên bài toán nhiều bước). BOSS quý: ráp một
+      # prompt hoàn chỉnh (vai trò+ràng buộc+few-shot+CoT) đo cải thiện so
+      # với prompt trần trụi.
+      - chien-luoc-giai-ma-va-lay-mau
+      # q8.4b (6 bài) — ôn greedy decoding (T8.3, lấy xác suất cao nhất mỗi
+      # bước) và giới hạn của nó (luôn cho CÙNG một đầu ra, không đa dạng),
+      # lấy mẫu ngẫu nhiên từ phân phối softmax THẬT (dùng đúng
+      # `khoi_transformer`/logits của T8.3, không mô phỏng), nhiệt độ
+      # (temperature — chia logit trước softmax, đo entropy phân phối thay
+      # đổi ra sao khi nhiệt độ tăng/giảm), top-k sampling (chỉ giữ k xác
+      # suất cao nhất, chuẩn hoá lại rồi lấy mẫu), top-p/nucleus sampling
+      # (giữ tập nhỏ nhất có tổng xác suất ≥p, số lượng token động theo
+      # từng bước — khác top-k cố định). BOSS quý: so 4 chiến lược (greedy,
+      # temperature, top-k, top-p) TRÊN CÙNG một mô hình thật đã huấn
+      # luyện ở T8.3, đo đa dạng đầu ra bằng số (ví dụ: số văn bản khác
+      # nhau sinh ra từ nhiều lần chạy).
+      - dau-ra-co-cau-truc-va-cong-cu
+      # q8.4c (5 bài) — vì sao cần đầu ra có cấu trúc (JSON máy phân tích
+      # được, không phải văn xuôi tự do máy phải đoán), ràng buộc theo
+      # schema + retry khi sai (kiểm đầu ra LLM mô phỏng khớp schema định
+      # trước chưa, không khớp thì yêu cầu lại), function-calling mô phỏng
+      # (LLM mô phỏng trả về tên hàm+tham số dạng có cấu trúc thay vì gọi
+      # thật), vòng lặp ReAct (suy luận→gọi công cụ mô phỏng→nhận kết
+      # quả→lặp tới khi đủ thông tin trả lời). BOSS quý nhỏ: một "trợ lý"
+      # nhận câu hỏi, gọi ĐÚNG công cụ mô phỏng cần thiết, trả JSON đúng
+      # schema.
+      - quan-ly-ngu-canh-va-hoi-thoai
+      # q8.4d (5 bài) — đếm token của một đoạn văn bản (tái dùng BPE THẬT
+      # của q8.3a, không đếm ký tự/từ), cửa sổ ngữ cảnh có trần (context
+      # window — mọi LLM có giới hạn số token đầu vào), cắt bớt lịch sử khi
+      # vượt trần (chiến lược giữ gần nhất/giữ đầu+cuối, đo bằng số token
+      # trước/sau), tóm tắt lịch sử hội thoại cũ (nén nhiều lượt cũ thành
+      # một đoạn ngắn mô phỏng, giữ ngữ nghĩa cốt lõi), bộ nhớ hội thoại
+      # nhiều lượt (giữ trạng thái xuyên nhiều lượt hỏi-đáp). BOSS quý nhỏ:
+      # vòng lặp hội thoại nhiều lượt tự cắt/tóm tắt khi gần đầy cửa sổ
+      # ngữ cảnh, đo token trước/sau mỗi lượt.
+      - boss-dung-llm-dung-cach
+      # q8.4e (6 bài, BOSS ĐÓNG T8.4) — ảo giác/hallucination (đo được:
+      # câu trả lời có nằm ngoài phạm vi ngữ cảnh cho phép không — so
+      # sánh với văn bản nguồn), đánh giá tự động đầu ra LLM (exact-match/
+      # độ tương đồng tự cài, không dùng thư viện ngoài), LLM-làm-giám-
+      # khảo (khái niệm dùng một LLM mô phỏng thứ hai chấm đầu ra LLM mô
+      # phỏng thứ nhất theo luật cố định), prompt injection/jailbreak
+      # (nhận diện chỉ thị độc hại giấu trong dữ liệu đầu vào — dữ liệu
+      # không phải lệnh), rủi ro PII/nội dung nhạy cảm (phát hiện mẫu
+      # thông tin cá nhân trong văn bản trước khi gửi đi). BOSS: ráp một
+      # trợ lý nhỏ dùng ĐÚNG mọi kỹ thuật cả track (prompt có cấu trúc,
+      # chiến lược giải mã, đầu ra JSON+công cụ, quản lý ngữ cảnh, kiểm ảo
+      # giác/injection), đóng T8.4 tại 28/28, bàn giao sang T8.5 "RAG từ
+      # số 0".
