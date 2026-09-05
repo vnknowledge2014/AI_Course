@@ -532,3 +532,97 @@ realm:
       # — ĐÓNG T8.1 (30/30), bàn giao nền tảng số học cho T8.2 (backprop/
       # autograd sẽ tái dùng CHÍNH khái niệm gradient descent đã học Ở
       # đây, nhưng tính đạo hàm TỰ ĐỘNG thay vì công thức đóng viết tay).
+      #
+      # T8.2 "Mạng nơ-ron từ số 0" (32 bài, 4 quest — MASTERPLAN chỉ cho số
+      # lượng+mô tả 1 dòng "autograd ~200 dòng", KHÔNG có breakdown cấp quest
+      # — TỰ thiết kế, tham khảo bản đồ khái niệm ở
+      # `references/repos/ai-for-beginners/lessons/3-NeuralNetworks/`
+      # (03-Perceptron, 04-OwnFramework — CHỈ lấy trình tự sư phạm: neuron
+      # đơn → vì sao cần phi tuyến (XOR) → MLP → backprop = chain rule lặp
+      # trên đồ thị tính toán; KHÔNG sao chép văn xuôi/notebook, tự viết ví
+      # dụ + tự verify số bằng Pyodide). Kiến trúc autograd mô phỏng theo lối
+      # "micrograd" (Value vô hướng, KHÔNG phải tensor — giữ đúng ràng buộc
+      # "autograd ~200 dòng" của MASTERPLAN, không phình thành mini-PyTorch).
+      - neuron-va-mang-nhieu-tang
+      # q8.2a (8 bài) — neuron đơn (nối tiếp logistic regression T8.1b: cùng
+      # công thức wx+b qua sigmoid, giờ gọi tên ĐÚNG "neuron"), hàm kích hoạt
+      # (sigmoid/tanh/ReLU/leaky ReLU — công thức + đạo hàm, vì sao đạo hàm
+      # cần TRƯỚC khi học backprop ở q8.2b), VÌ SAO CẦN PHI TUYẾN — chứng
+      # minh CỤ THỂ bằng số: một neuron tuyến tính KHÔNG THỂ tách XOR (thử
+      # mọi tổ hợp trọng số hợp lý, luôn sai ít nhất 1 điểm), MLP forward
+      # pass BẰNG TAY (2 tầng, trọng số cho SẴN, chỉ ra tầng ẩn tạo ra một
+      # không gian biểu diễn MỚI nơi XOR trở thành tách được tuyến tính —
+      # nối tiếp trực tiếp bài trước), khởi tạo trọng số (vì sao khởi tạo 0
+      # làm mọi neuron học GIỐNG HỆT nhau — đối xứng không phá được; vì sao
+      # khởi tạo quá lớn làm sigmoid/tanh bão hoà — đo THẬT độ lớn gradient
+      # cả hai ca; heuristic Xavier/He), độ sâu/độ rộng (đánh đổi năng lực
+      # mô hình — nối lại bias-variance của T8.1c), MLP cho hồi quy (không
+      # activation ở tầng ra) ĐỐI CHIẾU MLP cho phân loại (sigmoid/softmax ở
+      # tầng ra). BOSS quý: ráp class Layer+MLP forward-pass ĐẦY ĐỦ với
+      # trọng số cho sẵn, chạy đúng cả XOR (phân loại) lẫn một tập hồi quy
+      # nhỏ, đối chiếu byte-for-byte với số tính tay — CHƯA có huấn luyện,
+      # đó LÀ việc của q8.2b+q8.2c.
+      - dao-ham-tu-dong
+      # q8.2b (9 bài, LÕI KỸ THUẬT của T8.2) — đồ thị tính toán (biểu diễn
+      # một biểu thức nhiều bước thành DAG các phép toán, mỗi node giữ giá
+      # trị+phép toán+node cha), đạo hàm chuỗi ÔN LẠI bằng tay trên một biểu
+      # thức vô hướng nhiều bước cụ thể (chỉ ra vì sao làm tay không scale),
+      # class Value cộng/trừ/nhân (mỗi phép toán TỰ lưu một closure
+      # "backward cục bộ" — công thức undo phép đó), class Value mũ/chia/
+      # phi tuyến (thêm pow, tanh, relu — MỖI cái với đúng công thức đạo hàm
+      # riêng), sắp xếp tô-pô + duyệt ngược (thuật toán THẬT của `.backward()`
+      # — sắp mọi node theo tô-pô rồi lan truyền gradient từ output ngược về
+      # từng lá), TÍCH LUỸ gradient (gotcha KINH ĐIỂN của autograd: một Value
+      # dùng LẶP LẠI ở nhiều chỗ trong đồ thị PHẢI cộng dồn (+=) gradient chứ
+      # không ghi đè (=) — demo SỐ THẬT bản SAI cho gradient sai trên biến
+      # dùng hai lần, rồi bản ĐÚNG), kiểm đạo hàm bằng số (finite difference
+      # (f(x+h)-f(x-h))/2h — công cụ soát lỗi chuẩn, đối chiếu với gradient
+      # giải tích của autograd trên một biểu thức không tầm thường), ĐỐI
+      # CHIẾU hồi quy tuyến tính (lấy lại MSE loss của q8.1a, tính gradient
+      # bằng autograd THAY VÌ công thức đóng, đối chiếu khớp — bằng chứng cụ
+      # thể autograd ĐÚNG trên một bài toán đã biết đáp số). BOSS quý: động
+      # cơ Value autograd ĐẦY ĐỦ (~150-200 dòng, đúng ràng buộc MASTERPLAN)
+      # vượt qua gradient-check trên nhiều biểu thức phức hợp khác nhau —
+      # đây LÀ động cơ mọi quest sau của T8.2 tái dùng.
+      - huan-luyen-mang-no-ron
+      # q8.2c (9 bài) — neuron/MLP chạy TRÊN autograd (ráp lại class Layer/
+      # MLP của q8.2a nhưng giờ forward pass TỰ xây đồ thị tính toán qua
+      # Value của q8.2b — nối hai quý trước lại), hàm mất mát mạng nơ-ron
+      # (MSE cho hồi quy, softmax+cross-entropy cho phân loại — TÁI DÙNG
+      # chiêu log-sum-exp ổn định số học của T8.1c, giờ lan gradient QUA
+      # autograd thay vì đạo hàm tay), vòng lặp huấn luyện đầy đủ (forward →
+      # loss → backward() → cập nhật tham số → zero_grad, số liệu loss giảm
+      # THẬT qua từng epoch trên tập đồ chơi nhỏ), mini-batch SGD (batch vs
+      # full-batch vs single-sample — ảnh hưởng độ mượt/tốc độ đường loss),
+      # động lượng/momentum (bộ tích luỹ vận tốc — đo THẬT hội tụ nhanh hơn
+      # SGD trơn trên CÙNG bài toán), Adam (learning rate thích nghi theo
+      # từng tham số qua trung bình động gradient+bình phương gradient — so
+      # sánh SỐ THẬT SGD/momentum/Adam: bao nhiêu epoch để chạm cùng một
+      # ngưỡng loss), overfitting mạng nơ-ron (quá nhiều neuron ẩn/quá nhiều
+      # epoch nhớ vẹt tập nhỏ — đường val loss tách khỏi train loss, nối lại
+      # T8.1a), chính quy hoá mạng nơ-ron (L2 weight decay + dropout — ý
+      # tưởng dropout ĐƠN GIẢN: ngẫu nhiên triệt tiêu một phần activation lúc
+      # huấn luyện, đo THẬT hiệu quả trên val loss). BOSS quý: vòng lặp huấn
+      # luyện ĐẦY ĐỦ (Neuron/Layer/MLP + autograd + Adam + regularization)
+      # chạy hết trên MỘT tập hồi quy VÀ một tập phân loại đồ chơi, báo cáo
+      # loss/accuracy cuối.
+      - boss-mang-no-ron-tu-so-0
+      # q8.2d (6 bài, BOSS ĐÓNG T8.2) — dữ liệu phi tuyến THẬT (tự dựng tập
+      # 2D không tách được tuyến tính — hai vòng tròn đồng tâm hoặc hai hình
+      # trăng lồng nhau bằng công thức tường minh, KHÔNG sklearn — chứng
+      # minh SỐ THẬT logistic regression của T8.1b THẤT BẠI trên nó, lý do
+      # CẦN mạng nơ-ron của track này), ráp framework mạng nơ-ron (nối Value
+      # autograd của q8.2b + Neuron/Layer/MLP của q8.2a/q8.2c + Adam của
+      # q8.2c thành MỘT khối thống nhất dùng cho phần còn lại của BOSS),
+      # huấn luyện trên dữ liệu phi tuyến (MLP vừa ráp phân loại ĐÚNG tập ở
+      # bài 1 — số accuracy THẬT trước/sau so với mô hình tuyến tính thất
+      # bại), so sánh tối ưu hoá (SGD/momentum/Adam trên CÙNG bài toán phi
+      # tuyến này — số epoch THẬT để chạm cùng ngưỡng accuracy, không phải
+      # chỉ nói suông "Adam nhanh hơn"), gradient biến mất THẬT (dựng mạng
+      # SÂU hơn (nhiều tầng) dùng sigmoid/tanh, ĐO THẬT độ lớn gradient ở
+      # tầng đầu co lại RẤT MẠNH so với mạng nông — bắc cầu TỚI T8.3, nơi
+      # kiến trúc tốt hơn sẽ giải quyết vấn đề này). BOSS ĐÓNG T8.2 (32/32):
+      # ráp CUỐI autograd + framework MLP + optimizer + regularization,
+      # huấn luyện đầu-cuối trên dữ liệu phi tuyến, bàn giao ĐÚNG động cơ
+      # autograd này cho T8.3 (Transformer từ số 0 sẽ mở rộng autograd lên
+      # tensor/attention, KHÔNG viết lại từ đầu).
