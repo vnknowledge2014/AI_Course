@@ -793,3 +793,84 @@ realm:
       # chiến lược giải mã, đầu ra JSON+công cụ, quản lý ngữ cảnh, kiểm ảo
       # giác/injection), đóng T8.4 tại 28/28, bàn giao sang T8.5 "RAG từ
       # số 0".
+      #
+      # T8.5 "RAG từ số 0" (34 bài, 6 quest — MASTERPLAN chỉ cho một dòng
+      # mô tả "RAG từ số 0 (34, HNSW tự cài, BM25 hybrid)" — TỰ thiết kế
+      # breakdown cấp quest, không tìm thấy tài liệu tham khảo chuyên sâu
+      # về RAG/HNSW/BM25 trong references/ (chỉ có một ảnh minh hoạ
+      # "words to vectors" ở references/repos/ai-for-beginners — không đủ
+      # chi tiết để trích dẫn kỹ thuật, chỉ dùng làm gợi ý trực giác).
+      # QUYẾT ĐỊNH THIẾT KẾ bắt buộc: vì Pyodide KHÔNG có mạng nên KHÔNG
+      # thể tải một mô hình embedding THẬT đã huấn luyện trước — "embedding"
+      # trong track này là một VECTOR TỰ CHẾ, tất định, tự tính được ngay
+      # trong sandbox (ví dụ vector đếm từ có trọng số/TF trên một từ vựng
+      # cố định nhỏ, hoặc — khi cần vector "học" thật sự — tái dùng NGUYÊN
+      # VẸN bảng embedding token đã huấn luyện ở T8.3, gộp trung bình theo
+      # BPE token của một đoạn văn bản) — KHÔNG gọi API embedding thật, chỉ
+      # dạy CƠ CHẾ (đo tương đồng, đánh chỉ mục, tìm kiếm) trên vector CÓ
+      # THẬT do người học tự tính, không phải chất lượng ngữ nghĩa của một
+      # mô hình embedding sản xuất thật.
+      - chunking-va-embedding-tu-che
+      # q8.5a (6 bài) — vì sao cần RAG (kiến thức một LLM đóng băng ở thời
+      # điểm huấn luyện, cửa sổ ngữ cảnh có trần — bài học q8.4d — không
+      # thể nhét MỌI tài liệu vào một lượt gọi), chia văn bản dài thành
+      # đoạn nhỏ (chunking — theo câu, theo cửa sổ trượt CÓ chồng lấn để
+      # không cắt đứt ý giữa hai đoạn), xây một vector đại diện đoạn văn
+      # tự chế (đếm từ có trọng số trên từ vựng cố định — "embedding" tự
+      # chế, KHÔNG phải mô hình thật), đo hai đoạn GẦN NGHĨA cho vector
+      # GẦN NHAU hơn hai đoạn không liên quan (đo bằng khoảng cách/tương
+      # đồng thật, không suy đoán). BOSS quý: chia + tính vector cho một
+      # tài liệu nhỏ tự nghĩ, đối chiếu các cặp đoạn gần/xa nghĩa.
+      - tim-kiem-vector-va-do-tuong-dong
+      # q8.5b (5 bài) — tích vô hướng (dot product) đo mức độ "cùng
+      # hướng" của hai vector, độ tương đồng cosin (chuẩn hoá độ dài,
+      # tách bạch "cùng hướng" khỏi "cùng độ lớn"), tìm k lân cận gần
+      # nhất bằng VÉT CẠN (brute-force k-NN — so đúng MỌI cặp, chậm nhưng
+      # luôn đúng, làm chuẩn đối chiếu cho quest sau). BOSS quý: tìm đúng
+      # k đoạn văn liên quan nhất cho một câu hỏi, trên tập đoạn văn của
+      # bài trước.
+      - hnsw-tu-cai
+      # q8.5c (8 bài) — ý tưởng đồ thị điều hướng nhỏ (navigable small
+      # world — mỗi điểm nối tới vài "hàng xóm gần", đi men theo cạnh để
+      # tới đích nhanh hơn quét toàn bộ), cấu trúc NHIỀU TẦNG của HNSW
+      # (tầng trên thưa để nhảy xa, tầng dưới dày để tinh chỉnh), thuật
+      # toán CHÈN một điểm mới vào đồ thị (chọn tầng ngẫu nhiên CÓ SEED
+      # cố định để tất định, nối cạnh theo đúng luật), thuật toán TÌM
+      # KIẾM (đi tham lam từ tầng trên xuống tầng dưới), đo ĐỘ CHÍNH XÁC
+      # (recall so với vét cạn q8.5b — bao nhiêu kết quả HNSW trả về THẬT
+      # SỰ nằm trong top-k đúng) và tốc độ (đo số bước so sánh, không
+      # phải luôn quét hết). BOSS quý (đóng phần lõi kỹ thuật khó nhất
+      # track): HNSW tự cài đạt recall cao, số phép so sánh ÍT HƠN HẲN
+      # vét cạn trên một tập đoạn văn đủ lớn.
+      - bm25-va-tim-kiem-tu-khoa
+      # q8.5d (6 bài) — vì sao cần tìm kiếm theo TỪ KHOÁ bên cạnh vector
+      # (một tên riêng/mã số hiếm gặp có thể không được vector "học" tốt,
+      # nhưng khớp từ khoá CHÍNH XÁC luôn bắt được), tần suất từ trong
+      # một đoạn (term frequency), độ hiếm của từ trên toàn kho ngữ liệu
+      # (inverse document frequency — một từ xuất hiện trong CÀNG ÍT đoạn
+      # thì càng có giá trị phân biệt), công thức BM25 đầy đủ (kết hợp
+      # TF+IDF với hai tham số điều chỉnh k1/b, chống việc một từ lặp quá
+      # nhiều lấn át điểm số), xếp hạng mọi đoạn văn theo điểm BM25 cho
+      # một câu hỏi. BOSS quý: BM25 tự cài xếp đúng thứ hạng trên một bộ
+      # câu hỏi đối chứng đã biết trước đáp án đúng.
+      - hybrid-va-rerank
+      # q8.5e (4 bài) — kết hợp kết quả tìm kiếm VECTOR (q8.5b/c) và TỪ
+      # KHOÁ (BM25, q8.5d) — "BM25 hybrid" theo đúng yêu cầu MASTERPLAN —
+      # qua một công thức hợp nhất thứ hạng cố định (reciprocal rank
+      # fusion — cộng nghịch đảo thứ hạng từ cả hai danh sách, không cần
+      # chuẩn hoá điểm số khác thang đo), đo hybrid tìm ĐÚNG nhiều đoạn
+      # liên quan hơn TỪNG phương pháp đứng riêng trên một câu hỏi mà
+      # vector yếu (từ hiếm) HOẶC BM25 yếu (diễn đạt khác từ). BOSS quý
+      # nhỏ: hybrid vượt cả hai phương pháp riêng lẻ, đo bằng số cụ thể.
+      - boss-rag-tu-so-0
+      # q8.5f (5 bài, BOSS ĐÓNG T8.5 TẠI 34/34) — ráp TOÀN BỘ pipeline:
+      # chunking+vector tự chế (q8.5a) → chỉ mục HNSW (q8.5c) → tìm kiếm
+      # hybrid BM25+vector (q8.5e) → GHÉP các đoạn tìm được vào một prompt
+      # có cấu trúc (tái dùng nguyên tắc q8.4a/c) → LLM mô phỏng trả lời
+      # DỰA TRÊN ngữ cảnh vừa truy xuất, không phải "kiến thức nội tại".
+      # Đo cải thiện bằng số: LLM mô phỏng CÓ RAG (đọc đúng đoạn liên
+      # quan trước khi trả lời) so với KHÔNG có RAG (phải "đoán" trên một
+      # câu hỏi ngoài phạm vi kiến thức có sẵn của nó — tái hiện đúng
+      # phép đo ảo giác của q8.4e). Đóng T8.5 tại 34/34, bàn giao sang
+      # T8.6 "Hạ tầng & vận hành AI" (26 bài, TÁI DÙNG NGUYÊN theo
+      # MASTERPLAN — không xây thuật toán mới, ráp lại hạ tầng đã có).
