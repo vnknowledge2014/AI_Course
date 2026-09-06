@@ -1156,15 +1156,31 @@ realm:
       # đúng Ở hai bộ kịch bản hoàn toàn khác nhau. Thêm bài sẽ lặp lại
       # trục đã phủ, không mở trục mới — dừng tại 12.
       - giao-thuc-mcp-a2a
-      # T9.6 (~16-20 bài, ước lượng — owner thứ 6 "protocol" có trong
-      # luật lint MASTERPLAN nhưng KHÔNG có dòng riêng trong bảng #L §9.3)
-      # — MCP chuẩn hoá biên agent↔tool (dọc), A2A chuẩn hoá biên
-      # agent↔agent (ngang). Tách BẤT BIẾN (vì sao cần chuẩn hoá; JSON-
-      # RPC; capability negotiation; vòng đời task; lớp mối đe doạ: tool
-      # poisoning/confused deputy/token passthrough — dạy trong lesson)
-      # / PHIÊN BẢN (tên field/endpoint/header — dồn MỘT file
-      # `packages/mcp-kit/src/spec-2026-06.ts`, xây khi tới lượt track
-      # này). Cần Harness+Loop/Graph làm nền trước.
+      # T9.6 ĐÓNG tại 12/12 (q9.6a 6 + q9.6b 6, điều chỉnh XUỐNG từ ước
+      # lượng ban đầu "~16-20", CÙNG nguyên tắc đã áp dụng cho T9.1-T9.5)
+      # — PROTOCOL: MCP chuẩn hoá biên agent↔tool (dọc), A2A chuẩn hoá
+      # biên agent↔agent (ngang); track DUY NHẤT của R9 không có cầu nối
+      # FP (owner "protocol" không có world FP tương ứng ở MASTERPLAN
+      # §9.3). Hạ tầng: `packages/mcp-kit/src/spec-2026-06.ts` (BẤT BIẾN
+      # dạy trong lesson, PHIÊN BẢN dồn một file, lesson KHÔNG import —
+      # tự định nghĩa lại type khớp hình dạng). Trục CƠ CHẾ (q9.6a):
+      # JSON-RPC cơ bản (dispatch, -32601/-32602, id khớp request↔
+      # response), capability negotiation (giao ĐÚNG khoá cả hai bên
+      # cùng khai), tool schema qua MCP (validate TRƯỚC khi chạm tool
+      # thật, dùng lại được cho MỌI tool), A2A Agent Card (so khớp
+      # NGHIÊM NGẶT theo skill.id), vòng đời task sáu trạng thái (bảng
+      # chuyển hợp lệ, completed/canceled/failed là ngõ cụt), BOSS ráp
+      # cả năm bài (chuẩn hoá vs không chuẩn hoá). Trục KỸ NGHỆ (q9.6b):
+      # mã lỗi JSON-RPC đầy đủ (-32700/-32600/-32603, tool thật ném
+      # exception bị catch), MCP resources/list+read (catalog TRƯỚC nội
+      # dung, hai lớp lỗi tách biệt), A2A streaming (reduce nhiều sự
+      # kiện lên một task, vòng round-trip bắt buộc qua input-required),
+      # mối đe doạ tool poisoning cụ thể hoá (quét metadata TRƯỚC KHI
+      # tool tới tay agent, giới hạn CỐ Ý chỉ quét description), bảng so
+      # sánh 4 cấu hình cổng (hai trục đo, đối chứng không đổi ở mọi cấu
+      # hình), BOSS đóng CẢ TRACK: AgentCard đúng KHÔNG đủ nếu tool đứng
+      # sau bị lọc poisoning — hàng rào phải XẾP CHỒNG được. Thêm bài sẽ
+      # lặp lại trục đã phủ, không mở trục mới — dừng tại 12.
       - boss-ky-nghe-ung-dung-ai
       # T9.7 (~5-10 bài, đúng quy mô BOSS mọi Realm trước — KHÔNG ép
       # thành capstone khổng lồ để khớp tổng 180 giả tạo) — ráp TOÀN BỘ
