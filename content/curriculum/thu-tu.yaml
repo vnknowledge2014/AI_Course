@@ -1113,12 +1113,26 @@ realm:
       # thủ trên bộ tác vụ hỗn hợp (rate 0 → 0.875). Thêm bài sẽ lặp lại
       # trục đã phủ, không mở trục mới — dừng tại 12.
       - ky-thuat-vong-lap
-      # T9.4 (~18 bài) — LOOP: hình dạng vòng lặp + điều kiện dừng, chữa
-      # "không dừng/dừng sớm/đốt tiền/lặp lỗi cũ", đo bằng steps-to-
-      # success + %chạm step cap + cost/task; cầu nối FP: agent loop =
-      # fold trên State monad (`chapter-27-monads-bind.chapter.md`); tool
-      # call = Kleisli arrow, retry/fallback = Alternative (`chapter-28-
-      # applicative-validation.chapter.md`).
+      # T9.4 ĐÓNG tại 12/12 (q9.4a 6 + q9.4b 6, điều chỉnh XUỐNG từ ước
+      # lượng ban đầu "~18", CÙNG nguyên tắc đã áp dụng cho T9.1/T9.2/T9.3)
+      # — LOOP: hình dạng vòng lặp + điều kiện dừng, chữa "không
+      # dừng/dừng sớm/đốt tiền/lặp lỗi cũ", đo bằng steps-to-success +
+      # %chạm step cap + cost/task. Trục CƠ CHẾ (q9.4a): hình dạng vòng
+      # lặp cơ bản (giới hạn an toàn cứng, chưa phải step cap thật), ràng
+      # buộc step cap tường minh (hetBuoc khác loi), dừng sớm SAI (tín
+      # hiệu không đáng tin), phát hiện không tiến triển (dừng sớm ĐÚNG),
+      # cầu nối FP agent-loop-là-fold-trên-State qua `chapter-27-monads-
+      # bind.chapter.md`, BOSS đo steps-to-success + %chạm cap trên loop
+      # đơn giản vs đầy đủ. Trục KỸ NGHỆ (q9.4b): đo chi phí mỗi bước
+      # (cost/task tách biệt completion rate), loop gọi tool có retry
+      # (hai ngân sách độc lập — bước ngoài của loop VÀ retry-trong-bước
+      # của harness T9.3), cầu nối FP thứ hai tool-call-là-Kleisli-arrow
+      # + retry/fallback-là-Alternative qua `chapter-28-applicative-
+      # validation.chapter.md`, ngân sách bước chia sẻ giữa nhiều tác vụ
+      # (chia đều vs dùng-trước-nhường-sau), bảng so sánh nhiều cấu hình
+      # loop (ba trục đo tách biệt), BOSS ráp cả năm cơ chế production-
+      # grade (ngân sách "tổng" chỉ có ý nghĩa khi được CHIA SẺ thật).
+      # Thêm bài sẽ lặp lại trục đã phủ, không mở trục mới — dừng tại 12.
       - ky-thuat-do-thi
       # T9.5 (~14 bài) — GRAPH: topology + state schema, chữa "không
       # resume/không song song/không audit/không test từng nhánh", đo
