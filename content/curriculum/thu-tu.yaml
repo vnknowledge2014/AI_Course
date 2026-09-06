@@ -871,6 +871,78 @@ realm:
       # Đo cải thiện bằng số: LLM mô phỏng CÓ RAG (đọc đúng đoạn liên
       # quan trước khi trả lời) so với KHÔNG có RAG (phải "đoán" trên một
       # câu hỏi ngoài phạm vi kiến thức có sẵn của nó — tái hiện đúng
-      # phép đo ảo giác của q8.4e). Đóng T8.5 tại 34/34, bàn giao sang
-      # T8.6 "Hạ tầng & vận hành AI" (26 bài, TÁI DÙNG NGUYÊN theo
-      # MASTERPLAN — không xây thuật toán mới, ráp lại hạ tầng đã có).
+      # phép đo ảo giác của q8.4e). Đóng T8.5 tại 34/34.
+      #
+      # === T8.6 "Hạ tầng & vận hành AI" (26 bài, TÁI DÙNG NGUYÊN theo
+      # MASTERPLAN — nguồn: content/legacy/python/part-7-production/
+      # chapter-39-ai-system-design.chapter.md, đối chiếu Rust ch.43B/TS
+      # ch.42B cùng chủ đề). KHÔNG xây thuật toán mới — mọi bài RÁP LẠI kỹ
+      # thuật đã học (q8.2-q8.5) áp vào bối cảnh vận hành production. Vì
+      # sandbox không có GPU/mạng thật, mọi "hạ tầng" (inference server,
+      # gateway, message queue, vector DB phân mảnh) là HÀM MÔ PHỎNG THUẦN,
+      # tất định — đúng khuôn "quan-sat-va-canh-bao"/"trien-khai-an-toan"
+      # (T7.4) đã dùng cho chủ đề vận hành tương tự. Năm quest theo đúng 5
+      # mục của chương nguồn (39.1-39.5) cộng BOSS: ===
+      - ha-tang-suy-luan
+      # q8.6a (5 bài) — kiến trúc 3 tầng của hệ AI (Inference/Gateway/
+      # Orchestration, §39.1), vì sao pipeline suy luận "ngây thơ" (gọi
+      # model tuần tự, không gộp lô) lãng phí GPU — mô phỏng THỜI GIAN xử
+      # lý tuần tự so với GỘP LÔ (batching) trên cùng N request, đo tăng
+      # tốc bằng số cụ thể; mô phỏng đơn giản hoá ý tưởng PagedAttention
+      # (cấp phát bộ nhớ KV-cache theo KHỐI nhỏ có thể tái sử dụng, thay
+      # vì cấp phát liền một khối lớn cố định — đo tỉ lệ lãng phí bộ nhớ
+      # giữa hai cách). BOSS quý: mô phỏng hàng đợi suy luận có GỘP LÔ,
+      # đo thông lượng (request/giây) so với xử lý tuần tự trên cùng tải.
+      - ai-gateway
+      # q8.6b (5 bài) — vì sao giới hạn tốc độ (rate limit) PHẢI tính theo
+      # SỐ TOKEN chứ không phải số request (một request "tóm tắt 3 câu" và
+      # một request "phân tích 200 trang" đều là MỘT request nhưng chi phí
+      # chênh hàng nghìn lần, §39.3 bài tập 1) — mô phỏng token bucket
+      # theo token; xác thực API key (tra bảng, tất định); cân bằng tải
+      # (load balancing) giữa nhiều "node GPU" mô phỏng theo round-robin
+      # và least-loaded, đối chiếu số request mỗi node; đo lường/ghi sổ
+      # token đã dùng để tính phí (billing). BOSS quý: một cổng AI mô
+      # phỏng đầy đủ — xác thực, giới hạn theo token, định tuyến, ghi phí
+      # — từ chối ĐÚNG request vượt hạn mức, cho qua ĐÚNG request hợp lệ.
+      - rag-quy-mo-lon
+      # q8.6c (6 bài) — RAG mức doanh nghiệp so với RAG một máy (q8.5f):
+      # mô phỏng pipeline NẠP DỮ LIỆU theo sự kiện (event-driven ingestion
+      # — một hàng đợi việc cần làm, xử lý dần, KHÔNG chặn), phân mảnh
+      # (sharding) một kho vector LỚN thành nhiều mảnh nhỏ + CÔ LẬP THEO
+      # KHÁCH HÀNG (tenant isolation — dữ liệu khách A không bao giờ lọt
+      # vào kết quả tìm của khách B, đo bằng assert trực tiếp), mở rộng
+      # hybrid search (q8.5e) với một bước RERANK tường minh (chấm điểm
+      # lại top-N ứng viên bằng một hàm chấm điểm khác, tinh hơn — đo thứ
+      # hạng đổi khác sau rerank). BOSS quý: RAG nhiều khách hàng (multi-
+      # tenant) không rò rỉ dữ liệu, đo bằng số cụ thể trên một kho giả có
+      # ít nhất hai khách hàng.
+      - da-tac-tu-va-quan-sat-ai
+      # q8.6d (5 bài) — nhiều tác tử (agent) tương tác KHÔNG đồng bộ qua
+      # sự kiện thay vì gọi trực tiếp nhau (event sourcing — §39.5, đối
+      # chiếu event sourcing đã học ở R7 nếu có, hoặc tự thiết kế một hàng
+      # đợi sự kiện tối giản: agent A phát sự kiện, agent B xử lý xong mới
+      # phát sự kiện tiếp theo, đo đúng THỨ TỰ sự kiện xử lý được); semantic
+      # cache (trước khi "gọi LLM", tìm trong cache có câu hỏi tương tự đã
+      # trả lời chưa qua cosine similarity — tái dùng tuong_dong_cosine
+      # q8.5a/b — đo TỈ LỆ cache hit trên một tập câu hỏi có lặp ý); hàng
+      # đợi ưu tiên (priority queue) cho request trả phí so với miễn phí,
+      # xử lý ĐÚNG trường hợp đói (starvation) của hàng đợi thấp (đảm bảo
+      # request miễn phí vẫn được xử lý sau một số lần chờ nhất định, không
+      # bị bỏ đói vĩnh viễn). BOSS quý: bảng tra cứu sự cố (troubleshooting,
+      # §39 cuối chương — GPU OOM/độ trễ cao/chi phí tăng bất thường/RAG
+      # lệch chủ đề/timeout gateway) trả về ĐÚNG nguyên nhân+cách xử lý cho
+      # từng triệu chứng đầu vào.
+      - boss-ha-tang-van-hanh-ai
+      # q8.6e (5 bài, BOSS ĐÓNG T8.6 TẠI 26/26 VÀ R8 TẠI 190/190) — ráp
+      # TOÀN BỘ hạ tầng mô phỏng của 4 quest trước thành MỘT luồng xử lý
+      # request đầu-cuối: cổng AI (xác thực+giới hạn theo token+định
+      # tuyến, q8.6b) → hàng đợi suy luận có gộp lô (q8.6a) → truy xuất
+      # RAG đa khách hàng có hybrid+rerank (q8.6c) → bước sự kiện tác tử
+      # + đo cache/chi phí (q8.6d). Đo CẢ HỆ THỐNG mô phỏng trên một tải
+      # giả gồm nhiều request khác nhau (có request hợp lệ, có request
+      # vượt hạn mức, có request trùng câu hỏi cũ) — báo cáo bằng số cụ
+      # thể: bao nhiêu request được phục vụ đúng, bao nhiêu bị từ chối
+      # đúng lý do, tỉ lệ cache hit, thông lượng gộp lô so với tuần tự.
+      # Đóng T8.6 tại 26/26, đóng CẢ R8 "AI · Generative AI · RAG" tại
+      # 190/190 — bàn giao sang R9 "Kỹ nghệ ứng dụng AI" (180 bài,
+      # TypeScript, 7 track, lãnh thổ cuối cùng theo MASTERPLAN).
