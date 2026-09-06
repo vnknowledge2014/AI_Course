@@ -1066,10 +1066,18 @@ realm:
     ten: "Realm 9 — Kỹ nghệ ứng dụng AI"
     track:
       - ky-thuat-prompt
-      # T9.1 (~16 bài, quest breakdown TỰ THIẾT KẾ khi tới lượt) — pass@1
-      # trên bộ test prompt cố định; 1 bài làm cầu nối FP (tool schema =
-      # Domain Modeling Made Functional, `chapter-20-domain-modeling-
-      # with-dus.chapter.md`).
+      # T9.1 ĐÓNG tại 12/12 (q9.1a 6 + q9.1b 6, điều chỉnh XUỐNG từ ước
+      # lượng ban đầu "~16" của MASTERPLAN — đúng tinh thần "điều chỉnh
+      # khi tự thiết kế" đã ghi Ở trên: 12 bài phủ đủ CẢ hai trục của
+      # đơn vị PROMPT — trục KỸ THUẬT (q9.1a: phân loại nhiệm vụ, ràng
+      # buộc sửa mơ hồ, structured output/schema, few-shot, cầu nối FP
+      # Domain Modeling Made Functional qua `chapter-20-domain-modeling-
+      # with-dus.chapter.md`, BOSS ráp) VÀ trục KỸ NGHỆ (q9.1b: phân cấp
+      # chỉ thị, phòng thủ prompt injection, ràng buộc phủ định, template
+      # tái sử dụng, bộ kiểm thử hồi quy, BOSS ráp đo 3 chỉ số đồng thời:
+      # pass@1/tỉ lệ chống injection/tuân thủ ràng buộc phủ định) — thêm
+      # bài sẽ LẶP LẠI cùng trục đã phủ, không mở trục mới, nên dừng tại
+      # 12 thay vì ép đủ 16 cho khớp số liệu roadmap ban đầu.
       - ky-thuat-ngu-canh
       # T9.2 (~18 bài) — CONTEXT: toàn bộ cửa sổ token xuyên phiên, tác
       # giả chương trình (assembler), chữa "đúng chữ sai thông tin/thừa/
