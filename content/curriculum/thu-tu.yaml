@@ -1134,11 +1134,27 @@ realm:
       # grade (ngân sách "tổng" chỉ có ý nghĩa khi được CHIA SẺ thật).
       # Thêm bài sẽ lặp lại trục đã phủ, không mở trục mới — dừng tại 12.
       - ky-thuat-do-thi
-      # T9.5 (~14 bài) — GRAPH: topology + state schema, chữa "không
-      # resume/không song song/không audit/không test từng nhánh", đo
-      # bằng edge coverage + replay từ checkpoint; cầu nối FP: execution
-      # graph = Free monad + interpreter, catamorphism trên cây node
-      # (`chapter-30c-recursive-types-folds.chapter.md`).
+      # T9.5 ĐÓNG tại 12/12 (q9.5a 6 + q9.5b 6, điều chỉnh XUỐNG từ ước
+      # lượng ban đầu "~14", CÙNG nguyên tắc đã áp dụng cho T9.1-T9.4)
+      # — GRAPH: topology + state schema, chữa "không resume/không song
+      # song/không audit/không test từng nhánh", đo bằng edge coverage +
+      # replay từ checkpoint. Trục CƠ CHẾ (q9.5a): node+edge tường minh
+      # (bước kế tiếp do CHÍNH node quyết định ở runtime, không phải
+      # danh sách cố định), rẽ nhánh có điều kiện, edge coverage (đo
+      # nhánh nào ĐÃ/CHƯA chạm tới, tách biệt completion rate),
+      # checkpoint/resume (resume đúng vị trí, không chạy lại từ đầu),
+      # cầu nối FP execution-graph-là-catamorphism qua `chapter-30c-
+      # recursive-types-folds.chapter.md`, BOSS đo edge coverage + tiết
+      # kiệm lệnh gọi nhờ resume. Trục KỸ NGHỆ (q9.5b): fan-out/fan-in
+      # (song song mô phỏng đồng bộ, cả hai nhánh LUÔN chạy trọn vẹn),
+      # audit trail (ghi VÌ SAO mỗi cạnh được chọn, không chỉ đi qua
+      # đâu), test một nhánh riêng lẻ (không cần dàn dựng lại từ gốc),
+      # phát hiện chu trình (Set các node đã ghé, phân biệt với lưới an
+      # toàn thô), bảng so sánh cấu hình đồ thị (ba trục đo tách biệt),
+      # BOSS ráp production-grade vs đơn giản trên đồ thị có CẢ rẽ
+      # nhánh/fan-out/chu trình — hai runner cùng completion rate nhưng
+      # đúng Ở hai bộ kịch bản hoàn toàn khác nhau. Thêm bài sẽ lặp lại
+      # trục đã phủ, không mở trục mới — dừng tại 12.
       - giao-thuc-mcp-a2a
       # T9.6 (~16-20 bài, ước lượng — owner thứ 6 "protocol" có trong
       # luật lint MASTERPLAN nhưng KHÔNG có dòng riêng trong bảng #L §9.3)
