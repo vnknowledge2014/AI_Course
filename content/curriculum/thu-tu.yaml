@@ -1095,11 +1095,23 @@ realm:
       # sách theo khu vực Ở lượt cuối. Thêm bài sẽ lặp lại trục đã phủ,
       # không mở trục mới — dừng tại 12.
       - ky-thuat-harness
-      # T9.3 (~16 bài) — HARNESS: chương trình+repo bao quanh model, tác
-      # giả kỹ sư, chữa "model+prompt+context đều tốt vẫn fail", đo bằng
-      # completion rate khi đổi harness (A/B); cầu nối FP: error trong
-      # agent = ROP, không phải try/catch (`chapter-22-error-handling-
-      # rop.chapter.md`).
+      # T9.3 ĐÓNG tại 12/12 (q9.3a 6 + q9.3b 6, điều chỉnh XUỐNG từ ước
+      # lượng ban đầu "~16", CÙNG nguyên tắc đã áp dụng cho T9.1/T9.2) —
+      # HARNESS: chương trình+repo bao quanh model, tác giả kỹ sư, chữa
+      # "model+prompt+context đều tốt vẫn fail", đo bằng completion rate
+      # khi đổi harness (A/B). Trục CƠ CHẾ (q9.3a): tool mô phỏng lỗi tạm
+      # thời, retry một lần, fallback sang tool dự phòng, ràng buộc số
+      # lần thử lại tối đa, cầu nối FP lỗi-trong-agent-là-ROP qua
+      # `chapter-22-error-handling-rop.chapter.md`, BOSS ráp harness đơn
+      # giản (rate 0) vs đầy đủ (rate 1) trên CÙNG tool. Trục KỸ NGHỆ
+      # (q9.3b): timeout qua ngân sách bước mô phỏng (không đồng hồ
+      # thật), circuit breaker (trạng thái sống XUYÊN QUA nhiều lần gọi,
+      # khác retry sống TRONG một lần gọi), validate schema tool-call
+      # đứng gác TRƯỚC thực thi, định tuyến nhiều tool theo loại tác vụ,
+      # bảng so sánh nhiều cấu hình harness (hai trục đo tách riêng:
+      # completion rate + chi phí mô phỏng), BOSS ráp CẢ NĂM lớp phòng
+      # thủ trên bộ tác vụ hỗn hợp (rate 0 → 0.875). Thêm bài sẽ lặp lại
+      # trục đã phủ, không mở trục mới — dừng tại 12.
       - ky-thuat-vong-lap
       # T9.4 (~18 bài) — LOOP: hình dạng vòng lặp + điều kiện dừng, chữa
       # "không dừng/dừng sớm/đốt tiền/lặp lỗi cũ", đo bằng steps-to-
