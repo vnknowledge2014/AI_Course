@@ -1,0 +1,24 @@
+{
+  "name": "@byte/mcp-kit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Nguồn sự thật PHIÊN BẢN cho MCP/A2A — spec-2026-06.ts. Xem thu-tu.yaml (T9.6).",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "@types/node": "^26.1.2"
+  }
+}
