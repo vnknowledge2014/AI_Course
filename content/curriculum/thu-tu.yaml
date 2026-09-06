@@ -946,3 +946,169 @@ realm:
       # Đóng T8.6 tại 26/26, đóng CẢ R8 "AI · Generative AI · RAG" tại
       # 190/190 — bàn giao sang R9 "Kỹ nghệ ứng dụng AI" (180 bài,
       # TypeScript, 7 track, lãnh thổ cuối cùng theo MASTERPLAN).
+
+  # Realm 9 (MASTERPLAN.md §9.3 "R9 Kỹ nghệ ứng dụng AI (ranh giới 5
+  # 'engineering')", [roadmap], tóm tắt §9.1 ghi "7 track · 180 lesson",
+  # NHƯNG bảng chi tiết §9.3 chỉ đặt tên VÀ đếm bài cho 5 "world":
+  # PROMPT 16 + CONTEXT 18 + HARNESS 16 + LOOP 18 + GRAPH 14 = 82 — KHÔNG
+  # khớp 180. Một agent nghiên cứu read-only (dispatch ngay sau khi đóng
+  # R8) đã xác nhận: đây là mâu thuẫn CHÍNH MASTERPLAN chưa tự phân xử ở
+  # đâu cả (khác các mâu thuẫn số liệu khác trong tài liệu — vd 63-vs-68
+  # chương Rust, 21-vs-22 quest DB — đều có đoạn phân xử tường minh).
+  # Bằng chứng phụ: `packages/worldkit` (§10) chỉ đặt tên 2 world cho R9
+  # (`context-window, agent-trace`) — xác nhận bản thiết kế R9 trong
+  # chính MASTERPLAN CHƯA làm tới cùng, không phải lỗi đọc của agent.
+  #
+  # QUYẾT ĐỊNH (phiên chính tự chốt, KHÔNG ép số liệu khớp giả tạo, đúng
+  # tinh thần "TỰ thiết kế quest breakdown khi tới lượt" đã áp dụng cho
+  # MỌI track chưa có "Chi tiết §9.x" cấp quest từ trước tới giờ — T7.3/
+  # T7.4/toàn bộ 6 track R8): dùng 5 "world" của MASTERPLAN §9.3 LÀM 5
+  # track ĐẦU (T9.1-T9.5, giữ tên + số bài NÊU TRONG MASTERPLAN làm ước
+  # lượng KHỞI ĐẦU — sẽ điều chỉnh khi tự thiết kế quest THẬT, đúng cách
+  # mọi track trước đã làm), CỘNG THÊM 2 track: T9.6 cho owner thứ 6
+  # "protocol" (MCP+A2A — CÓ trong danh sách `concept_owner` của luật
+  # lint MASTERPLAN nhưng KHÔNG có dòng riêng trong bảng #L — bằng chứng
+  # rõ nhất nó là 1 track độc lập bị bỏ sót khỏi bảng), VÀ T9.7 capstone
+  # đóng realm (đúng khuôn BOSS-đóng-realm mọi Realm trước: `ByteLedger`
+  # ở R6, `boss-ha-tang-van-hanh-ai` ở R8) — quy mô CỦA T9.6/T9.7 KHÔNG
+  # ép để tổng đúng 180 (một capstone ~70 bài trái ngược MỌI tiền lệ BOSS
+  # trong khoá — BOSS luôn 5-10 bài); tổng số CUỐI CÙNG sẽ là bất cứ con
+  # số nào 7 track thật sự cần, xác nhận khi tự thiết kế, KHÔNG cố định
+  # trước. Con số 180 trong MASTERPLAN là số liệu MỨC ROADMAP (`[roadmap]`,
+  # dòng 1219 xác nhận mức TRACK không phải mức lesson), không phải một
+  # ràng buộc phải khớp tuyệt đối — giống R7/R8 trước đó, tổng CHỈ khớp
+  # SAU khi tự thiết kế xong toàn bộ, không phải TRƯỚC.
+  #
+  # Quan hệ 5 world (MASTERPLAN §9.3): Prompt ⊂ Context ⊂ Harness; Loop
+  # (dòng thời gian) và Graph (không gian trạng thái) là hai cách tạo
+  # control-flow BÊN TRONG Harness. Thứ tự dạy: Prompt → Context →
+  # Harness → (Loop, Graph song song, cùng đứng sau Harness) → Protocol
+  # (cần Harness+Loop/Graph làm nền để MCP/A2A có ý nghĩa) → Capstone.
+  #
+  # Ràng buộc `concept_owner ∈ {prompt,context,harness,loop,graph,
+  # protocol}` (MASTERPLAN): field này VÀ lint rule tương ứng CHƯA tồn
+  # tại trong `packages/content-schema`/`content-compiler` (đã xác nhận
+  # 0 kết quả grep) — áp dụng bằng KỶ LUẬT THIẾT KẾ (mỗi track chỉ dạy
+  # khái niệm thuộc đúng world của nó), KHÔNG xây field+lint mới cho tới
+  # khi có lý do cụ thể cần máy cưỡng chế.
+  #
+  # Góc FP bắt buộc — 1 lesson/world (MASTERPLAN §9.3, nối sang 159
+  # chương đã viết): agent loop=fold trên State monad, tool call=Kleisli
+  # arrow, retry/fallback=Alternative, execution graph=Free monad+
+  # interpreter, context assembly=Monoid có ràng buộc ngân sách, error=
+  # ROP, tool schema=Domain Modeling Made Functional. LƯU Ý: số chương
+  # trong MASTERPLAN (`chapter_27_monads.md` v.v.) LỆCH so với tên file
+  # thật trên đĩa — dùng tên THẬT khi viết brief: `chapter-27-monads-
+  # bind`, `chapter-28-applicative-validation`, `chapter-30c-recursive-
+  # types-folds`, `chapter-29-monoids-algebra` (không phải "abstract
+  # algebra", đó là ch.25), `chapter-22-error-handling-rop` (không phải
+  # ch.24), `chapter-20-domain-modeling-with-dus` (không phải ch.22) —
+  # đều trong `content/legacy/typescript/part-4-ddd/` và `part-5-fp-
+  # patterns/`. Mỗi track tự chọn MỘT bài để làm cầu nối FP này.
+  #
+  # ★ LÃNH THỔ TYPESCRIPT (MASTERPLAN §9.1, R6=Rust/R8=Python/R9=TS).
+  # QUYẾT ĐỊNH HẠ TẦNG (đã xác nhận qua agent nghiên cứu, không cần xây
+  # gì mới TRƯỚC bài đầu tiên — khác R4's 6 AST-kind bắt buộc trước
+  # T4.1):
+  #   - Chấm điểm: `packages/exec-typescript` CHƯA có AST-query engine
+  #     (chỉ có `kiem-kieu.ts` = tsc diagnostics, tier `compile`, khác
+  #     tier `static`/`requireAst` của Python). Hai realm TypeScript ĐÃ
+  #     build (R5.T5.5 `ky-nghe-phan-mem/04-van-hanh/`, TOÀN BỘ R7
+  #     `thiet-ke-he-thong/`) đều KHÔNG dùng tier `static` — chỉ
+  #     `gradingMatrix: [run, tests, output]`. R9 THEO ĐÚNG tiền lệ này,
+  #     KHÔNG xây `kiem-ast.ts` cho TypeScript trước — `tools/kiem_dot_
+  #     bien.mjs`/`kiem_ma_bai_hoc.mjs` đã hỗ trợ TS đầy đủ qua
+  #     `packages/exec-typescript` (đã xác nhận qua đọc code thật), nên
+  #     mutation-testing vẫn chạy qua output/tests-diff, không cần AST.
+  #   - LLM mô phỏng: viết hàm mock tất định TypeScript INLINE trong mỗi
+  #     bài (đúng cách R8 đã làm suốt 190 bài) — KHÔNG xây
+  #     `packages/llm-sim`/`llm-cassette` trước; `MockProviderSpec` 4-tier
+  #     (§4.6) là thiết kế dài hạn, chỉ trừu tượng hoá khi đủ bài dùng
+  #     lại logic mock giống nhau.
+  #   - `packages/mcp-kit/src/spec-2026-06.ts` — xây khi TỚI LƯỢT T9.6
+  #     (Protocol), không phải bây giờ, đúng nguyên tắc hạ tầng-trước-
+  #     nội-dung nhưng CHỈ khi thật sự cần (giống Cổng Rust T4.0b).
+  #
+  # Thư mục: `content/ky-nghe-ung-dung-ai/` (Vietnamese, đúng tiền lệ mọi
+  # realm — MASTERPLAN §10 ghi `ai-applied/` chỉ là tên gốc tiếng Anh
+  # CHƯA dịch từ lúc còn LÀ roadmap stub, xác nhận qua agent nghiên cứu:
+  # thư mục này CHƯA tồn tại trên đĩa).
+  # `teaches`/`requires`/`concepts` namespace: `kna.<slug>` ("kỹ nghệ ứng
+  # dụng AI", tránh trùng `ai.*` đã dùng cho R8).
+  #
+  # Nguồn tham khảo KHÁI NIỆM: `references/repos/` — không có material
+  # TypeScript sẵn có cho chủ đề agent/MCP/harness; material GẦN NHẤT là
+  # `content/legacy/rust/part-8-agentic-ai/` (11 chương, tier C, dùng
+  # crate `rig`+`rmcp` — ch.45-55: intro-to-rig, extractors-streaming,
+  # tool-calling, memory-hooks, rag-vector-stores, multi-agent-workflows,
+  # mcp, evaluation-testing, local-models, rusty-context, awesome-rig) —
+  # phải xếp `REWRITE` khi mượn Ý sang TypeScript (khác ngôn ngữ/framework,
+  # không được `REUSE`, đúng luật ràng buộc bảng 159 chương ở §9.1). Repo
+  # ngoài liên quan: `references/repos/learn-harness-engineering`,
+  # `Context-Engineering`, `Practical-Guide-to-Context-Engineering`,
+  # `agent-from-scratch`, `designing-multiagent-systems`, `Agentic-Design-
+  # Patterns`, `Prompt-Engineering-Guide` — CHỈ dùng LÀM bản đồ khái niệm,
+  # KHÔNG sao chép văn xuôi/ví dụ, đúng cách R6/R7/R8 đã làm.
+  #
+  # Tiền lệ R8 đã "chạm nông" một phần chủ đề này bằng Python, mức sơ cấp
+  # (KHÔNG lặp lại y hệt ở R9 — R9 đào sâu tầm kỹ sư production-grade):
+  # `tri-tue-nhan-tao/13-prompt-engineering-nen-tang/` (6 bài),
+  # `.../16-quan-ly-ngu-canh-va-hoi-thoai/` (5 bài),
+  # `.../27-da-tac-tu-va-quan-sat-ai/` (5 bài, gần chủ đề LOOP/GRAPH nhất).
+  #
+  # T9.1 "Kỹ thuật Prompt" (~16 bài, ước lượng khởi đầu từ MASTERPLAN,
+  # điều chỉnh khi tự thiết kế) mở màn Realm 9 — đơn vị công việc MỘT
+  # lượt request/response, tác giả con người viết tay, chữa lỗi "model
+  # hiểu SAI nhiệm vụ", đo bằng pass@1 trên bộ test prompt cố định. Bài 1
+  # `requires: []` — mở đầu CẢ Realm 9 (không tiền đề, giống bài 1 của
+  # R6/R7/R8).
+  - id: ky-nghe-ung-dung-ai
+    ten: "Realm 9 — Kỹ nghệ ứng dụng AI"
+    track:
+      - ky-thuat-prompt
+      # T9.1 (~16 bài, quest breakdown TỰ THIẾT KẾ khi tới lượt) — pass@1
+      # trên bộ test prompt cố định; 1 bài làm cầu nối FP (tool schema =
+      # Domain Modeling Made Functional, `chapter-20-domain-modeling-
+      # with-dus.chapter.md`).
+      - ky-thuat-ngu-canh
+      # T9.2 (~18 bài) — CONTEXT: toàn bộ cửa sổ token xuyên phiên, tác
+      # giả chương trình (assembler), chữa "đúng chữ sai thông tin/thừa/
+      # thiếu/context rot/vỡ ngân sách", đo bằng token/turn + recall +
+      # %turn vượt budget; cầu nối FP: context assembly = Monoid có ràng
+      # buộc ngân sách (`chapter-29-monoids-algebra.chapter.md`).
+      - ky-thuat-harness
+      # T9.3 (~16 bài) — HARNESS: chương trình+repo bao quanh model, tác
+      # giả kỹ sư, chữa "model+prompt+context đều tốt vẫn fail", đo bằng
+      # completion rate khi đổi harness (A/B); cầu nối FP: error trong
+      # agent = ROP, không phải try/catch (`chapter-22-error-handling-
+      # rop.chapter.md`).
+      - ky-thuat-vong-lap
+      # T9.4 (~18 bài) — LOOP: hình dạng vòng lặp + điều kiện dừng, chữa
+      # "không dừng/dừng sớm/đốt tiền/lặp lỗi cũ", đo bằng steps-to-
+      # success + %chạm step cap + cost/task; cầu nối FP: agent loop =
+      # fold trên State monad (`chapter-27-monads-bind.chapter.md`); tool
+      # call = Kleisli arrow, retry/fallback = Alternative (`chapter-28-
+      # applicative-validation.chapter.md`).
+      - ky-thuat-do-thi
+      # T9.5 (~14 bài) — GRAPH: topology + state schema, chữa "không
+      # resume/không song song/không audit/không test từng nhánh", đo
+      # bằng edge coverage + replay từ checkpoint; cầu nối FP: execution
+      # graph = Free monad + interpreter, catamorphism trên cây node
+      # (`chapter-30c-recursive-types-folds.chapter.md`).
+      - giao-thuc-mcp-a2a
+      # T9.6 (~16-20 bài, ước lượng — owner thứ 6 "protocol" có trong
+      # luật lint MASTERPLAN nhưng KHÔNG có dòng riêng trong bảng #L §9.3)
+      # — MCP chuẩn hoá biên agent↔tool (dọc), A2A chuẩn hoá biên
+      # agent↔agent (ngang). Tách BẤT BIẾN (vì sao cần chuẩn hoá; JSON-
+      # RPC; capability negotiation; vòng đời task; lớp mối đe doạ: tool
+      # poisoning/confused deputy/token passthrough — dạy trong lesson)
+      # / PHIÊN BẢN (tên field/endpoint/header — dồn MỘT file
+      # `packages/mcp-kit/src/spec-2026-06.ts`, xây khi tới lượt track
+      # này). Cần Harness+Loop/Graph làm nền trước.
+      - boss-ky-nghe-ung-dung-ai
+      # T9.7 (~5-10 bài, đúng quy mô BOSS mọi Realm trước — KHÔNG ép
+      # thành capstone khổng lồ để khớp tổng 180 giả tạo) — ráp TOÀN BỘ
+      # 6 track trước thành MỘT agent hoàn chỉnh giải một nhiệm vụ thật
+      # (prompt → context → harness chạy loop VÀ/HOẶC graph → gọi tool
+      # qua MCP), đo end-to-end. Đóng CẢ Realm 9 VÀ đóng TOÀN BỘ
+      # MASTERPLAN R0-R9.
