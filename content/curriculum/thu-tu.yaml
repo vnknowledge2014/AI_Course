@@ -1079,11 +1079,21 @@ realm:
       # bài sẽ LẶP LẠI cùng trục đã phủ, không mở trục mới, nên dừng tại
       # 12 thay vì ép đủ 16 cho khớp số liệu roadmap ban đầu.
       - ky-thuat-ngu-canh
-      # T9.2 (~18 bài) — CONTEXT: toàn bộ cửa sổ token xuyên phiên, tác
-      # giả chương trình (assembler), chữa "đúng chữ sai thông tin/thừa/
-      # thiếu/context rot/vỡ ngân sách", đo bằng token/turn + recall +
-      # %turn vượt budget; cầu nối FP: context assembly = Monoid có ràng
-      # buộc ngân sách (`chapter-29-monoids-algebra.chapter.md`).
+      # T9.2 ĐÓNG tại 12/12 (q9.2a 6 + q9.2b 6, điều chỉnh XUỐNG từ ước
+      # lượng ban đầu "~18", CÙNG nguyên tắc đã áp dụng cho T9.1) —
+      # CONTEXT: toàn bộ cửa sổ token xuyên phiên, tác giả chương trình
+      # (assembler). Trục CƠ CHẾ (q9.2a): đếm token giả lập + phát hiện
+      # vượt ngân sách, cửa sổ trượt, context rot đo bằng cặp boolean,
+      # lắp ngữ cảnh theo ưu tiên (ghim), cầu nối FP context assembly =
+      # Monoid có ràng buộc ngân sách (`chapter-29-monoids-algebra.
+      # chapter.md`), BOSS đo %turn vượt + recall một-phiên. Trục KỸ
+      # NGHỆ (q9.2b): tóm tắt thay vì xoá (giữ gist), ngân sách chia
+      # theo khu vực chức năng, sổ ghi nhớ dài hạn tách biệt khỏi cửa sổ
+      # (trích xuất MỘT LẦN, không quét lại), đo tỉ lệ recall LIÊN TỤC
+      # trên nhiều sự kiện (không phải 1 boolean), BOSS ráp production-
+      # shaped đo đồng thời hai loại recall (sổ ghi nhớ vs cửa sổ) + ngân
+      # sách theo khu vực Ở lượt cuối. Thêm bài sẽ lặp lại trục đã phủ,
+      # không mở trục mới — dừng tại 12.
       - ky-thuat-harness
       # T9.3 (~16 bài) — HARNESS: chương trình+repo bao quanh model, tác
       # giả kỹ sư, chữa "model+prompt+context đều tốt vẫn fail", đo bằng
