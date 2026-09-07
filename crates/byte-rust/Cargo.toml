@@ -10,8 +10,8 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 
-[profile.release]
-opt-level = "z"
-lto = true
-codegen-units = 1
-strip = true
+# Profile release cho crate này nằm ở Cargo.toml gốc workspace
+# ([profile.release] + [profile.release.package.byte-rust]) — Cargo chỉ áp
+# dụng profile khai ở root, khai lại ở đây bị lờ đi im lặng ("warning: profiles
+# for the non root package will be ignored, specify profiles at the workspace
+# root" khi chạy `cargo check --workspace`).

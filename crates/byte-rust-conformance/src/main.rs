@@ -191,7 +191,7 @@ fn main() {
         for hat in corpus::HAT_GIONG {
             let mut cac: Vec<(String, String)> =
                 vec![(format!("{}__goc", hat.ten), hat.ma.to_string())];
-            for (i, db) in mutate::sinh(hat.ten, hat.ma).into_iter().enumerate() {
+            for (i, db) in mutate::sinh(hat.ma).into_iter().enumerate() {
                 cac.push((format!("{}__{}__{i}", hat.ten, db.kieu), db.ma));
             }
 

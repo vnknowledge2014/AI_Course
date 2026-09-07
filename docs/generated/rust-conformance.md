@@ -29,7 +29,9 @@ cargo run -- --im      # bỏ chi tiết từng ca, chỉ in bảng
 > cd crates/byte-rust-conformance && cargo run --release -q -- --am
 > ```
 >
-> Trạng thái hiện tại: **0 nhận oan, 0 từ chối oan, cổng MỞ.** Ba ca cuối
+> Trạng thái hiện tại (xác nhận lại 07/09): **0 nhận oan, 0 từ chối oan, cổng
+> MỞ.** A. Mutant cơ học: 58/58 đồng ý (0 nhận oan). B. Corpus âm thủ công:
+> 89/100 đồng ý + 11/100 thú nhận `ChuaHoTro` (0 nhận oan). Ba ca cuối
 > (E0499, E0502, E0597) đã bịt bằng `crates/byte-rust/src/borrow_check.rs`.
 > Phần dưới giữ lại vì §2 và §7 vẫn còn giá trị — bài học "nguồn A xanh vì lý
 > do sai" không cũ đi.

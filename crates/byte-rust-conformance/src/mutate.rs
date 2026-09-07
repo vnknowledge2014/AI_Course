@@ -10,17 +10,19 @@
 
 #[derive(Debug, Clone)]
 pub struct DotBien {
-    pub hat_giong: String,
     pub kieu: &'static str,
     pub ma: String,
 }
 
 /// Mọi phép đột biến áp dụng được cho một chương trình.
-pub fn sinh(ten_hat: &str, ma: &str) -> Vec<DotBien> {
+///
+/// Không nhận tên hạt giống — nơi gọi (`main.rs`) đã có `hat.ten` sẵn trong
+/// vòng lặp ngoài, không cần `DotBien` mang lại nó lần nữa.
+pub fn sinh(ma: &str) -> Vec<DotBien> {
     let mut ra = Vec::new();
     let mut them = |kieu: &'static str, m: String| {
         if m != ma {
-            ra.push(DotBien { hat_giong: ten_hat.to_string(), kieu, ma: m });
+            ra.push(DotBien { kieu, ma: m });
         }
     };
 
