@@ -10,15 +10,8 @@
  * chạy trong WASM không tự ngắt được từ bên trong.
  */
 
-import type {
-  BoThucThi,
-  ChanDoan,
-  CongWorker,
-  KetQuaChay,
-  TinNhanTuWorker,
-  TuyChonChay,
-} from '@byte/exec-core';
-import { chanDoanQuaGio } from '@byte/exec-core';
+import type { BoThucThi, ChanDoan, CongWorker, KetQuaChay, TuyChonChay } from '@byte/exec-core';
+import { chanDoanQuaGio, chayCoHetGio } from '@byte/exec-core';
 
 const HET_HAN_MAC_DINH_MS = 15000; // Pyodide khởi động chậm hơn nhiều
 
@@ -57,23 +50,15 @@ export class BoThucThiPython implements BoThucThi {
     const id = this.idTiepTheo++;
     const t0 = performance.now();
 
-    const phanHoi = await new Promise<TinNhanTuWorker | null>((resolve) => {
-      const dongHo = setTimeout(() => {
-        cong.giet();
+    const phanHoi = await chayCoHetGio(
+      cong,
+      { id, ma, maKiemTra: tuyChon.maKiemTra, luoi: tuyChon.luoi },
+      hetHan,
+      () => {
         this.cong = null;
         this.daSanSang = false;
-        resolve(null);
-      }, hetHan);
-
-      cong.khiNhan((tin) => {
-        if (tin.loai === 'xong' && tin.id === id) {
-          clearTimeout(dongHo);
-          resolve(tin);
-        }
-      });
-
-      cong.gui({ loai: 'chay', id, ma, maKiemTra: tuyChon.maKiemTra, luoi: tuyChon.luoi });
-    });
+      },
+    );
 
     const thoiGianMs = performance.now() - t0;
 

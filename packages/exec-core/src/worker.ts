@@ -23,6 +23,45 @@ export interface CongWorker {
   giet(): void;
 }
 
+/**
+ * Gửi MỘT yêu cầu `chay` qua `CongWorker`, đua với đồng hồ hết giờ.
+ *
+ * Đây là lõi dùng chung của mọi engine chạy trong Worker (Python,
+ * TypeScript — Rust không cần vì WASM tự có ngân sách nhiên liệu, xem
+ * `packages/exec-rust`): gửi yêu cầu, đợi ĐÚNG phản hồi khớp `id` (không
+ * phải phản hồi cũ còn sót lại từ lần gọi trước), và nếu hết giờ TRƯỚC
+ * khi khớp được thì giết worker rồi trả `null` — cách duy nhất ngắt được
+ * một vòng lặp vô hạn đang chạy trong JavaScript.
+ *
+ * Trả `null` khi hết giờ, hoặc phản hồi khớp `id` khi worker trả lời kịp.
+ * Phần XỬ LÝ phản hồi đó (dịch traceback Python, dịch lỗi V8, v.v.) vẫn ở
+ * lại từng engine — nó khác nhau theo ngôn ngữ, không phải phần dùng
+ * chung.
+ */
+export function chayCoHetGio(
+  cong: CongWorker,
+  yeuCau: Omit<YeuCauChay, 'loai'>,
+  hetHanMs: number,
+  khiHetGio: () => void,
+): Promise<TinNhanTuWorker | null> {
+  return new Promise((resolve) => {
+    const dongHo = setTimeout(() => {
+      cong.giet();
+      khiHetGio();
+      resolve(null);
+    }, hetHanMs);
+
+    cong.khiNhan((tin) => {
+      if (tin.loai === 'xong' && tin.id === yeuCau.id) {
+        clearTimeout(dongHo);
+        resolve(tin);
+      }
+    });
+
+    cong.gui({ loai: 'chay', ...yeuCau });
+  });
+}
+
 /** Chẩn đoán khi worker bị giết vì quá giờ. */
 export function chanDoanQuaGio(hetHanMs: number): ChanDoan {
   const giay = hetHanMs / 1000;

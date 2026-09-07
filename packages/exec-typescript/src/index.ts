@@ -9,15 +9,8 @@
  * worker — cách duy nhất chắc chắn ngắt được vòng lặp trong JavaScript.
  */
 
-import type {
-  BoThucThi,
-  ChanDoan,
-  CongWorker,
-  KetQuaChay,
-  TinNhanTuWorker,
-  TuyChonChay,
-} from '@byte/exec-core';
-import { chanDoanQuaGio } from '@byte/exec-core';
+import type { BoThucThi, ChanDoan, CongWorker, KetQuaChay, TuyChonChay } from '@byte/exec-core';
+import { chanDoanQuaGio, chayCoHetGio } from '@byte/exec-core';
 
 const HET_HAN_MAC_DINH_MS = 5000;
 
@@ -79,22 +72,9 @@ export class BoThucThiTypeScript implements BoThucThi {
     const id = this.idTiepTheo++;
     const t0 = performance.now();
 
-    const phanHoi = await new Promise<TinNhanTuWorker | null>((resolve) => {
-      const dongHo = setTimeout(() => {
-        // Giết worker: cách DUY NHẤT ngắt được vòng lặp vô hạn trong JS.
-        cong.giet();
-        this.cong = null;
-        resolve(null);
-      }, hetHan);
-
-      cong.khiNhan((tin) => {
-        if (tin.loai === 'xong' && tin.id === id) {
-          clearTimeout(dongHo);
-          resolve(tin);
-        }
-      });
-
-      cong.gui({ loai: 'chay', id, ma, maKiemTra: tuyChon.maKiemTra });
+    // Giết worker khi hết giờ: cách DUY NHẤT ngắt được vòng lặp vô hạn trong JS.
+    const phanHoi = await chayCoHetGio(cong, { id, ma, maKiemTra: tuyChon.maKiemTra }, hetHan, () => {
+      this.cong = null;
     });
 
     const thoiGianMs = performance.now() - t0;
