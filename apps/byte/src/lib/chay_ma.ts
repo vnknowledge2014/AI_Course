@@ -49,6 +49,18 @@ export async function chay_python(
  *  sâu, nên vòng lặp vô hạn của người học bị chặn ở tầng Rust chứ không cần
  *  host giết ai cả. Đó là khác biệt thật giữa một interpreter mình viết và
  *  một runtime mượn — và là lý do ADR-001 chọn viết interpreter.
+ *
+ *  KHOẢNG TRỐNG CHƯA XONG: `apps/byte/src-tauri/src/lib.rs` đã định nghĩa
+ *  command `chay_rust` để chạy NATIVE trên desktop/mobile (nhanh hơn, không
+ *  qua WASM) — nhưng hàm dưới đây LUÔN LUÔN `fetch()` bản WASM, kể cả khi
+ *  chạy trong vỏ Tauri (`window.__TAURI__` tồn tại). Chưa nối dây vì việc
+ *  đó cần build/chạy thử THẬT một app Tauri (desktop hoặc mobile) để xác
+ *  nhận `invoke('chay_rust', ...)` cho kết quả giống hệt đường WASM — không
+ *  môi trường phát triển nào ở đây có sẵn Tauri runtime để kiểm chứng việc
+ *  đó, nên cố tình CHƯA đổi. Muốn hoàn thiện: rẽ nhánh theo
+ *  `'__TAURI__' in window`, gọi `invoke` từ `@tauri-apps/api/core` thay vì
+ *  `fetch`, rồi xác nhận cùng bộ test Rust (`packages/exec-rust/test/`) cho
+ *  kết quả khớp nhau giữa hai đường chạy trên MÁY THẬT có Tauri.
  */
 let may_rust: BoThucThiRust | null = null;
 
