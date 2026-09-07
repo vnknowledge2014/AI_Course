@@ -1,0 +1,60 @@
+name: cong
+
+# Chạy tools/cong.sh (toàn bộ ~15 cổng kiểm chất lượng nội dung + mã) trên
+# mọi PR và mọi lần đẩy lên main/mvp. Trước dự án KHÔNG có CI nào — mọi lần
+# kiểm chỉ dựa vào chạy tay, nên PR có thể lọt qua mà không ai chạy đủ cổng.
+on:
+  push:
+    branches: [main, mvp]
+  pull_request:
+
+concurrency:
+  group: cong-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cong:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # rust-toolchain.toml ở gốc repo tự ghim channel/target — action này
+      # chỉ cần cài ĐÚNG target wasm32 thêm vào, phần còn lại rustup tự đọc.
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cài dependency (pnpm)
+        run: pnpm install --frozen-lockfile
+
+      - name: Build mọi package + app
+        run: pnpm build
+
+      - name: Vendor numpy (Pyodide) + build WASM Rust
+        # Hai bước NÀY, không phải toàn bộ `chuan-bi` — tools/kiem_ma_bai_hoc.mjs
+        # và tools/kiem_dot_bien.mjs CHỈ đọc apps/byte/public/pyodide/*.whl và
+        # apps/byte/public/wasm/byte_rust.wasm (xem tools/nap_goi_pyodide.mjs
+        # + tools/kiem_ma_bai_hoc.mjs dòng có WASM_RUST) — không cần
+        # public/noi-dung, public/thu-vien, public/ts-lib (những thứ đó phục
+        # vụ app THẬT chạy trong trình duyệt, không phục vụ cổng kiểm tra).
+        run: |
+          cd apps/byte
+          pnpm run numpy
+          pnpm run wasm
+
+      - name: tools/cong.sh — toàn bộ cổng
+        run: bash tools/cong.sh
