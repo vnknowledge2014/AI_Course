@@ -49,9 +49,14 @@
   {#if buoc.kind === 'predict'}
     <DuDoan buoc={buoc as never} {xong} />
 
-  {:else if buoc.kind === 'code' || buoc.kind === 'sandbox'}
+  {:else if buoc.kind === 'code' || buoc.kind === 'sandbox' || buoc.kind === 'repair' || buoc.kind === 'refactor' || buoc.kind === 'assemble'}
     <!-- Sân chơi dùng chung thành phần với bài tập: cùng ô soạn, cùng nút
-         chạy, cùng sân khấu. Khác đúng một điều — nó không chấm. -->
+         chạy, cùng sân khấu. Khác đúng một điều — nó không chấm.
+         repair/refactor/assemble biên dịch ra ĐÚNG hình dạng CodeStep
+         (starter/solution/test/hints/validate) — xem content-compiler
+         lesson.ts, case 'code'|'repair'|'refactor'|'assemble' dùng
+         chung một nhánh — nên dùng lại BaiCode nguyên vẹn, không viết
+         thành phần riêng. -->
     <BaiCode buoc={buoc as never} {xong} san_choi={buoc.kind === 'sandbox'} />
 
   {:else if buoc.kind === 'reflect'}

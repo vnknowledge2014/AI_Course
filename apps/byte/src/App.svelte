@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { muc_luc, bai_hoc, thu_tu, type MucLuc } from './lib/noi_dung';
+  import { muc_luc, bai_hoc, thu_tu, thu_vien, type MucLuc } from './lib/noi_dung';
   import { dung_ban_do, bai_ke_tiep, so_ky_nang } from './lib/cay_ky_nang';
   import BanDo from './thanh_phan/BanDo.svelte';
   import ThuVien from './thanh_phan/ThuVien.svelte';
@@ -14,6 +14,9 @@
   let tien_do = $state(doc());
   let loi = $state<string | null>(null);
   let o_thu_vien = $state(false);
+  // 159 chỉ là số hiện tại — nạp lại từ thư viện thật để không trôi khỏi
+  // content/legacy/ khi thêm/bớt chương (xem apps/byte/src/App.svelte cũ).
+  let so_chuong_thu_vien = $state(159);
 
   let realm = $state<ReturnType<typeof thu_tu>>([]);
 
@@ -24,6 +27,9 @@
         realm = thu_tu();
       })
       .catch((e: Error) => (loi = e.message));
+    thu_vien()
+      .then((ch) => (so_chuong_thu_vien = ch.length))
+      .catch(() => {});
   });
 
   // Bản đồ tính lại mỗi khi tiến độ đổi — mở khoá là hàm của tiến độ, không
@@ -106,7 +112,7 @@
     <!-- Thư viện đặt DƯỚI bản đồ, không ngang hàng: bài tương tác là đường
          chính, chương đọc là chỗ tra khi đường chính chưa tới. -->
     <button class="mo-thu-vien" onclick={() => (o_thu_vien = true)}>
-      Thư viện — 159 chương đọc, phủ những lĩnh vực bài tập chưa với tới →
+      Thư viện — {so_chuong_thu_vien} chương đọc, phủ những lĩnh vực bài tập chưa với tới →
     </button>
   {/if}
 </main>

@@ -3,8 +3,10 @@
  *
  * Module WASM này tự nó đã an toàn: nó có ngân sách nhiên liệu và giới hạn độ
  * sâu bên trong, nên vòng lặp vô hạn của người học được chặn ở tầng Rust chứ
- * không cần host can thiệp. Nhờ vậy engine này không cần Worker để tránh treo
- * — nhưng vẫn chạy trong Worker để nhất quán với hai engine còn lại.
+ * không cần host can thiệp. Nhờ vậy engine này KHÔNG dùng Worker/`CongWorker`
+ * như hai engine còn lại — `chay()` chạy đồng bộ ngay trên luồng gọi nó (xem
+ * `apps/byte/src/lib/chay_ma.ts`, hàm `bo_thuc_thi_rust`). Chỉ cần bọc bên
+ * ngoài trong Worker nếu sau này người dùng thấy UI khựng lúc nạp/chạy WASM.
  */
 
 import type { BoThucThi, KetQuaChay, KetQuaThoRust, TuyChonChay } from '@byte/exec-core';
