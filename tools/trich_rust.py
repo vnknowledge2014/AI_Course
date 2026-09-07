@@ -12,7 +12,7 @@ from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-ROOT = Path("/Volumes/SEAGATE/Personal_Projects/AI_Course")
+ROOT = Path(__file__).resolve().parent.parent
 BOOKS = ROOT / "fp/Rust_Books"
 CORPUS = ROOT / "crates/byte-rust-conformance/corpus"
 
