@@ -1182,9 +1182,25 @@ realm:
       # sau bị lọc poisoning — hàng rào phải XẾP CHỒNG được. Thêm bài sẽ
       # lặp lại trục đã phủ, không mở trục mới — dừng tại 12.
       - boss-ky-nghe-ung-dung-ai
-      # T9.7 (~5-10 bài, đúng quy mô BOSS mọi Realm trước — KHÔNG ép
-      # thành capstone khổng lồ để khớp tổng 180 giả tạo) — ráp TOÀN BỘ
-      # 6 track trước thành MỘT agent hoàn chỉnh giải một nhiệm vụ thật
-      # (prompt → context → harness chạy loop VÀ/HOẶC graph → gọi tool
-      # qua MCP), đo end-to-end. Đóng CẢ Realm 9 VÀ đóng TOÀN BỘ
-      # MASTERPLAN R0-R9.
+      # T9.7 ĐÓNG tại 8/8 (một quest DUY NHẤT, KHÔNG chia a/b — đúng quy mô
+      # BOSS mọi capstone trước: byteledger-capstone R6 = 10 bài,
+      # boss-ha-tang-van-hanh-ai R8 = 5 bài — điều chỉnh XUỐNG từ ước lượng
+      # ban đầu "~5-10", vẫn trong khoảng đó) — ráp NGUYÊN VĂN cả 6 track
+      # trước (Prompt, Ngữ cảnh, Harness, Vòng lặp, Đồ thị, Giao thức
+      # MCP/A2A) thành MỘT agent "trợ lý nghiên cứu" hoàn chỉnh tra cứu hồ
+      # sơ/giá cổ phiếu/tin tức công ty qua 4 tool MCP: đặt bài toán (bài 1,
+      # bốn chỉ số đo end-to-end), ngữ cảnh nhiều lượt trong ngân sách (bài
+      # 2, CONTEXT và ĐO LƯỜNG là hai luồng tách biệt), harness retry+
+      # fallback quanh lỗi MCP (bài 3), vòng lặp nhiều bước với step cap
+      # tường minh (bài 4, câu ghép cần MỘT bước rảnh để xác nhận), phòng
+      # thủ injection + lọc tool poisoning (bài 5, hai hàng rào ĐỘC LẬP),
+      # audit trail toàn bộ pipeline (bài 6), bảng so sánh 4 cấu hình (bài
+      # 7, completion cao nhất KHÔNG đồng nghĩa đáng tin nhất), BOSS ráp cả
+      # bảy mảnh trên 6 câu hỏi hỗn hợp — "đầy đủ" vs "tối giản" cho CÙNG
+      # completion rate (0.6667) nhưng soLanChanAnToan (2 so với 0) lộ ra
+      # sự khác biệt sống còn (bài 8). Đóng CẢ Realm 9 (7/7 track: T9.1
+      # Prompt, T9.2 Ngữ cảnh, T9.3 Harness, T9.4 Vòng lặp, T9.5 Đồ thị,
+      # T9.6 Giao thức MCP/A2A, T9.7 Capstone — mỗi track một "world" của
+      # MASTERPLAN §9.3) VÀ đóng TOÀN BỘ MASTERPLAN R0-R9 (10 realm, từ
+      # nền tảng lập trình R0 tới kỹ nghệ ứng dụng AI R9) — không còn track
+      # nào trong roadmap v1.0 CHƯA viết.
