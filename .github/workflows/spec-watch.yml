@@ -1,0 +1,29 @@
+name: spec-watch
+
+# Cổng "tuần: conformance MCP/A2A vs spec upstream" mà MASTERPLAN §9 đòi hỏi.
+# Không nằm trong cong.sh: trôi spec là việc BẢO TRÌ theo lịch, không phải cổng
+# merge — một phiên bản MCP mới ra đời không được phép chặn một PR sửa typo.
+#
+# Đỏ = có drift giữa packages/mcp-kit/src/spec-2026-06.ts và spec upstream chưa
+# được khai (kèm lý do) trong tools/spec-watch-bo-qua.json. Fetch thất bại cũng
+# đỏ: một cổng âm thầm bỏ qua khi mất mạng là cổng chết.
+on:
+  schedule:
+    # 02:17 UTC thứ Tư hàng tuần — cố tình né phút :00/:30 đông đúc.
+    - cron: '17 2 * * 3'
+  workflow_dispatch:
+
+jobs:
+  spec-watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Script dùng fetch/fs có sẵn của Node — không cần pnpm install.
+      - name: Đối chiếu bề mặt MCP/A2A đã ghim với spec upstream
+        run: node tools/spec_watch.mjs

@@ -33,6 +33,7 @@ bash tools/cong.sh --nhanh  # bỏ 4 cổng chậm nhất (lời giải thật, 
 | `tien_do.py` | `cong.sh` CÓ gọi (in cuối, không tính vào 15 cổng) — đo % tiến độ v1.0 thật. |
 | `di_tru_sach.py` | Di trú 159 chương từ `fp/*_Books` sang `content/legacy/*.chapter.md`. Chạy TAY sau khi sửa sách nguồn trong `fp/` — xem `fp/README.md`. Không tự động vì di trú là một quyết định biên tập (khi nào đẩy bản mới sang content), không phải kiểm tra. |
 | `trich_rust.py` | Trích snippet Rust từ `fp/Rust_Books` vào `crates/byte-rust-conformance/corpus/`. Chạy TAY khi cần mở rộng corpus đối chiếu `rustc` — output đã có sẵn trong git (364 file), không cần chạy lại trừ khi `fp/Rust_Books` đổi. |
+| `spec_watch.mjs` | Đối chiếu bề mặt MCP/A2A mà khoá học ghim (`packages/mcp-kit/src/spec-2026-06.ts`) với spec upstream thật — cổng "conformance hàng tuần" của MASTERPLAN §9, chạy bởi `.github/workflows/spec-watch.yml` (cron tuần), KHÔNG phải cổng merge. Drift không sửa cơ học được (đổi từ vựng = quyết định nội dung), nên quản bằng baseline `spec-watch-bo-qua.json` kèm lý-do bắt buộc. Chạy tay: `node tools/spec_watch.mjs`. |
 
 ## Quy ước
 

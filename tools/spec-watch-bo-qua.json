@@ -1,0 +1,30 @@
+{
+  "ghiChu": "Baseline cho tools/spec_watch.mjs. LUẬT giống content/curriculum/dot-bien-bo-qua.yaml: mỗi mục phải có lyDo KHÔNG RỖNG; mục không còn khớp drift thật thì bị cổng ép xoá. Drift ở đây là quyết định NỘI DUNG (đổi từ vựng/ngữ nghĩa sẽ lan vào 12 bài T9.6 và bản rút gọn tự chứa trong từng bài), nên được chủ động khai thay vì sửa ồ ạt. Khi khoá học quyết định theo phiên bản mới: sửa packages/mcp-kit/src/spec-2026-06.ts + đồng bộ bản rút gọn trong các bài T9.6 + xoá mục tương ứng ở đây.",
+  "boQua": [
+    {
+      "doiTuong": "mcp:method:initialize",
+      "lyDo": "Upstream 2026-07-28 đổi handshake thành server/discover VÀ nới nó thành tuỳ chọn (clients MAY call). Khoá học ghim mốc 2026-06 trong đó initialize là LỜI GỌI ĐẦU TIÊN BẮT BUỘC — bài T9.6-02 dựng cả lập luận capability negotiation trên ngữ nghĩa bắt buộc đó. Đổi tên lẫn đổi ngữ nghĩa là quyết định nội dung sư phạm, không phải sửa cơ học.",
+      "ghiLuc": "2026-09-07"
+    },
+    {
+      "doiTuong": "mcp:method:notifications/initialized",
+      "lyDo": "Biến mất cùng đợt đổi initialize → server/discover ở 2026-07-28. Theo chung một quyết định nội dung với mục mcp:method:initialize.",
+      "ghiLuc": "2026-09-07"
+    },
+    {
+      "doiTuong": "a2a:field:AgentCard.url",
+      "lyDo": "Proto hiện thay AgentCard.url bằng repeated AgentInterface supported_interfaces (entry đầu là preferred). Bài T9.6-04 dạy AgentCard với url đơn; chuyển sang supported_interfaces đổi cả hình dạng dữ liệu bài tập (string → mảng object), cần viết lại bài chứ không chỉ đổi tên field.",
+      "ghiLuc": "2026-09-07"
+    },
+    {
+      "doiTuong": "a2a:task-state:TASK_STATE_REJECTED",
+      "lyDo": "Upstream thêm trạng thái kết thúc REJECTED (agent chủ động từ chối task) sau mốc ghim. laA2aTaskKetThuc chưa biết nó — tức dưới spec mới, task bị reject sẽ bị hàm trả về 'chưa kết thúc', SAI về mặt ngữ nghĩa kết thúc. Cần quyết định nội dung: thêm rejected vào tập kết thúc trong spec-2026-06.ts và bài dạy vòng đời task.",
+      "ghiLuc": "2026-09-07"
+    },
+    {
+      "doiTuong": "a2a:task-state:TASK_STATE_AUTH_REQUIRED",
+      "lyDo": "Upstream thêm trạng thái AUTH_REQUIRED (task tạm dừng chờ xác thực) sau mốc ghim — KHÔNG phải trạng thái kết thúc, nên không làm laA2aTaskKetThuc sai; nhưng bài dạy 'vòng đời task' chưa nhắc tới nhánh này. Cùng quyết định nội dung với mục REJECTED.",
+      "ghiLuc": "2026-09-07"
+    }
+  ]
+}

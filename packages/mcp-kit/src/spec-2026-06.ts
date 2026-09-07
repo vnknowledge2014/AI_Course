@@ -17,6 +17,14 @@
  * ngay trong code block của chính nó (không import chéo — mỗi bài tự chứa
  * hoàn toàn, đúng quy ước xuyên suốt Realm 9). Tên field trong bản rút gọn
  * đó PHẢI khớp CHÍNH XÁC tên field ở đây.
+ *
+ * THEO DÕI UPSTREAM: `.github/workflows/spec-watch.yml` đối chiếu bề mặt ghim
+ * ở file này với spec upstream THẬT hàng tuần (`tools/spec_watch.mjs`). Drift
+ * đã biết và LÝ DO giữ nguyên mốc này được khai ở `tools/spec-watch-bo-qua.json`
+ * — ví dụ 2026-07-28 đổi `initialize` thành `server/discover` và làm nó TUỲ
+ * CHỌN, trong khi bài T9.6-02 dạy nó là bắt buộc: đổi theo là quyết định nội
+ * dung sư phạm, không phải sửa cơ học. Cổng spec-watch đỏ khi có drift MỚI
+ * chưa khai.
  */
 
 /* ═══════════════ 1. MCP — lớp JSON-RPC 2.0 nền ═══════════════ */
