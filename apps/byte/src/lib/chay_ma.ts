@@ -6,8 +6,8 @@
  *  việc đó.
  */
 import { BoThucThiPython } from '@byte/exec-python';
-import { BoThucThiRust } from '@byte/exec-rust';
-import type { CongWorker, KetQuaChay, TinNhanTuWorker } from '@byte/exec-core';
+import { BoThucThiRust, ketQuaTuThoRust } from '@byte/exec-rust';
+import type { CongWorker, KetQuaChay, KetQuaThoRust, TinNhanTuWorker } from '@byte/exec-core';
 
 function tao_cong(): CongWorker {
   const w = new Worker(new URL('./python.worker.ts', import.meta.url), { type: 'module' });
@@ -43,24 +43,25 @@ export async function chay_python(
 
 /* ── Rust ───────────────────────────────────────────────────────────────── */
 
-/** Bộ thực thi Rust — `byte_rust.wasm`, 476 KB.
+/** Bộ thực thi Rust — có HAI đường chạy kết thúc ở cùng một chỗ.
  *
- *  Không cần Worker: module WASM tự có ngân sách nhiên liệu và giới hạn độ
- *  sâu, nên vòng lặp vô hạn của người học bị chặn ở tầng Rust chứ không cần
- *  host giết ai cả. Đó là khác biệt thật giữa một interpreter mình viết và
- *  một runtime mượn — và là lý do ADR-001 chọn viết interpreter.
+ *  Trong vỏ Tauri (desktop/mobile) thì gọi command native `invoke('chay_rust')`
+ *  — nhanh hơn và khỏi nạp 476 KB WASM. Ngoài trình duyệt thuần thì nạp
+ *  `byte_rust.wasm`. Cả hai đều nhận về ĐÚNG cùng một chuỗi JSON từ
+ *  `byte_rust::wasm::chay_thanh_json` và cùng đi qua hàm diễn dịch
+ *  `ketQuaTuThoRust`, nên kết quả chấm khớp hệt nhau theo CẤU TRÚC chứ không
+ *  phải theo hy vọng: một bài không thể đạt trên Mac mà trượt trên Android.
  *
- *  KHOẢNG TRỐNG CHƯA XONG: `apps/byte/src-tauri/src/lib.rs` đã định nghĩa
- *  command `chay_rust` để chạy NATIVE trên desktop/mobile (nhanh hơn, không
- *  qua WASM) — nhưng hàm dưới đây LUÔN LUÔN `fetch()` bản WASM, kể cả khi
- *  chạy trong vỏ Tauri (`window.__TAURI__` tồn tại). Chưa nối dây vì việc
- *  đó cần build/chạy thử THẬT một app Tauri (desktop hoặc mobile) để xác
- *  nhận `invoke('chay_rust', ...)` cho kết quả giống hệt đường WASM — không
- *  môi trường phát triển nào ở đây có sẵn Tauri runtime để kiểm chứng việc
- *  đó, nên cố tình CHƯA đổi. Muốn hoàn thiện: rẽ nhánh theo
- *  `'__TAURI__' in window`, gọi `invoke` từ `@tauri-apps/api/core` thay vì
- *  `fetch`, rồi xác nhận cùng bộ test Rust (`packages/exec-rust/test/`) cho
- *  kết quả khớp nhau giữa hai đường chạy trên MÁY THẬT có Tauri.
+ *  Đường WASM không cần Worker: module tự có ngân sách nhiên liệu và giới hạn
+ *  độ sâu, nên vòng lặp vô hạn của người học bị chặn ở tầng Rust chứ không cần
+ *  host giết ai cả. Đó là khác biệt thật giữa một interpreter mình viết và một
+ *  runtime mượn — và là lý do ADR-001 chọn viết interpreter.
+ *
+ *  Nhận biết vỏ Tauri: Tauri 2 tiêm `window.__TAURI_INTERNALS__` vào mọi
+ *  WebView nó quản lý (`window.__TAURI__` chỉ có khi bật `withGlobalTauri`, mà
+ *  `tauri.conf.json` không bật). Nếu `invoke` ném — ví dụ vỏ mới thiếu command
+ *  — quay về đường WASM: cùng một crate, cùng một JSON, nên chấm vẫn đúng,
+ *  chỉ chậm hơn; lỗi được báo qua `console.warn` thay vì nuốt lặng.
  */
 let may_rust: BoThucThiRust | null = null;
 
@@ -73,7 +74,30 @@ export function bo_thuc_thi_rust(): BoThucThiRust {
   return may_rust;
 }
 
+function trong_tauri(): boolean {
+  return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+}
+
+async function chay_rust_native(ma: string, ma_kiem_tra?: string): Promise<KetQuaChay> {
+  // Import ĐỘNG: @tauri-apps/api chỉ có ý nghĩa trong vỏ Tauri — import tĩnh sẽ
+  // kéo nó vào bundle web thuần dù không bao giờ gọi tới.
+  const { invoke } = await import('@tauri-apps/api/core');
+  // Command nhận nguyên chương trình (gồm cả phần kiểm tra), y hệt cách
+  // BoThucThiRust.chay ghép `ma\nmaKiemTra` trước khi đưa xuống WASM.
+  const nguon = ma_kiem_tra ? `${ma}\n${ma_kiem_tra}` : ma;
+  const t0 = performance.now();
+  const json = await invoke<string>('chay_rust', { nguon });
+  return ketQuaTuThoRust(JSON.parse(json) as KetQuaThoRust, performance.now() - t0);
+}
+
 export async function chay_rust(ma: string, ma_kiem_tra?: string): Promise<KetQuaChay> {
+  if (trong_tauri()) {
+    try {
+      return await chay_rust_native(ma, ma_kiem_tra);
+    } catch (loi) {
+      console.warn('chay_rust native thất bại, quay về đường WASM:', loi);
+    }
+  }
   const m = bo_thuc_thi_rust();
   return ma_kiem_tra ? m.chay(ma, { maKiemTra: ma_kiem_tra }) : m.chay(ma);
 }

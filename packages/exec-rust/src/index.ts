@@ -64,16 +64,7 @@ export class BoThucThiRust implements BoThucThi {
       outPtr = Number(goi >> 32n);
       outLen = Number(goi & 0xffffffffn);
       const json = this.decoder.decode(new Uint8Array(w.memory.buffer, outPtr, outLen));
-      const tho = JSON.parse(json) as KetQuaThoRust;
-      const chanDoan = tho.chan_doan.map(doiChanDoanRust);
-      return {
-        ok: tho.ok,
-        xuat: tho.xuat,
-        chanDoan,
-        thoiGianMs: performance.now() - t0,
-        // BR0500 = hết nhiên liệu, BR0505 = đệ quy quá sâu.
-        biNgat: chanDoan.some((d) => d.ma === 'BR0500' || d.ma === 'BR0505'),
-      };
+      return ketQuaTuThoRust(JSON.parse(json) as KetQuaThoRust, performance.now() - t0);
     } finally {
       // Giải phóng kể cả khi JSON.parse ném — nếu không, mỗi lần lỗi là một lần rò rỉ.
       if (outLen > 0) w.br_giai_phong(outPtr, outLen);
@@ -85,4 +76,28 @@ export class BoThucThiRust implements BoThucThi {
     this.xuat = null;
     this.dangNap = null;
   }
+}
+
+/** Đổi JSON thô của `byte-rust` thành `KetQuaChay` — khúc diễn dịch CHUNG của
+ *  cả hai host chạy Rust của app:
+ *
+ *  - Đường WASM: [`BoThucThiRust.chay`] vừa gọi ở trên.
+ *  - Đường Tauri native: command `chay_rust` ở `apps/byte/src-tauri/src/lib.rs`
+ *    trả về ĐÚNG cùng một chuỗi JSON (gọi thẳng
+ *    `byte_rust::wasm::chay_thanh_json` — một hàm, một định dạng).
+ *
+ *  Cùng một hàm diễn dịch là điều kiện bắt buộc: một bài ĐẠT trên Mac mà
+ *  TRƯỢT trên Android chỉ vì hai host map kết quả khác nhau thì người học
+ *  không còn tin vào công cụ nữa.
+ */
+export function ketQuaTuThoRust(tho: KetQuaThoRust, thoiGianMs: number): KetQuaChay {
+  const chanDoan = tho.chan_doan.map(doiChanDoanRust);
+  return {
+    ok: tho.ok,
+    xuat: tho.xuat,
+    chanDoan,
+    thoiGianMs,
+    // BR0500 = hết nhiên liệu, BR0505 = đệ quy quá sâu.
+    biNgat: chanDoan.some((d) => d.ma === 'BR0500' || d.ma === 'BR0505'),
+  };
 }
