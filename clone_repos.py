@@ -4,7 +4,10 @@ import re
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-WORKSPACE_DIR = "/Volumes/Lexar/01_Projects/Personal_Projects/AI_Course"
+# Đường dẫn tương đối theo vị trí file này — TRÁNH hardcode đường dẫn tuyệt đối
+# (từng hỏng thật khi máy/ổ đĩa đổi từ "Lexar" sang "SEAGATE", không ai sửa lại
+# kịp nên script không chạy được suốt nhiều tháng).
+WORKSPACE_DIR = os.path.dirname(os.path.abspath(__file__))
 RESOURCE_FILE = os.path.join(WORKSPACE_DIR, "resource.md")
 REPOS_DIR = os.path.join(WORKSPACE_DIR, "repos")
 

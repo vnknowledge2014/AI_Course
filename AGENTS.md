@@ -1,5 +1,12 @@
 # LLM Wiki Schema & Guidelines cho dự án AI_Course
 
+> **Phạm vi file này:** chỉ áp dụng cho lớp "kho tham chiếu tri thức AI" (`resource.md`, `repos/`,
+> `references/`, `wiki/`, và 3 script `clone_repos.py`/`check_repos.py`/`auto_ingest.py`) — lớp này
+> dùng để đào sâu, tra cứu và rút kiến thức nhằm cải tiến/mở rộng nội dung MASTERPLAN, KHÔNG phải
+> sản phẩm chính của repo. Sản phẩm chính là **Byte Academy** (`content/`, `apps/byte`, `packages/`,
+> `tools/`, `crates/`) — xem [`README.md`](README.md) và [`MASTERPLAN.md`](MASTERPLAN.md) cho quy ước
+> của lớp đó (chưa có `AGENTS.md`/`CLAUDE.md` riêng; theo quy ước ghi trong hai file này).
+
 Đây là cấu hình để duy trì wiki tri thức dự án thông qua LLMs (như Antigravity hoặc các Agent khác). 
 LLM đóng vai trò duy trì cấu trúc nội dung, cập nhật kiến thức liên tục từ Raw Sources vào Wiki.
 
