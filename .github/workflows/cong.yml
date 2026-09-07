@@ -38,23 +38,42 @@ jobs:
         with:
           targets: wasm32-unknown-unknown
 
+      # apps/byte/src-tauri là thành viên Cargo workspace (Cargo.toml gốc,
+      # `members = ["crates/*", "apps/byte/src-tauri"]`) — `cargo test
+      # --workspace` trong cong.sh BIÊN DỊCH nó dù không chạy app thật, và
+      # crate Tauri cần GTK/WebKitGTK để biên dịch trên Linux dù không có
+      # màn hình nào mở ra. Danh sách gói theo đúng tài liệu CI chính thức
+      # của Tauri v2 cho Ubuntu.
+      - name: Cài thư viện hệ thống cho Tauri (Linux)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev \
+            librsvg2-dev patchelf libxdo-dev libssl-dev \
+            libayatana-appindicator3-dev libgtk-3-dev
+
       - name: Cài dependency (pnpm)
         run: pnpm install --frozen-lockfile
 
       - name: Build mọi package + app
         run: pnpm build
 
-      - name: Vendor numpy (Pyodide) + build WASM Rust
-        # Hai bước NÀY, không phải toàn bộ `chuan-bi` — tools/kiem_ma_bai_hoc.mjs
-        # và tools/kiem_dot_bien.mjs CHỈ đọc apps/byte/public/pyodide/*.whl và
-        # apps/byte/public/wasm/byte_rust.wasm (xem tools/nap_goi_pyodide.mjs
-        # + tools/kiem_ma_bai_hoc.mjs dòng có WASM_RUST) — không cần
-        # public/noi-dung, public/thu-vien, public/ts-lib (những thứ đó phục
-        # vụ app THẬT chạy trong trình duyệt, không phục vụ cổng kiểm tra).
+      - name: Chuẩn bị asset cho app (nội dung + Pyodide + numpy + WASM Rust + ts-lib)
+        # ĐÚNG bằng `pnpm run chuan-bi` của apps/byte, chạy TỪNG bước riêng để
+        # log rõ bước nào chậm. Lần đầu viết workflow này chỉ chạy numpy+wasm,
+        # tưởng thế là đủ cho tools/kiem_ma_bai_hoc.mjs — SAI: script đó còn
+        # cần apps/byte/public/pyodide/pyodide-lock.json (do bước `pyodide`
+        # copy sang, KHÔNG PHẢI bước `numpy`), và cổng "App ship đủ bài"/
+        # "Test JS" cần public/noi-dung/index.json (bước `noi-dung`) — cả hai
+        # điều này chỉ lộ ra khi chạy CI thật, đã xác nhận qua log lỗi thật
+        # (`gh run view --log-failed`), không phải suy đoán.
         run: |
           cd apps/byte
+          pnpm run noi-dung
+          pnpm run thu-vien
+          pnpm run pyodide
           pnpm run numpy
           pnpm run wasm
+          pnpm run ts-lib
 
       - name: tools/cong.sh — toàn bộ cổng
         run: bash tools/cong.sh
